@@ -8,14 +8,18 @@ import numpy as np
 import FCClatt
 
 class LatticeTests(unittest.TestCase):
-        
-    def testbase(self):
-        self.failUnless(1+1 == 2)
-        
+    def setUp(self):
+        self.nnvect = FCClatt.makeNNvect()
+        self.invlist = FCClatt.invlist(self.nnvect)
+
     def testFCCcount(self):
-        nnvect = FCClatt.makeNNvect()
-        print np.shape(nnvect)
-        self.failUnless(np.shape(nnvect) == [12,3])
+        # check that we have z=12 neighbors, and we're in 3D        
+        self.assertEqual(np.shape(self.nnvect), (12,3))
+
+    def testFCCinversion(self):
+        # check that for each NN vector, we have its inverse too
+        for k1, k2 in enumerate(self.invlist):
+            self.assertEqual(self.nnvect[k1], -self.nnvect[k2])
 
 def main():
     unittest.main()
