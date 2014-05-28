@@ -11,9 +11,10 @@ def GFFTfunc(NNvect, rates):
    """
    return lambda q: np.sum(np.cos(np.dot(NNvect,q))*rates)-np.sum(rates)
 
-def GFdiff(NNvect, rates):
+def GF2(NNvect, rates):
    """
-   Construct the diffusivity matrix (small q limit of Fourier transform).
+   Construct the diffusivity matrix (small q limit of Fourier transform
+   as a second derivative).
    Returns a 3x3 matrix that can be dotted into q to get FT.
 
    Parameters
@@ -21,6 +22,19 @@ def GFdiff(NNvect, rates):
    NNvect[z,3]: list of nearest-neighbor vectors
    rates[z]:    jump rate for each neighbor
    """
-   # D0=np.zeros((3,3))
+   # return np.zeros((3,3))
    return -0.5*np.dot(NNvect.T*rates, NNvect)
+   
+def GF4(NNvect, rates):
+   """
+   Construct the discontinuity matrix (fourth derivative wit respect to q of
+   Fourier transform).
+   Returns a 3x3x3x3 matrix that can be dotted into q to get the FT.
+
+   Parameters
+   ----------
+   NNvect[z,3]: list of nearest-neighbor vectors
+   rates[z]:    jump rate for each neighbor
+   """
+   return np.zeros((3,3,3,3))
    

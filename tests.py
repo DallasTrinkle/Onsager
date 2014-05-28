@@ -45,7 +45,8 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         self.NNvect = FCClatt.NNvect()
         self.rates = np.array((1,)*np.shape(self.NNvect)[0])
         self.GFFT = GFcalc.GFFTfunc(self.NNvect, self.rates)
-        self.GFdiff = GFcalc.GFdiff(self.NNvect, self.rates)
+        self.GF2 = GFcalc.GF2(self.NNvect, self.rates)
+        self.GF4 = GFcalc.GF4(self.NNvect, self.rates)
 
     def testFTisfunc(self):
         self.assertTrue(callable(self.GFFT))
@@ -84,7 +85,8 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         self.assertEqual(self.GFFT(q),self.GFFT(q2))
 
     def testFTdim(self):
-        self.assertTrue(np.shape(self.GFdiff)==(3,3))
+        self.assertTrue(np.shape(self.GF2)==(3,3))
+        self.assertTrue(np.shape(self.GF4)==(3,3,3,3))
 
     def testFTDiffValue(self):
         # note: equality here doesn't work here, as we're using finite difference
@@ -94,18 +96,19 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         qsmall=np.array((delta,0,0))
         D0 = self.GFFT(qsmall)/(delta*delta)
         self.assertTrue(
-            abs(np.dot(qsmall,np.dot(self.GFdiff,qsmall))/(delta*delta)-D0) < eps )
+            abs(np.dot(qsmall,np.dot(self.GF2,qsmall))/(delta*delta)-D0) < eps )
 
         qsmall=np.array((delta,delta,0))
         D0 = self.GFFT(qsmall)/(delta*delta)
         self.assertTrue(
-            abs(np.dot(qsmall,np.dot(self.GFdiff,qsmall))/(delta*delta)-D0) < eps )
+            abs(np.dot(qsmall,np.dot(self.GF2,qsmall))/(delta*delta)-D0) < eps )
 
         qsmall=np.array((delta,delta,delta))
         D0 = self.GFFT(qsmall)/(delta*delta)
         self.assertTrue(
-            abs(np.dot(qsmall,np.dot(self.GFdiff,qsmall))/(delta*delta)-D0) < eps )
+            abs(np.dot(qsmall,np.dot(self.GF2,qsmall))/(delta*delta)-D0) < eps )
 
+    
 def main():
     unittest.main()
 
