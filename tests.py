@@ -163,6 +163,8 @@ class SphereHarmTests(unittest.TestCase):
         self.assertEqual(qsphere[0], 0) # theta (azimuthal)
         self.assertEqual(qsphere[1], np.pi*0.5) # phi (polar)
         self.assertEqual(qsphere[2], 1) # magnitude
+        qv2 = SphereHarm.SpheretoCart(qsphere)
+        for d in xrange(3): self.assertAlmostEqual(qv[d], qv2[d])
 
 def main():
     unittest.main()
