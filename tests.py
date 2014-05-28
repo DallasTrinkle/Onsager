@@ -148,7 +148,22 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         D4 = np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,self.GF4))))
         self.assertTrue(abs(D-D2-D4) < eps*(delta**4) )
         self.assertFalse(abs(D-D2) < eps*(delta**4) )
+
+# test spherical harmonics code
+import scipy
+import SphereHarm
         
+class SphereHarmTests(unittest.TestCase):
+    def setUp(self):
+        self.GF2 = np.eye(3)
+
+    def testCarttoSphere(self):
+        qv = np.array([1,0,0])
+        qsphere=SphereHarm.CarttoSphere(qv)
+        self.assertEqual(qsphere[0], 0) # theta (azimuthal)
+        self.assertEqual(qsphere[1], np.pi*0.5) # phi (polar)
+        self.assertEqual(qsphere[2], 1) # magnitude
+
 def main():
     unittest.main()
 
