@@ -124,13 +124,25 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         # note: equality here doesn't work here, as we're using finite difference
         # to evaluate a second derivative, so we use a threshold value.
         delta=1e-1
-        eps=1e-5
+        eps=1e-1
         qsmall=np.array((delta,0,0))
         D = self.GFFT(qsmall)
         D2 = np.dot(qsmall,np.dot(self.GF2,qsmall))
         D4 = np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,self.GF4))))
         self.assertTrue(abs(D-D2-D4) < eps*(delta**4) )
-    
+
+        qsmall=np.array((delta,delta,0))
+        D = self.GFFT(qsmall)
+        D2 = np.dot(qsmall,np.dot(self.GF2,qsmall))
+        D4 = np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,self.GF4))))
+        self.assertTrue(abs(D-D2-D4) < eps*(delta**4) )
+
+        qsmall=np.array((delta,delta,delta))
+        D = self.GFFT(qsmall)
+        D2 = np.dot(qsmall,np.dot(self.GF2,qsmall))
+        D4 = np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,self.GF4))))
+        self.assertTrue(abs(D-D2-D4) < eps*(delta**4) )
+        
 def main():
     unittest.main()
 

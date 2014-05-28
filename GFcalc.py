@@ -36,5 +36,11 @@ def GF4(NNvect, rates):
    NNvect[z,3]: list of nearest-neighbor vectors
    rates[z]:    jump rate for each neighbor
    """
-   return np.zeros((3,3,3,3))
+   D4 = np.zeros((3,3,3,3))
+   for a in xrange(3):
+      for b in xrange(3):
+         for c in xrange(3):
+            for d in xrange(3):
+               D4[a,b,c,d] = 1./24. * sum(NNvect[:,a]*NNvect[:,b]*NNvect[:,c]*NNvect[:,d]*rates[:])
+   return D4
    
