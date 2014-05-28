@@ -44,10 +44,10 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
     def setUp(self):
         self.NNvect = FCClatt.NNvect()
         self.rates = np.array((1,)*np.shape(self.NNvect)[0])
+        self.GFFT = GFcalc.GFFTfunc(self.NNvect, self.rates)
 
     def testFTfunc(self):
-        GFFT = GFcalc.GFFTfunc(self.NNvect, self.rates)
-        self.assertTrue(callable(GFFT))
+        self.assertTrue(callable(self.GFFT))
         
     def testFTdim(self):
         GFdiff = GFcalc.GFdiff(self.NNvect, self.rates)
