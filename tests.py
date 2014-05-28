@@ -88,6 +88,18 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         self.assertTrue(np.shape(self.GF2)==(3,3))
         self.assertTrue(np.shape(self.GF4)==(3,3,3,3))
 
+    def testFTDiffSymmetry(self):
+        self.assertTrue(np.all(self.GF2 == self.GF2.T))
+        self.assertEqual(self.GF2[0,0], self.GF2[1,1])
+        self.assertEqual(self.GF2[0,0], self.GF2[2,2])
+        for a in xrange(3):
+            for b in xrange(3):
+                for c in xrange(3):
+                    for d in xrange(3):
+                        ind=(a,b,c,d)
+                        inds = tuple(sorted(ind))
+                        self.assertEqual(self.GF4[ind], self.GF4[inds])
+
     def testFTDiffValue(self):
         # note: equality here doesn't work here, as we're using finite difference
         # to evaluate a second derivative, so we use a threshold value.
@@ -108,6 +120,16 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         self.assertTrue(
             abs(np.dot(qsmall,np.dot(self.GF2,qsmall))/(delta*delta)-D0) < eps )
 
+    def testFTDiff4Value(self):
+        # note: equality here doesn't work here, as we're using finite difference
+        # to evaluate a second derivative, so we use a threshold value.
+        delta=1e-1
+        eps=1e-5
+        qsmall=np.array((delta,0,0))
+        D = self.GFFT(qsmall)
+        D2 = np.dot(qsmall,np.dot(self.GF2,qsmall))
+        D4 = np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,self.GF4))))
+        self.assertTrue(abs(D-D2-D4) < eps*(delta**4) )
     
 def main():
     unittest.main()
