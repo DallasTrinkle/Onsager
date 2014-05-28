@@ -85,7 +85,27 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
 
     def testFTdim(self):
         self.assertTrue(np.shape(self.GFdiff)==(3,3))
-            
+
+    def testFTDiffValue(self):
+        # note: equality here doesn't work here, as we're using finite difference
+        # to evaluate a second derivative, so we use a threshold value.
+        delta=2.e-4
+        eps=1e-5
+        qsmall=np.array((delta,0,0))
+        D0 = self.GFFT(qsmall)/(delta*delta)
+        self.assertTrue(
+            abs(np.dot(qsmall,np.dot(self.GFdiff,qsmall))/(delta*delta)-D0) < eps )
+
+        qsmall=np.array((delta,delta,0))
+        D0 = self.GFFT(qsmall)/(delta*delta)
+        self.assertTrue(
+            abs(np.dot(qsmall,np.dot(self.GFdiff,qsmall))/(delta*delta)-D0) < eps )
+
+        qsmall=np.array((delta,delta,delta))
+        D0 = self.GFFT(qsmall)/(delta*delta)
+        self.assertTrue(
+            abs(np.dot(qsmall,np.dot(self.GFdiff,qsmall))/(delta*delta)-D0) < eps )
+
 def main():
     unittest.main()
 

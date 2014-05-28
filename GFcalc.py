@@ -21,6 +21,6 @@ def GFdiff(NNvect, rates):
    NNvect[z,3]: list of nearest-neighbor vectors
    rates[z]:    jump rate for each neighbor
    """
-   D0=np.zeros((3,3))
-   return D0
+   # D0=np.zeros((3,3))
+   return -0.5*np.dot(NNvect.T*rates, NNvect)
    
