@@ -35,6 +35,6 @@ def SpheretoCart(spv):
    ----------
    spv[3]: cartesian vector to convert
    """
-   return np.array(spv[2]*(np.cos(spv[0])*np.sin(spv[1]),
-                           np.sin(spv[0])*np.sin(spv[1]),
-                           np.cos(spv[1])))
+   return np.array((spv[2]*np.cos(spv[0])*np.sin(spv[1]),
+                    spv[2]*np.sin(spv[0])*np.sin(spv[1]),
+                    spv[2]*np.cos(spv[1])))
