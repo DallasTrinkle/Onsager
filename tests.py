@@ -38,14 +38,16 @@ class LatticeTests(unittest.TestCase):
 
 # At some point, we'll probably want to included point group operations, and appropriate tests...
 
-# import GFcalc
+import GFcalc
 
 class GreenFuncFourierTransformTests(unittest.TestCase):
     def setUp(self):
         self.NNvect = FCClatt.NNvect()
+        self.rates = np.array((1,)*np.shape(self.NNvect)[0])
 
     def testFTdim(self):
-        pass
+        GFdiff = GFcalc.GFdiff(self.NNvect, self.rates)
+        self.assertTrue(np.shape(GFdiff)==(3,3))
             
 def main():
     unittest.main()
