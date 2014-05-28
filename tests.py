@@ -45,13 +45,38 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         self.NNvect = FCClatt.NNvect()
         self.rates = np.array((1,)*np.shape(self.NNvect)[0])
         self.GFFT = GFcalc.GFFTfunc(self.NNvect, self.rates)
+        self.GFdiff = GFcalc.GFdiff(self.NNvect, self.rates)
 
-    def testFTfunc(self):
+    def testFTisfunc(self):
         self.assertTrue(callable(self.GFFT))
+
+    def testFTfuncZero(self):
+        q=np.array((0,0,0))
+        self.assertEqual(self.GFFT(q),0)
         
+    def testFTfuncZeroBZ(self):
+        q=np.array((2*np.pi,0,0))
+        self.assertEqual(self.GFFT(q),0)
+        q=np.array((2*np.pi,2*np.pi,0))
+        self.assertEqual(self.GFFT(q),0)
+        q=np.array((2*np.pi,2*np.pi,2*np.pi))
+        self.assertEqual(self.GFFT(q),0)
+        
+    def testFTfuncValues(self):
+        q=np.array((1,0,0))
+        self.assertTrue(self.GFFT(q)<0)
+
+    def testFTfuncSymmetry(self):
+        q=np.array((1,0,0))
+        q2=np.array((-1,0,0))
+        self.assertEqual(self.GFFT(q),self.GFFT(q2))
+        q2=np.array((0,1,0))
+        self.assertEqual(self.GFFT(q),self.GFFT(q2))
+        q2=np.array((0,0,1))
+        self.assertEqual(self.GFFT(q),self.GFFT(q2))
+
     def testFTdim(self):
-        GFdiff = GFcalc.GFdiff(self.NNvect, self.rates)
-        self.assertTrue(np.shape(GFdiff)==(3,3))
+        self.assertTrue(np.shape(self.GFdiff)==(3,3))
             
 def main():
     unittest.main()

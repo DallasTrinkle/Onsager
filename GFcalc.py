@@ -9,7 +9,7 @@ def GFFTfunc(NNvect, rates):
    NNvect[z,3]: list of nearest-neighbor vectors
    rates[z]:    jump rate for each neighbor
    """
-   return lambda q: np.sum(cos(np.dot(NNvect,q))*rates)-np.sum(rates)
+   return lambda q: np.sum(np.cos(np.dot(NNvect,q))*rates)-np.sum(rates)
 
 def GFdiff(NNvect, rates):
    """
