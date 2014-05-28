@@ -63,8 +63,16 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         self.assertEqual(self.GFFT(q),0)
         
     def testFTfuncValues(self):
+        # note: equality here doesn't quite work due to roundoff error at the 15th digit
         q=np.array((1,0,0))
         self.assertTrue(self.GFFT(q)<0)
+        self.assertAlmostEqual(self.GFFT(q), 8*(np.cos(1)-1))
+        q=np.array((1,1,0))
+        self.assertTrue(self.GFFT(q)<0)
+        self.assertAlmostEqual(self.GFFT(q), 2*(np.cos(2)-1)+8*(np.cos(1)-1))
+        q=np.array((1,1,1))
+        self.assertTrue(self.GFFT(q)<0)
+        self.assertAlmostEqual(self.GFFT(q), 6*(np.cos(2)-1))
 
     def testFTfuncSymmetry(self):
         q=np.array((1,0,0))
