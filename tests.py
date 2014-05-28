@@ -106,19 +106,22 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         delta=2.e-4
         eps=1e-5
         qsmall=np.array((delta,0,0))
-        D0 = self.GFFT(qsmall)/(delta*delta)
-        self.assertTrue(
-            abs(np.dot(qsmall,np.dot(self.GF2,qsmall))/(delta*delta)-D0) < eps )
+        D0 = self.GFFT(qsmall)
+        D2 = np.dot(qsmall,np.dot(qsmall,self.GF2))
+        self.assertTrue(abs(D0-D2) < eps*(delta**2) )
+        self.assertFalse(abs(D0) < eps*(delta**2) )
 
         qsmall=np.array((delta,delta,0))
-        D0 = self.GFFT(qsmall)/(delta*delta)
-        self.assertTrue(
-            abs(np.dot(qsmall,np.dot(self.GF2,qsmall))/(delta*delta)-D0) < eps )
+        D0 = self.GFFT(qsmall)
+        D2 = np.dot(qsmall,np.dot(qsmall,self.GF2))
+        self.assertTrue(abs(D0-D2) < eps*(delta**2) )
+        self.assertFalse(abs(D0) < eps*(delta**2) )
 
         qsmall=np.array((delta,delta,delta))
-        D0 = self.GFFT(qsmall)/(delta*delta)
-        self.assertTrue(
-            abs(np.dot(qsmall,np.dot(self.GF2,qsmall))/(delta*delta)-D0) < eps )
+        D0 = self.GFFT(qsmall)
+        D2 = np.dot(qsmall,np.dot(qsmall,self.GF2))
+        self.assertTrue(abs(D0-D2) < eps*(delta**2) )
+        self.assertFalse(abs(D0) < eps*(delta**2) )
 
     def testFTDiff4Value(self):
         # note: equality here doesn't work here, as we're using finite difference
@@ -127,21 +130,24 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         eps=1e-1
         qsmall=np.array((delta,0,0))
         D = self.GFFT(qsmall)
-        D2 = np.dot(qsmall,np.dot(self.GF2,qsmall))
+        D2 = np.dot(qsmall,np.dot(qsmall,self.GF2))
         D4 = np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,self.GF4))))
         self.assertTrue(abs(D-D2-D4) < eps*(delta**4) )
+        self.assertFalse(abs(D-D2) < eps*(delta**4) )
 
         qsmall=np.array((delta,delta,0))
         D = self.GFFT(qsmall)
-        D2 = np.dot(qsmall,np.dot(self.GF2,qsmall))
+        D2 = np.dot(qsmall,np.dot(qsmall,self.GF2))
         D4 = np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,self.GF4))))
         self.assertTrue(abs(D-D2-D4) < eps*(delta**4) )
+        self.assertFalse(abs(D-D2) < eps*(delta**4) )
 
         qsmall=np.array((delta,delta,delta))
         D = self.GFFT(qsmall)
-        D2 = np.dot(qsmall,np.dot(self.GF2,qsmall))
+        D2 = np.dot(qsmall,np.dot(qsmall,self.GF2))
         D4 = np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,self.GF4))))
         self.assertTrue(abs(D-D2-D4) < eps*(delta**4) )
+        self.assertFalse(abs(D-D2) < eps*(delta**4) )
         
 def main():
     unittest.main()
