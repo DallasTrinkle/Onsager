@@ -184,9 +184,9 @@ class SphereHarmTests(unittest.TestCase):
         Npolar=4
         Ntrunc=(Npolar*(Npolar+1))/2
         GFcoeff,indices=SphereHarm.YlmTransform(self.GF2iso, Npolar=Npolar)
-        self.assertEqual(np.shape(GFcoeff)[0], Ntrunc))
+        self.assertEqual(np.shape(GFcoeff)[0], Ntrunc)
         self.assertEqual(np.shape(indices[0])[0], Ntrunc)
-        self.assertEqual(np.shape(indices[0])[1], Ntrunc)
+        self.assertEqual(np.shape(indices[1])[0], Ntrunc)
 
 def main():
     unittest.main()
