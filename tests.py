@@ -155,7 +155,7 @@ import SphereHarm
         
 class SphereHarmTests(unittest.TestCase):
     def setUp(self):
-        self.GF2 = np.eye(3)
+        self.GF2iso = np.eye(3)
 
     def testCarttoSphere(self):
         qv = np.array([1,0,0])
@@ -164,6 +164,10 @@ class SphereHarmTests(unittest.TestCase):
         self.assertEqual(qsphere[1], np.pi*0.5) # phi (polar)
         self.assertEqual(qsphere[2], 1) # magnitude
         
+        qv = np.array([0,0,0])
+        qv2 = SphereHarm.SpheretoCart(SphereHarm.CarttoSphere(qv))
+        for d in xrange(3): self.assertAlmostEqual(qv[d], qv2[d])
+
         qv = np.array([1,0,0])
         qv2 = SphereHarm.SpheretoCart(SphereHarm.CarttoSphere(qv))
         for d in xrange(3): self.assertAlmostEqual(qv[d], qv2[d])
@@ -175,6 +179,14 @@ class SphereHarmTests(unittest.TestCase):
         qv = np.array([-1,1,-1])
         qv2 = SphereHarm.SpheretoCart(SphereHarm.CarttoSphere(qv))
         for d in xrange(3): self.assertAlmostEqual(qv[d], qv2[d])
+
+    def testYlmTransformDim(self):
+        Npolar=4
+        Ntrunc=(Npolar*(Npolar+1))/2
+        GFcoeff,indices=SphereHarm.YlmTransform(self.GF2iso, Npolar=Npolar)
+        self.assertEqual(np.shape(GFcoeff)[0], Ntrunc))
+        self.assertEqual(np.shape(indices[0])[0], Ntrunc)
+        self.assertEqual(np.shape(indices[0])[1], Ntrunc)
 
 def main():
     unittest.main()
