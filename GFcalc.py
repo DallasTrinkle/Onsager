@@ -204,3 +204,29 @@ def D4toNNN(D4):
                D15[ExpToIndex[tup.count(0),tup.count(1),tup.count(2)]] += D4[tup]
    return D15
 
+def RotateD4(D4, di, ei):
+   """
+   Returns the rotated (and scaled) version of the fourth-ranked tensor D4,
+   using the eigenvalues di and eigenvectors ei. Should be such that if you
+   take q, evaluate it as pi, then eval4(pi, Drot4) = eval4(q, D4).
+
+   Returns Drot4[3,3,3,3]
+
+   Parameters
+   ----------
+   D4[3,3,3,3]: fourth-rank tensor
+   di[3]:       eigenvalues
+   ei[3,3]:     eigenvectors (ei[i,:] corresponds to di[i])
+   """
+   Drot4 = np.zeros((3,3,3,3))
+   for a in xrange(3):
+      for b in xrange(3):
+         for c in xrange(3):
+            for d in xrange(3):
+               Drot4[a,b,c,d] = np.dot(ei[a],
+                                       np.dot(ei[b],
+                                              np.dot(ei[c],
+                                                     np.dot(ei[d],
+                                                            D4))))/np.sqrt(di[a]*di[b]*di[c]*di[d])
+
+   return Drot4
