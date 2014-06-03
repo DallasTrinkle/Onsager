@@ -344,7 +344,28 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         for ind in xrange(15):
             if ind != GFcalc.ExpToIndex[4,0,0]:
                 self.assertEqual(D15[ind], 0)
-    
+                
+        D4=np.zeros((3,3,3,3))
+        D4[1,1,1,1]=1
+        D15=GFcalc.D4toNNN(D4)
+        self.assertEqual(np.shape(D15), (15,))
+        self.assertEqual(D15[GFcalc.ExpToIndex[0,4,0]], 1)
+        for ind in xrange(15):
+            if ind != GFcalc.ExpToIndex[0,4,0]:
+                self.assertEqual(D15[ind], 0)
+
+        D4=np.zeros((3,3,3,3))
+        D4[0,0,0,1]=1
+        D4[0,0,1,0]=1
+        D4[0,1,0,0]=1
+        D4[1,0,0,0]=1
+        D15=GFcalc.D4toNNN(D4)
+        self.assertEqual(np.shape(D15), (15,))
+        self.assertEqual(D15[GFcalc.ExpToIndex[3,1,0]], 4)
+        for ind in xrange(15):
+            if ind != GFcalc.ExpToIndex[3,1,0]:
+                self.assertEqual(D15[ind], 0)
+
 def main():
     unittest.main()
 

@@ -174,5 +174,11 @@ def D4toNNN(D4):
    D4[3,3,3,3]: 4th rank tensor coefficient, as in D4[a,b,c,d]*x[a]*x[b]*x[c]*x[d]
    """
    D15 = np.zeros(15)
+   for a in xrange(3):
+      for b in xrange(3):
+         for c in xrange(3):
+            for d in xrange(3):
+               tup = (a,b,c,d)
+               D15[ExpToIndex[tup.count(0),tup.count(1),tup.count(2)]] += D4[tup]
    return D15
 
