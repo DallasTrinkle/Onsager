@@ -40,7 +40,7 @@ class LatticeTests(unittest.TestCase):
 
 import GFcalc
 
-class GreenFuncFourierTransformTests(unittest.TestCase):
+class GreenFuncDerivativeTests(unittest.TestCase):
     def setUp(self):
         self.NNvect = FCClatt.NNvect()
         self.rates = np.array((1,)*np.shape(self.NNvect)[0])
@@ -149,6 +149,23 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         self.assertTrue(abs(D-D2-D4) < eps*(delta**4) )
         self.assertFalse(abs(D-D2) < eps*(delta**4) )
 
+# code that does Fourier transforms
+class GreenFuncFourierTransformTests(unittest.TestCase):
+    def setUp(self):
+        self.NNvect = FCClatt.NNvect()
+        self.rates = np.array((1,)*np.shape(self.NNvect)[0])
+        self.GFFT = GFcalc.GFFTfunc(self.NNvect, self.rates)
+        self.GF2 = GFcalc.GF2(self.NNvect, self.rates)
+        self.GF4 = GFcalc.GF4(self.NNvect, self.rates)
+
+    def testEigenValueVect(self):
+        di, ei_vect = GFcalc.calcDE(self.GF2)
+        self.assertTrue(all(di==(12,12,12)))
+        self.assertTrue(any( all((1,0,0)==x) for x in ei_vect ))
+        self.assertTrue(any( all((0,1,0)==x) for x in ei_vect ))
+        self.assertTrue(any( all((0,0,1)==x) for x in ei_vect ))
+
+        
 # test spherical harmonics code
 import scipy
 import SphereHarm

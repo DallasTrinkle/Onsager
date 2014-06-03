@@ -43,4 +43,19 @@ def GF4(NNvect, rates):
             for d in xrange(3):
                D4[a,b,c,d] = 1./24. * sum(NNvect[:,a]*NNvect[:,b]*NNvect[:,c]*NNvect[:,d]*rates[:])
    return D4
+
+def calcDE(GF2):
+   """
+   Takes in the GF2 matrix (assumed to be real, symmetric) and diagonalizes it
+   returning the eigenvalues (d_i) and corresponding normalized eigenvectors (e_i).
+   Returns di[3], ei[3,3], where ei[i,:] is the eigenvector for di[i]
    
+   Parameters
+   ----------
+   GF2[3,3]: symmetric, real matrix from GF2()
+   """
+
+   di=np.zeros(3)
+   ei=np.zeros((3,3))
+   return di, ei
+
