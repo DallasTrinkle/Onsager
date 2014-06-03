@@ -69,3 +69,23 @@ def invertD2(D2):
    """
 
    return np.linalg.inv(D2)
+
+def unorm(di, ei, x):
+   """
+   Takes the eigenvalues di, eigenvectors ei, and the vector x, and returns the
+   normalized u vector, along with its magnitude. These are the key elements needed
+   in *all* of the Fourier transform expressions to follow.
+
+   Returns: ui[3], umagn
+
+   Parameters
+   ----------
+   di[3]:   eigenvalues of D2
+   ei[3,3]: eigenvectors of D2 (ei[i,:] == ith eigenvector)
+   x[3]:    cartesian position vector
+   """
+
+   ui = np.zeros(3)
+   umagn = 0
+   return ui, umagn
+

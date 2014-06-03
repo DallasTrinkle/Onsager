@@ -154,6 +154,8 @@ class GreenFuncDerivativeTests(unittest.TestCase):
 # code that does Fourier transforms
 class GreenFuncFourierTransformTests(unittest.TestCase):
     def setUp(self):
+        # di0/ei0 are the "original" eigenvalues / eigenvectors, and di/ei are the
+        # calculated versions
         self.di0 = np.array([0.5, 1., 2.])
         self.ei0 = np.array([[np.sqrt(0.5), np.sqrt(0.5),0],
                              [np.sqrt(1./6.),-np.sqrt(1./6.),np.sqrt(2./3.)],
@@ -177,6 +179,21 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         for a in xrange(3):
             for b in xrange(3):
                 self.assertAlmostEqual(self.GF2_0[a,b], self.GF2[a,b])
+
+    def testCalcUnorm(self):
+        # Graceful handling of 0?
+        x = np.zeros(3)
+        ui, umagn = GFcalc.unorm(self.di, self.ei_vect, x)
+        self.AssertEqual(umagn, 0)
+        self.AssertTrue(all(ui == 0))
+
+        # "arbitrary" vector
+        x = np.array([0.5, 0.25, -1])
+        ui, umagn = GFcalc.unorm(self.di, self.ei_vect, x)
+        self.assertAlmostEqual(np.dot(ui,ui), 1)
+        self.assertAlmostEqual(umagn, np.sqrt(np.dot(x, np.dot(self.GF2, x))))
+        for a in xrange(3):
+            self.assertAlmostEqual(ui[a]*umagn, np.dot(x, self.ei_vect[a,:]))
 
 # test spherical harmonics code
 import scipy
