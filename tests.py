@@ -384,12 +384,15 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
 
     def testRotateD4(self):
         """
-        Tests the rotation of D4 with the eigenvalues/vectors of D
+        Tests the rotation of D4 with the eigenvalues/vectors of D.
+        Checks that the eigenvectors input give what you expect, and also checks
+        equality for some arbitrary vector.
         """
         di = np.array([0.5, 1., 2.])
         ei = np.array([[np.sqrt(0.5), np.sqrt(0.5),0],
                        [np.sqrt(1./6.),-np.sqrt(1./6.),np.sqrt(2./3.)],
                        [np.sqrt(1./3.),-np.sqrt(1./3.),-np.sqrt(1./3.)]])
+
         D4=np.zeros((3,3,3,3))
         D4[0,0,0,0]=1
         Drot4 = GFcalc.RotateD4(D4, di, ei)
@@ -399,6 +402,20 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
                                    GFcalc.eval4(ei[a]/np.sqrt(di[a]), D4))
         q = np.array([1,-0.5, -0.25])
         pi, pnorm = GFcalc.pnorm(di, ei, q)
+        self.assertAlmostEqual(GFcalc.eval4(pi, Drot4)*(pnorm**4),
+                               GFcalc.eval4(q, D4))
+
+        D4=np.zeros((3,3,3,3))
+        D4[0,0,0,1]=0.25
+        D4[0,0,1,0]=0.25
+        D4[0,1,0,0]=0.25
+        D4[1,0,0,0]=0.25
+        D4[2,2,2,2]=-4
+        Drot4 = GFcalc.RotateD4(D4, di, ei)
+        self.assertEqual(np.shape(Drot4),(3,3,3,3))
+        for a in xrange(3):
+            self.assertAlmostEqual(Drot4[a,a,a,a],
+                                   GFcalc.eval4(ei[a]/np.sqrt(di[a]), D4))
         self.assertAlmostEqual(GFcalc.eval4(pi, Drot4)*(pnorm**4),
                                GFcalc.eval4(q, D4))
 
