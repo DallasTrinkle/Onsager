@@ -196,54 +196,6 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
             self.assertAlmostEqual(ui[a]*umagn,
                                    np.dot(x, self.ei_vect[a,:])/np.sqrt(self.di[a]))
 
-# test spherical harmonics code
-import scipy
-import SphereHarm
-        
-class SphereHarmTests(unittest.TestCase):
-    def setUp(self):
-        self.D2iso = np.eye(3)
-        self.Npolar=4
-        self.Ntrunc=(self.Npolar*(self.Npolar+1))/2
-
-    def testCarttoSphere(self):
-        qv = np.array([1,0,0])
-        qsphere=SphereHarm.CarttoSphere(qv)
-        self.assertEqual(qsphere[0], 0) # theta (azimuthal)
-        self.assertEqual(qsphere[1], np.pi*0.5) # phi (polar)
-        self.assertEqual(qsphere[2], 1) # magnitude
-        
-        qv = np.array([0,0,0])
-        qv2 = SphereHarm.SpheretoCart(SphereHarm.CarttoSphere(qv))
-        for d in xrange(3): self.assertAlmostEqual(qv[d], qv2[d])
-
-        qv = np.array([1,0,0])
-        qv2 = SphereHarm.SpheretoCart(SphereHarm.CarttoSphere(qv))
-        for d in xrange(3): self.assertAlmostEqual(qv[d], qv2[d])
-
-        qv = np.array([1,1,0])
-        qv2 = SphereHarm.SpheretoCart(SphereHarm.CarttoSphere(qv))
-        for d in xrange(3): self.assertAlmostEqual(qv[d], qv2[d])
-
-        qv = np.array([-1,1,-1])
-        qv2 = SphereHarm.SpheretoCart(SphereHarm.CarttoSphere(qv))
-        for d in xrange(3): self.assertAlmostEqual(qv[d], qv2[d])
-
-    def testYlmTransformDim(self):
-        Dcoeff,indices=SphereHarm.YlmTransform(self.D2iso, Npolar=self.Npolar)
-        self.assertEqual(np.shape(Dcoeff)[0], self.Ntrunc)
-        self.assertEqual(np.shape(indices[0])[0], self.Ntrunc)
-        self.assertEqual(np.shape(indices[1])[0], self.Ntrunc)
-
-    def testYlmTransformValuesIsotropic(self):
-        threshold=1e-7
-        Dcoeff,indices=SphereHarm.YlmTransform(self.D2iso, Npolar=self.Npolar)
-        # isotropic; only the l=0,m=0 value should be nonzero
-        for i, m in enumerate(indices[0]):
-            l = indices[1][i]
-            if (l==0): self.assertAlmostEqual(Dcoeff[i], np.sqrt(2))
-            else: self.assertTrue(abs(Dcoeff[i])<threshold)
-
 def main():
     unittest.main()
 
