@@ -13,15 +13,21 @@ class LatticeTests(unittest.TestCase):
         self.invlist = FCClatt.invlist(self.NNvect)
 
     def testFCCcount(self):
-        # check that we have z=12 neighbors, and we're in 3D        
+        """
+        check that we have z=12 neighbors, and we're in 3D
+        """
         self.assertEqual(np.shape(self.NNvect), (12,3))
 
     def testFCCinversioncount(self):
-        # right dimensions?
+        """
+        Right dimensions for matrices?
+        """
         self.assertEqual(np.shape(self.NNvect)[0], np.shape(self.invlist)[0])
 
     def testFCCbasic(self):
-        # do we have the right <110> nearest neighbor vectors?
+        """
+        Do we have the right <110> nearest neighbor vectors for FCC?
+        """
         self.assertTrue(any( all((1,1,0)==x) for x in self.NNvect ))
         self.assertTrue(any( all((1,-1,0)==x) for x in self.NNvect ))
         self.assertTrue(any( all((0,1,1)==x) for x in self.NNvect ))
@@ -32,7 +38,9 @@ class LatticeTests(unittest.TestCase):
         self.assertFalse(any( all((1,1,1)==x) for x in self.NNvect ))
         
     def testFCCinversion(self):
-        # check that for each NN vector, we have its inverse too
+        """
+        Check that for each NN vector, we have its inverse too, from invlist
+        """
         for k1, k2 in enumerate(self.invlist):
             self.assertTrue(all(self.NNvect[k1] == -self.NNvect[k2]))
 
@@ -49,13 +57,22 @@ class GreenFuncDerivativeTests(unittest.TestCase):
         self.D4 = GFcalc.D4(self.NNvect, self.rates) # + 4th deriv. of FT (>0)
 
     def testFTisfunc(self):
+        """
+        Do we get a function as DFT?
+        """
         self.assertTrue(callable(self.DFT))
 
     def testFTfuncZero(self):
+        """
+        Is the FT zero at gamma?
+        """
         q=np.array((0,0,0))
         self.assertEqual(self.DFT(q),0)
         
-    def testFTfuncZeroBZ(self):
+    def testFTfuncZeroRLV(self):
+        """
+        Is the FT zero for reciprocal lattice vectors?
+        """
         q=np.array((2*np.pi,0,0))
         self.assertEqual(self.DFT(q),0)
         q=np.array((2*np.pi,2*np.pi,0))
@@ -64,7 +81,11 @@ class GreenFuncDerivativeTests(unittest.TestCase):
         self.assertEqual(self.DFT(q),0)
         
     def testFTfuncValues(self):
-        # note: equality here doesn't quite work due to roundoff error at the 15th digit
+        """
+        Do we match some specific values?
+        Testing that we're negative, and "by hand" evaluation of a few cases.
+        Note: equality here doesn't quite work due to roundoff error at the 15th digit
+        """
         q=np.array((1,0,0))
         self.assertTrue(self.DFT(q)<0) # negative everywhere...
         self.assertAlmostEqual(self.DFT(q), 8*(np.cos(1)-1))
@@ -76,6 +97,9 @@ class GreenFuncDerivativeTests(unittest.TestCase):
         self.assertAlmostEqual(self.DFT(q), 6*(np.cos(2)-1))
 
     def testFTfuncSymmetry(self):
+        """
+        Does our FT obey basic cubic symmetry operations?
+        """
         q=np.array((1,0,0))
         q2=np.array((-1,0,0))
         self.assertEqual(self.DFT(q),self.DFT(q2))
@@ -85,10 +109,18 @@ class GreenFuncDerivativeTests(unittest.TestCase):
         self.assertEqual(self.DFT(q),self.DFT(q2))
 
     def testFTdim(self):
+        """
+        Do we have the correct dimensionality for our second and fourth derivatives?
+        """
         self.assertTrue(np.shape(self.D2)==(3,3))
         self.assertTrue(np.shape(self.D4)==(3,3,3,3))
 
     def testFTDiffSymmetry(self):
+        """
+        Do we obey basic symmetry for these values? That means that D2 should be
+        symmetric, and that any permutation of [abcd] should give the same value
+        in D4.
+        """
         self.assertTrue(np.all(self.D2 == self.D2.T))
         self.assertEqual(self.D2[0,0], self.D2[1,1])
         self.assertEqual(self.D2[0,0], self.D2[2,2])
@@ -101,8 +133,10 @@ class GreenFuncDerivativeTests(unittest.TestCase):
                         self.assertEqual(self.D4[ind], self.D4[inds])
 
     def testFTDiffValue(self):
-        # note: equality here doesn't work here, as we're using finite difference
-        # to evaluate a second derivative, so we use a threshold value.
+        """
+        Test out that the 2nd derivatives behave as expected, by doing a finite
+        difference evaluation. Requires using a threshold value.
+        """
         # Remember: D2 is negative of the second derivative (to make it positive def.)
         delta=2.e-4
         eps=1e-5
@@ -125,8 +159,10 @@ class GreenFuncDerivativeTests(unittest.TestCase):
         self.assertFalse(abs(D0) < eps*(delta**2) )
 
     def testFTDiff4Value(self):
-        # note: equality here doesn't work here, as we're using finite difference
-        # to evaluate a second derivative, so we use a threshold value.
+        """
+        Test out that the 4th derivatives behave as expected, by doing a finite
+        difference evaluation. Requires using a threshold value.
+        """
         # Remember: D2 is negative of the second derivative (to make it positive def.)
         delta=1e-1
         eps=1e-1
@@ -166,21 +202,34 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         self.GF2 = GFcalc.invertD2(self.D2)
 
     def testEigendim(self):
+        """
+        Correct dimensionality of eigenvalues and vectors?
+        """
         self.assertTrue(np.shape(self.di)==(3,))
         self.assertTrue(np.shape(self.ei_vect)==(3,3))
 
     def testEigenvalueVect(self):
+        """
+        Test that the eigenvalues and vectors by direct comparison with thresholds.
+        """
         # a little painful, due to thresholds (and possible negative eigenvectors)
         eps=1e-8
         for eig in self.di0: self.assertTrue(any(abs(self.di-eig)<eps) )
         for vec in self.ei0: self.assertTrue(any(abs(np.dot(x,vec))>(1-eps) for x in self.ei_vect))
 
     def testInverse(self):
+        """
+        Check the evaluation of the inverse.
+        """
         for a in xrange(3):
             for b in xrange(3):
                 self.assertAlmostEqual(self.GF2_0[a,b], self.GF2[a,b])
 
     def testCalcUnorm(self):
+        """
+        Test the normalized u vector and magnitude; ui = (x.ei)/sqrt(di), including
+        the handling of x=0.
+        """
         # Graceful handling of 0?
         x = np.zeros(3)
         ui, umagn = GFcalc.unorm(self.di, self.ei_vect, x)
@@ -197,6 +246,10 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
                                    np.dot(x, self.ei_vect[a,:])/np.sqrt(self.di[a]))
 
     def testCalcPnorm(self):
+        """
+        Test the normalized p vector and magnitude; pi = (q.ei)*sqrt(di), including
+        the handling of q=0.
+        """
         # Graceful handling of 0?
         q = np.zeros(3)
         pi, pmagn = GFcalc.pnorm(self.di, self.ei_vect, q)
@@ -213,6 +266,10 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
                                    np.dot(q, self.ei_vect[a,:])*np.sqrt(self.di[a]))
 
     def testPoleFT(self):
+        """
+        Test the evaluation of the fourier transform of the second-order pole,
+        including at 0.
+        """
         # Graceful handling of 0?
         pm = 0.5 # arbitrary at this point...
         x = np.zeros(3)
@@ -230,6 +287,25 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         
         g = GFcalc.poleFT(self.di, umagn, pm, erfupm)
         self.assertAlmostEqual(erfupm*0.25/(umagn*np.pi*np.sqrt(np.product(self.di))), g)
+
+    def testPowerExpansion(self):
+        """
+        Check that there are (a) 15 entries, (b) all non-negative, (c) summing to 4,
+        (d) uniquely in our power expansion.
+        """
+        self.assertEqual(np.shape(GFcalc.PowerExpansion),(15,3))
+        self.assertTrue(np.all(GFcalc.PowerExpansion>=0))
+        for i in xrange(15):
+            self.assertEqual(GFcalc.PowerExpansion[i].sum(), 4)
+            for j in xrange(i):
+                self.assertFalse(all(GFcalc.PowerExpansion[i]==GFcalc.PowerExpansion[j]))
+
+    def testConvD4toNNN(self):
+        """
+        Tests conversion of the 4th-rank 4th derivative into power expansion.
+        """
+        self.assertTrue(1==0)
+        
     
 def main():
     unittest.main()

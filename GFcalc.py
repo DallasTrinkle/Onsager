@@ -140,3 +140,11 @@ def poleFT(di, u, pm, erfupm=-1):
    if (erfupm==0):
       return 0.25*pm/np.sqrt(np.product(di*np.pi))
    return erfupm*0.25/(np.pi*u*np.sqrt(np.product(di)))
+
+# Hard-coded?
+PowerExpansion = np.array( (
+      (0,0,4), (0,4,0), (4,0,0),
+      (2,2,0), (2,0,2), (0,2,2),
+      (0,1,3), (0,3,1), (2,1,1),
+      (1,0,3), (3,0,1), (1,2,1),
+      (1,3,0), (3,1,0), (1,1,2)) )
