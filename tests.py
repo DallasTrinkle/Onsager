@@ -154,24 +154,30 @@ class GreenFuncDerivativeTests(unittest.TestCase):
 # code that does Fourier transforms
 class GreenFuncFourierTransformTests(unittest.TestCase):
     def setUp(self):
-        self.NNvect = FCClatt.NNvect()
-        self.rates = np.array((1,)*np.shape(self.NNvect)[0])
-        self.DFT = GFcalc.DFTfunc(self.NNvect, self.rates) # Fourier transform
-        self.D2 = GFcalc.D2(self.NNvect, self.rates) # - 2nd deriv. of FT (>0)
-        self.D4 = GFcalc.D4(self.NNvect, self.rates) # + 4th deriv. of FT (>0)
+        self.di0 = np.array([0.5, 1., 2.])
+        self.ei0 = np.array([[np.sqrt(0.5), np.sqrt(0.5),0],
+                             [np.sqrt(1./6.),-np.sqrt(1./6.),np.sqrt(2./3.)],
+                             [np.sqrt(1./3.),-np.sqrt(1./3.),-np.sqrt(1./3.)]])
+        self.D2 = np.dot(self.ei0.T, np.dot(np.diag(self.di0), self.ei0))
+        self.GF2_0 = np.dot(self.ei0.T, np.dot(np.diag(1./self.di0), self.ei0))
         self.di, self.ei_vect = GFcalc.calcDE(self.D2)
+        self.GF2 = GFcalc.invertD2(self.D2)
 
     def testEigendim(self):
         self.assertTrue(np.shape(self.di)==(3,))
         self.assertTrue(np.shape(self.ei_vect)==(3,3))
 
     def testEigenvalueVect(self):
-        self.assertTrue(all( self.di==(4,4,4)))
-        self.assertTrue(any( all((1,0,0)==x) for x in self.ei_vect ))
-        self.assertTrue(any( all((0,1,0)==x) for x in self.ei_vect ))
-        self.assertTrue(any( all((0,0,1)==x) for x in self.ei_vect ))
+        # a little painful, due to thresholds (and possible negative eigenvectors)
+        eps=1e-8
+        for eig in self.di0: self.assertTrue(any(abs(self.di-eig)<eps) )
+        for vec in self.ei0: self.assertTrue(any(abs(np.dot(x,vec))>(1-eps) for x in self.ei_vect))
 
-        
+    def testInverse(self):
+        for a in xrange(3):
+            for b in xrange(3):
+                self.assertAlmostEqual(self.GF2_0[a,b], self.GF2[a,b])
+
 # test spherical harmonics code
 import scipy
 import SphereHarm
