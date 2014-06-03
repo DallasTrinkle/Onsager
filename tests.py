@@ -139,6 +139,22 @@ class GreenFuncDerivativeTests(unittest.TestCase):
                         inds = tuple(sorted(ind))
                         self.assertEqual(self.D4[ind], self.D4[inds])
 
+    def testEval2(self):
+        """
+        Tests eval2(q,D) gives qDq
+        """
+        qvec = np.array((0.5, 0.75, -0.25))
+        self.assertAlmostEqual(np.dot(qvec, np.dot(qvec, self.D2)),
+                               GFcalc.eval2(qvec, self.D2))
+
+    def testEval4(self):
+        """
+        Tests eval4(q,D) gives qqDqq
+        """
+        qvec = np.array((0.5, 0.75, -0.25))
+        self.assertAlmostEqual(np.dot(qvec, np.dot(qvec, np.dot(qvec, np.dot(qvec, self.D4)))),
+                               GFcalc.eval4(qvec, self.D4))
+
     def testFTDiffValue(self):
         """
         Test out that the 2nd derivatives behave as expected, by doing a finite
@@ -149,19 +165,19 @@ class GreenFuncDerivativeTests(unittest.TestCase):
         eps=1e-5
         qsmall=np.array((delta,0,0))
         D0 = self.DFT(qsmall)
-        D2 = np.dot(qsmall,np.dot(qsmall,self.D2))
+        D2 = GFcalc.eval2(qsmall,self.D2)
         self.assertTrue(abs(D0+D2) < eps*(delta**2) )
         self.assertFalse(abs(D0) < eps*(delta**2) )
 
         qsmall=np.array((delta,delta,0))
         D0 = self.DFT(qsmall)
-        D2 = np.dot(qsmall,np.dot(qsmall,self.D2))
+        D2 = GFcalc.eval2(qsmall,self.D2)
         self.assertTrue(abs(D0+D2) < eps*(delta**2) )
         self.assertFalse(abs(D0) < eps*(delta**2) )
 
         qsmall=np.array((delta,delta,delta))
         D0 = self.DFT(qsmall)
-        D2 = np.dot(qsmall,np.dot(qsmall,self.D2))
+        D2 = GFcalc.eval2(qsmall,self.D2)
         self.assertTrue(abs(D0+D2) < eps*(delta**2) )
         self.assertFalse(abs(D0) < eps*(delta**2) )
 
@@ -175,22 +191,22 @@ class GreenFuncDerivativeTests(unittest.TestCase):
         eps=1e-1
         qsmall=np.array((delta,0,0))
         D = self.DFT(qsmall)
-        D2 = np.dot(qsmall,np.dot(qsmall,self.D2))
-        D4 = np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,self.D4))))
+        D2 = GFcalc.eval2(qsmall,self.D2)
+        D4 = GFcalc.eval4(qsmall,self.D4)
         self.assertTrue(abs(D+D2-D4) < eps*(delta**4) )
         self.assertFalse(abs(D+D2) < eps*(delta**4) )
 
         qsmall=np.array((delta,delta,0))
         D = self.DFT(qsmall)
-        D2 = np.dot(qsmall,np.dot(qsmall,self.D2))
-        D4 = np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,self.D4))))
+        D2 = GFcalc.eval2(qsmall,self.D2)
+        D4 = GFcalc.eval4(qsmall,self.D4)
         self.assertTrue(abs(D+D2-D4) < eps*(delta**4) )
         self.assertFalse(abs(D+D2) < eps*(delta**4) )
 
         qsmall=np.array((delta,delta,delta))
         D = self.DFT(qsmall)
-        D2 = np.dot(qsmall,np.dot(qsmall,self.D2))
-        D4 = np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,np.dot(qsmall,self.D4))))
+        D2 = GFcalc.eval2(qsmall,self.D2)
+        D4 = GFcalc.eval4(qsmall,self.D4)
         self.assertTrue(abs(D+D2-D4) < eps*(delta**4) )
         self.assertFalse(abs(D+D2) < eps*(delta**4) )
 
@@ -250,7 +266,7 @@ class GreenFuncFourierTransformPoleTests(unittest.TestCase):
         x = np.array([0.5, 0.25, -1])
         ui, umagn = GFcalc.unorm(self.di, self.ei_vect, x)
         self.assertAlmostEqual(np.dot(ui,ui), 1)
-        self.assertAlmostEqual(umagn, np.sqrt(np.dot(x, np.dot(self.GF2, x))))
+        self.assertAlmostEqual(umagn, np.sqrt(GFcalc.eval2(x, self.GF2)))
         for a in xrange(3):
             self.assertAlmostEqual(ui[a]*umagn,
                                    np.dot(x, self.ei_vect[a,:])/np.sqrt(self.di[a]))
@@ -270,7 +286,7 @@ class GreenFuncFourierTransformPoleTests(unittest.TestCase):
         q = np.array([0.5, 0.25, -1])
         pi, pmagn = GFcalc.pnorm(self.di, self.ei_vect, q)
         self.assertAlmostEqual(np.dot(pi,pi), 1)
-        self.assertAlmostEqual(pmagn, np.sqrt(np.dot(q, np.dot(self.D2, q))))
+        self.assertAlmostEqual(pmagn, np.sqrt(GFcalc.eval2(q, self.D2)))
         for a in xrange(3):
             self.assertAlmostEqual(pi[a]*pmagn,
                                    np.dot(q, self.ei_vect[a,:])*np.sqrt(self.di[a]))
@@ -365,6 +381,37 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         for ind in xrange(15):
             if ind != GFcalc.ExpToIndex[3,1,0]:
                 self.assertEqual(D15[ind], 0)
+
+    def testRotateD4(self):
+        """
+        Tests the rotation of D4 with the eigenvalues/vectors of D
+        """
+        di = np.array([0.5, 1., 2.])
+        ei = np.array([[np.sqrt(0.5), np.sqrt(0.5),0],
+                       [np.sqrt(1./6.),-np.sqrt(1./6.),np.sqrt(2./3.)],
+                       [np.sqrt(1./3.),-np.sqrt(1./3.),-np.sqrt(1./3.)]])
+        D4=np.zeros((3,3,3,3))
+        D4[0,0,0,0]=1
+        Drot4 = GFcalc.RotateD4(D4, di, ei)
+        self.assertEqual(np.shape(Drot4),(3,3,3,3))
+        for a in xrange(3):
+            self.assertAlmostEqual(Drot4[a,a,a,a],
+                                   GFcalc.eval4(ei[a]/sqrt(di[a]), D4))
+        q = np.array([1,-0.5, -0.25])
+        pi, pnorm = GFcalc.pnorm(di, ei, q)
+        self.assertAlmostEqual(GFcalc.eval4(pi, Drot4)*(pnorm**4),
+                               GFcalc.eval4(q, D4))
+        for a in xrange(3):
+            for b in xrange(3):
+                for c in xrange(3):
+                    for d in xrange(3):
+                        self.assertAlmostEqual(Drot4[a,b,c,d],
+                                               sqrt(di[a]*di[b]*di[c]*di[d])*
+                                               np.dot(ei[a],
+                                                      np.dot(ei[b],
+                                                             np.dot(ei[c],
+                                                                    np.dot(ei[d],
+                                                                           D4)))))
 
 def main():
     unittest.main()

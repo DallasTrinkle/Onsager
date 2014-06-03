@@ -46,6 +46,28 @@ def D4(NNvect, rates):
                D4[a,b,c,d] = 1./24. * sum(NNvect[:,a]*NNvect[:,b]*NNvect[:,c]*NNvect[:,d]*rates[:])
    return D4
 
+def eval2(q, D):
+   """
+   Returns q.D.q.
+
+   Parameters
+   ----------
+   q[3]:   3-vector
+   D[3,3]: second-rank tensor
+   """
+   return np.dot(q, np.dot(q, D))
+
+def eval4(q, D):
+   """
+   Returns q.q.D.q.q
+
+   Parameters
+   ----------
+   q[3]:   3-vector
+   D[3,3,3,3]: fourth-rank tensor
+   """
+   return np.dot(q, np.dot(q, np.dot(q, np.dot(q, D))))
+
 def calcDE(D2):
    """
    Takes in the D2 matrix (assumed to be real, symmetric) and diagonalizes it
