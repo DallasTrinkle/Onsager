@@ -219,14 +219,14 @@ def RotateD4(D4, di, ei):
    ei[3,3]:     eigenvectors (ei[i,:] corresponds to di[i])
    """
    Drot4 = np.zeros((3,3,3,3))
+   diinvsqrt = 1./np.sqrt(di)
    for a in xrange(3):
       for b in xrange(3):
          for c in xrange(3):
             for d in xrange(3):
-               Drot4[a,b,c,d] = np.dot(ei[a],
-                                       np.dot(ei[b],
-                                              np.dot(ei[c],
-                                                     np.dot(ei[d],
-                                                            D4))))/np.sqrt(di[a]*di[b]*di[c]*di[d])
-
+               Drot4[a,b,c,d] = (diinvsqrt[a]*diinvsqrt[b]*diinvsqrt[c]*diinvsqrt[d]*
+                                 np.dot(ei[a],
+                                        np.dot(ei[b],
+                                               np.dot(ei[c],
+                                                      np.dot(ei[d],D4)))))
    return Drot4

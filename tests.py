@@ -401,17 +401,6 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         pi, pnorm = GFcalc.pnorm(di, ei, q)
         self.assertAlmostEqual(GFcalc.eval4(pi, Drot4)*(pnorm**4),
                                GFcalc.eval4(q, D4))
-        for a in xrange(3):
-            for b in xrange(3):
-                for c in xrange(3):
-                    for d in xrange(3):
-                        self.assertAlmostEqual(Drot4[a,b,c,d],
-                                               np.sqrt(di[a]*di[b]*di[c]*di[d])*
-                                               np.dot(ei[a],
-                                                      np.dot(ei[b],
-                                                             np.dot(ei[c],
-                                                                    np.dot(ei[d],
-                                                                           D4)))))
 
 def main():
     unittest.main()
