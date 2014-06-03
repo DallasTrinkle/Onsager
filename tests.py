@@ -8,6 +8,9 @@ import numpy as np
 import FCClatt
 
 class LatticeTests(unittest.TestCase):
+    """
+    Set of tests that our lattice code is behaving correctly
+    """
     def setUp(self):
         self.NNvect = FCClatt.NNvect()
         self.invlist = FCClatt.invlist(self.NNvect)
@@ -49,6 +52,10 @@ class LatticeTests(unittest.TestCase):
 import GFcalc
 
 class GreenFuncDerivativeTests(unittest.TestCase):
+    """
+    Tests for the construction of D as a fourier transform, and the 2nd and 4th
+    derivatives.
+    """
     def setUp(self):
         self.NNvect = FCClatt.NNvect()
         self.rates = np.array((1,)*np.shape(self.NNvect)[0])
@@ -188,7 +195,10 @@ class GreenFuncDerivativeTests(unittest.TestCase):
         self.assertFalse(abs(D+D2) < eps*(delta**4) )
 
 # code that does Fourier transforms
-class GreenFuncFourierTransformTests(unittest.TestCase):
+class GreenFuncFourierTransformPoleTests(unittest.TestCase):
+    """
+    Tests for code involved in the Fourier transform of the second-order pole.
+    """
     def setUp(self):
         # di0/ei0 are the "original" eigenvalues / eigenvectors, and di/ei are the
         # calculated versions
@@ -288,6 +298,14 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         g = GFcalc.poleFT(self.di, umagn, pm, erfupm)
         self.assertAlmostEqual(erfupm*0.25/(umagn*np.pi*np.sqrt(np.product(self.di))), g)
 
+class GreenFuncFourierTransformDiscTests(unittest.TestCase):
+    """
+    Tests for the fourier transform of the discontinuity correction (4th derivative).
+    """
+    def setUp(self):
+        # GFcalc.ConstructExpToIndex()
+        pass
+
     def testPowerExpansion(self):
         """
         Check that there are (a) 15 entries, (b) all non-negative, (c) summing to 4,
@@ -300,12 +318,32 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
             for j in xrange(i):
                 self.assertFalse(all(GFcalc.PowerExpansion[i]==GFcalc.PowerExpansion[j]))
 
+    def testExpToIndex(self):
+        """
+        Checks that ExpToIndex is correctly constructed.
+        """
+        for n1 in xrange(5):
+            for n2 in xrange(5):
+                for n3 in xrange(5):
+                    if (n1+n2+n3 != 4):
+                        self.assertEqual(GFcalc.ExpToIndex[n1,n2,n3], 15)
+                    else:
+                        ind = GFcalc.ExpToIndex[n1,n2,n3]
+                        self.assertNotEqual(ind, 15)
+                        self.assertTrue(all(GFcalc.PowerExpansion[ind]==(n1,n2,n3)))
+
     def testConvD4toNNN(self):
         """
         Tests conversion of the 4th-rank 4th derivative into power expansion.
         """
-        self.assertTrue(1==0)
-        
+        D4=np.zeros((3,3,3,3))
+        D4[0,0,0,0]=1
+        D15=GFcalc.D4toNNN(D4)
+        self.assertEqual(np.shape(D15), (15,))
+        self.assertEqual(D15[GFcalc.ExpToIndex[4,0,0]], 1)
+        for ind in xrange(15):
+            if ind != GFcalc.ExpToIndex[4,0,0]:
+                self.assertEqual(D15[ind], 0)
     
 def main():
     unittest.main()

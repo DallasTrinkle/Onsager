@@ -148,3 +148,31 @@ PowerExpansion = np.array( (
       (0,1,3), (0,3,1), (2,1,1),
       (1,0,3), (3,0,1), (1,2,1),
       (1,3,0), (3,1,0), (1,1,2)) )
+
+# Conversion from hard-coded PowerExpansion back to index number; if not in range,
+# its equal to 15. Needs to be constructed
+
+def ConstructExpToIndex():
+   """
+   Setup to construct ExpToIndex to match PowerExpansion.
+   """
+   ExpToIndex = 15*np.ones((5,5,5), dtype=int)
+   for i in xrange(15):
+      ExpToIndex[tuple(PowerExpansion[i])] = i
+   return ExpToIndex
+
+ExpToIndex = ConstructExpToIndex()
+
+def D4toNNN(D4):
+   """
+   Converts from a fourth-derivative expansion D4 into power expansion.
+
+   Returns D15, the expansion coefficients for the power series.
+
+   Parameters
+   ----------
+   D4[3,3,3,3]: 4th rank tensor coefficient, as in D4[a,b,c,d]*x[a]*x[b]*x[c]*x[d]
+   """
+   D15 = np.zeros(15)
+   return D15
+
