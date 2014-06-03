@@ -156,6 +156,8 @@ import SphereHarm
 class SphereHarmTests(unittest.TestCase):
     def setUp(self):
         self.GF2iso = np.eye(3)
+        self.Npolar=4
+        self.Ntrunc=(self.Npolar*(self.Npolar+1))/2
 
     def testCarttoSphere(self):
         qv = np.array([1,0,0])
@@ -181,12 +183,19 @@ class SphereHarmTests(unittest.TestCase):
         for d in xrange(3): self.assertAlmostEqual(qv[d], qv2[d])
 
     def testYlmTransformDim(self):
-        Npolar=4
-        Ntrunc=(Npolar*(Npolar+1))/2
-        GFcoeff,indices=SphereHarm.YlmTransform(self.GF2iso, Npolar=Npolar)
-        self.assertEqual(np.shape(GFcoeff)[0], Ntrunc)
-        self.assertEqual(np.shape(indices[0])[0], Ntrunc)
-        self.assertEqual(np.shape(indices[1])[0], Ntrunc)
+        GFcoeff,indices=SphereHarm.YlmTransform(self.GF2iso, Npolar=self.Npolar)
+        self.assertEqual(np.shape(GFcoeff)[0], self.Ntrunc)
+        self.assertEqual(np.shape(indices[0])[0], self.Ntrunc)
+        self.assertEqual(np.shape(indices[1])[0], self.Ntrunc)
+
+    def testYlmTransformValuesIsotropic(self):
+        threshold=1e-7
+        GFcoeff,indices=SphereHarm.YlmTransform(self.GF2iso, Npolar=self.Npolar)
+        # isotropic; only the l=0,m=0 value should be nonzero
+        for i, m in enumerate(indices[0]):
+            l = indices[1][i]
+            if (l==0): self.assertAlmostEqual(GFcoeff[i], np.sqrt(2))
+            else: self.assertTrue(abs(GFcoeff[i])<threshold)
 
 def main():
     unittest.main()

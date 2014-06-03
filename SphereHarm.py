@@ -47,7 +47,8 @@ def SpheretoCart(spv):
 #   these need to be done using the spharm interface
 def YlmTransform(D, Npolar=64):
    """
-   Takes in a 3x3 matrix D, returns the spherical harmonic expansion of qDq.
+   Takes in a 3x3 matrix D, returns the spherical harmonic expansion of qDq, and
+   corresponding indices for m and n.
 
    Parameters
    ----------
