@@ -196,6 +196,22 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
             self.assertAlmostEqual(ui[a]*umagn,
                                    np.dot(x, self.ei_vect[a,:])/np.sqrt(self.di[a]))
 
+    def testCalcPnorm(self):
+        # Graceful handling of 0?
+        q = np.zeros(3)
+        pi, pmagn = GFcalc.pnorm(self.di, self.ei_vect, q)
+        self.assertEqual(pmagn, 0)
+        self.assertTrue(all(pi == 0))
+
+        # "arbitrary" vector
+        q = np.array([0.5, 0.25, -1])
+        pi, pmagn = GFcalc.pnorm(self.di, self.ei_vect, q)
+        self.assertAlmostEqual(np.dot(pi,pi), 1)
+        self.assertAlmostEqual(pmagn, np.sqrt(np.dot(q, np.dot(self.D2, q))))
+        for a in xrange(3):
+            self.assertAlmostEqual(pi[a]*pmagn,
+                                   np.dot(q, self.ei_vect[a,:])*np.sqrt(self.di[a]))
+    
 def main():
     unittest.main()
 

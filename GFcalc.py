@@ -93,3 +93,26 @@ def unorm(di, ei, x):
       ui /= umagn
    return ui, umagn
 
+def pnorm(di, ei, q):
+   """
+   Takes the eigenvalues di, eigenvectors ei, and the vector q, and returns the
+   normalized p vector, along with its magnitude. These are the key elements needed
+   in *all* of the Fourier transform expressions to follow.
+
+   Returns: pi[3], pmagn
+
+   Parameters
+   ----------
+   di[3]:   eigenvalues of D2
+   ei[3,3]: eigenvectors of D2 (ei[i,:] == ith eigenvector)
+   q[3]:    cartesian reciprocal vector
+   """
+
+   pi = np.zeros(3)
+   pmagn = 0
+   if (np.dot(q,q)>0):
+      pi = np.dot(ei, q)*np.sqrt(di)
+      pmagn = np.sqrt(np.dot(pi,pi))
+      pi /= pmagn
+   return pi, pmagn
+
