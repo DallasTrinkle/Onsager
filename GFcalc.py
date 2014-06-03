@@ -87,5 +87,9 @@ def unorm(di, ei, x):
 
    ui = np.zeros(3)
    umagn = 0
+   if (np.dot(x,x)>0):
+      ui = np.dot(ei, x)/np.sqrt(di)
+      umagn = np.sqrt(np.dot(ui,ui))
+      ui /= umagn
    return ui, umagn
 

@@ -184,8 +184,8 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         # Graceful handling of 0?
         x = np.zeros(3)
         ui, umagn = GFcalc.unorm(self.di, self.ei_vect, x)
-        self.AssertEqual(umagn, 0)
-        self.AssertTrue(all(ui == 0))
+        self.assertEqual(umagn, 0)
+        self.assertTrue(all(ui == 0))
 
         # "arbitrary" vector
         x = np.array([0.5, 0.25, -1])
@@ -193,7 +193,8 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         self.assertAlmostEqual(np.dot(ui,ui), 1)
         self.assertAlmostEqual(umagn, np.sqrt(np.dot(x, np.dot(self.GF2, x))))
         for a in xrange(3):
-            self.assertAlmostEqual(ui[a]*umagn, np.dot(x, self.ei_vect[a,:]))
+            self.assertAlmostEqual(ui[a]*umagn,
+                                   np.dot(x, self.ei_vect[a,:])/np.sqrt(self.di[a]))
 
 # test spherical harmonics code
 import scipy
