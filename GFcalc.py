@@ -1,6 +1,6 @@
 import numpy as np
 
-def GFFTfunc(NNvect, rates):
+def DFTfunc(NNvect, rates):
    """
    Returns a Fourier-transform function given the NNvect and rates
    
@@ -11,7 +11,7 @@ def GFFTfunc(NNvect, rates):
    """
    return lambda q: np.sum(np.cos(np.dot(NNvect,q))*rates)-np.sum(rates)
 
-def GF2(NNvect, rates):
+def D2(NNvect, rates):
    """
    Construct the diffusivity matrix (small q limit of Fourier transform
    as a second derivative).
@@ -25,7 +25,7 @@ def GF2(NNvect, rates):
    # return np.zeros((3,3))
    return 0.5*np.dot(NNvect.T*rates, NNvect)
    
-def GF4(NNvect, rates):
+def D4(NNvect, rates):
    """
    Construct the discontinuity matrix (fourth derivative wit respect to q of
    Fourier transform).
@@ -44,18 +44,18 @@ def GF4(NNvect, rates):
                D4[a,b,c,d] = 1./24. * sum(NNvect[:,a]*NNvect[:,b]*NNvect[:,c]*NNvect[:,d]*rates[:])
    return D4
 
-def calcDE(GF2):
+def calcDE(D2):
    """
-   Takes in the GF2 matrix (assumed to be real, symmetric) and diagonalizes it
+   Takes in the D2 matrix (assumed to be real, symmetric) and diagonalizes it
    returning the eigenvalues (d_i) and corresponding normalized eigenvectors (e_i).
    Returns di[3], ei[3,3], where ei[i,:] is the eigenvector for di[i]
    
    Parameters
    ----------
-   GF2[3,3]: symmetric, real matrix from GF2()
+   D2[3,3]: symmetric, real matrix from D2()
    """
 
    # di=np.zeros(3)
    # ei=np.zeros((3,3))
-   return np.linalg.eigh(GF2)
+   return np.linalg.eigh(D2)
 
