@@ -211,6 +211,16 @@ class GreenFuncFourierTransformTests(unittest.TestCase):
         for a in xrange(3):
             self.assertAlmostEqual(pi[a]*pmagn,
                                    np.dot(q, self.ei_vect[a,:])*np.sqrt(self.di[a]))
+
+    def testPoleFT(self):
+        # Graceful handling of 0?
+        pm = 0.5 # arbitrary at this point...
+        x = np.zeros(3)
+        ui, umagn = GFcalc.unorm(self.di, self.ei_vect, x)
+        g = GFcalc.poleFT(self.di,umagn, pm)
+        # pm*sqrt(d1*d2*d3)/4 pi^(3/2)
+        self.assertAlmostEqual(pm*0.25/np.sqrt(np.product(self.di*np.pi)), g)
+        
     
 def main():
     unittest.main()

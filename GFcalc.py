@@ -1,4 +1,6 @@
 import numpy as np
+import scipy as sp
+from scipy import special
 
 def DFTfunc(NNvect, rates):
    """
@@ -116,3 +118,25 @@ def pnorm(di, ei, q):
       pi /= pmagn
    return pi, pmagn
 
+def poleFT(di, u, pm, erfupm=-1):
+   """
+   Calculates the pole FT (excluding the volume prefactor) given the di eigenvalues,
+   the value of u magnitude (available from unorm), and the pmax scaling factor.
+   Note: if we've already calculated the erf, don't bother recalculating it here.
+
+   Returns erf(0.5*u*pm)/(4*pi*u*sqrt(d1*d2*d3)) if u>0
+   else pm/(4*pi^3/2 * sqrt(d1*d2*d3)) if u==0
+
+   Parameters
+   ----------
+   di[3]:  eigenvalues of D2
+   u:      magnitude of u (from unorm())
+   pm:     scaling factor for exponential cutoff function
+   erfupm: value of erf(0.5*u*pm) (optional; if not set, then its calculated)
+   """
+
+   if (erfupm < 0):
+      erfupm = special.erf(0.5*u*pm)
+   if (erfupm==0):
+      return 0.25*pm/np.sqrt(np.product(di*np.pi))
+   return erfupm*0.25/(np.pi*u*np.sqrt(np.product(di)))
