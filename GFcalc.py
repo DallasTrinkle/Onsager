@@ -23,7 +23,7 @@ def GF2(NNvect, rates):
    rates[z]:    jump rate for each neighbor
    """
    # return np.zeros((3,3))
-   return -0.5*np.dot(NNvect.T*rates, NNvect)
+   return 0.5*np.dot(NNvect.T*rates, NNvect)
    
 def GF4(NNvect, rates):
    """
@@ -55,7 +55,7 @@ def calcDE(GF2):
    GF2[3,3]: symmetric, real matrix from GF2()
    """
 
-   di=np.zeros(3)
-   ei=np.zeros((3,3))
-   return di, ei
+   # di=np.zeros(3)
+   # ei=np.zeros((3,3))
+   return np.linalg.eigh(GF2)
 
