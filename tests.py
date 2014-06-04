@@ -348,6 +348,19 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
                         self.assertNotEqual(ind, 15)
                         self.assertTrue(all(GFcalc.PowerExpansion[ind]==(n1,n2,n3)))
 
+    def testPowerEval(self):
+        """
+        Test the powereval(u) function that returns the 15 vector of powers of u.
+        """
+        u=np.array((0.5, -1./3., 7))
+        u15 = GFcalc.powereval(u)
+        for n1 in xrange(3):
+            for n2 in xrange(3):
+                for n3 in xrange(3):
+                    if (n1+n2+n3)==4:
+                        self.assertAlmostEqual((u[0]**n1)*(u[1]**n2)*(u[2]**n3),
+                                               u15[GFcalc.ExpToIndex[n1,n2,n3]])
+    
     def testConvD4toNNN(self):
         """
         Tests conversion of the 4th-rank 4th derivative into power expansion.
@@ -381,6 +394,17 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         for ind in xrange(15):
             if ind != GFcalc.ExpToIndex[3,1,0]:
                 self.assertEqual(D15[ind], 0)
+
+        D4=np.zeros((3,3,3,3))
+        for a in xrange(3):
+            for b in xrange(3):
+                for c in xrange(3):
+                    for d in xrange(3):
+                        D4[a,b,c,d] = 2 + a+3*b+9*c+27*d
+        D15=GFcalc.D4toNNN(D4)
+        x=np.array((0.23454, -1.24, 2.03))
+        self.assertAlmostEqual(np.dot(D15, GFcalc.powereval(x)),
+                               GFcalc.eval4(x, D4))
 
     def testRotateD4(self):
         """

@@ -204,6 +204,20 @@ def D4toNNN(D4):
                D15[ExpToIndex[tup.count(0),tup.count(1),tup.count(2)]] += D4[tup]
    return D15
 
+def powereval(u):
+   """
+   Takes the 3-vector u, and returns the 15-vector of the powers of u,
+   corresponding to PowerExpansion terms.
+
+   Parameters
+   ----------
+   u[3]: 3-vector to power-expand.
+   """
+   D15 = np.zeros(15)
+   for ind, power in enumerate(PowerExpansion):
+      D15[ind] = (u[0]**power[0])*(u[1]**power[1])*(u[2]**power[2])
+   return D15
+
 def RotateD4(D4, di, ei):
    """
    Returns the rotated (and scaled) version of the fourth-ranked tensor D4,
