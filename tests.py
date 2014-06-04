@@ -442,7 +442,14 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
                     else:
                         self.assertFalse(np.all(GFcalc.PowerFT[:,i,j]==0))
                         self.assertFalse(np.all(GFcalc.PowerFT[:,j,i]==0))
-    
+
+# DocTests... we use this for the small "utility" functions, rather than writing
+# explicit tests; doctests are compatible with unittests, so we're good here.
+import doctest
+def load_tests(loader, tests, ignore):
+    tests.addTests(doctest.DocTestSuite(GFcalc))
+    return tests
+
 def main():
     unittest.main()
 

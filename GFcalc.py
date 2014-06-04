@@ -235,11 +235,31 @@ def RotateD4(D4, di, ei):
 # coefficients. This is a bit messy, but necessary (pulled from Mathematica
 # evaluation of the same).
 
+def rotatelist(lis, i):
+   """
+   Returns rotated version of list--shifting by i.
+
+   >>> rotatelist([1,2,3], 0)
+   [1, 2, 3]
+   >>> rotatelist([1,2,3], 1)
+   [2, 3, 1]
+   >>> rotatelist([1,2,3], 2)
+   [3, 1, 2]
+   """
+   i = i % len(lis)
+   listrot=lis[:]
+   head = lis[:i]
+   del listrot[:i]
+   listrot.extend(head)
+   return listrot
+
 def ConstructPowerFT():
    """
    Setup to construct ExpToIndex to match PowerExpansion.
    """
    PowerFT = np.zeros((3,15,15))
+   for vec in ( (0,0,4), (2,2,0), (0,1,3), (2,1,1) ):
+      pass
    return PowerFT
 
 PowerFT = ConstructPowerFT()
