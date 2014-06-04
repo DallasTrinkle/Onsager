@@ -252,18 +252,19 @@ def discFT(di, u, pm, erfupm=-1, gaussupm=-1):
    di : array [:]
        eigenvalues of `D2`
    u : double
-       magnitude of u, from unorm() = x.D^-1.x
+       magnitude of u, from unorm() = `x`.`D2`^-1.`x`
    pm : double
        scaling factor pmax for exponential cutoff function
    erfupm : double, optional
-       value of erf(0.5*u*pm) (negative = not set, then its calculated)
+       value of erf(`u` `pm` / 2) (negative = not set, then its calculated)
    gaussupm : double, optional
-       value of exp(-(0.5*u*pm)) (negative = not set, then its calculated)
+       value of exp(-(`u` `pm` / 2)**2) (negative = not set, then its calculated)
 
    Returns
    -------
    poleFT : array [:]
        integral of Gaussian cutoff function corresponding to a l=0,2,4 discontinuities;
+       z = `u` `pm`
        l=0: 1/(4pi u^3 (d1 d2 d3)^1/2 * z^3 * exp(-z^2/4)/2 sqrt(pi)
        l=2: 1/(4pi u^3 (d1 d2 d3)^1/2 * (-15/2*erf(z/2)
              + (15/2 + 5/4 z^2)exp(-z^2/4)/sqrt(pi)
@@ -305,6 +306,12 @@ PowerExpansion = np.array( (
 def ConstructExpToIndex():
    """
    Setup to construct ExpToIndex to match PowerExpansion.
+
+   Returns
+   -------
+   ExpToIndex : array [5,5,5]
+       array that gives the corresponding index in PowerExpansion list for
+       (n1, n2, n3)
    """
    ExpToIndex = 15*np.ones((5,5,5), dtype=int)
    for i in xrange(15):
@@ -411,14 +418,16 @@ def rotatetuple(tup, i):
    listrot.extend(head)
    return tuple(listrot)
 
-# For these 3x3x3 matrices, the first entry is l corresponding to l=0, 2, 4
-# the next two indices correspond to our 3x3 blocks. For <004>, <220>, the
-# indices are "shifts". For the <013>/<031>/<112> blocks, these correspond to that
-# ordering. This is hardcoded, and comes from Mathematica. These all come from
-# transforming the matrices that convert powers qx^nx qy^ny qz^nz into spherical
-# harmonics, and then grouping these by l values that show up. This is transposed
-# so that we can make the 3x15 matrix as PowerFT[:,:,:] * D15[:], and then we need
-# to make two vectors: a 3-vector for (f0(z), f2(z), f4(z)) and a 15 vector of our powers
+"""
+For these 3x3x3 matrices, the first entry is l corresponding to l=0, 2, 4
+the next two indices correspond to our 3x3 blocks. For <004>, <220>, the
+indices are "shifts". For the <013>/<031>/<112> blocks, these correspond to that
+ordering. This is hardcoded, and comes from Mathematica. These all come from
+transforming the matrices that convert powers qx^nx qy^ny qz^nz into spherical
+harmonics, and then grouping these by l values that show up. This is transposed
+so that we can make the 3x15 matrix as PowerFT[:,:,:] * D15[:], and then we need
+to make two vectors: a 3-vector for (f0(z), f2(z), f4(z)) and a 15 vector of our powers
+"""
 
 # F44[l, s1, s2] for the <004> type power expansions:
 F44 = np.array((
@@ -456,6 +465,12 @@ def ConstructPowerFT():
    """
    Setup to construct the 3x15x15 PowerFT matrix, which gives the linear
    transform version of our Fourier transform.
+
+   Returns
+   -------
+   PowerFT : array [3,15,15]
+       The [l, n, m] matrix corresponding to the l=0, 2, and 4 FT, where if
+       we right multiply a 15 vector D15 by `PowerFT`, we get the 3x15 FT matrix.
    """
    PowerFT = np.zeros((3,15,15))
    # First up, our onsite terms, for the symmetric cases:
@@ -502,4 +517,3 @@ def ConstructPowerFT():
    return PowerFT
 
 PowerFT = ConstructPowerFT()
-
