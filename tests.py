@@ -466,8 +466,23 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         """
         Tests that the 3x15x15 matrix has the values we'd expect, above and
         beyond the symmetries that we listed above.
+        First case is isotropic; should come out isotropic (only l=0 term).        
         """
-        
+        D15 = np.zeros(15)
+        D15[GFcalc.ExpToIndex[4,0,0]]=1
+        D15[GFcalc.ExpToIndex[0,4,0]]=1
+        D15[GFcalc.ExpToIndex[0,0,4]]=1
+        D15[GFcalc.ExpToIndex[0,2,2]]=2
+        D15[GFcalc.ExpToIndex[2,0,2]]=2
+        D15[GFcalc.ExpToIndex[2,2,0]]=2
+
+        D15_0 = np.dot(GFcalc.PowerFT[0], D15)
+        D15_2 = np.dot(GFcalc.PowerFT[1], D15)
+        D15_4 = np.dot(GFcalc.PowerFT[2], D15)
+        for i in xrange(15):
+            self.assertAlmostEqual(D15_0[i], D15[i])
+            self.assertAlmostEqual(D15_2[i], 0)
+            self.assertAlmostEqual(D15_4[i], 0)
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.
