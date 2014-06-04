@@ -137,7 +137,8 @@ class GreenFuncDerivativeTests(unittest.TestCase):
                     for d in xrange(3):
                         ind=(a,b,c,d)
                         inds = tuple(sorted(ind))
-                        self.assertEqual(self.D4[ind], self.D4[inds])
+                        self.assertEqual(self.D4[ind], self.D4[inds],
+                                         msg="{} vs {}".format(ind, inds))
 
     def testEval2(self):
         """
@@ -342,11 +343,14 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
             for n2 in xrange(5):
                 for n3 in xrange(5):
                     if (n1+n2+n3 != 4):
-                        self.assertEqual(GFcalc.ExpToIndex[n1,n2,n3], 15)
+                        self.assertEqual(GFcalc.ExpToIndex[n1,n2,n3], 15,
+                                         msg="index {}{}{}".format(n1,n2,n3))
                     else:
                         ind = GFcalc.ExpToIndex[n1,n2,n3]
-                        self.assertNotEqual(ind, 15)
-                        self.assertTrue(all(GFcalc.PowerExpansion[ind]==(n1,n2,n3)))
+                        self.assertNotEqual(ind, 15,
+                                            msg="index {}".format(ind))
+                        self.assertTrue(all(GFcalc.PowerExpansion[ind]==(n1,n2,n3)),
+                                        msg="index {}{}{}".format(n1,n2,n3))
 
     def testPowerEval(self):
         """
@@ -359,7 +363,8 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
                 for n3 in xrange(3):
                     if (n1+n2+n3)==4:
                         self.assertAlmostEqual((u[0]**n1)*(u[1]**n2)*(u[2]**n3),
-                                               u15[GFcalc.ExpToIndex[n1,n2,n3]])
+                                               u15[GFcalc.ExpToIndex[n1,n2,n3]],
+                                               msg="index {}{}{}".format(n1,n2,n3))
     
     def testConvD4toNNN(self):
         """
@@ -439,7 +444,8 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         self.assertEqual(np.shape(Drot4),(3,3,3,3))
         for a in xrange(3):
             self.assertAlmostEqual(Drot4[a,a,a,a],
-                                   GFcalc.eval4(ei[a]/np.sqrt(di[a]), D4))
+                                   GFcalc.eval4(ei[a]/np.sqrt(di[a]), D4),
+                                   msg="index {}".format(a))
         self.assertAlmostEqual(GFcalc.eval4(pi, Drot4)*(pnorm**4),
                                GFcalc.eval4(q, D4))
 
@@ -453,29 +459,39 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         for i in xrange(15):
             for j in xrange(15):
                 if i==j:
-                    self.assertAlmostEqual(sum(GFcalc.PowerFT[:,i,j]),1)
+                    self.assertAlmostEqual(sum(GFcalc.PowerFT[:,i,j]),1,
+                                           msg="Checking {},{}".format(i,j))
                 else:
-                    self.assertAlmostEqual(sum(GFcalc.PowerFT[:,i,j]),0)
+                    self.assertAlmostEqual(sum(GFcalc.PowerFT[:,i,j]),0,
+                                           msg="Checking {},{}".format(i,j))
 
         for i in xrange(15):
             if tuple(GFcalc.PowerExpansion[i]).count(1) > 0:
                 # No l=0 entries for any indices containing 1
-                self.assertTrue(np.all(GFcalc.PowerFT[0,:,i]==0))
-                self.assertTrue(np.all(GFcalc.PowerFT[0,i,:]==0))
+                self.assertTrue(np.all(GFcalc.PowerFT[0,:,i]==0),
+                                msg="Checking {}".format(i))
+                self.assertTrue(np.all(GFcalc.PowerFT[0,i,:]==0),
+                                msg="Checking {}".format(i))
                 for j in xrange(15):
                     if tuple(GFcalc.PowerExpansion[j]).count(1) == 0:
-                        self.assertTrue(np.all(GFcalc.PowerFT[:,i,j]==0))
-                        self.assertTrue(np.all(GFcalc.PowerFT[:,j,i]==0))
+                        self.assertTrue(np.all(GFcalc.PowerFT[:,i,j]==0),
+                                        msg="Checking {},{}".format(i,j))
+                        self.assertTrue(np.all(GFcalc.PowerFT[:,j,i]==0),
+                                        msg="Checking {},{}".format(i,j))
             else:
                 for j in xrange(15):
                     # No mixing between those containing 1 and those not,
                     # but full for those without any 1's.
                     if tuple(GFcalc.PowerExpansion[j]).count(1) > 0:
-                        self.assertTrue(np.all(GFcalc.PowerFT[:,i,j]==0))
-                        self.assertTrue(np.all(GFcalc.PowerFT[:,j,i]==0))
+                        self.assertTrue(np.all(GFcalc.PowerFT[:,i,j]==0),
+                                        msg="Checking {},{}".format(i,j))
+                        self.assertTrue(np.all(GFcalc.PowerFT[:,j,i]==0),
+                                        msg="Checking {},{}".format(i,j))
                     else:
-                        self.assertFalse(np.any(GFcalc.PowerFT[:,i,j]==0))
-                        self.assertFalse(np.any(GFcalc.PowerFT[:,j,i]==0))
+                        self.assertFalse(np.any(GFcalc.PowerFT[:,i,j]==0),
+                                         msg="Checking {},{}".format(i,j))
+                        self.assertFalse(np.any(GFcalc.PowerFT[:,j,i]==0),
+                                         msg="Checking {},{}".format(i,j))
         # check against mixing between the <013>/<031>/<211>
         for v1 in ( (0,1,3), (0,3,1), (2,1,1) ):
             for s1 in xrange(3):
@@ -484,7 +500,8 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
                     for s2 in xrange(s1):
                         in2 = GFcalc.ExpToIndex[GFcalc.rotatetuple(v2,s2)]
                         for l in xrange(3):
-                            self.assertEqual(0, GFcalc.PowerFT[l, in1, in2])
+                            self.assertEqual(0, GFcalc.PowerFT[l, in1, in2],
+                                             msg="Checking {} {},{} {}".format(v1,s1,v2,s2))
 
     def test15x15FourierIsotropic(self):
         """
@@ -547,7 +564,7 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
 
         D15_0 = np.dot(GFcalc.PowerFT[0], D15)
         for i in xrange(15):
-            self.assertAlmostEqual(D15_0[i], D15_test[i])
+            self.assertAlmostEqual(D15_0[i], D15_test[i], msg="index {}".format(i))
 
         # result, from Mathematica (l=2)
         #{ -5/7, 0, 5/7,
@@ -577,7 +594,7 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
 
         D15_2 = np.dot(GFcalc.PowerFT[1], D15)
         for i in xrange(15):
-            self.assertAlmostEqual(D15_2[i], D15_test[i])
+            self.assertAlmostEqual(D15_2[i], D15_test[i], msg="index {}".format(i))
 
         # result, from Mathematica (l=4)
         # {-17/35, -1/5, 3/35,
@@ -607,7 +624,22 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
 
         D15_4 = np.dot(GFcalc.PowerFT[2], D15)
         for i in xrange(15):
-            self.assertAlmostEqual(D15_4[i], D15_test[i])
+            self.assertAlmostEqual(D15_4[i], D15_test[i], msg="index {}".format(i))
+
+    def testFourierIntergrals(self):
+        """
+        Tests for the three Fourier integrals, f0 f2 f4, that we'll use to construct
+        the full FT.
+        """
+        di = np.array((1,1,1))
+        ei = np.eye(3)
+        pm = 0.5
+
+        x = np.zeros(3)
+        ui, umagn = GFcalc.unorm(di, ei, x)
+        fi = GFcalc.discFT(di, umagn, pm)
+        self.assertEqual(np.shape(fi), (3,))
+        self.assertListEqual(list(fi), [0,0,0])
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.

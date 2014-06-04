@@ -157,11 +157,39 @@ def poleFT(di, u, pm, erfupm=-1):
    erfupm: value of erf(0.5*u*pm) (optional; if not set, then its calculated)
    """
 
+   if (u==0):
+      return 0.25*pm/np.sqrt(np.product(di*np.pi))
    if (erfupm < 0):
       erfupm = special.erf(0.5*u*pm)
-   if (erfupm==0):
-      return 0.25*pm/np.sqrt(np.product(di*np.pi))
    return erfupm*0.25/(np.pi*u*np.sqrt(np.product(di)))
+
+def discFT(di, u, pm, erfupm=-1, gaussupm=-1):
+   """
+   Calculates the discontinuity FT (excluding the volume prefactor) given the
+   di eigenvalues, the value of u magnitude (available from unorm), and the pmax
+   scaling factor. Returns a 3-vector for l=0, 2, and 4.
+   Note: if we've already calculated the erf or gauss, don't bother
+   recalculating it here.
+
+   Returns erf(0.5*u*pm)/(4*pi*u*sqrt(d1*d2*d3)) if u>0
+   else pm/(4*pi^3/2 * sqrt(d1*d2*d3)) if u==0
+
+   Parameters
+   ----------
+   di[3]:    eigenvalues of D2
+   u:        magnitude of u (from unorm())
+   pm:       scaling factor for exponential cutoff function
+   erfupm:   value of erf(0.5*u*pm) (optional; if not set, then its calculated)
+   gaussupm: value of exp(-(0.5*u*pm)) (optional; if not set, then its calculated)
+   """
+
+   if (u==0):
+      return np.array((0,0,0))
+   if (erfupm < 0):
+      erfupm = special.erf(0.5*u*pm)
+   if (gaussupm < 0):
+      guassupm = exp(-0.25*(u*pm)**2)
+   return np.array((1,1,1))
 
 # Hard-coded?
 PowerExpansion = np.array( (
