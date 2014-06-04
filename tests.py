@@ -421,7 +421,7 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
 
     def test15x15FourierSymmetries(self):
         """
-        Tests that the 15x15 matrix has the symmetries we'd expect corresponding
+        Tests that the 3x15x15 matrix has the symmetries we'd expect corresponding
         to powers.
         """
         self.assertEqual(np.shape(GFcalc.PowerFT), (3,15,15))
@@ -444,12 +444,30 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
                         self.assertTrue(np.all(GFcalc.PowerFT[:,j,i]==0))
             else:
                 for j in xrange(15):
+                    # No mixing between those containing 1 and those not,
+                    # but full for those without any 1's.
                     if tuple(GFcalc.PowerExpansion[j]).count(1) > 0:
                         self.assertTrue(np.all(GFcalc.PowerFT[:,i,j]==0))
                         self.assertTrue(np.all(GFcalc.PowerFT[:,j,i]==0))
                     else:
-                        self.assertFalse(np.all(GFcalc.PowerFT[:,i,j]==0))
-                        self.assertFalse(np.all(GFcalc.PowerFT[:,j,i]==0))
+                        self.assertFalse(np.any(GFcalc.PowerFT[:,i,j]==0))
+                        self.assertFalse(np.any(GFcalc.PowerFT[:,j,i]==0))
+        # check against mixing between the <013>/<031>/<211>
+        for v1 in ( (0,1,3), (0,3,1), (2,1,1) ):
+            for s1 in xrange(3):
+                in1 = GFcalc.ExpToIndex[GFcalc.rotatetuple(v1,s1)]
+                for v2 in ( (0,1,3), (0,3,1), (2,1,1) ):
+                    for s2 in xrange(s1):
+                        in2 = GFcalc.ExpToIndex[GFcalc.rotatetuple(v2,s2)]
+                        for l in xrange(3):
+                            self.assertEqual(0, GFcalc.PowerFT[l, in1, in2])
+
+    def test15x15FourierValues(self):
+        """
+        Tests that the 3x15x15 matrix has the values we'd expect, above and
+        beyond the symmetries that we listed above.
+        """
+        
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.

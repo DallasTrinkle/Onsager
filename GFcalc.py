@@ -256,7 +256,9 @@ def rotatetuple(tup, i):
 # For these 3x3x3 matrices, the first entry is l corresponding to l=0, 2, 4
 # the next two indices correspond to our 3x3 blocks. For <004>, <220>, the
 # indices are "shifts". For the <013>/<031>/<112> blocks, these correspond to that
-# ordering.
+# ordering. This is hardcoded, and comes from Mathematica. These all come from
+# transforming the matrices that convert powers qx^nx qy^ny qz^nz into spherical
+# harmonics, and then grouping these by l values that show up.
 
 # F44[l, s1, s2] for the <004> type power expansions:
 F44 = np.array((
@@ -327,7 +329,7 @@ def ConstructPowerFT():
                     ExpToIndex[rotatetuple(vec2,s2)],
                     ExpToIndex[rotatetuple(vec1,s1)]] = F24[l, s2, s1]
    
-   # <013>
+   # <013>/<031>/<211>; now, F13 indexes which of those three vectors we need
    veclist = ( (0,1,3), (0,3,1), (2,1,1) )
    for l in xrange(3):
       for v1 in xrange(3):
