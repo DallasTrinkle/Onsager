@@ -253,13 +253,92 @@ def rotatetuple(tup, i):
    listrot.extend(head)
    return tuple(listrot)
 
+# For these 3x3x3 matrices, the first entry is l corresponding to l=0, 2, 4
+# the next two indices correspond to our 3x3 blocks. For <004>, <220>, the
+# indices are "shifts". For the <013>/<031>/<112> blocks, these correspond to that
+# ordering.
+
+# F44[l, s1, s2] for the <004> type power expansions:
+F44 = np.array((
+      ((1./5.,1./5.,1./5.), (1./5.,1./5.,1./5.), (1./5.,1./5.,1./5.)),
+      ((4./7.,-2./7.,-2./7.), (-2./7.,4./7.,-2./7.), (-2./7.,-2./7.,4./7.)),
+      ((8./35.,3./35.,3./35.), (3./35.,8./35.,3./35.), (3./35.,3./35.,8./35.)))
+               )
+
+# F22[l, s1, s2] for the <220> type power expansions:
+F22 = np.array((
+      ((2./15.,2./15.,2./15.), (2./15.,2./15.,2./15.), (2./15.,2./15.,2./15.)),
+      ((2./21.,-1./21.,-1./21.), (-1./21.,2./21.,-1./21.), (-1./21.,-1./21.,2./21.)),
+      ((27./35.,-3./35.,-3./35.), (-3./35.,27./35.,-3./35.), (-3./35.,-3./35.,27./35.)))
+               )
+
+# F42[l, s1, s2] mixes the <004>/<220> types
+F42 = np.array((
+      ((1./15.,1./15.,1./15.), (1./15.,1./15.,1./15.), (1./15.,1./15.,1./15.)),
+      ((-2./21.,1./21.,1./21.), (1./21.,-2./21.,1./21.), (1./21.,1./21.,-2./21.)),
+      ((1./35.,-4./35.,-4./35.), (-4./35.,1./35.,-4./35.), (-4./35.,-4./35.,1./35.)))
+               )
+
+# F24[l, s1, s2] mixes the <220>/<004> types
+F24 = np.array((
+      ((2./5.,2./5.,2./5.), (2./5.,2./5.,2./5.), (2./5.,2./5.,2./5.)),
+      ((-4./7.,2./7.,2./7.), (2./7.,-4./7.,2./7.), (2./7.,2./7.,-4./7.)),
+      ((6./35.,-24./35.,-24./35.), (-24./35.,6./35.,-24./35.), (-24./35.,-24./35.,6./35.)))
+               )
+
+# F13[l, i1, i2] mixes the <013>/<031>/<211> types.
+# Now, i=0 is [013], 1 is [031], 2 is [211]. We use the shifts to permute among these.
+F13 = np.array((
+      ((0,0,0), (0,0,0), (0,0,0)),
+      ((3./7.,3./7.,1./7.), (3./7.,3./7.,1./7.), (3./7.,3./7.,1./7.)),
+      ((4./7.,-3./7.,-1./7.), (-3./7,4./7.,-1./7.), (-3./7.,-3./7.,6./7.)))
+               )
+
 def ConstructPowerFT():
    """
-   Setup to construct ExpToIndex to match PowerExpansion.
+   Setup to construct the 3x15x15 PowerFT matrix, which gives the linear
+   transform version of our Fourier transform.
    """
    PowerFT = np.zeros((3,15,15))
-   for vec in ( (0,0,4), (2,2,0), (0,1,3), (2,1,1) ):
-      pass
+   # First up, our onsite terms, for the symmetric cases:
+   # <004>
+   vec = (0,0,4)
+   for l in xrange(3):
+      for s1 in xrange(3):
+         for s2 in xrange(3):
+            PowerFT[l,
+                    ExpToIndex[rotatetuple(vec,s1)],
+                    ExpToIndex[rotatetuple(vec,s2)]] = F44[l, s1, s2]
+   # <220>
+   vec = (2,2,0)
+   for l in xrange(3):
+      for s1 in xrange(3):
+         for s2 in xrange(3):
+            PowerFT[l,
+                    ExpToIndex[rotatetuple(vec,s1)],
+                    ExpToIndex[rotatetuple(vec,s2)]] = F22[l, s1, s2]
+
+   # <400>/<220> mixed terms:
+   vec1 = (0,0,4)
+   vec2 = (2,2,0)
+   for l in xrange(3):
+      for s1 in xrange(3):
+         for s2 in xrange(3):
+            PowerFT[l,
+                    ExpToIndex[rotatetuple(vec1,s1)],
+                    ExpToIndex[rotatetuple(vec2,s2)]] = F42[l, s1, s2]
+            PowerFT[l,
+                    ExpToIndex[rotatetuple(vec2,s2)],
+                    ExpToIndex[rotatetuple(vec1,s1)]] = F24[l, s2, s1]
+   
+   # <013>
+   vec = (0,1,3)
+   for l in xrange(3):
+      for s1 in xrange(3):
+            PowerFT[l,
+                    ExpToIndex[rotatetuple(vec,s1)],
+                    ExpToIndex[rotatetuple(vec,s1)]] = F13[l, 0, 0]
+
    return PowerFT
 
 PowerFT = ConstructPowerFT()

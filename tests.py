@@ -425,6 +425,16 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         to powers.
         """
         self.assertEqual(np.shape(GFcalc.PowerFT), (3,15,15))
+        # The sum of the 3 15x15 matrices must be the identity matrix
+        for i in xrange(15):
+            for j in xrange(15):
+                if i==j:
+                    print i, j, GFcalc.PowerFT[:,i,j]
+                    print GFcalc.PowerExpansion[i]
+                    self.assertAlmostEqual(sum(GFcalc.PowerFT[:,i,j]),1)
+                else:
+                    self.assertAlmostEqual(sum(GFcalc.PowerFT[:,i,j]),0)
+
         for i in xrange(15):
             if tuple(GFcalc.PowerExpansion[i]).count(1) > 0:
                 # No l=0 entries for any indices containing 1
