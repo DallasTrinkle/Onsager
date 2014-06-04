@@ -429,8 +429,6 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         for i in xrange(15):
             for j in xrange(15):
                 if i==j:
-                    print i, j, GFcalc.PowerFT[:,i,j]
-                    print GFcalc.PowerExpansion[i]
                     self.assertAlmostEqual(sum(GFcalc.PowerFT[:,i,j]),1)
                 else:
                     self.assertAlmostEqual(sum(GFcalc.PowerFT[:,i,j]),0)
