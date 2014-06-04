@@ -235,23 +235,23 @@ def RotateD4(D4, di, ei):
 # coefficients. This is a bit messy, but necessary (pulled from Mathematica
 # evaluation of the same).
 
-def rotatelist(lis, i):
+def rotatetuple(tup, i):
    """
    Returns rotated version of list--shifting by i.
 
-   >>> rotatelist([1,2,3], 0)
-   [1, 2, 3]
-   >>> rotatelist([1,2,3], 1)
-   [2, 3, 1]
-   >>> rotatelist([1,2,3], 2)
-   [3, 1, 2]
+   >>> rotatetuple((1,2,3), 0)
+   (1, 2, 3)
+   >>> rotatetuple((1,2,3), 1)
+   (2, 3, 1)
+   >>> rotatetuple((1,2,3), 2)
+   (3, 1, 2)
    """
-   i = i % len(lis)
-   listrot=lis[:]
-   head = lis[:i]
+   i = i % len(tup)
+   listrot=list(tup)
+   head = listrot[:i]
    del listrot[:i]
    listrot.extend(head)
-   return listrot
+   return tuple(listrot)
 
 def ConstructPowerFT():
    """
