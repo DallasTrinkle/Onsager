@@ -656,6 +656,23 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         for l in xrange(3):
             self.assertAlmostEqual(fi[l], fi_0[l])
 
+        di = np.array([0.91231, 1.123, 2.1231])
+        ei = np.array([[np.sqrt(0.5), np.sqrt(0.5),0],
+                       [np.sqrt(1./6.),-np.sqrt(1./6.),np.sqrt(2./3.)],
+                       [np.sqrt(1./3.),-np.sqrt(1./3.),-np.sqrt(1./3.)]])
+        x = np.array([0.12, -0.51, 0.9123])
+        ui, umagn = GFcalc.unorm(di, ei, x)
+        fi = GFcalc.discFT(di, umagn, pm)
+        zhalf = 0.5*umagn*pm
+        zhalf2 = zhalf*zhalf
+        fi_0 = (1./(umagn*umagn*umagn*np.sqrt(np.product(np.pi*di)))*
+                np.array((zhalf**(3+0)*special.hyp1f1(0.5*(3+0),0.5*(3+2*0), -zhalf2),
+                          -zhalf**(3+2)*special.hyp1f1(0.5*(3+2),0.5*(3+2*2), -zhalf2),
+                          zhalf**(3+4)*special.hyp1f1(0.5*(3+4),0.5*(3+2*4), -zhalf2)
+                          )))
+        for l in xrange(3):
+            self.assertAlmostEqual(fi[l], fi_0[l])
+
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.
 import doctest
