@@ -169,7 +169,7 @@ PowerExpansion = np.array( (
       (2,2,0), (2,0,2), (0,2,2),
       (0,1,3), (0,3,1), (2,1,1),
       (1,0,3), (3,0,1), (1,2,1),
-      (1,3,0), (3,1,0), (1,1,2)) )
+      (1,3,0), (3,1,0), (1,1,2)), dtype=int)
 
 # Conversion from hard-coded PowerExpansion back to index number; if not in range,
 # its equal to 15. Needs to be constructed
@@ -230,3 +230,17 @@ def RotateD4(D4, di, ei):
                                                np.dot(ei[c],
                                                       np.dot(ei[d],D4)))))
    return Drot4
+
+# We construct the 3x15x15 matrix that gives the Fourier transform expansion
+# coefficients. This is a bit messy, but necessary (pulled from Mathematica
+# evaluation of the same).
+
+def ConstructPowerFT():
+   """
+   Setup to construct ExpToIndex to match PowerExpansion.
+   """
+   PowerFT = np.zeros((3,15,15))
+   return PowerFT
+
+PowerFT = ConstructPowerFT()
+

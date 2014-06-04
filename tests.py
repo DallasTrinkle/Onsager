@@ -419,6 +419,30 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         self.assertAlmostEqual(GFcalc.eval4(pi, Drot4)*(pnorm**4),
                                GFcalc.eval4(q, D4))
 
+    def test15x15FourierSymmetries(self):
+        """
+        Tests that the 15x15 matrix has the symmetries we'd expect corresponding
+        to powers.
+        """
+        self.assertEqual(np.shape(GFcalc.PowerFT), (3,15,15))
+        for i in xrange(15):
+            if tuple(GFcalc.PowerExpansion[i]).count(1) > 0:
+                # No l=0 entries for any indices containing 1
+                self.assertTrue(np.all(GFcalc.PowerFT[0,:,i]==0))
+                self.assertTrue(np.all(GFcalc.PowerFT[0,i,:]==0))
+                for j in xrange(15):
+                    if tuple(GFcalc.PowerExpansion[j]).count(1) == 0:
+                        self.assertTrue(np.all(GFcalc.PowerFT[:,i,j]==0))
+                        self.assertTrue(np.all(GFcalc.PowerFT[:,j,i]==0))
+            else:
+                for j in xrange(15):
+                    if tuple(GFcalc.PowerExpansion[j]).count(1) > 0:
+                        self.assertTrue(np.all(GFcalc.PowerFT[:,i,j]==0))
+                        self.assertTrue(np.all(GFcalc.PowerFT[:,j,i]==0))
+                    else:
+                        self.assertFalse(np.all(GFcalc.PowerFT[:,i,j]==0))
+                        self.assertFalse(np.all(GFcalc.PowerFT[:,j,i]==0))
+    
 def main():
     unittest.main()
 
