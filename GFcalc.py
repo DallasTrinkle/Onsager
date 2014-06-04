@@ -188,8 +188,8 @@ def discFT(di, u, pm, erfupm=-1, gaussupm=-1):
 
    if (u==0):
       return np.array((0,0,0))
-   pi1 = 1./sqrt(np.pi)
-   pre = 0.25/(np.pi*u*u*u*sqrt(product(di)))
+   pi1 = 1./np.sqrt(np.pi)
+   pre = 0.25/(np.pi*u*u*u*np.sqrt(np.product(di)))
    z = u*pm
    z2 = z*z
    z3 = z*z2
@@ -199,7 +199,7 @@ def discFT(di, u, pm, erfupm=-1, gaussupm=-1):
    if (erfupm < 0):
       erfupm = special.erf(0.5*z)
    if (gaussupm < 0):
-      guassupm = exp(-0.25*z2)
+      guassupm = np.exp(-0.25*z2)
    return pre*np.array((0.5*pi1*zm3*gaussupm,
                         -7.5*erfupm + pi1*gaussupm*(7.5*z-1.25*z3),
                         118.125*(1-14.*zm2)*erfupm + pi1*gaussupm*(

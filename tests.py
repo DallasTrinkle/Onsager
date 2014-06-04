@@ -5,6 +5,7 @@ Unit tests for vacancy mediated diffusion code.
 
 import unittest
 import numpy as np
+from scipy import special
 import FCClatt
 
 class LatticeTests(unittest.TestCase):
@@ -640,6 +641,21 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         fi = GFcalc.discFT(di, umagn, pm)
         self.assertEqual(np.shape(fi), (3,))
         self.assertListEqual(list(fi), [0,0,0])
+
+        # Results using HyperGeometric functions
+        umagn = 1.
+        fi = GFcalc.discFT(di, umagn, pm)
+        zhalf = 0.5*umagn*pm
+        zhalf2 = zhalf*zhalf
+        fi_0 = (1./(umagn*umagn*umagn*np.sqrt(np.product(np.pi*di)))*
+                np.array((zhalf**(3+0)*special.hyp1f1(0.5*(3+0),0.5*(3+2*0), -zhalf2),
+                          -zhalf**(3+2)*special.hyp1f1(0.5*(3+2),0.5*(3+2*2), -zhalf2),
+                          zhalf**(3+4)*special.hyp1f1(0.5*(3+4),0.5*(3+2*4), -zhalf2)
+                          )))
+        print fi
+        print fi_0
+        for l in xrange(3):
+            self.assertAlmostEqual(fi[l], fi_0[l])
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.
