@@ -1,11 +1,14 @@
-#!/usr/bin/env python
+"""
+FCClatt module
 
-### generates an FCC lattice
+Generates a neighbor vector list for an FCC lattice, and constructs the list of
+inverse indices.
+"""
 
 import numpy as np
 
 def NNvect():
-    r"""
+    """
     Constructs the FCC <110> transition vectors.
     """
     z = 12
@@ -21,7 +24,7 @@ def NNvect():
     return NNvect
 
 def invlist(NNvect):
-    r"""
+    """
     Constructs the list of inverse vectors for each vector.
 
     Parameters

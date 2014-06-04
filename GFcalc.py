@@ -1,3 +1,16 @@
+"""
+GFcalc module
+
+Code to compute the lattice Green function for diffusion; this entails inverting
+the "diffusion" matrix, which is infinite, singular, and has translational
+invariance. The solution involves fourier transforming to reciprocal space,
+inverting, and inverse fourier transforming back to real (lattice) space. The
+complication is that the inversion produces a second order pole which must be
+treated analytically. Subtracting off the pole then produces a discontinuity at
+the gamma-point (q=0), which also should be treated analytically. Then, the
+remaining function can be numerically inverse fourier transformed.
+"""
+
 import numpy as np
 import scipy as sp
 from scipy import special
@@ -8,8 +21,16 @@ def DFTfunc(NNvect, rates):
    
    Parameters
    ----------
-   NNvect[z,3]: list of nearest-neighbor vectors
-   rates[z]:    jump rate for each neighbor
+   NNvect : int array [:,:]
+       list of nearest-neighbor vectors
+   rates : array [:]
+       jump rate for each neighbor, from 1..z where z is the length of `NNvect`[,:]
+
+   Returns
+   -------
+   DFTfunc : callable function (q)
+       a callable function (constructed with lambda) that takes q and
+       returns the fourier transform of the D(R) matrix
    """
    return lambda q: np.sum(np.cos(np.dot(NNvect,q))*rates)-np.sum(rates)
 
@@ -17,12 +38,18 @@ def D2(NNvect, rates):
    """
    Construct the diffusivity matrix (small q limit of Fourier transform
    as a second derivative).
-   Returns a 3x3 matrix that can be dotted into q to get FT.
 
    Parameters
    ----------
-   NNvect[z,3]: list of nearest-neighbor vectors
-   rates[z]:    jump rate for each neighbor
+   NNvect : int array [:,:]
+       list of nearest-neighbor vectors
+   rates : array [:]
+       jump rate for each neighbor, from 1..z where z is the length of `NNvect`[,:]
+
+   Returns
+   -------
+   D2 : array [3,3]
+       3x3 matrix (2nd rank tensor) that can be dotted into q to get FT.
    """
    # return np.zeros((3,3))
    return 0.5*np.dot(NNvect.T*rates, NNvect)
@@ -31,12 +58,18 @@ def D4(NNvect, rates):
    """
    Construct the discontinuity matrix (fourth derivative wit respect to q of
    Fourier transform).
-   Returns a 3x3x3x3 matrix that can be dotted into q to get the FT.
 
    Parameters
    ----------
-   NNvect[z,3]: list of nearest-neighbor vectors
-   rates[z]:    jump rate for each neighbor
+   NNvect : int array [:,:]
+       list of nearest-neighbor vectors
+   rates : array [:]
+       jump rate for each neighbor, from 1..z where z is the length of `NNvect`[,:]
+
+   Returns
+   -------
+   D4 : array [3,3,3,3]
+       3x3x3x3 matrix (4th rank tensor) that can be dotted into q to get FT.
    """
    D4 = np.zeros((3,3,3,3))
    for a in xrange(3):
@@ -52,8 +85,10 @@ def eval2(q, D):
 
    Parameters
    ----------
-   q[3]:   3-vector
-   D[3,3]: second-rank tensor
+   q : array [3]
+       3-vector
+   D : array[3,3]
+       second-rank tensor
    """
    return np.dot(q, np.dot(q, D))
 
@@ -63,8 +98,12 @@ def eval4(q, D):
 
    Parameters
    ----------
-   q[3]:   3-vector
-   D[3,3,3,3]: fourth-rank tensor
+   Parameters
+   ----------
+   q : array [3]
+       3-vector
+   D : array[3,3,3,3]
+       fourth-rank tensor
    """
    return np.dot(q, np.dot(q, np.dot(q, np.dot(q, D))))
 
@@ -72,12 +111,22 @@ def calcDE(D2):
    """
    Takes in the D2 matrix (assumed to be real, symmetric) and diagonalizes it
    returning the eigenvalues (d_i) and corresponding normalized eigenvectors (e_i).
-   Returns di[3], ei[3,3], where ei[i,:] is the eigenvector for di[i]. NOTE: this is
-   the transposed version of what eigh returns.
    
    Parameters
    ----------
-   D2[3,3]: symmetric, real matrix from D2()
+   D2 : array[:,:]
+       symmetric, real matrix from D2()
+
+   Returns
+   -------
+   di : array [:]
+       eigenvalues of D2
+   ei : array [:,:]
+       eigenvectors of D2, where ei[i,:] is the eigenvector for di[i]
+
+   Notes
+   -----
+   This uses eigh, but returns the transposed version of output from eigh.
    """
 
    di, ei=np.linalg.eigh(D2)
@@ -89,7 +138,13 @@ def invertD2(D2):
 
    Parameters
    ----------
-   D2[3,3]: symmetric, real matrix from D2()
+   D2 : array[:,:]
+       symmetric, real matrix from D2()
+
+   Returns
+   -------
+   invD2 : array[:,:]
+       inverse of `D2`
    """
 
    return np.linalg.inv(D2)
@@ -100,13 +155,21 @@ def unorm(di, ei, x):
    normalized u vector, along with its magnitude. These are the key elements needed
    in *all* of the Fourier transform expressions to follow.
 
-   Returns: ui[3], umagn
-
    Parameters
    ----------
-   di[3]:   eigenvalues of D2
-   ei[3,3]: eigenvectors of D2 (ei[i,:] == ith eigenvector)
-   x[3]:    cartesian position vector
+   di : array [:]
+       eigenvalues of D2
+   ei : array [:,:]
+       eigenvectors of D2, where ei[i,:] is the eigenvector for di[i]
+   x : array [:]
+       cartesian position vector
+
+   Returns
+   -------
+   ui : array [:]
+       normalized components ui = (di^-1/2 x.ei)/umagn
+   umagn : double
+       magnitude = sum_i di^-1 (x.ei)^2 = x.D^-1.x
    """
 
    ui = np.zeros(3)
@@ -123,13 +186,21 @@ def pnorm(di, ei, q):
    normalized p vector, along with its magnitude. These are the key elements needed
    in *all* of the Fourier transform expressions to follow.
 
-   Returns: pi[3], pmagn
-
    Parameters
    ----------
-   di[3]:   eigenvalues of D2
-   ei[3,3]: eigenvectors of D2 (ei[i,:] == ith eigenvector)
-   q[3]:    cartesian reciprocal vector
+   di : array [:]
+       eigenvalues of D2
+   ei : array [:,:]
+       eigenvectors of D2, where ei[i,:] is the eigenvector for di[i]
+   q : array [:]
+       cartesian reciprocal vector
+
+   Returns
+   -------
+   pi : array [:]
+       normalized components pi = (di^1/2 q.ei)/pmagn
+   pmagn : double
+       magnitude = sum_i di (q.ei)^2 = q.D.q
    """
 
    pi = np.zeros(3)
@@ -144,17 +215,24 @@ def poleFT(di, u, pm, erfupm=-1):
    """
    Calculates the pole FT (excluding the volume prefactor) given the di eigenvalues,
    the value of u magnitude (available from unorm), and the pmax scaling factor.
-   Note: if we've already calculated the erf, don't bother recalculating it here.
-
-   Returns erf(0.5*u*pm)/(4*pi*u*sqrt(d1*d2*d3)) if u>0
-   else pm/(4*pi^3/2 * sqrt(d1*d2*d3)) if u==0
 
    Parameters
    ----------
-   di[3]:  eigenvalues of D2
-   u:      magnitude of u (from unorm())
-   pm:     scaling factor for exponential cutoff function
-   erfupm: value of erf(0.5*u*pm) (optional; if not set, then its calculated)
+   di : array [:]
+       eigenvalues of D2
+   u : double
+       magnitude of u, from unorm() = x.D^-1.x
+   pm : double
+       scaling factor pmax for exponential cutoff function
+   erfupm : double, optional
+       value of erf(0.5*u*pm) (negative = not set, then its calculated)
+
+   Returns
+   -------
+   poleFT : double
+       integral of Gaussian cutoff function corresponding to a l=0 pole;
+       erf(0.5*u*pm)/(4*pi*u*sqrt(d1*d2*d3)) if u>0
+       pm/(4*pi^3/2 * sqrt(d1*d2*d3)) if u==0
    """
 
    if (u==0):
@@ -168,22 +246,29 @@ def discFT(di, u, pm, erfupm=-1, gaussupm=-1):
    Calculates the discontinuity FT (excluding the volume prefactor) given the
    di eigenvalues, the value of u magnitude (available from unorm), and the pmax
    scaling factor. Returns a 3-vector for l=0, 2, and 4.
-   Note: if we've already calculated the erf or gauss, don't bother
-   recalculating it here.
-
-   Returns 0 if u==0. If u>0, then z = u*pm
-   l=0: 1/(4pi u^3 (d1 d2 d3)^1/2 * z^3 * exp(-z^2/4)/2 sqrt(pi)
-   l=2: 1/(4pi u^3 (d1 d2 d3)^1/2 * (-15/2*erf(z/2) + (15/2 + 5/4 z^2)exp(-z^2/4)/sqrt(pi)
-   l=4: 1/(4pi u^3 (d1 d2 d3)^1/2 * (63*15/8*(1-14/z^2)*erf(z/2) +
-     (63*15*14/8z + 63*5/2 z + 63/8 z^3)exp(-z^2/4)/sqrt(pi)
 
    Parameters
    ----------
-   di[3]:    eigenvalues of D2
-   u:        magnitude of u (from unorm())
-   pm:       scaling factor for exponential cutoff function
-   erfupm:   value of erf(0.5*u*pm) (optional; if not set, then its calculated)
-   gaussupm: value of exp(-(0.5*u*pm)) (optional; if not set, then its calculated)
+   di : array [:]
+       eigenvalues of D2
+   u : double
+       magnitude of u, from unorm() = x.D^-1.x
+   pm : double
+       scaling factor pmax for exponential cutoff function
+   erfupm : double, optional
+       value of erf(0.5*u*pm) (negative = not set, then its calculated)
+   gaussupm : double, optional
+       value of exp(-(0.5*u*pm)) (negative = not set, then its calculated)
+
+   Returns
+   -------
+   poleFT : array [:]
+       integral of Gaussian cutoff function corresponding to a l=0,2,4 discontinuities;
+       l=0: 1/(4pi u^3 (d1 d2 d3)^1/2 * z^3 * exp(-z^2/4)/2 sqrt(pi)
+       l=2: 1/(4pi u^3 (d1 d2 d3)^1/2 * (-15/2*erf(z/2)
+             + (15/2 + 5/4 z^2)exp(-z^2/4)/sqrt(pi)
+       l=4: 1/(4pi u^3 (d1 d2 d3)^1/2 * (63*15/8*(1-14/z^2)*erf(z/2)
+             + (63*15*14/8z + 63*5/2 z + 63/8 z^3)exp(-z^2/4)/sqrt(pi)
    """
 
    if (u==0):
@@ -236,7 +321,12 @@ def D4toNNN(D4):
 
    Parameters
    ----------
-   D4[3,3,3,3]: 4th rank tensor coefficient, as in D4[a,b,c,d]*x[a]*x[b]*x[c]*x[d]
+   D4 : array [3,3,3,3]
+       4th rank tensor coefficient, as in D4[a,b,c,d]*x[a]*x[b]*x[c]*x[d]
+
+   Returns
+   -------
+   D15 : array [15]
    """
    D15 = np.zeros(15)
    for a in xrange(3):
