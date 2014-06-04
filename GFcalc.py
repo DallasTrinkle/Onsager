@@ -258,7 +258,9 @@ def rotatetuple(tup, i):
 # indices are "shifts". For the <013>/<031>/<112> blocks, these correspond to that
 # ordering. This is hardcoded, and comes from Mathematica. These all come from
 # transforming the matrices that convert powers qx^nx qy^ny qz^nz into spherical
-# harmonics, and then grouping these by l values that show up.
+# harmonics, and then grouping these by l values that show up. This is transposed
+# so that we can make the 3x15 matrix as PowerFT[:,:,:] * D15[:], and then we need
+# to make two vectors: a 3-vector for (f0(z), f2(z), f4(z)) and a 15 vector of our powers
 
 # F44[l, s1, s2] for the <004> type power expansions:
 F44 = np.array((

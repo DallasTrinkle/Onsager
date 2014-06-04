@@ -462,7 +462,7 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
                         for l in xrange(3):
                             self.assertEqual(0, GFcalc.PowerFT[l, in1, in2])
 
-    def test15x15FourierValues(self):
+    def test15x15FourierIsotropic(self):
         """
         Tests that the 3x15x15 matrix has the values we'd expect, above and
         beyond the symmetries that we listed above.
@@ -483,6 +483,107 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
             self.assertAlmostEqual(D15_0[i], D15[i])
             self.assertAlmostEqual(D15_2[i], 0)
             self.assertAlmostEqual(D15_4[i], 0)
+
+    def test15x15FourierValues(self):
+        """
+        Tests that the 3x15x15 matrix has the values we'd expect, above and
+        beyond the symmetries that we listed above.
+        """
+        D15 = np.zeros(15)
+        D15[GFcalc.ExpToIndex[0,0,4]]=1
+        D15[GFcalc.ExpToIndex[0,4,0]]=2
+        D15[GFcalc.ExpToIndex[4,0,0]]=3
+        D15[GFcalc.ExpToIndex[2,2,0]]=4
+        D15[GFcalc.ExpToIndex[2,0,2]]=5
+        D15[GFcalc.ExpToIndex[0,2,2]]=6
+
+        D15[GFcalc.ExpToIndex[0,1,3]]=7
+        D15[GFcalc.ExpToIndex[0,3,1]]=8
+        D15[GFcalc.ExpToIndex[2,1,1]]=9
+
+        D15[GFcalc.ExpToIndex[1,0,3]]=10
+        D15[GFcalc.ExpToIndex[3,0,1]]=11
+        D15[GFcalc.ExpToIndex[1,2,1]]=12
+
+        D15[GFcalc.ExpToIndex[1,3,0]]=13
+        D15[GFcalc.ExpToIndex[3,1,0]]=14
+        D15[GFcalc.ExpToIndex[1,1,2]]=15
+
+        # result, from Mathematica (l=0)
+        #{ 11/5, 11/5, 11/5,
+        #  22/5, 22/5, 22/5,
+        #  0,0,0, 0,0,0, 0,0,0 }
+        D15_test = np.zeros(15)
+        D15_test[GFcalc.ExpToIndex[0,0,4]]=11./5.
+        D15_test[GFcalc.ExpToIndex[0,4,0]]=11./5.
+        D15_test[GFcalc.ExpToIndex[4,0,0]]=11./5.
+        D15_test[GFcalc.ExpToIndex[2,2,0]]=22./5.
+        D15_test[GFcalc.ExpToIndex[2,0,2]]=22./5.
+        D15_test[GFcalc.ExpToIndex[0,2,2]]=22./5.
+
+        D15_0 = np.dot(GFcalc.PowerFT[0], D15)
+        for i in xrange(15):
+            self.assertAlmostEqual(D15_0[i], D15_test[i])
+
+        # result, from Mathematica (l=2)
+        #{ -5/7, 0, 5/7,
+        #   5/7, 0, -5/7,
+        #   54/7, 54/7, 54/7,
+        #   75/7, 75/7, 75/7,
+        #   96/7, 96/7, 96/7}
+        D15_test = np.zeros(15)
+        D15_test[GFcalc.ExpToIndex[0,0,4]]=-5./7.
+        D15_test[GFcalc.ExpToIndex[0,4,0]]=0.
+        D15_test[GFcalc.ExpToIndex[4,0,0]]=5./7.
+        D15_test[GFcalc.ExpToIndex[2,2,0]]=5./7.
+        D15_test[GFcalc.ExpToIndex[2,0,2]]=0
+        D15_test[GFcalc.ExpToIndex[0,2,2]]=-5./7.
+
+        D15_test[GFcalc.ExpToIndex[0,1,3]]=54./7.
+        D15_test[GFcalc.ExpToIndex[0,3,1]]=54./7.
+        D15_test[GFcalc.ExpToIndex[2,1,1]]=54./7.
+
+        D15_test[GFcalc.ExpToIndex[1,0,3]]=75./7.
+        D15_test[GFcalc.ExpToIndex[3,0,1]]=75./7.
+        D15_test[GFcalc.ExpToIndex[1,2,1]]=75./7.
+
+        D15_test[GFcalc.ExpToIndex[1,3,0]]=96./7.
+        D15_test[GFcalc.ExpToIndex[3,1,0]]=96./7.
+        D15_test[GFcalc.ExpToIndex[1,1,2]]=96./7.
+
+        D15_2 = np.dot(GFcalc.PowerFT[1], D15)
+        for i in xrange(15):
+            self.assertAlmostEqual(D15_2[i], D15_test[i])
+
+        # result, from Mathematica (l=4)
+        # {-17/35, -1/5, 3/35,
+        #  -39/35, 3/5, 81/35,
+        #  -5/7, 2/7, 9/7,
+        #  -5/7, 2/7, 9/7,
+        #  -5/7, 2/7, 9/7}
+        D15_test = np.zeros(15)
+        D15_test[GFcalc.ExpToIndex[0,0,4]]=-17./35.
+        D15_test[GFcalc.ExpToIndex[0,4,0]]=-1./5.
+        D15_test[GFcalc.ExpToIndex[4,0,0]]=3/35.
+        D15_test[GFcalc.ExpToIndex[2,2,0]]=-39./35.
+        D15_test[GFcalc.ExpToIndex[2,0,2]]=3./5.
+        D15_test[GFcalc.ExpToIndex[0,2,2]]=81./35.
+
+        D15_test[GFcalc.ExpToIndex[0,1,3]]=-5./7.
+        D15_test[GFcalc.ExpToIndex[0,3,1]]=2./7.
+        D15_test[GFcalc.ExpToIndex[2,1,1]]=9./7.
+
+        D15_test[GFcalc.ExpToIndex[1,0,3]]=-5./7.
+        D15_test[GFcalc.ExpToIndex[3,0,1]]=2./7.
+        D15_test[GFcalc.ExpToIndex[1,2,1]]=9./7.
+
+        D15_test[GFcalc.ExpToIndex[1,3,0]]=-5./7.
+        D15_test[GFcalc.ExpToIndex[3,1,0]]=2./7.
+        D15_test[GFcalc.ExpToIndex[1,1,2]]=9./7.
+
+        D15_4 = np.dot(GFcalc.PowerFT[2], D15)
+        for i in xrange(15):
+            self.assertAlmostEqual(D15_4[i], D15_test[i])
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.
