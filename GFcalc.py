@@ -173,7 +173,7 @@ def discFT(di, u, pm, erfupm=-1, gaussupm=-1):
 
    Returns 0 if u==0. If u>0, then z = u*pm
    l=0: 1/(4pi u^3 (d1 d2 d3)^1/2 * z^3 * exp(-z^2/4)/2 sqrt(pi)
-   l=2: 1/(4pi u^3 (d1 d2 d3)^1/2 * (-15/2*erf(z/2) + (15/2 - 5/4 z^2)exp(-z^2/4)/sqrt(pi)
+   l=2: 1/(4pi u^3 (d1 d2 d3)^1/2 * (-15/2*erf(z/2) + (15/2 + 5/4 z^2)exp(-z^2/4)/sqrt(pi)
    l=4: 1/(4pi u^3 (d1 d2 d3)^1/2 * (63*15/8*(1-14/z^2)*erf(z/2) +
      (63*15*14/8z + 63*5/2 z + 63/8 z^3)exp(-z^2/4)/sqrt(pi)
 
@@ -199,9 +199,9 @@ def discFT(di, u, pm, erfupm=-1, gaussupm=-1):
    if (erfupm < 0):
       erfupm = special.erf(0.5*z)
    if (gaussupm < 0):
-      guassupm = np.exp(-0.25*z2)
-   return pre*np.array((0.5*pi1*zm3*gaussupm,
-                        -7.5*erfupm + pi1*gaussupm*(7.5*z-1.25*z3),
+      gaussupm = np.exp(-0.25*z2)
+   return pre*np.array((0.5*pi1*z3*gaussupm,
+                        -7.5*erfupm + pi1*gaussupm*(7.5*z+1.25*z3),
                         118.125*(1-14.*zm2)*erfupm + pi1*gaussupm*(
             1653.75*zm1 + 157.5*z + 7.875*z3)
                         ))

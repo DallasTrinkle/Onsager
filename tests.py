@@ -642,7 +642,8 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         self.assertEqual(np.shape(fi), (3,))
         self.assertListEqual(list(fi), [0,0,0])
 
-        # Results using HyperGeometric functions
+        # Results using HyperGeometric functions:
+        # 1/(pi^3/2 * u^3 * (d1 d2 d3)^1/2) (z/2)^(3+l) 1F1(3/2 + l/2, 3/2+l, -(z/2)^2)
         umagn = 1.
         fi = GFcalc.discFT(di, umagn, pm)
         zhalf = 0.5*umagn*pm
@@ -652,8 +653,6 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
                           -zhalf**(3+2)*special.hyp1f1(0.5*(3+2),0.5*(3+2*2), -zhalf2),
                           zhalf**(3+4)*special.hyp1f1(0.5*(3+4),0.5*(3+2*4), -zhalf2)
                           )))
-        print fi
-        print fi_0
         for l in xrange(3):
             self.assertAlmostEqual(fi[l], fi_0[l])
 
