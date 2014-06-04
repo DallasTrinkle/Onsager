@@ -303,7 +303,7 @@ class GreenFuncFourierTransformPoleTests(unittest.TestCase):
         x = np.zeros(3)
         ui, umagn = GFcalc.unorm(self.di, self.ei_vect, x)
         g = GFcalc.poleFT(self.di,umagn, pm)
-        # pm*sqrt(d1*d2*d3)/4 pi^(3/2)
+        # pm/( sqrt(d1 d2 d3) 4 pi^(3/2) )
         self.assertAlmostEqual(pm*0.25/np.sqrt(np.product(self.di*np.pi)), g)
 
         x=np.array((0.25, 0.5, 1))
