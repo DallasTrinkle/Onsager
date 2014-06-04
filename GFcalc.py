@@ -171,8 +171,11 @@ def discFT(di, u, pm, erfupm=-1, gaussupm=-1):
    Note: if we've already calculated the erf or gauss, don't bother
    recalculating it here.
 
-   Returns erf(0.5*u*pm)/(4*pi*u*sqrt(d1*d2*d3)) if u>0
-   else pm/(4*pi^3/2 * sqrt(d1*d2*d3)) if u==0
+   Returns 0 if u==0. If u>0, then z = u*pm
+   l=0: 1/(4pi u^3 (d1 d2 d3)^1/2 * z^3 * exp(-z^2/4)/2 sqrt(pi)
+   l=2: 1/(4pi u^3 (d1 d2 d3)^1/2 * (-15/2*erf(z/2) + (15/2 - 5/4 z^2)exp(-z^2/4)/sqrt(pi)
+   l=4: 1/(4pi u^3 (d1 d2 d3)^1/2 * (63*15/8*(1-14/z^2)*erf(z/2) +
+     (63*15*14/8z + 63*5/2 z + 63/8 z^3)exp(-z^2/4)/sqrt(pi)
 
    Parameters
    ----------
@@ -185,11 +188,23 @@ def discFT(di, u, pm, erfupm=-1, gaussupm=-1):
 
    if (u==0):
       return np.array((0,0,0))
+   pi1 = 1./sqrt(np.pi)
+   pre = 0.25/(np.pi*u*u*u*sqrt(product(di)))
+   z = u*pm
+   z2 = z*z
+   z3 = z*z2
+   zm1 = 1./z
+   zm2 = zm1*zm1
+   zm3 = zm1*zm2
    if (erfupm < 0):
-      erfupm = special.erf(0.5*u*pm)
+      erfupm = special.erf(0.5*z)
    if (gaussupm < 0):
-      guassupm = exp(-0.25*(u*pm)**2)
-   return np.array((1,1,1))
+      guassupm = exp(-0.25*z2)
+   return pre*np.array((0.5*pi1*zm3*gaussupm,
+                        -7.5*erfupm + pi1*gaussupm*(7.5*z-1.25*z3),
+                        118.125*(1-14.*zm2)*erfupm + pi1*gaussupm*(
+            1653.75*zm1 + 157.5*z + 7.875*z3)
+                        ))
 
 # Hard-coded?
 PowerExpansion = np.array( (
