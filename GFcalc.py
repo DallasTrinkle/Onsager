@@ -109,20 +109,20 @@ def eval4(q, D):
 
 def calcDE(D2):
    """
-   Takes in the D2 matrix (assumed to be real, symmetric) and diagonalizes it
-   returning the eigenvalues (d_i) and corresponding normalized eigenvectors (e_i).
+   Takes in the `D2` matrix (assumed to be real, symmetric) and diagonalizes it
+   returning the eigenvalues (`di`) and corresponding normalized eigenvectors (`ei`).
    
    Parameters
    ----------
    D2 : array[:,:]
-       symmetric, real matrix from D2()
+       symmetric, real matrix from `D2`()
 
    Returns
    -------
    di : array [:]
-       eigenvalues of D2
+       eigenvalues of `D2`
    ei : array [:,:]
-       eigenvectors of D2, where ei[i,:] is the eigenvector for di[i]
+       eigenvectors of `D2`, where `ei`[i,:] is the eigenvector for `di`[i]
 
    Notes
    -----
@@ -134,12 +134,12 @@ def calcDE(D2):
 
 def invertD2(D2):
    """
-   Takes in the matrix D2, returns its inverse (which gets used repeatedly).
+   Takes in the matrix `D2`, returns its inverse (which gets used repeatedly).
 
    Parameters
    ----------
    D2 : array[:,:]
-       symmetric, real matrix from D2()
+       symmetric, real matrix from `D2`()
 
    Returns
    -------
@@ -151,25 +151,25 @@ def invertD2(D2):
 
 def unorm(di, ei, x):
    """
-   Takes the eigenvalues di, eigenvectors ei, and the vector x, and returns the
+   Takes the eigenvalues `di`, eigenvectors `ei`, and the vector x, and returns the
    normalized u vector, along with its magnitude. These are the key elements needed
    in *all* of the Fourier transform expressions to follow.
 
    Parameters
    ----------
    di : array [:]
-       eigenvalues of D2
+       eigenvalues of `D2`
    ei : array [:,:]
-       eigenvectors of D2, where ei[i,:] is the eigenvector for di[i]
+       eigenvectors of `D2`, where `ei`[i,:] is the eigenvector for `di`[i]
    x : array [:]
        cartesian position vector
 
    Returns
    -------
    ui : array [:]
-       normalized components ui = (di^-1/2 x.ei)/umagn
+       normalized components ui = (`di`^-1/2 x.`ei`)/umagn
    umagn : double
-       magnitude = sum_i di^-1 (x.ei)^2 = x.D^-1.x
+       magnitude = sum_i `di`^-1 (x.`ei`)^2 = x.D^-1.x
    """
 
    ui = np.zeros(3)
@@ -182,25 +182,25 @@ def unorm(di, ei, x):
 
 def pnorm(di, ei, q):
    """
-   Takes the eigenvalues di, eigenvectors ei, and the vector q, and returns the
+   Takes the eigenvalues `di`, eigenvectors `ei`, and the vector q, and returns the
    normalized p vector, along with its magnitude. These are the key elements needed
    in *all* of the Fourier transform expressions to follow.
 
    Parameters
    ----------
    di : array [:]
-       eigenvalues of D2
+       eigenvalues of `D2`
    ei : array [:,:]
-       eigenvectors of D2, where ei[i,:] is the eigenvector for di[i]
+       eigenvectors of `D2`, where `ei`[i,:] is the eigenvector for `di`[i]
    q : array [:]
        cartesian reciprocal vector
 
    Returns
    -------
    pi : array [:]
-       normalized components pi = (di^1/2 q.ei)/pmagn
+       normalized components pi = (`di`^1/2 q.`ei`)/pmagn
    pmagn : double
-       magnitude = sum_i di (q.ei)^2 = q.D.q
+       magnitude = sum_i `di` (q.`ei`)^2 = q.D.q
    """
 
    pi = np.zeros(3)
@@ -213,13 +213,13 @@ def pnorm(di, ei, q):
 
 def poleFT(di, u, pm, erfupm=-1):
    """
-   Calculates the pole FT (excluding the volume prefactor) given the di eigenvalues,
+   Calculates the pole FT (excluding the volume prefactor) given the `di` eigenvalues,
    the value of u magnitude (available from unorm), and the pmax scaling factor.
 
    Parameters
    ----------
    di : array [:]
-       eigenvalues of D2
+       eigenvalues of `D2`
    u : double
        magnitude of u, from unorm() = x.D^-1.x
    pm : double
@@ -244,13 +244,13 @@ def poleFT(di, u, pm, erfupm=-1):
 def discFT(di, u, pm, erfupm=-1, gaussupm=-1):
    """
    Calculates the discontinuity FT (excluding the volume prefactor) given the
-   di eigenvalues, the value of u magnitude (available from unorm), and the pmax
+   `di` eigenvalues, the value of u magnitude (available from unorm), and the pmax
    scaling factor. Returns a 3-vector for l=0, 2, and 4.
 
    Parameters
    ----------
    di : array [:]
-       eigenvalues of D2
+       eigenvalues of `D2`
    u : double
        magnitude of u, from unorm() = x.D^-1.x
    pm : double
@@ -315,18 +315,17 @@ ExpToIndex = ConstructExpToIndex()
 
 def D4toNNN(D4):
    """
-   Converts from a fourth-derivative expansion D4 into power expansion.
-
-   Returns D15, the expansion coefficients for the power series.
+   Converts from a fourth-derivative expansion `D4` into power expansion.
 
    Parameters
    ----------
    D4 : array [3,3,3,3]
-       4th rank tensor coefficient, as in D4[a,b,c,d]*x[a]*x[b]*x[c]*x[d]
+       4th rank tensor coefficient, as in `D4`[a,b,c,d]*x[a]*x[b]*x[c]*x[d]
 
    Returns
    -------
    D15 : array [15]
+       expansion coefficients in terms of powers
    """
    D15 = np.zeros(15)
    for a in xrange(3):
@@ -344,26 +343,38 @@ def powereval(u):
 
    Parameters
    ----------
-   u[3]: 3-vector to power-expand.
+   u : array [3]
+       3-vector to power-expand.
+
+   Returns
+   -------
+   powers : array [15]
+       `u` components raised to the powers in PowerExpansion
    """
-   D15 = np.zeros(15)
+   powers = np.zeros(15)
    for ind, power in enumerate(PowerExpansion):
-      D15[ind] = (u[0]**power[0])*(u[1]**power[1])*(u[2]**power[2])
-   return D15
+      powers[ind] = (u[0]**power[0])*(u[1]**power[1])*(u[2]**power[2])
+   return powers
 
 def RotateD4(D4, di, ei):
    """
-   Returns the rotated (and scaled) version of the fourth-ranked tensor D4,
-   using the eigenvalues di and eigenvectors ei. Should be such that if you
-   take q, evaluate it as pi, then eval4(pi, Drot4) = eval4(q, D4).
-
-   Returns Drot4[3,3,3,3]
+   Returns the rotated (and scaled) version of the fourth-ranked tensor `D4`,
+   using the eigenvalues `di` and eigenvectors `ei` into `Drot4`.
 
    Parameters
    ----------
-   D4[3,3,3,3]: fourth-rank tensor
-   di[3]:       eigenvalues
-   ei[3,3]:     eigenvectors (ei[i,:] corresponds to di[i])
+   D4 : array [3,3,3,3]
+       4th rank tensor coefficient, as in `D4`[a,b,c,d]*x[a]*x[b]*x[c]*x[d]
+   di : array [:]
+       eigenvalues of `D2`
+   ei : array [:,:]
+       eigenvectors of `D2`, where `ei`[i,:] is the eigenvector for `di`[i]
+
+   Returns
+   -------
+   Drot4 : array [3,3,3,3]
+       4th rank tensor coefficients, rotated so that for `q`, converted to normalized
+       `pi` with magnitude `pmagn`, `pmagn`**4 eval4(`pi`, `Drot4`) = eval4(`q`, `D4`).
    """
    Drot4 = np.zeros((3,3,3,3))
    diinvsqrt = 1./np.sqrt(di)
