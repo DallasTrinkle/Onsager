@@ -719,6 +719,10 @@ class KPTMeshTests(unittest.TestCase):
         self.assertTrue(any( all((0,0,np.pi)==x) for x in self.kptmesh.BZG ))
         self.assertTrue(any( all((0,0,-np.pi)==x) for x in self.kptmesh.BZG ))
         self.assertFalse(any( all((0,0,0)==x) for x in self.kptmesh.BZG ))
+        vec = np.array((1,1,1))
+        self.assertTrue(self.kptmesh.incell(self.kptmesh.BZG, vec))
+        vec = np.array((4,0,-4))
+        self.assertFalse(self.kptmesh.incell(self.kptmesh.BZG, vec))
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.

@@ -24,7 +24,7 @@ class KPTmesh:
         self.rlattice = 2.*np.pi*(np.linalg.inv(lattice)).T
         self.Nmesh = (0,0,0)
         self.Nkpt = 0
-        self.__genBZG()
+        self.genBZG()
 
     def genmesh(self, N):
         """
@@ -38,10 +38,39 @@ class KPTmesh:
         self.Nmesh = N
         self.Nkpt = np.product(N)
 
-    def __genBZG(self):
+    def incell(self, BZG, vec):
+        """
+        Tells us if vec is inside our set of defining points.
+        
+        Parameters
+        ----------
+        G : array [:,3]
+            array of vectors that define the BZ
+        vec : array [3]
+            vector to be tested
+            
+        Returns
+        -------
+        False if outside the BZ, True otherwise
+        """
+        for G in BZG:
+            if np.all(vec == G): continue
+            if np.dot(vec, G) >= np.dot(G,G): return False
+        return True
+        
+    def genBZG(self):
         """
         Generates the reciprocal lattice G points that define the Brillouin zone.
         """
-        BZG = [[0,0,0], [1,1,1]]
-        self.BZG = np.array(BZG)
+        # Start with a list of possible vectors; add those that define the BZ...
+        BZG = []
+        nv = [0,0,0]
+        for nv[0] in xrange(-3,4):
+            for nv[1] in xrange(-3,4):
+                for nv[2] in xrange(-3,4):
+                    if nv==[0,0,0]: continue
+                    vec = np.dot(self.lattice, nv)
+                    if self.incell(BZG, vec): BZG.append(np.dot(self.rlattice, nv))
+        # ... and use a list comprehension to only keep those that still remain
+        self.BZG = np.array([0.5*vec for vec in BZG if self.incell(BZG,vec)])
         
