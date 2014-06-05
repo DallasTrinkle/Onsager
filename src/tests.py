@@ -723,6 +723,14 @@ class KPTMeshTests(unittest.TestCase):
         self.assertTrue(self.kptmesh.incell(self.kptmesh.BZG, vec))
         vec = np.array((4,0,-4))
         self.assertFalse(self.kptmesh.incell(self.kptmesh.BZG, vec))
+        
+    def testKPT_fullmesh_points(self):
+        """Are the points in the k-point mesh that we expect to see?"""
+        self.kptmesh.genmesh(self.N)
+        kpts, wts = self.kptmesh.fullmesh()
+        self.assertAlmostEqual(sum(wts), 1)
+        self.assertAlmostEqual(wts[0], 1./self.kptmesh.Nkpt)
+        self.assertTrue(any( all((2.*np.pi/self.N[0],0,0)==x) for x in kpts ))
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.

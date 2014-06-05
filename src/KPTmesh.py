@@ -10,7 +10,7 @@ class KPTmesh:
     """
     A class to construct (symmetrized, reduced to the irreducible wedge) k-point meshes.
     """
-    def __init__(self, lattice):
+    def __init__(self, lattice, Nmesh=(0,0,0)):
         """
         Creates an instance of a k-point mesh generator.
         
@@ -18,25 +18,38 @@ class KPTmesh:
         ----------
         lattice : array [3,3}
             lattice vectors, in *column* form, so that a1 = a[:,0], a2 = a[:,1], a3 = a[:,2]
+        Nmesh : list [3], optional
+            number of divisions; can be specified later using genmesh().
         """
         self.lattice = lattice
         self.volume = np.linalg.det(lattice)
         self.rlattice = 2.*np.pi*(np.linalg.inv(lattice)).T
-        self.Nmesh = (0,0,0)
-        self.Nkpt = 0
+        self.Nmesh = (-1,-1,-1)
+        self.Nkpt = -1
+        self.kptfull = np.array(((0)))
         self.genBZG()
+        if (Nmesh != (0,0,0)): self.genmesh(self, self.Nmesh)
 
-    def genmesh(self, N):
+    def genmesh(self, Nmesh):
         """
         Initiates, if mesh doesn't already exist, the construction of a mesh of size N.
         
         Parameters
         ----------
-        N : list
+        Nmesh : list
             should have length 3; specifies number of divisions in 1, 2, 3 directions.
         """
-        self.Nmesh = N
-        self.Nkpt = np.product(N)
+        if Nmesh[0] == self.Nmesh[0] and Nmesh[1] == self.Nmesh[1] and Nmesh[2] == self.Nmesh[2] : return
+        self.Nmesh = Nmesh
+        self.Nkpt = np.product(Nmesh)
+        if self.Nkpt == 0: return
+        dN = np.array([1./x for x in Nmesh])
+        meshrange = [xrange(-Nmesh[0]/2+1, Nmesh[0]/2+1),
+                     xrange(-Nmesh[1]/2+1, Nmesh[1]/2+1),
+                     xrange(-Nmesh[2]/2+1, Nmesh[2]/2+1)]
+        # use a list comprehension to iterate and build:
+        self.kptfull = np.array([ np.dot(self.rlattice, (n0*dN[0], n1*dN[1], n2*dN[2]))
+                                  for n0 in meshrange[0] for n1 in meshrange[1] for n2 in meshrange[2] ])
 
     def incell(self, BZG, vec):
         """
@@ -74,3 +87,21 @@ class KPTmesh:
         # ... and use a list comprehension to only keep those that still remain
         self.BZG = np.array([0.5*vec for vec in BZG if self.incell(BZG,vec)])
         
+    def fullmesh(self):
+        """
+        Returns (after generating, if need be) the full (unfolded) k-point mesh, with weights.
+        
+        Returns
+        -------
+        kpt : array [:,3]
+            individual k-points, in Cartesian coordinates
+        wts : array [:]
+            weight of each k-point
+        """
+        if (np.shape(self.kptfull) != (self.Nkpt, 3)):
+            # generate those kpoints!
+            self.genmesh(self.Nmesh)
+        if self.Nkpt == 0 :
+            return np.array(((0))), np.array((0))
+        return self.kptfull, np.array((1./self.Nkpt,)*self.Nkpt)
+    
