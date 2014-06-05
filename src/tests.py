@@ -682,10 +682,43 @@ class KPTMeshTests(unittest.TestCase):
     """
     def setUp(self):
         self.lattice = np.eye(3)
+        self.N = (4, 4, 4)
         self.kptmesh = KPTmesh.KPTmesh(self.lattice)
         
     def testKPTclassexists(self):
+        """Does it exist?"""
         self.assertIsInstance(self.kptmesh, KPTmesh.KPTmesh)
+        
+    def testKPTreciprocallattice(self):
+        """Have we correctly constructed the reciprocal lattice vectors?"""
+        dotprod = np.dot(self.kptmesh.rlattice.T, self.kptmesh.lattice)
+        dotprod0 = 2.*np.pi*np.eye(3)
+        for a in xrange(3):
+            for b in xrange(3):
+                self.assertAlmostEqual(dotprod[a,b], dotprod0[a,b])
+    
+    def testKPTvolume(self):
+        """Correct volume for cell?"""
+        self.assertAlmostEqual(1., self.kptmesh.volume)
+        
+    def testKPTconstruct(self):
+        """Can we construct a mesh with the correct number of points?"""
+        # reset
+        self.kptmesh.genmesh((0,0,0))
+        self.assertEqual(self.kptmesh.Nkpt, 0)
+        self.kptmesh.genmesh(self.N)
+        self.assertEqual(self.kptmesh.Nkpt, np.product(self.N))
+        
+    def testKPT_BZ_Gpoints(self):
+        """Do we have the correct G points that define the BZ?"""
+        self.assertEqual(np.shape(self.kptmesh.BZG), (6,3))
+        self.assertTrue(any( all((np.pi,0,0)==x) for x in self.kptmesh.BZG ))
+        self.assertTrue(any( all((-np.pi,0,0)==x) for x in self.kptmesh.BZG ))
+        self.assertTrue(any( all((0,np.pi,0)==x) for x in self.kptmesh.BZG ))
+        self.assertTrue(any( all((0,-np.pi,0)==x) for x in self.kptmesh.BZG ))
+        self.assertTrue(any( all((0,0,np.pi)==x) for x in self.kptmesh.BZG ))
+        self.assertTrue(any( all((0,0,-np.pi)==x) for x in self.kptmesh.BZG ))
+        self.assertFalse(any( all((0,0,0)==x) for x in self.kptmesh.BZG ))
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.
