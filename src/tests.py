@@ -673,6 +673,20 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         for l in xrange(3):
             self.assertAlmostEqual(fi[l], fi_0[l])
 
+# Tests for our k-point mesh generator
+import KPTmesh
+
+class KPTMeshTests(unittest.TestCase):
+    """
+    Set of tests for our kpt-mesh generation class
+    """
+    def setUp(self):
+        self.lattice = np.eye(3)
+        self.kptmesh = KPTmesh.KPTmesh(self.lattice)
+        
+    def testKPTclassexists(self):
+        self.assertIsInstance(self.kptmesh, KPTmesh.KPTmesh)
+
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.
 import doctest
