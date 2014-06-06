@@ -545,11 +545,27 @@ class GFcalc:
         """
         Initialize GF calculator with NN vector lists and rates
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         NNvect : array [:, 3]
             list of nearest-neighbor vectors
         rates : array [:]
             list of escape rates
         """
         pass
+
+    def GF(self, R):
+        """
+        Evaluate the GF at point R.
+
+        Parameters
+        ----------
+        R : array [3]
+            lattice position to evalute GF
+
+        Returns
+        -------
+        G : double
+            GF at point R
+        """
+        return 0

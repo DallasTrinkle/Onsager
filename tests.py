@@ -731,12 +731,43 @@ class GFCalcObjectTests(unittest.TestCase):
     """Set of tests for our GF-calculation class"""
 
     def setUp(self):
-        self.GF = GFcalc.GFcalc(FCClatt.NNvect,
-                                np.array((1,) * 12))
+        self.NNvect = FCClatt.NNvect()
+        self.rates = np.array((1,) * 12)
+        self.GF = GFcalc.GFcalc(self.NNvect, self.rates)
 
     def testGFclassexists(self):
         """Does it exist?"""
         self.assertIsInstance(self.GF, GFcalc.GFcalc)
+
+    def testGFclasscalc(self):
+        """Can we calculate a value for (0, 0, 0) and have it be non-zero?"""
+        R = np.array((0, 0, 0))
+        g = self.GF.GF(R)
+        self.assertNotEqual(g, 0)
+
+    def testGFsymmetry(self):
+        """Do we have the basic symmetries we expect?"""
+        Rlist = (np.array((0, 1, 1)),
+                 np.array((1, 0, 1)),
+                 np.array((1, 1, 0)))
+        glist = [self.GF.GF(R) for R in Rlist]
+        self.assertAlmostEqual(glist[0], glist[1])
+        self.assertAlmostEqual(glist[0], glist[2])
+        self.assertAlmostEqual(glist[1], glist[2])
+
+    def testGFpseudoinverse(self):
+        """Is G the pseudoinverse of D? Check value at origin, and first NN"""
+        R0 = np.array((0, 0, 0))
+        Rlist = [R0 + R for R in self.NNvect]
+        g0 = self.GF.GF(R0)
+        glist = [self.GF.GF(R) for R in Rlist]
+        self.assertAlmostEqual(-sum(self.rates)*g0+sum(self.rates*glist), 1)
+
+        R1 = self.NNvect[0]
+        Rlist = [R0 + R for R in self.NNvect]
+        g1 = self.GF.GF(R1)
+        glist = [self.GF.GF(R) for R in Rlist]
+        self.assertAlmostEqual(-sum(self.rates)*g1+sum(self.rates*glist), 0)
 
 
 # DocTests... we use this for the small "utility" functions, rather than writing
