@@ -11,6 +11,7 @@ class KPTmesh:
     """
     A class to construct (symmetrized, reduced to the irreducible wedge) k-point meshes.
     """
+
     def __init__(self, lattice, nmesh=(0, 0, 0), groupops=None):
         """
         Creates an instance of a k-point mesh generator.
@@ -26,7 +27,7 @@ class KPTmesh:
         """
         self.lattice = lattice
         self.volume = np.linalg.det(lattice)
-        self.rlattice = 2.*np.pi*(np.linalg.inv(lattice)).T
+        self.rlattice = 2. * np.pi * (np.linalg.inv(lattice)).T
         self.Nmesh = (-1, -1, -1)
         self.Nkpt = -1
         self.Nkptsym = -1
@@ -35,7 +36,7 @@ class KPTmesh:
         self.genBZG()
         if nmesh != (0, 0, 0):
             self.genmesh(nmesh)
-        if groupops != None :
+        if groupops != None:
             self.groupops = groupops
         else:
             self.gengroupops()
@@ -49,23 +50,23 @@ class KPTmesh:
         Nmesh : list
             should have length 3; specifies number of divisions in 1, 2, 3 directions.
         """
-        if Nmesh == self.Nmesh : return
-        self.Nkptsym = -1 # we will need to regenerate the symmetry-reduced, but only when requested
+        if Nmesh == self.Nmesh: return
+        self.Nkptsym = -1  # we will need to regenerate the symmetry-reduced, but only when requested
         self.Nmesh = Nmesh
         self.Nkpt = np.product(Nmesh)
         if self.Nkpt == 0: return
-        dN = np.array([1./x for x in Nmesh])
+        dN = np.array([1. / x for x in Nmesh])
         # use a list comprehension to iterate and build:
-        self.kptfull = np.array([np.dot(self.rlattice, (n0*dN[0], n1*dN[1], n2*dN[2]))
-                                 for n0 in xrange(-Nmesh[0]/2+1, Nmesh[0]/2+1)
-                                 for n1 in xrange(-Nmesh[1]/2+1, Nmesh[1]/2+1)
-                                 for n2 in xrange(-Nmesh[2]/2+1, Nmesh[2]/2+1)])
+        self.kptfull = np.array([np.dot(self.rlattice, (n0 * dN[0], n1 * dN[1], n2 * dN[2]))
+                                 for n0 in xrange(-Nmesh[0] / 2 + 1, Nmesh[0] / 2 + 1)
+                                 for n1 in xrange(-Nmesh[1] / 2 + 1, Nmesh[1] / 2 + 1)
+                                 for n2 in xrange(-Nmesh[2] / 2 + 1, Nmesh[2] / 2 + 1)])
         # run through list to ensure that all k-points are inside the BZ
-        Gmin = min([ np.dot(G, G) for G in self.BZG])
+        Gmin = min([np.dot(G, G) for G in self.BZG])
         for i, k in enumerate(self.kptfull):
-            if np.dot(k, k)>=Gmin:
+            if np.dot(k, k) >= Gmin:
                 for G in self.BZG:
-                    if np.dot(k, G)>np.dot(G, G):
+                    if np.dot(k, G) > np.dot(G, G):
                         k -= 2. * G
                 self.kptfull[i] = k
 
@@ -79,35 +80,35 @@ class KPTmesh:
         threshold : double, optional
             threshold for equality in magnitudes and equality of vectors
         """
-        if self.Nkptsym >= 0 : return # kick out if we've already done this
+        if self.Nkptsym >= 0: return  # kick out if we've already done this
         if self.Nkpt == 0:
             self.Nkptsym = 0
             return
-        self.genmesh(self.Nmesh) # make sure we have our k-points
+        self.genmesh(self.Nmesh)  # make sure we have our k-points
         kptlist = list(self.kptfull)
         kptlist.sort(key=lambda k: np.vdot(k, k))
         k2_indices = []
         k2old = np.vdot(kptlist[0], kptlist[0])
         for i, k2 in enumerate([np.vdot(k, k) for k in kptlist]):
-            if k2>(k2old+threshold):
+            if k2 > (k2old + threshold):
                 k2_indices.append(i)
                 k2old = k2
         k2_indices.append(self.Nkpt)
         # k2_indices now contains a list of indices with the same magnitudes
         kptsym = []
-        wsym = [] # unscaled at this point
+        wsym = []  # unscaled at this point
         kmin = 0
-        basewt = 1./self.Nkpt
+        basewt = 1. / self.Nkpt
         for kmax in k2_indices:
             complist = []
             wtlist = []
             for k in kptlist[kmin:kmax]:
-                match=False
+                match = False
                 for i, kcomp in enumerate(complist):
                     if self.symmatch(k, kcomp, threshold):
                         # update weight, kick out
                         wtlist[i] += basewt
-                        match=True
+                        match = True
                         continue
                 if not match:
                     # new symmetry point!
@@ -115,7 +116,7 @@ class KPTmesh:
                     wtlist.append(basewt)
             kptsym += complist
             wsym += wtlist
-            kmin=kmax
+            kmin = kmax
         self.kptsym = np.array(kptsym)
         self.wsym = np.array(wsym)
         self.Nkptsym = np.size(self.wsym)
@@ -150,8 +151,8 @@ class KPTmesh:
                                for n0 in supercellvect
                                for n1 in supercellvect
                                for n2 in supercellvect]
-                  if abs(np.linalg.det(nmat))==1]:
-            if np.all(abs(np.dot(g.T, g)-np.eye(3))<threshold):
+                  if abs(np.linalg.det(nmat)) == 1]:
+            if np.all(abs(np.dot(g.T, g) - np.eye(3)) < threshold):
                 groupops.append(g)
         self.groupops = np.array(groupops)
 
@@ -172,10 +173,10 @@ class KPTmesh:
         -------
         False if outside the BZ, True otherwise
         """
-        if BZG == None :
-            BZG=self.BZG
+        if BZG == None:
+            BZG = self.BZG
         # checks that vec.G < G^2 for all G (and throws out the option that vec == G, in case threshold == 0)
-        return all([np.dot(vec, G) < (np.dot(G, G)+threshold) for G in BZG if not np.all(vec == G)])
+        return all([np.dot(vec, G) < (np.dot(G, G) + threshold) for G in BZG if not np.all(vec == G)])
 
     def symmatch(self, k, kcomp, threshold=1e-8):
         """
@@ -194,7 +195,7 @@ class KPTmesh:
         -------
         True if equivalent by a point group operation, False otherwise
         """
-        return any([np.all(abs(k-np.dot(g, kcomp))<threshold) for g in self.groupops])
+        return any([np.all(abs(k - np.dot(g, kcomp)) < threshold) for g in self.groupops])
 
     def genBZG(self):
         """
@@ -210,8 +211,8 @@ class KPTmesh:
             vec = np.dot(self.lattice, nv)
             if self.incell(vec, BZG, threshold=0): BZG.append(np.dot(self.rlattice, nv))
         # ... and use a list comprehension to only keep those that still remain
-        self.BZG = np.array([0.5*vec for vec in BZG if self.incell(vec, BZG, threshold=0)])
-        
+        self.BZG = np.array([0.5 * vec for vec in BZG if self.incell(vec, BZG, threshold=0)])
+
     def fullmesh(self):
         """
         Returns (after generating, if need be) the full (unfolded) k-point mesh, with weights.
@@ -226,9 +227,9 @@ class KPTmesh:
         if np.shape(self.kptfull) != (self.Nkpt, 3):
             # generate those kpoints!
             self.genmesh(self.Nmesh)
-        if self.Nkpt == 0 :
+        if self.Nkpt == 0:
             return np.array(((0))), np.array((0))
-        return self.kptfull, np.array((1./self.Nkpt,)*self.Nkpt)
+        return self.kptfull, np.array((1. / self.Nkpt,) * self.Nkpt)
 
     def symmesh(self):
         """
@@ -244,6 +245,6 @@ class KPTmesh:
         if np.shape(self.kptsym) != (self.Nkptsym, 3):
             # generate those kpoints!
             self.reducemesh()
-        if self.Nkptsym == 0 :
+        if self.Nkptsym == 0:
             return np.array(((0))), np.array((0))
         return self.kptsym, self.wsym
