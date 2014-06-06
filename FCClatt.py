@@ -10,18 +10,18 @@ import numpy as np
 def NNvect():
     """
     Constructs the FCC <110> transition vectors.
+
+    Returns
+    -------
+    NNvect : array [12, 3]
+        nearest neighbor vectors
     """
-    z = 12
-    NNvect = np.empty((z,3), dtype=int)
-    n=[0,0,0]
-    z=0
-    for n[0] in (-1,0,1):
-        for n[1] in (-1,0,1):
-            for n[2] in (-1,0,1):
-                if sum(n)%2 == 0 and n.count(0) != 3:
-                    NNvect[z] = n[:]
-                    z+=1
-    return NNvect
+    return np.array([ (n0, n1, n2)
+                      for n0 in xrange(-1,2)
+                      for n1 in xrange(-1,2)
+                      for n2 in xrange(-1,2)
+                      if (n0, n1, n2) != (0, 0, 0) and (n0+n1+n2)%2 == 0],
+                    dtype=float)
 
 def invlist(NNvect):
     """

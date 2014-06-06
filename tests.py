@@ -665,6 +665,13 @@ class KPTMeshTests(unittest.TestCase):
             self.assertTrue(self.kptmesh.incell(q),
                             msg="Failed with vector {} not in BZ".format(q))
 
+    def testKPT_symmetry(self):
+        """Do we have the correct number of point group operations? Are they unique?"""
+        self.assertEqual(np.shape(self.kptmesh.groupops), (48,3,3))
+        for i,g1 in enumerate(self.kptmesh.groupops):
+            for g2 in self.kptmesh.groupops[:i]:
+                self.assertFalse(np.all(g1==g2),
+                                 msg="Group operations {} and {} both found in kptmesh".format(g1,g2))
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.

@@ -6,11 +6,12 @@ Class definition for KPTmesh class; allows automated construction of kpt meshes
 
 import numpy as np
 
+
 class KPTmesh:
     """
     A class to construct (symmetrized, reduced to the irreducible wedge) k-point meshes.
     """
-    def __init__(self, lattice, Nmesh=(0,0,0)):
+    def __init__(self, lattice, nmesh=(0, 0, 0), groupops=None):
         """
         Creates an instance of a k-point mesh generator.
         
@@ -20,15 +21,22 @@ class KPTmesh:
             lattice vectors, in *column* form, so that a1 = a[:,0], a2 = a[:,1], a3 = a[:,2]
         Nmesh : list [3], optional
             number of divisions; can be specified later using genmesh().
+        groupops : list [Nop, 3, 3], optional
+            point group operations; if not explicitly included, then generate from RLV
         """
         self.lattice = lattice
         self.volume = np.linalg.det(lattice)
         self.rlattice = 2.*np.pi*(np.linalg.inv(lattice)).T
-        self.Nmesh = (-1,-1,-1)
+        self.Nmesh = (-1, -1, -1)
         self.Nkpt = -1
-        self.kptfull = np.array(((0)))
+        self.kptfull = np.array([[0]])
         self.genBZG()
-        if (Nmesh != (0,0,0)): self.genmesh(Nmesh)
+        if nmesh != (0, 0, 0):
+            self.genmesh(nmesh)
+        if groupops != None :
+            self.groupops = groupops
+        else:
+            self.gengroupops()
 
     def genmesh(self, Nmesh):
         """
@@ -51,13 +59,24 @@ class KPTmesh:
         self.kptfull = np.array([ np.dot(self.rlattice, (n0*dN[0], n1*dN[1], n2*dN[2]))
                                   for n0 in meshrange[0] for n1 in meshrange[1] for n2 in meshrange[2] ])
         # run through list to ensure that all k-points are inside the BZ
-        Gmin = min([ np.dot(G,G) for G in self.BZG])
+        Gmin = min([ np.dot(G, G) for G in self.BZG])
         for i,k in enumerate(self.kptfull):
-            if np.dot(k,k)>=Gmin:
+            if np.dot(k, k)>=Gmin:
                 for G in self.BZG:
-                    if np.dot(k,G)>np.dot(G,G):
-                        k = k - 2.*G
+                    if np.dot(k, G)>np.dot(G, G):
+                        k -= 2. * G
                 self.kptfull[i] = k
+
+    def gengroupops(self, threshold=1e-8):
+        """
+        Generates the point group operations, given the reciprocal lattice vectors.
+
+        Parameters
+        ----------
+        threshold : double, optional
+            threshold for equality in generating point group operations
+        """
+        self.groupops = np.array([np.eye(3)]*48)
 
     def incell(self, vec, BZG=None, threshold=1e-5):
         """
@@ -76,9 +95,10 @@ class KPTmesh:
         -------
         False if outside the BZ, True otherwise
         """
-        if BZG==None: BZG=self.BZG
+        if BZG == None :
+            BZG=self.BZG
         # checks that vec.G < G^2 for all G (and throws out the option that vec == G, in case threshold == 0)
-        return all([ (np.dot(vec, G) < np.dot(G,G)+threshold) for G in BZG if not np.all(vec == G)])
+        return all([(np.dot(vec, G) < np.dot(G, G)+threshold) for G in BZG if not np.all(vec == G)])
 
     def genBZG(self):
         """
@@ -86,11 +106,11 @@ class KPTmesh:
         """
         # Start with a list of possible vectors; add those that define the BZ...
         BZG = []
-        nv = [0,0,0]
-        for nv[0] in xrange(-3,4):
-            for nv[1] in xrange(-3,4):
-                for nv[2] in xrange(-3,4):
-                    if nv==[0,0,0]: continue
+        nv = [0, 0, 0]
+        for nv[0] in xrange(-3, 4):
+            for nv[1] in xrange(-3, 4):
+                for nv[2] in xrange(-3, 4):
+                    if nv==[0, 0, 0]: continue
                     vec = np.dot(self.lattice, nv)
                     if self.incell(vec, BZG, threshold=0): BZG.append(np.dot(self.rlattice, nv))
         # ... and use a list comprehension to only keep those that still remain
@@ -107,7 +127,7 @@ class KPTmesh:
         wts : array [:]
             weight of each k-point
         """
-        if (np.shape(self.kptfull) != (self.Nkpt, 3)):
+        if np.shape(self.kptfull) != (self.Nkpt, 3):
             # generate those kpoints!
             self.genmesh(self.Nmesh)
         if self.Nkpt == 0 :

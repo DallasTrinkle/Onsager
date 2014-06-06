@@ -412,7 +412,7 @@ def rotatetuple(tup, i):
     >>> rotatetuple((1,2,3), 2)
     (3, 1, 2)
     """
-    i = i % len(tup)
+    i %= len(tup)
     listrot=list(tup)
     head = listrot[:i]
     del listrot[:i]
