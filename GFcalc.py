@@ -15,6 +15,7 @@ import numpy as np
 import scipy as sp
 from scipy import special
 
+
 def DFTfunc(NNvect, rates):
     """
     Returns a Fourier-transform function given the NNvect and rates

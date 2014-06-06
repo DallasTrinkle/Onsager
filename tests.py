@@ -8,6 +8,7 @@ import numpy as np
 from scipy import special
 import FCClatt
 
+
 class LatticeTests(unittest.TestCase):
     """Set of tests that our lattice code is behaving correctly"""
     def setUp(self):
@@ -24,14 +25,14 @@ class LatticeTests(unittest.TestCase):
 
     def testFCCbasic(self):
         """Do we have the right <110> nearest neighbor vectors for FCC?"""
-        self.assertTrue(any( all((1,1,0)==x) for x in self.NNvect ))
-        self.assertTrue(any( all((1,-1,0)==x) for x in self.NNvect ))
-        self.assertTrue(any( all((0,1,1)==x) for x in self.NNvect ))
-        self.assertTrue(any( all((0,1,-1)==x) for x in self.NNvect ))
-        self.assertTrue(any( all((1,0,1)==x) for x in self.NNvect ))
-        self.assertTrue(any( all((-1,0,1)==x) for x in self.NNvect ))
-        self.assertFalse(any( all((0,0,0)==x) for x in self.NNvect ))
-        self.assertFalse(any( all((1,1,1)==x) for x in self.NNvect ))
+        self.assertTrue(any( all((1, 1, 0) == x) for x in self.NNvect ))
+        self.assertTrue(any( all((1, -1, 0) == x) for x in self.NNvect ))
+        self.assertTrue(any( all((0, 1, 1) == x) for x in self.NNvect ))
+        self.assertTrue(any( all((0, 1, -1) == x) for x in self.NNvect ))
+        self.assertTrue(any( all((1, 0, 1) == x) for x in self.NNvect ))
+        self.assertTrue(any( all((-1, 0, 1) == x) for x in self.NNvect ))
+        self.assertFalse(any( all((0, 0, 0) == x) for x in self.NNvect ))
+        self.assertFalse(any( all((1, 1, 1) == x) for x in self.NNvect ))
         
     def testFCCinversion(self):
         """Check that for each NN vector, we have its inverse too, from invlist"""
@@ -57,62 +58,62 @@ class GreenFuncDerivativeTests(unittest.TestCase):
 
     def testFTfuncZero(self):
         """Is the FT zero at gamma?"""
-        q=np.array((0,0,0))
-        self.assertEqual(self.DFT(q),0)
+        q=np.array((0, 0, 0))
+        self.assertEqual(self.DFT(q), 0)
         
     def testFTfuncZeroRLV(self):
         """Is the FT zero for reciprocal lattice vectors?"""
-        q=np.array((2*np.pi,0,0))
-        self.assertEqual(self.DFT(q),0)
-        q=np.array((2*np.pi,2*np.pi,0))
-        self.assertEqual(self.DFT(q),0)
-        q=np.array((2*np.pi,2*np.pi,2*np.pi))
-        self.assertEqual(self.DFT(q),0)
+        q=np.array((2*np.pi, 0, 0))
+        self.assertEqual(self.DFT(q), 0)
+        q=np.array((2*np.pi,2*np.pi, 0))
+        self.assertEqual(self.DFT(q), 0)
+        q=np.array((2*np.pi, 2*np.pi, 2*np.pi))
+        self.assertEqual(self.DFT(q), 0)
         
     def testFTfuncValues(self):
         """Do we match some specific values?
         Testing that we're negative, and "by hand" evaluation of a few cases.
         Note: equality here doesn't quite work due to roundoff error at the 15th digit"""
-        q=np.array((1,0,0))
-        self.assertTrue(self.DFT(q)<0) # negative everywhere...
+        q=np.array((1, 0, 0))
+        self.assertTrue(self.DFT(q) < 0) # negative everywhere...
         self.assertAlmostEqual(self.DFT(q), 8*(np.cos(1)-1))
-        q=np.array((1,1,0))
-        self.assertTrue(self.DFT(q)<0)
+        q=np.array((1, 1, 0))
+        self.assertTrue(self.DFT(q) < 0)
         self.assertAlmostEqual(self.DFT(q), 2*(np.cos(2)-1)+8*(np.cos(1)-1))
-        q=np.array((1,1,1))
-        self.assertTrue(self.DFT(q)<0)
+        q=np.array((1, 1, 1))
+        self.assertTrue(self.DFT(q) < 0)
         self.assertAlmostEqual(self.DFT(q), 6*(np.cos(2)-1))
 
     def testFTfuncSymmetry(self):
         """Does our FT obey basic cubic symmetry operations?"""
-        q=np.array((1,0,0))
-        q2=np.array((-1,0,0))
-        self.assertEqual(self.DFT(q),self.DFT(q2))
-        q2=np.array((0,1,0))
-        self.assertEqual(self.DFT(q),self.DFT(q2))
-        q2=np.array((0,0,1))
-        self.assertEqual(self.DFT(q),self.DFT(q2))
+        q=np.array((1, 0, 0))
+        q2=np.array((-1, 0, 0))
+        self.assertEqual(self.DFT(q), self.DFT(q2))
+        q2=np.array((0, 1, 0))
+        self.assertEqual(self.DFT(q), self.DFT(q2))
+        q2=np.array((0, 0, 1))
+        self.assertEqual(self.DFT(q), self.DFT(q2))
 
     def testFTdim(self):
         """Do we have the correct dimensionality for our second and fourth derivatives?"""
-        self.assertTrue(np.shape(self.D2)==(3,3))
-        self.assertTrue(np.shape(self.D4)==(3,3,3,3))
+        self.assertTrue(np.shape(self.D2) == (3, 3))
+        self.assertTrue(np.shape(self.D4) == (3, 3, 3, 3))
 
     def testFTDiffSymmetry(self):
         """Do we obey basic symmetry for these values?
         That means that D2 should be symmetric, and that any permutation of [abcd]
         should give the same value in D4."""
         self.assertTrue(np.all(self.D2 == self.D2.T))
-        self.assertEqual(self.D2[0,0], self.D2[1,1])
-        self.assertEqual(self.D2[0,0], self.D2[2,2])
-        for a in xrange(3):
-            for b in xrange(3):
-                for c in xrange(3):
-                    for d in xrange(3):
-                        ind=(a,b,c,d)
-                        inds = tuple(sorted(ind))
-                        self.assertEqual(self.D4[ind], self.D4[inds],
-                                         msg="{} vs {}".format(ind, inds))
+        self.assertEqual(self.D2[0, 0], self.D2[1, 1])
+        self.assertEqual(self.D2[0, 0], self.D2[2, 2])
+        for ind in [(a, b, c, d)
+                    for a in xrange(3)
+                    for b in xrange(3)
+                    for c in xrange(3)
+                    for d in xrange(3)]:
+            inds = tuple(sorted(ind))
+            self.assertEqual(self.D4[ind], self.D4[inds],
+                             msg="{} vs {}".format(ind, inds))
 
     def testEval2(self):
         """Does eval2(q,D) give qDq?"""
@@ -133,21 +134,21 @@ class GreenFuncDerivativeTests(unittest.TestCase):
         # Remember: D2 is negative of the second derivative (to make it positive def.)
         delta=2.e-4
         eps=1e-5
-        qsmall=np.array((delta,0,0))
+        qsmall=np.array((delta, 0, 0))
         D0 = self.DFT(qsmall)
-        D2 = GFcalc.eval2(qsmall,self.D2)
+        D2 = GFcalc.eval2(qsmall, self.D2)
         self.assertTrue(abs(D0+D2) < eps*(delta**2) )
         self.assertFalse(abs(D0) < eps*(delta**2) )
 
-        qsmall=np.array((delta,delta,0))
+        qsmall=np.array((delta, delta, 0))
         D0 = self.DFT(qsmall)
-        D2 = GFcalc.eval2(qsmall,self.D2)
+        D2 = GFcalc.eval2(qsmall, self.D2)
         self.assertTrue(abs(D0+D2) < eps*(delta**2) )
         self.assertFalse(abs(D0) < eps*(delta**2) )
 
-        qsmall=np.array((delta,delta,delta))
+        qsmall=np.array((delta, delta, delta))
         D0 = self.DFT(qsmall)
-        D2 = GFcalc.eval2(qsmall,self.D2)
+        D2 = GFcalc.eval2(qsmall, self.D2)
         self.assertTrue(abs(D0+D2) < eps*(delta**2) )
         self.assertFalse(abs(D0) < eps*(delta**2) )
 
@@ -158,24 +159,24 @@ class GreenFuncDerivativeTests(unittest.TestCase):
         # Remember: D2 is negative of the second derivative (to make it positive def.)
         delta=1e-1
         eps=1e-1
-        qsmall=np.array((delta,0,0))
+        qsmall=np.array((delta, 0, 0))
         D = self.DFT(qsmall)
-        D2 = GFcalc.eval2(qsmall,self.D2)
-        D4 = GFcalc.eval4(qsmall,self.D4)
+        D2 = GFcalc.eval2(qsmall, self.D2)
+        D4 = GFcalc.eval4(qsmall, self.D4)
         self.assertTrue(abs(D+D2-D4) < eps*(delta**4) )
         self.assertFalse(abs(D+D2) < eps*(delta**4) )
 
-        qsmall=np.array((delta,delta,0))
+        qsmall=np.array((delta, delta, 0))
         D = self.DFT(qsmall)
-        D2 = GFcalc.eval2(qsmall,self.D2)
-        D4 = GFcalc.eval4(qsmall,self.D4)
+        D2 = GFcalc.eval2(qsmall, self.D2)
+        D4 = GFcalc.eval4(qsmall, self.D4)
         self.assertTrue(abs(D+D2-D4) < eps*(delta**4) )
         self.assertFalse(abs(D+D2) < eps*(delta**4) )
 
-        qsmall=np.array((delta,delta,delta))
+        qsmall=np.array((delta, delta, delta))
         D = self.DFT(qsmall)
-        D2 = GFcalc.eval2(qsmall,self.D2)
-        D4 = GFcalc.eval4(qsmall,self.D4)
+        D2 = GFcalc.eval2(qsmall, self.D2)
+        D4 = GFcalc.eval4(qsmall, self.D4)
         self.assertTrue(abs(D+D2-D4) < eps*(delta**4) )
         self.assertFalse(abs(D+D2) < eps*(delta**4) )
 
@@ -203,8 +204,8 @@ class GreenFuncFourierTransformPoleTests(unittest.TestCase):
         """Test that the eigenvalues and vectors by direct comparison with thresholds."""
         # a little painful, due to thresholds (and possible negative eigenvectors)
         eps=1e-8
-        for eig in self.di0: self.assertTrue(any(abs(self.di-eig)<eps) )
-        for vec in self.ei0: self.assertTrue(any(abs(np.dot(x,vec))>(1-eps) for x in self.ei_vect))
+        for eig in self.di0: self.assertTrue(any(abs(self.di-eig) < eps) )
+        for vec in self.ei0: self.assertTrue(any(abs(np.dot(x,vec)) > (1-eps) for x in self.ei_vect))
 
     def testInverse(self):
         """Check the evaluation of the inverse."""
@@ -240,11 +241,11 @@ class GreenFuncFourierTransformPoleTests(unittest.TestCase):
         # "arbitrary" vector
         q = np.array([0.5, 0.25, -1])
         pi, pmagn = GFcalc.pnorm(self.di, self.ei_vect, q)
-        self.assertAlmostEqual(np.dot(pi,pi), 1)
+        self.assertAlmostEqual(np.dot(pi, pi), 1)
         self.assertAlmostEqual(pmagn, np.sqrt(GFcalc.eval2(q, self.D2)))
         for a in xrange(3):
             self.assertAlmostEqual(pi[a]*pmagn,
-                                   np.dot(q, self.ei_vect[a,:])*np.sqrt(self.di[a]))
+                                   np.dot(q, self.ei_vect[a, :])*np.sqrt(self.di[a]))
 
     def testPoleFT(self):
         """Test the evaluation of the fourier transform of the second-order pole, including at 0."""
@@ -274,8 +275,8 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
 
     def testPowerExpansion(self):
         """Check that there are (a) 15 entries, (b) all non-negative, (c) summing to 4, (d) uniquely in our power expansion."""
-        self.assertEqual(np.shape(GFcalc.PowerExpansion),(15,3))
-        self.assertTrue(np.all(GFcalc.PowerExpansion>=0))
+        self.assertEqual(np.shape(GFcalc.PowerExpansion), (15, 3))
+        self.assertTrue(np.all(GFcalc.PowerExpansion >= 0))
         for i in xrange(15):
             self.assertEqual(GFcalc.PowerExpansion[i].sum(), 4)
             for j in xrange(i):
@@ -287,14 +288,14 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
             for n2 in xrange(5):
                 for n3 in xrange(5):
                     if (n1+n2+n3 != 4):
-                        self.assertEqual(GFcalc.ExpToIndex[n1,n2,n3], 15,
-                                         msg="index {}{}{}".format(n1,n2,n3))
+                        self.assertEqual(GFcalc.ExpToIndex[n1, n2, n3], 15,
+                                         msg="index {}{}{}".format(n1, n2, n3))
                     else:
-                        ind = GFcalc.ExpToIndex[n1,n2,n3]
+                        ind = GFcalc.ExpToIndex[n1, n2, n3]
                         self.assertNotEqual(ind, 15,
                                             msg="index {}".format(ind))
-                        self.assertTrue(all(GFcalc.PowerExpansion[ind]==(n1,n2,n3)),
-                                        msg="index {}{}{}".format(n1,n2,n3))
+                        self.assertTrue(all(GFcalc.PowerExpansion[ind]==(n1, n2, n3)),
+                                        msg="index {}{}{}".format(n1, n2, n3))
 
     def testPowerEval(self):
         """Test the powereval(u) function that returns the 15 vector of powers of u."""
@@ -305,47 +306,47 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
                 for n3 in xrange(3):
                     if (n1+n2+n3)==4:
                         self.assertAlmostEqual((u[0]**n1)*(u[1]**n2)*(u[2]**n3),
-                                               u15[GFcalc.ExpToIndex[n1,n2,n3]],
-                                               msg="index {}{}{}".format(n1,n2,n3))
+                                               u15[GFcalc.ExpToIndex[n1, n2, n3]],
+                                               msg="index {}{}{}".format(n1, n2, n3))
     
     def testConvD4toNNN(self):
         """Tests conversion of the 4th-rank 4th derivative into power expansion."""
-        D4=np.zeros((3,3,3,3))
-        D4[0,0,0,0]=1
+        D4=np.zeros((3, 3, 3, 3))
+        D4[0, 0, 0, 0]=1
         D15=GFcalc.D4toNNN(D4)
         self.assertEqual(np.shape(D15), (15,))
-        self.assertEqual(D15[GFcalc.ExpToIndex[4,0,0]], 1)
+        self.assertEqual(D15[GFcalc.ExpToIndex[4, 0, 0]], 1)
         for ind in xrange(15):
-            if ind != GFcalc.ExpToIndex[4,0,0]:
+            if ind != GFcalc.ExpToIndex[4, 0, 0]:
                 self.assertEqual(D15[ind], 0)
                 
-        D4=np.zeros((3,3,3,3))
-        D4[1,1,1,1]=1
+        D4=np.zeros((3, 3, 3, 3))
+        D4[1, 1, 1, 1]=1
         D15=GFcalc.D4toNNN(D4)
         self.assertEqual(np.shape(D15), (15,))
-        self.assertEqual(D15[GFcalc.ExpToIndex[0,4,0]], 1)
+        self.assertEqual(D15[GFcalc.ExpToIndex[0, 4, 0]], 1)
         for ind in xrange(15):
-            if ind != GFcalc.ExpToIndex[0,4,0]:
+            if ind != GFcalc.ExpToIndex[0, 4, 0]:
                 self.assertEqual(D15[ind], 0)
 
-        D4=np.zeros((3,3,3,3))
-        D4[0,0,0,1]=1
-        D4[0,0,1,0]=1
-        D4[0,1,0,0]=1
-        D4[1,0,0,0]=1
+        D4=np.zeros((3, 3, 3, 3))
+        D4[0, 0, 0, 1]=1
+        D4[0, 0, 1, 0]=1
+        D4[0, 1, 0, 0]=1
+        D4[1, 0, 0, 0]=1
         D15=GFcalc.D4toNNN(D4)
         self.assertEqual(np.shape(D15), (15,))
-        self.assertEqual(D15[GFcalc.ExpToIndex[3,1,0]], 4)
+        self.assertEqual(D15[GFcalc.ExpToIndex[3, 1, 0]], 4)
         for ind in xrange(15):
-            if ind != GFcalc.ExpToIndex[3,1,0]:
+            if ind != GFcalc.ExpToIndex[3, 1, 0]:
                 self.assertEqual(D15[ind], 0)
 
-        D4=np.zeros((3,3,3,3))
+        D4=np.zeros((3, 3, 3, 3))
         for a in xrange(3):
             for b in xrange(3):
                 for c in xrange(3):
                     for d in xrange(3):
-                        D4[a,b,c,d] = 2 + a+3*b+9*c+27*d
+                        D4[a, b, c, d] = 2 + a+3*b+9*c+27*d
         D15=GFcalc.D4toNNN(D4)
         x=np.array((0.23454, -1.24, 2.03))
         self.assertAlmostEqual(np.dot(D15, GFcalc.powereval(x)),
@@ -357,32 +358,32 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         equality for some arbitrary vector.
         """
         di = np.array([0.5, 1., 2.])
-        ei = np.array([[np.sqrt(0.5), np.sqrt(0.5),0],
-                       [np.sqrt(1./6.),-np.sqrt(1./6.),np.sqrt(2./3.)],
-                       [np.sqrt(1./3.),-np.sqrt(1./3.),-np.sqrt(1./3.)]])
+        ei = np.array([[np.sqrt(0.5), np.sqrt(0.5), 0],
+                       [np.sqrt(1./6.), -np.sqrt(1./6.), np.sqrt(2./3.)],
+                       [np.sqrt(1./3.), -np.sqrt(1./3.), -np.sqrt(1./3.)]])
 
-        D4=np.zeros((3,3,3,3))
-        D4[0,0,0,0]=1
+        D4=np.zeros((3, 3, 3, 3))
+        D4[0, 0, 0, 0]=1
         Drot4 = GFcalc.RotateD4(D4, di, ei)
-        self.assertEqual(np.shape(Drot4),(3,3,3,3))
+        self.assertEqual(np.shape(Drot4),(3, 3, 3, 3))
         for a in xrange(3):
-            self.assertAlmostEqual(Drot4[a,a,a,a],
+            self.assertAlmostEqual(Drot4[a, a, a, a],
                                    GFcalc.eval4(ei[a]/np.sqrt(di[a]), D4))
         q = np.array([1,-0.5, -0.25])
         pi, pnorm = GFcalc.pnorm(di, ei, q)
         self.assertAlmostEqual(GFcalc.eval4(pi, Drot4)*(pnorm**4),
                                GFcalc.eval4(q, D4))
 
-        D4=np.zeros((3,3,3,3))
-        D4[0,0,0,1]=0.25
-        D4[0,0,1,0]=0.25
-        D4[0,1,0,0]=0.25
-        D4[1,0,0,0]=0.25
-        D4[2,2,2,2]=-4
+        D4=np.zeros((3, 3, 3, 3))
+        D4[0, 0, 0, 1]=0.25
+        D4[0, 0, 1, 0]=0.25
+        D4[0, 1, 0, 0]=0.25
+        D4[1, 0, 0, 0]=0.25
+        D4[2, 2, 2, 2]=-4
         Drot4 = GFcalc.RotateD4(D4, di, ei)
-        self.assertEqual(np.shape(Drot4),(3,3,3,3))
+        self.assertEqual(np.shape(Drot4),(3, 3, 3, 3))
         for a in xrange(3):
-            self.assertAlmostEqual(Drot4[a,a,a,a],
+            self.assertAlmostEqual(Drot4[a, a, a, a],
                                    GFcalc.eval4(ei[a]/np.sqrt(di[a]), D4),
                                    msg="index {}".format(a))
         self.assertAlmostEqual(GFcalc.eval4(pi, Drot4)*(pnorm**4),
@@ -394,62 +395,62 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         # The sum of the 3 15x15 matrices must be the identity matrix
         for i in xrange(15):
             for j in xrange(15):
-                if i==j:
-                    self.assertAlmostEqual(sum(GFcalc.PowerFT[:,i,j]),1,
-                                           msg="Checking {},{}".format(i,j))
+                if i == j:
+                    self.assertAlmostEqual(sum(GFcalc.PowerFT[:,i, j]),1,
+                                           msg="Checking {},{}".format(i, j))
                 else:
-                    self.assertAlmostEqual(sum(GFcalc.PowerFT[:,i,j]),0,
-                                           msg="Checking {},{}".format(i,j))
+                    self.assertAlmostEqual(sum(GFcalc.PowerFT[:,i, j]),0,
+                                           msg="Checking {},{}".format(i, j))
 
         for i in xrange(15):
             if tuple(GFcalc.PowerExpansion[i]).count(1) > 0:
                 # No l=0 entries for any indices containing 1
-                self.assertTrue(np.all(GFcalc.PowerFT[0,:,i]==0),
+                self.assertTrue(np.all(GFcalc.PowerFT[0, :, i] == 0),
                                 msg="Checking {}".format(i))
-                self.assertTrue(np.all(GFcalc.PowerFT[0,i,:]==0),
+                self.assertTrue(np.all(GFcalc.PowerFT[0, i, :] == 0),
                                 msg="Checking {}".format(i))
                 for j in xrange(15):
                     if tuple(GFcalc.PowerExpansion[j]).count(1) == 0:
-                        self.assertTrue(np.all(GFcalc.PowerFT[:,i,j]==0),
-                                        msg="Checking {},{}".format(i,j))
-                        self.assertTrue(np.all(GFcalc.PowerFT[:,j,i]==0),
-                                        msg="Checking {},{}".format(i,j))
+                        self.assertTrue(np.all(GFcalc.PowerFT[:, i, j]==0),
+                                        msg="Checking {},{}".format(i, j))
+                        self.assertTrue(np.all(GFcalc.PowerFT[:, j, i]==0),
+                                        msg="Checking {},{}".format(i, j))
             else:
                 for j in xrange(15):
                     # No mixing between those containing 1 and those not,
                     # but full for those without any 1's.
                     if tuple(GFcalc.PowerExpansion[j]).count(1) > 0:
-                        self.assertTrue(np.all(GFcalc.PowerFT[:,i,j]==0),
-                                        msg="Checking {},{}".format(i,j))
-                        self.assertTrue(np.all(GFcalc.PowerFT[:,j,i]==0),
-                                        msg="Checking {},{}".format(i,j))
+                        self.assertTrue(np.all(GFcalc.PowerFT[:, i, j]==0),
+                                        msg="Checking {},{}".format(i, j))
+                        self.assertTrue(np.all(GFcalc.PowerFT[:, j, i]==0),
+                                        msg="Checking {},{}".format(i, j))
                     else:
-                        self.assertFalse(np.any(GFcalc.PowerFT[:,i,j]==0),
-                                         msg="Checking {},{}".format(i,j))
-                        self.assertFalse(np.any(GFcalc.PowerFT[:,j,i]==0),
-                                         msg="Checking {},{}".format(i,j))
+                        self.assertFalse(np.any(GFcalc.PowerFT[:, i, j]==0),
+                                         msg="Checking {},{}".format(i, j))
+                        self.assertFalse(np.any(GFcalc.PowerFT[:, j, i]==0),
+                                         msg="Checking {},{}".format(i, j))
         # check against mixing between the <013>/<031>/<211>
-        for v1 in ( (0,1,3), (0,3,1), (2,1,1) ):
+        for v1 in ( (0, 1, 3), (0, 3, 1), (2, 1, 1) ):
             for s1 in xrange(3):
-                in1 = GFcalc.ExpToIndex[GFcalc.rotatetuple(v1,s1)]
-                for v2 in ( (0,1,3), (0,3,1), (2,1,1) ):
+                in1 = GFcalc.ExpToIndex[GFcalc.rotatetuple(v1, s1)]
+                for v2 in ( (0, 1, 3), (0, 3, 1), (2, 1, 1) ):
                     for s2 in xrange(s1):
-                        in2 = GFcalc.ExpToIndex[GFcalc.rotatetuple(v2,s2)]
+                        in2 = GFcalc.ExpToIndex[GFcalc.rotatetuple(v2, s2)]
                         for l in xrange(3):
                             self.assertEqual(0, GFcalc.PowerFT[l, in1, in2],
-                                             msg="Checking {} {},{} {}".format(v1,s1,v2,s2))
+                                             msg="Checking {} {},{} {}".format(v1, s1, v2, s2))
 
     def test15x15FourierIsotropic(self):
         """Tests that the 3x15x15 matrix has the values we'd expect, above and beyond the symmetries.
         First case is isotropic; should come out isotropic (only l=0 term).        
         """
         D15 = np.zeros(15)
-        D15[GFcalc.ExpToIndex[4,0,0]]=1
-        D15[GFcalc.ExpToIndex[0,4,0]]=1
-        D15[GFcalc.ExpToIndex[0,0,4]]=1
-        D15[GFcalc.ExpToIndex[0,2,2]]=2
-        D15[GFcalc.ExpToIndex[2,0,2]]=2
-        D15[GFcalc.ExpToIndex[2,2,0]]=2
+        D15[GFcalc.ExpToIndex[4, 0, 0]]=1
+        D15[GFcalc.ExpToIndex[0, 4, 0]]=1
+        D15[GFcalc.ExpToIndex[0, 0, 4]]=1
+        D15[GFcalc.ExpToIndex[0, 2, 2]]=2
+        D15[GFcalc.ExpToIndex[2, 0, 2]]=2
+        D15[GFcalc.ExpToIndex[2, 2, 0]]=2
 
         D15_0 = np.dot(GFcalc.PowerFT[0], D15)
         D15_2 = np.dot(GFcalc.PowerFT[1], D15)
@@ -462,36 +463,36 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
     def test15x15FourierValues(self):
         """Tests that the 3x15x15 matrix has the values we'd expect, above and beyond the symmetries."""
         D15 = np.zeros(15)
-        D15[GFcalc.ExpToIndex[0,0,4]]=1
-        D15[GFcalc.ExpToIndex[0,4,0]]=2
-        D15[GFcalc.ExpToIndex[4,0,0]]=3
-        D15[GFcalc.ExpToIndex[2,2,0]]=4
-        D15[GFcalc.ExpToIndex[2,0,2]]=5
-        D15[GFcalc.ExpToIndex[0,2,2]]=6
+        D15[GFcalc.ExpToIndex[0, 0, 4]]=1
+        D15[GFcalc.ExpToIndex[0, 4, 0]]=2
+        D15[GFcalc.ExpToIndex[4, 0, 0]]=3
+        D15[GFcalc.ExpToIndex[2, 2, 0]]=4
+        D15[GFcalc.ExpToIndex[2, 0, 2]]=5
+        D15[GFcalc.ExpToIndex[0, 2, 2]]=6
 
-        D15[GFcalc.ExpToIndex[0,1,3]]=7
-        D15[GFcalc.ExpToIndex[0,3,1]]=8
-        D15[GFcalc.ExpToIndex[2,1,1]]=9
+        D15[GFcalc.ExpToIndex[0, 1, 3]]=7
+        D15[GFcalc.ExpToIndex[0, 3, 1]]=8
+        D15[GFcalc.ExpToIndex[2, 1, 1]]=9
 
-        D15[GFcalc.ExpToIndex[1,0,3]]=10
-        D15[GFcalc.ExpToIndex[3,0,1]]=11
-        D15[GFcalc.ExpToIndex[1,2,1]]=12
+        D15[GFcalc.ExpToIndex[1, 0, 3]]=10
+        D15[GFcalc.ExpToIndex[3, 0, 1]]=11
+        D15[GFcalc.ExpToIndex[1, 2, 1]]=12
 
-        D15[GFcalc.ExpToIndex[1,3,0]]=13
-        D15[GFcalc.ExpToIndex[3,1,0]]=14
-        D15[GFcalc.ExpToIndex[1,1,2]]=15
+        D15[GFcalc.ExpToIndex[1, 3, 0]]=13
+        D15[GFcalc.ExpToIndex[3, 1, 0]]=14
+        D15[GFcalc.ExpToIndex[1, 1, 2]]=15
 
         # result, from Mathematica (l=0)
         #{ 11/5, 11/5, 11/5,
         #  22/5, 22/5, 22/5,
         #  0,0,0, 0,0,0, 0,0,0 }
         D15_test = np.zeros(15)
-        D15_test[GFcalc.ExpToIndex[0,0,4]]=11./5.
-        D15_test[GFcalc.ExpToIndex[0,4,0]]=11./5.
-        D15_test[GFcalc.ExpToIndex[4,0,0]]=11./5.
-        D15_test[GFcalc.ExpToIndex[2,2,0]]=22./5.
-        D15_test[GFcalc.ExpToIndex[2,0,2]]=22./5.
-        D15_test[GFcalc.ExpToIndex[0,2,2]]=22./5.
+        D15_test[GFcalc.ExpToIndex[0, 0, 4]]=11./5.
+        D15_test[GFcalc.ExpToIndex[0, 4, 0]]=11./5.
+        D15_test[GFcalc.ExpToIndex[4, 0, 0]]=11./5.
+        D15_test[GFcalc.ExpToIndex[2, 2, 0]]=22./5.
+        D15_test[GFcalc.ExpToIndex[2, 0, 2]]=22./5.
+        D15_test[GFcalc.ExpToIndex[0, 2, 2]]=22./5.
 
         D15_0 = np.dot(GFcalc.PowerFT[0], D15)
         for i in xrange(15):
@@ -504,24 +505,24 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         #   75/7, 75/7, 75/7,
         #   96/7, 96/7, 96/7}
         D15_test = np.zeros(15)
-        D15_test[GFcalc.ExpToIndex[0,0,4]]=-5./7.
-        D15_test[GFcalc.ExpToIndex[0,4,0]]=0.
-        D15_test[GFcalc.ExpToIndex[4,0,0]]=5./7.
-        D15_test[GFcalc.ExpToIndex[2,2,0]]=5./7.
-        D15_test[GFcalc.ExpToIndex[2,0,2]]=0
-        D15_test[GFcalc.ExpToIndex[0,2,2]]=-5./7.
+        D15_test[GFcalc.ExpToIndex[0, 0, 4]]=-5./7.
+        D15_test[GFcalc.ExpToIndex[0, 4, 0]]=0.
+        D15_test[GFcalc.ExpToIndex[4, 0, 0]]=5./7.
+        D15_test[GFcalc.ExpToIndex[2, 2, 0]]=5./7.
+        D15_test[GFcalc.ExpToIndex[2, 0, 2]]=0
+        D15_test[GFcalc.ExpToIndex[0, 2, 2]]=-5./7.
 
-        D15_test[GFcalc.ExpToIndex[0,1,3]]=54./7.
-        D15_test[GFcalc.ExpToIndex[0,3,1]]=54./7.
-        D15_test[GFcalc.ExpToIndex[2,1,1]]=54./7.
+        D15_test[GFcalc.ExpToIndex[0, 1, 3]]=54./7.
+        D15_test[GFcalc.ExpToIndex[0, 3, 1]]=54./7.
+        D15_test[GFcalc.ExpToIndex[2, 1, 1]]=54./7.
 
-        D15_test[GFcalc.ExpToIndex[1,0,3]]=75./7.
-        D15_test[GFcalc.ExpToIndex[3,0,1]]=75./7.
-        D15_test[GFcalc.ExpToIndex[1,2,1]]=75./7.
+        D15_test[GFcalc.ExpToIndex[1, 0, 3]]=75./7.
+        D15_test[GFcalc.ExpToIndex[3, 0, 1]]=75./7.
+        D15_test[GFcalc.ExpToIndex[1, 2, 1]]=75./7.
 
-        D15_test[GFcalc.ExpToIndex[1,3,0]]=96./7.
-        D15_test[GFcalc.ExpToIndex[3,1,0]]=96./7.
-        D15_test[GFcalc.ExpToIndex[1,1,2]]=96./7.
+        D15_test[GFcalc.ExpToIndex[1, 3, 0]]=96./7.
+        D15_test[GFcalc.ExpToIndex[3, 1, 0]]=96./7.
+        D15_test[GFcalc.ExpToIndex[1, 1, 2]]=96./7.
 
         D15_2 = np.dot(GFcalc.PowerFT[1], D15)
         for i in xrange(15):
@@ -534,24 +535,24 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         #  -5/7, 2/7, 9/7,
         #  -5/7, 2/7, 9/7}
         D15_test = np.zeros(15)
-        D15_test[GFcalc.ExpToIndex[0,0,4]]=-17./35.
-        D15_test[GFcalc.ExpToIndex[0,4,0]]=-1./5.
-        D15_test[GFcalc.ExpToIndex[4,0,0]]=3/35.
-        D15_test[GFcalc.ExpToIndex[2,2,0]]=-39./35.
-        D15_test[GFcalc.ExpToIndex[2,0,2]]=3./5.
-        D15_test[GFcalc.ExpToIndex[0,2,2]]=81./35.
+        D15_test[GFcalc.ExpToIndex[0, 0, 4]]=-17./35.
+        D15_test[GFcalc.ExpToIndex[0, 4, 0]]=-1./5.
+        D15_test[GFcalc.ExpToIndex[4, 0, 0]]=3/35.
+        D15_test[GFcalc.ExpToIndex[2, 2, 0]]=-39./35.
+        D15_test[GFcalc.ExpToIndex[2, 0, 2]]=3./5.
+        D15_test[GFcalc.ExpToIndex[0, 2, 2]]=81./35.
 
-        D15_test[GFcalc.ExpToIndex[0,1,3]]=-5./7.
-        D15_test[GFcalc.ExpToIndex[0,3,1]]=2./7.
-        D15_test[GFcalc.ExpToIndex[2,1,1]]=9./7.
+        D15_test[GFcalc.ExpToIndex[0, 1, 3]]=-5./7.
+        D15_test[GFcalc.ExpToIndex[0, 3, 1]]=2./7.
+        D15_test[GFcalc.ExpToIndex[2, 1, 1]]=9./7.
 
-        D15_test[GFcalc.ExpToIndex[1,0,3]]=-5./7.
-        D15_test[GFcalc.ExpToIndex[3,0,1]]=2./7.
-        D15_test[GFcalc.ExpToIndex[1,2,1]]=9./7.
+        D15_test[GFcalc.ExpToIndex[1, 0, 3]]=-5./7.
+        D15_test[GFcalc.ExpToIndex[3, 0, 1]]=2./7.
+        D15_test[GFcalc.ExpToIndex[1, 2, 1]]=9./7.
 
-        D15_test[GFcalc.ExpToIndex[1,3,0]]=-5./7.
-        D15_test[GFcalc.ExpToIndex[3,1,0]]=2./7.
-        D15_test[GFcalc.ExpToIndex[1,1,2]]=9./7.
+        D15_test[GFcalc.ExpToIndex[1, 3, 0]]=-5./7.
+        D15_test[GFcalc.ExpToIndex[3, 1, 0]]=2./7.
+        D15_test[GFcalc.ExpToIndex[1, 1, 2]]=9./7.
 
         D15_4 = np.dot(GFcalc.PowerFT[2], D15)
         for i in xrange(15):
@@ -559,7 +560,7 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
 
     def testFourierIntergrals(self):
         """Tests for the three Fourier integrals, f0 f2 f4, that we'll use to construct the full FT."""
-        di = np.array((1,1,1))
+        di = np.array((1, 1, 1))
         ei = np.eye(3)
         pm = 0.5
 
@@ -567,7 +568,7 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         ui, umagn = GFcalc.unorm(di, ei, x)
         fi = GFcalc.discFT(di, umagn, pm)
         self.assertEqual(np.shape(fi), (3,))
-        self.assertListEqual(list(fi), [0,0,0])
+        self.assertListEqual(list(fi), [0, 0, 0])
 
         # Results using HyperGeometric functions:
         # 1/(pi^3/2 * u^3 * (d1 d2 d3)^1/2) (z/2)^(3+l) 1F1(3/2 + l/2, 3/2+l, -(z/2)^2)
@@ -576,17 +577,17 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         zhalf = 0.5*umagn*pm
         zhalf2 = zhalf*zhalf
         fi_0 = (1./(umagn*umagn*umagn*np.sqrt(np.product(np.pi*di)))*
-                np.array((zhalf**(3+0)*special.hyp1f1(0.5*(3+0),0.5*(3+2*0), -zhalf2),
-                          -zhalf**(3+2)*special.hyp1f1(0.5*(3+2),0.5*(3+2*2), -zhalf2),
-                          zhalf**(3+4)*special.hyp1f1(0.5*(3+4),0.5*(3+2*4), -zhalf2)
+                np.array((zhalf**(3+0)*special.hyp1f1(0.5*(3+0), 0.5*(3+2*0), -zhalf2),
+                          -zhalf**(3+2)*special.hyp1f1(0.5*(3+2), 0.5*(3+2*2), -zhalf2),
+                          zhalf**(3+4)*special.hyp1f1(0.5*(3+4), 0.5*(3+2*4), -zhalf2)
                           )))
         for l in xrange(3):
             self.assertAlmostEqual(fi[l], fi_0[l])
 
         di = np.array([0.91231, 1.123, 2.1231])
-        ei = np.array([[np.sqrt(0.5), np.sqrt(0.5),0],
-                       [np.sqrt(1./6.),-np.sqrt(1./6.),np.sqrt(2./3.)],
-                       [np.sqrt(1./3.),-np.sqrt(1./3.),-np.sqrt(1./3.)]])
+        ei = np.array([[np.sqrt(0.5), np.sqrt(0.5), 0],
+                       [np.sqrt(1./6.), -np.sqrt(1./6.), np.sqrt(2./3.)],
+                       [np.sqrt(1./3.), -np.sqrt(1./3.), -np.sqrt(1./3.)]])
         x = np.array([0.12, -0.51, 0.9123])
         ui, umagn = GFcalc.unorm(di, ei, x)
         fi = GFcalc.discFT(di, umagn, pm)
@@ -629,7 +630,7 @@ class KPTMeshTests(unittest.TestCase):
     def testKPTconstruct(self):
         """Can we construct a mesh with the correct number of points?"""
         # reset
-        self.kptmesh.genmesh((0,0,0))
+        self.kptmesh.genmesh((0, 0, 0))
         self.assertEqual(self.kptmesh.Nkpt, 0)
         self.kptmesh.genmesh(self.N)
         self.assertEqual(self.kptmesh.Nkpt, np.product(self.N))
@@ -644,9 +645,9 @@ class KPTMeshTests(unittest.TestCase):
         self.assertTrue(any( all((0, 0, np.pi)==x) for x in self.kptmesh.BZG ))
         self.assertTrue(any( all((0, 0, -np.pi)==x) for x in self.kptmesh.BZG ))
         self.assertFalse(any( all((0, 0, 0)==x) for x in self.kptmesh.BZG ))
-        vec = np.array((1,1,1))
+        vec = np.array((1, 1, 1))
         self.assertTrue(self.kptmesh.incell(vec))
-        vec = np.array((4,0,-4))
+        vec = np.array((4, 0, -4))
         self.assertFalse(self.kptmesh.incell(vec))
         
     def testKPT_fullmesh_points(self):
@@ -655,7 +656,7 @@ class KPTMeshTests(unittest.TestCase):
         kpts, wts = self.kptmesh.fullmesh()
         self.assertAlmostEqual(sum(wts), 1)
         self.assertAlmostEqual(wts[0], 1./self.kptmesh.Nkpt)
-        self.assertTrue(any( all((2.*np.pi/self.N[0],0,0)==x) for x in kpts ))
+        self.assertTrue(any( all((2.*np.pi/self.N[0],0,0) == x) for x in kpts ))
 
     def testKPT_insideBZ(self):
         """Do we only have points that are inside the BZ?"""
@@ -673,7 +674,7 @@ class KPTMeshTests(unittest.TestCase):
             self.assertAlmostEqual(abs(np.linalg.det(g)), 1)
         for i,g1 in enumerate(self.kptmesh.groupops):
             for g2 in self.kptmesh.groupops[:i]:
-                self.assertFalse(np.all(g1==g2),
+                self.assertFalse(np.all(g1 == g2),
                                  msg="Group operations {} and {} are duplicated in kptmesh".format(g1,g2))
             bgb = np.dot(binv, np.dot(g1, self.kptmesh.rlattice))
             self.assertTrue(np.all(bgb == np.round(bgb)))
