@@ -77,11 +77,9 @@ class KPTmesh:
         False if outside the BZ, True otherwise
         """
         if BZG==None: BZG=self.BZG
-        for G in BZG:
-            if np.all(vec == G): continue
-            if np.dot(vec, G) >= np.dot(G,G)-threshold: return False
-        return True
-        
+        # checks that vec.G < G^2 for all G (and throws out the option that vec == G, in case threshold == 0)
+        return all([ (np.dot(vec, G) < np.dot(G,G)+threshold) for G in BZG if not np.all(vec == G)])
+
     def genBZG(self):
         """
         Generates the reciprocal lattice G points that define the Brillouin zone.
