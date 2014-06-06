@@ -28,7 +28,7 @@ class KPTmesh:
         self.Nkpt = -1
         self.kptfull = np.array(((0)))
         self.genBZG()
-        if (Nmesh != (0,0,0)): self.genmesh(self, self.Nmesh)
+        if (Nmesh != (0,0,0)): self.genmesh(Nmesh)
 
     def genmesh(self, Nmesh):
         """
@@ -50,25 +50,36 @@ class KPTmesh:
         # use a list comprehension to iterate and build:
         self.kptfull = np.array([ np.dot(self.rlattice, (n0*dN[0], n1*dN[1], n2*dN[2]))
                                   for n0 in meshrange[0] for n1 in meshrange[1] for n2 in meshrange[2] ])
+        # run through list to ensure that all k-points are inside the BZ
+        Gmin = min([ np.dot(G,G) for G in self.BZG])
+        for i,k in enumerate(self.kptfull):
+            if np.dot(k,k)>=Gmin:
+                for G in self.BZG:
+                    if np.dot(k,G)>np.dot(G,G):
+                        k = k - 2.*G
+                self.kptfull[i] = k
 
-    def incell(self, BZG, vec):
+    def incell(self, vec, BZG=None, threshold=1e-5):
         """
         Tells us if vec is inside our set of defining points.
         
         Parameters
         ----------
-        G : array [:,3]
-            array of vectors that define the BZ
         vec : array [3]
             vector to be tested
-            
+        BGZ : array [:,3], optional (default = self.BZG)
+            array of vectors that define the BZ
+        threshold : double, options
+            threshold to use for "equality"
+
         Returns
         -------
         False if outside the BZ, True otherwise
         """
+        if BZG==None: BZG=self.BZG
         for G in BZG:
             if np.all(vec == G): continue
-            if np.dot(vec, G) >= np.dot(G,G): return False
+            if np.dot(vec, G) >= np.dot(G,G)-threshold: return False
         return True
         
     def genBZG(self):
@@ -83,9 +94,9 @@ class KPTmesh:
                 for nv[2] in xrange(-3,4):
                     if nv==[0,0,0]: continue
                     vec = np.dot(self.lattice, nv)
-                    if self.incell(BZG, vec): BZG.append(np.dot(self.rlattice, nv))
+                    if self.incell(vec, BZG, threshold=0): BZG.append(np.dot(self.rlattice, nv))
         # ... and use a list comprehension to only keep those that still remain
-        self.BZG = np.array([0.5*vec for vec in BZG if self.incell(BZG,vec)])
+        self.BZG = np.array([0.5*vec for vec in BZG if self.incell(vec, BZG, threshold=0)])
         
     def fullmesh(self):
         """

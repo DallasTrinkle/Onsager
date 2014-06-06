@@ -645,9 +645,9 @@ class KPTMeshTests(unittest.TestCase):
         self.assertTrue(any( all((0,0,-np.pi)==x) for x in self.kptmesh.BZG ))
         self.assertFalse(any( all((0,0,0)==x) for x in self.kptmesh.BZG ))
         vec = np.array((1,1,1))
-        self.assertTrue(self.kptmesh.incell(self.kptmesh.BZG, vec))
+        self.assertTrue(self.kptmesh.incell(vec))
         vec = np.array((4,0,-4))
-        self.assertFalse(self.kptmesh.incell(self.kptmesh.BZG, vec))
+        self.assertFalse(self.kptmesh.incell(vec))
         
     def testKPT_fullmesh_points(self):
         """Are the points in the k-point mesh that we expect to see?"""
@@ -656,6 +656,15 @@ class KPTMeshTests(unittest.TestCase):
         self.assertAlmostEqual(sum(wts), 1)
         self.assertAlmostEqual(wts[0], 1./self.kptmesh.Nkpt)
         self.assertTrue(any( all((2.*np.pi/self.N[0],0,0)==x) for x in kpts ))
+
+    def testKPT_insideBZ(self):
+        """Do we only have points that are inside the BZ?"""
+        self.kptmesh.genmesh(self.N)
+        kpts, wts = self.kptmesh.fullmesh()
+        for q in kpts:
+            self.assertTrue(self.kptmesh.incell(q),
+                            msg="Failed with vector {} not in BZ".format(q))
+
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.
