@@ -637,13 +637,13 @@ class KPTMeshTests(unittest.TestCase):
     def testKPT_BZ_Gpoints(self):
         """Do we have the correct G points that define the BZ?"""
         self.assertEqual(np.shape(self.kptmesh.BZG), (6,3))
-        self.assertTrue(any( all((np.pi,0,0)==x) for x in self.kptmesh.BZG ))
-        self.assertTrue(any( all((-np.pi,0,0)==x) for x in self.kptmesh.BZG ))
-        self.assertTrue(any( all((0,np.pi,0)==x) for x in self.kptmesh.BZG ))
-        self.assertTrue(any( all((0,-np.pi,0)==x) for x in self.kptmesh.BZG ))
-        self.assertTrue(any( all((0,0,np.pi)==x) for x in self.kptmesh.BZG ))
-        self.assertTrue(any( all((0,0,-np.pi)==x) for x in self.kptmesh.BZG ))
-        self.assertFalse(any( all((0,0,0)==x) for x in self.kptmesh.BZG ))
+        self.assertTrue(any( all((np.pi, 0, 0)==x) for x in self.kptmesh.BZG ))
+        self.assertTrue(any( all((-np.pi, 0, 0)==x) for x in self.kptmesh.BZG ))
+        self.assertTrue(any( all((0, np.pi, 0)==x) for x in self.kptmesh.BZG ))
+        self.assertTrue(any( all((0, -np.pi, 0)==x) for x in self.kptmesh.BZG ))
+        self.assertTrue(any( all((0, 0, np.pi)==x) for x in self.kptmesh.BZG ))
+        self.assertTrue(any( all((0, 0, -np.pi)==x) for x in self.kptmesh.BZG ))
+        self.assertFalse(any( all((0, 0, 0)==x) for x in self.kptmesh.BZG ))
         vec = np.array((1,1,1))
         self.assertTrue(self.kptmesh.incell(vec))
         vec = np.array((4,0,-4))
@@ -666,14 +666,17 @@ class KPTMeshTests(unittest.TestCase):
                             msg="Failed with vector {} not in BZ".format(q))
 
     def testKPT_symmetry(self):
-        """Do we have the correct number of point group operations? Are they unique?"""
+        """Do we have the correct number of point group operations? Are they unique? Are they symmetries?"""
         self.assertEqual(np.shape(self.kptmesh.groupops), (48,3,3))
+        binv = np.linalg.inv(self.kptmesh.rlattice)
         for g in self.kptmesh.groupops:
             self.assertAlmostEqual(abs(np.linalg.det(g)), 1)
         for i,g1 in enumerate(self.kptmesh.groupops):
             for g2 in self.kptmesh.groupops[:i]:
                 self.assertFalse(np.all(g1==g2),
                                  msg="Group operations {} and {} both found in kptmesh".format(g1,g2))
+            bgb = np.dot(binv, np.dot(g1, self.kptmesh.rlattice))
+            self.assertTrue(np.all(bgb == np.round(bgb)))
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.
