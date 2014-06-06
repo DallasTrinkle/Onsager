@@ -117,7 +117,7 @@ class KPTmesh:
             wsym += wtlist
             kmin=kmax
         self.kptsym = np.array(kptsym)
-        self.wsym = np.array(wtlist)
+        self.wsym = np.array(wsym)
         self.Nkptsym = np.size(self.wsym)
 
     def gengroupops(self, threshold=1e-8):

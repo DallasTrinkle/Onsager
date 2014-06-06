@@ -674,25 +674,31 @@ class KPTMeshTests(unittest.TestCase):
         for i,g1 in enumerate(self.kptmesh.groupops):
             for g2 in self.kptmesh.groupops[:i]:
                 self.assertFalse(np.all(g1==g2),
-                                 msg="Group operations {} and {} both found in kptmesh".format(g1,g2))
+                                 msg="Group operations {} and {} are duplicated in kptmesh".format(g1,g2))
             bgb = np.dot(binv, np.dot(g1, self.kptmesh.rlattice))
             self.assertTrue(np.all(bgb == np.round(bgb)))
 
     def testKPT_IRZ(self):
-        """Do we produce a correct reduction irreducible wedge?"""
+        """Do we produce a correct irreducible wedge?"""
         self.kptmesh.genmesh(self.N)
         kpts, wts = self.kptmesh.symmesh()
         self.assertAlmostEqual(sum(wts), 1)
         for i, k in enumerate(kpts):
             # We want to determine what the weight for each point should be, and compare
-            basewt = 1./self.kptmesh.Nkpt
-            sortk = sorted(k)
-            basewt *= (2**(3-list(k).count(0)))
-            if sortk[0] != sortk[1] and sortk[1] != sortk[2]:
-                basewt *= 6
-            elif sortk[0] != sortk[1] or sortk[1] != sortk[2]:
-                basewt *= 2
-            self.assertAlmostEqual(basewt, wts[i])
+            # dealing with the BZ edges is complicated; so we skip that in our tests
+            if all([np.dot(k, G)<(np.dot(G, G)-1e-8) for G in self.kptmesh.BZG]):
+                basewt = 1./self.kptmesh.Nkpt
+                sortk = sorted(k)
+                basewt *= (2**(3-list(k).count(0)))
+                if sortk[0] != sortk[1] and sortk[1] != sortk[2]:
+                    basewt *= 6
+                elif sortk[0] != sortk[1] or sortk[1] != sortk[2]:
+                    basewt *= 3
+                self.assertAlmostEqual(basewt, wts[i])
+        # integration test
+        kptfull, wtfull = self.kptmesh.fullmesh()
+        self.assertAlmostEqual(sum(wtfull*[np.cos(sum(k)) for k in kptfull]),
+                               sum(wts*[np.cos(sum(k)) for k in kpts]))
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.
