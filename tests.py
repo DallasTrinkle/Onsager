@@ -702,6 +702,21 @@ class KPTMeshTests(unittest.TestCase):
         self.assertNotAlmostEquals(sum(wtfull*[np.cos(k[0]) for k in kptfull]),
                                    sum(wts*[np.cos(k[0]) for k in kpts]))
 
+    def testKPT_integration(self):
+        """Do we get integral values that we expect? 1/(2pi)^3 int cos(kx+ky+kz)^3 = 1/2"""
+        self.kptmesh.genmesh(self.N)
+        kptfull, wtfull = self.kptmesh.fullmesh()
+        kpts, wts = self.kptmesh.symmesh()
+        self.assertAlmostEqual(sum(wtfull*[np.cos(sum(k))**2 for k in kptfull]), 0.5)
+        self.assertAlmostEqual(sum(wts*[np.cos(sum(k))**2 for k in kpts]), 0.5)
+        self.assertAlmostEqual(sum(wtfull*[np.cos(sum(k)) for k in kptfull]), 0)
+        self.assertAlmostEqual(sum(wts*[np.cos(sum(k)) for k in kpts]), 0)
+        # Note: below we have the true values of the integral, but these should disagree
+        # due to numerical error.
+        self.assertNotAlmostEqual(sum(wtfull*[sum(k)**2 for k in kptfull]), 9.8696044010893586188)
+        self.assertNotAlmostEqual(sum(wts*[sum(k)**2 for k in kpts]), 9.8696044010893586188)
+
+
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.
 import doctest
