@@ -668,6 +668,8 @@ class KPTMeshTests(unittest.TestCase):
     def testKPT_symmetry(self):
         """Do we have the correct number of point group operations? Are they unique?"""
         self.assertEqual(np.shape(self.kptmesh.groupops), (48,3,3))
+        for g in self.kptmesh.groupops:
+            self.assertAlmostEqual(abs(np.linalg.det(g)), 1)
         for i,g1 in enumerate(self.kptmesh.groupops):
             for g2 in self.kptmesh.groupops[:i]:
                 self.assertFalse(np.all(g1==g2),

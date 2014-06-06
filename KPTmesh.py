@@ -68,14 +68,38 @@ class KPTmesh:
 
     def gengroupops(self, threshold=1e-8):
         """
-        Generates the point group operations, given the reciprocal lattice vectors.
+        Generates the point group operations (stored in cartesian coord), given the reciprocal lattice vectors.
 
         Parameters
         ----------
         threshold : double, optional
             threshold for equality in generating point group operations
+
+        Notes
+        -----
+        The principle of the algorithm rests on a simple idea: a point group operation can be expressed
+        as a "supercell" of size 1 (which means an integer, idempotent matrix), and an orthogonal matrix
+        (a "rotation", so its transpose is its inverse). Then, if g is a potential op,
+        g.[b] = [b].n
+        where n is an integer, idempotent matrix and g is an orthogonal matrix. We generate all possible
+        integer, idempotent n matrices, construct g, and test for orthogonality.
         """
-        self.groupops = np.array([np.eye(3)]*48)
+        groupops = []
+        invrlatt = np.linalg.inv(self.rlattice)
+        supercellvect = [np.array((n0, n1, n2))
+                         for n0 in xrange(-1, 2)
+                         for n1 in xrange(-1, 2)
+                         for n2 in xrange(-1, 2)
+                         if (n0, n1, n2) != (0, 0, 0)]
+        for g in [np.dot(self.rlattice, np.dot(nmat, invrlatt))
+                  for nmat in [np.array((n0, n1, n2))
+                               for n0 in supercellvect
+                               for n1 in supercellvect
+                               for n2 in supercellvect]
+                  if abs(np.linalg.det(nmat))==1]:
+            if np.all(abs(np.dot(g.T, g)-np.eye(3))<threshold):
+                groupops.append(g)
+        self.groupops = np.array(groupops)
 
     def incell(self, vec, BZG=None, threshold=1e-5):
         """
