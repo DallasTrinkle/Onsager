@@ -727,6 +727,18 @@ class KPTMeshTests(unittest.TestCase):
         self.assertNotAlmostEqual(sum(wts * [sum(k) ** 2 for k in kpts]), 9.8696044010893586188)
 
 
+class GFCalcObjectTests(unittest.TestCase):
+    """Set of tests for our GF-calculation class"""
+
+    def setUp(self):
+        self.GF = GFcalc.GFcalc(FCClatt.NNvect,
+                                np.array((1,) * 12))
+
+    def testGFclassexists(self):
+        """Does it exist?"""
+        self.assertIsInstance(self.GF, GFcalc.GFcalc)
+
+
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.
 import doctest

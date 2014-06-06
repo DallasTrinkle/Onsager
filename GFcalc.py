@@ -538,3 +538,18 @@ def ConstructPowerFT():
 
 
 PowerFT = ConstructPowerFT()
+
+
+class GFcalc:
+    def __init__(self, NNvect, rates):
+        """
+        Initialize GF calculator with NN vector lists and rates
+
+        Parameter
+        ---------
+        NNvect : array [:, 3]
+            list of nearest-neighbor vectors
+        rates : array [:]
+            list of escape rates
+        """
+        pass
