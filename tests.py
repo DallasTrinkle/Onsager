@@ -699,6 +699,8 @@ class KPTMeshTests(unittest.TestCase):
         kptfull, wtfull = self.kptmesh.fullmesh()
         self.assertAlmostEqual(sum(wtfull*[np.cos(sum(k)) for k in kptfull]),
                                sum(wts*[np.cos(sum(k)) for k in kpts]))
+        self.assertNotAlmostEquals(sum(wtfull*[np.cos(k[0]) for k in kptfull]),
+                                   sum(wts*[np.cos(k[0]) for k in kpts]))
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.
