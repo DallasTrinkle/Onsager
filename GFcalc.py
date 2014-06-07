@@ -14,6 +14,7 @@ remaining function can be numerically inverse fourier transformed.
 import numpy as np
 import scipy as sp
 from scipy import special
+import KPTmesh
 
 
 def DFTfunc(NNvect, rates):
@@ -541,18 +542,42 @@ PowerFT = ConstructPowerFT()
 
 
 class GFcalc:
-    def __init__(self, NNvect, rates):
+    def __init__(self, lattice, NNvect, rates, Nmax = 4):
         """
         Initialize GF calculator with NN vector lists and rates
 
         Parameters
         ----------
+        lattice : array [:, :]
+            lattice vectors defining periodicity; a[:,i] = coordinates of lattice vector a_i.
         NNvect : array [:, 3]
             list of nearest-neighbor vectors
         rates : array [:]
             list of escape rates
+        Nmax : integer, optional
+            how far out will we evaluate our GF? This determines the KPTmesh that will be used.
+
+        Notes
+        -----
+        The Green Function calculator has a few support pieces for the calculation:
+        * kpoint mesh (symmetrized to inside the irreducible wedge)
+        * point group operations
+        * D-FT function calculation, with 2nd and 4th derivatives
+        * cached version of G calculated for stars
         """
-        pass
+        self.lattice = lattice
+        self.NNvect = NNvect
+        self.rates = rates
+        self.kptmesh = KPTmesh.KPTmesh(lattice)
+        # NOTE: as [b] = [a]^-T, the Cartesian group operations in reciprocal space
+        # match real space, so we can piggy-back on the KPTmesh calculation of same
+        self.groupops = self.kptmesh.groupops
+        self.DFT = DFTfunc(NNvect, rates)
+        self.D2 = D2(NNvect, rates)
+        self.D4 = D4(NNvect, rates)
+        self.di, self.ei = calcDE(self.D2)
+        # determine pmax
+        # determine k-point mesh
 
     def GF(self, R):
         """

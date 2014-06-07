@@ -13,6 +13,7 @@ class LatticeTests(unittest.TestCase):
     """Set of tests that our lattice code is behaving correctly"""
 
     def setUp(self):
+        self.lattice = FCClatt.lattice()
         self.NNvect = FCClatt.NNvect()
         self.invlist = FCClatt.invlist(self.NNvect)
 
@@ -23,6 +24,7 @@ class LatticeTests(unittest.TestCase):
     def testFCCinversioncount(self):
         """Right dimensions for matrices?"""
         self.assertEqual(np.shape(self.NNvect)[0], np.shape(self.invlist)[0])
+        self.assertEqual(np.shape(self.lattice), (3, 3))
 
     def testFCCbasic(self):
         """Do we have the right <110> nearest neighbor vectors for FCC?"""
@@ -39,6 +41,14 @@ class LatticeTests(unittest.TestCase):
         """Check that for each NN vector, we have its inverse too, from invlist"""
         for k1, k2 in enumerate(self.invlist):
             self.assertTrue(all(self.NNvect[k1] == -self.NNvect[k2]))
+
+    def testNNvectlatticevect(self):
+        """Check that our NN vectors are all lattice vectors"""
+        invlatt = np.linalg.inv(self.lattice)
+        for vec in self.NNvect:
+            uvec = np.dot(invlatt, vec)
+            for d in xrange(3):
+                self.assertAlmostEqual(uvec[d], round(uvec[d]))
 
 # At some point, we'll probably want to included point group operations, and appropriate tests...
 
@@ -731,9 +741,11 @@ class GFCalcObjectTests(unittest.TestCase):
     """Set of tests for our GF-calculation class"""
 
     def setUp(self):
+        # cell vectors for FCC:
+        self.lattice = FCClatt.lattice()
         self.NNvect = FCClatt.NNvect()
         self.rates = np.array((1,) * 12)
-        self.GF = GFcalc.GFcalc(self.NNvect, self.rates)
+        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
 
     def testGFclassexists(self):
         """Does it exist?"""

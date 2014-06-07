@@ -7,6 +7,21 @@ inverse indices.
 
 import numpy as np
 
+
+def lattice():
+    """
+    Constructs the FCC lattice vectors.
+
+    Returns
+    -------
+    a : array [:, :]
+        lattice vectors; a[:, i] = cartesian coordinates of vector a_i
+    """
+    return np.array(((0, 1, 1),
+                     (1, 0, 1),
+                     (1, 1, 0)),
+                    dtype=float)
+
 def NNvect():
     """
     Constructs the FCC <110> transition vectors.
@@ -16,12 +31,13 @@ def NNvect():
     NNvect : array [12, 3]
         nearest neighbor vectors
     """
-    return np.array([ (n0, n1, n2)
-                      for n0 in xrange(-1,2)
-                      for n1 in xrange(-1,2)
-                      for n2 in xrange(-1,2)
-                      if (n0, n1, n2) != (0, 0, 0) and (n0+n1+n2)%2 == 0],
+    return np.array([(n0, n1, n2)
+                     for n0 in xrange(-1, 2)
+                     for n1 in xrange(-1, 2)
+                     for n2 in xrange(-1, 2)
+                     if (n0, n1, n2) != (0, 0, 0) and (n0 + n1 + n2) % 2 == 0],
                     dtype=float)
+
 
 def invlist(NNvect):
     """
@@ -41,7 +57,7 @@ def invlist(NNvect):
     invlist = np.empty((z), dtype=int)
     for k1 in xrange(z):
         for k2 in xrange(z):
-            if all((NNvect[k1] + NNvect[k2]) == (0,0,0)) :
+            if all((NNvect[k1] + NNvect[k2]) == (0, 0, 0)):
                 invlist[k1] = k2
     return invlist
 
