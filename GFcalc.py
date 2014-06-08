@@ -576,12 +576,56 @@ class GFcalc:
         self.D2 = D2(NNvect, rates)
         self.D4 = D4(NNvect, rates)
         self.di, self.ei = calcDE(self.D2)
-        # determine pmax
-        # determine k-point mesh
+        # determine pmax: find largest p value at BZ faces, then
+        self.pmax = np.sqrt(max([eval2(G, self.D2) for G in self.kptmesh.BZG])/
+                            -np.log(1e-11))
+        self.Nmax = Nmax
+        self.Nmesh = [0, 0, 0] # we haven't constructed anything just yet; wait till first call.
+        self.Gcache = [] # our cached values
+
+    def calckR(self, R):
+        """
+        Calculates k.R for vector R. But it also does a few "behind-the-scenes" checks:
+        1. If the mesh doesn't even exist, we need to construct it.
+        2. If the mesh already exists, it may not be sufficient, which requires reconstruction
+        Mesh reconstruction uses Nmax and this value of R to make sure we're good. For best
+        results, Nmax should be a reasonable "upper limit," so that we only construct the mesh
+        once for a series of R's.
+        After we construct the mesh, we create space for Gsc, but leave it empty.
+
+        Parameters
+        ----------
+        R : array [3]
+            vector (cartesian) where we'll calculate k.R
+
+        Returns
+        -------
+        kR : array [:]
+            value of k.R for each k-point
+        """
+        # currently just creates space
+        self.Gsc = np.zeros(self.kptmesh.Nkptsym)
+        self.Gsc_calced = False
+        return np.array([0,]*self.kptmesh.Nkptsym)
+
+    def calcGsc(self):
+        """
+        Calculates the semi-continuum correction (G - second-order pole - discontinuity)
+
+        Checks first that we haven't already calculated this; if so, it does nothing.
+        Else, it calculated for every k-point in the irreducible wedge.
+        """
+        if self.Gsc_calced : return
+        for i, k in enumerate(self.kptmesh.symmesh()):
+            if np.dot(k) == 0:
+                self.Gsc[i] = 1./self.pmax**2
+            else:
+                self.Gsc[i] = 0
+        self.Gsc_calced = True
 
     def GF(self, R):
         """
-        Evaluate the GF at point R.
+        Evaluate the GF at point R. Takes advantage of caching with stars.
 
         Parameters
         ----------
@@ -593,4 +637,16 @@ class GFcalc:
         G : double
             GF at point R
         """
+        # check against the cache first:
+        # Gcache = [ [R.R, [R1, R2, ...], gvalue], ... ]
+        for gcache in [ gc for gc in self.Gcache if gc[0] == np.dot(R,R)]:
+            if any(np.all(abs(vec - R) < 1e-8) for vec in gcache[1]):
+                return gcache[2]
+        kR = self.calckR(R)
+        self.calcGsc() # in case we don't have a cached version of this (G-G2-G4)
+        # our steps are
+        # 0. calculate the IFT of Gsc
+        # 1. calculate the IFT of the 2nd order pole
+        # 2. calculate the IFT of the 4th otder pole
+        # 3. create a cached value, and return G.
         return 0
