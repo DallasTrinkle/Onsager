@@ -572,16 +572,20 @@ class GFcalc:
         # NOTE: as [b] = [a]^-T, the Cartesian group operations in reciprocal space
         # match real space, so we can piggy-back on the KPTmesh calculation of same
         self.groupops = self.kptmesh.groupops
+        self.volume = self.kptmesh.volume
         self.DFT = DFTfunc(NNvect, rates)
         self.D2 = D2(NNvect, rates)
-        self.D4 = D4(NNvect, rates)
         self.di, self.ei = calcDE(self.D2)
+        # get the rotated D15 (from D4) with p_i version, and FT version
+        self.D15 = D4toNNN(RotateD4(D4(NNvect, rates), self.di, self.ei))
+        self.D15FT = np.array([np.dot(PowerFT[i], self.D15) for i in xrange(3)])
         # determine pmax: find largest p value at BZ faces, then
         self.pmax = np.sqrt(max([eval2(G, self.D2) for G in self.kptmesh.BZG])/
                             -np.log(1e-11))
         self.Nmax = Nmax
         self.Nmesh = [0, 0, 0] # we haven't constructed anything just yet; wait till first call.
         self.Gcache = [] # our cached values
+        self.Gsc_calced = False
 
     def calckR(self, R):
         """
@@ -603,10 +607,19 @@ class GFcalc:
         kR : array [:]
             value of k.R for each k-point
         """
-        # currently just creates space
-        self.Gsc = np.zeros(self.kptmesh.Nkptsym)
-        self.Gsc_calced = False
-        return np.array([0,]*self.kptmesh.Nkptsym)
+        # determine if we need to recalculate everything
+        if self.Nmesh == [0, 0, 0]:
+            self.Nmesh = [4*self.Nmax, 4*self.Nmax, 4*self.Nmax]
+        if self.kptmesh.Nkpt < 0:
+            self.kptmesh.genmesh(self.Nmesh)
+            self.kptmesh.reducemesh()
+            self.Gsc = np.zeros(self.kptmesh.Nkptsym)
+            self.Gsc_calced = False
+        kR = np.array([np.dot(k, R) for k in self.kptmesh.symmesh()[0]])
+        # check that kR will not produce aliasing errors: that requires that the smallest
+        # non-zero value of k.R be smaller than pi/2
+        # ... check goes here.
+        return kR
 
     def calcGsc(self):
         """
@@ -616,11 +629,14 @@ class GFcalc:
         Else, it calculated for every k-point in the irreducible wedge.
         """
         if self.Gsc_calced : return
-        for i, k in enumerate(self.kptmesh.symmesh()):
-            if np.dot(k) == 0:
+        for i, k in enumerate(self.kptmesh.symmesh()[0]):
+            if np.dot(k, k) == 0:
                 self.Gsc[i] = 1./self.pmax**2
             else:
-                self.Gsc[i] = 0
+                pi, pmagn = pnorm(self.di, self.ei, k)
+                self.Gsc[i] = 1./self.DFT(k) + \
+                              np.exp(-pmagn**2)*(1./(pmagn**2)
+                                                 - np.dot(self.D15, powereval(pi)))
         self.Gsc_calced = True
 
     def GF(self, R):
@@ -646,7 +662,18 @@ class GFcalc:
         self.calcGsc() # in case we don't have a cached version of this (G-G2-G4)
         # our steps are
         # 0. calculate the IFT of Gsc
+        Gsc = sum([np.cos(x) for x in kR] * self.Gsc * self.kptmesh.symmesh()[1])
         # 1. calculate the IFT of the 2nd order pole
-        # 2. calculate the IFT of the 4th otder pole
+        ui, umagn = unorm(self.di, self.ei, R)
+        G2 = self.volume * poleFT(self.di, umagn, self.pmax)
+        # 2. calculate the IFT of the 4th order pole
+        G4 = self.volume * np.dot(discFT(self.di, umagn, self.pmax),
+                                  np.dot(self.D15FT, powereval(ui)))
         # 3. create a cached value, and return G.
-        return 0
+        G = Gsc - G2 + G4
+        gcache = [np.dot(R, R), [R], G]
+        for Rp in [np.dot(g, R) for g in self.groupops]:
+            if not any(all(Rp == x) for x in gcache[1]):
+                gcache[1].append(Rp)
+        self.Gcache.append(gcache)
+        return G
