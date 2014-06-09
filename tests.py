@@ -787,19 +787,19 @@ class GFCalcObjectTests(unittest.TestCase):
         Rlist = [R2 + R for R in self.NNvect]
         g0 = self.GF.GF(R2)
         glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 0)
+        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 0, delta=1e-4)
 
         R0 = np.array((0, 0, 0))
         Rlist = [R0 + R for R in self.NNvect]
         g0 = self.GF.GF(R0)
         glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 1)
+        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 1, delta=1e-4)
 
         R1 = self.NNvect[0]
         Rlist = [R1 + R for R in self.NNvect]
         g1 = self.GF.GF(R1)
         glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 0)
+        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 0, delta=1e-4)
 
 
 # DocTests... we use this for the small "utility" functions, rather than writing

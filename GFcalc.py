@@ -564,7 +564,6 @@ class GFcalc:
         * D-FT function calculation, with 2nd and 4th derivatives
         * cached version of G calculated for stars
         """
-        # TODO Create Gdc for R=0
         self.lattice = lattice
         self.NNvect = NNvect
         self.rates = rates
@@ -582,10 +581,25 @@ class GFcalc:
         # determine pmax: find smallest p value at BZ faces, then
         self.pmax = np.sqrt(min([eval2(G, self.D2) for G in self.kptmesh.BZG])/
                             -np.log(1e-11))
+        # discontinuity correction at R=0
+        self.Gdisc0 = self.calcGsc_zero()
         self.Nmax = Nmax
         self.Nmesh = [0, 0, 0] # we haven't constructed anything just yet; wait till first call.
         self.Gcache = [] # our cached values
         self.Gsc_calced = False
+
+    def calcGsc_zero(self):
+        """
+        Calculates the R=0 value of the discontinuity correction.
+        """
+        return self.volume*self.pmax**7/(32*np.pi**1.5*np.sqrt(np.prod(self.di)))*(
+            3.*(self.D15[ExpToIndex[4, 0, 0]] +
+                self.D15[ExpToIndex[0, 4, 0]] +
+                self.D15[ExpToIndex[0, 0, 4]]) +
+            (self.D15[ExpToIndex[0, 2, 2]] +
+             self.D15[ExpToIndex[2, 0, 2]] +
+             self.D15[ExpToIndex[2, 2, 0]])
+        )
 
     def genmesh(self, Nmesh=None):
         """
@@ -692,8 +706,11 @@ class GFcalc:
         ui, umagn = unorm(self.di, self.ei, R)
         G2 = self.volume * poleFT(self.di, umagn, self.pmax)
         # 2. calculate the IFT of the 4th order pole
-        G4 = self.volume * np.dot(discFT(self.di, umagn, self.pmax),
-                                  np.dot(self.D15FT, powereval(ui)))
+        if umagn > 0:
+            G4 = self.volume * np.dot(discFT(self.di, umagn, self.pmax),
+                                      np.dot(self.D15FT, powereval(ui)))
+        else:
+            G4 = self.Gdisc0
         # 3. create a cached value, and return G.
         G = Gsc - G2 + G4
         gcache = [np.dot(R, R), [R], G]
