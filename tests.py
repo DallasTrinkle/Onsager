@@ -1,4 +1,4 @@
-# !/usr/bin/env python
+#!/usr/bin/env python
 """
 Unit tests for vacancy mediated diffusion code.
 """
@@ -752,6 +752,17 @@ class GFCalcObjectTests(unittest.TestCase):
         self.NNvect = np.array([[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]])
         self.rates = np.array((1,) * 6)
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
+
+    def testGFkR(self):
+        """Can we calculate k.R for points?"""
+        R = np.array((0, 0, 0))
+        coskR = self.GF.calccoskR(R)
+        for x in coskR:
+            self.assertAlmostEqual(x, 1)
+        self.assertAlmostEqual(sum(coskR*self.GF.wts), 1)
+        R = np.array((1, 0, 0))
+        coskR = self.GF.calccoskR(R)
+        self.assertAlmostEqual(sum(coskR*self.GF.wts), 0)
 
     def testGFclassexists(self):
         """Does it exist?"""

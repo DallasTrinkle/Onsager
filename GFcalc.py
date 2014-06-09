@@ -578,17 +578,41 @@ class GFcalc:
         # get the rotated D15 (from D4) with p_i version, and FT version
         self.D15 = D4toNNN(RotateD4(D4(NNvect, rates), self.di, self.ei))
         self.D15FT = np.array([np.dot(PowerFT[i], self.D15) for i in xrange(3)])
-        # determine pmax: find largest p value at BZ faces, then
-        self.pmax = np.sqrt(max([eval2(G, self.D2) for G in self.kptmesh.BZG])/
+        # determine pmax: find smallest p value at BZ faces, then
+        self.pmax = np.sqrt(min([eval2(G, self.D2) for G in self.kptmesh.BZG])/
                             -np.log(1e-11))
         self.Nmax = Nmax
         self.Nmesh = [0, 0, 0] # we haven't constructed anything just yet; wait till first call.
         self.Gcache = [] # our cached values
         self.Gsc_calced = False
 
-    def calckR(self, R):
+    def genmesh(self, Nmesh=None):
         """
-        Calculates k.R for vector R. But it also does a few "behind-the-scenes" checks:
+        Generate the kpt mesh, if not already existing.
+
+        Parameters
+        ----------
+        Nmesh : array [3], optional
+            the mesh that we want to generate; otherwise, use self.Nmesh
+        """
+        regen = False
+        if Nmesh != None:
+            if any(self.Nmesh != Nmesh):
+                self.Nmesh = Nmesh
+                regen = True
+        if self.Nmesh == [0, 0, 0]:
+            self.Nmesh = [4*self.Nmax, 4*self.Nmax, 4*self.Nmax]
+            regen = True
+        if regen:
+            self.kptmesh.genmesh(self.Nmesh)
+            self.kpt, self.wts = self.kptmesh.symmesh()
+            self.Gsc = np.zeros(self.kptmesh.Nkptsym)
+            self.Gsc_calced = False
+
+    def calccoskR(self, R):
+        """
+        Calculates cos(k.R) for vector R, but with all of the pt group ops on k.
+        It also does a few "behind-the-scenes" checks:
         1. If the mesh doesn't even exist, we need to construct it.
         2. If the mesh already exists, it may not be sufficient, which requires reconstruction
         Mesh reconstruction uses Nmax and this value of R to make sure we're good. For best
@@ -603,22 +627,16 @@ class GFcalc:
 
         Returns
         -------
-        kR : array [:]
-            value of k.R for each k-point
+        coskR : array [:]
+            symmetrized value of cos(k.R) for each k-point
         """
         # determine if we need to recalculate everything
-        if self.Nmesh == [0, 0, 0]:
-            self.Nmesh = [4*self.Nmax, 4*self.Nmax, 4*self.Nmax]
-        if self.kptmesh.Nkpt < 0:
-            self.kptmesh.genmesh(self.Nmesh)
-            self.kpt, self.wts = self.kptmesh.symmesh()
-            self.Gsc = np.zeros(self.kptmesh.Nkptsym)
-            self.Gsc_calced = False
-        kR = np.array([np.dot(k, R) for k in self.kpt])
+        self.genmesh() # make sure we have a mesh
+        coskR = np.array([sum([np.cos(np.dot(np.dot(g, k), R)) for g in self.groupops]) for k in self.kpt])
         # check that kR will not produce aliasing errors: that requires that the smallest
         # non-zero value of k.R be smaller than pi/2
         # ... check goes here.
-        return kR
+        return coskR/np.shape(self.groupops)[0]
 
     def calcGsc(self):
         """
@@ -627,6 +645,7 @@ class GFcalc:
         Checks first that we haven't already calculated this; if so, it does nothing.
         Else, it calculated for every k-point in the irreducible wedge.
         """
+        self.genmesh() # make sure we have a mesh
         if self.Gsc_calced : return
         for i, k in enumerate(self.kpt):
             if np.dot(k, k) == 0:
@@ -657,11 +676,11 @@ class GFcalc:
         for gcache in [ gc for gc in self.Gcache if gc[0] == np.dot(R,R)]:
             if any(np.all(abs(vec - R) < 1e-8) for vec in gcache[1]):
                 return gcache[2]
-        kR = self.calckR(R)
+        coskR = self.calccoskR(R)
         self.calcGsc() # in case we don't have a cached version of this (G-G2-G4)
         # our steps are
         # 0. calculate the IFT of Gsc
-        Gsc = sum([np.cos(x) for x in kR] * self.Gsc * self.wts)
+        Gsc = sum(coskR * self.Gsc * self.wts)
         # 1. calculate the IFT of the 2nd order pole
         ui, umagn = unorm(self.di, self.ei, R)
         G2 = self.volume * poleFT(self.di, umagn, self.pmax)
