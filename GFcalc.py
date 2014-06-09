@@ -564,6 +564,7 @@ class GFcalc:
         * D-FT function calculation, with 2nd and 4th derivatives
         * cached version of G calculated for stars
         """
+        # TODO Create Gdc for R=0
         self.lattice = lattice
         self.NNvect = NNvect
         self.rates = rates
@@ -630,13 +631,19 @@ class GFcalc:
         coskR : array [:]
             symmetrized value of cos(k.R) for each k-point
         """
+        # TODO determine if we need a more accurate mesh for a given R value
         # determine if we need to recalculate everything
         self.genmesh() # make sure we have a mesh
-        coskR = np.array([sum([np.cos(np.dot(np.dot(g, k), R)) for g in self.groupops]) for k in self.kpt])
+        gRlist = [np.dot(g, R) for g in self.groupops]
+        # for g in self.groupops:
+        #     gRvec = np.dot(g, R)
+        #     if not any([np.all(np.abs(gRvec, vec)<1e-8) for vec in gRlist]):
+        #         gRlist.append(gRvec)
+        coskR = np.array([np.average([np.cos(np.dot(k, gR)) for gR in gRlist]) for k in self.kpt])
         # check that kR will not produce aliasing errors: that requires that the smallest
         # non-zero value of k.R be smaller than pi/2
         # ... check goes here.
-        return coskR/np.shape(self.groupops)[0]
+        return coskR
 
     def calcGsc(self):
         """
