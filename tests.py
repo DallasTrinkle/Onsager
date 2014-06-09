@@ -776,7 +776,7 @@ class GFCalcObjectTests(unittest.TestCase):
         self.assertAlmostEqual(-sum(self.rates)*g0+sum(self.rates*glist), 1)
 
         R1 = self.NNvect[0]
-        Rlist = [R0 + R for R in self.NNvect]
+        Rlist = [R1 + R for R in self.NNvect]
         g1 = self.GF.GF(R1)
         glist = [self.GF.GF(R) for R in Rlist]
         self.assertAlmostEqual(-sum(self.rates)*g1+sum(self.rates*glist), 0)

@@ -631,7 +631,7 @@ class GFcalc:
         if self.Gsc_calced : return
         for i, k in enumerate(self.kptmesh.symmesh()[0]):
             if np.dot(k, k) == 0:
-                self.Gsc[i] = 1./self.pmax**2
+                self.Gsc[i] = -1./self.pmax**2
             else:
                 pi, pmagn = pnorm(self.di, self.ei, k)
                 self.Gsc[i] = 1./self.DFT(k) + \
