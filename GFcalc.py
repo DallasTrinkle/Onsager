@@ -275,13 +275,13 @@ def discFT(di, u, pm, erfupm=-1, gaussupm=-1):
 
     Returns
     -------
-    poleFT : array [:]
+    discFT : array [:]
         integral of Gaussian cutoff function corresponding to a l=0,2,4 discontinuities;
         z = `u` `pm`
-        l=0: 1/(4pi u^3 (d1 d2 d3)^1/2 * z^3 * exp(-z^2/4)/2 sqrt(pi)
-        l=2: 1/(4pi u^3 (d1 d2 d3)^1/2 * (-15/2*erf(z/2)
+        l=0: 1/(4pi u^3 (d1 d2 d3)^1/2) * z^3 * exp(-z^2/4)/2 sqrt(pi)
+        l=2: 1/(4pi u^3 (d1 d2 d3)^1/2) * (-15/2*erf(z/2)
                 + (15/2 + 5/4 z^2)exp(-z^2/4)/sqrt(pi)
-        l=4: 1/(4pi u^3 (d1 d2 d3)^1/2 * (63*15/8*(1-14/z^2)*erf(z/2)
+        l=4: 1/(4pi u^3 (d1 d2 d3)^1/2) * (63*15/8*(1-14/z^2)*erf(z/2)
                 + (63*15*14/8z + 63*5/2 z + 63/8 z^3)exp(-z^2/4)/sqrt(pi)
     """
 
@@ -294,7 +294,6 @@ def discFT(di, u, pm, erfupm=-1, gaussupm=-1):
     z3 = z * z2
     zm1 = 1. / z
     zm2 = zm1 * zm1
-    zm3 = zm1 * zm2
     if (erfupm < 0):
         erfupm = special.erf(0.5 * z)
     if (gaussupm < 0):
@@ -612,10 +611,10 @@ class GFcalc:
             self.Nmesh = [4*self.Nmax, 4*self.Nmax, 4*self.Nmax]
         if self.kptmesh.Nkpt < 0:
             self.kptmesh.genmesh(self.Nmesh)
-            self.kptmesh.reducemesh()
+            self.kpt, self.wts = self.kptmesh.symmesh()
             self.Gsc = np.zeros(self.kptmesh.Nkptsym)
             self.Gsc_calced = False
-        kR = np.array([np.dot(k, R) for k in self.kptmesh.symmesh()[0]])
+        kR = np.array([np.dot(k, R) for k in self.kpt])
         # check that kR will not produce aliasing errors: that requires that the smallest
         # non-zero value of k.R be smaller than pi/2
         # ... check goes here.
@@ -629,14 +628,14 @@ class GFcalc:
         Else, it calculated for every k-point in the irreducible wedge.
         """
         if self.Gsc_calced : return
-        for i, k in enumerate(self.kptmesh.symmesh()[0]):
+        for i, k in enumerate(self.kpt):
             if np.dot(k, k) == 0:
                 self.Gsc[i] = -1./self.pmax**2
             else:
                 pi, pmagn = pnorm(self.di, self.ei, k)
                 self.Gsc[i] = 1./self.DFT(k) + \
-                              np.exp(-pmagn**2)*(1./(pmagn**2)
-                                                 - np.dot(self.D15, powereval(pi)))
+                              np.exp(-(pmagn/self.pmax)**2)*(1./(pmagn**2)
+                                                             - np.dot(self.D15, powereval(pi)))
         self.Gsc_calced = True
 
     def GF(self, R):
@@ -662,7 +661,7 @@ class GFcalc:
         self.calcGsc() # in case we don't have a cached version of this (G-G2-G4)
         # our steps are
         # 0. calculate the IFT of Gsc
-        Gsc = sum([np.cos(x) for x in kR] * self.Gsc * self.kptmesh.symmesh()[1])
+        Gsc = sum([np.cos(x) for x in kR] * self.Gsc * self.wts)
         # 1. calculate the IFT of the 2nd order pole
         ui, umagn = unorm(self.di, self.ei, R)
         G2 = self.volume * poleFT(self.di, umagn, self.pmax)

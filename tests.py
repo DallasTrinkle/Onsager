@@ -742,9 +742,15 @@ class GFCalcObjectTests(unittest.TestCase):
 
     def setUp(self):
         # cell vectors for FCC:
-        self.lattice = FCClatt.lattice()
-        self.NNvect = FCClatt.NNvect()
-        self.rates = np.array((1,) * 12)
+        # self.lattice = FCClatt.lattice()
+        # self.NNvect = FCClatt.NNvect()
+        # self.rates = np.array((1,) * 12)
+        # vectors for simple cubic:
+        self.lattice = np.array([[1, 0, 0],
+                                 [0, 1, 0],
+                                 [0, 0, 1]])
+        self.NNvect = np.array([[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]])
+        self.rates = np.array((1,) * 6)
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
 
     def testGFclassexists(self):
@@ -759,27 +765,30 @@ class GFCalcObjectTests(unittest.TestCase):
 
     def testGFsymmetry(self):
         """Do we have the basic symmetries we expect?"""
-        Rlist = (np.array((0, 1, 1)),
-                 np.array((1, 0, 1)),
-                 np.array((1, 1, 0)))
-        glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(glist[0], glist[1])
-        self.assertAlmostEqual(glist[0], glist[2])
-        self.assertAlmostEqual(glist[1], glist[2])
+        glist = [self.GF.GF(R) for R in self.NNvect]
+        for g0 in glist:
+            for g1 in glist:
+                self.assertAlmostEqual(g0, g1)
 
     def testGFpseudoinverse(self):
         """Is G the pseudoinverse of D? Check value at origin, and first NN"""
+        R2 = np.array((1, 1, 0))
+        Rlist = [R2 + R for R in self.NNvect]
+        g0 = self.GF.GF(R2)
+        glist = [self.GF.GF(R) for R in Rlist]
+        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 0)
+
         R0 = np.array((0, 0, 0))
         Rlist = [R0 + R for R in self.NNvect]
         g0 = self.GF.GF(R0)
         glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(-sum(self.rates)*g0+sum(self.rates*glist), 1)
+        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 1)
 
         R1 = self.NNvect[0]
         Rlist = [R1 + R for R in self.NNvect]
         g1 = self.GF.GF(R1)
         glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(-sum(self.rates)*g1+sum(self.rates*glist), 0)
+        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 0)
 
 
 # DocTests... we use this for the small "utility" functions, rather than writing
