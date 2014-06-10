@@ -592,7 +592,7 @@ class GFcalc:
         """
         Calculates the R=0 value of the discontinuity correction.
         """
-        return self.volume*self.pmax**7/(32*np.pi**1.5*np.sqrt(np.prod(self.di)))*(
+        return self.volume*self.pmax**3/(15*8*np.pi**1.5*np.sqrt(np.prod(self.di)))*(
             3.*(self.D15[ExpToIndex[4, 0, 0]] +
                 self.D15[ExpToIndex[0, 4, 0]] +
                 self.D15[ExpToIndex[0, 0, 4]]) +
