@@ -612,7 +612,7 @@ class GFcalc:
         """
         regen = False
         if Nmesh != None:
-            if any(self.Nmesh != Nmesh):
+            if not self.Nmesh == Nmesh:
                 self.Nmesh = Nmesh
                 regen = True
         if self.Nmesh == [0, 0, 0]:

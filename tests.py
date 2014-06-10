@@ -775,7 +775,7 @@ class GFCalcObjectTestsSC(unittest.TestCase):
                                  [0, 1, 0],
                                  [0, 0, 1]])
         self.NNvect = np.array([[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]])
-        self.rates = np.array((1,) * 6)
+        self.rates = np.array((1./6.,) * 6)
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
 
     def testGFkR(self):
@@ -842,7 +842,7 @@ class GFCalcObjectTestsFCC(unittest.TestCase):
         # cell vectors for FCC:
         self.lattice = FCClatt.lattice()
         self.NNvect = FCClatt.NNvect()
-        self.rates = np.array((1,) * 12)
+        self.rates = np.array((1./12.,) * 12)
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
 
     def testGFkR(self):
@@ -900,6 +900,18 @@ class GFCalcObjectTestsFCC(unittest.TestCase):
         g2 = self.GF.GF(R2)
         glist = [self.GF.GF(R) for R in Rlist]
         self.assertAlmostEqual(sum(self.rates*(glist-g2)), 0, delta=1e-5)
+
+    def testGFanaylticvalue(self):
+        """Compare our G(R=0) value against Koiwa and Ishioka, 1983b value"""
+        # From Koiwa, M, and Ishioka, S. (1983a) J. Stat. Phys. 30, 477; (1983b) Phil. Mag. A47, 927.
+        # The 200 value disagrees by more than the numerical integration error we have;
+        # 32^3 vs 24^3 gives a change of 1.57e-7; 32^3 vs. 16^3 gives a a change of 1.5e-6
+        # which are consistent with integration errors for this algorithm.
+        # This appears to be converging towards -0.2299125
+        # self.GF.genmesh([32, 32, 32])
+        self.assertAlmostEqual(self.GF.GF(np.array([0, 0, 0])), -1.344661, delta=1e-5)
+        self.assertAlmostEqual(self.GF.GF(np.array([1, 1, 0])), -0.344661, delta=1e-5)
+        self.assertAlmostEqual(self.GF.GF(np.array([2, 0, 0])), -0.229936, delta=3e-5)
 
 
 # DocTests... we use this for the small "utility" functions, rather than writing
