@@ -675,7 +675,7 @@ class GFcalc:
                 pi, pmagn = pnorm(self.di, self.ei, k)
                 self.Gsc[i] = 1./self.DFT(k) + \
                               np.exp(-(pmagn/self.pmax)**2)*(1./(pmagn**2)
-                                                             - np.dot(self.D15, powereval(pi)))
+                                                             + np.dot(self.D15, powereval(pi)))
         self.Gsc_calced = True
 
     def GF(self, R):
@@ -712,7 +712,7 @@ class GFcalc:
         else:
             G4 = self.Gdisc0
         # 3. create a cached value, and return G.
-        G = Gsc - G2 + G4
+        G = Gsc - G2 - G4
         gcache = [np.dot(R, R), [R], G]
         for Rp in [np.dot(g, R) for g in self.groupops]:
             if not any(all(Rp == x) for x in gcache[1]):

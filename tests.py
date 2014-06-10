@@ -287,7 +287,6 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
     """Tests for the fourier transform of the discontinuity correction (4th derivative)."""
 
     def setUp(self):
-        # GFcalc.ConstructExpToIndex()
         pass
 
     def testPowerExpansion(self):
@@ -618,6 +617,37 @@ class GreenFuncFourierTransformDiscTests(unittest.TestCase):
         for l in xrange(3):
             self.assertAlmostEqual(fi[l], fi_0[l])
 
+
+
+class GFcalcFunctionTests(unittest.TestCase):
+    def setUp(self):
+        self.NNvect = FCClatt.NNvect()
+        self.rates = np.array((1,) * np.shape(self.NNvect)[0])
+        self.DFT = GFcalc.DFTfunc(self.NNvect, self.rates)  # Fourier transform
+        self.D2 = GFcalc.D2(self.NNvect, self.rates)  # - 2nd deriv. of FT (>0)
+        self.di, self.ei = GFcalc.calcDE(self.D2)
+        self.D4 = GFcalc.D4(self.NNvect, self.rates)  # + 4th deriv. of FT (>0)
+        self.D15 = GFcalc.D4toNNN(
+            GFcalc.RotateD4(self.D4, self.di, self.ei))
+
+    def testSemiContinuum(self):
+        """Does our semicontinuum function go as q^2 for small q?"""
+        klist = [np.array((0.1, 0, 0)),
+                 np.array((0.05, 0, 0))]
+        pilist = [GFcalc.pnorm(self.di, self.ei, k)[0] for k in klist]
+        pmlist = [GFcalc.pnorm(self.di, self.ei, k)[1] for k in klist]
+        # pmax = pmlist[0]*100
+        pmax = 1e10
+        Glist = np.array([1./self.DFT(k) for k in klist])
+        # fc = np.array([np.exp(-(pmagn/pmax)**2) for pmagn in pmlist])
+        fc = np.array([1, 1])
+        G2 = fc*np.array([1./pmagn**2 for pmagn in pmlist])
+        Gdc = fc*np.array([np.dot(self.D15, GFcalc.powereval(pi)) for pi in pilist])
+        Gsc = Glist + G2 + Gdc
+        self.assertAlmostEqual((Gsc[1] + 1./pmax**2)/(Gsc[0] + 1./pmax**2),
+                               0.25, delta=1e-4)
+
+
 # Tests for our k-point mesh generator
 import KPTmesh
 
@@ -736,7 +766,6 @@ class KPTMeshTests(unittest.TestCase):
         self.assertNotAlmostEqual(sum(wtfull * [sum(k) ** 2 for k in kptfull]), 9.8696044010893586188)
         self.assertNotAlmostEqual(sum(wts * [sum(k) ** 2 for k in kpts]), 9.8696044010893586188)
 
-
 class GFCalcObjectTests(unittest.TestCase):
     """Set of tests for our GF-calculation class"""
 
@@ -785,7 +814,9 @@ class GFCalcObjectTests(unittest.TestCase):
         """Do we have the correct value for the discontinuity correction at R=0?"""
         # Should be V/((2pi)^3 * sqrt(d1 d2 d3)) * int( exp(-p^2/pm^2) * D4.phat )
         # where we integrate over all space
-        pass
+        Gdc0 = self.GF.volume*self.GF.pmax**3/(8*np.pi**1.5*np.sqrt(np.product(self.GF.di)))*\
+               self.GF.D15FT[0, GFcalc.ExpToIndex[4, 0, 0]]
+        self.assertAlmostEqual(Gdc0, self.GF.Gdisc0)
 
     def testGFpseudoinverse(self):
         """Is G the pseudoinverse of D? Check value at origin, and first NN"""
@@ -793,19 +824,19 @@ class GFCalcObjectTests(unittest.TestCase):
         Rlist = [R0 + R for R in self.NNvect]
         g0 = self.GF.GF(R0)
         glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 1, delta=1e-4)
+        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 1, delta=1e-5)
 
         R1 = self.NNvect[0]
         Rlist = [R1 + R for R in self.NNvect]
         g1 = self.GF.GF(R1)
         glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(sum(self.rates*(glist-g1)), 0, delta=1e-4)
+        self.assertAlmostEqual(sum(self.rates*(glist-g1)), 0, delta=1e-5)
 
         R2 = np.array((1, 1, 0))
         Rlist = [R2 + R for R in self.NNvect]
         g2 = self.GF.GF(R2)
         glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(sum(self.rates*(glist-g2)), 0, delta=1e-4)
+        self.assertAlmostEqual(sum(self.rates*(glist-g2)), 0, delta=1e-5)
 
 
 # DocTests... we use this for the small "utility" functions, rather than writing
