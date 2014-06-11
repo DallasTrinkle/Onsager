@@ -725,3 +725,13 @@ class GFCalcObjectTestsDistortedFCC(GFCalcObjectTestsSC):
         self.NNvect = np.array([np.dot(eps, v) for v in FCClatt.NNvect()])
         self.rates = np.array((1./12.,) * 12)
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
+
+
+# DocTests... we use this for the small "utility" functions, rather than writing
+# explicit tests; doctests are compatible with unittests, so we're good here.
+import doctest
+
+def load_tests(loader, tests, ignore):
+    tests.addTests(doctest.DocTestSuite(GFcalc))
+    return tests
+
