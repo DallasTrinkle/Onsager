@@ -4,6 +4,8 @@ KPTmesh module
 Class definition for KPTmesh class; allows automated construction of kpt meshes
 """
 
+__author__ = 'Dallas R. Trinkle'
+
 import numpy as np
 
 

@@ -1,14 +1,15 @@
+"""
+Unit tests for lattice structure
+"""
+
 __author__ = 'Dallas R. Trinkle'
 
-"""
-Unit tests for vacancy mediated diffusion code.
-"""
 # TODO: additional lattice structures?
 # TODO: use spglib and/or interface with pymatgen to automatically construct accordingly
 
 import unittest
 import FCClatt
-
+import numpy as np
 
 class LatticeTests(unittest.TestCase):
     """Set of tests that our lattice code is behaving correctly"""

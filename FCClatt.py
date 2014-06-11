@@ -5,6 +5,8 @@ Generates a neighbor vector list for an FCC lattice, and constructs the list of
 inverse indices.
 """
 
+__author__ = 'Dallas R. Trinkle'
+
 import numpy as np
 
 

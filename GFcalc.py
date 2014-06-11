@@ -11,6 +11,8 @@ the gamma-point (q=0), which also should be treated analytically. Then, the
 remaining function can be numerically inverse fourier transformed.
 """
 
+__author__ = 'Dallas R. Trinkle'
+
 import numpy as np
 import scipy as sp
 from scipy import special
