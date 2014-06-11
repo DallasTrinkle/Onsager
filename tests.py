@@ -766,7 +766,7 @@ class KPTMeshTests(unittest.TestCase):
         self.assertNotAlmostEqual(sum(wtfull * [sum(k) ** 2 for k in kptfull]), 9.8696044010893586188)
         self.assertNotAlmostEqual(sum(wts * [sum(k) ** 2 for k in kpts]), 9.8696044010893586188)
 
-# TODO: can we refactor the lattice tests into a single class, then derive other test classes from them?
+
 class GFCalcObjectTestsSC(unittest.TestCase):
     """Set of tests for our GF-calculation class for simple cubic"""
 
@@ -786,7 +786,7 @@ class GFCalcObjectTestsSC(unittest.TestCase):
         for x in coskR:
             self.assertAlmostEqual(x, 1)
         self.assertAlmostEqual(sum(coskR*self.GF.wts), 1)
-        R = np.array((1, 0, 0))
+        R = self.NNvect[0]
         coskR = self.GF.calccoskR(R)
         self.assertAlmostEqual(sum(coskR*self.GF.wts), 0)
 
@@ -831,14 +831,14 @@ class GFCalcObjectTestsSC(unittest.TestCase):
         glist = [self.GF.GF(R) for R in Rlist]
         self.assertAlmostEqual(sum(self.rates*(glist-g1)), 0, delta=1e-5)
 
-        R2 = np.array((1, 1, 0))
+        R2 = self.NNvect[0] + self.NNvect[2]
         Rlist = [R2 + R for R in self.NNvect]
         g2 = self.GF.GF(R2)
         glist = [self.GF.GF(R) for R in Rlist]
         self.assertAlmostEqual(sum(self.rates*(glist-g2)), 0, delta=1e-5)
 
 
-class GFCalcObjectTestsFCC(unittest.TestCase):
+class GFCalcObjectTestsFCC(GFCalcObjectTestsSC):
     """Set of tests for our GF-calculation class for FCC"""
 
     def setUp(self):
@@ -847,64 +847,6 @@ class GFCalcObjectTestsFCC(unittest.TestCase):
         self.NNvect = FCClatt.NNvect()
         self.rates = np.array((1./12.,) * 12)
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
-
-    def testGFkR(self):
-        """Can we calculate k.R for points?"""
-        R = np.array((0, 0, 0))
-        coskR = self.GF.calccoskR(R)
-        for x in coskR:
-            self.assertAlmostEqual(x, 1)
-        self.assertAlmostEqual(sum(coskR*self.GF.wts), 1)
-        R = np.array((1, 1, 0))
-        coskR = self.GF.calccoskR(R)
-        self.assertAlmostEqual(sum(coskR*self.GF.wts), 0)
-
-    def testGFclassexists(self):
-        """Does it exist?"""
-        self.assertIsInstance(self.GF, GFcalc.GFcalc)
-
-    def testGFclasscalc(self):
-        """Can we calculate a value for (0, 0, 0) and have it be non-zero?"""
-        R = np.array((0, 0, 0))
-        g = self.GF.GF(R)
-        self.assertNotEqual(g, 0)
-
-    def testGFsymmetry(self):
-        """Do we have the basic symmetries we expect?"""
-        for R in self.NNvect:
-            g0 = self.GF.GF(R)
-            for gR in [np.dot(g, R) for g in self.GF.kptmesh.groupops]:
-                g1 = self.GF.GF(gR)
-                self.assertAlmostEqual(g0, g1,
-                                       msg="Symmetry broken between {} and {}; got {} and {}".format(R, gR, g0, g1))
-
-    def testGFdisc0(self):
-        """Do we have the correct value for the discontinuity correction at R=0?"""
-        # Should be V/((2pi)^3 * sqrt(d1 d2 d3)) * int( exp(-p^2/pm^2) * D4.phat )
-        # where we integrate over all space
-        Gdc0 = self.GF.volume*self.GF.pmax**3/(8*np.pi**1.5*np.sqrt(np.product(self.GF.di)))*\
-               self.GF.D15FT[0, GFcalc.ExpToIndex[4, 0, 0]]
-        self.assertAlmostEqual(Gdc0, self.GF.Gdisc0)
-
-    def testGFpseudoinverse(self):
-        """Is G the pseudoinverse of D? Check value at origin, and first NN"""
-        R0 = np.array((0, 0, 0))
-        Rlist = [R0 + R for R in self.NNvect]
-        g0 = self.GF.GF(R0)
-        glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 1, delta=1e-5)
-
-        R1 = self.NNvect[0]
-        Rlist = [R1 + R for R in self.NNvect]
-        g1 = self.GF.GF(R1)
-        glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(sum(self.rates*(glist-g1)), 0, delta=1e-5)
-
-        R2 = np.array([2, 0, 0])
-        Rlist = [R2 + R for R in self.NNvect]
-        g2 = self.GF.GF(R2)
-        glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(sum(self.rates*(glist-g2)), 0, delta=1e-5)
 
     def testGFanaylticvalue(self):
         """Compare our G(R=0) value against Koiwa and Ishioka, 1983b value"""
@@ -919,8 +861,7 @@ class GFCalcObjectTestsFCC(unittest.TestCase):
         self.assertAlmostEqual(self.GF.GF(np.array([2, 0, 0])), -0.229936, delta=3e-5)
 
 
-
-class GFCalcObjectTestsDistortedSC(unittest.TestCase):
+class GFCalcObjectTestsDistortedSC(GFCalcObjectTestsSC):
     """Set of tests for our GF-calculation class for distorted simple cubic"""
 
     def setUp(self):
@@ -932,64 +873,20 @@ class GFCalcObjectTestsDistortedSC(unittest.TestCase):
         self.rates = np.array((1./6.,) * 6)
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
 
-    def testGFkR(self):
-        """Can we calculate k.R for points?"""
-        R = np.array((0, 0, 0))
-        coskR = self.GF.calccoskR(R)
-        for x in coskR:
-            self.assertAlmostEqual(x, 1)
-        self.assertAlmostEqual(sum(coskR*self.GF.wts), 1)
-        R = np.array((1, 0, 0))
-        coskR = self.GF.calccoskR(R)
-        self.assertAlmostEqual(sum(coskR*self.GF.wts), 0)
 
-    def testGFclassexists(self):
-        """Does it exist?"""
-        self.assertIsInstance(self.GF, GFcalc.GFcalc)
+class GFCalcObjectTestsDistortedFCC(GFCalcObjectTestsSC):
+    """Set of tests for our GF-calculation class for distorted face-centered cubic"""
 
-    def testGFclasscalc(self):
-        """Can we calculate a value for (0, 0, 0) and have it be non-zero?"""
-        R = np.array((0, 0, 0))
-        g = self.GF.GF(R)
-        self.assertNotEqual(g, 0)
-
-    def testGFsymmetry(self):
-        """Do we have the basic symmetries we expect?"""
-        for R in self.NNvect:
-            g0 = self.GF.GF(R)
-            for gR in [np.dot(g, R) for g in self.GF.kptmesh.groupops]:
-                g1 = self.GF.GF(gR)
-                self.assertAlmostEqual(g0, g1,
-                                       msg="Symmetry broken between {} and {}; got {} and {}".format(R, gR, g0, g1))
-
-    def testGFdisc0(self):
-        """Do we have the correct value for the discontinuity correction at R=0?"""
-        # Should be V/((2pi)^3 * sqrt(d1 d2 d3)) * int( exp(-p^2/pm^2) * D4.phat )
-        # where we integrate over all space
-        Gdc0 = self.GF.volume*self.GF.pmax**3/(8*np.pi**1.5*np.sqrt(np.product(self.GF.di)))*\
-               self.GF.D15FT[0, GFcalc.ExpToIndex[4, 0, 0]]
-        self.assertAlmostEqual(Gdc0, self.GF.Gdisc0)
-
-    def testGFpseudoinverse(self):
-        """Is G the pseudoinverse of D? Check value at origin, and first NN"""
-        R0 = np.array((0, 0, 0))
-        Rlist = [R0 + R for R in self.NNvect]
-        g0 = self.GF.GF(R0)
-        glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(sum(self.rates*(glist-g0)), 1, delta=1e-5)
-
-        R1 = self.NNvect[0]
-        Rlist = [R1 + R for R in self.NNvect]
-        g1 = self.GF.GF(R1)
-        glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(sum(self.rates*(glist-g1)), 0, delta=1e-5)
-
-        R2 = np.array((1, 1, 0))
-        Rlist = [R2 + R for R in self.NNvect]
-        g2 = self.GF.GF(R2)
-        glist = [self.GF.GF(R) for R in Rlist]
-        self.assertAlmostEqual(sum(self.rates*(glist-g2)), 0, delta=1e-5)
-
+    def setUp(self):
+        # cell vectors for distorted FCC:
+        eps = np.array([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, np.sqrt(0.5)]])
+        self.lattice = np.dot(eps, FCClatt.lattice())
+        self.NNvect = np.array([np.dot(eps, v) for v in FCClatt.NNvect()])
+        self.rates = np.array((1./12.,) * 12)
+        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
 
 
 # DocTests... we use this for the small "utility" functions, rather than writing
