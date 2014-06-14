@@ -2,7 +2,7 @@
 Unit tests for star (and double-star) generation and indexing
 """
 
-__author__ = 'dallas'
+__author__ = 'Dallas R. Trinkle'
 
 #
 
@@ -25,12 +25,19 @@ class StarTests(unittest.TestCase):
         self.star = stars.Star(self.NNvect, self.groupops)
 
     def testStarcount(self):
-        """Check that the counts (Npts, Nstars) make sense for FCC, with Nshells = 1"""
+        """Check that the counts (Npts, Nstars) make sense for FCC, with Nshells = 1, 2"""
         self.star.generate(1)
         self.assertEqual(self.star.Nstars, 1)
         self.assertEqual(self.star.Npts, np.shape(self.NNvect)[0])
+        self.star.generate(2)
+        for s in self.star.stars:
+            print s
+        self.assertEqual(self.star.Nstars, 4)
 
     def testStarmembers(self):
         """Are the members correct?"""
         self.star.generate(1)
-        pass
+        s = self.star.stars[0]
+        for v in self.NNvect:
+            self.assertTrue(any(all(abs(v-v1)<1e-8) for v1 in s))
+

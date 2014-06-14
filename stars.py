@@ -83,7 +83,7 @@ class Star:
             complist_pts = []   # for finding unique points
             for x in vectlist[xmin:xmax]:
                 # Q1: is this a unique point?
-                if any([all(abs(x-xcomp) < threshold) for xcomp in complist_pts]):
+                if any([np.all(abs(x-xcomp) < threshold) for xcomp in complist_pts]):
                     continue
                 complist_pts.append(x)
                 # Q2: is this a new rep. for a unique star?
