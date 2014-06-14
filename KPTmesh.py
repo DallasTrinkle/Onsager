@@ -20,7 +20,7 @@ class KPTmesh:
         
         Parameters
         ----------
-        lattice : array [3,3}
+        lattice : array [3,3]
             lattice vectors, in *column* form, so that a1 = a[:,0], a2 = a[:,1], a3 = a[:,2]
         Nmesh : list [3], optional
             number of divisions; can be specified later using genmesh().
