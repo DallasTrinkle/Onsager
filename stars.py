@@ -254,6 +254,55 @@ class DoubleStar:
         self.Ndstars = len(self.dstars)
         self.index = None
 
+    def generateindices(self):
+        """
+        Generates the double star indices for the set of points, if not already generated
+        """
+        if self.index != None:
+            return
+        self.index = np.zeros(self.Npairs, dtype=int)
+        for i, p in enumerate(self.pairs):
+            for nds, ds in enumerate(self.dstars):
+                if any([p == p1 for p1 in ds]):
+                    self.index[i] = nds
+
+    def dstarindex(self, p):
+        """
+        Returns the index for the double-star to which pair p belongs.
+
+        Parameters
+        ----------
+        p : two-tuple
+            pair to find the double-star for
+
+        Returns
+        -------
+        index corresponding to double-star; -1 if not found.
+        """
+        self.generateindices()
+        for i, p1 in enumerate(self.pairs):
+            if p1 == p:
+                return self.index[i]
+        return -1
+
+    def pairindex(self, p):
+        """
+        Returns the index corresponding to the pair p.
+
+        Parameters
+        ----------
+        p : two-tuple
+            pair to index
+
+        Returns
+        -------
+        index corresponding to pair; -1 if not found.
+        """
+        for i, v in enumerate(self.pairs):
+            if v == p:
+                return i
+        return -1
+
     def symmatch(self, x, xcomp, threshold=1e-8):
         """
         Tells us if x and xcomp are equivalent by a symmetry group

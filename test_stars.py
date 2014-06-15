@@ -142,3 +142,18 @@ class DoubleStarTests(unittest.TestCase):
         #     print self.star.pts[ds[0][0]], self.star.pts[ds[0][1]]
         self.assertEqual(self.dstar.Ndstars, 4 + 1 + 2)
 
+    def testPairIndices(self):
+        """Check that our pair indexing works correctly for Nshell=1..4"""
+        for nshells in xrange(1, 5):
+            self.star.generate(nshells)
+            self.dstar.generate(self.star)
+            for pair in self.dstar.pairs:
+                self.assertTrue(pair == self.dstar.pairs[self.dstar.pairindex(pair)])
+
+    def testDoubleStarindices(self):
+        """Check that our double-star indexing works correctly for Nshell=1..4"""
+        for nshells in xrange(1, 5):
+            self.star.generate(nshells)
+            self.dstar.generate(self.star)
+            for pair in self.dstar.pairs:
+                self.assertTrue(any(pair == p for p in self.dstar.dstars[self.dstar.dstarindex(pair)]))
