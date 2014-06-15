@@ -121,7 +121,7 @@ class DoubleStarTests(unittest.TestCase):
         self.assertTrue(self.dstar.Npairs > 0)
 
     def testDoubleStarCount(self):
-        """Check that the counts (Npts, Nstars) make sense for FCC, with Nshells = 1"""
+        """Check that the counts (Npts, Nstars) make sense for FCC, with Nshells = 1, 2"""
         # each of the 12 <110> pairs to 101, 10-1, 011, 01-1 = 4, so should be 48 pairs
         # (which includes "double counting": i->j and j->i)
         # but *all* of those 48 are all equivalent to each other by symmetry: one double-star.
@@ -129,3 +129,16 @@ class DoubleStarTests(unittest.TestCase):
         self.dstar.generate(self.star)
         self.assertEqual(self.dstar.Npairs, 48)
         self.assertEqual(self.dstar.Ndstars, 1)
+        # Now have four stars (110, 200, 211, 220), so this means
+        # 12 <110> pairs to 11 (no 000!); 12*11
+        # 6 <200> pairs to 110, 101, 1-10, 10-1; 211, 21-1, 2-11, 2-1-1 = 8; 6*8
+        # 24 <211> pairs to 110, 101; 200; 112, 121; 202, 220 = 7; 24*7
+        # 12 <220> pairs to 110; 12-1, 121, 21-1, 211 = 5; 12*5
+        # unique pairs: (110, 101); (110, 200); (110, 211); (110, 220); (200, 211); (211, 112); (211, 220)
+        self.star.generate(2)
+        self.dstar.generate(self.star)
+        self.assertEqual(self.dstar.Npairs, 12*11 + 6*8 + 24*7 + 12*5)
+        # for ds in self.dstar.dstars:
+        #     print self.star.pts[ds[0][0]], self.star.pts[ds[0][1]]
+        self.assertEqual(self.dstar.Ndstars, 4 + 1 + 2)
+

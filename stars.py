@@ -37,7 +37,7 @@ class Star:
 
     def generate(self, Nshells, threshold=1e-8):
         """
-        Construct the actual shells, indexing.
+        Construct the actual points and stars.
 
         Parameters
         ----------
@@ -190,8 +190,7 @@ class DoubleStar:
     """
     def __init__(self, star=None):
         """
-        Initiates a star-generator for a given set of nearest-neighbor vectors
-        and group operations. Explicitly *excludes* the trivial star R=0.
+        Initiates a double-star-generator; is designed to work with a given star.
 
         Parameters
         ----------
@@ -210,7 +209,7 @@ class DoubleStar:
 
     def generate(self, star, threshold=1e-8):
         """
-        Construct the actual double-shells, indexing.
+        Construct the actual double-stars.
 
         Parameters
         ----------
@@ -232,11 +231,28 @@ class DoubleStar:
             for dv in self.NNvect:
                 v2 = v1 + dv
                 i2 = self.star.pointindex(v2)
+                # check that i2 is a valid point
                 if i2 >= 0:
                     self.pairs.append((i1, i2))
+        # sort the pairs
+        self.pairs.sort(key=lambda x: max(np.dot(x[0], x[0]), np.dot(x[1], x[1])))
         self.Npairs = len(self.pairs)
         # now to make the unique sets of pairs (double-stars)
-        self.Ndstars = self.Npairs
+        self.dstars = []
+        for pair in self.pairs:
+            # Q: is this a new rep. for a unique double-star?
+            match = False
+            for i, ds in enumerate(self.dstars):
+                if self.symmatch(pair, ds[0], threshold):
+                    # update star
+                    self.dstars[i].append(pair)
+                    match = True
+                    continue
+            if not match:
+                # new symmetry point!
+                self.dstars.append([pair])
+        self.Ndstars = len(self.dstars)
+        self.index = None
 
     def symmatch(self, x, xcomp, threshold=1e-8):
         """
@@ -244,10 +260,10 @@ class DoubleStar:
 
         Parameters
         ----------
-        x : array [3]
-            vector to be tested
-        xcomp : array [3]
-            vector to compare
+        x : 2-tuple
+            two indices corresponding to a pair
+        xcomp : 2-tuple
+            two indices corresponding to a pair to compare
         threshold : double, optional
             threshold to use for "equality"
 
@@ -255,5 +271,14 @@ class DoubleStar:
         -------
         True if equivalent by a point group operation, False otherwise
         """
-        return any([np.all(abs(x - np.dot(g, xcomp)) < threshold) for g in self.groupops])
+        # first, try the tuple "forward"
+        v00 = self.star.pts[x[0]]
+        v01 = self.star.pts[x[1]]
+        v10 = self.star.pts[xcomp[0]]
+        v11 = self.star.pts[xcomp[1]]
+        if any([np.all(abs(v00 - np.dot(g, v10)) < threshold) and np.all(abs(v01 - np.dot(g, v11)) < threshold)
+                for g in self.groupops]):
+            return True
+        return any([np.all(abs(v00 - np.dot(g, v11)) < threshold) and np.all(abs(v01 - np.dot(g, v10)) < threshold)
+                for g in self.groupops])
 
