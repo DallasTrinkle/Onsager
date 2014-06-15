@@ -234,6 +234,7 @@ class DoubleStar:
                     self.pairs += (i1, self.star.pointindex(v2))
         self.Npairs = len(self.pairs)
         # now to make the unique sets of pairs (double-stars)
+        self.Ndstars = self.Npairs
 
     def symmatch(self, x, xcomp, threshold=1e-8):
         """
