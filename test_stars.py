@@ -30,8 +30,6 @@ class StarTests(unittest.TestCase):
         self.assertEqual(self.star.Nstars, 1)
         self.assertEqual(self.star.Npts, np.shape(self.NNvect)[0])
         self.star.generate(2)
-        for s in self.star.stars:
-            print s
         self.assertEqual(self.star.Nstars, 4)
 
     def testStarmembers(self):

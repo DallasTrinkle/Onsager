@@ -64,7 +64,7 @@ class Star:
         for i in range(Nshells-1):
             # add all NNvect to last shell produced, always excluding 0
             lastshell = [v1+v2 for v1 in lastshell for v2 in self.NNvect if not all(abs(v1+v2)<threshold)]
-            vectlist.append(lastshell)
+            vectlist += lastshell
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
         vectlist.sort(key=lambda x: np.vdot(x, x))
         x2_indices = []
@@ -99,6 +99,7 @@ class Star:
                     complist_stars.append([x])
             self.stars += complist_stars
             self.pts += complist_pts
+            xmin=xmax
         self.Nstars = len(self.stars)
         self.Npts = len(self.pts)
 
