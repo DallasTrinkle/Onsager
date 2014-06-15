@@ -64,7 +64,7 @@ class Star:
         lastshell = list(vectlist)
         for i in range(Nshells-1):
             # add all NNvect to last shell produced, always excluding 0
-            lastshell = [v1+v2 for v1 in lastshell for v2 in self.NNvect if not all(abs(v1+v2)<threshold)]
+            lastshell = [v1+v2 for v1 in lastshell for v2 in self.NNvect if not all(abs(v1 + v2) < threshold)]
             vectlist += lastshell
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
         vectlist.sort(key=lambda x: np.vdot(x, x))
@@ -84,7 +84,7 @@ class Star:
             complist_pts = []   # for finding unique points
             for x in vectlist[xmin:xmax]:
                 # Q1: is this a unique point?
-                if any([np.all(abs(x-xcomp) < threshold) for xcomp in complist_pts]):
+                if any([np.all(abs(x - xcomp) < threshold) for xcomp in complist_pts]):
                     continue
                 complist_pts.append(x)
                 # Q2: is this a new rep. for a unique star?
@@ -103,6 +103,64 @@ class Star:
             xmin=xmax
         self.Nstars = len(self.stars)
         self.Npts = len(self.pts)
+        self.index = None
+
+    def generateindices(self):
+        """
+        Generates the star indices for the set of points, if not already generated
+        """
+        if self.index != None:
+            return
+        self.index = np.zeros(self.Npts, dtype=int)
+        for i, v in enumerate(self.pts):
+            for ns, s in enumerate(self.stars):
+                if np.dot(v, v) != np.dot(s[0], s[0]):
+                    continue
+                if any([all(v == v1) for v1 in s]):
+                    self.index[i] = ns
+
+    def starindex(self, x, threshold=1e-8):
+        """
+        Returns the index for the star to which vector x belongs.
+
+        Parameters
+        ----------
+        x : array [3]
+            vector to check against star
+
+        threshold : float, optional
+            threshold for equality
+
+        Returns
+        -------
+        index corresponding to star; -1 if not found.
+        """
+        self.generateindices()
+        for i, v in enumerate(self.pts):
+            if all(abs(x - v) < threshold):
+                return self.index[i]
+        return -1
+
+    def pointindex(self, x, threshold=1e-8):
+        """
+        Returns the index corresponding to the point x.
+
+        Parameters
+        ----------
+        x : array [3]
+            vector to check against star
+
+        threshold : float, optional
+            threshold for equality
+
+        Returns
+        -------
+        index corresponding to point; -1 if not found.
+        """
+        for i, v in enumerate(self.pts):
+            if all(abs(x - v) < threshold):
+                return i
+        return -1
 
     def symmatch(self, x, xcomp, threshold=1e-8):
         """

@@ -24,6 +24,33 @@ class StarTests(unittest.TestCase):
         self.groupops = self.kpt.groupops
         self.star = stars.Star(self.NNvect, self.groupops)
 
+    def isclosed(self, s, groupops, threshold=1e-8):
+        """
+        Evaluate if star s is closed against group operations.
+
+        Parameters
+        ----------
+        s : list of vectors
+            star
+
+        groupops : list (or array) of 3x3 matrices
+            all group operations
+
+        threshold : float, optional
+            threshold for equality in comparison
+
+        Returns
+        -------
+        True if every pair of vectors in star are related by a group operation;
+        False otherwise
+        """
+        for v1 in s:
+            for v2 in s:
+                if not any([all(abs(v1 - np.dot(g, v2))<threshold) for g in groupops]):
+                    return False
+        return True
+
+
     def testStarConsistent(self):
         """Check that the counts (Npts, Nstars) make sense for FCC, with Nshells = 1..4"""
         for n in xrange(1,5):
@@ -37,6 +64,7 @@ class StarTests(unittest.TestCase):
                 elif x[0] != x[1] or x[1] != x[2]:
                     num *= 3
                 self.assertEqual(num, len(s))
+                self.assertTrue(self.isclosed(s, self.groupops))
 
     def testStarmembers(self):
         """Are the members correct?"""
@@ -59,6 +87,18 @@ class StarTests(unittest.TestCase):
         # 110, 200, 211, 220, 310, 321, 330, 222
         self.star.generate(3)
         self.assertEqual(self.star.Nstars, 8)
+
+    def testStarindices(self):
+        """Check that our indexing is correct."""
+        self.star.generate(4)
+        for ns, s in enumerate(self.star.stars):
+            for v in s:
+                self.assertEqual(ns, self.star.starindex(v))
+        self.assertEqual(-1, self.star.starindex(np.zeros(3)))
+        for i, v in enumerate(self.star.pts):
+            self.assertEqual(i, self.star.pointindex(v))
+        self.assertEqual(-1, self.star.pointindex(np.zeros(3)))
+
 
 
 class DoubleStarTests(unittest.TestCase):
