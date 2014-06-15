@@ -77,7 +77,7 @@ class Star:
         x2_indices.append(len(vectlist))
         # x2_indices now contains a list of indices with the same magnitudes
         self.stars = []
-        self.pts = []
+        ptlist = []
         xmin = 0
         for xmax in x2_indices:
             complist_stars = [] # for finding unique stars
@@ -99,8 +99,9 @@ class Star:
                     # new symmetry point!
                     complist_stars.append([x])
             self.stars += complist_stars
-            self.pts += complist_pts
+            ptlist += complist_pts
             xmin=xmax
+        self.pts = np.array(ptlist)
         self.Nstars = len(self.stars)
         self.Npts = len(self.pts)
         self.index = None
@@ -230,8 +231,9 @@ class DoubleStar:
         for i1, v1 in enumerate(self.star.pts):
             for dv in self.NNvect:
                 v2 = v1 + dv
-                if not all(abs(v2) < threshold):
-                    self.pairs += (i1, self.star.pointindex(v2))
+                i2 = self.star.pointindex(v2)
+                if i2 >= 0:
+                    self.pairs.append((i1, i2))
         self.Npairs = len(self.pairs)
         # now to make the unique sets of pairs (double-stars)
         self.Ndstars = self.Npairs
