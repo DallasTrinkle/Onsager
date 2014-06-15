@@ -223,6 +223,17 @@ class DoubleStar:
             return
         self.star = star
         self.Npts = star.Npts
+        self.NNvect = star.NNvect
+        self.groupops = star.groupops
+        self.pairs = []
+        # make the pairs first
+        for i1, v1 in enumerate(self.star.pts):
+            for dv in self.NNvect:
+                v2 = v1 + dv
+                if not all(abs(v2) < threshold):
+                    self.pairs += (i1, self.star.pointindex(v2))
+        self.Npairs = len(self.pairs)
+        # now to make the unique sets of pairs (double-stars)
 
     def symmatch(self, x, xcomp, threshold=1e-8):
         """
