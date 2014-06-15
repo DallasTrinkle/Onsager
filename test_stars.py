@@ -20,7 +20,7 @@ class StarTests(unittest.TestCase):
         self.lattice = FCClatt.lattice()
         self.NNvect = FCClatt.NNvect()
         self.invlist = FCClatt.invlist(self.NNvect)
-        self.kpt = KPTmesh.KPTmesh(self.lattice, )
+        self.kpt = KPTmesh.KPTmesh(self.lattice)
         self.groupops = self.kpt.groupops
         self.star = stars.Star(self.NNvect, self.groupops)
 
@@ -60,3 +60,22 @@ class StarTests(unittest.TestCase):
         self.star.generate(3)
         self.assertEqual(self.star.Nstars, 8)
 
+
+class DoubleStarTests(unittest.TestCase):
+    """Set of tests that our DoubleStar class is behaving correctly."""
+
+    def setUp(self):
+        self.lattice = FCClatt.lattice()
+        self.NNvect = FCClatt.NNvect()
+        self.invlist = FCClatt.invlist(self.NNvect)
+        self.kpt = KPTmesh.KPTmesh(self.lattice)
+        self.groupops = self.kpt.groupops
+        self.star = stars.Star(self.NNvect, self.groupops)
+        self.dstar = stars.DoubleStar()
+
+    def testDoubleStarGeneration(self):
+        """Can we generate a double-star?"""
+        self.star.generate(1)
+        self.dstar.generate(self.star)
+        self.assertTrue(self.dstar.Ndstars > 0)
+        self.assertTrue(self.dstar.Npairs > 0)

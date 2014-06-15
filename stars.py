@@ -54,6 +54,7 @@ class Star:
         if Nshells == 0:
             self.Nshells = 0
             self.Nstars = 0
+            self.Npts = 0
             return
         if Nshells == self.Nshells:
             return
@@ -102,6 +103,68 @@ class Star:
             xmin=xmax
         self.Nstars = len(self.stars)
         self.Npts = len(self.pts)
+
+    def symmatch(self, x, xcomp, threshold=1e-8):
+        """
+        Tells us if x and xcomp are equivalent by a symmetry group
+
+        Parameters
+        ----------
+        x : array [3]
+            vector to be tested
+        xcomp : array [3]
+            vector to compare
+        threshold : double, optional
+            threshold to use for "equality"
+
+        Returns
+        -------
+        True if equivalent by a point group operation, False otherwise
+        """
+        return any([np.all(abs(x - np.dot(g, xcomp)) < threshold) for g in self.groupops])
+
+
+class DoubleStar:
+    """
+    A class to construct double-stars (pairs of sites,
+    where each pair is related by a single group op).
+    """
+    def __init__(self, star=None):
+        """
+        Initiates a star-generator for a given set of nearest-neighbor vectors
+        and group operations. Explicitly *excludes* the trivial star R=0.
+
+        Parameters
+        ----------
+        star : Star, optional
+            all of our input parameters will come from this, if non-empty
+        """
+        if star != None:
+            self.NNvect = star.NNvect
+            self.groupops = star.groupops
+            if self.star.Nshells > 0:
+                self.generate(star)
+        self.star = None
+        self.Ndstars = 0
+        self.Npairs = 0
+        self.Npts = 0
+
+    def generate(self, star, threshold=1e-8):
+        """
+        Construct the actual double-shells, indexing.
+
+        Parameters
+        ----------
+        star : Star, optional
+            all of our input parameters will come from this, if non-empty
+        """
+        if star.Nshells == 0:
+            self.Npairs = 0
+            return
+        if star == self.star and star.Npts == self.Npts:
+            return
+        self.star = star
+        self.Npts = star.Npts
 
     def symmatch(self, x, xcomp, threshold=1e-8):
         """
