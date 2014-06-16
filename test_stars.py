@@ -14,12 +14,15 @@ import stars
 
 
 class StarTests(unittest.TestCase):
-    """Set of tests that our star code is behaving correctly"""
+    """Set of tests that our star code is behaving correctly for a general materials"""
 
     def setUp(self):
-        self.lattice = FCClatt.lattice()
-        self.NNvect = FCClatt.NNvect()
-        self.invlist = FCClatt.invlist(self.NNvect)
+        self.lattice = np.array([[3, 0, 0],
+                                 [0, 2, 0],
+                                 [0, 0, 1]])
+        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
+                                [0, 2, 0], [0, -2, 0],
+                                [0, 0, 1], [0, 0, -1]])
         self.kpt = KPTmesh.KPTmesh(self.lattice)
         self.groupops = self.kpt.groupops
         self.star = stars.Star(self.NNvect, self.groupops)
@@ -46,13 +49,47 @@ class StarTests(unittest.TestCase):
         """
         for v1 in s:
             for v2 in s:
-                if not any([all(abs(v1 - np.dot(g, v2))<threshold) for g in groupops]):
+                if not any([all(abs(v1 - np.dot(g, v2)) < threshold) for g in groupops]):
                     return False
         return True
 
 
     def testStarConsistent(self):
-        """Check that the counts (Npts, Nstars) make sense for FCC, with Nshells = 1..4"""
+        """Check that the counts (Npts, Nstars) make sense, with Nshells = 1..4"""
+        for n in xrange(1,5):
+            self.star.generate(n)
+            self.assertEqual(self.star.Npts, sum([len(s) for s in self.star.stars]))
+            for s in self.star.stars:
+                self.assertTrue(self.isclosed(s, self.groupops))
+
+    def testStarindices(self):
+        """Check that our indexing is correct."""
+        self.star.generate(4)
+        for ns, s in enumerate(self.star.stars):
+            for v in s:
+                self.assertEqual(ns, self.star.starindex(v))
+        self.assertEqual(-1, self.star.starindex(np.zeros(3)))
+        for i, v in enumerate(self.star.pts):
+            self.assertEqual(i, self.star.pointindex(v))
+        self.assertEqual(-1, self.star.pointindex(np.zeros(3)))
+
+
+class CubicStarTests(StarTests):
+    """Set of tests that our star code is behaving correctly for cubic materials"""
+
+    def setUp(self):
+        self.lattice = np.array([[1, 0, 0],
+                                 [0, 1, 0],
+                                 [0, 0, 1]])
+        self.NNvect = np.array([[1, 0, 0], [-1, 0, 0],
+                                [0, 1, 0], [0, -1, 0],
+                                [0, 0, 1], [0, 0, -1]])
+        self.kpt = KPTmesh.KPTmesh(self.lattice)
+        self.groupops = self.kpt.groupops
+        self.star = stars.Star(self.NNvect, self.groupops)
+
+    def testStarConsistent(self):
+        """Check that the counts (Npts, Nstars) make sense for cubic, with Nshells = 1..4"""
         for n in xrange(1,5):
             self.star.generate(n)
             self.assertEqual(self.star.Npts, sum([len(s) for s in self.star.stars]))
@@ -73,6 +110,17 @@ class StarTests(unittest.TestCase):
         for v in self.NNvect:
             self.assertTrue(any(all(abs(v-v1)<1e-8) for v1 in s))
 
+
+class FCCStarTests(CubicStarTests):
+    """Set of tests that our star code is behaving correctly for FCC"""
+
+    def setUp(self):
+        self.lattice = FCClatt.lattice()
+        self.NNvect = FCClatt.NNvect()
+        self.kpt = KPTmesh.KPTmesh(self.lattice)
+        self.groupops = self.kpt.groupops
+        self.star = stars.Star(self.NNvect, self.groupops)
+
     def testStarCount(self):
         """Check that the counts (Npts, Nstars) make sense for FCC, with Nshells = 1, 2, 3"""
         # 110
@@ -88,18 +136,6 @@ class StarTests(unittest.TestCase):
         self.star.generate(3)
         self.assertEqual(self.star.Nstars, 8)
 
-    def testStarindices(self):
-        """Check that our indexing is correct."""
-        self.star.generate(4)
-        for ns, s in enumerate(self.star.stars):
-            for v in s:
-                self.assertEqual(ns, self.star.starindex(v))
-        self.assertEqual(-1, self.star.starindex(np.zeros(3)))
-        for i, v in enumerate(self.star.pts):
-            self.assertEqual(i, self.star.pointindex(v))
-        self.assertEqual(-1, self.star.pointindex(np.zeros(3)))
-
-
 
 class DoubleStarTests(unittest.TestCase):
     """Set of tests that our DoubleStar class is behaving correctly."""
@@ -107,7 +143,6 @@ class DoubleStarTests(unittest.TestCase):
     def setUp(self):
         self.lattice = FCClatt.lattice()
         self.NNvect = FCClatt.NNvect()
-        self.invlist = FCClatt.invlist(self.NNvect)
         self.kpt = KPTmesh.KPTmesh(self.lattice)
         self.groupops = self.kpt.groupops
         self.star = stars.Star(self.NNvect, self.groupops)
@@ -143,16 +178,16 @@ class DoubleStarTests(unittest.TestCase):
         self.assertEqual(self.dstar.Ndstars, 4 + 1 + 2)
 
     def testPairIndices(self):
-        """Check that our pair indexing works correctly for Nshell=1..4"""
-        for nshells in xrange(1, 5):
+        """Check that our pair indexing works correctly for Nshell=1..3"""
+        for nshells in xrange(1, 4):
             self.star.generate(nshells)
             self.dstar.generate(self.star)
             for pair in self.dstar.pairs:
                 self.assertTrue(pair == self.dstar.pairs[self.dstar.pairindex(pair)])
 
     def testDoubleStarindices(self):
-        """Check that our double-star indexing works correctly for Nshell=1..4"""
-        for nshells in xrange(1, 5):
+        """Check that our double-star indexing works correctly for Nshell=1..3"""
+        for nshells in xrange(1, 4):
             self.star.generate(nshells)
             self.dstar.generate(self.star)
             for pair in self.dstar.pairs:
