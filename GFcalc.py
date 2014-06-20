@@ -625,6 +625,7 @@ class GFcalc:
             self.kpt, self.wts = self.kptmesh.symmesh()
             self.Gsc = np.zeros(self.kptmesh.Nkptsym)
             self.Gsc_calced = False
+            self.Gcache = [] # our cached values
 
     def calccoskR(self, R):
         """
