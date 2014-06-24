@@ -212,3 +212,51 @@ class StarVectorTests(unittest.TestCase):
         self.star.generate(1)
         self.starvec.generate(self.star)
         self.assertTrue(self.starvec.Nstarvects>0)
+
+    def StarVectorConsistent(self, nshells):
+        """Do the star vectors obey the definition?"""
+        self.star.generate(nshells)
+        self.starvec.generate(self.star)
+        for i, s in enumerate(self.starvec.starvecpos):
+            vec=self.starvec.starvecvec[i]
+            # s: star positions
+            # vec: corresponding vector in vector function
+            for n, R in enumerate(s):
+                v=vec[n]
+                for g in self.groupops:
+                    R1 = np.dot(g, R)
+                    for m, R2 in enumerate(s):
+                        if all(abs(R1 - R2) < 1e-8):
+                            self.assertTrue(all(abs(vec[m] - np.dot(g, v)) < 1e-8))
+
+    def TestStarVectorConsistent(self):
+        """Do the star vectors obey the definition?"""
+        self.StarVectorConsistent(self, 1)
+
+    def testStarVectorCount(self):
+        """Does our star vector count make any sense?"""
+        self.star.generate(1)
+        self.starvec.generate(self.star)
+        self.assertEqual(self.starvec.Nstarvects, 3)
+
+class StarVectorFCCTests(StarVectorTests):
+    """Set of tests that our StarVector class is behaving correctly, for FCC"""
+    def setUp(self):
+        self.lattice = FCClatt.lattice()
+        self.NNvect = FCClatt.NNvect()
+        self.kpt = KPTmesh.KPTmesh(self.lattice)
+        self.groupops = self.kpt.groupops
+        self.star = stars.Star(self.NNvect, self.groupops)
+        self.starvec = stars.StarVector(self.star)
+
+    def testStarVectorCount(self):
+        """Does our star vector count make any sense?"""
+        self.star.generate(2)
+        self.starvec.generate(self.star)
+        # nn + nn = 4 stars, and that should make 5 star-vectors!
+        self.assertEqual(self.starvec.Nstarvects, 5)
+
+    def TestStarVectorConsistent(self):
+        """Do the star vectors obey the definition?"""
+        self.StarVectorConsistent(self, 2)
+

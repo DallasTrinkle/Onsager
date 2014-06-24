@@ -354,7 +354,7 @@ class StarVector:
             if star.Nshells > 0:
                 self.generate(star)
 
-    def generate(self, star):
+    def generate(self, star, threshold=1e-8):
         """
         Construct the actual star-vectors
 
@@ -371,3 +371,70 @@ class StarVector:
         self.Npts = star.Npts
         self.NNvect = star.NNvect
         self.groupops = star.groupops
+        self.starvecpos = []
+        self.starvecvec = []
+        for s in self.star.stars:
+            # start by generating the parallel star-vector; always trivially present:
+            self.starvecpos.append(s)
+            scale = 1./np.sqrt(len(s)*np.dot(s[0],s[0])) # normalization factor
+            self.starvecvec.append([v*scale for v in s])
+            # next, try to generate perpendicular star-vectors, if present:
+            v0 = np.cross(s[0], np.array([0, 0, 1]))
+            if np.dot(v0, v0) < threshold:
+                v0 = np.cross(s[0], np.array([1, 0, 0]))
+            v1 = np.cross(s[0], v0)
+            # normalization:
+            v0 /= np.sqrt(np.dot(v0, v0))
+            v1 /= np.sqrt(np.dot(v1, v1))
+            Nvect = 2
+            # run over the invariant group operations for vector s[0]:
+            for g in [g0 for g0 in self.groupops if all(abs(np.dot(g0, s[0]) - s[0]) < threshold)]:
+                if Nvect == 0:
+                    continue
+                gv0 = np.dot(g, v0)
+                if Nvect == 1:
+                    # we only need to check that we still have an invariant vector
+                    if any(abs(gv0 - v0) > threshold):
+                        Nvect = 0
+                if Nvect == 2:
+                    gv1 = np.dot(g, v1)
+                    g00 = np.dot(v0, gv0)
+                    g11 = np.dot(v1, gv1)
+                    g01 = np.dot(v0, gv1)
+                    g10 = np.dot(v1, gv0)
+                    if abs((abs(g00*g11 - g01*g10) - 1)) > threshold:
+                        # we don't have an orthogonal matrix, so kick out
+                        Nvect = 0
+                        continue
+                    if abs(g01-g10) > threshold:
+                        # we have a rotation... so the only eigenvalues are complex conjugate pairs
+                        Nvect = 0
+                        continue
+                    if (abs(g00 - 1) > threshold) or (abs(g11 - 1) > threshold):
+                        if abs(g00 - 1) > threshold:
+                            Nvect = 1
+                            continue
+                        if abs(g11 - 1) > threshold:
+                            v1 = v0
+                            Nvect = 1
+                            continue
+                        v0 = (g01*v0 + (1 - g00)*v1)/np.sqrt(g01*g10 + (1 - g00)**2)
+                        Nvect = 1
+            # so... do we have any vectors to add?
+            if Nvect > 0:
+                v0 /= np.sqrt(len(s))
+                v1 /= np.sqrt(len(s))
+                vlist = [v0]
+                if Nvect > 1:
+                    vlist.append(v1)
+                # add the positions
+                for v in vlist:
+                    self.starvecpos.append(s)
+                    veclist = []
+                    for R in s:
+                        for g in self.groupops:
+                            if all(abs(R - np.dot(g, s[0])) < threshold):
+                                veclist += [np.dot(g, v)]
+                                continue
+                    self.starvecvec.append(veclist)
+        self.Nstarvects = len(self.starvecpos)
