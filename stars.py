@@ -437,4 +437,11 @@ class StarVector:
                                 veclist += [np.dot(g, v)]
                                 continue
                     self.starvecvec.append(veclist)
+        self.generateouter()
         self.Nstarvects = len(self.starvecpos)
+
+    def generateouter(self):
+        """
+        Generate our outer products for our star-vectors
+        """
+        self.outer = [sum([np.outer(v, v) for v in veclist]) for veclist in self.starvecvec]

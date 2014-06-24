@@ -23,8 +23,7 @@ class StarTests(unittest.TestCase):
         self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
                                 [0, 2, 0], [0, -2, 0],
                                 [0, 0, 1], [0, 0, -1]])
-        self.kpt = KPTmesh.KPTmesh(self.lattice)
-        self.groupops = self.kpt.groupops
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
         self.star = stars.Star(self.NNvect, self.groupops)
 
     def isclosed(self, s, groupops, threshold=1e-8):
@@ -84,8 +83,7 @@ class CubicStarTests(StarTests):
         self.NNvect = np.array([[1, 0, 0], [-1, 0, 0],
                                 [0, 1, 0], [0, -1, 0],
                                 [0, 0, 1], [0, 0, -1]])
-        self.kpt = KPTmesh.KPTmesh(self.lattice)
-        self.groupops = self.kpt.groupops
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
         self.star = stars.Star(self.NNvect, self.groupops)
 
     def testStarConsistent(self):
@@ -117,8 +115,7 @@ class FCCStarTests(CubicStarTests):
     def setUp(self):
         self.lattice = FCClatt.lattice()
         self.NNvect = FCClatt.NNvect()
-        self.kpt = KPTmesh.KPTmesh(self.lattice)
-        self.groupops = self.kpt.groupops
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
         self.star = stars.Star(self.NNvect, self.groupops)
 
     def testStarCount(self):
@@ -143,8 +140,7 @@ class DoubleStarTests(unittest.TestCase):
     def setUp(self):
         self.lattice = FCClatt.lattice()
         self.NNvect = FCClatt.NNvect()
-        self.kpt = KPTmesh.KPTmesh(self.lattice)
-        self.groupops = self.kpt.groupops
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
         self.star = stars.Star(self.NNvect, self.groupops)
         self.dstar = stars.DoubleStar()
 
@@ -202,8 +198,7 @@ class StarVectorTests(unittest.TestCase):
         self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
                                 [0, 2, 0], [0, -2, 0],
                                 [0, 0, 1], [0, 0, -1]])
-        self.kpt = KPTmesh.KPTmesh(self.lattice)
-        self.groupops = self.kpt.groupops
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
         self.star = stars.Star(self.NNvect, self.groupops)
         self.starvec = stars.StarVector(self.star)
 
@@ -220,14 +215,15 @@ class StarVectorTests(unittest.TestCase):
         for s, vec in zip(self.starvec.starvecpos, self.starvec.starvecvec):
             for R, v in zip(s, vec):
                 for g in self.groupops:
-                    R1 = np.dot(g, R)
-                    for m, R2 in enumerate(s):
-                        if all(abs(R1 - R2) < 1e-8):
-                            self.assertTrue(all(abs(vec[m] - np.dot(g, v)) < 1e-8))
+                    Rrot = np.dot(g, R)
+                    vrot = np.dot(g, v)
+                    for R1, v1 in zip(s, vec):
+                        if (abs(R1 - Rrot) < 1e-8).all():
+                            self.assertTrue((abs(v1 - vrot) < 1e-8).all())
 
-    def TestStarVectorConsistent(self):
+    def testStarVectorConsistent(self):
         """Do the star vectors obey the definition?"""
-        self.StarVectorConsistent(self, 1)
+        self.StarVectorConsistent(1)
 
     def testStarVectorCount(self):
         """Does our star vector count make any sense?"""
@@ -235,13 +231,24 @@ class StarVectorTests(unittest.TestCase):
         self.starvec.generate(self.star)
         self.assertEqual(self.starvec.Nstarvects, 3)
 
+    def testStarVectorOuterProduct(self):
+        """Do we generate the correct outer products for our star-vectors?"""
+        self.star.generate(1)
+        self.starvec.generate(self.star)
+        for outer in self.starvec.outer:
+            self.assertAlmostEqual(np.trace(outer), 1)
+            # should also be symmetric:
+            for g in self.groupops:
+                g_out_gT = np.dot(g, np.dot(outer, g.T))
+                self.assertTrue((abs(outer - g_out_gT) < 1e-8).all())
+
+
 class StarVectorFCCTests(StarVectorTests):
     """Set of tests that our StarVector class is behaving correctly, for FCC"""
     def setUp(self):
         self.lattice = FCClatt.lattice()
         self.NNvect = FCClatt.NNvect()
-        self.kpt = KPTmesh.KPTmesh(self.lattice)
-        self.groupops = self.kpt.groupops
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
         self.star = stars.Star(self.NNvect, self.groupops)
         self.starvec = stars.StarVector(self.star)
 
@@ -252,7 +259,16 @@ class StarVectorFCCTests(StarVectorTests):
         # nn + nn = 4 stars, and that should make 5 star-vectors!
         self.assertEqual(self.starvec.Nstarvects, 5)
 
-    def TestStarVectorConsistent(self):
+    def testStarVectorConsistent(self):
         """Do the star vectors obey the definition?"""
-        self.StarVectorConsistent(self, 2)
+        self.StarVectorConsistent(2)
 
+    def testStarVectorOuterProductMore(self):
+        """Do we generate the correct outer products for our star-vectors?"""
+        self.star.generate(2)
+        self.starvec.generate(self.star)
+        # with cubic symmetry, these all have to equal 1/3 * identity
+        testouter = 1./3.*np.eye(3)
+        for outer in self.starvec.outer:
+            print outer
+            self.assertTrue((abs(outer - testouter) < 1e-8).all())
