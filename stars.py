@@ -197,15 +197,15 @@ class DoubleStar:
         star : Star, optional
             all of our input parameters will come from this, if non-empty
         """
+        self.star = None
+        self.Ndstars = 0
+        self.Npairs = 0
+        self.Npts = 0
         if star != None:
             self.NNvect = star.NNvect
             self.groupops = star.groupops
             if self.star.Nshells > 0:
                 self.generate(star)
-        self.star = None
-        self.Ndstars = 0
-        self.Npairs = 0
-        self.Npts = 0
 
     def generate(self, star, threshold=1e-8):
         """
@@ -331,3 +331,43 @@ class DoubleStar:
         return any([np.all(abs(v00 - np.dot(g, v11)) < threshold) and np.all(abs(v01 - np.dot(g, v10)) < threshold)
                 for g in self.groupops])
 
+class StarVector:
+    """
+    A class to construct star-vectors, and be able to efficiently index.
+    """
+    def __init__(self, star=None):
+        """
+        Initiates a star-vector-generator; is designed to work with a given star.
+
+        Parameters
+        ----------
+        star : Star, optional
+            all of our input parameters will come from this, if non-empty
+        """
+        self.star = None
+        self.Npts = 0
+        self.Nstarvects = 0
+        self.Nstars = 0
+        if star != None:
+            self.NNvect = star.NNvect
+            self.groupops = star.groupops
+            if star.Nshells > 0:
+                self.generate(star)
+
+    def generate(self, star):
+        """
+        Construct the actual star-vectors
+
+        Parameters
+        ----------
+        star : Star, optional
+            all of our input parameters will come from this, if non-empty
+        """
+        if star.Nshells == 0:
+            return
+        if star == self.star and star.Npts == self.Npts:
+            return
+        self.star = star
+        self.Npts = star.Npts
+        self.NNvect = star.NNvect
+        self.groupops = star.groupops

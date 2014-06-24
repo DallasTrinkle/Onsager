@@ -192,3 +192,23 @@ class DoubleStarTests(unittest.TestCase):
             self.dstar.generate(self.star)
             for pair in self.dstar.pairs:
                 self.assertTrue(any(pair == p for p in self.dstar.dstars[self.dstar.dstarindex(pair)]))
+
+class StarVectorTests(unittest.TestCase):
+    """Set of tests that our StarVector class is behaving correctly"""
+    def setUp(self):
+        self.lattice = np.array([[3, 0, 0],
+                                 [0, 2, 0],
+                                 [0, 0, 1]])
+        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
+                                [0, 2, 0], [0, -2, 0],
+                                [0, 0, 1], [0, 0, -1]])
+        self.kpt = KPTmesh.KPTmesh(self.lattice)
+        self.groupops = self.kpt.groupops
+        self.star = stars.Star(self.NNvect, self.groupops)
+        self.starvec = stars.StarVector(self.star)
+
+    def testStarVectorGenerate(self):
+        """Can we generate star-vectors that make sense?"""
+        self.star.generate(1)
+        self.starvec.generate(self.star)
+        self.assertTrue(self.starvec.Nstarvects>0)
