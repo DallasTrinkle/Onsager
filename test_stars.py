@@ -217,12 +217,8 @@ class StarVectorTests(unittest.TestCase):
         """Do the star vectors obey the definition?"""
         self.star.generate(nshells)
         self.starvec.generate(self.star)
-        for i, s in enumerate(self.starvec.starvecpos):
-            vec=self.starvec.starvecvec[i]
-            # s: star positions
-            # vec: corresponding vector in vector function
-            for n, R in enumerate(s):
-                v=vec[n]
+        for s, vec in zip(self.starvec.starvecpos, self.starvec.starvecvec):
+            for R, v in zip(s, vec):
                 for g in self.groupops:
                     R1 = np.dot(g, R)
                     for m, R2 in enumerate(s):
