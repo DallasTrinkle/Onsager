@@ -402,28 +402,25 @@ class StarVector:
                     g11 = np.dot(v1, gv1)
                     g01 = np.dot(v0, gv1)
                     g10 = np.dot(v1, gv0)
-                    if abs((abs(g00*g11 - g01*g10) - 1)) > threshold:
-                        # we don't have an orthogonal matrix, so kick out
-                        Nvect = 0
-                        continue
-                    if abs(g01-g10) > threshold:
-                        # we have a rotation... so the only eigenvalues are complex conjugate pairs
+                    if abs((abs(g00*g11 - g01*g10) - 1)) > threshold or abs(g01-g10) > threshold:
+                        # we don't have an orthogonal matrix, or we have a rotation, so kick out
                         Nvect = 0
                         continue
                     if (abs(g00 - 1) > threshold) or (abs(g11 - 1) > threshold):
-                        if abs(g00 - 1) > threshold:
+                        # if we don't have the identify matrix, then we have to find the one vector that survives
+                        if abs(g00 - 1) < threshold:
                             Nvect = 1
                             continue
-                        if abs(g11 - 1) > threshold:
-                            v1 = v0
+                        if abs(g11 - 1) < threshold:
+                            v0 = v1
                             Nvect = 1
                             continue
                         v0 = (g01*v0 + (1 - g00)*v1)/np.sqrt(g01*g10 + (1 - g00)**2)
                         Nvect = 1
             # so... do we have any vectors to add?
             if Nvect > 0:
-                v0 /= np.sqrt(len(s))
-                v1 /= np.sqrt(len(s))
+                v0 /= np.sqrt(len(s)*np.dot(v0, v0))
+                v1 /= np.sqrt(len(s)*np.dot(v1, v1))
                 vlist = [v0]
                 if Nvect > 1:
                     vlist.append(v1)
@@ -434,8 +431,8 @@ class StarVector:
                     for R in s:
                         for g in self.groupops:
                             if all(abs(R - np.dot(g, s[0])) < threshold):
-                                veclist += [np.dot(g, v)]
-                                continue
+                                veclist.append(np.dot(g, v))
+                                break
                     self.starvecvec.append(veclist)
         self.generateouter()
         self.Nstarvects = len(self.starvecpos)
