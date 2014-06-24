@@ -270,5 +270,4 @@ class StarVectorFCCTests(StarVectorTests):
         # with cubic symmetry, these all have to equal 1/3 * identity
         testouter = 1./3.*np.eye(3)
         for outer in self.starvec.outer:
-            print outer
             self.assertTrue((abs(outer - testouter) < 1e-8).all())
