@@ -202,9 +202,7 @@ class DoubleStar:
         self.Npairs = 0
         self.Npts = 0
         if star != None:
-            self.NNvect = star.NNvect
-            self.groupops = star.groupops
-            if self.star.Nshells > 0:
+            if star.Nshells > 0:
                 self.generate(star)
 
     def generate(self, star, threshold=1e-8):
@@ -456,7 +454,7 @@ class StarVector:
 
         Returns
         -------
-        GFexpansion: array[Nsv, Nsv, Nstars]
+        GFexpansion: array[Nsv, Nsv, Nstars+1]
             the GF matrix[i, j] = GFexpansion[i, j, 0]*GF(0) + sum(GFexpansion[i, j, k+1] * GF(starGF[k]))
         """
         if self.Nstarvects == 0:
@@ -479,3 +477,39 @@ class StarVector:
                 else:
                     GFexpansion[i, j, :] = GFexpansion[j, i, :]
         return GFexpansion
+
+    def rateexpansion(self, dstar):
+        """
+        Construct the omega1 matrix expansion in terms of the double stars.
+
+        Parameters
+        ----------
+        dstar: DoubleStar
+            double-stars (i.e., pairs that are related by a symmetry operation; usually the sites
+            are connected by a NN vector to facilitate a jump; indicates unique vacancy jumps
+            around a solute)
+
+        Returns
+        -------
+        rateexpansion: array[Nsv, Nsv, Ndstars]
+            the omega1 matrix[i, j] = sum(rateexpansion[i, j, k] * omega1(dstar[k]))
+        """
+        if self.Nstarvects == 0:
+            return None
+        if not isinstance(dstar, DoubleStar):
+            raise TypeError('need a double star')
+        rateexpansion = np.zeros((self.Nstarvects, self.Nstarvects, dstar.Ndstars))
+        for i in xrange(self.Nstarvects):
+            for j in xrange(self.Nstarvects):
+                if i <= j :
+                    for Ri, vi in zip(self.starvecpos[i], self.starvecvec[i]):
+                        for Rj, vj in zip(self.starvecpos[j], self.starvecvec[j]):
+                            # note: double-stars are tuples of point indices
+                            k = dstar.dstarindex((dstar.star.pointindex(Ri),
+                                                  dstar.star.pointindex(Rj)))
+                            # note: k == -1 indicates now a pair that does not appear, not an error
+                            if k >= 0:
+                                rateexpansion[i, j, k] += np.dot(vi, vj)
+                else:
+                    rateexpansion[i, j, :] = rateexpansion[j, i, :]
+        return rateexpansion

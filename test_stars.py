@@ -333,3 +333,61 @@ class StarVectorGFFCClinearTests(StarVectorGFlinearTests):
         """Test the construction of the GF using double-nn shell"""
         self.ConstructGF(2)
 
+
+class StarVectorOmegalinearTests(unittest.TestCase):
+    """Set of tests for our expansion of omega_1 in double-stars"""
+    def setUp(self):
+        self.lattice = np.array([[3, 0, 0],
+                                 [0, 2, 0],
+                                 [0, 0, 1]])
+        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
+                                [0, 2, 0], [0, -2, 0],
+                                [0, 0, 1], [0, 0, -1]])
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.star = stars.Star(self.NNvect, self.groupops)
+        self.dstar = stars.DoubleStar()
+        self.starvec = stars.StarVector()
+        self.rates = np.array((3., 3., 2., 2., 1., 1.))
+
+    def testConstructOmega1(self):
+        self.star.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.dstar.generate(self.star)
+        self.starvec.generate(self.star)
+        rateexpand = self.starvec.rateexpansion(self.dstar)
+        self.assertEqual(np.shape(rateexpand),
+                         (self.starvec.Nstarvects, self.starvec.Nstarvects, self.dstar.Ndstars))
+        om1expand = np.zeros(self.dstar.Ndstars)
+        for nd, ds in enumerate(self.dstar.dstars):
+            pair = ds[0]
+            dv = self.star.pts[pair[0]]-self.star.pts[pair[1]]
+            for vec, rate in zip(self.NNvect, self.rates):
+                if all(abs(dv - vec) < 1e-8):
+                    om1expand[nd] = rate
+                    break
+        # print om1expand
+        for i in xrange(self.starvec.Nstarvects):
+            for j in xrange(self.starvec.Nstarvects):
+                # test the construction
+                om1 = 0
+                for Ri, vi in zip(self.starvec.starvecpos[i], self.starvec.starvecvec[i]):
+                    for Rj, vj in zip(self.starvec.starvecpos[j], self.starvec.starvecvec[j]):
+                        dv = Ri - Rj
+                        for vec, rate in zip(self.NNvect, self.rates):
+                            if all(abs(dv - vec) < 1e-8):
+                                om1 += np.dot(vi, vj) * rate
+                                break
+                self.assertAlmostEqual(om1, np.dot(rateexpand[i, j, :], om1expand))
+        # print(np.dot(rateexpand, om1expand))
+
+
+class StarVectorFCCOmegalinearTests(StarVectorOmegalinearTests):
+    """Set of tests for our expansion of omega_1 in double-stars for FCC"""
+    def setUp(self):
+        self.lattice = FCClatt.lattice()
+        self.NNvect = FCClatt.NNvect()
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.star = stars.Star(self.NNvect, self.groupops)
+        self.dstar = stars.DoubleStar()
+        self.starvec = stars.StarVector()
+        self.rates = np.array((1./12.,) * 12)
+
