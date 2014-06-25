@@ -442,3 +442,40 @@ class StarVector:
         Generate our outer products for our star-vectors
         """
         self.outer = [sum([np.outer(v, v) for v in veclist]) for veclist in self.starvecvec]
+
+    def GFexpansion(self, starGF):
+        """
+        Construct the GF matrix expansion in terms of the star vectors, and indexed
+        to starGF.
+
+        Parameters
+        ----------
+        starGF: Star
+            stars that reference the GF; should be at least twice the size of the
+            stars used to construct the star vector
+
+        Returns
+        -------
+        GFexpansion: array[Nsv, Nsv, Nstars]
+            the GF matrix[i, j] = GFexpansion[i, j, 0]*GF(0) + sum(GFexpansion[i, j, k+1] * GF(starGF[k]))
+        """
+        if self.Nstarvects == 0:
+            return None
+        if not isinstance(starGF, Star):
+            raise TypeError('need a star')
+        GFexpansion = np.zeros((self.Nstarvects, self.Nstarvects, starGF.Nstars+1))
+        for i in xrange(self.Nstarvects):
+            for j in xrange(self.Nstarvects):
+                if i <= j :
+                    for Ri, vi in zip(self.starvecpos[i], self.starvecvec[i]):
+                        for Rj, vj in zip(self.starvecpos[j], self.starvecvec[j]):
+                            if (Ri == Rj).all():
+                                k = 0
+                            else:
+                                k = starGF.starindex(Ri - Rj) + 1
+                                if k == 0:
+                                    raise ArithmeticError('GF star not large enough to include {}'.format(Ri - Rj))
+                            GFexpansion[i, j, k] += np.dot(vi, vj)
+                else:
+                    GFexpansion[i, j, :] = GFexpansion[j, i, :]
+        return GFexpansion

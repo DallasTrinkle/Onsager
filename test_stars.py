@@ -271,3 +271,65 @@ class StarVectorFCCTests(StarVectorTests):
         testouter = 1./3.*np.eye(3)
         for outer in self.starvec.outer:
             self.assertTrue((abs(outer - testouter) < 1e-8).all())
+
+import GFcalc
+
+
+class StarVectorGFlinearTests(unittest.TestCase):
+    """Set of tests that make sure we can construct the GF matrix as a linear combination"""
+    def setUp(self):
+        self.lattice = np.array([[3, 0, 0],
+                                 [0, 2, 0],
+                                 [0, 0, 1]])
+        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
+                                [0, 2, 0], [0, -2, 0],
+                                [0, 0, 1], [0, 0, -1]])
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.star = stars.Star(self.NNvect, self.groupops)
+        self.star2 = stars.Star(self.NNvect, self.groupops)
+        self.starvec = stars.StarVector(self.star)
+        self.rates = np.array((3., 3., 2., 2., 1., 1.))
+        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
+
+    def ConstructGF(self, nshells):
+        self.star.generate(nshells)
+        self.star2.generate(2*nshells)
+        self.starvec.generate(self.star)
+        GFexpand = self.starvec.GFexpansion(self.star2)
+        self.assertEqual(np.shape(GFexpand),
+                         (self.starvec.Nstarvects, self.starvec.Nstarvects, self.star2.Nstars + 1))
+        gexpand = np.zeros(self.star2.Nstars + 1)
+        gexpand[0] = self.GF.GF(np.zeros(3))
+        for i in xrange(self.star2.Nstars):
+            gexpand[i + 1] = self.GF.GF(self.star2.stars[i][0])
+        for i in xrange(self.starvec.Nstarvects):
+            for j in xrange(self.starvec.Nstarvects):
+                # test the construction
+                self.assertAlmostEqual(sum(GFexpand[i, j, :]), 0)
+                g = 0
+                for Ri, vi in zip(self.starvec.starvecpos[i], self.starvec.starvecvec[i]):
+                    for Rj, vj in zip(self.starvec.starvecpos[j], self.starvec.starvecvec[j]):
+                        g += np.dot(vi, vj)*self.GF.GF(Ri - Rj)
+                self.assertAlmostEqual(g, np.dot(GFexpand[i, j, :], gexpand))
+        # print(np.dot(GFexpand, gexpand))
+
+    def testConstructGF(self):
+        """Test the construction of the GF using double-nn shell"""
+        self.ConstructGF(2)
+
+class StarVectorGFFCClinearTests(StarVectorGFlinearTests):
+    """Set of tests that make sure we can construct the GF matrix as a linear combination for FCC"""
+    def setUp(self):
+        self.lattice = FCClatt.lattice()
+        self.NNvect = FCClatt.NNvect()
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.star = stars.Star(self.NNvect, self.groupops)
+        self.star2 = stars.Star(self.NNvect, self.groupops)
+        self.starvec = stars.StarVector(self.star)
+        self.rates = np.array((1./12., ) * 12)
+        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
+
+    def testConstructGF(self):
+        """Test the construction of the GF using double-nn shell"""
+        self.ConstructGF(2)
+
