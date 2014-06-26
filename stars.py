@@ -603,7 +603,8 @@ class StarVector:
         if not isinstance(NNstar, Star):
             raise TypeError('need a star')
         bias1ds = np.zeros((self.Nstarvects, dstar.Ndstars))
-        bias1prob = np.zeros((self.Nstarvects, dstar.Ndstars), dtype=int)
+        bias1prob = np.empty((self.Nstarvects, dstar.Ndstars), dtype=int)
+        bias1prob[:, :] = -1
         bias1NN = np.zeros((self.Nstarvects, NNstar.Nstars))
 
         # run through the star-vectors
@@ -624,6 +625,13 @@ class StarVector:
                         bias1NN[i, nn] += geom
                     else:
                         ind = dstar.dstarindex((p1, p2))
+                        if ind == -1:
+                            raise Error('Problem with DoubleStar indexing; could not find double-star for pair')
                         bias1ds[i, ind] += geom
-                        bias1prob[i, ind] = dstar.star.index[p2]
+                        sind = dstar.star.index[p2]
+                        if bias1prob[i, ind] == -1:
+                            bias1prob[i, ind] = sind
+                        else:
+                            if bias1prob[i, ind] != sind:
+                                raise Error('Inconsistent star endpoints found')
         return bias1ds, bias1prob, bias1NN

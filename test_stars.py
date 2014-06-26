@@ -534,7 +534,9 @@ class StarVectorBias1linearTests(unittest.TestCase):
         for i, ds in enumerate(self.dstar.dstars):
             p1, p2 = ds[0]
             dv = self.star.pts[p1] - self.star.pts[p2]
-            om1expand[i] = om0expand[self.NNstar.starindex(dv)]
+            sind = self.NNstar.starindex(dv)
+            self.assertNotEqual(sind, -1)
+            om1expand[i] = om0expand[sind]
         self.starvec.generate(self.star)
         bias1ds, bias1prob, bias1NN = self.starvec.bias1expansion(self.dstar, self.NNstar)
         self.assertEqual(np.shape(bias1ds),
@@ -547,7 +549,7 @@ class StarVectorBias1linearTests(unittest.TestCase):
         # construct some fake probabilities for testing: (add an "extra" star, set it's probability to 1
         # note: this probability is to be the SQRT of the true probability
         probsqrt = np.sqrt(np.array([1.10**(self.star.Nstars-n) for n in range(self.star.Nstars + 1)]))
-        probsqrt[-1] = 1
+        probsqrt[-1] = 1 # this is important, as it represents our baseline "far-field"
         biasvec = np.zeros((self.star.Npts, 3)) # bias vector: all the hops *excluding* exchange
         for i, pt in enumerate(self.star.pts):
             # in this, we are taking advantage of inversion symmetry: so vec is actually negative
@@ -575,12 +577,13 @@ class StarVectorBias1linearTests(unittest.TestCase):
             for Ri, vi in zip(svpos, svvec):
                 biasveccomp[self.star.pointindex(Ri), :] += om0*vi
 
-        print(biasvec)
         print(np.dot(bias1ds * probsqrt[bias1prob], om1expand))
         print(np.dot(bias1NN, om0expand))
         print 'bias1ds', bias1ds
         print 'bias1prob', bias1prob
         print 'bias1NN', bias1NN
+        print 'biasvec', biasvec
+        print 'biasveccomp', biasveccomp
 
         for i, pt in enumerate(self.star.pts):
             for d in xrange(3):
