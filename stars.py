@@ -564,3 +564,61 @@ class StarVector:
             if ind != -1:
                 bias2expansion[i, ind] = np.dot(self.starvecpos[i][0], self.starvecvec[i][0])*len(NNstar.stars[ind])
         return bias2expansion
+
+    def bias1expansion(self, dstar, NNstar):
+        """
+        Construct the bias1 vector expansion in terms of the nearest-neighbor stars.
+        There are three pieces to this that we need to construct now, so it's more
+        complicated.
+
+        Parameters
+        ----------
+        dstar: DoubleStar
+            double-stars (i.e., pairs that are related by a symmetry operation; usually the sites
+            are connected by a NN vector to facilitate a jump; indicates unique vacancy jumps
+            around a solute)
+
+        NNstar: Star
+            stars representing the unique nearest-neighbor jumps
+
+        Returns
+        -------
+        bias1ds: array[Nsv, Ndstars]
+            the bias1 vector[i] = sum(bias1ds[i, k] * prob_star[bias1prob[i, k] * omega1[dstar[k]])
+
+        bias1prob: array[Nsv, Ndstars], dtype=int
+            index for the corresponding *star* whose probability defines the endpoint.
+
+        bias1NN: array[Nsv, NNNstars]
+            we have an additional contribution to the bias1 vector:
+            bias1 vector[i] += sum(bias1NN[i, k] * omega0[NNstar[k]])
+        """
+        if self.Nstarvects == 0:
+            return None
+        if not isinstance(dstar, DoubleStar):
+            raise TypeError('need a double star')
+        if not isinstance(NNstar, Star):
+            raise TypeError('need a star')
+        bias1d = np.zeros((self.Nstarvects, dstar.Ndstars))
+        bias1prob = np.zeros((self.Nstarvects, dstar.Ndstars), dtype=int)
+        bias1NN = np.zeros((self.Nstarvects, NNstar.Nstars))
+
+        for i in xrange(self.Nstarvects):
+            for j in xrange(self.Nstarvects):
+                if i <= j :
+                    for Ri, vi in zip(self.starvecpos[i], self.starvecvec[i]):
+                        for Rj, vj in zip(self.starvecpos[j], self.starvecvec[j]):
+                            # note: double-stars are tuples of point indices
+                            k = dstar.dstarindex((dstar.star.pointindex(Ri),
+                                                  dstar.star.pointindex(Rj)))
+                            # note: k == -1 indicates now a pair that does not appear, not an error
+                            if k >= 0:
+                                rate1expansion[i, j, k] += np.dot(vi, vj)
+                else:
+                    rate1expansion[i, j, :] = rate1expansion[j, i, :]
+
+        # for i in xrange(self.Nstarvects):
+        #     ind = NNstar.starindex(self.starvecpos[i][0])
+        #     if ind != -1:
+        #         bias2expansion[i, ind] = np.dot(self.starvecpos[i][0], self.starvecvec[i][0])*len(NNstar.stars[ind])
+        return bias1d, bias1prob, bias1NN
