@@ -488,6 +488,17 @@ class StarVectorBias2linearTests(unittest.TestCase):
         for i in xrange(self.star.Npts):
             for d in xrange(3):
                 self.assertAlmostEqual(biasvec[i, d], biasveccomp[i, d])
-        print(biasvec)
-        print(np.dot(bias2expand, om2expand))
+        # print(biasvec)
+        # print(np.dot(bias2expand, om2expand))
 
+
+class StarVectorFCCBias2linearTests(StarVectorBias2linearTests):
+    """Set of tests for our expansion of omega_2 in NN stars for FCC"""
+    def setUp(self):
+        self.lattice = FCClatt.lattice()
+        self.NNvect = FCClatt.NNvect()
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.NNstar = stars.Star(self.NNvect, self.groupops)
+        self.star = stars.Star(self.NNvect, self.groupops)
+        self.starvec = stars.StarVector()
+        self.rates = np.array((1./12.,) * 12)
