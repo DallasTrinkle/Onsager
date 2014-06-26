@@ -434,3 +434,13 @@ class StarVectorOmega2linearTests(unittest.TestCase):
         # print(np.dot(rate2expand, om2expand))
 
 
+class StarVectorFCCOmega2linearTests(StarVectorOmega2linearTests):
+    """Set of tests for our expansion of omega_2 in double-stars for FCC"""
+    def setUp(self):
+        self.lattice = FCClatt.lattice()
+        self.NNvect = FCClatt.NNvect()
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.NNstar = stars.Star(self.NNvect, self.groupops)
+        self.star = stars.Star(self.NNvect, self.groupops)
+        self.starvec = stars.StarVector()
+        self.rates = np.array((1./12.,) * 12)
