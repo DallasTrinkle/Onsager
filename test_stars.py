@@ -353,8 +353,8 @@ class StarVectorOmegalinearTests(unittest.TestCase):
         self.star.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
         self.dstar.generate(self.star)
         self.starvec.generate(self.star)
-        rateexpand = self.starvec.rateexpansion(self.dstar)
-        self.assertEqual(np.shape(rateexpand),
+        rate1expand = self.starvec.rate1expansion(self.dstar)
+        self.assertEqual(np.shape(rate1expand),
                          (self.starvec.Nstarvects, self.starvec.Nstarvects, self.dstar.Ndstars))
         om1expand = np.zeros(self.dstar.Ndstars)
         for nd, ds in enumerate(self.dstar.dstars):
@@ -376,7 +376,7 @@ class StarVectorOmegalinearTests(unittest.TestCase):
                             if all(abs(dv - vec) < 1e-8):
                                 om1 += np.dot(vi, vj) * rate
                                 break
-                self.assertAlmostEqual(om1, np.dot(rateexpand[i, j, :], om1expand))
+                self.assertAlmostEqual(om1, np.dot(rate1expand[i, j, :], om1expand))
         # print(np.dot(rateexpand, om1expand))
 
 
@@ -390,4 +390,44 @@ class StarVectorFCCOmegalinearTests(StarVectorOmegalinearTests):
         self.dstar = stars.DoubleStar()
         self.starvec = stars.StarVector()
         self.rates = np.array((1./12.,) * 12)
+
+
+class StarVectorOmega2linearTests(unittest.TestCase):
+    """Set of tests for our expansion of omega_2 in double-stars"""
+    def setUp(self):
+        self.lattice = np.array([[3, 0, 0],
+                                 [0, 2, 0],
+                                 [0, 0, 1]])
+        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
+                                [0, 2, 0], [0, -2, 0],
+                                [0, 0, 1], [0, 0, -1]])
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.NNstar = stars.Star(self.NNvect, self.groupops)
+        self.star = stars.Star(self.NNvect, self.groupops)
+        self.starvec = stars.StarVector()
+        self.rates = np.array((3., 3., 2., 2., 1., 1.))
+
+    def testConstructOmega2(self):
+        self.NNstar.generate(1) # we need the NN set of stars for NN jumps
+        # construct the set of rates corresponding to the unique stars:
+        om2expand = np.zeros(self.NNstar.Nstars)
+        for vec, rate in zip(self.NNvect, self.rates):
+            om2expand[self.NNstar.starindex(vec)] = rate
+        self.star.generate(2) # go ahead and make a "large" set of stars
+        self.starvec.generate(self.star)
+        rate2expand = self.starvec.rate2expansion(self.NNstar)
+        self.assertEqual(np.shape(rate2expand),
+                         (self.starvec.Nstarvects, self.starvec.Nstarvects, self.NNstar.Nstars))
+        for i in xrange(self.starvec.Nstarvects):
+            for j in xrange(self.starvec.Nstarvects):
+                # test the construction
+                om2 = 0
+                for Ri, vi in zip(self.starvec.starvecpos[i], self.starvec.starvecvec[i]):
+                    for vec, rate in zip(self.NNvect, self.rates):
+                        if (vec == Ri).all():
+                            om2 += -np.dot(vi, vi) * rate
+                            break
+                self.assertAlmostEqual(om2, np.dot(rate2expand[i, j, :], om2expand))
+        print(np.dot(rateexpand, om2expand))
+
 

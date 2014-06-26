@@ -478,7 +478,7 @@ class StarVector:
                     GFexpansion[i, j, :] = GFexpansion[j, i, :]
         return GFexpansion
 
-    def rateexpansion(self, dstar):
+    def rate1expansion(self, dstar):
         """
         Construct the omega1 matrix expansion in terms of the double stars.
 
@@ -491,14 +491,14 @@ class StarVector:
 
         Returns
         -------
-        rateexpansion: array[Nsv, Nsv, Ndstars]
-            the omega1 matrix[i, j] = sum(rateexpansion[i, j, k] * omega1(dstar[k]))
+        rate1expansion: array[Nsv, Nsv, Ndstars]
+            the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1(dstar[k]))
         """
         if self.Nstarvects == 0:
             return None
         if not isinstance(dstar, DoubleStar):
             raise TypeError('need a double star')
-        rateexpansion = np.zeros((self.Nstarvects, self.Nstarvects, dstar.Ndstars))
+        rate1expansion = np.zeros((self.Nstarvects, self.Nstarvects, dstar.Ndstars))
         for i in xrange(self.Nstarvects):
             for j in xrange(self.Nstarvects):
                 if i <= j :
@@ -509,7 +509,34 @@ class StarVector:
                                                   dstar.star.pointindex(Rj)))
                             # note: k == -1 indicates now a pair that does not appear, not an error
                             if k >= 0:
-                                rateexpansion[i, j, k] += np.dot(vi, vj)
+                                rate1expansion[i, j, k] += np.dot(vi, vj)
                 else:
-                    rateexpansion[i, j, :] = rateexpansion[j, i, :]
-        return rateexpansion
+                    rate1expansion[i, j, :] = rate1expansion[j, i, :]
+        return rate1expansion
+
+    def rate2expansion(self, NNstar):
+        """
+        Construct the omega2 matrix expansion in terms of the nearest-neighbor stars.
+
+        Parameters
+        ----------
+        NNstar: Star
+            stars representing the unique nearest-neighbor jumps
+
+        Returns
+        -------
+        rate2expansion: array[Nsv, Nsv, NNstars]
+            the omega2 matrix[i, j] = sum(rate2expansion[i, j, k] * omega2(NNstar[k]))
+        """
+        if self.Nstarvects == 0:
+            return None
+        if not isinstance(NNstar, Star):
+            raise TypeError('need a star')
+        rate2expansion = np.zeros((self.Nstarvects, self.Nstarvects, NNstar.Nstars))
+        for i in xrange(self.Nstarvects):
+            # this is a diagonal matrix, so...
+            ind = NNstar.starindex(self.starvecpos[i][0])
+            if ind == -1:
+                continue
+            rate2expansion[i, i, ind] = -np.dot(self.starvecvec[i][0], self.starvecvec[i][0])*len(NNstar.stars[ind])
+        return rate2expansion
