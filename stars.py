@@ -536,7 +536,6 @@ class StarVector:
         for i in xrange(self.Nstarvects):
             # this is a diagonal matrix, so...
             ind = NNstar.starindex(self.starvecpos[i][0])
-            if ind == -1:
-                continue
-            rate2expansion[i, i, ind] = -np.dot(self.starvecvec[i][0], self.starvecvec[i][0])*len(NNstar.stars[ind])
+            if ind != -1:
+                rate2expansion[i, i, ind] = -np.dot(self.starvecvec[i][0], self.starvecvec[i][0])*len(NNstar.stars[ind])
         return rate2expansion

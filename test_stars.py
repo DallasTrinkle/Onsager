@@ -419,15 +419,18 @@ class StarVectorOmega2linearTests(unittest.TestCase):
         self.assertEqual(np.shape(rate2expand),
                          (self.starvec.Nstarvects, self.starvec.Nstarvects, self.NNstar.Nstars))
         for i in xrange(self.starvec.Nstarvects):
+            # test the construction
+            om2 = 0
+            for Ri, vi in zip(self.starvec.starvecpos[i], self.starvec.starvecvec[i]):
+                for vec, rate in zip(self.NNvect, self.rates):
+                    if (vec == Ri).all():
+                        om2 += -np.dot(vi, vi) * rate
+                        break
+            self.assertAlmostEqual(om2, np.dot(rate2expand[i, i, :], om2expand))
             for j in xrange(self.starvec.Nstarvects):
-                # test the construction
-                om2 = 0
-                for Ri, vi in zip(self.starvec.starvecpos[i], self.starvec.starvecvec[i]):
-                    for vec, rate in zip(self.NNvect, self.rates):
-                        if (vec == Ri).all():
-                            om2 += -np.dot(vi, vi) * rate
-                            break
-                self.assertAlmostEqual(om2, np.dot(rate2expand[i, j, :], om2expand))
-        print(np.dot(rateexpand, om2expand))
+                if j != i:
+                    for d in xrange(self.NNstar.Nstars):
+                        self.assertAlmostEquals(0, rate2expand[i, j, d])
+        # print(np.dot(rate2expand, om2expand))
 
 
