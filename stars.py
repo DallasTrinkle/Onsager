@@ -105,6 +105,7 @@ class Star:
         self.Nstars = len(self.stars)
         self.Npts = len(self.pts)
         self.index = None
+        self.generateindices()
 
     def generateindices(self):
         """
@@ -112,13 +113,15 @@ class Star:
         """
         if self.index != None:
             return
-        self.index = np.zeros(self.Npts, dtype=int)
+        self.index = np.empty(self.Npts, dtype=int)
+        self.index[:] = -1
         for i, v in enumerate(self.pts):
             for ns, s in enumerate(self.stars):
                 if np.dot(v, v) != np.dot(s[0], s[0]):
                     continue
                 if any([all(v == v1) for v1 in s]):
                     self.index[i] = ns
+                    break
 
     def starindex(self, x, threshold=1e-8):
         """
@@ -584,7 +587,7 @@ class StarVector:
         Returns
         -------
         bias1ds: array[Nsv, Ndstars]
-            the bias1 vector[i] = sum(bias1ds[i, k] * prob_star[bias1prob[i, k] * omega1[dstar[k]])
+            the bias1 vector[i] = sum(bias1ds[i, k] * sqrt(prob_star[bias1prob[i, k]) * omega1[dstar[k]])
 
         bias1prob: array[Nsv, Ndstars], dtype=int
             index for the corresponding *star* whose probability defines the endpoint.
@@ -599,26 +602,28 @@ class StarVector:
             raise TypeError('need a double star')
         if not isinstance(NNstar, Star):
             raise TypeError('need a star')
-        bias1d = np.zeros((self.Nstarvects, dstar.Ndstars))
+        bias1ds = np.zeros((self.Nstarvects, dstar.Ndstars))
         bias1prob = np.zeros((self.Nstarvects, dstar.Ndstars), dtype=int)
         bias1NN = np.zeros((self.Nstarvects, NNstar.Nstars))
 
-        for i in xrange(self.Nstarvects):
-            for j in xrange(self.Nstarvects):
-                if i <= j :
-                    for Ri, vi in zip(self.starvecpos[i], self.starvecvec[i]):
-                        for Rj, vj in zip(self.starvecpos[j], self.starvecvec[j]):
-                            # note: double-stars are tuples of point indices
-                            k = dstar.dstarindex((dstar.star.pointindex(Ri),
-                                                  dstar.star.pointindex(Rj)))
-                            # note: k == -1 indicates now a pair that does not appear, not an error
-                            if k >= 0:
-                                rate1expansion[i, j, k] += np.dot(vi, vj)
-                else:
-                    rate1expansion[i, j, :] = rate1expansion[j, i, :]
-
-        # for i in xrange(self.Nstarvects):
-        #     ind = NNstar.starindex(self.starvecpos[i][0])
-        #     if ind != -1:
-        #         bias2expansion[i, ind] = np.dot(self.starvecpos[i][0], self.starvecvec[i][0])*len(NNstar.stars[ind])
-        return bias1d, bias1prob, bias1NN
+        # run through the star-vectors
+        for i, svR, svv in zip(range(self.Nstarvects),
+                               self.starvecpos, self.starvecvec):
+            # run through the NN stars
+            p1 = dstar.star.pointindex(svR[0]) # first half of our pair
+            for nn, nns in enumerate(NNstar.stars):
+                # and their individual jumps
+                for vec in nns:
+                    endpoint = svR[0] + vec
+                    if all(abs(endpoint) < 1e-8):
+                        continue
+                    geom = np.dot(svv[0], vec) * len(svR)
+                    p2 = dstar.star.pointindex(endpoint)
+                    if p2 == -1:
+                        # we landed outside our range of double-stars, so...
+                        bias1NN[i, nn] += geom
+                    else:
+                        ind = dstar.dstarindex((p1, p2))
+                        bias1ds[i, ind] += geom
+                        bias1prob[i, ind] = dstar.star.index[p2]
+        return bias1ds, bias1prob, bias1NN

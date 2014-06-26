@@ -552,9 +552,9 @@ class StarVectorBias1linearTests(unittest.TestCase):
         for i, pt in enumerate(self.star.pts):
             # in this, we are taking advantage of inversion symmetry: so vec is actually negative
             for vec, rate in zip(self.NNvect, self.rates):
-                if not (vec == pt).all():
+                if not all(abs(pt + vec) < 1e-8):
                     # note: starindex returns -1 if not found, which defaults to the final probability of 1.
-                    biasvec[i, :] -= vec*rate*probsqrt[self.star.starindex(vec-pt)]
+                    biasvec[i, :] += vec*rate*probsqrt[self.star.starindex(pt + vec)]
         # construct the same bias vector using our expansion
         biasveccomp = np.zeros((self.star.Npts, 3))
         # we need to combine bias1ds and bias1prob; bias1d[sv, ds]*prob[bias1prob[sv, ds]]
@@ -578,7 +578,12 @@ class StarVectorBias1linearTests(unittest.TestCase):
         print(biasvec)
         print(np.dot(bias1ds * probsqrt[bias1prob], om1expand))
         print(np.dot(bias1NN, om0expand))
+        print 'bias1ds', bias1ds
+        print 'bias1prob', bias1prob
+        print 'bias1NN', bias1NN
 
-        for i in xrange(self.star.Npts):
+        for i, pt in enumerate(self.star.pts):
             for d in xrange(3):
-                self.assertAlmostEqual(biasvec[i, d], biasveccomp[i, d])
+                self.assertAlmostEqual(biasvec[i, d], biasveccomp[i, d],
+                                       msg='Did not match point[{}] {} direction {} where {} != {}'.format(
+                                           i, pt, d, biasvec[i, d], biasveccomp[i, d]))
