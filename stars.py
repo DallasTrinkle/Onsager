@@ -539,3 +539,28 @@ class StarVector:
             if ind != -1:
                 rate2expansion[i, i, ind] = -np.dot(self.starvecvec[i][0], self.starvecvec[i][0])*len(NNstar.stars[ind])
         return rate2expansion
+
+    def bias2expansion(self, NNstar):
+        """
+        Construct the bias2 vector expansion in terms of the nearest-neighbor stars.
+
+        Parameters
+        ----------
+        NNstar: Star
+            stars representing the unique nearest-neighbor jumps
+
+        Returns
+        -------
+        bias2expansion: array[Nsv, NNstars]
+            the bias2 vector[i] = sum(bias2expansion[i, k] * omega2(NNstar[k]))
+        """
+        if self.Nstarvects == 0:
+            return None
+        if not isinstance(NNstar, Star):
+            raise TypeError('need a star')
+        bias2expansion = np.zeros((self.Nstarvects, NNstar.Nstars))
+        for i in xrange(self.Nstarvects):
+            ind = NNstar.starindex(self.starvecpos[i][0])
+            if ind != -1:
+                bias2expansion[i, ind] = np.dot(self.starvecpos[i][0], self.starvecvec[i][0])*len(NNstar.stars[ind])
+        return bias2expansion

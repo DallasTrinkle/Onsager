@@ -393,7 +393,7 @@ class StarVectorFCCOmegalinearTests(StarVectorOmegalinearTests):
 
 
 class StarVectorOmega2linearTests(unittest.TestCase):
-    """Set of tests for our expansion of omega_2 in double-stars"""
+    """Set of tests for our expansion of omega_2 in NN stars"""
     def setUp(self):
         self.lattice = np.array([[3, 0, 0],
                                  [0, 2, 0],
@@ -435,7 +435,7 @@ class StarVectorOmega2linearTests(unittest.TestCase):
 
 
 class StarVectorFCCOmega2linearTests(StarVectorOmega2linearTests):
-    """Set of tests for our expansion of omega_2 in double-stars for FCC"""
+    """Set of tests for our expansion of omega_2 in NN stars for FCC"""
     def setUp(self):
         self.lattice = FCClatt.lattice()
         self.NNvect = FCClatt.NNvect()
@@ -444,3 +444,50 @@ class StarVectorFCCOmega2linearTests(StarVectorOmega2linearTests):
         self.star = stars.Star(self.NNvect, self.groupops)
         self.starvec = stars.StarVector()
         self.rates = np.array((1./12.,) * 12)
+
+
+class StarVectorBias2linearTests(unittest.TestCase):
+    """Set of tests for our expansion of bias vector (2) in NN stars"""
+    def setUp(self):
+        self.lattice = np.array([[3, 0, 0],
+                                 [0, 2, 0],
+                                 [0, 0, 1]])
+        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
+                                [0, 2, 0], [0, -2, 0],
+                                [0, 0, 1], [0, 0, -1]])
+        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.NNstar = stars.Star(self.NNvect, self.groupops)
+        self.star = stars.Star(self.NNvect, self.groupops)
+        self.starvec = stars.StarVector()
+        self.rates = np.array((3., 3., 2., 2., 1., 1.))
+
+    def testConstructBias2(self):
+        self.NNstar.generate(1) # we need the NN set of stars for NN jumps
+        # construct the set of rates corresponding to the unique stars:
+        om2expand = np.zeros(self.NNstar.Nstars)
+        for vec, rate in zip(self.NNvect, self.rates):
+            om2expand[self.NNstar.starindex(vec)] = rate
+        self.star.generate(2) # go ahead and make a "large" set of stars
+        self.starvec.generate(self.star)
+        bias2expand = self.starvec.bias2expansion(self.NNstar)
+        self.assertEqual(np.shape(bias2expand),
+                         (self.starvec.Nstarvects, self.NNstar.Nstars))
+        biasvec = np.zeros((self.star.Npts, 3)) # bias vector
+        for i, pt in enumerate(self.star.pts):
+            for vec, rate in zip(self.NNvect, self.rates):
+                if (vec == pt).all():
+                    biasvec[i, :] += vec*rate
+        # construct the same bias vector using our expansion
+        biasveccomp = np.zeros((self.star.Npts, 3))
+        for om2, svpos, svvec in zip(np.dot(bias2expand, om2expand),
+                                     self.starvec.starvecpos,
+                                     self.starvec.starvecvec):
+            # test the construction
+            for Ri, vi in zip(svpos, svvec):
+                biasveccomp[self.star.pointindex(Ri), :] = om2*vi
+        for i in xrange(self.star.Npts):
+            for d in xrange(3):
+                self.assertAlmostEqual(biasvec[i, d], biasveccomp[i, d])
+        print(biasvec)
+        print(np.dot(bias2expand, om2expand))
+
