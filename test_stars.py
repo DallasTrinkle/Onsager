@@ -13,18 +13,50 @@ import numpy as np
 import stars
 
 
+def setuportho():
+    lattice = np.array([[3, 0, 0],
+                        [0, 2, 0],
+                        [0, 0, 1]], dtype=float)
+    NNvect = np.array([[3, 0, 0], [-3, 0, 0],
+                       [0, 2, 0], [0, -2, 0],
+                       [0, 0, 1], [0, 0, -1]], dtype=float)
+    groupops = KPTmesh.KPTmesh(lattice).groupops
+    star = stars.Star(NNvect, groupops)
+    return lattice, NNvect, groupops, star
+
+def orthorates():
+    return np.array([3, 3, 2, 2, 1, 1], dtype=float)
+
+def setupcubic():
+    lattice = np.array([[1, 0, 0],
+                        [0, 1, 0],
+                        [0, 0, 1]], dtype=float)
+    NNvect = np.array([[1, 0, 0], [-1, 0, 0],
+                       [0, 1, 0], [0, -1, 0],
+                       [0, 0, 1], [0, 0, -1]], dtype=float)
+    groupops = KPTmesh.KPTmesh(lattice).groupops
+    star = stars.Star(NNvect, groupops)
+    return lattice, NNvect, groupops, star
+
+def cubicrates():
+    return np.array([1./6.,]*6, dtype=float)
+
+def setupFCC():
+    lattice = FCClatt.lattice()
+    NNvect = FCClatt.NNvect()
+    groupops = KPTmesh.KPTmesh(lattice).groupops
+    star = stars.Star(NNvect, groupops)
+    return lattice, NNvect, groupops, star
+
+def FCCrates():
+    return np.array([1./12.,]*12, dtype=float)
+
+
 class StarTests(unittest.TestCase):
     """Set of tests that our star code is behaving correctly for a general materials"""
 
     def setUp(self):
-        self.lattice = np.array([[3, 0, 0],
-                                 [0, 2, 0],
-                                 [0, 0, 1]])
-        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
-                                [0, 2, 0], [0, -2, 0],
-                                [0, 0, 1], [0, 0, -1]])
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
-        self.star = stars.Star(self.NNvect, self.groupops)
+        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
 
     def isclosed(self, s, groupops, threshold=1e-8):
         """
@@ -77,14 +109,7 @@ class CubicStarTests(StarTests):
     """Set of tests that our star code is behaving correctly for cubic materials"""
 
     def setUp(self):
-        self.lattice = np.array([[1, 0, 0],
-                                 [0, 1, 0],
-                                 [0, 0, 1]])
-        self.NNvect = np.array([[1, 0, 0], [-1, 0, 0],
-                                [0, 1, 0], [0, -1, 0],
-                                [0, 0, 1], [0, 0, -1]])
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
-        self.star = stars.Star(self.NNvect, self.groupops)
+        self.lattice, self.NNvect, self.groupops, self.star = setupcubic()
 
     def testStarConsistent(self):
         """Check that the counts (Npts, Nstars) make sense for cubic, with Nshells = 1..4"""
@@ -113,10 +138,7 @@ class FCCStarTests(CubicStarTests):
     """Set of tests that our star code is behaving correctly for FCC"""
 
     def setUp(self):
-        self.lattice = FCClatt.lattice()
-        self.NNvect = FCClatt.NNvect()
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
-        self.star = stars.Star(self.NNvect, self.groupops)
+        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
 
     def testStarCount(self):
         """Check that the counts (Npts, Nstars) make sense for FCC, with Nshells = 1, 2, 3"""
@@ -138,10 +160,7 @@ class DoubleStarTests(unittest.TestCase):
     """Set of tests that our DoubleStar class is behaving correctly."""
 
     def setUp(self):
-        self.lattice = FCClatt.lattice()
-        self.NNvect = FCClatt.NNvect()
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
-        self.star = stars.Star(self.NNvect, self.groupops)
+        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
         self.dstar = stars.DoubleStar()
 
     def testDoubleStarGeneration(self):
@@ -192,14 +211,7 @@ class DoubleStarTests(unittest.TestCase):
 class StarVectorTests(unittest.TestCase):
     """Set of tests that our StarVector class is behaving correctly"""
     def setUp(self):
-        self.lattice = np.array([[3, 0, 0],
-                                 [0, 2, 0],
-                                 [0, 0, 1]])
-        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
-                                [0, 2, 0], [0, -2, 0],
-                                [0, 0, 1], [0, 0, -1]])
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
-        self.star = stars.Star(self.NNvect, self.groupops)
+        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
         self.starvec = stars.StarVector(self.star)
 
     def testStarVectorGenerate(self):
@@ -264,10 +276,7 @@ class StarVectorTests(unittest.TestCase):
 class StarVectorFCCTests(StarVectorTests):
     """Set of tests that our StarVector class is behaving correctly, for FCC"""
     def setUp(self):
-        self.lattice = FCClatt.lattice()
-        self.NNvect = FCClatt.NNvect()
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
-        self.star = stars.Star(self.NNvect, self.groupops)
+        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
         self.starvec = stars.StarVector(self.star)
 
     def testStarVectorCount(self):
@@ -296,17 +305,10 @@ import GFcalc
 class StarVectorGFlinearTests(unittest.TestCase):
     """Set of tests that make sure we can construct the GF matrix as a linear combination"""
     def setUp(self):
-        self.lattice = np.array([[3, 0, 0],
-                                 [0, 2, 0],
-                                 [0, 0, 1]])
-        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
-                                [0, 2, 0], [0, -2, 0],
-                                [0, 0, 1], [0, 0, -1]])
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
-        self.star = stars.Star(self.NNvect, self.groupops)
+        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
         self.star2 = stars.Star(self.NNvect, self.groupops)
         self.starvec = stars.StarVector(self.star)
-        self.rates = np.array((3., 3., 2., 2., 1., 1.))
+        self.rates = orthorates()
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
 
     def ConstructGF(self, nshells):
@@ -338,13 +340,10 @@ class StarVectorGFlinearTests(unittest.TestCase):
 class StarVectorGFFCClinearTests(StarVectorGFlinearTests):
     """Set of tests that make sure we can construct the GF matrix as a linear combination for FCC"""
     def setUp(self):
-        self.lattice = FCClatt.lattice()
-        self.NNvect = FCClatt.NNvect()
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
-        self.star = stars.Star(self.NNvect, self.groupops)
+        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
         self.star2 = stars.Star(self.NNvect, self.groupops)
         self.starvec = stars.StarVector(self.star)
-        self.rates = np.array((1./12., ) * 12)
+        self.rates = FCCrates()
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
 
     def testConstructGF(self):
@@ -355,17 +354,10 @@ class StarVectorGFFCClinearTests(StarVectorGFlinearTests):
 class StarVectorOmegalinearTests(unittest.TestCase):
     """Set of tests for our expansion of omega_1 in double-stars"""
     def setUp(self):
-        self.lattice = np.array([[3, 0, 0],
-                                 [0, 2, 0],
-                                 [0, 0, 1]])
-        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
-                                [0, 2, 0], [0, -2, 0],
-                                [0, 0, 1], [0, 0, -1]])
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
-        self.star = stars.Star(self.NNvect, self.groupops)
+        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
         self.dstar = stars.DoubleStar()
         self.starvec = stars.StarVector()
-        self.rates = np.array((3., 3., 2., 2., 1., 1.))
+        self.rates = orthorates()
 
     def testConstructOmega1(self):
         self.star.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
@@ -401,29 +393,19 @@ class StarVectorOmegalinearTests(unittest.TestCase):
 class StarVectorFCCOmegalinearTests(StarVectorOmegalinearTests):
     """Set of tests for our expansion of omega_1 in double-stars for FCC"""
     def setUp(self):
-        self.lattice = FCClatt.lattice()
-        self.NNvect = FCClatt.NNvect()
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
-        self.star = stars.Star(self.NNvect, self.groupops)
+        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
         self.dstar = stars.DoubleStar()
         self.starvec = stars.StarVector()
-        self.rates = np.array((1./12.,) * 12)
+        self.rates = FCCrates()
 
 
 class StarVectorOmega2linearTests(unittest.TestCase):
     """Set of tests for our expansion of omega_2 in NN stars"""
     def setUp(self):
-        self.lattice = np.array([[3, 0, 0],
-                                 [0, 2, 0],
-                                 [0, 0, 1]])
-        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
-                                [0, 2, 0], [0, -2, 0],
-                                [0, 0, 1], [0, 0, -1]])
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
         self.NNstar = stars.Star(self.NNvect, self.groupops)
-        self.star = stars.Star(self.NNvect, self.groupops)
         self.starvec = stars.StarVector()
-        self.rates = np.array((3., 3., 2., 2., 1., 1.))
+        self.rates = orthorates()
 
     def testConstructOmega2(self):
         self.NNstar.generate(1) # we need the NN set of stars for NN jumps
@@ -455,29 +437,19 @@ class StarVectorOmega2linearTests(unittest.TestCase):
 class StarVectorFCCOmega2linearTests(StarVectorOmega2linearTests):
     """Set of tests for our expansion of omega_2 in NN stars for FCC"""
     def setUp(self):
-        self.lattice = FCClatt.lattice()
-        self.NNvect = FCClatt.NNvect()
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
         self.NNstar = stars.Star(self.NNvect, self.groupops)
-        self.star = stars.Star(self.NNvect, self.groupops)
         self.starvec = stars.StarVector()
-        self.rates = np.array((1./12.,) * 12)
+        self.rates = FCCrates()
 
 
 class StarVectorBias2linearTests(unittest.TestCase):
     """Set of tests for our expansion of bias vector (2) in NN stars"""
     def setUp(self):
-        self.lattice = np.array([[3, 0, 0],
-                                 [0, 2, 0],
-                                 [0, 0, 1]])
-        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
-                                [0, 2, 0], [0, -2, 0],
-                                [0, 0, 1], [0, 0, -1]])
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
         self.NNstar = stars.Star(self.NNvect, self.groupops)
-        self.star = stars.Star(self.NNvect, self.groupops)
         self.starvec = stars.StarVector()
-        self.rates = np.array((3., 3., 2., 2., 1., 1.))
+        self.rates = orthorates()
 
     def testConstructBias2(self):
         self.NNstar.generate(1) # we need the NN set of stars for NN jumps
@@ -513,30 +485,20 @@ class StarVectorBias2linearTests(unittest.TestCase):
 class StarVectorFCCBias2linearTests(StarVectorBias2linearTests):
     """Set of tests for our expansion of omega_2 in NN stars for FCC"""
     def setUp(self):
-        self.lattice = FCClatt.lattice()
-        self.NNvect = FCClatt.NNvect()
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
         self.NNstar = stars.Star(self.NNvect, self.groupops)
-        self.star = stars.Star(self.NNvect, self.groupops)
         self.starvec = stars.StarVector()
-        self.rates = np.array((1./12.,) * 12)
+        self.rates = FCCrates()
 
 
 class StarVectorBias1linearTests(unittest.TestCase):
     """Set of tests for our expansion of bias vector (1) in double + NN stars"""
     def setUp(self):
-        self.lattice = np.array([[3, 0, 0],
-                                 [0, 2, 0],
-                                 [0, 0, 1]])
-        self.NNvect = np.array([[3, 0, 0], [-3, 0, 0],
-                                [0, 2, 0], [0, -2, 0],
-                                [0, 0, 1], [0, 0, -1]])
-        self.groupops = KPTmesh.KPTmesh(self.lattice).groupops
+        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
         self.NNstar = stars.Star(self.NNvect, self.groupops)
-        self.star = stars.Star(self.NNvect, self.groupops)
         self.dstar = stars.DoubleStar()
         self.starvec = stars.StarVector()
-        self.rates = np.array((3., 3., 2., 2., 1., 1.))  # hop rates
+        self.rates = orthorates()
 
     def testConstructBias1(self):
         self.NNstar.generate(1) # we need the NN set of stars for NN jumps

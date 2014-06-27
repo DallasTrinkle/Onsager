@@ -380,9 +380,9 @@ class StarVector:
             scale = 1./np.sqrt(len(s)*np.dot(s[0],s[0])) # normalization factor
             self.starvecvec.append([v*scale for v in s])
             # next, try to generate perpendicular star-vectors, if present:
-            v0 = np.cross(s[0], np.array([0, 0, 1]))
+            v0 = np.cross(s[0], np.array([0, 0, 1.]))
             if np.dot(v0, v0) < threshold:
-                v0 = np.cross(s[0], np.array([1, 0, 0]))
+                v0 = np.cross(s[0], np.array([1., 0, 0]))
             v1 = np.cross(s[0], v0)
             # normalization:
             v0 /= np.sqrt(np.dot(v0, v0))
