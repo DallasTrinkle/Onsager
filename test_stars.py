@@ -13,6 +13,7 @@ import numpy as np
 import stars
 
 
+# Setup for orthorhombic, simple cubic, and FCC cells:
 def setuportho():
     lattice = np.array([[3, 0, 0],
                         [0, 2, 0],
@@ -241,12 +242,18 @@ class StarVectorTests(unittest.TestCase):
             for s2, v2 in zip(self.starvec.starvecpos, self.starvec.starvecvec):
                 if (s1[0] == s2[0]).all():
                     dp = 0
-                    for vv1, vv2 in zip(v1, v1):
+                    for vv1, vv2 in zip(v1, v2):
                         dp += np.dot(vv1, vv2)
                     if (v1[0] == v2[0]).all():
-                        self.assertAlmostEqual(1, dp)
+                        self.assertAlmostEqual(1., dp,
+                                               msg='Failed normality for {}/{} and {}/{}'.format(
+                                                   s1[0], v1[0], s2[0], v2[0]
+                                               ))
                     else:
-                        self.assertAlmostEqual(0, dp)
+                        self.assertAlmostEqual(0., dp,
+                                               msg='Failed orthogonality for {}/{} and {}/{}'.format(
+                                                   s1[0], v1[0], s2[0], v2[0]
+                                               ))
 
     def testStarVectorConsistent(self):
         """Do the star vectors obey the definition?"""
@@ -517,8 +524,8 @@ class StarVectorBias1linearTests(unittest.TestCase):
             sind = self.NNstar.starindex(dv)
             self.assertNotEqual(sind, -1)
             om1expand[i] = om0expand[sind]
-        print 'om0:', om0expand
-        print 'om1:', om1expand
+        # print 'om0:', om0expand
+        # print 'om1:', om1expand
         self.starvec.generate(self.star)
         bias1ds, bias1prob, bias1NN = self.starvec.bias1expansion(self.dstar, self.NNstar)
         self.assertEqual(np.shape(bias1ds),
@@ -559,15 +566,6 @@ class StarVectorBias1linearTests(unittest.TestCase):
             for Ri, vi in zip(svpos, svvec):
                 biasveccomp[self.star.pointindex(Ri), :] += om0*vi
 
-        print(np.dot(bias1ds * probsqrt[bias1prob], om1expand))
-        print(np.dot(bias1NN, om0expand))
-        print 'bias1ds', bias1ds
-        print 'bias1prob', bias1prob
-        print 'bias1NN', bias1NN
-        print 'biasvec, biasveccomp:'
-        for bv, bvc in zip(biasvec, biasveccomp):
-            print bv, bvc
-
         for svpos, svvec in zip(self.starvec.starvecpos, self.starvec.starvecvec):
             for Ri, vi in zip(svpos, svvec):
                 self.assertAlmostEqual(np.dot(vi, biasvec[self.star.pointindex(Ri)]),
@@ -582,3 +580,22 @@ class StarVectorBias1linearTests(unittest.TestCase):
                 self.assertAlmostEqual(biasvec[i, d], biasveccomp[i, d],
                                        msg='Did not match point[{}] {} direction {} where {} != {}'.format(
                                            i, pt, d, biasvec[i, d], biasveccomp[i, d]))
+
+        # print(np.dot(bias1ds * probsqrt[bias1prob], om1expand))
+        # print(np.dot(bias1NN, om0expand))
+        # print 'bias1ds', bias1ds
+        # print 'bias1prob', bias1prob
+        # print 'bias1NN', bias1NN
+        # print 'biasvec, biasveccomp:'
+        # for bv, bvc in zip(biasvec, biasveccomp):
+        #     print bv, bvc
+
+
+class StarVectorFCCBias1linearTests(StarVectorBias1linearTests):
+    """Set of tests for our expansion of bias vector (1) in double + NN stars for FCC"""
+    def setUp(self):
+        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
+        self.NNstar = stars.Star(self.NNvect, self.groupops)
+        self.dstar = stars.DoubleStar()
+        self.starvec = stars.StarVector()
+        self.rates = FCCrates()
