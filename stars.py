@@ -602,6 +602,7 @@ class StarVector:
             raise TypeError('need a double star')
         if not isinstance(NNstar, Star):
             raise TypeError('need a star')
+        NNstar.generateindices()
         bias1ds = np.zeros((self.Nstarvects, dstar.Ndstars))
         bias1prob = np.empty((self.Nstarvects, dstar.Ndstars), dtype=int)
         bias1prob[:, :] = -1
@@ -612,26 +613,28 @@ class StarVector:
                                self.starvecpos, self.starvecvec):
             # run through the NN stars
             p1 = dstar.star.pointindex(svR[0]) # first half of our pair
-            for nn, nns in enumerate(NNstar.stars):
-                # and their individual jumps
-                for vec in nns:
-                    endpoint = svR[0] + vec
-                    if all(abs(endpoint) < 1e-8):
-                        continue
-                    geom = np.dot(svv[0], vec) * len(svR)
-                    p2 = dstar.star.pointindex(endpoint)
-                    if p2 == -1:
-                        # we landed outside our range of double-stars, so...
-                        bias1NN[i, nn] += geom
+            # nnst = star index, vec = NN jump vector
+            for nnst, vec in zip(NNstar.index, NNstar.pts):
+                endpoint = svR[0] + vec
+                # throw out the origin as an endpoint
+                if all(abs(endpoint) < 1e-8):
+                    continue
+                geom = np.dot(svv[0], vec) * len(svR)
+                p2 = dstar.star.pointindex(endpoint)
+                if p2 == -1:
+                    # we landed outside our range of double-stars, so...
+                    bias1NN[i, nnst] += geom
+                else:
+                    ind = dstar.dstarindex((p1, p2))
+                    if ind == -1:
+                        raise ArithmeticError('Problem with DoubleStar indexing; could not find double-star for pair')
+                    bias1ds[i, ind] += geom
+                    sind = dstar.star.index[p2]
+                    if sind == -1:
+                        raise ArithmeticError('Could not locate endpoint in a star in DoubleStar')
+                    if bias1prob[i, ind] == -1:
+                        bias1prob[i, ind] = sind
                     else:
-                        ind = dstar.dstarindex((p1, p2))
-                        if ind == -1:
-                            raise Error('Problem with DoubleStar indexing; could not find double-star for pair')
-                        bias1ds[i, ind] += geom
-                        sind = dstar.star.index[p2]
-                        if bias1prob[i, ind] == -1:
-                            bias1prob[i, ind] = sind
-                        else:
-                            if bias1prob[i, ind] != sind:
-                                raise Error('Inconsistent star endpoints found')
+                        if bias1prob[i, ind] != sind:
+                            raise ArithmeticError('Inconsistent DoubleStar endpoints found')
         return bias1ds, bias1prob, bias1NN

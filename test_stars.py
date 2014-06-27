@@ -221,9 +221,27 @@ class StarVectorTests(unittest.TestCase):
                         if (abs(R1 - Rrot) < 1e-8).all():
                             self.assertTrue((abs(v1 - vrot) < 1e-8).all())
 
+    def StarVectorOrthonormal(self, nshells):
+        """Are the star vectors orthonormal?"""
+        self.star.generate(nshells)
+        self.starvec.generate(self.star)
+        for s1, v1 in zip(self.starvec.starvecpos, self.starvec.starvecvec):
+            for s2, v2 in zip(self.starvec.starvecpos, self.starvec.starvecvec):
+                if (s1[0] == s2[0]).all():
+                    dp = 0
+                    for vv1, vv2 in zip(v1, v1):
+                        dp += np.dot(vv1, vv2)
+                    if (v1[0] == v2[0]).all():
+                        self.assertAlmostEqual(1, dp)
+                    else:
+                        self.assertAlmostEqual(0, dp)
+
     def testStarVectorConsistent(self):
         """Do the star vectors obey the definition?"""
-        self.StarVectorConsistent(1)
+        self.StarVectorConsistent(2)
+
+    def testStarVectorOrthonormal(self):
+        self.StarVectorOrthonormal(2)
 
     def testStarVectorCount(self):
         """Does our star vector count make any sense?"""
@@ -537,6 +555,8 @@ class StarVectorBias1linearTests(unittest.TestCase):
             sind = self.NNstar.starindex(dv)
             self.assertNotEqual(sind, -1)
             om1expand[i] = om0expand[sind]
+        print 'om0:', om0expand
+        print 'om1:', om1expand
         self.starvec.generate(self.star)
         bias1ds, bias1prob, bias1NN = self.starvec.bias1expansion(self.dstar, self.NNstar)
         self.assertEqual(np.shape(bias1ds),
@@ -546,32 +566,32 @@ class StarVectorBias1linearTests(unittest.TestCase):
         self.assertEqual(np.shape(bias1NN),
                          (self.starvec.Nstarvects, self.NNstar.Nstars))
         self.assertIs(bias1prob.dtype, np.dtype('int64')) # needs to be for indexing
-        # construct some fake probabilities for testing: (add an "extra" star, set it's probability to 1
+        # make sure that we don't have -1 as our endpoint probability for any ds that are used.
+        for b1ds, b1p in zip(bias1ds, bias1prob):
+            for ds, p in zip(b1ds, b1p):
+                if p == -1:
+                    self.assertEqual(ds, 0)
+        # construct some fake probabilities for testing, with an "extra" star, set it's probability to 1
+        # this is ONLY needed for testing purposes--the expansion should never access it.
         # note: this probability is to be the SQRT of the true probability
+        # probsqrt = np.array([1,]*(self.star.Nstars+1)) # very little bias...
         probsqrt = np.sqrt(np.array([1.10**(self.star.Nstars-n) for n in range(self.star.Nstars + 1)]))
         probsqrt[-1] = 1 # this is important, as it represents our baseline "far-field"
         biasvec = np.zeros((self.star.Npts, 3)) # bias vector: all the hops *excluding* exchange
         for i, pt in enumerate(self.star.pts):
-            # in this, we are taking advantage of inversion symmetry: so vec is actually negative
             for vec, rate in zip(self.NNvect, self.rates):
                 if not all(abs(pt + vec) < 1e-8):
                     # note: starindex returns -1 if not found, which defaults to the final probability of 1.
                     biasvec[i, :] += vec*rate*probsqrt[self.star.starindex(pt + vec)]
         # construct the same bias vector using our expansion
         biasveccomp = np.zeros((self.star.Npts, 3))
-        # we need to combine bias1ds and bias1prob; bias1d[sv, ds]*prob[bias1prob[sv, ds]]
-        # bias1dprob = bias1ds * prob[bias1prob]
-        # bias1dprob = bias1ds.copy()
-        # for svi in xrange(self.starvec.Nstarvects):
-        #     for dsi in xrange(self.dstar.Ndstars):
-        #         bias1dprob[svi, dsi] *= prob[bias1prob[sv, ds]]
         for om1, svpos, svvec in zip(np.dot(bias1ds * probsqrt[bias1prob], om1expand),
                                      self.starvec.starvecpos,
                                      self.starvec.starvecvec):
             # test the construction
             for Ri, vi in zip(svpos, svvec):
-                biasveccomp[self.star.pointindex(Ri), :] = om1*vi
-        for om0, svpos, svvec in zip(np.dot((bias1NN), om0expand),
+                biasveccomp[self.star.pointindex(Ri), :] += om1*vi
+        for om0, svpos, svvec in zip(np.dot(bias1NN, om0expand),
                                      self.starvec.starvecpos,
                                      self.starvec.starvecvec):
             for Ri, vi in zip(svpos, svvec):
@@ -582,8 +602,18 @@ class StarVectorBias1linearTests(unittest.TestCase):
         print 'bias1ds', bias1ds
         print 'bias1prob', bias1prob
         print 'bias1NN', bias1NN
-        print 'biasvec', biasvec
-        print 'biasveccomp', biasveccomp
+        print 'biasvec, biasveccomp:'
+        for bv, bvc in zip(biasvec, biasveccomp):
+            print bv, bvc
+
+        for svpos, svvec in zip(self.starvec.starvecpos, self.starvec.starvecvec):
+            for Ri, vi in zip(svpos, svvec):
+                self.assertAlmostEqual(np.dot(vi, biasvec[self.star.pointindex(Ri)]),
+                                       np.dot(vi, biasveccomp[self.star.pointindex(Ri)]),
+                                       msg='Did not match dot product for {} along {} where {} != {}'.format(
+                                           Ri, vi, biasvec[self.star.pointindex(Ri)],
+                                           biasveccomp[self.star.pointindex(Ri)]
+                                       ))
 
         for i, pt in enumerate(self.star.pts):
             for d in xrange(3):
