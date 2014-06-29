@@ -33,6 +33,7 @@ class StarSet:
         """
         self.NNvect = NNvect
         self.groupops = groupops
+        self.Nshells = 0
         self.generate(Nshells)
 
     def generate(self, Nshells, threshold=1e-8):
