@@ -105,6 +105,57 @@ class StarTests(unittest.TestCase):
             self.assertEqual(i, self.star.pointindex(v))
         self.assertEqual(-1, self.star.pointindex(np.zeros(3)))
 
+    def assertEqualStars(self, s1, s2):
+        """Asserts that two stars are equal."""
+        self.assertEqual(s1.Npts, s2.Npts,
+                         msg='Number of points in two star sets are not equal: {} != {}'.format(
+                             s1.Npts, s2.Npts
+                         ))
+        self.assertEqual(s1.Nshells, s2.Nshells,
+                         msg='Number of shells in two star sets are not equal: {} != {}'.format(
+                             s1.Nshells, s2.Nshells
+                         ))
+        self.assertEqual(s1.Nstars, s2.Nstars,
+                         msg='Number of stars in two star sets are not equal: {} != {}'.format(
+                             s1.Nstars, s2.Nstars
+                         ))
+        for s in s1.stars:
+            ind = s2.starindex(s[0])
+            self.assertNotEqual(ind, -1,
+                                msg='Could not find {} from s1 in s2'.format(
+                                    s[0]
+                                ))
+            for R in s:
+                self.assertEqual(ind, s2.starindex(R),
+                                 msg='Point {} and {} from star in s1 belong to different stars in s2'.format(
+                                     s[0], R
+                                 ))
+        for s in s2.stars:
+            ind = s1.starindex(s[0])
+            self.assertNotEqual(ind, -1,
+                                msg='Could not find {} from s2 in s1'.format(
+                                    s[0]
+                                ))
+            for R in s:
+                self.assertEqual(ind, s1.starindex(R),
+                                 msg='Point {} and {} from star in s2 belong to different stars in s1'.format(
+                                     s[0], R
+                                 ))
+
+    def testStarCombine(self):
+        """Check that we can combine two stars and get what we expect."""
+        s1 = stars.StarSet(self.NNvect, self.groupops)
+        s2 = stars.StarSet(self.NNvect, self.groupops)
+        s3 = stars.StarSet(self.NNvect, self.groupops)
+        s4 = stars.StarSet(self.NNvect, self.groupops)
+        s1.generate(1)
+        s2.generate(1)
+        s3.combine(s1, s2)
+        s4.generate(2)
+        # s3 = s1 + s2, should equal s4
+        self.assertEqualStars(s1, s2)
+        self.assertEqualStars(s3, s4)
+
 
 class CubicStarTests(StarTests):
     """Set of tests that our star code is behaving correctly for cubic materials"""
