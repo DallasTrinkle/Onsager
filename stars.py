@@ -85,17 +85,11 @@ class StarSet:
         x2_indices.append(len(vectlist))
         # x2_indices now contains a list of indices with the same magnitudes
         self.stars = []
-        ptlist = []
         xmin = 0
         for xmax in x2_indices:
             complist_stars = [] # for finding unique stars
-            complist_pts = []   # for finding unique points
             for x in vectlist[xmin:xmax]:
-                # Q1: is this a unique point?
-                if any([np.all(abs(x - xcomp) < threshold) for xcomp in complist_pts]):
-                    continue
-                complist_pts.append(x)
-                # Q2: is this a new rep. for a unique star?
+                # is this a new rep. for a unique star?
                 match = False
                 for i, s in enumerate(complist_stars):
                     if self.symmatch(x, s[0], threshold):
@@ -107,9 +101,8 @@ class StarSet:
                     # new symmetry point!
                     complist_stars.append([x])
             self.stars += complist_stars
-            ptlist += complist_pts
             xmin=xmax
-        self.pts = np.array(ptlist)
+        self.pts = np.array(vectlist)
         self.Nstars = len(self.stars)
         self.Npts = len(self.pts)
         self.index = None
@@ -142,19 +135,19 @@ class StarSet:
             raise TypeError('need a star')
         if not isinstance(s2, StarSet):
             raise TypeError('need a star')
-        if len(s1.NNvect) != len(s2.NNvect):
+        if len(s1.NNvect) != len(s2.NNvect) or len(self.NNvect != s1.NNvect):
             raise ArithmeticError('Cannot combine two stars that are using different NN vectors')
         else:
-            for v1, v2 in zip(s1.NNvect, s2.NNvect):
-                if not all(v1 == v2):
+            for v1, v2, v3 in zip(s1.NNvect, s2.NNvect, self.NNvect):
+                if not all(v1 == v2) or not all(v1 == v3):
                     raise ArithmeticError('Cannot combine two stars that are using different NN vectors')
-        if len(s1.groupops) != len(s2.groupops):
+        if len(s1.groupops) != len(s2.groupops) or len(s1.groupops) != len(self.groupops):
             raise ArithmeticError('Cannot combine two stars that are using different point groups')
         else:
-            for g1, g2 in zip(s1.groupops, s2.groupops):
-                if not all(g1.flat == g2.flat):
+            for g1, g2, g3 in zip(s1.groupops, s2.groupops, self.groupops):
+                if not all(g1.flat == g2.flat) or not all(g1.flat == g3.flat):
                     raise ArithmeticError('Cannot combine two stars that are using different point groups')
-        self.generate(s1.Nshells + s2.Nshells)
+        self.generate(s1.Nshells + s2.Nshells, threshold)
 
     def generateindices(self):
         """
