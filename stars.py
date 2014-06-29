@@ -4,7 +4,7 @@ Stars module
 Classes to generate stars and double stars; a lot of indexing functionality.
 """
 
-# TODO: need to make sure we can read / write stars for optimal functionality (or pickle?)
+# TODO: need to make sure we can read / write stars for optimal functionality (JSON?)
 
 __author__ = 'Dallas R. Trinkle'
 

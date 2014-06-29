@@ -1,5 +1,5 @@
 """
-Unit tests for star (and double-star) generation and indexing
+Unit tests for star, double-star and vector-star generation and indexing
 """
 
 __author__ = 'Dallas R. Trinkle'
