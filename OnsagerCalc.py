@@ -57,6 +57,7 @@ class VacancyMediated:
         self.NNstar = stars.StarSet(self.jumpvect, self.groupops, 1)
         self.thermo = stars.StarSet(self.jumpvect, self.groupops)
         self.kinetic = stars.StarSet(self.jumpvect, self.groupops)
+        self.omega1 = stars.DoubleStarSet(self.kinetic)
         self.Nthermo = 0
         self.generate(Nthermo)
 
@@ -77,11 +78,18 @@ class VacancyMediated:
             return
         self.thermo.generate(Nthermo)
         self.kinetic.combine(self.thermo, self.NNstar)
+        self.omega1.generate(self.kinetic)
+        # the following is a list of indices corresponding to the jump-type; so that if one
+        # chooses *not* to calculate omega1, the corresponding omega0 value can be substituted
+        # This is returned both for reference, and used for internal consumption
+        self.omega1LIMB = [self.NNstar.starindex(self.kinetic.pts[p[0][0]] - self.kinetic.pts[p[0][1]])
+                           for p in self.omega1.dstars]
+
 
     def omega0list(self, Nthermo = None):
         """
         Return a list of endpoints for a vacancy jump, corresponding to omega0: no solute.
-        Note: omega0list and omega2list are, by definition, the same.
+        Note: omega0list and omega2list are, by definition, the same. Defined by Stars.
 
         Parameters
         ----------
@@ -101,7 +109,7 @@ class VacancyMediated:
     def interactlist(self, Nthermo = None):
         """
         Return a list of solute-vacancy configurations for interactions. The points correspond
-        to a vector between a solute atom and a vacancy.
+        to a vector between a solute atom and a vacancy. Defined by Stars.
 
         Parameters
         ----------
@@ -116,3 +124,25 @@ class VacancyMediated:
         if Nthermo != None:
             self.generate(Nthermo)
         return [s[0] for s in self.thermo.stars]
+
+    def omega1list(self, Nthermo = None):
+        """
+        Return a list of pairs of endpoints for a vacancy jump, corresponding to omega1:
+        Solute at the origin, vacancy hopping between two sites. Defined by Double Stars.
+
+        Parameters
+        ----------
+        Nthermo : integer, optional
+            if set to some value, then we call generate(Nthermo) first.
+
+        Returns
+        -------
+        omega1list : list of tuples of array[3]
+            list of paired endpoints for a vacancy jump: the solute is at the origin,
+            and these define start- and end-points for the vacancy jump.
+        """
+        if Nthermo != None:
+            self.generate(Nthermo)
+        return [(self.kinetic.pts[p[0][0]], self.kinetic.pts[p[0][1]]) for p in self.omega1.dstars], \
+               self.omega1LIMB
+
