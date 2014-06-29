@@ -51,7 +51,31 @@ class BaseTests(unittest.TestCase):
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.rates = setuportho()
         self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
+        self.Njumps = 3
 
     def testGenerate(self):
         # try to generate with a single interaction shell
         self.Lcalc.generate(1)
+        jumplist = self.Lcalc.omega0list()
+        # we expect to have three unique jumps to calculate:
+        self.assertEqual(len(jumplist), self.Njumps)
+        for j in jumplist:
+            self.assertTrue(any([ (v == j).all() for v in self.NNvect]))
+
+
+class FCCBaseTests(BaseTests):
+    """Set of tests that our Onsager calculator is well-behaved"""
+
+    def setUp(self):
+        self.lattice, self.NNvect, self.groupops, self.rates = setupFCC()
+        self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
+        self.Njumps = 1
+
+
+class SCBaseTests(BaseTests):
+    """Set of tests that our Onsager calculator is well-behaved"""
+
+    def setUp(self):
+        self.lattice, self.NNvect, self.groupops, self.rates = setupcubic()
+        self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
+        self.Njumps = 1

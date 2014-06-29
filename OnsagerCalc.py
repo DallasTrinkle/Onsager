@@ -47,7 +47,7 @@ class VacancyMediated:
         groupops : list of array[3, 3]
             point group operations
 
-        Nthermo : integer
+        Nthermo : integer, optional
             range of thermodynamic interactions, in terms of "shells", which is multiple
             summations of jumpvect
         """
@@ -55,6 +55,7 @@ class VacancyMediated:
         self.jumpvect = [v for v in jumpvect]
         self.groupops = [g for g in groupops]
         self.NNstar = stars.StarSet(self.jumpvect, self.groupops, 1)
+        self.Nthermo = 0
         self.generate(Nthermo)
 
     def generate(self, Nthermo):
@@ -70,6 +71,25 @@ class VacancyMediated:
         """
         if Nthermo == 0:
             self.Nthermo = 0
+        if Nthermo == self.Nthermo:
             return
 
+    def omega0list(self, Nthermo = None):
+        """
+        Return a list of endpoints for a vacancy jump, corresponding to omega0: no solute.
+        Note: omega0list and omega2list are, by definition, the same.
 
+        Parameters
+        ----------
+        Nthermo : integer, optional
+            if set to some value, then we call geneate(Nthermo) first.
+
+        Returns
+        -------
+        omega0list : list of array[3]
+            list of endpoints for a vacancy jump: we will expect rates for jumps from
+            the origin to each of these endpoints as inputs for our calculation
+        """
+        if Nthermo != None:
+            self.generate(Nthermo)
+        return [s[0] for s in self.NNstar.stars]
