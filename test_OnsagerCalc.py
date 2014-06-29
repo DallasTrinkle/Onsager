@@ -52,6 +52,7 @@ class BaseTests(unittest.TestCase):
         self.lattice, self.NNvect, self.groupops, self.rates = setuportho()
         self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
         self.Njumps = 3
+        self.Ninteract = [3, 9]
 
     def testGenerate(self):
         # try to generate with a single interaction shell
@@ -61,6 +62,14 @@ class BaseTests(unittest.TestCase):
         self.assertEqual(len(jumplist), self.Njumps)
         for j in jumplist:
             self.assertTrue(any([ (v == j).all() for v in self.NNvect]))
+        for i, n in enumerate(self.Ninteract):
+            self.Lcalc.generate(i+1)
+            interactlist = self.Lcalc.interactlist()
+            self.assertEqual(len(interactlist), n)
+            for v in self.NNvect:
+                self.assertTrue(any([all(abs(v - np.dot(g, R)) < 1e-8)
+                                     for R in interactlist
+                                     for g in self.groupops]))
 
 
 class FCCBaseTests(BaseTests):
@@ -70,6 +79,7 @@ class FCCBaseTests(BaseTests):
         self.lattice, self.NNvect, self.groupops, self.rates = setupFCC()
         self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
         self.Njumps = 1
+        self.Ninteract = [1, 4]
 
 
 class SCBaseTests(BaseTests):
@@ -79,3 +89,4 @@ class SCBaseTests(BaseTests):
         self.lattice, self.NNvect, self.groupops, self.rates = setupcubic()
         self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
         self.Njumps = 1
+        self.Ninteract = [1, 3]

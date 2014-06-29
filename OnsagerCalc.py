@@ -55,6 +55,7 @@ class VacancyMediated:
         self.jumpvect = [v for v in jumpvect]
         self.groupops = [g for g in groupops]
         self.NNstar = stars.StarSet(self.jumpvect, self.groupops, 1)
+        self.thermo = stars.StarSet(self.jumpvect, self.groupops)
         self.Nthermo = 0
         self.generate(Nthermo)
 
@@ -73,6 +74,7 @@ class VacancyMediated:
             self.Nthermo = 0
         if Nthermo == self.Nthermo:
             return
+        self.thermo.generate(Nthermo)
 
     def omega0list(self, Nthermo = None):
         """
@@ -82,7 +84,7 @@ class VacancyMediated:
         Parameters
         ----------
         Nthermo : integer, optional
-            if set to some value, then we call geneate(Nthermo) first.
+            if set to some value, then we call generate(Nthermo) first.
 
         Returns
         -------
@@ -93,3 +95,22 @@ class VacancyMediated:
         if Nthermo != None:
             self.generate(Nthermo)
         return [s[0] for s in self.NNstar.stars]
+
+    def interactlist(self, Nthermo = None):
+        """
+        Return a list of solute-vacancy configurations for interactions. The points correspond
+        to a vector between a solute atom and a vacancy.
+
+        Parameters
+        ----------
+        Nthermo : integer, optional
+            if set to some value, then we call generate(Nthermo) first.
+
+        Returns
+        -------
+        interactlist : list of array[3]
+            list of vectors to connect a solute and a vacancy jump.
+        """
+        if Nthermo != None:
+            self.generate(Nthermo)
+        return [s[0] for s in self.thermo.stars]
