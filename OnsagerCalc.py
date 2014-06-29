@@ -56,6 +56,7 @@ class VacancyMediated:
         self.groupops = [g for g in groupops]
         self.NNstar = stars.StarSet(self.jumpvect, self.groupops, 1)
         self.thermo = stars.StarSet(self.jumpvect, self.groupops)
+        self.kinetic = stars.StarSet(self.jumpvect, self.groupops)
         self.Nthermo = 0
         self.generate(Nthermo)
 
@@ -75,6 +76,7 @@ class VacancyMediated:
         if Nthermo == self.Nthermo:
             return
         self.thermo.generate(Nthermo)
+        self.kinetic.combine(self.thermo, self.NNstar)
 
     def omega0list(self, Nthermo = None):
         """
