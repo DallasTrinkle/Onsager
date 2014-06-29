@@ -54,6 +54,7 @@ class BaseTests(unittest.TestCase):
         self.Njumps = 3
         self.Ninteract = [3, 9]
         self.Nomega1 = [9, 27]
+        self.NGF = [35, 84]
 
     def testGenerate(self):
         # try to generate with a single interaction shell
@@ -63,9 +64,10 @@ class BaseTests(unittest.TestCase):
         self.assertEqual(len(jumplist), self.Njumps)
         for j in jumplist:
             self.assertTrue(any([ (v == j).all() for v in self.NNvect]))
-        for thermo, nint, nom1 in zip(range(len(self.Ninteract)),
-                                      self.Ninteract,
-                                      self.Nomega1):
+        for thermo, nint, nom1, nGF in zip(range(len(self.Ninteract)),
+                                           self.Ninteract,
+                                           self.Nomega1,
+                                           self.NGF):
             self.Lcalc.generate(thermo+1)
             interactlist = self.Lcalc.interactlist()
             self.assertEqual(len(interactlist), nint)
@@ -79,6 +81,12 @@ class BaseTests(unittest.TestCase):
             #     print pair[0], pair[1]
             self.assertEqual(len(omega1list), nom1)
             self.assertEqual(len(omega1index), nom1)
+            for vecpair, omindex in zip(omega1list, omega1index):
+                jump = jumplist[omindex]
+                self.assertTrue(any([all(abs(np.dot(g, jump) - (vecpair[0]-vecpair[1])) < 1e-8)
+                                     for g in self.groupops]))
+            GFlist = self.Lcalc.GFlist()
+            self.assertEqual(len(GFlist), nGF)
 
 
 class FCCBaseTests(BaseTests):
@@ -90,6 +98,7 @@ class FCCBaseTests(BaseTests):
         self.Njumps = 1
         self.Ninteract = [1, 4]
         self.Nomega1 = [7, 20]
+        self.NGF = [16, 37]
 
 
 class SCBaseTests(BaseTests):
@@ -101,3 +110,4 @@ class SCBaseTests(BaseTests):
         self.Njumps = 1
         self.Ninteract = [1, 3]
         self.Nomega1 = [2, 6]
+        self.NGF = [11, 23]

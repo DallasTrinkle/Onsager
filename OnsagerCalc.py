@@ -57,7 +57,9 @@ class VacancyMediated:
         self.NNstar = stars.StarSet(self.jumpvect, self.groupops, 1)
         self.thermo = stars.StarSet(self.jumpvect, self.groupops)
         self.kinetic = stars.StarSet(self.jumpvect, self.groupops)
+        self.GF = stars.StarSet(self.jumpvect, self.groupops)
         self.omega1 = stars.DoubleStarSet(self.kinetic)
+        self.biasvec = stars.VectorStarSet(self.GF)
         self.Nthermo = 0
         self.generate(Nthermo)
 
@@ -84,7 +86,10 @@ class VacancyMediated:
         # This is returned both for reference, and used for internal consumption
         self.omega1LIMB = [self.NNstar.starindex(self.kinetic.pts[p[0][0]] - self.kinetic.pts[p[0][1]])
                            for p in self.omega1.dstars]
-
+        self.GF.combine(self.kinetic, self.kinetic)
+        self.biasvec.generate(self.GF)
+        # this is the list of points for the GF calculation; we need to add in the origin now:
+        self.GFR = [np.zeros(3)] + [sR[0] for sR in self.GF.stars]
 
     def omega0list(self, Nthermo = None):
         """
@@ -124,6 +129,26 @@ class VacancyMediated:
         if Nthermo != None:
             self.generate(Nthermo)
         return [s[0] for s in self.thermo.stars]
+
+    def GFlist(self, Nthermo = None):
+        """
+        Return a list of points for the vacancy GF calculation, corresponding to omega0: no solute.
+        Defined by Stars.
+
+        Parameters
+        ----------
+        Nthermo : integer, optional
+            if set to some value, then we call generate(Nthermo) first.
+
+        Returns
+        -------
+        GFlist : list of array[3]
+            list of points to calculate the vacancy diffusion GF; this is based ultimately on omega0,
+            and is the (pseudo)inverse of the vacancy hop rate matrix.
+        """
+        if Nthermo != None:
+            self.generate(Nthermo)
+        return self.GFR
 
     def omega1list(self, Nthermo = None):
         """
