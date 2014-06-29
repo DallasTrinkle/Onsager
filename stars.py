@@ -135,7 +135,7 @@ class StarSet:
             raise TypeError('need a star')
         if not isinstance(s2, StarSet):
             raise TypeError('need a star')
-        if len(s1.NNvect) != len(s2.NNvect) or len(self.NNvect != s1.NNvect):
+        if len(s1.NNvect) != len(s2.NNvect) or len(self.NNvect) != len(s1.NNvect):
             raise ArithmeticError('Cannot combine two stars that are using different NN vectors')
         else:
             for v1, v2, v3 in zip(s1.NNvect, s2.NNvect, self.NNvect):
