@@ -11,7 +11,7 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 
 
-class Star:
+class StarSet:
     """
     A class to construct stars, and be able to efficiently index.
     """
@@ -186,7 +186,7 @@ class Star:
         return any([np.all(abs(x - np.dot(g, xcomp)) < threshold) for g in self.groupops])
 
 
-class DoubleStar:
+class DoubleStarSet:
     """
     A class to construct double-stars (pairs of sites,
     where each pair is related by a single group op).
@@ -332,13 +332,13 @@ class DoubleStar:
         return any([np.all(abs(v00 - np.dot(g, v11)) < threshold) and np.all(abs(v01 - np.dot(g, v10)) < threshold)
                 for g in self.groupops])
 
-class StarVector:
+class VectorStarSet:
     """
-    A class to construct star-vectors, and be able to efficiently index.
+    A class to construct vector stars, and be able to efficiently index.
     """
     def __init__(self, star=None):
         """
-        Initiates a star-vector-generator; is designed to work with a given star.
+        Initiates a vector-star generator; is designed to work with a given star.
 
         Parameters
         ----------
@@ -347,7 +347,7 @@ class StarVector:
         """
         self.star = None
         self.Npts = 0
-        self.Nstarvects = 0
+        self.Nvstars = 0
         self.Nstars = 0
         if star != None:
             self.NNvect = star.NNvect
@@ -372,13 +372,13 @@ class StarVector:
         self.Npts = star.Npts
         self.NNvect = star.NNvect
         self.groupops = star.groupops
-        self.starvecpos = []
-        self.starvecvec = []
+        self.vecpos = []
+        self.vecvec = []
         for s in self.star.stars:
             # start by generating the parallel star-vector; always trivially present:
-            self.starvecpos.append(s)
+            self.vecpos.append(s)
             scale = 1./np.sqrt(len(s)*np.dot(s[0],s[0])) # normalization factor
-            self.starvecvec.append([v*scale for v in s])
+            self.vecvec.append([v*scale for v in s])
             # next, try to generate perpendicular star-vectors, if present:
             v0 = np.cross(s[0], np.array([0, 0, 1.]))
             if np.dot(v0, v0) < threshold:
@@ -427,22 +427,22 @@ class StarVector:
                     vlist.append(v1)
                 # add the positions
                 for v in vlist:
-                    self.starvecpos.append(s)
+                    self.vecpos.append(s)
                     veclist = []
                     for R in s:
                         for g in self.groupops:
                             if all(abs(R - np.dot(g, s[0])) < threshold):
                                 veclist.append(np.dot(g, v))
                                 break
-                    self.starvecvec.append(veclist)
+                    self.vecvec.append(veclist)
         self.generateouter()
-        self.Nstarvects = len(self.starvecpos)
+        self.Nvstars = len(self.vecpos)
 
     def generateouter(self):
         """
         Generate our outer products for our star-vectors
         """
-        self.outer = [sum([np.outer(v, v) for v in veclist]) for veclist in self.starvecvec]
+        self.outer = [sum([np.outer(v, v) for v in veclist]) for veclist in self.vecvec]
 
     def GFexpansion(self, starGF):
         """
@@ -460,16 +460,16 @@ class StarVector:
         GFexpansion: array[Nsv, Nsv, Nstars+1]
             the GF matrix[i, j] = GFexpansion[i, j, 0]*GF(0) + sum(GFexpansion[i, j, k+1] * GF(starGF[k]))
         """
-        if self.Nstarvects == 0:
+        if self.Nvstars == 0:
             return None
-        if not isinstance(starGF, Star):
+        if not isinstance(starGF, StarSet):
             raise TypeError('need a star')
-        GFexpansion = np.zeros((self.Nstarvects, self.Nstarvects, starGF.Nstars+1))
-        for i in xrange(self.Nstarvects):
-            for j in xrange(self.Nstarvects):
+        GFexpansion = np.zeros((self.Nvstars, self.Nvstars, starGF.Nstars+1))
+        for i in xrange(self.Nvstars):
+            for j in xrange(self.Nvstars):
                 if i <= j :
-                    for Ri, vi in zip(self.starvecpos[i], self.starvecvec[i]):
-                        for Rj, vj in zip(self.starvecpos[j], self.starvecvec[j]):
+                    for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
+                        for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                             if (Ri == Rj).all():
                                 k = 0
                             else:
@@ -497,16 +497,16 @@ class StarVector:
         rate1expansion: array[Nsv, Nsv, Ndstars]
             the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1(dstar[k]))
         """
-        if self.Nstarvects == 0:
+        if self.Nvstars == 0:
             return None
-        if not isinstance(dstar, DoubleStar):
+        if not isinstance(dstar, DoubleStarSet):
             raise TypeError('need a double star')
-        rate1expansion = np.zeros((self.Nstarvects, self.Nstarvects, dstar.Ndstars))
-        for i in xrange(self.Nstarvects):
-            for j in xrange(self.Nstarvects):
+        rate1expansion = np.zeros((self.Nvstars, self.Nvstars, dstar.Ndstars))
+        for i in xrange(self.Nvstars):
+            for j in xrange(self.Nvstars):
                 if i <= j :
-                    for Ri, vi in zip(self.starvecpos[i], self.starvecvec[i]):
-                        for Rj, vj in zip(self.starvecpos[j], self.starvecvec[j]):
+                    for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
+                        for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                             # note: double-stars are tuples of point indices
                             k = dstar.dstarindex((dstar.star.pointindex(Ri),
                                                   dstar.star.pointindex(Rj)))
@@ -531,16 +531,16 @@ class StarVector:
         rate2expansion: array[Nsv, Nsv, NNstars]
             the omega2 matrix[i, j] = sum(rate2expansion[i, j, k] * omega2(NNstar[k]))
         """
-        if self.Nstarvects == 0:
+        if self.Nvstars == 0:
             return None
-        if not isinstance(NNstar, Star):
+        if not isinstance(NNstar, StarSet):
             raise TypeError('need a star')
-        rate2expansion = np.zeros((self.Nstarvects, self.Nstarvects, NNstar.Nstars))
-        for i in xrange(self.Nstarvects):
+        rate2expansion = np.zeros((self.Nvstars, self.Nvstars, NNstar.Nstars))
+        for i in xrange(self.Nvstars):
             # this is a diagonal matrix, so...
-            ind = NNstar.starindex(self.starvecpos[i][0])
+            ind = NNstar.starindex(self.vecpos[i][0])
             if ind != -1:
-                rate2expansion[i, i, ind] = -np.dot(self.starvecvec[i][0], self.starvecvec[i][0])*len(NNstar.stars[ind])
+                rate2expansion[i, i, ind] = -np.dot(self.vecvec[i][0], self.vecvec[i][0])*len(NNstar.stars[ind])
         return rate2expansion
 
     def bias2expansion(self, NNstar):
@@ -557,15 +557,15 @@ class StarVector:
         bias2expansion: array[Nsv, NNstars]
             the bias2 vector[i] = sum(bias2expansion[i, k] * omega2(NNstar[k]))
         """
-        if self.Nstarvects == 0:
+        if self.Nvstars == 0:
             return None
-        if not isinstance(NNstar, Star):
+        if not isinstance(NNstar, StarSet):
             raise TypeError('need a star')
-        bias2expansion = np.zeros((self.Nstarvects, NNstar.Nstars))
-        for i in xrange(self.Nstarvects):
-            ind = NNstar.starindex(self.starvecpos[i][0])
+        bias2expansion = np.zeros((self.Nvstars, NNstar.Nstars))
+        for i in xrange(self.Nvstars):
+            ind = NNstar.starindex(self.vecpos[i][0])
             if ind != -1:
-                bias2expansion[i, ind] = np.dot(self.starvecpos[i][0], self.starvecvec[i][0])*len(NNstar.stars[ind])
+                bias2expansion[i, ind] = np.dot(self.vecpos[i][0], self.vecvec[i][0])*len(NNstar.stars[ind])
         return bias2expansion
 
     def bias1expansion(self, dstar, NNstar):
@@ -596,21 +596,21 @@ class StarVector:
             we have an additional contribution to the bias1 vector:
             bias1 vector[i] += sum(bias1NN[i, k] * omega0[NNstar[k]])
         """
-        if self.Nstarvects == 0:
+        if self.Nvstars == 0:
             return None
-        if not isinstance(dstar, DoubleStar):
+        if not isinstance(dstar, DoubleStarSet):
             raise TypeError('need a double star')
-        if not isinstance(NNstar, Star):
+        if not isinstance(NNstar, StarSet):
             raise TypeError('need a star')
         NNstar.generateindices()
-        bias1ds = np.zeros((self.Nstarvects, dstar.Ndstars))
-        bias1prob = np.empty((self.Nstarvects, dstar.Ndstars), dtype=int)
+        bias1ds = np.zeros((self.Nvstars, dstar.Ndstars))
+        bias1prob = np.empty((self.Nvstars, dstar.Ndstars), dtype=int)
         bias1prob[:, :] = -1
-        bias1NN = np.zeros((self.Nstarvects, NNstar.Nstars))
+        bias1NN = np.zeros((self.Nvstars, NNstar.Nstars))
 
         # run through the star-vectors
-        for i, svR, svv in zip(range(self.Nstarvects),
-                               self.starvecpos, self.starvecvec):
+        for i, svR, svv in zip(range(self.Nvstars),
+                               self.vecpos, self.vecvec):
             # run through the NN stars
             p1 = dstar.star.pointindex(svR[0]) # first half of our pair
             # nnst = star index, vec = NN jump vector

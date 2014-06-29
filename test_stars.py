@@ -22,7 +22,7 @@ def setuportho():
                        [0, 2, 0], [0, -2, 0],
                        [0, 0, 1], [0, 0, -1]], dtype=float)
     groupops = KPTmesh.KPTmesh(lattice).groupops
-    star = stars.Star(NNvect, groupops)
+    star = stars.StarSet(NNvect, groupops)
     return lattice, NNvect, groupops, star
 
 def orthorates():
@@ -36,7 +36,7 @@ def setupcubic():
                        [0, 1, 0], [0, -1, 0],
                        [0, 0, 1], [0, 0, -1]], dtype=float)
     groupops = KPTmesh.KPTmesh(lattice).groupops
-    star = stars.Star(NNvect, groupops)
+    star = stars.StarSet(NNvect, groupops)
     return lattice, NNvect, groupops, star
 
 def cubicrates():
@@ -46,7 +46,7 @@ def setupFCC():
     lattice = FCClatt.lattice()
     NNvect = FCClatt.NNvect()
     groupops = KPTmesh.KPTmesh(lattice).groupops
-    star = stars.Star(NNvect, groupops)
+    star = stars.StarSet(NNvect, groupops)
     return lattice, NNvect, groupops, star
 
 def FCCrates():
@@ -162,7 +162,7 @@ class DoubleStarTests(unittest.TestCase):
 
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.dstar = stars.DoubleStar()
+        self.dstar = stars.DoubleStarSet()
 
     def testDoubleStarGeneration(self):
         """Can we generate a double-star?"""
@@ -209,23 +209,23 @@ class DoubleStarTests(unittest.TestCase):
             for pair in self.dstar.pairs:
                 self.assertTrue(any(pair == p for p in self.dstar.dstars[self.dstar.dstarindex(pair)]))
 
-class StarVectorTests(unittest.TestCase):
-    """Set of tests that our StarVector class is behaving correctly"""
+class VectorStarTests(unittest.TestCase):
+    """Set of tests that our VectorStar class is behaving correctly"""
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setuportho()
-        self.starvec = stars.StarVector(self.star)
+        self.vecstar = stars.VectorStarSet(self.star)
 
-    def testStarVectorGenerate(self):
+    def testVectorStarGenerate(self):
         """Can we generate star-vectors that make sense?"""
         self.star.generate(1)
-        self.starvec.generate(self.star)
-        self.assertTrue(self.starvec.Nstarvects>0)
+        self.vecstar.generate(self.star)
+        self.assertTrue(self.vecstar.Nvstars>0)
 
-    def StarVectorConsistent(self, nshells):
+    def VectorStarConsistent(self, nshells):
         """Do the star vectors obey the definition?"""
         self.star.generate(nshells)
-        self.starvec.generate(self.star)
-        for s, vec in zip(self.starvec.starvecpos, self.starvec.starvecvec):
+        self.vecstar.generate(self.star)
+        for s, vec in zip(self.vecstar.vecpos, self.vecstar.vecvec):
             for R, v in zip(s, vec):
                 for g in self.groupops:
                     Rrot = np.dot(g, R)
@@ -234,12 +234,12 @@ class StarVectorTests(unittest.TestCase):
                         if (abs(R1 - Rrot) < 1e-8).all():
                             self.assertTrue((abs(v1 - vrot) < 1e-8).all())
 
-    def StarVectorOrthonormal(self, nshells):
+    def VectorStarOrthonormal(self, nshells):
         """Are the star vectors orthonormal?"""
         self.star.generate(nshells)
-        self.starvec.generate(self.star)
-        for s1, v1 in zip(self.starvec.starvecpos, self.starvec.starvecvec):
-            for s2, v2 in zip(self.starvec.starvecpos, self.starvec.starvecvec):
+        self.vecstar.generate(self.star)
+        for s1, v1 in zip(self.vecstar.vecpos, self.vecstar.vecvec):
+            for s2, v2 in zip(self.vecstar.vecpos, self.vecstar.vecvec):
                 if (s1[0] == s2[0]).all():
                     dp = 0
                     for vv1, vv2 in zip(v1, v2):
@@ -255,24 +255,24 @@ class StarVectorTests(unittest.TestCase):
                                                    s1[0], v1[0], s2[0], v2[0]
                                                ))
 
-    def testStarVectorConsistent(self):
+    def testVectorStarConsistent(self):
         """Do the star vectors obey the definition?"""
-        self.StarVectorConsistent(2)
+        self.VectorStarConsistent(2)
 
-    def testStarVectorOrthonormal(self):
-        self.StarVectorOrthonormal(2)
+    def testVectorStarOrthonormal(self):
+        self.VectorStarOrthonormal(2)
 
-    def testStarVectorCount(self):
+    def testVectorStarCount(self):
         """Does our star vector count make any sense?"""
         self.star.generate(1)
-        self.starvec.generate(self.star)
-        self.assertEqual(self.starvec.Nstarvects, 3)
+        self.vecstar.generate(self.star)
+        self.assertEqual(self.vecstar.Nvstars, 3)
 
-    def testStarVectorOuterProduct(self):
+    def testVectorStarOuterProduct(self):
         """Do we generate the correct outer products for our star-vectors?"""
         self.star.generate(1)
-        self.starvec.generate(self.star)
-        for outer in self.starvec.outer:
+        self.vecstar.generate(self.star)
+        for outer in self.vecstar.outer:
             self.assertAlmostEqual(np.trace(outer), 1)
             # should also be symmetric:
             for g in self.groupops:
@@ -280,62 +280,62 @@ class StarVectorTests(unittest.TestCase):
                 self.assertTrue((abs(outer - g_out_gT) < 1e-8).all())
 
 
-class StarVectorFCCTests(StarVectorTests):
-    """Set of tests that our StarVector class is behaving correctly, for FCC"""
+class VectorStarFCCTests(VectorStarTests):
+    """Set of tests that our VectorStar class is behaving correctly, for FCC"""
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.starvec = stars.StarVector(self.star)
+        self.vecstar = stars.VectorStarSet(self.star)
 
-    def testStarVectorCount(self):
+    def testVectorStarCount(self):
         """Does our star vector count make any sense?"""
         self.star.generate(2)
-        self.starvec.generate(self.star)
+        self.vecstar.generate(self.star)
         # nn + nn = 4 stars, and that should make 5 star-vectors!
-        self.assertEqual(self.starvec.Nstarvects, 5)
+        self.assertEqual(self.vecstar.Nvstars, 5)
 
-    def testStarVectorConsistent(self):
+    def testVectorStarConsistent(self):
         """Do the star vectors obey the definition?"""
-        self.StarVectorConsistent(2)
+        self.VectorStarConsistent(2)
 
-    def testStarVectorOuterProductMore(self):
+    def testVectorStarOuterProductMore(self):
         """Do we generate the correct outer products for our star-vectors?"""
         self.star.generate(2)
-        self.starvec.generate(self.star)
+        self.vecstar.generate(self.star)
         # with cubic symmetry, these all have to equal 1/3 * identity
         testouter = 1./3.*np.eye(3)
-        for outer in self.starvec.outer:
+        for outer in self.vecstar.outer:
             self.assertTrue((abs(outer - testouter) < 1e-8).all())
 
 import GFcalc
 
 
-class StarVectorGFlinearTests(unittest.TestCase):
+class VectorStarGFlinearTests(unittest.TestCase):
     """Set of tests that make sure we can construct the GF matrix as a linear combination"""
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setuportho()
-        self.star2 = stars.Star(self.NNvect, self.groupops)
-        self.starvec = stars.StarVector(self.star)
+        self.star2 = stars.StarSet(self.NNvect, self.groupops)
+        self.vecstar = stars.VectorStarSet(self.star)
         self.rates = orthorates()
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
 
     def ConstructGF(self, nshells):
         self.star.generate(nshells)
         self.star2.generate(2*nshells)
-        self.starvec.generate(self.star)
-        GFexpand = self.starvec.GFexpansion(self.star2)
+        self.vecstar.generate(self.star)
+        GFexpand = self.vecstar.GFexpansion(self.star2)
         self.assertEqual(np.shape(GFexpand),
-                         (self.starvec.Nstarvects, self.starvec.Nstarvects, self.star2.Nstars + 1))
+                         (self.vecstar.Nvstars, self.vecstar.Nvstars, self.star2.Nstars + 1))
         gexpand = np.zeros(self.star2.Nstars + 1)
         gexpand[0] = self.GF.GF(np.zeros(3))
         for i in xrange(self.star2.Nstars):
             gexpand[i + 1] = self.GF.GF(self.star2.stars[i][0])
-        for i in xrange(self.starvec.Nstarvects):
-            for j in xrange(self.starvec.Nstarvects):
+        for i in xrange(self.vecstar.Nvstars):
+            for j in xrange(self.vecstar.Nvstars):
                 # test the construction
                 self.assertAlmostEqual(sum(GFexpand[i, j, :]), 0)
                 g = 0
-                for Ri, vi in zip(self.starvec.starvecpos[i], self.starvec.starvecvec[i]):
-                    for Rj, vj in zip(self.starvec.starvecpos[j], self.starvec.starvecvec[j]):
+                for Ri, vi in zip(self.vecstar.vecpos[i], self.vecstar.vecvec[i]):
+                    for Rj, vj in zip(self.vecstar.vecpos[j], self.vecstar.vecvec[j]):
                         g += np.dot(vi, vj)*self.GF.GF(Ri - Rj)
                 self.assertAlmostEqual(g, np.dot(GFexpand[i, j, :], gexpand))
         # print(np.dot(GFexpand, gexpand))
@@ -344,12 +344,12 @@ class StarVectorGFlinearTests(unittest.TestCase):
         """Test the construction of the GF using double-nn shell"""
         self.ConstructGF(2)
 
-class StarVectorGFFCClinearTests(StarVectorGFlinearTests):
+class VectorStarGFFCClinearTests(VectorStarGFlinearTests):
     """Set of tests that make sure we can construct the GF matrix as a linear combination for FCC"""
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.star2 = stars.Star(self.NNvect, self.groupops)
-        self.starvec = stars.StarVector(self.star)
+        self.star2 = stars.StarSet(self.NNvect, self.groupops)
+        self.vecstar = stars.VectorStarSet(self.star)
         self.rates = FCCrates()
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
 
@@ -358,21 +358,21 @@ class StarVectorGFFCClinearTests(StarVectorGFlinearTests):
         self.ConstructGF(2)
 
 
-class StarVectorOmegalinearTests(unittest.TestCase):
+class VectorStarOmegalinearTests(unittest.TestCase):
     """Set of tests for our expansion of omega_1 in double-stars"""
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setuportho()
-        self.dstar = stars.DoubleStar()
-        self.starvec = stars.StarVector()
+        self.dstar = stars.DoubleStarSet()
+        self.vecstar = stars.VectorStarSet()
         self.rates = orthorates()
 
     def testConstructOmega1(self):
         self.star.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
         self.dstar.generate(self.star)
-        self.starvec.generate(self.star)
-        rate1expand = self.starvec.rate1expansion(self.dstar)
+        self.vecstar.generate(self.star)
+        rate1expand = self.vecstar.rate1expansion(self.dstar)
         self.assertEqual(np.shape(rate1expand),
-                         (self.starvec.Nstarvects, self.starvec.Nstarvects, self.dstar.Ndstars))
+                         (self.vecstar.Nvstars, self.vecstar.Nvstars, self.dstar.Ndstars))
         om1expand = np.zeros(self.dstar.Ndstars)
         for nd, ds in enumerate(self.dstar.dstars):
             pair = ds[0]
@@ -382,12 +382,12 @@ class StarVectorOmegalinearTests(unittest.TestCase):
                     om1expand[nd] = rate
                     break
         # print om1expand
-        for i in xrange(self.starvec.Nstarvects):
-            for j in xrange(self.starvec.Nstarvects):
+        for i in xrange(self.vecstar.Nvstars):
+            for j in xrange(self.vecstar.Nvstars):
                 # test the construction
                 om1 = 0
-                for Ri, vi in zip(self.starvec.starvecpos[i], self.starvec.starvecvec[i]):
-                    for Rj, vj in zip(self.starvec.starvecpos[j], self.starvec.starvecvec[j]):
+                for Ri, vi in zip(self.vecstar.vecpos[i], self.vecstar.vecvec[i]):
+                    for Rj, vj in zip(self.vecstar.vecpos[j], self.vecstar.vecvec[j]):
                         dv = Ri - Rj
                         for vec, rate in zip(self.NNvect, self.rates):
                             if all(abs(dv - vec) < 1e-8):
@@ -397,21 +397,21 @@ class StarVectorOmegalinearTests(unittest.TestCase):
         # print(np.dot(rateexpand, om1expand))
 
 
-class StarVectorFCCOmegalinearTests(StarVectorOmegalinearTests):
+class VectorStarFCCOmegalinearTests(VectorStarOmegalinearTests):
     """Set of tests for our expansion of omega_1 in double-stars for FCC"""
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.dstar = stars.DoubleStar()
-        self.starvec = stars.StarVector()
+        self.dstar = stars.DoubleStarSet()
+        self.vecstar = stars.VectorStarSet()
         self.rates = FCCrates()
 
 
-class StarVectorOmega2linearTests(unittest.TestCase):
+class VectorStarOmega2linearTests(unittest.TestCase):
     """Set of tests for our expansion of omega_2 in NN stars"""
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setuportho()
-        self.NNstar = stars.Star(self.NNvect, self.groupops)
-        self.starvec = stars.StarVector()
+        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
+        self.vecstar = stars.VectorStarSet()
         self.rates = orthorates()
 
     def testConstructOmega2(self):
@@ -421,41 +421,41 @@ class StarVectorOmega2linearTests(unittest.TestCase):
         for vec, rate in zip(self.NNvect, self.rates):
             om2expand[self.NNstar.starindex(vec)] = rate
         self.star.generate(2) # go ahead and make a "large" set of stars
-        self.starvec.generate(self.star)
-        rate2expand = self.starvec.rate2expansion(self.NNstar)
+        self.vecstar.generate(self.star)
+        rate2expand = self.vecstar.rate2expansion(self.NNstar)
         self.assertEqual(np.shape(rate2expand),
-                         (self.starvec.Nstarvects, self.starvec.Nstarvects, self.NNstar.Nstars))
-        for i in xrange(self.starvec.Nstarvects):
+                         (self.vecstar.Nvstars, self.vecstar.Nvstars, self.NNstar.Nstars))
+        for i in xrange(self.vecstar.Nvstars):
             # test the construction
             om2 = 0
-            for Ri, vi in zip(self.starvec.starvecpos[i], self.starvec.starvecvec[i]):
+            for Ri, vi in zip(self.vecstar.vecpos[i], self.vecstar.vecvec[i]):
                 for vec, rate in zip(self.NNvect, self.rates):
                     if (vec == Ri).all():
                         om2 += -np.dot(vi, vi) * rate
                         break
             self.assertAlmostEqual(om2, np.dot(rate2expand[i, i, :], om2expand))
-            for j in xrange(self.starvec.Nstarvects):
+            for j in xrange(self.vecstar.Nvstars):
                 if j != i:
                     for d in xrange(self.NNstar.Nstars):
                         self.assertAlmostEquals(0, rate2expand[i, j, d])
         # print(np.dot(rate2expand, om2expand))
 
 
-class StarVectorFCCOmega2linearTests(StarVectorOmega2linearTests):
+class VectorStarFCCOmega2linearTests(VectorStarOmega2linearTests):
     """Set of tests for our expansion of omega_2 in NN stars for FCC"""
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.NNstar = stars.Star(self.NNvect, self.groupops)
-        self.starvec = stars.StarVector()
+        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
+        self.vecstar = stars.VectorStarSet()
         self.rates = FCCrates()
 
 
-class StarVectorBias2linearTests(unittest.TestCase):
+class VectorStarBias2linearTests(unittest.TestCase):
     """Set of tests for our expansion of bias vector (2) in NN stars"""
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setuportho()
-        self.NNstar = stars.Star(self.NNvect, self.groupops)
-        self.starvec = stars.StarVector()
+        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
+        self.vecstar = stars.VectorStarSet()
         self.rates = orthorates()
 
     def testConstructBias2(self):
@@ -465,10 +465,10 @@ class StarVectorBias2linearTests(unittest.TestCase):
         for vec, rate in zip(self.NNvect, self.rates):
             om2expand[self.NNstar.starindex(vec)] = rate
         self.star.generate(2) # go ahead and make a "large" set of stars
-        self.starvec.generate(self.star)
-        bias2expand = self.starvec.bias2expansion(self.NNstar)
+        self.vecstar.generate(self.star)
+        bias2expand = self.vecstar.bias2expansion(self.NNstar)
         self.assertEqual(np.shape(bias2expand),
-                         (self.starvec.Nstarvects, self.NNstar.Nstars))
+                         (self.vecstar.Nvstars, self.NNstar.Nstars))
         biasvec = np.zeros((self.star.Npts, 3)) # bias vector: only the exchange hops
         for i, pt in enumerate(self.star.pts):
             for vec, rate in zip(self.NNvect, self.rates):
@@ -477,8 +477,8 @@ class StarVectorBias2linearTests(unittest.TestCase):
         # construct the same bias vector using our expansion
         biasveccomp = np.zeros((self.star.Npts, 3))
         for om2, svpos, svvec in zip(np.dot(bias2expand, om2expand),
-                                     self.starvec.starvecpos,
-                                     self.starvec.starvecvec):
+                                     self.vecstar.vecpos,
+                                     self.vecstar.vecvec):
             # test the construction
             for Ri, vi in zip(svpos, svvec):
                 biasveccomp[self.star.pointindex(Ri), :] = om2*vi
@@ -489,22 +489,22 @@ class StarVectorBias2linearTests(unittest.TestCase):
         # print(np.dot(bias2expand, om2expand))
 
 
-class StarVectorFCCBias2linearTests(StarVectorBias2linearTests):
+class VectorStarFCCBias2linearTests(VectorStarBias2linearTests):
     """Set of tests for our expansion of omega_2 in NN stars for FCC"""
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.NNstar = stars.Star(self.NNvect, self.groupops)
-        self.starvec = stars.StarVector()
+        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
+        self.vecstar = stars.VectorStarSet()
         self.rates = FCCrates()
 
 
-class StarVectorBias1linearTests(unittest.TestCase):
+class VectorStarBias1linearTests(unittest.TestCase):
     """Set of tests for our expansion of bias vector (1) in double + NN stars"""
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setuportho()
-        self.NNstar = stars.Star(self.NNvect, self.groupops)
-        self.dstar = stars.DoubleStar()
-        self.starvec = stars.StarVector()
+        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
+        self.dstar = stars.DoubleStarSet()
+        self.vecstar = stars.VectorStarSet()
         self.rates = orthorates()
 
     def testConstructBias1(self):
@@ -526,14 +526,14 @@ class StarVectorBias1linearTests(unittest.TestCase):
             om1expand[i] = om0expand[sind]
         # print 'om0:', om0expand
         # print 'om1:', om1expand
-        self.starvec.generate(self.star)
-        bias1ds, bias1prob, bias1NN = self.starvec.bias1expansion(self.dstar, self.NNstar)
+        self.vecstar.generate(self.star)
+        bias1ds, bias1prob, bias1NN = self.vecstar.bias1expansion(self.dstar, self.NNstar)
         self.assertEqual(np.shape(bias1ds),
-                         (self.starvec.Nstarvects, self.dstar.Ndstars))
+                         (self.vecstar.Nvstars, self.dstar.Ndstars))
         self.assertEqual(np.shape(bias1prob),
-                         (self.starvec.Nstarvects, self.dstar.Ndstars))
+                         (self.vecstar.Nvstars, self.dstar.Ndstars))
         self.assertEqual(np.shape(bias1NN),
-                         (self.starvec.Nstarvects, self.NNstar.Nstars))
+                         (self.vecstar.Nvstars, self.NNstar.Nstars))
         self.assertIs(bias1prob.dtype, np.dtype('int64')) # needs to be for indexing
         # make sure that we don't have -1 as our endpoint probability for any ds that are used.
         for b1ds, b1p in zip(bias1ds, bias1prob):
@@ -555,18 +555,18 @@ class StarVectorBias1linearTests(unittest.TestCase):
         # construct the same bias vector using our expansion
         biasveccomp = np.zeros((self.star.Npts, 3))
         for om1, svpos, svvec in zip(np.dot(bias1ds * probsqrt[bias1prob], om1expand),
-                                     self.starvec.starvecpos,
-                                     self.starvec.starvecvec):
+                                     self.vecstar.vecpos,
+                                     self.vecstar.vecvec):
             # test the construction
             for Ri, vi in zip(svpos, svvec):
                 biasveccomp[self.star.pointindex(Ri), :] += om1*vi
         for om0, svpos, svvec in zip(np.dot(bias1NN, om0expand),
-                                     self.starvec.starvecpos,
-                                     self.starvec.starvecvec):
+                                     self.vecstar.vecpos,
+                                     self.vecstar.vecvec):
             for Ri, vi in zip(svpos, svvec):
                 biasveccomp[self.star.pointindex(Ri), :] += om0*vi
 
-        for svpos, svvec in zip(self.starvec.starvecpos, self.starvec.starvecvec):
+        for svpos, svvec in zip(self.vecstar.vecpos, self.vecstar.vecvec):
             for Ri, vi in zip(svpos, svvec):
                 self.assertAlmostEqual(np.dot(vi, biasvec[self.star.pointindex(Ri)]),
                                        np.dot(vi, biasveccomp[self.star.pointindex(Ri)]),
@@ -591,11 +591,11 @@ class StarVectorBias1linearTests(unittest.TestCase):
         #     print bv, bvc
 
 
-class StarVectorFCCBias1linearTests(StarVectorBias1linearTests):
+class VectorStarFCCBias1linearTests(VectorStarBias1linearTests):
     """Set of tests for our expansion of bias vector (1) in double + NN stars for FCC"""
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.NNstar = stars.Star(self.NNvect, self.groupops)
-        self.dstar = stars.DoubleStar()
-        self.starvec = stars.StarVector()
+        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
+        self.dstar = stars.DoubleStarSet()
+        self.vecstar = stars.VectorStarSet()
         self.rates = FCCrates()
