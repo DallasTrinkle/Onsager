@@ -64,8 +64,16 @@ class StarSet:
         lastshell = list(vectlist)
         for i in range(Nshells-1):
             # add all NNvect to last shell produced, always excluding 0
-            lastshell = [v1+v2 for v1 in lastshell for v2 in self.NNvect if not all(abs(v1 + v2) < threshold)]
-            vectlist += lastshell
+            # lastshell = [v1+v2 for v1 in lastshell for v2 in self.NNvect if not all(abs(v1 + v2) < threshold)]
+            nextshell = []
+            for v1 in lastshell:
+                for v2 in self.NNvect:
+                    v = v1 + v2
+                    if not all(abs(v) < threshold):
+                        if not any([all(abs(v - vi) < threshold) for vi in vectlist]):
+                            nextshell.append(v)
+                            vectlist.append(v)
+            lastshell = nextshell
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
         vectlist.sort(key=lambda x: np.vdot(x, x))
         x2_indices = []
