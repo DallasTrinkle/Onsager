@@ -87,6 +87,21 @@ class BaseTests(unittest.TestCase):
                                      for g in self.groupops]))
             GFlist = self.Lcalc.GFlist()
             self.assertEqual(len(GFlist), nGF)
+            # we test this by making the list of endpoints from omega1, and doing all
+            # possible additions with point group ops, and making sure it shows up.
+            vlist = [pair[0] for pair in omega1list] + [pair[1] for pair in omega1list]
+            for v1 in vlist:
+                for gv in [np.dot(g, v1) for g in self.groupops]:
+                    for v2 in vlist:
+                        vsum = gv + v2
+                        match = False
+                        for vGF in GFlist:
+                            if np.dot(vGF, vGF) != np.dot(vsum, vsum):
+                                continue
+                            if any([all(abs(vsum - np.dot(g, vGF)) < 1e-8) for g in self.groupops]):
+                                match = True
+                                break
+                        self.assertTrue(match)
 
 
 class FCCBaseTests(BaseTests):
