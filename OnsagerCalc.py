@@ -171,3 +171,56 @@ class VacancyMediated:
         return [(self.kinetic.pts[p[0][0]], self.kinetic.pts[p[0][1]]) for p in self.omega1.dstars], \
                self.omega1LIMB
 
+    def maketracer(self):
+        """
+        Generates input to Lij that corresponds to a tracer atom; useful for building
+        input to Lij()
+
+        Returns
+        -------
+        prob : array[thermo.Nstars]
+            probability for each site in thermodynamic interaction range
+        om2 : array[NNstar.Nstars]
+            rates for exchange
+        om1 : array[omega1.Ndstars]
+            rates for vacancy motion around a solute
+        """
+        prob = np.zeros(self.thermo.Nstars, dtype=float)
+        prob[:] = 1.
+        om2 = np.zeros(self.NNstar.Nstars, dtype=float)
+        om2[:] = -1.
+        om1 = np.zeros(self.omega1.Ndstars, dtype=float)
+        om1[:] = -1.
+        return prob, om2, om1
+
+    def Lij(self, gf, om0, prob, om2, om1):
+        """
+        Calculates the transport coefficients Lvv, Lss, and Lsv from the GF,
+        omega0, omega1, and omega2 rates along with site probabilities.
+
+        Parameters
+        ----------
+        gf : array[NGF_sites]
+            Green function for vacancy evaluated at sites
+        om0 : array[NNjumps]
+            rates for vacancy jumps
+        prob : array[thermosites]
+            probability of solute-vacancy complex at each sites
+        om2 : array[NNjumps]
+            rates for vacancy-solute exchange; if -1, use om0 entry
+        om1 : array[Ndstars]
+            rates for vacancy jumps around solute; if -1, use corresponding om0 entry
+
+        Returns
+        -------
+        Lvv : array[3, 3]
+            vacancy-vacancy; needs to be multiplied by cv/kBT
+        Lss : array[3, 3]
+            solute-solute; needs to be multiplied by cv*cs/kBT
+        Lsv : array[3, 3]
+            solute-vacancy; needs to be multiplied by cv*cs/kBT
+        """
+        Lvv = np.eye(3)
+        Lss = np.eye(3)
+        Lsv = np.zeros((3,3))
+        return Lvv, Lss, Lsv

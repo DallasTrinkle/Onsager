@@ -103,6 +103,33 @@ class BaseTests(unittest.TestCase):
                                 break
                         self.assertTrue(match)
 
+    def testTracerIndexing(self):
+        """Test out the generation of the tracer example indexing."""
+        for n in [1, 2]:
+            self.Lcalc.generate(n)
+            prob, om2, om1 = self.Lcalc.maketracer()
+            self.assertEqual(len(prob), len(self.Lcalc.interactlist()))
+            self.assertEqual(len(om2), len(self.Lcalc.omega0list()))
+            om1list, om1index = self.Lcalc.omega1list()
+            self.assertEqual(len(om1), len(om1list))
+            for p in prob:
+                self.assertEqual(p, 1)
+            for om in om2:
+                self.assertEqual(om, -1)
+            for om in om1:
+                self.assertEqual(om, -1)
+
+    def testTracer(self):
+        """Test the actual evaluation of the tracer diffusion value."""
+        for n in [1, 2]:
+            self.Lcalc.generate(n)
+            prob, om2, om1 = self.Lcalc.maketracer()
+            om0 = np.array((1.,)*len(om2), dtype=float)
+            gf = np.array((1.,)*len(self.Lcalc.GFlist()))
+            Lvv, Lss, Lsv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
+            for lvv, lss in zip(Lvv.flat, Lss.flat):
+                self.assertAlmostEqual(lvv, lss)
+
 
 class FCCBaseTests(BaseTests):
     """Set of tests that our Onsager calculator is well-behaved"""
