@@ -4,7 +4,8 @@ Unit tests for Onsager calculator for vacancy-mediated diffusion.
 
 __author__ = 'Dallas R. Trinkle'
 
-#
+# TODO: add the five-frequency model as a test for FCC; add in BCC
+# TODO: additional tests using the 14 frequency model for FCC?
 
 import unittest
 import FCClatt
@@ -134,22 +135,22 @@ class BaseTests(unittest.TestCase):
 import GFcalc
 
 
-class FCCBaseTests(BaseTests):
+class SCBaseTests(BaseTests):
     """Set of tests that our Onsager calculator is well-behaved"""
 
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.rates = setupFCC()
+        self.lattice, self.NNvect, self.groupops, self.rates = setupcubic()
         self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
         self.Njumps = 1
-        self.Ninteract = [1, 4]
-        self.Nomega1 = [7, 20]
-        self.NGF = [16, 37]
-        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates, Nmax=4)
+        self.Ninteract = [1, 3]
+        self.Nomega1 = [2, 6]
+        self.NGF = [11, 23]
+        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
         self.D0 = self.GF.D2[0, 0]
-        self.correl = 0.781
+        self.correl = 0.653
 
     def testTracerValue(self):
-        """Make sure we get the correct tracer correlation coefficients for FCC"""
+        """Make sure we get the correct tracer correlation coefficients"""
         self.Lcalc.generate(1)
         prob, om2, om1 = self.Lcalc.maketracer()
         om0 = np.array((self.rates[0],)*len(om2), dtype=float)
@@ -174,16 +175,18 @@ class FCCBaseTests(BaseTests):
         self.assertAlmostEqual(-Lss[0, 0]/Lsv[0, 0], self.correl, delta=1e-3)
 
 
-class SCBaseTests(FCCBaseTests):
+class FCCBaseTests(SCBaseTests):
     """Set of tests that our Onsager calculator is well-behaved"""
 
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.rates = setupcubic()
+        self.lattice, self.NNvect, self.groupops, self.rates = setupFCC()
         self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
         self.Njumps = 1
-        self.Ninteract = [1, 3]
-        self.Nomega1 = [2, 6]
-        self.NGF = [11, 23]
-        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
+        self.Ninteract = [1, 4]
+        self.Nomega1 = [7, 20]
+        self.NGF = [16, 37]
+        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates, Nmax=4)
         self.D0 = self.GF.D2[0, 0]
-        self.correl = 0.653
+        self.correl = 0.781
+
+

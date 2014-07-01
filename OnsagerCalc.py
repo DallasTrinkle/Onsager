@@ -64,7 +64,7 @@ class VacancyMediated:
         self.Nthermo = 0
         self.generate(Nthermo)
 
-    def generate(self, Nthermo):
+    def generate(self, Nthermo, genmatrices=False):
         """
         Generate the necessary stars, double-stars, vector-stars, etc. based on the
         thermodynamic range.
@@ -74,6 +74,9 @@ class VacancyMediated:
         Nthermo : integer
             range of thermodynamic interactions, in terms of "shells", which is multiple
             summations of jumpvect
+
+        genmatrices : logical, optional
+            if set, call generate matrices (default is to wait until needed)
         """
         if Nthermo == 0:
             self.Nthermo = 0
@@ -81,8 +84,6 @@ class VacancyMediated:
             return
         self.thermo.generate(Nthermo)
         self.kinetic.combine(self.thermo, self.NNstar)
-        self.thermo2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.thermo.stars]
-        self.NN2thermo = [self.thermo.starindex(Rs[0]) for Rs in self.NNstar.stars]
         self.omega1.generate(self.kinetic)
         # the following is a list of indices corresponding to the jump-type; so that if one
         # chooses *not* to calculate omega1, the corresponding omega0 value can be substituted
@@ -93,6 +94,33 @@ class VacancyMediated:
         self.biasvec.generate(self.kinetic)
         # this is the list of points for the GF calculation; we need to add in the origin now:
         self.GFR = [np.zeros(3)] + [sR[0] for sR in self.GF.stars]
+        self.matricesgenerated = False
+        if genmatrices:
+            self.generatematrices()
+
+    def generatematrices(self, Nthermo=None):
+        """
+        Makes all of the pieces we need to calculate the diffusion. Called by Lij, but we store
+        "cached" versions for efficiency.
+
+        Parameters
+        ----------
+        Nthermo : integer, optional
+            range of thermodynamic interactions, in terms of "shells", which is multiple
+            summations of jumpvect; if set, call generate() first.
+        """
+        if Nthermo != None:
+            self.generate(Nthermo)
+        if not self.matricesgenerated:
+            self.matricesgenerated = True
+            self.thermo2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.thermo.stars]
+            self.NN2thermo = [self.thermo.starindex(Rs[0]) for Rs in self.NNstar.stars]
+            self.GFexpansion = self.biasvec.GFexpansion(self.GF)
+            self.rate1expansion = self.biasvec.rate1expansion(self.omega1)
+            self.rate2expansion = self.biasvec.rate2expansion(self.NNstar)
+            self.bias2expansion = self.biasvec.bias2expansion(self.NNstar)
+            self.bias1ds, self.bias1prob, self.bias1NN = \
+                self.biasvec.bias1expansion(self.omega1, self.NNstar)
 
     def omega0list(self, Nthermo = None):
         """
@@ -226,6 +254,7 @@ class VacancyMediated:
         L1sv : array[3, 3]
             correlation for solute-vacancy; needs to be multiplied by cv*cs/kBT
         """
+        self.generatematrices()
         # convert jump vectors to an array, and construct the rates as an array
         Lvv = GFcalc.D2(np.array(self.jumpvect),
                         np.array(sum([[om,]*len(Rs)
@@ -235,32 +264,26 @@ class VacancyMediated:
                                        for om, Rs in zip(om2*prob[self.NN2thermo],
                                                          self.NNstar.stars)], [])))
 
-        G0 = np.dot(self.biasvec.GFexpansion(self.GF), gf)
+        G0 = np.dot(self.GFexpansion, gf)
+
         probsqrt = np.zeros(self.kinetic.Nstars)
         probsqrt[:] = 1.
         for p, ind in zip(prob, self.thermo2kin):
             probsqrt[ind] = np.sqrt(p)
 
-        om1expand = np.array(om1) # omega_1
-        delta_om1 = np.zeros(self.omega1.Ndstars) # omega_1 - omega_0
-        for i, om, ind in zip(range(len(om1)), om1, self.omega1LIMB):
-            if om > 0:
-                delta_om1[i] = om - om0[ind]
-            else:
-                om1expand[i] = om0[ind]
-        delta_om = np.dot(self.biasvec.rate1expansion(self.omega1), delta_om1)
+        om1LIMB = np.array(om0[self.omega1LIMB])
+        om1expand = np.array([r1 if r1 >= 0 else r0
+                              for r1, r0 in zip(om1, om1LIMB)]) # omega_1
+        delta_om1 = om1expand - om1LIMB # omega_1 - omega_0
 
-        om2expand = np.array(om2) # omega_2
-        for i, om in enumerate(om2):
-            if om < 0:
-                om2expand[i] = om0[i]
-        delta_om += np.dot(self.biasvec.rate2expansion(self.NNstar), om2expand)
+        om2expand = np.array([r2 if r2 >= 0 else r0
+                              for r2, r0 in zip(om2, om0)]) # omega_2
+        delta_om = np.dot(self.rate1expansion, delta_om1) + \
+                   np.dot(self.rate2expansion, om2expand)
 
-        bias2vec = np.dot(self.biasvec.bias2expansion(self.NNstar), om2expand)
-
-        bias1ds, bias1prob, bias1NN = self.biasvec.bias1expansion(self.omega1, self.NNstar)
-        bias1vec = np.dot(bias1ds * probsqrt[bias1prob], om1expand) + \
-                   np.dot(bias1NN, om0)
+        bias2vec = np.dot(self.bias2expansion, om2expand)
+        bias1vec = np.dot(self.bias1ds * probsqrt[self.bias1prob], om1expand) + \
+                   np.dot(self.bias1NN, om0)
 
         # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
         G = np.dot(np.linalg.inv(np.eye(len(bias1vec)) + np.dot(G0, delta_om)), G0)
