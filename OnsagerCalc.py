@@ -24,6 +24,7 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 import stars
+import GFcalc
 
 
 class VacancyMediated:
@@ -87,7 +88,7 @@ class VacancyMediated:
         self.omega1LIMB = [self.NNstar.starindex(self.kinetic.pts[p[0][0]] - self.kinetic.pts[p[0][1]])
                            for p in self.omega1.dstars]
         self.GF.combine(self.kinetic, self.kinetic)
-        self.biasvec.generate(self.GF)
+        self.biasvec.generate(self.kinetic)
         # this is the list of points for the GF calculation; we need to add in the origin now:
         self.GFR = [np.zeros(3)] + [sR[0] for sR in self.GF.stars]
 
@@ -193,6 +194,79 @@ class VacancyMediated:
         om1[:] = -1.
         return prob, om2, om1
 
+    def _lij(self, gf, om0, prob, om2, om1):
+        """
+        Calculates the pieces for the transport coefficients: Lvv, L0ss, L2ss, L1sv
+        from the GF, omega0, omega1, and omega2 rates along with site probabilities.
+        Used by Lij.
+
+        Parameters
+        ----------
+        gf : array[NGF_sites]
+            Green function for vacancy evaluated at sites
+        om0 : array[NNjumps]
+            rates for vacancy jumps
+        prob : array[thermosites]
+            probability of solute-vacancy complex at each sites
+        om2 : array[NNjumps]
+            rates for vacancy-solute exchange; if -1, use om0 entry
+        om1 : array[Ndstars]
+            rates for vacancy jumps around solute; if -1, use corresponding om0 entry
+
+        Returns
+        -------
+        Lvv : array[3, 3]
+            vacancy-vacancy; needs to be multiplied by cv/kBT
+        L0ss : array[3, 3]
+            "bare" solute-solute; needs to be multiplied by cv*cs/kBT
+        L2ss : array[3, 3]
+            correlation for solute-solute; needs to be multiplied by cv*cs/kBT
+        L1sv : array[3, 3]
+            correlation for solute-vacancy; needs to be multiplied by cv*cs/kBT
+        """
+        # convert jump vectors to an array, and construct the rates as an array
+        Lvv = GFcalc.D2(np.array(self.jumpvect),
+                        np.array(sum([[om,]*len(Rs)
+                                      for om, Rs in zip(om0, self.NNstar.stars)], [])))
+        L0ss = GFcalc.D2(np.array(self.jumpvect),
+                         np.array(sum([[om,]*len(Rs)
+                                       for om, Rs in zip(om2, self.NNstar.stars)], [])))
+
+        G0 = np.dot(self.biasvec.GFexpansion(self.GF), gf)
+        probsqrt = np.sqrt(prob)
+
+        om1expand = np.zeros(self.omega1.Ndstars) # omega_1
+        delta_om1 = np.zeros(self.omega1.Ndstars) # omega_1 - omega_0
+        for i, om, ind in zip(range(len(om1)), om1, self.omega1LIMB):
+            if om > 0:
+                om1expand[i] = om
+                delta_om1[i] = om - om0[ind]
+            else:
+                om1expand[i] = om0[ind]
+        delta_om = np.dot(self.biasvec.rate1expansion(self.omega1), delta_om1)
+
+        om2expand = np.zeros(self.NNstar.Nstars) # omega_2
+        delta_om2 = np.zeros(self.NNstar.Nstars) # omega_2 - omega_0
+        for i, om in enumerate(om2):
+            if om > 0:
+                om2expand[i] = om
+                delta_om2[i] = om - om0[ind]
+            else:
+                om2expand[i] = om0[ind]
+        delta_om += np.dot(self.biasvec.rate2expansion(self.NNstar), delta_om2)
+
+        bias2vec = np.dot(self.biasvec.bias2expansion(self.NNstar), om2expand)
+
+        bias1ds, bias1prob, bias1NN = self.biasvec.bias1expansion(self.omega1, self.NNstar)
+        bias1vec = np.dot(bias1ds * probsqrt[bias1prob], om1expand) + \
+                   np.dot(bias1NN, om0)
+
+        # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
+        G = np.dot(np.linalg.inv(np.eye(3) + np.dot(G0, delta_om)), G0)
+        L2ss = np.dot(bias2vec, np.dot(G, bias2vec))
+        L1sv = np.dot(bias1vec, np.dot(G, bias2vec))
+        return Lvv, L0ss, L2ss, L1sv
+
     def Lij(self, gf, om0, prob, om2, om1):
         """
         Calculates the transport coefficients Lvv, Lss, and Lsv from the GF,
@@ -220,7 +294,5 @@ class VacancyMediated:
         Lsv : array[3, 3]
             solute-vacancy; needs to be multiplied by cv*cs/kBT
         """
-        Lvv = np.eye(3)
-        Lss = np.eye(3)
-        Lsv = np.zeros((3,3))
-        return Lvv, Lss, Lsv
+        Lvv, L0ss, L2ss, L1sv = self._lij(gf, om0, prob, om2, om1)
+        return Lvv, L0ss + L2ss, -L0ss - L2ss + L1sv

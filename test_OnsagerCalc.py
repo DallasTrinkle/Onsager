@@ -165,7 +165,7 @@ class FCCBaseTests(BaseTests):
             self.assertEqual(L[2, 2], L[0, 0])
         self.assertAlmostEqual(Lvv[0, 0], self.D0)
         self.assertAlmostEqual(Lss[0, 0], self.D0)
-        self.assertAlmostEqual(Lsv[0, 0]/Lss[0, 0], self.correl, delta=1e-3)
+        self.assertAlmostEqual(-Lsv[0, 0]/Lss[0, 0], self.correl, delta=1e-3)
 
 
 class SCBaseTests(FCCBaseTests):
