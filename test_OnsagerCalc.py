@@ -131,6 +131,9 @@ class BaseTests(unittest.TestCase):
                 self.assertAlmostEqual(lvv, lss)
 
 
+import GFcalc
+
+
 class FCCBaseTests(BaseTests):
     """Set of tests that our Onsager calculator is well-behaved"""
 
@@ -141,6 +144,27 @@ class FCCBaseTests(BaseTests):
         self.Ninteract = [1, 4]
         self.Nomega1 = [7, 20]
         self.NGF = [16, 37]
+
+    def testTracerValue(self):
+        """Make sure we get the correct tracer correlation coefficients for FCC"""
+        self.Lcalc.generate(1)
+        prob, om2, om1 = self.Lcalc.maketracer()
+        om0 = np.array((self.rates[0],)*len(om2), dtype=float)
+        GFlist = self.Lcalc.GFlist()
+        GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
+        gf = np.array([GF.GF(R) for R in GFlist])
+        Lvv, Lss, Lsv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
+        for p in [(i, j) for i in range(3) for j in range(3) if i != j]:
+            self.assertEqual(0, Lvv[p])
+            self.assertEqual(0, Lss[p])
+            self.assertEqual(0, Lsv[p])
+        for L in [Lvv, Lss, Lsv]:
+            self.assertEqual(L[0, 0], L[1, 1])
+            self.assertEqual(L[1, 1], L[2, 2])
+            self.assertEqual(L[2, 2], L[0, 0])
+        self.assertAlmostEqual(Lvv[0, 0], 4.)
+        self.assertAlmostEqual(Lss[0, 0], 4.)
+        self.assertAlmostEqual(Lsv[0, 0]/Lss[0, 0], 0.781, delta=1e-3)
 
 
 class SCBaseTests(BaseTests):
