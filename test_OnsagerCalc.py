@@ -132,16 +132,17 @@ class BaseTests(unittest.TestCase):
             for om in om1:
                 self.assertEqual(om, -1)
 
-    def testTracer(self):
-        """Test the actual evaluation of the tracer diffusion value."""
+    def testTracerFake(self):
+        """Test the (fake) evaluation of the tracer diffusion value."""
         for n in [1, 2]:
             self.Lcalc.generate(n)
             prob, om2, om1 = self.Lcalc.maketracer()
             om0 = np.array((1.,)*len(om2), dtype=float)
             gf = np.array((1.,)*len(self.Lcalc.GFlist()))
             Lvv, Lss, Lsv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
-            for lvv, lsv in zip(Lvv.flat, Lsv.flat):
-                self.assertAlmostEqual(lvv, -lsv)
+            for lvv, lsv, lss in zip(Lvv.flat, Lsv.flat, Lss.flat):
+                self.assertAlmostEqual(lvv, lsv)
+                self.assertAlmostEqual(lvv, -lss)
 
 
 import GFcalc
@@ -169,9 +170,9 @@ class SCBaseTests(BaseTests):
         om2 = om0.copy()
         gf = np.array([self.GF.GF(R) for R in self.Lcalc.GFlist()])
         Lvv, Lss, Lsv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
-        print 'Lvv:', Lvv
-        print 'Lss:', Lss
-        print 'Lsv:', Lsv
+        # print 'Lvv:', Lvv
+        # print 'Lss:', Lss
+        # print 'Lsv:', Lsv
         for p in [(i, j) for i in range(3) for j in range(3) if i != j]:
             self.assertAlmostEqual(0, Lvv[p])
             self.assertAlmostEqual(0, Lss[p])
@@ -211,7 +212,7 @@ class BCCBaseTests(SCBaseTests):
         self.Njumps = 1
         self.Ninteract = [1, 4]
         self.Nomega1 = [3, 20]
-        self.NGF = [16, 37]
+        self.NGF = [14, 37]
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
         self.D0 = self.GF.D2[0, 0]
         self.correl = 0.727
