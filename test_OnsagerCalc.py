@@ -45,6 +45,18 @@ def setupFCC():
     rates = np.array([1./12.,]*12, dtype=float)
     return lattice, NNvect, groupops, rates
 
+def setupBCC():
+    lattice = np.array([[-1, 1, 1],
+                        [1, -1, 1],
+                        [1, 1, -1]], dtype=float)
+    NNvect = np.array([[-1, 1, 1], [1, -1, -1],
+                       [1, -1, 1], [-1, 1, -1],
+                       [1, 1, -1], [-1, -1, 1],
+                       [1, 1, 1], [-1, -1, -1]], dtype=float)
+    groupops = KPTmesh.KPTmesh(lattice).groupops
+    rates = np.array([1./8.,]*8, dtype=float)
+    return lattice, NNvect, groupops, rates
+
 
 class BaseTests(unittest.TestCase):
     """Set of tests that our Onsager calculator is well-behaved"""
@@ -185,8 +197,21 @@ class FCCBaseTests(SCBaseTests):
         self.Ninteract = [1, 4]
         self.Nomega1 = [7, 20]
         self.NGF = [16, 37]
-        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates, Nmax=4)
+        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
         self.D0 = self.GF.D2[0, 0]
         self.correl = 0.781
 
 
+class BCCBaseTests(SCBaseTests):
+    """Set of tests that our Onsager calculator is well-behaved"""
+
+    def setUp(self):
+        self.lattice, self.NNvect, self.groupops, self.rates = setupBCC()
+        self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
+        self.Njumps = 1
+        self.Ninteract = [1, 4]
+        self.Nomega1 = [3, 20]
+        self.NGF = [16, 37]
+        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
+        self.D0 = self.GF.D2[0, 0]
+        self.correl = 0.727
