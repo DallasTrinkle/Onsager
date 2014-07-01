@@ -229,6 +229,7 @@ class VacancyMediated:
         Lvv = GFcalc.D2(np.array(self.jumpvect),
                         np.array(sum([[om,]*len(Rs)
                                       for om, Rs in zip(om0, self.NNstar.stars)], [])))
+        # THIS IS NOT RIGHT... need to multiply by vacancy/solute probability for NN
         L0ss = GFcalc.D2(np.array(self.jumpvect),
                          np.array(sum([[om,]*len(Rs)
                                        for om, Rs in zip(om2, self.NNstar.stars)], [])))
@@ -249,13 +250,10 @@ class VacancyMediated:
         delta_om = np.dot(self.biasvec.rate1expansion(self.omega1), delta_om1)
 
         om2expand = np.array(om2) # omega_2
-        delta_om2 = np.zeros(self.NNstar.Nstars) # omega_2 - omega_0
         for i, om in enumerate(om2):
-            if om > 0:
-                delta_om2[i] = om - om0[ind]
-            else:
+            if om < 0:
                 om2expand[i] = om0[i]
-        delta_om += np.dot(self.biasvec.rate2expansion(self.NNstar), delta_om2)
+        delta_om += np.dot(self.biasvec.rate2expansion(self.NNstar), om2expand)
 
         bias2vec = np.dot(self.biasvec.bias2expansion(self.NNstar), om2expand)
 
