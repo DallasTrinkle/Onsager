@@ -200,7 +200,63 @@ class FCCBaseTests(SCBaseTests):
         self.NGF = [16, 37]
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
         self.D0 = self.GF.D2[0, 0]
-        self.correl = 0.781
+        self.correl = 0.78145
+
+    def fivefreq(self, w0, w1, w2, w3, w4):
+        """The solute/solute diffusion coefficient in the 5-freq. model"""
+        b = w4/w0
+        # 7(1-F) = (10 b^4 + 180.3 b^3 + 924.3 b^2 + 1338.1 b)/ (2 b^4 + 40.1 b^3 + 253/3 b^2 + 596 b + 435.3)
+        F7 = 7. - b*(1338.1 + b*(924.3 + b*(180.3 + b*10.)))/\
+                  (435.3 + b*(596. + b*(253.3 + b*(40.1 + b*2.))))
+        p = w4/w3
+        return p*w2*(2.*w1 + w3*F7)/(2.*w2 + 2.*w1 + w3*F7)
+
+    def testFiveFreq(self):
+        """Test whether we can reproduce the five frequency model"""
+        self.Lcalc.generate(1)
+        w0 = self.rates[0]
+        w1 = 0.80 * w0
+        w2 = 1.5 * w0
+        w3 = 0.75 * w0
+        w4 = 2.00 * w0
+        w3w4 = np.sqrt(w3*w4)
+        prob, om2, om1 = self.Lcalc.maketracer()
+        om0 = np.array([w0])
+        om2 = np.array([w2])
+        prob[0] = w4/w3
+        om1list, om1index = self.Lcalc.omega1list()
+        # making the om1 list... a little tricky
+        for i, pair in enumerate(om1list):
+            p0nn = any([all(abs(pair[0] - x) < 1e-8) for x in self.NNvect])
+            p1nn = any([all(abs(pair[1] - x) < 1e-8) for x in self.NNvect])
+            if p0nn and p1nn:
+                om1[i] = w1
+                continue
+            if p0nn or p1nn:
+                om1[i] = w3w4
+                continue
+            # rely on LIMB for rest...
+        gf = np.array([self.GF.GF(R) for R in self.Lcalc.GFlist()])
+        print 'om0:', om0
+        print 'om1:', om1
+        print 'om2:', om2
+        print 'prob:', prob
+        print 'gf:', gf
+        Lvv, Lss, Lsv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
+        print 'Lvv:', Lvv
+        print 'Lss:', Lss
+        print 'Lsv:', Lsv
+        for p in [(i, j) for i in range(3) for j in range(3) if i != j]:
+            self.assertAlmostEqual(0, Lvv[p])
+            self.assertAlmostEqual(0, Lss[p])
+            self.assertAlmostEqual(0, Lsv[p])
+        for L in [Lvv, Lss, Lsv]:
+            self.assertAlmostEqual(L[0, 0], L[1, 1])
+            self.assertAlmostEqual(L[1, 1], L[2, 2])
+            self.assertAlmostEqual(L[2, 2], L[0, 0])
+        self.assertAlmostEqual(Lvv[0, 0], self.D0)
+        self.assertAlmostEqual(Lss[0, 0], 4.*self.fivefreq(w0, w1, w2, w3, w4), delta=1e-3)
+
 
 
 class BCCBaseTests(SCBaseTests):
@@ -211,8 +267,8 @@ class BCCBaseTests(SCBaseTests):
         self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
         self.Njumps = 1
         self.Ninteract = [1, 4]
-        self.Nomega1 = [3, 20]
-        self.NGF = [14, 37]
+        self.Nomega1 = [3, 9]
+        self.NGF = [14, 30]
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
         self.D0 = self.GF.D2[0, 0]
         self.correl = 0.727

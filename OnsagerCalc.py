@@ -196,6 +196,9 @@ class VacancyMediated:
         omega1list : list of tuples of array[3]
             list of paired endpoints for a vacancy jump: the solute is at the origin,
             and these define start- and end-points for the vacancy jump.
+        omega1LIMB : int array [Ndstar]
+            index specifying which type of jump in omega0 would correspond to the LIMB
+            approximation
         """
         if Nthermo != None:
             self.generate(Nthermo)
