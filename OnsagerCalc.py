@@ -81,6 +81,7 @@ class VacancyMediated:
             return
         self.thermo.generate(Nthermo)
         self.kinetic.combine(self.thermo, self.NNstar)
+        self.thermo2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.thermo.stars]
         self.omega1.generate(self.kinetic)
         # the following is a list of indices corresponding to the jump-type; so that if one
         # chooses *not* to calculate omega1, the corresponding omega0 value can be substituted
@@ -233,26 +234,27 @@ class VacancyMediated:
                                        for om, Rs in zip(om2, self.NNstar.stars)], [])))
 
         G0 = np.dot(self.biasvec.GFexpansion(self.GF), gf)
-        probsqrt = np.sqrt(prob)
+        probsqrt = np.zeros(self.kinetic.Nstars)
+        probsqrt[:] = 1.
+        for p, ind in zip(prob, self.thermo2kin):
+            probsqrt[ind] = np.sqrt(p)
 
-        om1expand = np.zeros(self.omega1.Ndstars) # omega_1
+        om1expand = np.array(om1) # omega_1
         delta_om1 = np.zeros(self.omega1.Ndstars) # omega_1 - omega_0
         for i, om, ind in zip(range(len(om1)), om1, self.omega1LIMB):
             if om > 0:
-                om1expand[i] = om
                 delta_om1[i] = om - om0[ind]
             else:
                 om1expand[i] = om0[ind]
         delta_om = np.dot(self.biasvec.rate1expansion(self.omega1), delta_om1)
 
-        om2expand = np.zeros(self.NNstar.Nstars) # omega_2
+        om2expand = np.array(om2) # omega_2
         delta_om2 = np.zeros(self.NNstar.Nstars) # omega_2 - omega_0
         for i, om in enumerate(om2):
             if om > 0:
-                om2expand[i] = om
                 delta_om2[i] = om - om0[ind]
             else:
-                om2expand[i] = om0[ind]
+                om2expand[i] = om0[i]
         delta_om += np.dot(self.biasvec.rate2expansion(self.NNstar), delta_om2)
 
         bias2vec = np.dot(self.biasvec.bias2expansion(self.NNstar), om2expand)
@@ -262,9 +264,15 @@ class VacancyMediated:
                    np.dot(bias1NN, om0)
 
         # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
-        G = np.dot(np.linalg.inv(np.eye(3) + np.dot(G0, delta_om)), G0)
-        L2ss = np.dot(bias2vec, np.dot(G, bias2vec))
-        L1sv = np.dot(bias1vec, np.dot(G, bias2vec))
+        G = np.dot(np.linalg.inv(np.eye(len(bias1vec)) + np.dot(G0, delta_om)), G0)
+        L2ss = np.zeros((3, 3))
+        L1sv = np.zeros((3, 3))
+        for outer, b1, b2, Gb2 in zip(self.biasvec.outer,
+                                      bias1vec,
+                                      bias2vec,
+                                      np.dot(G, bias2vec)):
+            L1sv += outer*b1*Gb2
+            L2ss += outer*b2*Gb2
         return Lvv, L0ss, L2ss, L1sv
 
     def Lij(self, gf, om0, prob, om2, om1):

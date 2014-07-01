@@ -127,8 +127,8 @@ class BaseTests(unittest.TestCase):
             om0 = np.array((1.,)*len(om2), dtype=float)
             gf = np.array((1.,)*len(self.Lcalc.GFlist()))
             Lvv, Lss, Lsv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
-            for lvv, lss in zip(Lvv.flat, Lss.flat):
-                self.assertAlmostEqual(lvv, lss)
+            for lvv, lsv in zip(Lvv.flat, Lsv.flat):
+                self.assertAlmostEqual(lvv, -lsv)
 
 
 import GFcalc
@@ -144,7 +144,7 @@ class FCCBaseTests(BaseTests):
         self.Ninteract = [1, 4]
         self.Nomega1 = [7, 20]
         self.NGF = [16, 37]
-        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
+        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates, Nmax=4)
         self.D0 = self.GF.D2[0, 0]
         self.correl = 0.781
 
@@ -153,19 +153,25 @@ class FCCBaseTests(BaseTests):
         self.Lcalc.generate(1)
         prob, om2, om1 = self.Lcalc.maketracer()
         om0 = np.array((self.rates[0],)*len(om2), dtype=float)
+        om2 = om0.copy()
         gf = np.array([self.GF.GF(R) for R in self.Lcalc.GFlist()])
         Lvv, Lss, Lsv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
+        print 'Lvv:', Lvv
+        print 'Lss:', Lss
+        print 'Lsv:', Lsv
         for p in [(i, j) for i in range(3) for j in range(3) if i != j]:
-            self.assertEqual(0, Lvv[p])
-            self.assertEqual(0, Lss[p])
-            self.assertEqual(0, Lsv[p])
+            self.assertAlmostEqual(0, Lvv[p])
+            self.assertAlmostEqual(0, Lss[p])
+            self.assertAlmostEqual(0, Lsv[p])
         for L in [Lvv, Lss, Lsv]:
-            self.assertEqual(L[0, 0], L[1, 1])
-            self.assertEqual(L[1, 1], L[2, 2])
-            self.assertEqual(L[2, 2], L[0, 0])
+            self.assertAlmostEqual(L[0, 0], L[1, 1])
+            self.assertAlmostEqual(L[1, 1], L[2, 2])
+            self.assertAlmostEqual(L[2, 2], L[0, 0])
+        # No solute drag, so Lsv = -Lvv; Lvv = normal vacancy diffusion
+        # all correlation is in that geometric prefactor of Lss.
         self.assertAlmostEqual(Lvv[0, 0], self.D0)
-        self.assertAlmostEqual(Lss[0, 0], self.D0)
-        self.assertAlmostEqual(-Lsv[0, 0]/Lss[0, 0], self.correl, delta=1e-3)
+        self.assertAlmostEqual(-Lsv[0, 0], self.D0)
+        self.assertAlmostEqual(-Lss[0, 0]/Lsv[0, 0], self.correl, delta=1e-3)
 
 
 class SCBaseTests(FCCBaseTests):
