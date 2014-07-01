@@ -82,6 +82,7 @@ class VacancyMediated:
         self.thermo.generate(Nthermo)
         self.kinetic.combine(self.thermo, self.NNstar)
         self.thermo2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.thermo.stars]
+        self.NN2thermo = [self.thermo.starindex(Rs[0]) for Rs in self.NNstar.stars]
         self.omega1.generate(self.kinetic)
         # the following is a list of indices corresponding to the jump-type; so that if one
         # chooses *not* to calculate omega1, the corresponding omega0 value can be substituted
@@ -229,10 +230,10 @@ class VacancyMediated:
         Lvv = GFcalc.D2(np.array(self.jumpvect),
                         np.array(sum([[om,]*len(Rs)
                                       for om, Rs in zip(om0, self.NNstar.stars)], [])))
-        # THIS IS NOT RIGHT... need to multiply by vacancy/solute probability for NN
         L0ss = GFcalc.D2(np.array(self.jumpvect),
                          np.array(sum([[om,]*len(Rs)
-                                       for om, Rs in zip(om2, self.NNstar.stars)], [])))
+                                       for om, Rs in zip(om2*prob[self.NN2thermo],
+                                                         self.NNstar.stars)], [])))
 
         G0 = np.dot(self.biasvec.GFexpansion(self.GF), gf)
         probsqrt = np.zeros(self.kinetic.Nstars)
