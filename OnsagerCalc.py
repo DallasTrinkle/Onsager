@@ -119,7 +119,7 @@ class VacancyMediated:
             self.rate1expansion = self.biasvec.rate1expansion(self.omega1)
             self.rate2expansion = self.biasvec.rate2expansion(self.NNstar)
             self.bias2expansion = self.biasvec.bias2expansion(self.NNstar)
-            self.bias1ds, self.bias1prob, self.bias1NN = \
+            self.bias1ds, self.omega1ds, self.gen1prob, self.bias1NN, self.omega1NN = \
                 self.biasvec.bias1expansion(self.omega1, self.NNstar)
 
     def omega0list(self, Nthermo = None):
@@ -277,15 +277,19 @@ class VacancyMediated:
         om1LIMB = np.array(om0[self.omega1LIMB])
         om1expand = np.array([r1 if r1 >= 0 else r0
                               for r1, r0 in zip(om1, om1LIMB)]) # omega_1
-        delta_om1 = om1expand - om1LIMB # omega_1 - omega_0
-
         om2expand = np.array([r2 if r2 >= 0 else r0
                               for r2, r0 in zip(om2, om0)]) # omega_2
-        delta_om = np.dot(self.rate1expansion, delta_om1) + \
+
+        # delta_om1 = om1expand - om1LIMB # omega_1 - omega_0
+        # onsite term: need to make sure we divide out by the starting point probability, too
+        om1onsite = (np.dot(self.omega1ds * probsqrt[self.gen1prob], om1expand) +
+                     np.dot(self.omega1NN, om0))/probsqrt
+        delta_om = np.dot(self.rate1expansion, om1expand) + \
+                   np.diag(om1onsite) + \
                    np.dot(self.rate2expansion, om2expand)
 
         bias2vec = np.dot(self.bias2expansion, om2expand)
-        bias1vec = np.dot(self.bias1ds * probsqrt[self.bias1prob], om1expand) + \
+        bias1vec = np.dot(self.bias1ds * probsqrt[self.gen1prob], om1expand) + \
                    np.dot(self.bias1NN, om0)
 
         # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
