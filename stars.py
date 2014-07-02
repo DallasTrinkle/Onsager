@@ -562,7 +562,8 @@ class VectorStarSet:
 
     def rate2expansion(self, NNstar):
         """
-        Construct the omega2 matrix expansion in terms of the nearest-neighbor stars.
+        Construct the omega2 matrix expansion in terms of the nearest-neighbor stars. Includes
+        the "on-site" terms as well, hence there's a factor of 2 in the output.
 
         Parameters
         ----------
@@ -583,7 +584,7 @@ class VectorStarSet:
             # this is a diagonal matrix, so...
             ind = NNstar.starindex(self.vecpos[i][0])
             if ind != -1:
-                rate2expansion[i, i, ind] = -np.dot(self.vecvec[i][0], self.vecvec[i][0])*len(NNstar.stars[ind])
+                rate2expansion[i, i, ind] = -2.*np.dot(self.vecvec[i][0], self.vecvec[i][0])*len(NNstar.stars[ind])
         return rate2expansion
 
     def bias2expansion(self, NNstar):
@@ -610,6 +611,85 @@ class VectorStarSet:
             if ind != -1:
                 bias2expansion[i, ind] = np.dot(self.vecpos[i][0], self.vecvec[i][0])*len(NNstar.stars[ind])
         return bias2expansion
+
+    def _general1expansion(self, dstar, NNstar, vector=None):
+        """
+        Construct the bias1 or omega1 onsite vector expansion in terms of the
+        nearest-neighbor stars. There are three pieces to this that we need to
+        construct now, so it's more complicated. Since we use the *identical* algorithm
+        twice, we use the tag vector to determine whether we are calculating bias1
+        (vector == True) or omega1 onsite (vector == False)
+
+        Parameters
+        ----------
+        dstar: DoubleStar
+            double-stars (i.e., pairs that are related by a symmetry operation; usually the sites
+            are connected by a NN vector to facilitate a jump; indicates unique vacancy jumps
+            around a solute)
+
+        NNstar: Star
+            stars representing the unique nearest-neighbor jumps
+
+        Returns
+        -------
+        gen1ds: array[Nsv, Ndstars]
+            the gen1 vector[i] = sum(gen1ds[i, k] * sqrt(prob_star[gen1prob[i, k]) * omega1[dstar[k]])
+
+        gen1prob: array[Nsv, Ndstars], dtype=int
+            index for the corresponding *star* whose probability defines the endpoint.
+
+        gen1NN: array[Nsv, NNNstars]
+            we have an additional contribution to the bias1 vector:
+            bias1 vector[i] += sum(bias1NN[i, k] * omega0[NNstar[k]])
+        """
+        if not isinstance(vector, bool):
+            raise TypeError('vector not set (or not to a boolean value?)')
+        if self.Nvstars == 0:
+            return None
+        if not isinstance(dstar, DoubleStarSet):
+            raise TypeError('need a double star')
+        if not isinstance(NNstar, StarSet):
+            raise TypeError('need a star')
+        NNstar.generateindices()
+        gen1ds = np.zeros((self.Nvstars, dstar.Ndstars))
+        gen1bias = np.empty((self.Nvstars, dstar.Ndstars), dtype=int)
+        gen1bias[:, :] = -1
+        gen1NN = np.zeros((self.Nvstars, NNstar.Nstars))
+
+        # run through the star-vectors
+        for i, svR, svv in zip(range(self.Nvstars),
+                               self.vecpos, self.vecvec):
+            # run through the NN stars
+            p1 = dstar.star.pointindex(svR[0]) # first half of our pair
+            # nnst = star index, vec = NN jump vector
+            for nnst, vec in zip(NNstar.index, NNstar.pts):
+                endpoint = svR[0] + vec
+                # throw out the origin as an endpoint
+                if all(abs(endpoint) < 1e-8):
+                    continue
+                # whether we calculate bias or omega1 onsite expansion:
+                if vector:
+                    geom = np.dot(svv[0], vec) * len(svR)
+                else:
+                    geom = np.dot(svv[0], svv[0]) * len(svR)
+                p2 = dstar.star.pointindex(endpoint)
+                if p2 == -1:
+                    # we landed outside our range of double-stars, so...
+                    gen1NN[i, nnst] += geom
+                else:
+                    ind = dstar.dstarindex((p1, p2))
+                    if ind == -1:
+                        raise ArithmeticError('Problem with DoubleStar indexing; could not find double-star for pair')
+                    gen1ds[i, ind] += geom
+                    sind = dstar.star.index[p2]
+                    if sind == -1:
+                        raise ArithmeticError('Could not locate endpoint in a star in DoubleStar')
+                    if gen1bias[i, ind] == -1:
+                        gen1bias[i, ind] = sind
+                    else:
+                        if gen1bias[i, ind] != sind:
+                            raise ArithmeticError('Inconsistent DoubleStar endpoints found')
+        return gen1ds, gen1bias, gen1NN
 
     def bias1expansion(self, dstar, NNstar):
         """
@@ -639,45 +719,34 @@ class VectorStarSet:
             we have an additional contribution to the bias1 vector:
             bias1 vector[i] += sum(bias1NN[i, k] * omega0[NNstar[k]])
         """
-        if self.Nvstars == 0:
-            return None
-        if not isinstance(dstar, DoubleStarSet):
-            raise TypeError('need a double star')
-        if not isinstance(NNstar, StarSet):
-            raise TypeError('need a star')
-        NNstar.generateindices()
-        bias1ds = np.zeros((self.Nvstars, dstar.Ndstars))
-        bias1prob = np.empty((self.Nvstars, dstar.Ndstars), dtype=int)
-        bias1prob[:, :] = -1
-        bias1NN = np.zeros((self.Nvstars, NNstar.Nstars))
+        return self._general1expansion(dstar, NNstar, vector=True)
 
-        # run through the star-vectors
-        for i, svR, svv in zip(range(self.Nvstars),
-                               self.vecpos, self.vecvec):
-            # run through the NN stars
-            p1 = dstar.star.pointindex(svR[0]) # first half of our pair
-            # nnst = star index, vec = NN jump vector
-            for nnst, vec in zip(NNstar.index, NNstar.pts):
-                endpoint = svR[0] + vec
-                # throw out the origin as an endpoint
-                if all(abs(endpoint) < 1e-8):
-                    continue
-                geom = np.dot(svv[0], vec) * len(svR)
-                p2 = dstar.star.pointindex(endpoint)
-                if p2 == -1:
-                    # we landed outside our range of double-stars, so...
-                    bias1NN[i, nnst] += geom
-                else:
-                    ind = dstar.dstarindex((p1, p2))
-                    if ind == -1:
-                        raise ArithmeticError('Problem with DoubleStar indexing; could not find double-star for pair')
-                    bias1ds[i, ind] += geom
-                    sind = dstar.star.index[p2]
-                    if sind == -1:
-                        raise ArithmeticError('Could not locate endpoint in a star in DoubleStar')
-                    if bias1prob[i, ind] == -1:
-                        bias1prob[i, ind] = sind
-                    else:
-                        if bias1prob[i, ind] != sind:
-                            raise ArithmeticError('Inconsistent DoubleStar endpoints found')
-        return bias1ds, bias1prob, bias1NN
+    def rate1onsiteexpansion(self, dstar, NNstar):
+        """
+        Construct the omega1 onsite expansion in terms of the nearest-neighbor stars.
+        There are three pieces to this that we need to construct now, so it's more
+        complicated; it's somewhat similar to the bias_1 vector construction.
+
+        Parameters
+        ----------
+        dstar: DoubleStar
+            double-stars (i.e., pairs that are related by a symmetry operation; usually the sites
+            are connected by a NN vector to facilitate a jump; indicates unique vacancy jumps
+            around a solute)
+
+        NNstar: Star
+            stars representing the unique nearest-neighbor jumps
+
+        Returns
+        -------
+        omega1ds: array[Nsv, Ndstars]
+            the omega1 onsite vector[i] = sum(omega1ds[i, k] * sqrt(prob_star[omega1prob[i, k]) * omega1[dstar[k]])
+
+        omega1prob: array[Nsv, Ndstars], dtype=int
+            index for the corresponding *star* whose probability defines the endpoint.
+
+        omega1NN: array[Nsv, NNNstars]
+            we have an additional contribution to the omega1 onsite vector:
+            omega1 onsite vector[i] += sum(omega1NN[i, k] * omega0[NNstar[k]])
+        """
+        return self._general1expansion(dstar, NNstar, vector=False)
