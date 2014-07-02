@@ -671,7 +671,7 @@ class VectorStarSet:
                 if vector:
                     geom = np.dot(svv[0], vec) * len(svR)
                 else:
-                    geom = np.dot(svv[0], svv[0]) * len(svR)
+                    geom = -len(svR) # np.dot(svv[0], svv[0]) * len(svR)
                 p2 = dstar.star.pointindex(endpoint)
                 if p2 == -1:
                     # we landed outside our range of double-stars, so...
