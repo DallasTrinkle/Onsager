@@ -275,17 +275,10 @@ class VacancyMediated:
         # onsite term: need to make sure we divide out by the starting point probability, too
         om1onsite = (np.dot(self.omega1ds * probsqrt[self.gen1prob], om1expand) +
                      np.dot(self.omega1NN, om0))/probsqrt[self.vstar2kin]
-
         delta_om = np.dot(self.rate1expansion, om1expand) + \
                    np.diag(om1onsite) + \
                    np.dot(self.rate2expansion, om2expand) - \
                    np.dot(self.rate0expansion, om0)
-
-        print 'om1:\n', np.dot(self.rate1expansion, om1expand)
-        print 'om1_onsite:\n', np.diag(om1onsite)
-        print 'om2:\n', np.dot(self.rate2expansion, om2expand)
-        print 'om0:\n', np.dot(self.rate0expansion, om0)
-        print 'delta_om:\n', delta_om
 
         bias2vec = np.dot(self.bias2expansion, om2expand*np.sqrt(prob[self.NN2thermo]))
         bias1vec = np.dot(self.bias1ds * probsqrt[self.gen1prob], om1expand) + \
@@ -309,9 +302,12 @@ class VacancyMediated:
                          np.array(sum([[om,]*len(Rs)
                                        for om, Rs in zip(om2expand*prob[self.NN2thermo],
                                                          self.NNstar.stars)], [])))
-
-
         return Lvv, L0ss, L2ss, L1sv
+        # print 'om1:\n', np.dot(self.rate1expansion, om1expand)
+        # print 'om1_onsite:\n', np.diag(om1onsite)
+        # print 'om2:\n', np.dot(self.rate2expansion, om2expand)
+        # print 'om0:\n', np.dot(self.rate0expansion, om0)
+        # print 'delta_om:\n', delta_om
 
     def Lij(self, gf, om0, prob, om2, om1):
         """

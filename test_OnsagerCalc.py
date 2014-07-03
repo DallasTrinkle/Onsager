@@ -141,8 +141,8 @@ class BaseTests(unittest.TestCase):
             gf = np.array((1.,)*len(self.Lcalc.GFlist()))
             Lvv, Lss, Lsv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
             for lvv, lsv, lss in zip(Lvv.flat, Lsv.flat, Lss.flat):
-                self.assertAlmostEqual(lvv, lsv)
-                self.assertAlmostEqual(lvv, -lss)
+                self.assertAlmostEqual(lvv, -lsv)
+                self.assertAlmostEqual(lvv, lss)
 
 
 import GFcalc
@@ -216,9 +216,9 @@ class FCCBaseTests(SCBaseTests):
         """Test whether we can reproduce the five frequency model"""
         self.Lcalc.generate(1)
         w0 = self.rates[0]
-        w1 = 1.0 * w0
-        w2 = 1.0 * w0
-        w3 = 2.0 * w0
+        w1 = 0.8 * w0
+        w2 = 1.25 * w0
+        w3 = 1.5 * w0
         w4 = 0.5 * w0
         w3w4 = np.sqrt(w3*w4)
         prob, om2, om1 = self.Lcalc.maketracer()
@@ -230,7 +230,6 @@ class FCCBaseTests(SCBaseTests):
         for i, pair in enumerate(om1list):
             p0nn = any([all(abs(pair[0] - x) < 1e-8) for x in self.NNvect])
             p1nn = any([all(abs(pair[1] - x) < 1e-8) for x in self.NNvect])
-            print pair, p0nn, p1nn
             if p0nn and p1nn:
                 om1[i] = w1
                 continue
@@ -239,15 +238,7 @@ class FCCBaseTests(SCBaseTests):
                 continue
             # rely on LIMB for rest...
         gf = np.array([self.GF.GF(R) for R in self.Lcalc.GFlist()])
-        print 'om0:', om0
-        print 'om1:', om1
-        print 'om2:', om2
-        print 'prob:', prob
-        print 'gf:', gf
         Lvv, Lss, Lsv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
-        print 'Lvv:', Lvv
-        print 'Lss:', Lss
-        print 'Lsv:', Lsv
         for p in [(i, j) for i in range(3) for j in range(3) if i != j]:
             self.assertAlmostEqual(0, Lvv[p])
             self.assertAlmostEqual(0, Lss[p])
@@ -258,6 +249,14 @@ class FCCBaseTests(SCBaseTests):
             self.assertAlmostEqual(L[2, 2], L[0, 0])
         self.assertAlmostEqual(Lvv[0, 0], self.D0)
         self.assertAlmostEqual(Lss[0, 0], 4.*fivefreq(w0, w1, w2, w3, w4), delta=1e-3)
+        # print 'om0:', om0
+        # print 'om1:', om1
+        # print 'om2:', om2
+        # print 'prob:', prob
+        # print 'gf:', gf
+        # print 'Lvv:', Lvv
+        # print 'Lss:', Lss
+        # print 'Lsv:', Lsv
 
 
 
