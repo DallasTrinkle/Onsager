@@ -428,22 +428,26 @@ class VectorStarOmega0Tests(unittest.TestCase):
         for vec, rate in zip(self.NNvect, self.rates):
             om0expand[self.NNstar.starindex(vec)] = rate
 
-        for i in xrange(self.vecstar.Nvstars):
-            om0_onsite = -sum(self.rates)
-            self.assertAlmostEqual(om0_onsite, np.dot(rate0expand[i, i, :], om0expand))
-            for j in xrange(self.vecstar.Nvstars):
-                # test the construction
-                om0 = 0
-                for Ri, vi in zip(self.vecstar.vecpos[i], self.vecstar.vecvec[i]):
-                    for Rj, vj in zip(self.vecstar.vecpos[j], self.vecstar.vecvec[j]):
-                        dv = Ri - Rj
-                        for vec, rate in zip(self.NNvect, self.rates):
-                            if all(abs(dv - vec) < 1e-8):
-                                om0 += np.dot(vi, vj) * rate
-                                break
-                if i != j:
-                    self.assertAlmostEqual(om0, np.dot(rate0expand[i, j, :], om0expand))
-        # print(np.dot(rateexpand, om1expand))
+        om0matrix = -sum(self.rates)*np.eye(self.star.Npts)
+        for i, pt in enumerate(self.star.pts):
+            for vec, rate in zip(self.NNvect, self.rates):
+                j = self.star.pointindex(pt + vec)
+                if j >= 0:
+                    om0matrix[i, j] = rate
+        # now, we need to convert that omega0 matrix into the "folded down"
+        for i, (sRv0, svv0) in enumerate(zip(self.vecstar.vecpos, self.vecstar.vecvec)):
+            for j, (sRv1, svv1) in enumerate(zip(self.vecstar.vecpos, self.vecstar.vecvec)):
+                om0_sv = 0
+                for R0, v0 in zip(sRv0, svv0):
+                    for R1, v1 in zip(sRv1, svv1):
+                        om0_sv += np.dot(v0, v1)*\
+                                  om0matrix[self.star.pointindex(R0),
+                                            self.star.pointindex(R1)]
+                om0_sv_comp = np.dot(rate0expand[i, j], om0expand)
+                self.assertAlmostEqual(om0_sv, om0_sv_comp,
+                                       msg='Failed to match {}, {}: {} != {}'.format(
+                                           i, j, om0_sv, om0_sv_comp)
+                                       )
 
 
 class VectorStarFCCOmega0Tests(VectorStarOmega0Tests):
