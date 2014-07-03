@@ -549,12 +549,11 @@ class VectorStarSet:
                 if i <= j :
                     for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
                         for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                            # note: double-stars are tuples of point indices
+                            # which NN shell is this? k == -1 indicates a pair that does not appear
                             k = NNstar.starindex(Ri - Rj)
-                            # note: k == -1 indicates now a pair that does not appear, not an error
                             if k >= 0:
                                 rate0expansion[i, j, k] += np.dot(vi, vj)
-                # note: we do *addition* here because there are two (possible) on-site contributions
+                # note: we do *addition* here because we may have on-site contributions above
                 if i == j:
                     for k, s in enumerate(NNstar.stars):
                         rate0expansion[i, i, k] += -len(s)
@@ -712,7 +711,7 @@ class VectorStarSet:
                 if all(abs(endpoint) < 1e-8):
                     continue
                 geom_bias = np.dot(svv[0], vec) * len(svR)
-                geom_omega1 = -1 #len(svR)
+                geom_omega1 = -1. #len(svR)
                 p2 = dstar.star.pointindex(endpoint)
                 if p2 == -1:
                     # we landed outside our range of double-stars, so...

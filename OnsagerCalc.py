@@ -260,14 +260,6 @@ class VacancyMediated:
             correlation for solute-vacancy; needs to be multiplied by cv*cs/kBT
         """
         self.generatematrices()
-        # convert jump vectors to an array, and construct the rates as an array
-        Lvv = GFcalc.D2(np.array(self.jumpvect),
-                        np.array(sum([[om,]*len(Rs)
-                                      for om, Rs in zip(om0, self.NNstar.stars)], [])))
-        L0ss = GFcalc.D2(np.array(self.jumpvect),
-                         np.array(sum([[om,]*len(Rs)
-                                       for om, Rs in zip(om2*prob[self.NN2thermo],
-                                                         self.NNstar.stars)], [])))
 
         G0 = np.dot(self.GFexpansion, gf)
 
@@ -295,7 +287,7 @@ class VacancyMediated:
         print 'om0:\n', np.dot(self.rate0expansion, om0)
         print 'delta_om:\n', delta_om
 
-        bias2vec = np.dot(self.bias2expansion, om2expand)
+        bias2vec = np.dot(self.bias2expansion, om2expand*np.sqrt(prob[self.NN2thermo]))
         bias1vec = np.dot(self.bias1ds * probsqrt[self.gen1prob], om1expand) + \
                    np.dot(self.bias1NN, om0)
 
@@ -309,6 +301,16 @@ class VacancyMediated:
                                       np.dot(G, bias2vec)):
             L1sv += outer*b1*Gb2
             L2ss += outer*b2*Gb2
+        # convert jump vectors to an array, and construct the rates as an array
+        Lvv = GFcalc.D2(np.array(self.jumpvect),
+                        np.array(sum([[om,]*len(Rs)
+                                      for om, Rs in zip(om0, self.NNstar.stars)], [])))
+        L0ss = GFcalc.D2(np.array(self.jumpvect),
+                         np.array(sum([[om,]*len(Rs)
+                                       for om, Rs in zip(om2expand*prob[self.NN2thermo],
+                                                         self.NNstar.stars)], [])))
+
+
         return Lvv, L0ss, L2ss, L1sv
 
     def Lij(self, gf, om0, prob, om2, om1):

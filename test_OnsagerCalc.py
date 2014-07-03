@@ -188,6 +188,16 @@ class SCBaseTests(BaseTests):
         self.assertAlmostEqual(-Lss[0, 0]/Lsv[0, 0], self.correl, delta=1e-3)
 
 
+def fivefreq(w0, w1, w2, w3, w4):
+    """The solute/solute diffusion coefficient in the 5-freq. model"""
+    b = w4/w0
+    # 7(1-F) = (10 b^4 + 180.3 b^3 + 924.3 b^2 + 1338.1 b)/ (2 b^4 + 40.1 b^3 + 253/3 b^2 + 596 b + 435.3)
+    F7 = 7. - b*(1338.1 + b*(924.3 + b*(180.3 + b*10.)))/\
+              (435.3 + b*(596. + b*(253.3 + b*(40.1 + b*2.))))
+    p = w4/w3
+    return p*w2*(2.*w1 + w3*F7)/(2.*w2 + 2.*w1 + w3*F7)
+
+
 class FCCBaseTests(SCBaseTests):
     """Set of tests that our Onsager calculator is well-behaved"""
 
@@ -202,23 +212,14 @@ class FCCBaseTests(SCBaseTests):
         self.D0 = self.GF.D2[0, 0]
         self.correl = 0.78145
 
-    def fivefreq(self, w0, w1, w2, w3, w4):
-        """The solute/solute diffusion coefficient in the 5-freq. model"""
-        b = w4/w0
-        # 7(1-F) = (10 b^4 + 180.3 b^3 + 924.3 b^2 + 1338.1 b)/ (2 b^4 + 40.1 b^3 + 253/3 b^2 + 596 b + 435.3)
-        F7 = 7. - b*(1338.1 + b*(924.3 + b*(180.3 + b*10.)))/\
-                  (435.3 + b*(596. + b*(253.3 + b*(40.1 + b*2.))))
-        p = w4/w3
-        return p*w2*(2.*w1 + w3*F7)/(2.*w2 + 2.*w1 + w3*F7)
-
     def testFiveFreq(self):
         """Test whether we can reproduce the five frequency model"""
         self.Lcalc.generate(1)
         w0 = self.rates[0]
-        w1 = 0.80 * w0
-        w2 = 1.5 * w0
-        w3 = 0.75 * w0
-        w4 = 2.00 * w0
+        w1 = 1.0 * w0
+        w2 = 1.0 * w0
+        w3 = 2.0 * w0
+        w4 = 0.5 * w0
         w3w4 = np.sqrt(w3*w4)
         prob, om2, om1 = self.Lcalc.maketracer()
         om0 = np.array([w0])
@@ -229,6 +230,7 @@ class FCCBaseTests(SCBaseTests):
         for i, pair in enumerate(om1list):
             p0nn = any([all(abs(pair[0] - x) < 1e-8) for x in self.NNvect])
             p1nn = any([all(abs(pair[1] - x) < 1e-8) for x in self.NNvect])
+            print pair, p0nn, p1nn
             if p0nn and p1nn:
                 om1[i] = w1
                 continue
@@ -255,7 +257,7 @@ class FCCBaseTests(SCBaseTests):
             self.assertAlmostEqual(L[1, 1], L[2, 2])
             self.assertAlmostEqual(L[2, 2], L[0, 0])
         self.assertAlmostEqual(Lvv[0, 0], self.D0)
-        self.assertAlmostEqual(Lss[0, 0], 4.*self.fivefreq(w0, w1, w2, w3, w4), delta=1e-3)
+        self.assertAlmostEqual(Lss[0, 0], 4.*fivefreq(w0, w1, w2, w3, w4), delta=1e-3)
 
 
 
