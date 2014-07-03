@@ -115,7 +115,9 @@ class VacancyMediated:
             self.matricesgenerated = True
             self.thermo2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.thermo.stars]
             self.NN2thermo = [self.thermo.starindex(Rs[0]) for Rs in self.NNstar.stars]
+            self.vstar2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.biasvec.vecpos]
             self.GFexpansion = self.biasvec.GFexpansion(self.GF)
+            self.rate0expansion = self.biasvec.rate0expansion(self.NNstar)
             self.rate1expansion = self.biasvec.rate1expansion(self.omega1)
             self.rate2expansion = self.biasvec.rate2expansion(self.NNstar)
             self.bias2expansion = self.biasvec.bias2expansion(self.NNstar)
@@ -274,19 +276,18 @@ class VacancyMediated:
         for p, ind in zip(prob, self.thermo2kin):
             probsqrt[ind] = np.sqrt(p)
 
-        om1LIMB = np.array(om0[self.omega1LIMB])
         om1expand = np.array([r1 if r1 >= 0 else r0
-                              for r1, r0 in zip(om1, om1LIMB)]) # omega_1
+                              for r1, r0 in zip(om1, om0[self.omega1LIMB])]) # omega_1
         om2expand = np.array([r2 if r2 >= 0 else r0
                               for r2, r0 in zip(om2, om0)]) # omega_2
-
-        # delta_om1 = om1expand - om1LIMB # omega_1 - omega_0
         # onsite term: need to make sure we divide out by the starting point probability, too
         om1onsite = (np.dot(self.omega1ds * probsqrt[self.gen1prob], om1expand) +
-                     np.dot(self.omega1NN, om0))/probsqrt
+                     np.dot(self.omega1NN, om0))/probsqrt[self.vstar2kin]
+
         delta_om = np.dot(self.rate1expansion, om1expand) + \
                    np.diag(om1onsite) + \
-                   np.dot(self.rate2expansion, om2expand)
+                   np.dot(self.rate2expansion, om2expand) - \
+                   np.dot(self.rate0expansion, om0)
 
         bias2vec = np.dot(self.bias2expansion, om2expand)
         bias1vec = np.dot(self.bias1ds * probsqrt[self.gen1prob], om1expand) + \
