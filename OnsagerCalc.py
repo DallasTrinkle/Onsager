@@ -289,6 +289,12 @@ class VacancyMediated:
                    np.dot(self.rate2expansion, om2expand) - \
                    np.dot(self.rate0expansion, om0)
 
+        print 'om1:\n', np.dot(self.rate1expansion, om1expand)
+        print 'om1_onsite:\n', np.diag(om1onsite)
+        print 'om2:\n', np.dot(self.rate2expansion, om2expand)
+        print 'om0:\n', np.dot(self.rate0expansion, om0)
+        print 'delta_om:\n', delta_om
+
         bias2vec = np.dot(self.bias2expansion, om2expand)
         bias1vec = np.dot(self.bias1ds * probsqrt[self.gen1prob], om1expand) + \
                    np.dot(self.bias1NN, om0)

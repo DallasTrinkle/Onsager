@@ -712,7 +712,7 @@ class VectorStarSet:
                 if all(abs(endpoint) < 1e-8):
                     continue
                 geom_bias = np.dot(svv[0], vec) * len(svR)
-                geom_omega1 = -len(svR) # np.dot(svv[0], svv[0]) * len(svR)
+                geom_omega1 = -1 #len(svR)
                 p2 = dstar.star.pointindex(endpoint)
                 if p2 == -1:
                     # we landed outside our range of double-stars, so...
