@@ -524,6 +524,44 @@ class VectorStarSet:
                     GFexpansion[i, j, :] = GFexpansion[j, i, :]
         return GFexpansion
 
+    def rate0expansion(self, NNstar):
+        """
+        Construct the omega0 matrix expansion in terms of the NN stars. Note: includes
+        on-site terms.
+
+        Parameters
+        ----------
+        NNstar: Star
+            nearest-neighbor stars
+
+        Returns
+        -------
+        rate0expansion: array[Nsv, Nsv, Nstars]
+            the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0(NNstar[k]))
+        """
+        if self.Nvstars == 0:
+            return None
+        if not isinstance(NNstar, StarSet):
+            raise TypeError('need a star')
+        rate0expansion = np.zeros((self.Nvstars, self.Nvstars, NNstar.Nstars))
+        for i in xrange(self.Nvstars):
+            for j in xrange(self.Nvstars):
+                if i < j :
+                    for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
+                        for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
+                            # note: double-stars are tuples of point indices
+                            k = NNstar.starindex(Ri - Rj)
+                            # note: k == -1 indicates now a pair that does not appear, not an error
+                            if k >= 0:
+                                rate0expansion[i, j, k] += np.dot(vi, vj)
+                else:
+                    if i == j:
+                        for k, s in enumerate(NNstar.stars):
+                            rate0expansion[i, i, k] = -len(s)
+                    else:
+                        rate0expansion[i, j, :] = rate0expansion[j, i, :]
+        return rate0expansion
+
     def rate1expansion(self, dstar):
         """
         Construct the omega1 matrix expansion in terms of the double stars.

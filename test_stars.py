@@ -409,6 +409,52 @@ class VectorStarGFFCClinearTests(VectorStarGFlinearTests):
         self.ConstructGF(2)
 
 
+class VectorStarOmega0Tests(unittest.TestCase):
+    """Set of tests for our expansion of omega_0 in NN vectors"""
+    def setUp(self):
+        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
+        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
+        self.vecstar = stars.VectorStarSet()
+        self.rates = orthorates()
+
+    def testConstructOmega0(self):
+        self.star.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.NNstar.generate(1) # just nearest-neighbor stars
+        self.vecstar.generate(self.star)
+        rate0expand = self.vecstar.rate0expansion(self.NNstar)
+        self.assertEqual(np.shape(rate0expand),
+                         (self.vecstar.Nvstars, self.vecstar.Nvstars, self.NNstar.Nstars))
+        om0expand = np.zeros(self.NNstar.Nstars)
+        for vec, rate in zip(self.NNvect, self.rates):
+            om0expand[self.NNstar.starindex(vec)] = rate
+
+        for i in xrange(self.vecstar.Nvstars):
+            om0_onsite = -sum(self.rates)
+            self.assertAlmostEqual(om0_onsite, np.dot(rate0expand[i, i, :], om0expand))
+            for j in xrange(self.vecstar.Nvstars):
+                # test the construction
+                om0 = 0
+                for Ri, vi in zip(self.vecstar.vecpos[i], self.vecstar.vecvec[i]):
+                    for Rj, vj in zip(self.vecstar.vecpos[j], self.vecstar.vecvec[j]):
+                        dv = Ri - Rj
+                        for vec, rate in zip(self.NNvect, self.rates):
+                            if all(abs(dv - vec) < 1e-8):
+                                om0 += np.dot(vi, vj) * rate
+                                break
+                if i != j:
+                    self.assertAlmostEqual(om0, np.dot(rate0expand[i, j, :], om0expand))
+        # print(np.dot(rateexpand, om1expand))
+
+
+class VectorStarFCCOmega0Tests(VectorStarOmega0Tests):
+    """Set of tests for our expansion of omega_0 in NN vect for FCC"""
+    def setUp(self):
+        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
+        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
+        self.vecstar = stars.VectorStarSet()
+        self.rates = FCCrates()
+
+
 class VectorStarOmegalinearTests(unittest.TestCase):
     """Set of tests for our expansion of omega_1 in double-stars"""
     def setUp(self):
