@@ -546,7 +546,7 @@ class VectorStarSet:
         rate0expansion = np.zeros((self.Nvstars, self.Nvstars, NNstar.Nstars))
         for i in xrange(self.Nvstars):
             for j in xrange(self.Nvstars):
-                if i < j :
+                if i <= j :
                     for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
                         for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                             # note: double-stars are tuples of point indices
@@ -554,12 +554,12 @@ class VectorStarSet:
                             # note: k == -1 indicates now a pair that does not appear, not an error
                             if k >= 0:
                                 rate0expansion[i, j, k] += np.dot(vi, vj)
-                else:
-                    if i == j:
-                        for k, s in enumerate(NNstar.stars):
-                            rate0expansion[i, i, k] = -len(s)
-                    else:
-                        rate0expansion[i, j, :] = rate0expansion[j, i, :]
+                # note: we do *addition* here because there are two (possible) on-site contributions
+                if i == j:
+                    for k, s in enumerate(NNstar.stars):
+                        rate0expansion[i, i, k] += -len(s)
+                if i > j:
+                    rate0expansion[i, j, :] = rate0expansion[j, i, :]
         return rate0expansion
 
     def rate1expansion(self, dstar):

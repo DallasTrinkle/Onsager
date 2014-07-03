@@ -657,7 +657,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
                 if not all(abs(pt + vec) < 1e-8):
                     # note: starindex returns -1 if not found, which defaults to the final probability of 1.
                     biasvec[i, :] += vec*rate*probsqrt[self.star.starindex(pt + vec)]
-                    omega1onsite[i] -=  np.dot(vec, vec)*rate*probsqrt[self.star.starindex(pt + vec)]
+                    omega1onsite[i] -=  rate*probsqrt[self.star.starindex(pt + vec)]
             omega1onsite[i] /= probsqrt[self.star.index[i]]
         # construct the same bias vector using our expansion
         biasveccomp = np.zeros((self.star.Npts, 3))
@@ -672,7 +672,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
             # test the construction
             for Ri, vi in zip(svpos, svvec):
                 biasveccomp[self.star.pointindex(Ri), :] += om_b*vi
-                omega1onsitecomp[self.star.pointindex(Ri)] += om_on * np.dot(vi, vi)
+                omega1onsitecomp[self.star.pointindex(Ri)] += om_on # * np.dot(vi, vi)
         for i in xrange(self.star.Npts):
             omega1onsitecomp[i] /= probsqrt[self.star.index[i]]
         # this is a little confusing, but we need to take into account the multiplicity;
