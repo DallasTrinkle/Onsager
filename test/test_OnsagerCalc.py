@@ -11,7 +11,6 @@ import unittest
 import onsager.FCClatt as FCClatt
 import onsager.KPTmesh as KPTmesh
 import numpy as np
-import onsager.stars as stars
 import onsager.OnsagerCalc as OnsagerCalc
 
 
