@@ -18,7 +18,12 @@ Typical usage looks like::
 Many of the subpackages within Onsager are support for the main attraction, which
 is in OnsagerCalc. An example of how to use the OnsagerCalc pieces is shown in
 fivefreq.py, which computes the well-known five-frequency model for vacancy-
-mediated solute transport in an FCC lattice. With some small modifications,
+mediated solute transport in an FCC lattice. It can very easily be modified
+to use a different lattice / NNvect set.
+
+The tests for the package are include in test; tests.py will run all of the tests
+in the directory with verbosity level 2. This can be time-consuming (on the order
+of tens of minutes) to run all tests.
 
 Contributors
 ============
