@@ -8,7 +8,7 @@ setup(
     author_email = 'dtrinkle@illinois.edu',
     license='LICENSE.txt',
     url = 'https://github.com/DallasTrinkle/onsager', # use the URL to the github repo
-    download_url = 'https://github.com/DallasTrinkle/onsager/tarball/0.1', # I'll explain this in a second
-    keywords = ['diffusion', 'Onsager', 'mass transport'], # arbitrary keywords
+    download_url = 'https://github.com/DallasTrinkle/onsager/tarball/0.1', # for when we upload
+    keywords = ['diffusion', 'Onsager', 'mass transport'],
     classifiers = [],
 )
