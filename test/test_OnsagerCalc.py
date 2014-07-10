@@ -8,11 +8,11 @@ __author__ = 'Dallas R. Trinkle'
 # TODO: additional tests using the 14 frequency model for FCC?
 
 import unittest
-import FCClatt
-import KPTmesh
+import onsager.FCClatt as FCClatt
+import onsager.KPTmesh as KPTmesh
 import numpy as np
-import stars
-import OnsagerCalc
+import onsager.stars as stars
+import onsager.OnsagerCalc as OnsagerCalc
 
 
 # Setup for orthorhombic, simple cubic, and FCC cells; different than test_stars
@@ -145,7 +145,7 @@ class BaseTests(unittest.TestCase):
                 self.assertAlmostEqual(lvv, lss)
 
 
-import GFcalc
+import onsager.GFcalc as GFcalc
 
 
 class SCBaseTests(BaseTests):

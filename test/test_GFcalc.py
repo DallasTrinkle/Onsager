@@ -7,8 +7,8 @@ __author__ = 'Dallas R. Trinkle'
 import unittest
 import numpy as np
 from scipy import special
-import FCClatt
-import GFcalc
+import onsager.FCClatt as FCClatt
+import onsager.GFcalc as GFcalc
 
 class GreenFuncDerivativeTests(unittest.TestCase):
     """Tests for the construction of D as a fourier transform, and the 2nd and 4th derivatives."""

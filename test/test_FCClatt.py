@@ -8,7 +8,7 @@ __author__ = 'Dallas R. Trinkle'
 # TODO: use spglib and/or interface with pymatgen to automatically construct accordingly
 
 import unittest
-import FCClatt
+import onsager.FCClatt as FCClatt
 import numpy as np
 
 class LatticeTests(unittest.TestCase):

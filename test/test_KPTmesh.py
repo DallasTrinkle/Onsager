@@ -6,7 +6,7 @@ __author__ = 'Dallas R. Trinkle'
 
 import unittest
 import numpy as np
-import KPTmesh
+import onsager.KPTmesh as KPTmesh
 
 
 class KPTMeshTests(unittest.TestCase):

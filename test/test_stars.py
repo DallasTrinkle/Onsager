@@ -7,10 +7,10 @@ __author__ = 'Dallas R. Trinkle'
 #
 
 import unittest
-import FCClatt
-import KPTmesh
+import onsager.FCClatt as FCClatt
+import onsager.KPTmesh as KPTmesh
 import numpy as np
-import stars
+import onsager.stars as stars
 
 
 # Setup for orthorhombic, simple cubic, and FCC cells:
@@ -357,7 +357,7 @@ class VectorStarFCCTests(VectorStarTests):
         for outer in self.vecstar.outer:
             self.assertTrue((abs(outer - testouter) < 1e-8).all())
 
-import GFcalc
+import onsager.GFcalc as GFcalc
 
 
 class VectorStarGFlinearTests(unittest.TestCase):
