@@ -138,7 +138,7 @@ class BaseTests(unittest.TestCase):
             prob, om2, om1 = self.Lcalc.maketracer()
             om0 = np.array((1.,)*len(om2), dtype=float)
             gf = np.array((1.,)*len(self.Lcalc.GFlist()))
-            Lvv, Lss, Lsv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
+            Lvv, Lss, Lsv, L1vv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
             for lvv, lsv, lss in zip(Lvv.flat, Lsv.flat, Lss.flat):
                 self.assertAlmostEqual(lvv, -lsv)
                 self.assertAlmostEqual(lvv, lss)
@@ -168,7 +168,7 @@ class SCBaseTests(BaseTests):
         om0 = np.array((self.rates[0],)*len(om2), dtype=float)
         om2 = om0.copy()
         gf = np.array([self.GF.GF(R) for R in self.Lcalc.GFlist()])
-        Lvv, Lss, Lsv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
+        Lvv, Lss, Lsv, L1vv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
         # print 'Lvv:', Lvv
         # print 'Lss:', Lss
         # print 'Lsv:', Lsv
@@ -176,7 +176,8 @@ class SCBaseTests(BaseTests):
             self.assertAlmostEqual(0, Lvv[p])
             self.assertAlmostEqual(0, Lss[p])
             self.assertAlmostEqual(0, Lsv[p])
-        for L in [Lvv, Lss, Lsv]:
+            self.assertAlmostEqual(0, L1vv[p])
+        for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertAlmostEqual(L[0, 0], L[1, 1])
             self.assertAlmostEqual(L[1, 1], L[2, 2])
             self.assertAlmostEqual(L[2, 2], L[0, 0])
@@ -237,12 +238,13 @@ class FCCBaseTests(SCBaseTests):
                 continue
             # rely on LIMB for rest...
         gf = np.array([self.GF.GF(R) for R in self.Lcalc.GFlist()])
-        Lvv, Lss, Lsv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
+        Lvv, Lss, Lsv, L1vv = self.Lcalc.Lij(gf, om0, prob, om2, om1)
         for p in [(i, j) for i in range(3) for j in range(3) if i != j]:
             self.assertAlmostEqual(0, Lvv[p])
             self.assertAlmostEqual(0, Lss[p])
             self.assertAlmostEqual(0, Lsv[p])
-        for L in [Lvv, Lss, Lsv]:
+            self.assertAlmostEqual(0, L1vv[p])
+        for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertAlmostEqual(L[0, 0], L[1, 1])
             self.assertAlmostEqual(L[1, 1], L[2, 2])
             self.assertAlmostEqual(L[2, 2], L[0, 0])
