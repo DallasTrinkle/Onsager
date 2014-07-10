@@ -1,0 +1,856 @@
+\documentclass[aps,prb,superscriptaddress,showpacs,preprint,floatfix]{revtex4-1}
+
+\usepackage{epsfig,amsmath,amssymb,txfonts}
+
+% Shortcuts for words
+\newcommand*{\abinit}[0]{\textit{ab~initio}}
+\newcommand*{\Abinit}[0]{\textit{Ab~initio}}
+\newcommand*{\naive}[0]{na\"\i ve}
+\newcommand*{\et}[0]{\textit{et~al.}}
+
+% math shortcuts
+\DeclareMathOperator{\erf}{erf}
+\DeclareMathOperator{\IFT}{IFT}
+\newcommand*{\eps}[0]{\varepsilon}
+\newcommand*{\x}[0]{\times}
+\newcommand*{\ox}[0]{\otimes}
+\newcommand*{\EE}[1]{\times 10^{{#1}}}
+
+% macros for math
+%\newcommand*{\VECIT}[1]{\vec{#1}}
+\newcommand*{\VECIT}[1]{\mathbf{#1}}
+\newcommand*{\kB}[0]{k_{\text{B}}}
+\newcommand*{\eV}[0]{\text{eV}}
+\newcommand*{\meV}[0]{\text{meV}}
+\newcommand*{\DR}[0]{\underline{D}}
+\newcommand*{\Dk}[0]{\widetilde{D}}
+\newcommand*{\kv}[0]{\VECIT{k}}
+\newcommand*{\qv}[0]{\VECIT{q}}
+\newcommand*{\pv}[0]{\VECIT{p}}
+\newcommand*{\kh}[0]{\hat k}
+\newcommand*{\Rv}[0]{\VECIT{R}}
+\newcommand*{\rv}[0]{\VECIT{r}}
+\newcommand*{\av}[0]{\VECIT{a}}
+\newcommand*{\vv}[0]{\VECIT{v}}
+\newcommand*{\xv}[0]{\VECIT{x}}
+\newcommand*{\xsv}[0]{\VECIT{x}_\text{s}}
+\newcommand*{\xvv}[0]{\VECIT{x}_\text{v}}
+\newcommand*{\xspv}[0]{\VECIT{x}'_\text{s}}
+\newcommand*{\xvpv}[0]{\VECIT{x}'_\text{v}}
+\newcommand*{\yv}[0]{\VECIT{y}}
+\newcommand*{\uv}[0]{\VECIT{u}}
+\newcommand*{\bv}[0]{\VECIT{b}}
+\newcommand*{\Gv}[0]{\VECIT{G}}
+\newcommand*{\uk}[0]{\widetilde{u}}
+\newcommand*{\fv}[0]{\VECIT{f}}
+\newcommand*{\gv}[0]{\VECIT{g}}
+\newcommand*{\tv}[0]{\VECIT{t}}
+%\newcommand*{\disl}[0]{\rho_\perp}
+\newcommand*{\disl}[0]{\rho_{\text{disl}}}
+\newcommand*{\rc}[0]{r_\text{c}}
+\newcommand*{\DE}[0]{\Delta E}
+\newcommand*{\site}[0]{\tilde f}
+\newcommand*{\epsv}[0]{\eps_\text{v}} %volumetric strain
+\newcommand*{\Eb}[0]{E_\text{b}} %solute-vacancy binding energy
+\newcommand*{\alpv}[0]{\alpha_\text{v}} %volumetric strain energy, vacancy
+\newcommand*{\alps}[0]{\alpha_\text{s}} %volumetric strain energy, solute
+\newcommand*{\cv}[0]{c_\text{v}} %vacancy concentration
+\newcommand*{\cs}[0]{c_\text{s}} %solute concentration
+\newcommand*{\muv}[0]{\mu^\text{v}} %vacancy chemical potential
+\newcommand*{\mus}[0]{\mu^\text{s}} %solute chemical potential
+\newcommand*{\straj}[0]{s^\alpha_\text{traj}} % trajectory contribution to s(q,omega)
+\newcommand*{\FFT}[1]{\tilde #1}
+\newcommand*{\pw}[0]{\FFT p} % Fourier transform
+\newcommand*{\cw}[0]{\FFT c} % Fourier transform
+\newcommand*{\sw}[0]{\FFT s} % Fourier transform
+
+\newcommand*{\flux}[1]{\VECIT{J}^{#1}}
+\newcommand*{\fluxt}[1]{\VECIT{J}^\text{#1}}
+\newcommand*{\Onsager}[1]{\underline L^{(#1)}}
+\newcommand*{\Onsagert}[1]{\Onsager{\text{#1}}}
+\newcommand*{\Dvv}[0]{\underline D^\text{v}}
+\newcommand*{\DD}[0]{\underline D^\text{(4)}}
+\newcommand*{\Lvv}[0]{\Onsagert{vv}}
+\newcommand*{\Lsv}[0]{\Onsagert{sv}}
+\newcommand*{\Lvs}[0]{\Onsagert{vs}}
+\newcommand*{\Lss}[0]{\Onsagert{ss}}
+\newcommand*{\nconf}[0]{\VECIT{\underline n}}
+\newcommand*{\hW}[0]{\hat W}
+\newcommand*{\hw}[0]{\hat\omega}
+\newcommand*{\hP}[0]{\hat P}
+\newcommand*{\hH}[0]{\hat H}
+\newcommand*{\hEt}[0]{\hat E^{\text{trans}}}
+\newcommand*{\etav}[0]{\VECIT{\hat\eta}}
+\newcommand*{\dxv}[0]{\VECIT{\hat{\delta x}}}
+\newcommand*{\bxv}[0]{\VECIT{\hat{wx}}}
+\newcommand*{\hbv}[0]{\VECIT{\hat{b}}}
+\newcommand*{\hgv}[0]{\VECIT{\hat{\gamma}}}
+\newcommand*{\hg}[0]{\hat{g}}
+\newcommand*{\Esv}[0]{E^\text{s-v}}
+\newcommand*{\di}[0]{d}
+\newcommand*{\ei}[0]{\VECIT{e}}
+\newcommand*{\pmax}[0]{p_\text{max}}
+\newcommand*{\hgsc}[0]{\hg^0_\text{sc}}
+\newcommand*{\VS}[1]{\langle#1\rangle}
+\newcommand*{\GBZ}[0]{G_\text{BZ}}
+\newcommand*{\Ng}[0]{N_\text{group}}
+\newcommand*{\VV}[0]{\underline{VV}}
+\newcommand*{\R}[0]{R}
+\newcommand*{\Rtv}[0]{\{\R,\tv\}}
+\newcommand*{\Rtvinv}[0]{\{\R,\tv\}^{-1}}
+\newcommand*{\Rtvinvexplicit}[0]{\{\R^{-1},-\R^{-1}\tv\}}
+
+% Shortcuts for environments
+\newcommand*{\be}[0]{\begin{equation}}
+\newcommand*{\ee}[0]{\end{equation}}
+\newcommand*{\beu}[0]{\begin{equation*}}
+\newcommand*{\eeu}[0]{\end{equation*}}
+\newcommand*{\bme}[0]{\begin{multline}}
+\newcommand*{\eme}[0]{\end{multline}}
+\newcommand*{\bmeu}[0]{\begin{multline*}}
+\newcommand*{\emeu}[0]{\end{multline*}}
+\newcommand*{\ba}[0]{\begin{array}}
+\newcommand*{\ea}[0]{\end{array}}
+\newcommand*{\bfig}[0]{\begin{figure}[t]}
+\newcommand*{\efig}[0]{\end{figure}}
+\newcommand*{\bfigwide}[0]{\begin{figure*}[ht]}
+\newcommand*{\efigwide}[0]{\end{figure*}}
+
+% Shortcuts for figures (small width = single column width)
+\newlength{\wholefigwidth}
+\setlength{\wholefigwidth}{6in}
+\newlength{\smallfigwidth}
+\setlength{\smallfigwidth}{3in}	%{2.25in}
+\newlength{\halfsmallfigwidth}
+\setlength{\halfsmallfigwidth}{1.5in}
+
+\newcommand{\PARA}[1]{\smallskip\noindent\textbf{#1}\quad}
+\newcommand{\Fig}[1]{Fig.~\ref{fig:#1}}
+\newcommand{\Tab}[1]{Table~\ref{tab:#1}}
+\newcommand{\Sec}[1]{Section~\ref{sec:#1}}
+\newcommand{\Eqn}[1]{Eqn.~\ref{eqn:#1}}
+\newcommand{\rcite}[1]{Ref.~\onlinecite{#1}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\title{Automatic analytic evaluation of vacancy-mediated transport: Onsager coefficients in the dilute limit using a Green function approach}
+
+\author{Dallas R. Trinkle}
+\email{dtrinkle@illinois.edu}
+\affiliation{Department of Materials Science and Engineering, University of Illinois, Urbana-Champaign, Illinois 61801, USA}
+
+\date{\today}
+\begin{abstract}
+Derivation of the generalized solution for diffusion from the master equation, focusing on vacancy-mediated diffusion. The particular application is for the dilute limit (single solute and vacancy), and the construction of an analytic Green-function based solution, taking advantage of point-group symmetry. This could serve as a starting point for building out a self-consistent mean-field (SCMF)-type solution beyond the dilute limit, that takes advantage of the Green function solution in the dilute limit. Extensions to multiple-atom unit cells and strain derivatives using perturbation theory could follow.
+\end{abstract}
+%\pacs{}
+
+\maketitle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\PARA{Introduction.}
+Our goal is to evaluate the Onsager transport coefficients in a (dilute) alloy for the case of vacancy-mediated diffusion. In particular, we are interested in the three (tensor) transport coefficients, $\Lvv$, $\Lsv$, and $\Lss$ where
+\be
+\begin{split}
+\fluxt{v} &= -\Lvv\nabla\muv - \Lsv\nabla\mus\\
+\fluxt{s} &= -\Lsv\nabla\muv - \Lss\nabla\mus
+\end{split}
+\label{eqn:Onsager}
+\ee
+for vacancies ``v'' and solute ``s.'' The fluxes $\fluxt{v}$ and $\fluxt{s}$ combine to produce the solvent flux $\fluxt{A} = -\fluxt{v}-\fluxt{s}$, so that there is site conservation. Moreover, the chemical potentials $\muv$ and $\mus$ are defined relative to the solvent chemical potential $\mu^\text{A}$. For our purposes, we are interested in the motion of vacancies and solute in response to their chemical potential gradients, and the response of solvent atoms, or the response of vacancies and solute to solvent chemical potentials follow from these relations.
+
+\PARA{Master equation.}
+To model this system, we work with a lattice gas model, containing the three ``species'' of interest: solvent ``A,'' solute ``s,'' and vacancies ``v.'' We consider a set of crystal sites, defined by $\xv = \Rv + \uv$ for $\Rv$ a lattice vector and $\uv$ a crystalline basis. A configuration is a vector $\nconf$ where each element $n^\alpha_\xv$ determines the site occupancy by species $\alpha$ at site $\xv$; the occupancies are either 0 or 1, and $\sum_\alpha n^\alpha_\xv = 1$ for all sites $\xv$. The system admits possible transitions from configuration $\nconf$ to $\nconf'$ defined by the transition rate matrix $\hW(\nconf\to\nconf')$. Furthermore, this rate matrix gives us the master equation for the evolution of the system probability $\hP(\nconf, t)$ with time $t$ as
+\be
+\frac{d\hP(\nconf, t)}{dt} =
+\sum_{\nconf'} \hW(\nconf'\to\nconf) \hP(\nconf', t)
+- \hW(\nconf\to\nconf')\hP(\nconf, t)
+\ee
+This expression is primarily useful for us to define \textit{steady-state} and \textit{equilibrium} in terms of balance and detailed balance, respectively. A probability distribution $\hP(\nconf)$ will be in \textit{balance} if it obeys
+\be
+\sum_{\nconf'} \hW(\nconf'\to\nconf) \hP(\nconf')
+= \sum_{\nconf'} \hW(\nconf\to\nconf')\hP(\nconf)
+\label{eqn:balance}
+\ee
+for all configurations $\nconf$. A probability distribution $\hP_0(\nconf)$ will be in \textit{detailed balance} if it obeys
+\be
+\hW(\nconf'\to\nconf) \hP_0(\nconf')
+= \hW(\nconf\to\nconf')\hP_0(\nconf)
+\label{eqn:detailedbalance}
+\ee
+for all configurations $\nconf$ and $\nconf'$. Clearly, detailed balance is sufficient for balance, but not necessary. In particular, we note that a system satisfying detailed balance will be in equilibrium (zero flux), while a system satisfying balance will be in steady-state, and may admit non-zero fluxes. Our approach to determining transport coefficients is to use near-equilibrium thermodynamics: we will find steady-state solutions that are the equilibrium distribution plus a small perturbation corresponding to a chemical potential gradient $\nabla\mu$, then determine the fluxes and solve directly for the transport coefficients from \Eqn{Onsager}.
+
+We assume that our transition matrix corresponds to a physical system with a Hamiltonian $\hH(\nconf)$; then, the equilibrium distribution for chemical potentials $\mu^\alpha$ is
+\be
+\hP_0(\nconf) = \exp\left[\frac{1}{\kB T}\left(
+\Omega_0 + \sum_\alpha \mu^\alpha\sum_\xv n^\alpha_\xv - \hH(\nconf)
+\right)\right]
+\label{eqn:equilibrium}
+\ee
+where $\Omega_0$ is a normalization constant such that $\sum_\nconf \hP_0(\nconf) = 1$. We will assume that $\hP_0(\nconf)$ obeys detailed balance (\Eqn{detailedbalance}), which determines a relationship between $\hW$ and $\hH$. Note also that $\hH$ is a lattice function, and as such will obey symmetry relations of the underlying lattice; i.e., it will remain invariant with respect to all space-group operations applied to $\nconf$. Those symmetries also necessarily translate to $\hW$. Moreover, we will assume that \textit{all} non-zero transition rates $\hW(\nconf\to\nconf')$ conserve mass: $\sum_\xv n^\alpha_\xv = \sum_\xv n^{\prime\alpha}_\xv$ for all $\alpha$.
+
+\PARA{Transport coefficients.}
+In order to introduce a steady-state solution with chemical potential gradients, we will consider a site-based chemical potential perturbation $\delta\mu^\alpha_\xv$; these perturbations are such that for any two sites $\xv$ and $\yv$,
+\be
+\delta\mu^\alpha_\xv - \delta\mu^\alpha_\yv = (\xv-\yv)\cdot\nabla\mu^\alpha
+\label{eqn:deltamudiff}
+\ee
+where $\nabla\mu^\alpha$ will be considered a homogeneous constant and small chemical potential gradient vector. Note that we do not need to write down the specific form that $\delta\mu$ will take, as we will see that \textit{only} differences of the form \Eqn{deltamudiff} will appear in our equations. Next, we work with an ansatz steady-state solution
+\be
+\hP_\text{ss}(\nconf) := \hP_0(\nconf)\exp\left[\frac{1}{\kB T}\left(
+\delta\Omega_0 + \sum_\alpha\sum_\xv \delta\mu^\alpha_\xv n^\alpha_\xv 
+-\sum_\alpha \etav^\alpha(\nconf)\cdot\nabla\mu^\alpha
+\right)\right]
+\label{eqn:steadystate}
+\ee
+where $\delta\Omega_0$ is a normalization constant, and $\etav^\alpha(\nconf)$ is a vector lattice function, with the same lattice symmetries as $\hH$, albeit as a \textit{vector}, so that rotations also rotate $\etav$ (while $\hH$ is a scalar). The combination $\etav^\alpha(\nconf)\cdot\nabla\mu$ acts as the effective Hamiltonian in the SCMF notation. In order to solve for the steady-state, and determine the fluxes, we introduce the mass-transport vector
+\be
+\dxv^\alpha(\nconf\to\nconf') := \sum_\xv n^{\prime\alpha}_\xv \xv - \sum_\xv n^\alpha_\xv \xv
+= \sum_\xv \left(n^{\prime\alpha}_\xv - n^{\alpha}_\xv\right)\xv
+\label{eqn:deltax}
+\ee
+which is the total transport of species $\alpha$ in the transition $\nconf\to\nconf'$. Given mass-conservation, and as we work in the laboratory frame, for any non-zero $\hW(\nconf\to\nconf')$, we have $\sum_\alpha \dxv^\alpha(\nconf\to\nconf') = 0$. The additional symmetries are that $\dxv^\alpha(\nconf\to\nconf')=-\dxv^\alpha(\nconf'\to\nconf)$, which requires that $\dxv^\alpha(\nconf\to\nconf)=0$. Finally, $\dxv^\alpha$ operates as expected under crystal symmetry operations. Then, the flux of species $\alpha$ can be found in a system with total volume $V_0$; for convenience, we multiply through by the volume and temperature $\kB T$ to get
+\be
+V_0\kB T \flux{\alpha} = \sum_{\nconf,\nconf'}
+\dxv^\alpha(\nconf\to\nconf')
+\hW(\nconf\to\nconf')
+\left(\kB T \hP_\text{ss}(\nconf)\right).
+\label{eqn:fluxdef}
+\ee
+In the limit of small gradients $\nabla\mu^\alpha$, we can expand our steady-state solution $\kB T \hP_\text{ss}$,
+\be
+\kB T\hP_\text{ss}(\nconf) = 
+\hP_0(\nconf)\left[\kB T + \delta\Omega_0 
++ \sum_\beta\sum_\xv \delta\mu^\beta_\xv n^\beta_\xv 
+-\sum_\beta \etav^\beta(\nconf)\cdot\nabla\mu^\beta
+\right] + O\left(|\nabla\mu|^2\right)
+\ee
+which substitutes into \Eqn{fluxdef} to get, to first order,
+\be
+\begin{split}
+V_0\kB T \flux{\alpha} &= \sum_{\nconf,\nconf'}
+\dxv^\alpha(\nconf\to\nconf')
+\hW(\nconf\to\nconf')
+\hP_0(\nconf)\left[\kB T + \delta\Omega_0 
++ \sum_\beta\sum_\xv \delta\mu^\beta_\xv n^\beta_\xv 
+-\sum_\beta \etav^\beta(\nconf)\cdot\nabla\mu^\beta
+\right]\\
+&= \frac12\sum_{\nconf,\nconf'}
+\Bigg(
+\dxv^\alpha(\nconf\to\nconf')\hW(\nconf\to\nconf')
+\hP_0(\nconf)\left[\kB T + \delta\Omega_0 + \sum_\beta\sum_\xv \delta\mu^\beta_\xv n^\beta_\xv \right]\\
+&\qquad+ 
+\dxv^\alpha(\nconf'\to\nconf)\hW(\nconf'\to\nconf)
+\hP_0(\nconf')\left[\kB T + \delta\Omega_0 + \sum_\beta\sum_\xv \delta\mu^\beta_\xv n^{\prime\beta}_\xv \right]
+\Bigg)\\
+&\quad-
+\sum_{\nconf,\nconf'}
+\hW(\nconf\to\nconf')\hP_0(\nconf)
+\dxv^\alpha(\nconf\to\nconf')\sum_\beta \etav^\beta(\nconf)\cdot\nabla\mu^\beta
+\\
+\end{split}
+\ee
+where the second expression comes from symmetrizing the double summation. This expression can be simplified in a few quick steps. First, we note by detailed balance and antisymmetry of $\dxv$ that $\dxv^\alpha(\nconf'\to\nconf)\hW(\nconf'\to\nconf)\hP_0(\nconf')
+=-\dxv^\alpha(\nconf\to\nconf')\hW(\nconf\to\nconf')\hP_0(\nconf)$. Next, we note that $\sum_{\beta,\xv}\delta\mu^\beta_\xv(n^\beta_\xv-n^{\prime\beta}_\xv) = -\dxv^\beta(\nconf\to\nconf')\cdot\nabla\mu^\beta$. Then,
+\be
+\begin{split}
+V_0\kB T \flux{\alpha} &= 
+-\sum_\beta\Bigg[
+\frac12\sum_{\nconf,\nconf'}
+\hP_0(\nconf)\hW(\nconf\to\nconf')\dxv^\alpha(\nconf\to\nconf')\dxv^\beta(\nconf\to\nconf')
+\\
+&\qquad+\sum_{\nconf,\nconf'}
+\hW(\nconf\to\nconf')\hP_0(\nconf)
+\dxv^\alpha(\nconf\to\nconf')\etav^\beta(\nconf)\Bigg]\cdot\nabla\mu^\beta
+\\
+\end{split}
+\ee
+and thus our transport coefficients are
+\be
+\Onsager{\alpha\beta} = 
+\frac1{\kB T V_0}\sum_{\nconf,\nconf'}
+\hP_0(\nconf)\hW(\nconf\to\nconf')\left[\frac12 \dxv^\alpha(\nconf\to\nconf')\ox\dxv^\beta(\nconf\to\nconf')
++\dxv^\alpha(\nconf\to\nconf')\ox\etav^\beta(\nconf)\right],
+\label{eqn:transportcoeff}
+\ee
+where $\ox$ is the outer (or dyad) product of two vectors.%
+\footnote{The construction $\VECIT{a}\ox\VECIT{b}$ is a second rank tensor such that $(\VECIT{a}\ox\VECIT{b})\cdot\vv = (\VECIT{b}\cdot\vv)\VECIT{a}$ for any vector $\vv$.}
+The first term is the ``bare'' mobility, and the second contains the correlations.
+
+Two brief notes about the second term in the right hand side of \Eqn{transportcoeff}. First, it can be symmetrized with respect to $\nconf$ and $\nconf'$, in a similar fashion to the first term of \Eqn{transportcoeff}. This gives
+\be
+\sum_{\nconf,\nconf'}
+\hP_0(\nconf)\hW(\nconf\to\nconf')
+\dxv^\alpha(\nconf\to\nconf')\ox\etav^\beta(\nconf)=
+\frac12\sum_{\nconf,\nconf'}
+\hP_0(\nconf)\hW(\nconf\to\nconf')
+\dxv^\alpha(\nconf\to\nconf')\ox(\etav^\beta(\nconf)-\etav^\beta(\nconf')),
+\ee
+which indicates that only differences in $\etav$ are important. Furthermore, as $\etav$ is a lattice function, we can potentially apply lattice function relationships (as shown for the effective Hamiltonian in SCMF) to express. We do not take advantage of that in what follows, however. Secondly, we define the \textit{rate-bias vector},
+\be
+\bxv^\alpha(\nconf) := \sum_{\nconf'}
+\hW(\nconf\to\nconf')\dxv^\alpha(\nconf\to\nconf')
+\label{eqn:ratebias}
+\ee
+which is a non-zero vector when the jumps in one direction occur with a different rate for the opposite direction. Then, the transport coefficients are
+\be
+\Onsager{\alpha\beta} = 
+\frac1{\kB T V_0}\sum_{\nconf,\nconf'}
+\hP_0(\nconf)\left[\frac12\hW(\nconf\to\nconf') \dxv^\alpha(\nconf\to\nconf')\ox\dxv^\beta(\nconf\to\nconf')
++\bxv^\alpha(\nconf)\ox\etav^\beta(\nconf)\right].
+\label{eqn:transportcoeff-eta}
+\ee
+
+\PARA{Balance equation.}
+The final step is to solve for our corrections, $\etav$, using balance. If we take \Eqn{balance}, to linear order in $\nabla\mu^\beta$, we have
+\be
+\begin{split}
+&\sum_{\nconf'}\hW(\nconf'\to\nconf)
+\hP_0(\nconf')\left[\kB T + \delta\Omega_0 
++ \sum_\beta\sum_\xv \delta\mu^\beta_\xv n^{\prime\beta}_\xv 
+-\sum_\beta \etav^\beta(\nconf')\cdot\nabla\mu^\beta
+\right]
+=\\
+&\sum_{\nconf'}\hW(\nconf\to\nconf')
+\hP_0(\nconf)\left[\kB T + \delta\Omega_0 
++ \sum_\beta\sum_\xv \delta\mu^\beta_\xv n^\beta_\xv 
+-\sum_\beta \etav^\beta(\nconf)\cdot\nabla\mu^\beta
+\right].
+\end{split}
+\label{eqn:balance-eta1}
+\ee
+We apply detailed balance, $\hW(\nconf'\to\nconf)\hP_0(\nconf')=\hW(\nconf\to\nconf')\hP_0(\nconf)$ to the left-hand side of \Eqn{balance-eta1} to (1) cancel out the first two terms of each side, and (2) rearrange the sides to find
+\be
+\sum_\beta
+\sum_{\nconf'}\hP_0(\nconf)\hW(\nconf\to\nconf')
+\dxv^\beta(\nconf\to\nconf')\cdot\nabla\mu^\beta
+=
+\sum_\beta
+\sum_{\nconf'}\hP_0(\nconf)\hW(\nconf\to\nconf')
+\left[
+\etav^\beta(\nconf')-\etav^\beta(\nconf)\right]\cdot\nabla\mu^\beta.
+\label{eqn:balance-eta2}
+\ee
+This holds for any arbitrary $\nabla\mu^\beta$. We define a matrix version of $\hW$, where
+\be
+\hW_{\nconf\nconf'} =
+\begin{cases}
+\hW(\nconf\to\nconf') &: \nconf' \ne \nconf\\
+-\sum_{\nconf'} \hW(\nconf\to\nconf') &: \nconf' = \nconf
+\end{cases}
+\ee
+and, divide out $\hP_0(\nconf)$ from \Eqn{balance-eta2} to produce
+\be
+\bxv^\beta(\nconf) = \sum_{\nconf'} \hW_{\nconf\nconf'}\etav^\beta(\nconf').
+\label{eqn:balance-eta}
+\ee
+Thus, the diffusion problem involves solving \Eqn{balance-eta} for $\etav$.
+
+There are a few approaches to solve \Eqn{balance-eta}. The equation is general; we will consider, going forward, the case of vacancy-mediated diffusion. One approach is the self-consistent mean-field method (SCMF).\cite{Nastar2000,Nastar2005} The SCMF approach solves \Eqn{balance-eta} by (a) selecting a particular direction for diffusion, (b) multiplying both sides by $\hP_0(\nconf)$ and summing over $\nconf$ to convert the equation into thermodynamic averages, (c) writing out $\etav(\nconf)$ in terms of pair interactions that are invariant along the diffusion direction, and (d) are cutoff after a fixed distance (setting $\etav(\nconf)=0$ for vacancy-solute distance greater than a cutoff). This is an approximate solution for the effective Hamiltonian, which becomes more accurate as the cutoff distance is increased. The second approach---laid out here---is a Green-function approach, which is fairly straightforward for the dilute-vacancy/solute limit for vacancy-mediated diffusion, and is exact. The Green function approach to the problem seeks to solve \Eqn{balance-eta} by constructing the \textit{exact} pseudo-inverse of $\hW_{\nconf\nconf'}$ for the dilute-vacancy/dilute-solute limit; in that case, we treat a single vacancy and single solute in the total volume $V_0$, while we take the thermodynamic limit of $V_0\to\infty$. We do this by (a) breaking $\hW_{\nconf\nconf'}$ into three contributions---the bare vacancy, vacancy near a solute, and vacancy-solute exchange---and (b) taking advantage of translational invariance for our lattice functions. Moreover, we will also take advantage of point-group symmetry operations to maximally reduce the rank of the linear problem to be solved. Note that this is similar in approach to Koiwa and Ishioka;\cite{Koiwa1983} the intention here is to (a) automate the computation of the Green function for the vacancy and the vacancy-solute complex for a general case, as well as (b) automate the symmetry analysis.
+
+\PARA{Symmetrizing.}
+Before we reduce down to the dilute-vacancy/dilute-solute limit, we will slightly rewrite \Eqn{balance-eta} so that we are dealing with the pseudo-inverse of a \textit{symmetric} matrix. We define the matrix $\hw_{\nconf\nconf'}$,
+\be
+\hw_{\nconf\nconf'}:= \hP_0^{1/2}(\nconf)\hW_{\nconf\nconf'}\hP_0^{-1/2}(\nconf')
+\label{eqn:omega-def}
+\ee
+which is symmetric by detailed balance,
+\be
+\begin{split}
+\hw_{\nconf\nconf'}&=\hP_0^{1/2}(\nconf)\hW_{\nconf\nconf'}\hP_0^{-1/2}(\nconf')\\
+&=\hP_0^{-1/2}(\nconf)\hP_0(\nconf)\hW_{\nconf\nconf'}\hP_0^{-1/2}(\nconf')\\
+&=\hP_0^{-1/2}(\nconf)\hW_{\nconf'\nconf}\hP_0(\nconf')\hP_0^{-1/2}(\nconf')\\
+&=\hP_0^{-1/2}(\nconf)\hW_{\nconf'\nconf}\hP_0^{1/2}(\nconf')\\
+&=\hw_{\nconf'\nconf}.
+\end{split}
+\ee
+This form of the matrix can be related to the linear-interpolated migration barrier (LIMB) approximation; going back to \Eqn{equilibrium},
+\be
+\hP_0^{1/2}(\nconf)\hP_0^{-1/2}(\nconf')=
+\exp\left[\frac{\hH(\nconf') - \hH(\nconf)}{2\kB T}\right]
+\ee
+as we only consider transitions that conserve particle number. If we have a transition state energy $\hEt(\nconf-\nconf')$ between $\nconf$ and $\nconf'$ so that $\hW(\nconf\to\nconf')\propto\exp(-(\hEt(\nconf-\nconf')-\hH(\nconf'))/(\kB T))$, then for $\nconf\ne\nconf'$,
+\be
+\hw_{\nconf\nconf'}\propto
+\exp\left[\frac{\hEt(\nconf-\nconf') - (\hH(\nconf') + \hH(\nconf))/2}{\kB T}\right]
+\ee
+which is \textit{constant} for allowed jumps in the LIMB approximation.
+
+Next we define, the \textit{bias vector},
+\be
+\hbv^\alpha(\nconf) := \hP_0^{1/2}(\nconf)\bxv^\alpha(\nconf)
+\ee
+and the symmetrized correction vector,
+\be
+\hgv^\alpha(\nconf) := \hP_0^{1/2}(\nconf)\etav^\alpha(\nconf).
+\ee
+which then, by \Eqn{balance-eta}, gives
+\be
+\begin{split}
+\hP_0^{-1/2}(\nconf)\hbv^\alpha(\nconf)
+&= \sum_{\nconf'} W_{\nconf\nconf'}\hP_0^{-1/2}(\nconf')\hgv^\alpha(\nconf')\\
+\hbv^\alpha(\nconf)
+&= \sum_{\nconf'} \hP_0^{1/2}(\nconf)W_{\nconf\nconf'}\hP_0^{-1/2}(\nconf')\hgv^\alpha(\nconf')\\
+&= \sum_{\nconf'} \hw_{\nconf\nconf'}\hgv^\alpha(\nconf').
+\end{split}
+\ee
+Let the pseudo-inverse of $\hw$ be $\hg$, the Green function. Then,
+\be
+\hgv^\alpha(\nconf) = \sum_{\nconf'} \hg_{\nconf\nconf'}\hbv^\alpha(\nconf')
+\ee
+and
+\be
+\begin{split}
+\sum_{\nconf} \hP_0(\nconf)\bxv^\alpha(\nconf)\ox\etav^\beta(\nconf)
+&= 
+\sum_{\nconf} \hP_0(\nconf)\hP_0^{-1/2}(\nconf)
+\hbv^\alpha(\nconf)\ox\hP_0^{-1/2}(\nconf)\hgv^\beta(\nconf)\\
+&= 
+\sum_{\nconf,\nconf'} \hbv^\alpha(\nconf)\ox\hg_{\nconf\nconf'}\hbv^\beta(\nconf').
+\end{split}
+\ee
+This shows that $\Onsagert{AB}=\Onsagert{BA}$ as $\hg_{\nconf\nconf'}=\hg_{\nconf'\nconf}$. It also means that we only need to find $\hg_{\nconf\nconf'}$ for those configurations where $\hbv^\alpha(\nconf)\ne0$. Thus, our transport coefficients are
+\be
+\Onsager{\alpha\beta} = 
+\frac1{\kB T V_0}\sum_{\nconf,\nconf'}
+\frac12\hP_0^{1/2}(\nconf)\hw_{\nconf\nconf'}\hP_0^{1/2}(\nconf')
+\dxv^\alpha(\nconf\to\nconf')\ox\dxv^\beta(\nconf\to\nconf')
++\hbv^\alpha(\nconf)\ox\hg_{\nconf\nconf'}\hbv^\beta(\nconf').
+\label{eqn:Onsager-symmetric}
+\ee
+
+\PARA{Dilute-vacancy/dilute-solute limit.}
+For the dilute-vacancy/dilute-solute limit, our state $\nconf$ simplifies to the position of the solute and the vacancy. We will take advantage of translational invariance; moreover, we will specify the position of the vacancy relative to the solute: $\xsv$ will be the position of the solute in the lattice, and $\xvv+\xsv$ the position of the vacancy. We assume that the vacancy and solute have a finite interaction range, so that for large enough $\xvv$, the site probability $\hP^0(\xsv\xvv)\propto\exp(-\Esv(\xvv)/\kB T)$ is independent of $\xvv$. We breakdown our transition rate matrix into three pieces. First, we consider the translation of the vacancy. We will work with a Bravais lattice, where every site has the same set of vacancy jump vectors $\yv_\kappa$ and jump rates $\omega^0_\kappa$ \text{in the absence of a solute}; then,
+\be
+\hW^0_{\xsv\xvv,\xspv\xvpv} := \delta(\xsv-\xspv)\sum_\kappa \omega^0_\kappa
+\left[\delta(\xvv-\xvpv-\yv_\kappa) - \delta(\xvv-\xvpv)\right],
+\ee
+where $\delta$ is the Kronecker delta function, and the second term gives the correct value for $\hW_{\nconf\nconf}$. As the site probability is independent of $\xvv$ for large $\xvv$, $\hw^0 = \hW^0$. Note that the rates must obey the point-group symmetry of the lattice; that is, if $\yv_{\kappa_1}$ and $\yv_{\kappa_2}$ are related by a symmetry operation, then $\omega_{\kappa_1}=\omega_{\kappa_2}$. As all Bravais lattices contain inversion symmetry, this also means that $-\yv_\kappa$ has the same jump rates as $\yv_\kappa$. The second contribution is the change in jump rates near the vacancy---including exclusion of transitions to $\xvv=\xsv$---when converted to $\hw$ it also includes the changes in site probabilities. We define
+\be
+\hw^1_{\xsv\xvv,\xspv\xvpv} := \delta(\xsv-\xspv)
+\left[\hP_0^{1/2}(\xsv\xvv)\hW_{\xsv\xvv,\xsv\xvpv}\hP_0^{-1/2}(\xsv\xvpv) 
+- \hw^0_{\xsv\xvv,\xsv\xvpv}\right],
+\ee
+which will be zero as $\xvv$ gets far away from the solute. The final contribution is the solute-vacancy exchange term, which is
+\be
+\hw^2_{\xsv\xvv,\xspv\xvpv} := \sum_\kappa \omega^2_\kappa\left[
+\delta(\xvv-\xsv-\yv_\kappa)\delta(\xspv-\xvpv-\yv_\kappa)
+-\delta(\xvv-\xvpv)\delta(\xsv-\xspv)\right]
+\ee
+which is also zero when $\xvv$ is not near the solute. The exchange rates, $\omega^2_\kappa$, are typically different than $\omega^0_\kappa$; it is not required that the hop vectors $\yv_\kappa$ for the vacancy/solute exchange be the same as the vacancy jumps, but they do will need to connect lattice sites. We have included the onsite ($\nconf\nconf$) contribution to exchange in $\hw^2$, but it can appear in $\hw^1$ as well, so long as it is not double-counted. Hence, we have $\hw = \hw^0 + \hw^1 + \hw^2$. Note also that this breakdown partly follows the labeling of the five-frequency model, though both ``3'' (dissociation) and ``4'' (association) jumps are subsumed as part of $\hw^1$, and produce non-zero bias vectors for sites at the edge of association for a solute-vacancy complex.
+
+\PARA{Green function solution.}
+The separation of jumps allows for the solution of the Green function first for $\hw^0$, which will be $\hg^0$, followed by the corrections due to $\hw^1+\hw^2$. This is particularly useful as both $\hw^1$ and $\hw^2$ are strictly zero beyond a finite range; hence, the full Green function can be found exactly using
+\be
+\hg = ((\hg^0)^{-1} + \hw^1 + \hw^2)^{-1} = (\mathbf{1} + \hg^0(\hw^1+\hw^2))^{-1}\hg^0,
+\label{eqn:GFcorrection}
+\ee
+which can be done for any subspace of states where $\hw^1+\hw^2=0$ for all states \textit{not} in the subspace. We briefly outline the approach that takes advantage of translational invariance: First, we solve for $\hg^0$ by transforming $\hw^0$ to reciprocal space, inverting, separating into a pole, a discontinuity, and a smooth periodic function, which are inverted analytically for the first two terms, and numerically for the last. Next, we consider the subspace of sites with non-zero bias vectors, and express our bias and correction vectors in a fully symmetrized representation, called vector-stars (related to stars); the Green function, and the changes in rates $\hw^1$ and $\hw^2$ can be written as matrices in this representation. We also note that, due to translational invariance in the bias vector, we only need to consider $\hw^2$ in reciprocal space at $\qv=0$. Finally, we can write \Eqn{GFcorrection} as a finite-dimensional matrix inversion problem, which can be solved numerically and used in \Eqn{Onsager-symmetric} to construct the transport coefficients. The use of a symmetrized representation---stars, and introducing vector-stars and double-stars---also dictates the minimum information required for the computation of site probabilities (energies) and rates (energy barriers), providing for an automated computation of transport coefficients that is also maximally efficient.
+
+\PARA{Vacancy Green function.} We solve for the Green function $\hg^0$, the pseudoinverse of $\hw^0$. We note first that $\hw^0$ is diagonal and invariant in $\xsv,\xspv$, so we will simplify by writing everything in terms of $\xvv,\xvpv$ only. Next, $\hw^0$ only depends on the difference $\xvv-\xvpv$, so it will be diagonal in reciprocal space. We take advantage of this with linear basis change $\phi_{\qv,\xv}=\exp(i \qv\cdot\xvv)/\sqrt{N}$ for the $N$ sites, so that
+\be
+\begin{split}
+\hw^0(\qv,\qv') &= \frac{1}{N}\sum_{\xvv,\xvpv} e^{i\qv\cdot\xvv}\hw^0_{\xvv,\xvpv} e^{-i\qv'\cdot\xvpv}\\
+&=\delta(\qv-\qv')\sum_\kappa \omega^0_\kappa\left(e^{i\qv\cdot\yv_\kappa}-1\right)
+\end{split}
+\ee
+is the Fourier transform of $\hw^0$; as it is only nonzero for $\qv=\qv'$, we will use the shorthand $\hw^0(\qv)$. Then, our inverse Fourier transform is given by
+\be
+\begin{split}
+\hw^0_{\xvv,\xvpv} &= \frac{1}{N}\sum_{\qv,\qv'} e^{-i\qv\cdot\xvv}\hw^0(\qv,\qv')e^{i\qv'\cdot\xvpv}\\
+&=V\int_\text{BZ}\frac{d^3q}{(2\pi)^3} e^{-i\qv\cdot(\xvv-\xvpv)} \hw^0(\qv),
+\end{split}
+\ee
+where $V=V_0/N$ is the volume per site in the lattice. We take advantage of similar definitions for the Fourier transform of $\hg^0_{\xvv,\xvpv}$ to get $\hg^0(\qv)$, and find that for all $\qv\ne0$ inside the Brillouin zone, $\hg^0(\qv) = (\hw^0(\qv))^{-1}$. Thus,
+\be
+\hg^0_{\xvv,\xvpv} = V\int_\text{BZ}\frac{d^3q}{(2\pi)^3} e^{-i\qv\cdot(\xvv-\xvpv)} (\hw^0(\qv))^{-1},
+\label{eqn:Green-function-integral}
+\ee
+and we need only to evaluate the integral in \Eqn{Green-function-integral} to find the Green function.
+
+To integrate \Eqn{Green-function-integral}, we note that it contains a second-order pole at the origin that needs to be treated analytically. If we expand out $\hw^0(\qv)$ for small $\qv$, we find
+\be
+\hw^0(\qv) = -\qv\cdot\left[\frac12\sum_\kappa \omega^0_\kappa \yv_\kappa\ox\yv_\kappa\right]\cdot\qv + O(q^4),
+\ee
+which can be written as $-\qv\cdot \Dvv\cdot\qv + O(q^4)$ with the dilute-limit vacancy diffusivity,
+\be
+\Dvv = \frac{\kB T}{\cv} \Lvv = \frac12\sum_\kappa \omega^0_\kappa \yv_\kappa\ox\yv_\kappa
+\label{eqn:vacancy-diffusivity}
+\ee
+(c.f., \Eqn{Onsager-symmetric}). Note that the second-rank tensor $\Dvv$ is symmetric and positive-definite; therefore, it has three real, positive eigenvalues $\di_i$ with corresponding orthonormal eigenvectors $\ei_i$. Note that if $\Dvv$ is isotropic (e.g., a cubic system), $\di_1=\di_2=\di_3$. We define the following coordinate transforms to ``scaled'' reciprocal and real space coordinates,
+\be
+p_i := \di_i^{1/2}(\ei_i\cdot\qv),
+\quad
+u_i := \di_i^{-1/2}(\ei_i\cdot\xv)
+\ee
+and then
+\be
+\qv = \sum_i \di_i^{-1/2} p_i\ei_i,
+\quad
+\xv = \sum_i \di_i^{1/2} u_i\ei_i
+\ee
+so that $-\qv\cdot\Dvv\cdot\qv = -|\pv|^2$ and $\exp(-i\qv\cdot\xv)=\exp(-i\pv\cdot\uv)$. With this coordinate transform, we can also write out the next term in our Taylor expansion of $\hw^0(\qv)$ as
+\be
+\hw^0(\qv) = -p^2 + 
+\sum_{ijkl} \DD_{ijkl} p_i p_j p_k p_l + O(q^6)
+\label{eqn:fourth-order-definition}
+\ee
+where
+\be
+\DD_{ijkl} := \frac{1}{24\sqrt{d_i d_j d_k d_l}}
+\sum_\kappa \omega^0_\kappa (\yv_\kappa\cdot\ei_i)(\yv_\kappa\cdot\ei_j)(\yv_\kappa\cdot\ei_k)(\yv_\kappa\cdot\ei_l).
+\ee
+To facilitate the inverse Fourier transform, we can rewrite the fourth-order expansion in terms of 15 coefficients of powers of $p_1$, $p_2$, and $p_3$ as
+\be
+\sum_{ijkl} \DD_{ijkl}  p_i p_j p_k p_l = 
+\sum_{n_1+n_2+n_3 = 4} \DD_{[n_1n_2n_3]} p_1^{n_1} p_2^{n_2} p_3^{n_3}
+\ee
+Finally, we can write the Green function as the sum of three terms,
+\be
+\hg^0(\qv) = -\frac{\exp(-p^2/\pmax^2)}{p^2} - 
+\exp(-p^2/\pmax^2) \sum_{n_1+n_2+n_3 = 4} \DD_{[n_1n_2n_3]}\frac{p_1^{n_1} p_2^{n_2} p_3^{n_3}}{p^4}
++ \hgsc(\qv)
+\ee
+for a threshold value $\pmax$ (described below) and where the (smooth) semicontinuum piece $\hgsc(\qv)$ is the difference between the first two terms and $(\hw^0(\qv))^{-1}$. The first term is a second-order pole in $\qv$, while the second term is a discontinuity at $\qv=0$; it has different values in the limit as $\qv\to0$ depending on the direction for approaching the origin. Note also that as $q\to 0$, $\hgsc(\qv=0)=-1/\pmax^2$. These two terms needs to be inverse Fourier transformed analytically, while the last term can be evaluated numerically on a finite grid\cite{TrinkleLGF2008,Ghazisaeidi2010}. We will evaluate the analytic inverse Fourier transforms by expanding the integral in \Eqn{Green-function-integral} to all space; this requires that $\exp(-p^2/\pmax^2)$ be sufficiently small at the Brillouin zone edge; hence, the value of $\pmax$ is chosen so that
+\be
+\pmax\le\left(\frac{\inf\{\qv\cdot\Dvv\cdot\qv: \qv\in\text{BZ boundary}\}}{-\ln\eps_\text{threshold}}\right)^{1/2}
+\ee
+for a threshold $\eps_\text{threshold}$; then $\exp(-p^2/\pmax^2)\le\eps_\text{threshold}$ everywhere on the boundary of the Brillouin zone. Note that smaller values of $\pmax$ require more grid points for the inverse Fourier transform of $\hgsc$.
+
+\PARA{Inverse transform of pole.} First,
+\be
+V\int_\text{BZ}\frac{d^3q}{(2\pi)^3} e^{-i\qv\cdot(\xvv-\xvpv)} 
+\frac{\exp(-p^2/\pmax^2)}{p^2} = 
+\frac{V}{(\di_1 \di_2 \di_3)^{1/2}}\int \frac{d^3p}{(2\pi)^3} \frac{e^{-i\pv\cdot\uv}\exp(-p^2/\pmax^2)}{p^2}.
+\label{eqn:G2-FT}
+\ee
+The function to inverse Fourier transform is spherically symmetric, and so is the solution in $\uv$,
+\be
+\frac{V}{4\pi(\di_1 \di_2 \di_3)^{1/2} u}\erf\left(\frac{u\pmax}{2}\right)
+=
+\frac{V}{4\pi}\frac{\erf\left(\frac12\left(\xv\cdot(\Dvv)^{-1}\cdot\xv)\right)^{1/2}\pmax
+\right)}{\left(\det\Dvv(\xv\cdot(\Dvv)^{-1}\cdot\xv)\right)^{-1/2}}
+\ee
+by noting that
+\be
+u = \left(\sum_i \di_i^{-1} x_i^2\right)^{1/2} =
+\left(\xv\cdot(\Dvv)^{-1}\cdot\xv\right)^{1/2}
+\ee
+and that $\di_1 \di_2 \di_3 = \det\Dvv$. The inverse Fourier transform value at $\xv = 0$ is
+\be
+\frac{V\pmax}{4\pi^{3/2}(\di_1 \di_2 \di_3)^{1/2}}
+\ee
+
+%% Page 52
+
+\PARA{Inverse transform of discontinuity.}
+Inverse Fourier transforming the discontinuity is a bit more complicated as there are fifteen contributions to be considered. However, symmetry helps reduce the complexity enormously. First, the fifteen powers can be reduced to four distinct types, and the process of inverse Fourier transforming mixes classes in a limited way. The four classes are: $\VS{004}=\{[004],[040],[400]\}$, $\VS{220}=\{[220],[202],[022]\}$, $\VS{013}=\{[013],[031],[310],[130],[103],[301]\}$, and $\VS{211}=\{[211],[121],[112]\}$. The fifteen unique powers serve as a basis that can be transformed into a spherical harmonic expansion using the one $\ell=0$, five $\ell=2$, and nine $\ell=4$ $Y_\ell^m(\hat\pv)$ functions; the inverse Fourier transform of $Y_\ell^m(\hat\pv)$ is
+\be
+\IFT\{\exp(-p^2/\pmax^2)Y_\ell^m(\hat\pv)\} = \frac{V}{4\pi(\di_1 \di_2 \di_3)^{1/3} u^3}
+f_\ell(u\pmax)Y_\ell^m(\hat\uv)
+\ee
+with $f_\ell(z)$ to be shown below for $\ell=0, 2, 4$. We define the $15\x15$ matrix
+\be
+E^{\ell m}_{[n_1n_2n_3]} := \int_0^\pi \int_0^{2\pi}
+(-1)^m Y_\ell^{-m}(\theta,\phi)
+(\sin\theta\cos\phi)^{n_1}(\sin\theta\sin\phi)^{n_2}(\cos\theta)^{n_3}
+\;d\phi\sin\theta\; d\theta
+\ee
+which is the expansion of $[n_1n_2n_3]$ in spherical harmonics. We use this to construct three $15\x15$ matrices for $\ell=0, 2, 4$,
+\be
+F^\ell_{[n'_1n'_2n'_3],[n_1n_2n_3]} :=
+\sum_{m=-\ell}^{\ell} (E^{-1})^{\ell m}_{[n'_1n'_2n'_3]}E^{\ell m}_{n_1n_2n_3}
+\ee
+so that the inverse Fourier transform of our discontinuity is
+\be
+\frac{V}{4\pi(\di_1 \di_2 \di_3)^{1/3} u^3}
+\sum_{\ell=0, 2, 4} f_\ell(u\pmax)
+\sum_{n'_1+n'_2+n'_3=4}\frac{u_1^{n'_1}u_2^{n'_2}u_3^{n'_3}}{u^4}\sum_{n_1+n_2+n_3=4}
+F^\ell_{[n'_1n'_2n'_3],[n_1n_2n_3]}\DD_{[n_1n_2n_3]}
+\label{eqn:G4-FT}
+\ee
+
+The remaining pieces in \Eqn{G4-FT} are $F^\ell$ and $f_\ell$. First, $F^\ell$ is highly symmetric. The non-zero terms for $F^0$ are (remaining found via permutation of indices),
+\be
+\begin{split}
+F^0_{[004],[004]} = 1/5 \quad&\quad F^0_{[004],[220]} = 2/5\\
+F^0_{[040],[004]} = 1/5 \quad&\quad F^0_{[040],[220]} = 2/5\\
+F^0_{[400],[004]} = 1/5 \quad&\quad F^0_{[400],[220]} = 2/5\\
+F^0_{[220],[004]} = 1/15 \quad&\quad F^0_{[220],[220]} = 2/15\\
+F^0_{[202],[004]} = 1/15 \quad&\quad F^0_{[202],[220]} = 2/15\\
+F^0_{[022],[004]} = 1/15 \quad&\quad F^0_{[022],[220]} = 2/15\\
+\end{split}
+\ee
+then the $\VS{004}$ and $\VS{220}$ terms for $F^2$ and $F^4$ are
+\be
+\begin{split}
+F^2_{[004],[004]} = 4/7 \quad&\quad F^2_{[004],[220]} = -4/7\\
+F^2_{[040],[004]} = -2/7 \quad&\quad F^2_{[040],[220]} = 2/7\\
+F^2_{[400],[004]} = -2/7 \quad&\quad F^2_{[400],[220]} = 2/7\\
+F^2_{[220],[004]} = -2/21 \quad&\quad F^2_{[220],[220]} = 2/21\\
+F^2_{[202],[004]} = 1/21 \quad&\quad F^2_{[202],[220]} = -1/21\\
+F^2_{[022],[004]} = 1/21 \quad&\quad F^2_{[022],[220]} = -1/21\\
+\end{split}
+\ee
+and
+\be
+\begin{split}
+F^4_{[004],[004]} = 8/35 \quad&\quad F^4_{[004],[220]} = 6/35\\
+F^4_{[040],[004]} = 3/35 \quad&\quad F^4_{[040],[220]} = -24/35\\
+F^4_{[400],[004]} = 3/35 \quad&\quad F^4_{[400],[220]} = -24/35\\
+F^4_{[220],[004]} = 1/35 \quad&\quad F^4_{[220],[220]} = 27/35\\
+F^4_{[202],[004]} = -4/35 \quad&\quad F^4_{[202],[220]} = -3/35\\
+F^4_{[022],[004]} = -4/35 \quad&\quad F^4_{[022],[220]} = -3/35\\
+\end{split}
+\ee
+while the final non-zero terms in $F^2$ and $F^4$ are
+\be
+\begin{split}
+F^2_{[013],[013]} = 3/7 \quad&\quad F^2_{[013],[211]} = 3/7\\
+F^2_{[031],[013]} = 3/7 \quad&\quad F^2_{[031],[211]} = 3/7\\
+F^2_{[211],[013]} = 1/7 \quad&\quad F^2_{[211],[211]} = 1/7\\
+F^4_{[013],[013]} = 4/7 \quad&\quad F^4_{[013],[211]} = -3/7\\
+F^4_{[031],[013]} = -3/7 \quad&\quad F^4_{[031],[211]} = -3/7\\
+F^4_{[211],[013]} = -1/7 \quad&\quad F^4_{[211],[211]} = 6/7\\
+\end{split}
+\ee
+with the remaining terms determined by permutation of indices. The three Fourier transform functions are, in terms of the hypergeometric function,
+\be
+f_\ell(z) = \frac{z^{3+\ell}}{2^\ell \pi}\;_1F_1\left(\frac32+\frac\ell2, \frac32 + \ell, -\left(\frac{z}{2}\right)^2\right)
+\ee
+or, explicitly,
+\be
+\begin{split}
+f_0(z) &= \frac{1}{2\sqrt\pi} z^3\exp\left(-\left(\frac{z}{2}\right)^2\right)\\
+f_2(z) &= -\frac{15}{2}\erf\left(\frac12 z\right)
++\left(\frac{15}{2\sqrt\pi} z + \frac{5}{4\sqrt\pi} z^3\right)
+\exp\left(-\left(\frac{z}{2}\right)^2\right)\\
+f_4(z) &= \frac{63\cdot15}{8}\left(1-\frac{14}{z^2}\right)
+\erf\left(\frac12 z\right)
++\left(\frac{63\cdot15\cdot14}{8\sqrt\pi} z^{-1} + \frac{63\cdot5}{2\sqrt\pi} z + \frac{63}{8\sqrt\pi} z^3\right)
+\exp\left(-\left(\frac{z}{2}\right)^2\right).\\
+\end{split}
+\ee
+Each of these functions goes to 0 (as $z^{3+\ell}$). The inverse Fourier transform value at $\xv = 0$ is
+\be
+\frac{V\pmax^3\left(3\DD_{[400]} + 3\DD_{[040]} + 3\DD_{[004]} + \DD_{[022]} + \DD_{[202]} + \DD_{[220]}\right)}{15\cdot8\pi^{3/2}(\di_1 \di_2 \di_3)^{1/2}}
+\ee
+
+\PARA{Inverse transform of semicontinuum piece.} The final contribution to the inverse Fourier transform of $\hg^0$ is $\hgsc$, which is complicated enough to require numerical integration on a regularly spaced grid in the Brillouin zone. This function is smooth (after subtracting off the pole and discontinuity) and periodic, so it converges quickly with the number of grid points.\cite{Ghazisaeidi2010} We use a regular, gamma-centered $N_1\x N_2\x N_3$ mesh (each $N_i$ is even) in terms of the reciprocal lattice vectors $\bv_1, \bv_2, \bv_3$ as
+\be
+\qv = \frac{m_1}{N_1}\bv_1 +  \frac{m_2}{N_2}\bv_2 +  \frac{m_3}{N_3}\bv_3.
+\ee
+We initially generate the mesh of $\qv$ using $m_i = -(N_i/2)+1\ldots(N_i/2)$, but then we translate $\qv$ so that they remain entirely within the Brillouin zone. Our Brillouin zone is defined by a set of reciprocal lattice vectors $\GBZ:=\{\Gv\}$ where $\qv$ is in the Brillouin zone if and only if $\qv\cdot\Gv \le \Gv^2/2$ for all $\Gv\in\GBZ$. So, once we generate our initial set of $\qv$, we check that each lies inside the Brillouin zone; if we find a $\Gv\in\GBZ$ such that $\qv\cdot\Gv > \Gv^2/2$, we replace it with $\qv-\Gv$. At this stage, all of our $\qv$ are equally weighted, and so we approximate our integral $V\int_\text{BZ} d^3q/(2\pi)^3$ as the average value over our $\qv$. Next, we take advantage of point group symmetry to reduce the number of unique $\qv$ we need to consider, and replace our average with a weighted average. We can group our $\qv$ points in \textit{stars}; that is, a set of points that are all related to one another by point group operations $\R$; since groups are closed, we can select a single representative from each, and compute $\hgsc$ at that $\qv$; the weight in the average will be the number of $q$-points in that star. To perform the inverse Fourier transform, the value of $e^{i\qv\cdot\xv}$ for a star is instead given by
+\be
+\frac1{\Ng}\sum_R e^{i\qv\cdot(\R\xv)}
+\ee
+where there are $\Ng$ point group operations $\R$. Note that we can apply $\R$ either to $\xv$ or $\qv$. With the three pieces of the Green function, we can compute the vacancy Green function $\hg^0$ for any vector $\xvv-\xvpv$. Note that the use of a regular grid to inverse Fourier transform requires that we include sufficient density to avoid aliasing errors; that is, the smallest non-zero value of $\qv\cdot\xv$ should be smaller than $\pi$. As the number of $q$-points increases, the error scales with $N_1^{-4} + N_2^{-4} + N_3^{-4}$.
+
+\PARA{Translational invariance of the Green function solution.} Finally, with our expression for $\hg^0$, we can construct the full Green function using \Eqn{GFcorrection}. As written, we need to consider all states $\xsv\xvv$ that have a non-zero bias vector; there are an (essentially) infinite set of $\xsv$ to consider; however, due to translational invariance, these will all be equal to one another. We can take advantage of this, as we are not interested in $\hg$ itself, but rather $\sum_{\nconf,\nconf'}\bv^\alpha(\nconf)\hg_{\nconf\nconf'}\bv^\beta(\nconf')$. We note that $\bv^\alpha(\xsv\xvv)$ is independent of $\xsv$, so
+\be
+\sum_{\xsv,\xspv}\sum_{\xvv,\xvpv}\bv^\alpha(\xsv\xvv)\ox\hg_{\xsv\xvv,\xspv\xvpv}\bv^\beta(\xspv\xvpv) = \sum_{\xvv,\xvpv}\bv^\alpha(0\xvv)\ox\left(N\sum_{\xsv}\hg_{\xsv\xvv,0\xvpv}\right)\bv^\beta(0\xvpv).
+\ee
+The most straightforward way to evaluate the quantity in parenthesis is to note that, as $\hg_{\xsv\xvv,\xspv\xvpv}$ depends only on $\xsv-\xspv$, this is equal to the $\qv=0$ term of its Fourier transform (which is diagonal). Then, if we return to \Eqn{GFcorrection}, we note that both $\hg$ and $\hg^{-1}$ have the same translational symmetry with respect to $\xsv-\xspv$, so that
+\be
+\sum_{\xsv}\hg_{\xsv\xvv,0\xvpv} = \left((\hg^0_{\xvv\xvpv})^{-1}+\hw^1_{\xvv\xvpv} + \sum_{\xsv}\hw^2_{\xsv\xvv,0\xspv}\right)^{-1}.
+\ee
+That is, we can replace $\hw^2$ in \Eqn{GFcorrection} with the sum over all solute positions, and work entirely with the positions of the vacancy $\xvv,\xvpv$.
+
+% page 56
+
+\PARA{Symmetry and lattice functions.} A brief aside regarding symmetry operations.\cite{Glazer2013} We use the Seitz notation for a symmetry operation $\Rtv$, where for a point $\xv$, $\Rtv\xv:=R\xv + \tv$. Then, the inverse $\Rtvinv = \Rtvinvexplicit$. The full set of operations make up the \textit{space group}; for our purposes here, we will be interested in \textit{point group} operations; these are the operations that leave a single point unchanged. Without loss of generality in what follows, we will restrict ourselves to the point group leaving $\mathbf{0}$ unchanged; when there won't be any confusion, we will simply refer to $\{\R,\mathbf{0}\}$ with $\R$. We will consider \textit{scalar lattice functions}, \textit{vector lattice functions}, and linear operations on the same. A trivial extension to \textit{tensor lattice functions} is possible.
+
+A lattice function $f_\xv$ is a function that has a scalar value lattice points $\xv$. Then, the application of $\Rtv$ to $f_\xv$ produces a new lattice function $g = \Rtv f$ such that $f_\xv = g_{\Rtv\xv}$ for all $\xv$; or, $g_\xv = f_{\Rtvinv\xv}$. This definition is such that, for example, the lattice function $\delta(\xv-\xv_0)$ gives $\Rtv\delta(\xv-\xv_0) = \delta(\xv-\Rtv\xv_0)$, as one would expect. A vector lattice function $\fv_\xv$ is a function that has a vector value for lattice points $\xv$. Then, the application of $\Rtv$ to $\fv_\xv$ produces a new vector lattice function $\gv = \Rtv\fv$ such that $\fv_\xv = R(\gv_{\Rtv\xv})$ for all $\xv$; or, $\gv_\xv = R^{-1}(\fv_{\Rtvinv\xv})$. Extending this a tensor lattice function is straightforward. Note that, written this way, each $\Rtv$ now also acts as a linear operator on our (vector) space of scalar and vector lattice functions. We can go further to define a scalar (inner) product between two scalar lattice functions $f_\xv$ and $g_\xv$ as
+\be
+f \cdot g := \sum_{\xv} f_\xv g_\xv,
+\ee
+or the sum of the product of the function values; and for two vector lattice function $\fv_\xv$ and $\gv_\xv$ as
+\be
+\fv \cdot \gv := \sum_{\xv} \fv_\xv\cdot \gv_\xv,
+\ee
+or the sum of the dot-product of the vector function values. This admits the notion of an orthonormal basis for our scalar and lattice vector functions. One example of such basis functions are $\delta(\xv-\xv_0)$ for all $\xv_0$ as lattice sites; we will shorthand these lattice functions as $\delta^{\xv_0}$. For vector lattice functions, the basis would be $\VECIT{e}\delta(\xv-\xv_0)$ for different orthonormal 3-vectors $\VECIT{e}$.
+
+Next, we consider a (real) symmetric linear operator $A$ on our lattice functions. We can represent $A$ with a matrix $A_{\xv,\xv'}$ where
+\be
+A_{\xv,\xv'} := \delta^\xv \cdot(A\delta^{\xv'}).
+\ee
+If $A$ is a symmetric operator, then $f\cdot(Ag)=g\cdot(Af)$ for any two lattice functions $f_\xv$ and $g_\xv$. Since $A$ is a real, symmetric linear operator, it has real eigenvalues and eigenvectors that fully span the vector space. Our symmetry operators $\Rtv$ are unitary operators, and so have complex eigenvalues and eigenvectors that fully span the vector space; the eigenvalues are all roots of unity (i.e., they have magnitude of 1). If we have an operator $A$ that \textit{also} commutes with a symmetry operator $\Rtv$---that is, $A\Rtv = \Rtv A$---then eigenvectors of $A$ are also eigenvectors of $\Rtv$. In particular, if we take all of the eigenvectors of $\Rtv$ that all have the same eigenvalue, then $A$ will remain closed on that set; thus, we can construct block-diagonal matrix versions of $A$.
+
+If we restrict ourselves to the point group operations that leave $\mathbf{0}$ unchanged, we can define \textit{stars} and \textit{vector stars} in terms of scalar and vector lattice functions. We can construct eigenvectors of the full set of point group operations $\R$ on scalar lattice functions in terms of \textit{stars}; a star $s$ is a set of lattice points where for any two $\xv,\xv'\in s$, there exists a point group operation $\R$ such that $\R\xv=\xv'$, and for $\xv\in s$, $\R\xv\in s$ for all point group operations $\R$. Then we can define an normalized lattice function corresponding to that star, call it $s_\xv$, where
+\be
+s_\xv := \frac1{N_s}\sum_{\xv'\in s} \delta(\xv-\xv')
+\ee
+where $N_s$ is the cardinality of the star $s$. Next, we can construct eigenvectors of the full set of point group operations $\R$ on vector lattice functions in term of \textit{vector stars}; a vector star $vs$ is a set of vector tuples, $(\xv,\vv)$ where $\xv$ is a lattice vector, and $(R\xv,R\vv)$ is included for all point group operations $\R$, and that for all $(\xv,\vv), (\xv',\vv')\in vs$ there exists a point group operation $\R$ such that $(\R\xv,\R\vv)=(\xv',\vv')$. Note that all of the $\vv$ vectors have the same magnitude. We can define a normalized vector lattice function corresponding to that vector star, call is $\VECIT{vs}_\xv$, where
+\be
+\VECIT{vs}_\xv := \frac1{N_s |\vv|}\sum_{(\xv',\vv)\in vs} \vv\delta(\xv-\xv')
+\ee
+Each unique star $s$ has at least one, and as many as three, unique vector stars associated with it. We construct the vector stars to be orthonormal: if $vs$ and $vs'$ are based on the same star $s$, then for $(\xv,\vv)\in vs$ and $(\xv,\vv')\in vs'$, $\vv\cdot\vv'=0$ if $vs\ne vs'$; otherwise $\vv\cdot\vv' = 1/N_s$ where $N_s$ is the cardinality of the star $s$, so that the corresponding vector lattice functions are orthonormal. For each star $s$, there is the \textit{parallel vector star} where for each $(\xv,\vv)\in vs$, $\vv\propto\xv$, as this trivially satisfies the definition of a vector star. However, there may be one or two possible \textit{perpendicular vectors stars}; these are such that for each $(\xv,\vv)\in vs$, $\vv\cdot\xv = 0$. To be vector stars, we require that for each $\R$ such that $\R\xv = \xv$, the corresponding $\vv$ obeys $\R\vv = \vv$; there may be one or two unique solutions in addition to $\vv\propto\xv$. As an example, in a simple cubic system, the star $s =\VS{100}$ only has the parallel vector star, while the star $s = \VS{210}$ has both the parallel vector star and one perpendicular vector star with entries such as $([210],[\bar120])$, and the state $s = \VS{321}$ has the parallel vector star and two perpendicular vector stars. 
+
+Finally, we note that the symmetric linear operators we will consider below---transition rate matrices and Green functions---not only commute with our point group operations, but are unchanged: $\R A = A\R = A$. This means that we can construct linear expansions of $A$ in terms of operators that themselves are unchanged by $\R$. A double star $ds$ is a set of sets of two lattice vectors $\{\xv_0,\xv_1\}$ such that for any two sets $\{\xv_0,\xv_1\}$ and $\{\xv'_0, \xv'_1\}$ in $ds$, there exists a point group operation $\R$ such that either $\{\R\xv_0, \R\xv_1\}=\{\xv'_0,\xv'_1\}$; and for any $\{\xv_0,\xv_1\}\in ds$, $\{\R\xv_0,\R\xv_1\}\in ds$ for all point group operations $R$. Then, one can construct a linear operator corresponding to a double star, with matrix elements given by $ds_{\yv,\yv'}$
+\be
+ds_{\yv,\yv'} := \sum_{\{\xv,\xv'\}\in ds} \left(\delta(\yv-\xv)\delta(\yv'-\xv') + \delta(\yv-\xv')\delta(\yv'-\xv)\right),
+\ee
+and linear combinations of these $ds$ matrices can be used as a minimal representation of our symmetric functions. Note that onsite ($\xv=\xv'$) terms may need to be added to express $\hw$ elements.
+
+\PARA{Symmetry of the Green function solution.} If we consider the vacancy sites around a solute, there are point group operations $\R$ that commute with the Hamiltonian, transition matrices, and anything derived from those quantities. For example, $\hw_{R\xsv\;R\xvv,R\xspv\;R\xvpv} = \hw_{\xsv\xvv,\xspv\xvpv}$. As shown above, we can eliminate $\xsv$ and $\xspv$ from consideration in the Green function, and so the point group operations that are most of interest are those where $\xsv$ is left unchanged; without loss of generality, we can assume $\xsv=0$ in what follows. First, we recall a \textit{star} is a set of vectors $s$ that are all related by symmetry operations; in this case, we will take the stars to be vacancy sites $\xvv$, such that for any two $\xvv,\xvpv\in s$, there exists a point group operation $\R$ such that $\R\xvv = \xvpv$. A set of unique stars then dictates (a) the unique jump vectors for a vacancy, $\omega^0_\kappa$ as well as exchange $\omega^2_\kappa$, and (b) the unique solute-vacancy binding energies (and probabilities) that must be determined. Next, each site will have bias vectors associated with them; we only need to consider the sites with non-zero bias vectors, but as the bias vectors are determined by transition rates and site probabilities, they too must obey symmetry. That is, if $\xvv$ and $\xvpv$ both belong to the same star $s$, then $\R\xvv = \xvpv$ also means that $\R\bv^\alpha(\xvv) = \bv^\alpha(\xvpv)$. Hence, we use the idea \textit{vector stars} $vs$ that are fully symmetrized sets of vector tuples, $(\xv,\vv)$ where $(R\xv,R\vv)$ is included for all point group operations $\R$ \textit{and there is only one $\vv$ for each $\xv$}. Then, our bias vectors at sites can be represented as linear combinations of vector stars. The number of unique vector stars---corresponding to non-zero bias vectors---in part determines the reduced dimensionality of for the Green function. Finally, in addition to the stars that describe transitions $\omega^0$ and $\omega^2$, we have to consider the unique transitions in $\omega^1$; these are described by \textit{double stars}. We consider double star $ds$ where the two lattice vectors $\{\xv_0,\xv_1\}\in ds$ are such that $\xv_0-\xv_1=\yv_\kappa$ for some $\kappa$. Because we treat the solute as a special case, we specifically exclude $\xv=0$ from any of the double stars. The unique double stars dictate the symmetry unique possible vacancy transitions (forward and backward) near a solute.
+
+To summarize: (1) different stars determine the sets of unique vacancy-solute complexes to consider; (2) different stars determine the sets of unique jump vectors for the vacancy and for vacancy solute exchange; (3) different double stars determine the sets of unique vacancy jumps near a solute; and (4) different vector stars represent the possible bias vectors, and the dimensionality of the Green function. The final step is possible because our Green function and all transition matrices commute with the point group operations; since they commute, if one has an eigenvector of all of the point group operations---in this case, corresponding to an eigenvalue of 1---then operating on it with the Green function can only produce other eigenvectors of the point group operations. Hence, the set of vector stars are not mixed by the operation of the Green function, or any of the transition matrices, and so we can use matrix representations of those linear operators on the vector stars.
+
+\PARA{Transport coefficients using vector stars.} Let us index our vector stars by $i$ as $vs_i$; then, we can construct the matrices
+\be
+\begin{split}
+g^0_{ij}&:=\sum_{(\xv,\vv)\in vs_i}\sum_{(\xv',\vv')\in vs_j}(\vv\cdot\vv')\hg^0_{\xv-\xv',0}\\
+\omega^1_{ij}&:=\sum_{(\xv,\vv)\in vs_i}\sum_{(\xv',\vv')\in vs_j}(\vv\cdot\vv')\hw^1_{0\xv,0\xv'}\\
+\omega^2_{ij}&:=\sum_{(\xv,\vv)\in vs_i}\sum_{(\xv',\vv')\in vs_j}(\vv\cdot\vv')\sum_{\xsv}\hw^2_{\xsv\xv,0\xv'}\\
+\end{split}
+\ee
+from which the matrix $g_{ij}$ is constructed as $(\mathbf{1}+g^0(\omega^1+\omega^2))^{-1}g^0$. Note in particular that we need to sum over all sites to ensure that the diagonal terms are correct as well. We define the solute-vacancy complex probabilities $\rho(\xv)=\exp(-\Esv(\xv)/\kB T)$. We also need the bias vectors; we can write the vacancy bias and exchange bias vectors
+\be
+\begin{split}
+b^1_i&:=\sum_{(\xv,\vv)\in vs_i}\sum_{\xv'}
+\vv\cdot(\xv-\xv')\;\left(\hw^1_{0\xv,0\xv'}+\hw^0_{0\xv,0\xv'}\right)\rho^{1/2}(\xv')\\
+b^2_i&:=\sum_{(\xv,\vv)\in vs_i}
+\vv\cdot\xv\;\hw^2_{0\;\xv,\xv\;-\xv}\rho^{1/2}(\xv)\\
+\end{split}
+\ee
+so that $\bv^\text{s}$ is given by $b^2_i$ and $\bv^\text{v}$ is $b^1_i-b^2_i$. The final construction is to produce the contributions to the transport second-rank tensor; we construct the second-rank tensor $\VV_{ij}$ for each $ij$ combination
+\be
+\VV_{ij}:=\sum_{(\xv,\vv)\in vs_i}\sum_{(\xv',\vv')\in vs_j} \vv\ox\vv' \delta(\xv-\xv').
+\ee
+Then, we can build the following contributions
+\be
+\begin{split}
+\underline l^{(0),\text{vv}} &:= \frac{\cv}{\kB T}
+\frac12\sum_\kappa \omega^0_\kappa \yv_\kappa\ox\yv_\kappa\\
+\underline l^{(0),\text{ss}} &:= \frac{\cv\cs}{\kB T}
+\frac12\sum_\kappa \omega^2_\kappa \yv_\kappa\ox\yv_\kappa \rho(\yv_\kappa)\\
+\underline l^{(2),\text{ss}} &:= \frac{\cv\cs}{\kB T}
+\sum_{ijk} b^2_i \VV_{ij} g_{jk} b^2_k\\
+\underline l^{(1),\text{sv}} &:= \frac{\cv\cs}{\kB T}
+\sum_{ijk} b^1_i \VV_{ij} g_{jk} b^2_k\\
+\underline l^{(1),\text{vv}} &:= \frac{\cv\cs}{\kB T}
+\sum_{ijk} b^1_i \VV_{ij} g_{jk} b^1_k\\
+\end{split}
+\ee
+so that
+\be
+\begin{split}
+\Lvv &= \underline l^{(0),\text{vv}} + \underline l^{(1),\text{vv}} - 2\underline l^{(1),\text{sv}} + \underline l^{(2),\text{ss}}\\
+\Lss &= \underline l^{(0),\text{ss}} + \underline l^{(2),\text{ss}}\\
+\Lsv &= -\Lss + \underline l^{(1),\text{sv}}\\
+\end{split}
+\ee
+to first order in $\cv$ and $\cs$.
+
+%merlin.mbs apsrev4-1.bst 2010-07-25 4.21a (PWD, AO, DPC) hacked
+%Control: key (0)
+%Control: author (8) initials jnrlst
+%Control: editor formatted (1) identically to author
+%Control: production of article title (-1) disabled
+%Control: page (0) single
+%Control: year (1) truncated
+%Control: production of eprint (0) enabled
+\begin{thebibliography}{7}%
+\makeatletter
+\providecommand \@ifxundefined [1]{%
+ \@ifx{#1\undefined}
+}%
+\providecommand \@ifnum [1]{%
+ \ifnum #1\expandafter \@firstoftwo
+ \else \expandafter \@secondoftwo
+ \fi
+}%
+\providecommand \@ifx [1]{%
+ \ifx #1\expandafter \@firstoftwo
+ \else \expandafter \@secondoftwo
+ \fi
+}%
+\providecommand \natexlab [1]{#1}%
+\providecommand \enquote  [1]{``#1''}%
+\providecommand \bibnamefont  [1]{#1}%
+\providecommand \bibfnamefont [1]{#1}%
+\providecommand \citenamefont [1]{#1}%
+\providecommand \href@noop [0]{\@secondoftwo}%
+\providecommand \href [0]{\begingroup \@sanitize@url \@href}%
+\providecommand \@href[1]{\@@startlink{#1}\@@href}%
+\providecommand \@@href[1]{\endgroup#1\@@endlink}%
+\providecommand \@sanitize@url [0]{\catcode `\\12\catcode `\$12\catcode
+  `\&12\catcode `\#12\catcode `\^12\catcode `\_12\catcode `\%12\relax}%
+\providecommand \@@startlink[1]{}%
+\providecommand \@@endlink[0]{}%
+\providecommand \url  [0]{\begingroup\@sanitize@url \@url }%
+\providecommand \@url [1]{\endgroup\@href {#1}{\urlprefix }}%
+\providecommand \urlprefix  [0]{URL }%
+\providecommand \Eprint [0]{\href }%
+\providecommand \doibase [0]{http://dx.doi.org/}%
+\providecommand \selectlanguage [0]{\@gobble}%
+\providecommand \bibinfo  [0]{\@secondoftwo}%
+\providecommand \bibfield  [0]{\@secondoftwo}%
+\providecommand \translation [1]{[#1]}%
+\providecommand \BibitemOpen [0]{}%
+\providecommand \bibitemStop [0]{}%
+\providecommand \bibitemNoStop [0]{.\EOS\space}%
+\providecommand \EOS [0]{\spacefactor3000\relax}%
+\providecommand \BibitemShut  [1]{\csname bibitem#1\endcsname}%
+\let\auto@bib@innerbib\@empty
+%</preamble>
+\bibitem [{Note1()}]{Note1}%
+  \BibitemOpen
+  \bibinfo {note} {The construction $\protect \mathbf {a}\otimes \protect
+  \mathbf {b}$ is a second rank tensor such that $(\protect \mathbf {a}\otimes
+  \protect \mathbf {b})\cdot \protect \mathbf {v}= (\protect \mathbf {b}\cdot
+  \protect \mathbf {v})\protect \mathbf {a}$ for any vector $\protect \mathbf
+  {v}$.}\BibitemShut {Stop}%
+\bibitem [{\citenamefont {Nastar}\ \emph {et~al.}(2000)\citenamefont {Nastar},
+  \citenamefont {Dobretsov},\ and\ \citenamefont {Martin}}]{Nastar2000}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Nastar}}, \bibinfo {author} {\bibfnamefont {V.~Y.}\ \bibnamefont
+  {Dobretsov}}, \ and\ \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
+  {Martin}},\ }\href {\doibase 10.1080/01418610008212047} {\bibfield  {journal}
+  {\bibinfo  {journal} {Philos. Mag. A}\ }\textbf {\bibinfo {volume} {80}},\
+  \bibinfo {pages} {155} (\bibinfo {year} {2000})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Nastar}(2005)}]{Nastar2005}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Nastar}},\ }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal}
+  {Philos. Mag.}\ }\textbf {\bibinfo {volume} {85}},\ \bibinfo {pages} {3767}
+  (\bibinfo {year} {2005})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Koiwa}\ and\ \citenamefont
+  {Ishioka}(1983)}]{Koiwa1983}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Koiwa}}\ and\ \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
+  {Ishioka}},\ }\href {\doibase 10.1080/01418618308243130} {\bibfield
+  {journal} {\bibinfo  {journal} {Philos. Mag. A}\ }\textbf {\bibinfo {volume}
+  {47}},\ \bibinfo {pages} {927} (\bibinfo {year} {1983})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Trinkle}(2008)}]{TrinkleLGF2008}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.~R.}\ \bibnamefont
+  {Trinkle}},\ }\href {\doibase 10.1103/PhysRevB.78.014110} {\bibfield
+  {journal} {\bibinfo  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume}
+  {78}},\ \bibinfo {pages} {014110} (\bibinfo {year} {2008})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Ghazisaeidi}\ and\ \citenamefont
+  {Trinkle}(2010)}]{Ghazisaeidi2010}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Ghazisaeidi}}\ and\ \bibinfo {author} {\bibfnamefont {D.~R.}\ \bibnamefont
+  {Trinkle}},\ }\href {\doibase 10.1103/PhysRevB.82.064115} {\bibfield
+  {journal} {\bibinfo  {journal} {Phys. Rev. B}\ }\textbf {\bibinfo {volume}
+  {82}},\ \bibinfo {pages} {064115} (\bibinfo {year} {2010})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Glazer}\ and\ \citenamefont
+  {Burns}(2013)}]{Glazer2013}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Glazer}}\ and\ \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont {Burns}},\
+  }\href {\doibase ISBN:978-0-12-394400-9} {\emph {\bibinfo {title} {Space
+  Groups for Solid State Scientists}}},\ \bibinfo {edition} {3rd}\ ed.\
+  (\bibinfo  {publisher} {Elsevier},\ \bibinfo {year} {2013})\BibitemShut
+  {NoStop}%
+\end{thebibliography}%
+\end{document}
