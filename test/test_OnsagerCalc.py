@@ -185,6 +185,7 @@ class SCBaseTests(BaseTests):
         # all correlation is in that geometric prefactor of Lss.
         self.assertAlmostEqual(Lvv[0, 0], self.D0)
         self.assertAlmostEqual(-Lsv[0, 0], self.D0)
+        self.assertAlmostEqual(L1vv[0, 0], 0.)
         self.assertAlmostEqual(-Lss[0, 0]/Lsv[0, 0], self.correl, delta=1e-3)
 
 

@@ -1,0 +1,14 @@
+# Five frequency inputs to fivefreq.py
+# Each line has w0 w1 w2 w3 w4
+# w0 = rate of vacancy jump without solute
+# w1 = rate of vacancy jump between 1st nn of solute
+# w2 = rate of vacancy/solute exchange
+# w3 = rate of vacancy escape from solute 1st nn
+# w4 = return rate for w3; rate of formation of complex
+0.25 0.25 0.25 0.25 0.25
+0.25 1.00 0.25 0.25 1.00
+0.25 1.00 0.25 0.25 4.00
+0.25 1.00 1.00 0.25 1.00
+0.25 1.00 0.25 1.00 0.25
+0.25 1.00 0.25 1.00 0.125
+0.25 0.5 0.125 0.25 1.00

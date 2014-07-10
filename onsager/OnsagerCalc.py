@@ -338,4 +338,4 @@ class VacancyMediated:
             vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT
         """
         Lvv, L0ss, L2ss, L1sv, L1vv = self._lij(gf, om0, prob, om2, om1)
-        return Lvv, L0ss + L2ss, -L0ss - L2ss + L1sv, L0ss - 2*L1sv + L1vv
+        return Lvv, L0ss + L2ss, -L0ss - L2ss + L1sv, L2ss - 2*L1sv + L1vv
