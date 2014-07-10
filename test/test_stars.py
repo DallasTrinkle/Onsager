@@ -320,15 +320,39 @@ class VectorStarTests(unittest.TestCase):
         self.assertEqual(self.vecstar.Nvstars, 3)
 
     def testVectorStarOuterProduct(self):
-        """Do we generate the correct outer products for our star-vectors?"""
+        """Do we generate the correct outer products for our star-vectors (symmetry checks)?"""
         self.star.generate(1)
         self.vecstar.generate(self.star)
-        for outer in self.vecstar.outer:
+        self.assertEqual(np.shape(self.vecstar.outer), (3, 3, self.vecstar.Nvstars, self.vecstar.Nvstars))
+        # check our diagonal blocks first:
+        for outer in [self.vecstar.outer[:, :, i, i]
+                      for i in range(self.vecstar.Nvstars)]:
             self.assertAlmostEqual(np.trace(outer), 1)
             # should also be symmetric:
             for g in self.groupops:
                 g_out_gT = np.dot(g, np.dot(outer, g.T))
                 self.assertTrue((abs(outer - g_out_gT) < 1e-8).all())
+        # off-diagonal terms now
+        for outer in [self.vecstar.outer[:, :, i, j]
+                      for i in range(self.vecstar.Nvstars)
+                      for j in range(self.vecstar.Nvstars)
+                      if i != j]:
+            self.assertAlmostEqual(np.trace(outer), 0)
+            # should also be symmetric:
+            for g in self.groupops:
+                g_out_gT = np.dot(g, np.dot(outer, g.T))
+                self.assertTrue((abs(outer - g_out_gT) < 1e-8).all())
+        for i, (sRv0, svv0) in enumerate(zip(self.vecstar.vecpos, self.vecstar.vecvec)):
+            for j, (sRv1, svv1) in enumerate(zip(self.vecstar.vecpos, self.vecstar.vecvec)):
+                testouter = np.zeros((3, 3))
+                if (sRv0[0] == sRv1[0]).all():
+                    # we have the same underlying star to work with, so...
+                    for v0, v1 in zip(svv0, svv1):
+                        testouter += np.outer(v0, v1)
+                self.assertTrue((abs(self.vecstar.outer[:, :, i, j] - testouter) < 1e-8).all(),
+                                msg='Failed for vector stars {} and {}:\n{} !=\n{}'.format(
+                                    i, j, outer, testouter
+                                ))
 
 
 class VectorStarFCCTests(VectorStarTests):
@@ -352,10 +376,17 @@ class VectorStarFCCTests(VectorStarTests):
         """Do we generate the correct outer products for our star-vectors?"""
         self.star.generate(2)
         self.vecstar.generate(self.star)
-        # with cubic symmetry, these all have to equal 1/3 * identity
+        # with cubic symmetry, these all have to equal 1/3 * identity, and
+        # with a diagonal matrix
         testouter = 1./3.*np.eye(3)
-        for outer in self.vecstar.outer:
+        for outer in [self.vecstar.outer[:, :, i, i]
+                      for i in range(self.vecstar.Nvstars)]:
             self.assertTrue((abs(outer - testouter) < 1e-8).all())
+        for outer in [self.vecstar.outer[:, :, i, j]
+                      for i in range(self.vecstar.Nvstars)
+                      for j in range(self.vecstar.Nvstars)
+                      if i != j]:
+            self.assertTrue((abs(outer) < 1e-8).all())
 
 import onsager.GFcalc as GFcalc
 

@@ -8,3 +8,11 @@ approach, combined with point group symmetry reduction for maximum efficiency.
 
 Typical usage looks like::
 
+    #!/usr/bin/env python
+
+    from onsager import all
+
+    ...
+
+Many of the subpackages within Onsager are support for the main attraction, which
+is in OnsagerCalc.

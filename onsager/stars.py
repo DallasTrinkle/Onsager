@@ -400,7 +400,7 @@ class VectorStarSet:
 
     def generate(self, star, threshold=1e-8):
         """
-        Construct the actual star-vectors
+        Construct the actual vectors stars
 
         Parameters
         ----------
@@ -478,14 +478,24 @@ class VectorStarSet:
                                 veclist.append(np.dot(g, v))
                                 break
                     self.vecvec.append(veclist)
-        self.generateouter()
         self.Nvstars = len(self.vecpos)
+        self.generateouter()
 
     def generateouter(self):
         """
-        Generate our outer products for our star-vectors
+        Generate our outer products for our star-vectors.
+
+        Returns
+        -------
+        outer : array [3, 3, Nvstars, Nvstars]
+            outer[:, :, i, j] is the 3x3 tensor outer product for two vector-stars vs[i] and vs[j]
         """
-        self.outer = [sum([np.outer(v, v) for v in veclist]) for veclist in self.vecvec]
+        self.outer = np.zeros((3, 3, self.Nvstars, self.Nvstars))
+        for i, (sR0, sv0) in enumerate(zip(self.vecpos, self.vecvec)):
+            for j, (sR1, sv1) in enumerate(zip(self.vecpos, self.vecvec)):
+                if (sR0[0] == sR1[0]).all():
+                    self.outer[:, :, i, j] = sum([np.outer(v0, v1) for v0, v1 in zip(sv0, sv1)])
+        #[sum([np.outer(v, v) for v in veclist]) for veclist in self.vecvec]
 
     def GFexpansion(self, starGF):
         """
