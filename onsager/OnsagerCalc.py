@@ -109,7 +109,7 @@ class VacancyMediated:
             range of thermodynamic interactions, in terms of "shells", which is multiple
             summations of jumpvect; if set, call generate() first.
         """
-        if Nthermo != None:
+        if Nthermo is not None:
             self.generate(Nthermo)
         if not self.matricesgenerated:
             self.matricesgenerated = True
@@ -140,7 +140,7 @@ class VacancyMediated:
             list of endpoints for a vacancy jump: we will expect rates for jumps from
             the origin to each of these endpoints as inputs for our calculation
         """
-        if Nthermo != None:
+        if Nthermo is not None:
             self.generate(Nthermo)
         return [s[0] for s in self.NNstar.stars]
 
@@ -159,7 +159,7 @@ class VacancyMediated:
         interactlist : list of array[3]
             list of vectors to connect a solute and a vacancy jump.
         """
-        if Nthermo != None:
+        if Nthermo is not None:
             self.generate(Nthermo)
         return [s[0] for s in self.thermo.stars]
 
@@ -179,7 +179,7 @@ class VacancyMediated:
             list of points to calculate the vacancy diffusion GF; this is based ultimately on omega0,
             and is the (pseudo)inverse of the vacancy hop rate matrix.
         """
-        if Nthermo != None:
+        if Nthermo is not None:
             self.generate(Nthermo)
         return self.GFR
 
@@ -202,7 +202,7 @@ class VacancyMediated:
             index specifying which type of jump in omega0 would correspond to the LIMB
             approximation
         """
-        if Nthermo != None:
+        if Nthermo is not None:
             self.generate(Nthermo)
         return [(self.kinetic.pts[p[0][0]], self.kinetic.pts[p[0][1]]) for p in self.omega1.dstars], \
                self.omega1LIMB

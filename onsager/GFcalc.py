@@ -613,7 +613,7 @@ class GFcalc:
             the mesh that we want to generate; otherwise, use self.Nmesh
         """
         regen = False
-        if Nmesh != None:
+        if Nmesh is not None:
             if not self.Nmesh == Nmesh:
                 self.Nmesh = Nmesh
                 regen = True

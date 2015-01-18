@@ -154,7 +154,7 @@ class StarSet:
         """
         Generates the star indices for the set of points, if not already generated
         """
-        if self.index != None:
+        if self.index is not None:
             return
         self.index = np.empty(self.Npts, dtype=int)
         self.index[:] = -1
@@ -247,7 +247,7 @@ class DoubleStarSet:
         self.Ndstars = 0
         self.Npairs = 0
         self.Npts = 0
-        if star != None:
+        if star is not None:
             if star.Nshells > 0:
                 self.generate(star)
 
@@ -302,7 +302,7 @@ class DoubleStarSet:
         """
         Generates the double star indices for the set of points, if not already generated
         """
-        if self.index != None:
+        if self.index is not None:
             return
         self.index = np.zeros(self.Npairs, dtype=int)
         for i, p in enumerate(self.pairs):
@@ -392,7 +392,7 @@ class VectorStarSet:
         self.Npts = 0
         self.Nvstars = 0
         self.Nstars = 0
-        if star != None:
+        if star is not None:
             self.NNvect = star.NNvect
             self.groupops = star.groupops
             if star.Nshells > 0:

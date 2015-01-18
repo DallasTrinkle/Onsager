@@ -38,7 +38,7 @@ class KPTmesh:
         self.genBZG()
         if nmesh != (0, 0, 0):
             self.genmesh(nmesh)
-        if groupops != None:
+        if groupops is not None:
             self.groupops = groupops
         else:
             self.gengroupops()
@@ -175,7 +175,7 @@ class KPTmesh:
         -------
         False if outside the BZ, True otherwise
         """
-        if BZG == None:
+        if BZG is None:
             BZG = self.BZG
         # checks that vec.G < G^2 for all G (and throws out the option that vec == G, in case threshold == 0)
         return all([np.dot(vec, G) < (np.dot(G, G) + threshold) for G in BZG if not np.all(vec == G)])
