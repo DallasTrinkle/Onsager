@@ -56,11 +56,11 @@ class GreenFuncDerivativeTests(unittest.TestCase):
         """Does our FT obey basic cubic symmetry operations?"""
         q = np.array((1, 0, 0))
         q2 = np.array((-1, 0, 0))
-        self.assertEqual(self.DFT(q), self.DFT(q2))
+        self.assertAlmostEqual(self.DFT(q), self.DFT(q2))
         q2 = np.array((0, 1, 0))
-        self.assertEqual(self.DFT(q), self.DFT(q2))
+        self.assertAlmostEqual(self.DFT(q), self.DFT(q2))
         q2 = np.array((0, 0, 1))
-        self.assertEqual(self.DFT(q), self.DFT(q2))
+        self.assertAlmostEqual(self.DFT(q), self.DFT(q2))
 
     def testFTdim(self):
         """Do we have the correct dimensionality for our second and fourth derivatives?"""
