@@ -217,6 +217,8 @@ class CrystalClassTests(unittest.TestCase):
         else: self.assertTrue(False, msg="HCP basis not correct")
         self.assertEqual(len(crys.g), 24)
         self.isspacegroup(crys)
+        self.assertEqual(len(crys.pointindex[0][0]), 12)
+        self.assertEqual(len(crys.pointindex[0][1]), 12)
 
     def testscgroupops(self):
         """Do we have 48 space group operations?"""
@@ -226,6 +228,21 @@ class CrystalClassTests(unittest.TestCase):
         # for g in crys.g:
         #     print g.rot, g.trans, g.indexmap
         #     print g.cartrot, g.carttrans
+
+    def testfccpointgroup(self):
+        """Test out that we generate point groups correctly"""
+        crys = crystal.Crystal(self.fcclatt, self.basis)
+        self.assertEqual(sorted(crys.pointindex[0][0]), range(48))
+
+    def testomegagroupops(self):
+        """Build the omega lattice; make sure the space group is correct"""
+        basis = [[np.array([0.,0.,0.]),
+                  np.array([1./3.,2./3.,0.5]),
+                  np.array([2./3.,1./3.,0.5])]]
+        crys = crystal.Crystal(self.hexlatt, basis)
+        self.assertEqual(crys.N, 3)
+        self.assertEqual(len(crys.g), 24)
+        self.isspacegroup(crys)
 
     def testmaptrans(self):
         """Does our map translation operate correctly?"""

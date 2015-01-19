@@ -136,12 +136,13 @@ class Crystal(object):
                 for u in elem:
                     assert type(u) is np.ndarray, "{} in {} is not an array".format(u, elem)
             self.basis = [ [ incell(u) for u in atombasis] for atombasis in basis]
-        self.reduce()
-        self.minlattice()
+        self.reduce() # clean up basis as needed
+        self.minlattice()  # clean up lattice vectors as needed
         self.N = sum(len(atomlist) for atomlist in self.basis)
-        self.calcmetric()
-        self.gengroup()
-        self.center()
+        self.volume, self.metric = self.calcmetric()
+        self.center() # should do before gengroup so that inversion is centered at origin
+        self.g = self.gengroup() # do before genpoint
+        self.pointindex = self.genpoint()
 
     def center(self):
         """
@@ -240,7 +241,7 @@ class Crystal(object):
             super[j, i] = 1
         # check that we have a right-handed lattice
         if np.linalg.det(self.lattice) * np.linalg.det(super) < 0:
-            super = np.dot(super, np.array([[1,0,0],[0,1,0],[0,0,-1]]))
+            super[:,2] = -super[:,2]
         if not np.all(super == np.eye(3, dtype=int)):
             self.lattice = np.dot(self.lattice, super)
             self.basis = self.remapbasis(super)
@@ -269,13 +270,14 @@ class Crystal(object):
     def calcmetric(self):
         """
         Computes the volume of the cell and the metric tensor
+        :return: volume, metric tensor
         """
-        self.volume = abs(np.linalg.det(self.lattice))
-        self.metric = np.dot(self.lattice.T, self.lattice)
+        return abs(np.linalg.det(self.lattice)), np.dot(self.lattice.T, self.lattice)
 
     def gengroup(self):
         """
         Generate all of the space group operations.
+        :return: list of group operations
         """
         invlatt = np.linalg.inv(self.lattice)
         groupops = []
@@ -304,4 +306,15 @@ class Crystal(object):
                                             np.dot(self.lattice, np.dot(super,invlatt)),
                                             np.dot(self.lattice, trans),
                                             indexmap))
-        self.g = groupops
+        return groupops
+
+    def genpoint(self):
+        """
+        Generate our point group indices. Done with crazy list comprehension due to the
+        structure of our basis.
+        :return: list of list of indices of group operations that leave a site unchanged
+        """
+        return [ [ [ gind for gind, g in enumerate(self.g)
+                     if g.indexmap[atomtypeindex][atomindex] == atomindex ]
+                   for atomindex in range(len(atomlist))]
+                 for atomtypeindex, atomlist in enumerate(self.basis) ]
