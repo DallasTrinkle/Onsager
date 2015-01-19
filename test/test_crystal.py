@@ -41,42 +41,47 @@ class CrystalClassTests(unittest.TestCase):
                                          [0, 0, self.c_a]])
         self.basis = [np.array([0.,0.,0.])]
 
-    def isscMetric(self, crys):
-        self.assertAlmostEqual(crys.volume, self.a0**3)
+    def isscMetric(self, crys, a0=0):
+        if a0==0: a0=self.a0
+        self.assertAlmostEqual(crys.volume, a0**3)
         for i, a2 in enumerate(crys.metric.flatten()):
             if i%4 == 0:
                 # diagonal element
-                self.assertAlmostEqual(a2, self.a0**2)
+                self.assertAlmostEqual(a2, a0**2)
             else:
                 # off-diagonal element
                 self.assertAlmostEqual(a2, 0)
 
-    def isfccMetric(self, crys):
-        self.assertAlmostEqual(crys.volume, 0.25*self.a0**3)
+    def isfccMetric(self, crys, a0=0):
+        if a0==0: a0=self.a0
+        self.assertAlmostEqual(crys.volume, 0.25*a0**3)
         for i, a2 in enumerate(crys.metric.flatten()):
             if i%4 == 0:
                 # diagonal element
-                self.assertAlmostEqual(a2, 0.5*self.a0**2)
+                self.assertAlmostEqual(a2, 0.5*a0**2)
             else:
                 # off-diagonal element
-                self.assertAlmostEqual(a2, 0.25*self.a0**2)
+                self.assertAlmostEqual(a2, 0.25*a0**2)
 
-    def isbccMetric(self, crys):
-        self.assertAlmostEqual(crys.volume, 0.5*self.a0**3)
+    def isbccMetric(self, crys, a0=0):
+        if a0==0: a0=self.a0
+        self.assertAlmostEqual(crys.volume, 0.5*a0**3)
         for i, a2 in enumerate(crys.metric.flatten()):
             if i%4 == 0:
                 # diagonal element
-                self.assertAlmostEqual(a2, 0.75*self.a0**2)
+                self.assertAlmostEqual(a2, 0.75*a0**2)
             else:
                 # off-diagonal element
-                self.assertAlmostEqual(a2, -0.25*self.a0**2)
+                self.assertAlmostEqual(a2, -0.25*a0**2)
 
-    def ishexMetric(self, crys):
-        self.assertAlmostEqual(crys.volume, np.sqrt(0.75)*self.c_a*self.a0**3)
-        self.assertAlmostEqual(crys.metric[0,0], self.a0**2)
-        self.assertAlmostEqual(crys.metric[1,1], self.a0**2)
-        self.assertAlmostEqual(crys.metric[0,1], -0.5*self.a0**2)
-        self.assertAlmostEqual(crys.metric[2,2], (self.c_a*self.a0)**2)
+    def ishexMetric(self, crys, a0=0, c_a=0):
+        if a0==0: a0=self.a0
+        if c_a==0: c_a=self.c_a
+        self.assertAlmostEqual(crys.volume, np.sqrt(0.75)*c_a*a0**3)
+        self.assertAlmostEqual(crys.metric[0,0], a0**2)
+        self.assertAlmostEqual(crys.metric[1,1], a0**2)
+        self.assertAlmostEqual(crys.metric[0,1], -0.5*a0**2)
+        self.assertAlmostEqual(crys.metric[2,2], (c_a*a0)**2)
         self.assertAlmostEqual(crys.metric[0,2], 0)
         self.assertAlmostEqual(crys.metric[1,2], 0)
 
@@ -119,6 +124,14 @@ class CrystalClassTests(unittest.TestCase):
         self.assertEqual(len(crys.basis), 1)    # one chemistry
         self.assertEqual(len(crys.basis[0]), 1) # one atom in the unit cell
 
+    def testbccReduce2(self):
+        """If we start with a supercell, does it get reduced back to our start?"""
+        basis = [[np.array([0.,0.,0.]), np.array([0.5,0.5,0.5])]]
+        crys = crystal.Crystal(self.sclatt, basis)
+        self.isbccMetric(crys)
+        self.assertEqual(len(crys.basis), 1)    # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1) # one atom in the unit cell
+
     def testscShift(self):
         """If we start with a supercell, does it get reduced back to our start?"""
         nsuper = np.array([[5,-3,0],[1,-1,3],[-2,1,1]], dtype=int)
@@ -133,9 +146,12 @@ class CrystalClassTests(unittest.TestCase):
         """If we start with a supercell, does it get reduced back to our start?"""
         basis = [np.array([0, 0, 0]), np.array([1./3., 2./3., 1./2.])]
         crys = crystal.Crystal(self.hexlatt, basis)
+        print crys.lattice
+        print crys.basis
         self.ishexMetric(crys)
         self.assertEqual(len(crys.basis), 1)    # one chemistry
         self.assertEqual(len(crys.basis[0]), 2) # two atoms in the unit cell
+        # there needs to be [1/3,2/3,1/4] or [1/3,2/3,3/4], and then the opposite
 
     def testscgroupops(self):
         """Do we have 48 space group operations?"""

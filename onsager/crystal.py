@@ -131,13 +131,26 @@ class Crystal(object):
         """
         Center the atoms in the cell if there is an inversion operation present.
         """
+        # trivial case:
         if self.N == 1:
             self.basis = [[ np.array([0., 0., 0.]) ]]
-        else:
-            shift = np.array([ 0 if u==0 else (1-u)/self.N
-                               for u in np.sum(np.array([atom for atomlist in self.basis
-                                                         for atom in atomlist]), axis = 0) ] )
-            self.basis = [ [ incell(atom + shift) for atom in atomlist] for atomlist in self.basis]
+            return
+        # else, invert positions!
+        trans, indexmap = maptranslation(self.basis, [ [-u for u in atomlist] for atomlist in self.basis])
+        if indexmap is None:
+            return
+        # translate by -1/2 * trans for inversion
+        self.basis = [ [ incell(u-0.5*trans) for u in atomlist] for atomlist in self.basis]
+        # now, check for "aesthetics" of our basis choice
+        shift = np.array([0.,0.,0.])
+        for d in xrange(3):
+            if np.any([ np.isclose(u[d],0) for atomlist in self.basis for u in atomlist ]):
+                shift[d] = 0
+            elif np.any([ np.isclose(u[d],0.5) for atomlist in self.basis for u in atomlist ]):
+                shift[d] = 0.5
+            elif sum([ 1 for atomlist in self.basis for u in atomlist if u[d] < 0.25 or u[d] > 0.75]) > self.N/2:
+                shift[d] = 0.5
+        self.basis = [ [ incell(atom + shift) for atom in atomlist] for atomlist in self.basis]
 
     def reduce(self):
         """
