@@ -78,6 +78,22 @@ def maptranslation(oldpos, newpos):
         return None, None
 
 
+class GroupOp(object):
+    """
+    A class corresponding to a group operation. May add more here later beyond just storage.
+    """
+
+    def __init__(self, rot, trans, cartrot, carttrans, indexmap):
+        """
+        Initialization
+        """
+        self.rot = rot
+        self.trans = trans
+        self.cartrot = cartrot
+        self.carttrans = carttrans
+        self.indexmap = indexmap
+
+
 class Crystal(object):
     """
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.
@@ -261,6 +277,7 @@ class Crystal(object):
         """
         Generate all of the space group operations.
         """
+        invlatt = np.linalg.inv(self.lattice)
         groupops = []
         supercellvect = [np.array((n0, n1, n2))
                          for n0 in xrange(-1, 2)
@@ -277,11 +294,14 @@ class Crystal(object):
             if abs(np.linalg.det(super)) == 1:
                 if np.all(np.isclose(np.dot(super.T, np.dot(self.metric, super)), self.metric)):
                     # possible operation--need to check the atomic positions
-                    groupops.append(super)
+                    trans, indexmap = maptranslation(self.basis,
+                                                     [[ np.dot(super, u)
+                                                        for u in atomlist]
+                                                        for atomlist in self.basis])
+                    if indexmap is None: continue
+                    groupops.append(GroupOp(super,
+                                            trans,
+                                            np.dot(self.lattice, np.dot(super,invlatt)),
+                                            np.dot(self.lattice, trans),
+                                            indexmap))
         self.g = groupops
-
-
-
-
-
-

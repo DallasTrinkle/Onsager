@@ -146,17 +146,29 @@ class CrystalClassTests(unittest.TestCase):
         """If we start with a supercell, does it get reduced back to our start?"""
         basis = [np.array([0, 0, 0]), np.array([1./3., 2./3., 1./2.])]
         crys = crystal.Crystal(self.hexlatt, basis)
-        print crys.lattice
-        print crys.basis
         self.ishexMetric(crys)
         self.assertEqual(len(crys.basis), 1)    # one chemistry
         self.assertEqual(len(crys.basis[0]), 2) # two atoms in the unit cell
         # there needs to be [1/3,2/3,1/4] or [1/3,2/3,3/4], and then the opposite
+        # it's a little clunky; there's probably a better way to test this:
+        if np.any([ np.all(np.isclose(u, np.array([1./3.,2./3.,0.25])))
+                    for atomlist in crys.basis for u in atomlist]):
+            self.assertTrue(np.any([ np.all(np.isclose(u, np.array([2./3.,1./3.,0.75])))
+                                     for atomlist in crys.basis for u in atomlist]))
+        elif np.any([ np.all(np.isclose(u, np.array([1./3.,2./3.,0.75])))
+                      for atomlist in crys.basis for u in atomlist]):
+            self.assertTrue(np.any([ np.all(np.isclose(u, np.array([2./3.,1./3.,0.25])))
+                                     for atomlist in crys.basis for u in atomlist]))
+        else: self.assertTrue(False, msg="HCP basis not correct")
+        self.assertEqual(len(crys.g), 24)
 
     def testscgroupops(self):
         """Do we have 48 space group operations?"""
         crys = crystal.Crystal(self.sclatt, self.basis)
         self.assertEqual(len(crys.g), 48)
+        # for g in crys.g:
+        #     print g.rot, g.trans, g.indexmap
+        #     print g.cartrot, g.carttrans
 
     def testmaptrans(self):
         """Does our map translation operate correctly?"""
