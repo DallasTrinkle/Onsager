@@ -28,9 +28,17 @@ class CrystalClassTests(unittest.TestCase):
 
     def setUp(self):
         self.a0 = 2.5
+        self.c_a = np.sqrt(8./3.)
         self.sclatt = self.a0*np.eye(3)
-        self.fcclatt = self.a0*np.array([[0, 0.5, 0.5], [0.5, 0, 0.5], [0.5, 0.5, 0]])
-        self.bcclatt = self.a0*np.array([[-0.5, 0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, -0.5]])
+        self.fcclatt = self.a0*np.array([[0, 0.5, 0.5],
+                                         [0.5, 0, 0.5],
+                                         [0.5, 0.5, 0]])
+        self.bcclatt = self.a0*np.array([[-0.5, 0.5, 0.5],
+                                         [0.5, -0.5, 0.5],
+                                         [0.5, 0.5, -0.5]])
+        self.hexlatt = self.a0*np.array([[0.5, 0.5, 0],
+                                         [-np.sqrt(0.75), np.sqrt(0.75), 0],
+                                         [0, 0, self.c_a]])
         self.basis = [np.array([0.,0.,0.])]
 
     def isscMetric(self, crys):
@@ -63,6 +71,15 @@ class CrystalClassTests(unittest.TestCase):
                 # off-diagonal element
                 self.assertAlmostEqual(a2, -0.25*self.a0**2)
 
+    def ishexMetric(self, crys):
+        self.assertAlmostEqual(crys.volume, np.sqrt(0.75)*self.c_a*self.a0**3)
+        self.assertAlmostEqual(crys.metric[0,0], self.a0**2)
+        self.assertAlmostEqual(crys.metric[1,1], self.a0**2)
+        self.assertAlmostEqual(crys.metric[0,1], -0.5*self.a0**2)
+        self.assertAlmostEqual(crys.metric[2,2], (self.c_a*self.a0)**2)
+        self.assertAlmostEqual(crys.metric[0,2], 0)
+        self.assertAlmostEqual(crys.metric[1,2], 0)
+
     def testscMetric(self):
         """Does the simple cubic lattice have the right volume and metric?"""
         crys = crystal.Crystal(self.sclatt, self.basis)
@@ -86,10 +103,38 @@ class CrystalClassTests(unittest.TestCase):
 
     def testscReduce(self):
         """If we start with a supercell, does it get reduced back to our start?"""
-        nsuper = np.array([[2,0,0],[0,1,0],[0,0,1]], dtype=int)
-        doublebasis = [self.basis[0], np.array([0.5, 0, 0]) + self.basis[0]]
+        nsuper = np.array([[2,0,0],[0,2,0],[0,0,1]], dtype=int)
+        doublebasis = [self.basis[0], np.array([0.5, 0, 0]) + self.basis[0],
+                       np.array([0, 0.5, 0]) + self.basis[0], np.array([0.5, 0.5, 0]) + self.basis[0]]
         crys = crystal.Crystal(np.dot(self.sclatt, nsuper), doublebasis)
-        crys.lattice = 0
         self.isscMetric(crys)
         self.assertEqual(len(crys.basis), 1)    # one chemistry
         self.assertEqual(len(crys.basis[0]), 1) # one atom in the unit cell
+
+    def testscReduce2(self):
+        """If we start with a supercell, does it get reduced back to our start?"""
+        nsuper = np.array([[5,-3,0],[1,-1,3],[-2,1,1]], dtype=int)
+        crys = crystal.Crystal(np.dot(self.sclatt, nsuper), self.basis)
+        self.isscMetric(crys)
+        self.assertEqual(len(crys.basis), 1)    # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1) # one atom in the unit cell
+
+    def testscShift(self):
+        """If we start with a supercell, does it get reduced back to our start?"""
+        nsuper = np.array([[5,-3,0],[1,-1,3],[-2,1,1]], dtype=int)
+        basis = [np.array([0.33, -0.25, 0.45])]
+        crys = crystal.Crystal(np.dot(self.sclatt, nsuper), basis)
+        self.isscMetric(crys)
+        self.assertEqual(len(crys.basis), 1)    # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1) # one atom in the unit cell
+        self.assertTrue(np.all(np.isclose(crys.basis[0][0], np.array([0,0,0]))))
+
+    def testhcp(self):
+        """If we start with a supercell, does it get reduced back to our start?"""
+        basis = [np.array([0, 0, 0]), np.array([1./3., 2./3., 1./2.])]
+        crys = crystal.Crystal(self.hexlatt, basis)
+        print crys.lattice
+        print crys.basis
+        self.ishexMetric(crys)
+        self.assertEqual(len(crys.basis), 1)    # one chemistry
+        self.assertEqual(len(crys.basis[0]), 2) # two atoms in the unit cell
