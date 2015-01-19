@@ -22,7 +22,7 @@ def inhalf(vec):
     """
     Returns the vector inside the centered cell (in [-0.5,0.5)**3)
     """
-    return vec - np.rint(vec)
+    return vec - np.floor(vec+0.5)
 
 def maptranslation(oldpos, newpos):
     """

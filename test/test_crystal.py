@@ -85,6 +85,61 @@ class CrystalClassTests(unittest.TestCase):
         self.assertAlmostEqual(crys.metric[0,2], 0)
         self.assertAlmostEqual(crys.metric[1,2], 0)
 
+    def isspacegroup(self, crys):
+        """Check that the space group obeys all group definitions: not fast."""
+        # 1. Contains the identity: O(group size)
+        identpresent = False
+        for g in crys.g:
+            if np.all(g.rot == np.eye(3, dtype=int) ):
+                identpresent = True
+                self.assertTrue(np.all(np.isclose(g.trans, 0)),
+                                msg="Identity has bad translation: {}".format(g.trans))
+                for atommap in g.indexmap:
+                    for i, j in enumerate(atommap):
+                        self.assertTrue(i==j,
+                                        msg="Identity has bad indexmap: {}".format(g.indexmap))
+        self.assertTrue(identpresent,
+                        msg="Missing identity")
+        # 2. Check for inverses: O(group size^2)
+        for g in crys.g:
+            invrot = np.linalg.inv(g.rot)
+            invtrans = crystal.inhalf(-np.dot(invrot,g.trans))
+            invcartrot = g.cartrot.T
+            invpresent = False
+            for gp in crys.g:
+                if np.all(np.isclose(gp.rot, invrot)):
+                    if np.all(np.isclose(gp.trans, invtrans)):
+                        invpresent = True
+                        self.assertTrue(np.all(np.isclose(gp.cartrot, invcartrot)),
+                                        msg="Inverse rotation not unitary?\n{} vs\n{}".format(gp.cartrot, invcartrot))
+                        for atomlist0, atomlist1 in zip(g.indexmap, gp.indexmap):
+                            for i,j in enumerate(atomlist0):
+                                self.assertTrue(atomlist1[j] == i,
+                                                msg="Bad inverse index mapping:\n{} vs {}".format(g.indexmap,
+                                                                                                  gp.indexmap))
+            self.assertTrue(invpresent,
+                            msg="Missing inverse for op\n{}|{}\nShould be:\n{}|{}".format(g.rot, g.trans,
+                                                                                          invrot, invtrans))
+        # 3. Closed under multiplication: g.g': O(group size^3)
+        for g in crys.g:
+            for gp in crys.g:
+                rot = np.dot(g.rot, gp.rot)
+                trans = crystal.inhalf(g.trans + np.dot(g.rot, gp.trans))
+                indexmap = []
+                for atomlist0, atomlist1 in zip(g.indexmap, gp.indexmap):
+                    indexmap.append([atomlist0[i] for i in atomlist1])
+                prodpresent = False
+                for h in crys.g:
+                    if np.all(np.isclose(h.rot, rot)):
+                        if np.all(np.isclose(h.trans, trans)):
+                            prodpresent = True
+                            for atomlist0, atomlist1 in zip(h.indexmap, indexmap):
+                                self.assertTrue(atomlist0 == atomlist1,
+                                                msg="Bad product index mapping:\n {} vs {}".format(h.indexmap,
+                                                                                                   indexmap))
+                self.assertTrue(prodpresent,
+                                msg="Missing product op:\n{}|{}".format(rot, trans))
+
     def testscMetric(self):
         """Does the simple cubic lattice have the right volume and metric?"""
         crys = crystal.Crystal(self.sclatt, self.basis)
@@ -161,11 +216,13 @@ class CrystalClassTests(unittest.TestCase):
                                      for atomlist in crys.basis for u in atomlist]))
         else: self.assertTrue(False, msg="HCP basis not correct")
         self.assertEqual(len(crys.g), 24)
+        self.isspacegroup(crys)
 
     def testscgroupops(self):
         """Do we have 48 space group operations?"""
         crys = crystal.Crystal(self.sclatt, self.basis)
         self.assertEqual(len(crys.g), 48)
+        self.isspacegroup(crys)
         # for g in crys.g:
         #     print g.rot, g.trans, g.indexmap
         #     print g.cartrot, g.carttrans
@@ -186,7 +243,7 @@ class CrystalClassTests(unittest.TestCase):
         oldbasis = [[np.array([0.,0.,0.]), np.array([1./3.,2./3.,1./2.])]]
         newbasis = [[np.array([0.,0.,0.]), np.array([-1./3.,-2./3.,-1./2.])]]
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
-        self.assertTrue(np.all(np.isclose(trans, np.array([1./3.,-1./3.,1./2.]))))
+        self.assertTrue(np.all(np.isclose(trans, np.array([1./3.,-1./3.,-1./2.]))))
         self.assertEqual(indexmap, [[1,0]])
 
         oldbasis = [[np.array([0.,0.,0.])], [np.array([1./3.,2./3.,1./2.]), np.array([2./3.,1./3.,1./2.])]]
