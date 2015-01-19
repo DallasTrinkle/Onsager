@@ -69,8 +69,9 @@ class Crystal(object):
         self.reduce()
         self.minlattice()
         self.N = sum(len(atomlist) for atomlist in self.basis)
-        self.center()
         self.calcmetric()
+        self.gengroup()
+        self.center()
 
     def center(self):
         """
@@ -188,3 +189,32 @@ class Crystal(object):
         """
         self.volume = abs(np.linalg.det(self.lattice))
         self.metric = np.dot(self.lattice.T, self.lattice)
+
+    def gengroup(self):
+        """
+        Generate all of the space group operations.
+        """
+        groupops = []
+        supercellvect = [np.array((n0, n1, n2))
+                         for n0 in xrange(-1, 2)
+                         for n1 in xrange(-1, 2)
+                         for n2 in xrange(-1, 2)
+                         if (n0, n1, n2) != (0, 0, 0)]
+        matchvect = [ [ u for u in supercellvect
+                        if np.isclose(np.dot(u, np.dot(self.metric, u)),
+                                      self.metric[d,d]) ] for d in xrange(3) ]
+        for super in [ np.array((r0, r1, r2)).T
+                       for r0 in matchvect[0]
+                       for r1 in matchvect[1]
+                       for r2 in matchvect[2] ]:
+            if abs(np.linalg.det(super)) == 1:
+                if np.all(np.isclose(np.dot(super.T, np.dot(self.metric, super)), self.metric)):
+                    # possible operation--need to check the atomic positions
+                    groupops.append(super)
+        self.g = groupops
+
+
+
+
+
+

@@ -133,8 +133,11 @@ class CrystalClassTests(unittest.TestCase):
         """If we start with a supercell, does it get reduced back to our start?"""
         basis = [np.array([0, 0, 0]), np.array([1./3., 2./3., 1./2.])]
         crys = crystal.Crystal(self.hexlatt, basis)
-        print crys.lattice
-        print crys.basis
         self.ishexMetric(crys)
         self.assertEqual(len(crys.basis), 1)    # one chemistry
         self.assertEqual(len(crys.basis[0]), 2) # two atoms in the unit cell
+
+    def testscgroupops(self):
+        """Do we have 48 space group operations?"""
+        crys = crystal.Crystal(self.sclatt, self.basis)
+        self.assertEqual(len(crys.g), 48)
