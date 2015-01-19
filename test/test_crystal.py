@@ -141,3 +141,33 @@ class CrystalClassTests(unittest.TestCase):
         """Do we have 48 space group operations?"""
         crys = crystal.Crystal(self.sclatt, self.basis)
         self.assertEqual(len(crys.g), 48)
+
+    def testmaptrans(self):
+        """Does our map translation operate correctly?"""
+        basis = [[np.array([0,0,0])]]
+        trans, indexmap = crystal.maptranslation(basis, basis)
+        self.assertTrue(np.all(np.isclose(trans, np.array([0,0,0]))))
+        self.assertEqual(indexmap, [[0]])
+
+        oldbasis = [[np.array([0.2,0,0])]]
+        newbasis = [[np.array([-0.2,0,0])]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
+        self.assertTrue(np.all(np.isclose(trans, np.array([0.4,0,0]))))
+        self.assertEqual(indexmap, [[0]])
+
+        oldbasis = [[np.array([0.,0.,0.]), np.array([1./3.,2./3.,1./2.])]]
+        newbasis = [[np.array([0.,0.,0.]), np.array([-1./3.,-2./3.,-1./2.])]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
+        self.assertTrue(np.all(np.isclose(trans, np.array([1./3.,-1./3.,1./2.]))))
+        self.assertEqual(indexmap, [[1,0]])
+
+        oldbasis = [[np.array([0.,0.,0.])], [np.array([1./3.,2./3.,1./2.]), np.array([2./3.,1./3.,1./2.])]]
+        newbasis = [[np.array([0.,0.,0.])], [np.array([2./3.,1./3.,1./2.]), np.array([1./3.,2./3.,1./2.])]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
+        self.assertTrue(np.all(np.isclose(trans, np.array([0.,0.,0.]))))
+        self.assertEqual(indexmap, [[0],[1,0]])
+
+        oldbasis = [[np.array([0.,0.,0.]), np.array([1./3.,2./3.,1./2.])]]
+        newbasis = [[np.array([0.,0.,0.]), np.array([-1./4.,-1./2.,-1./2.])]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
+        self.assertEqual(indexmap, None)

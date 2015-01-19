@@ -24,6 +24,60 @@ def inhalf(vec):
     """
     return vec - np.rint(vec)
 
+def maptranslation(oldpos, newpos):
+    """
+    Given a list of transformed positions, identify if there's a translation vector
+    that maps from the current positions to the new position.
+
+    :param oldpos: list of list of array[3]
+    :param newpos: list of list of array[3], same layout as oldpos
+    :return: translation (array[3]), mapping (list of list of indices)
+
+    The mapping specifies the index that the *translated* atom corresponds to in the
+    original position set. If unable to construct a mapping, the mapping return is
+    None; the translation vector will be meaningless.
+    """
+    # type-checking; may remove in production
+    assert type(oldpos) == list, "oldpos is not a list"
+    assert type(newpos) == list, "newpos is not a list"
+    assert len(oldpos) == len(newpos), "{} and {} do not have the same length".format(oldpos, newpos)
+    for a,b in zip(oldpos, newpos):
+        assert type(a) == list, "element of oldpos {} is not a list".format(a)
+        assert type(b) == list, "element of newpos {} is not a list".format(b)
+        assert len(a) == len(b), "{} and {} do not have the same length".format(a,b)
+    # Work with the shortest possible list for identifying translations
+    maxlen = 0
+    atomindex = 0
+    for i, ulist in enumerate(oldpos):
+        if len(ulist) > maxlen:
+            maxlen = len(ulist)
+            atomindex = i
+    ru0 = newpos[atomindex][0]
+    for ub in oldpos[atomindex]:
+        trans = inhalf(ub - ru0)
+        foundmap = True
+        # now check against all the others, and construct the mapping
+        indexmap = []
+        for atomlist0, atomlist1 in zip(oldpos, newpos):
+            # work through the "new" positions
+            if not foundmap: break
+            maplist = []
+            for rua in atomlist1:
+                for j, ub in enumerate(atomlist0):
+                    if np.all(np.isclose(inhalf(ub-rua-trans), 0)):
+                        maplist.append(j)
+                        break
+            if len(maplist) != len(atomlist0):
+                foundmap = False
+            else:
+                indexmap.append(maplist)
+        if foundmap: break
+    if foundmap:
+        return trans, indexmap
+    else:
+        return None, None
+
+
 class Crystal(object):
     """
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.
@@ -75,7 +129,7 @@ class Crystal(object):
 
     def center(self):
         """
-        Center the atoms in the cell.
+        Center the atoms in the cell if there is an inversion operation present.
         """
         if self.N == 1:
             self.basis = [[ np.array([0., 0., 0.]) ]]
