@@ -53,7 +53,19 @@ class GroupOperationTests(unittest.TestCase):
         self.assertEqual(newop, mirroroptrans)
 
     def testMultiplication(self):
+        """Does group operation multiplication work correctly?"""
         self.assertEqual(self.mirrorop*self.mirrorop, self.ident)
+        v1 = np.array([1,0,0])
+        trans = self.ident + v1
+        self.assertEqual(trans*trans, self.ident + 2*v1)
+        rot3 = crystal.GroupOp(np.eye(3, dtype=int), np.array([0,0,0]), np.eye(3), [[1,2,0]])
+        ident3 = crystal.GroupOp(np.eye(3, dtype=int), np.array([0,0,0]), np.eye(3), [[0,1,2]])
+        self.assertEqual(rot3*rot3*rot3, ident3)
+
+    def testInversion(self):
+        """Is the product with the inverse equal to identity?"""
+        self.assertEqual(self.mirrorop*(self.mirrorop.inv()), self.ident)
+
 
 
 class CrystalClassTests(unittest.TestCase):

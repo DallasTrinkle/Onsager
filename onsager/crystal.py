@@ -122,7 +122,21 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         """Multiply two group operations to produce a new group operation"""
         if __debug__:
             if type(other) is not GroupOp: raise TypeError
-        return self
+        indexmap = []
+        for atomlist0, atomlist1 in zip(self.indexmap, other.indexmap):
+            indexmap.append([atomlist0[i] for i in atomlist1])
+        return GroupOp(np.dot(self.rot, other.rot),
+                       np.dot(self.rot, other.trans) + self.trans,
+                       np.dot(self.cartrot, other.cartrot),
+                       indexmap)
+
+    def inv(self):
+        """Construct and return the inverse of the group operation"""
+        inverse = (np.round(np.linalg.inv(self.rot))).astype(int)
+        indexmap = [ []]
+        for atomlist0, atomlist1 in zip(self.indexmap, other.indexmap):
+            indexmap.append([atomlist0[i] for i in atomlist1])
+
 
 
 class Crystal(object):
