@@ -23,6 +23,25 @@ class UnitCellTests(unittest.TestCase):
         self.assertTrue(np.all(np.isclose(crystal.inhalf(a), b)))
 
 
+class GroupOperationTests(unittest.TestCase):
+    """Tests for our group operations."""
+    def setUp(self):
+        self.rot = np.array([[0,1,0],
+                             [1,0,0],
+                             [0,0,1]])
+        self.trans = np.array([0.,0.,0.])
+        self.cartrot = np.array([[0.,1.,0.],
+                                 [1.,0.,0.],
+                                 [0.,0.,1.]])
+        self.carttrans = np.array([0.,0.,0.])
+        self.indexmap = [[0]]
+        self.mirrorop = crystal.GroupOp(self.rot,self.trans,self.cartrot,self.carttrans,self.indexmap)
+
+    def testMirrordirect(self):
+        """Does our mirror operation work correctly on a cartesian direction?"""
+        self.assertTrue(True)
+
+
 class CrystalClassTests(unittest.TestCase):
     """Tests for the crystal class and symmetry analysis."""
 

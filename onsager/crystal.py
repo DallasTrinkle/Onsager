@@ -11,6 +11,7 @@ Class to store definition of a crystal, along with some analysis
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
+import collections
 
 def incell(vec):
     """
@@ -78,20 +79,14 @@ def maptranslation(oldpos, newpos):
         return None, None
 
 
-class GroupOp(object):
+class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot carttrans indexmap')):
     """
-    A class corresponding to a group operation. May add more here later beyond just storage.
+    A class corresponding to a group operation. Based on namedtuple, so it is immutable.
     """
 
-    def __init__(self, rot, trans, cartrot, carttrans, indexmap):
-        """
-        Initialization
-        """
-        self.rot = rot
-        self.trans = trans
-        self.cartrot = cartrot
-        self.carttrans = carttrans
-        self.indexmap = indexmap
+    def __call__(self, arg):
+        """Apply the group operation to the argument"""
+        return np.dot(self.cartrot, arg)
 
 
 class Crystal(object):
