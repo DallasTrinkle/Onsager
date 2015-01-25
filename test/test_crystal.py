@@ -52,6 +52,9 @@ class GroupOperationTests(unittest.TestCase):
         mirroroptrans = crystal.GroupOp(self.rot,self.trans + v1,self.cartrot,self.indexmap)
         self.assertEqual(newop, mirroroptrans)
 
+    def testMultiplication(self):
+        self.assertEqual(self.mirrorop*self.mirrorop, self.ident)
+
 
 class CrystalClassTests(unittest.TestCase):
     """Tests for the crystal class and symmetry analysis."""

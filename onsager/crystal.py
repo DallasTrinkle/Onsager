@@ -38,14 +38,15 @@ def maptranslation(oldpos, newpos):
     original position set. If unable to construct a mapping, the mapping return is
     None; the translation vector will be meaningless.
     """
-    # type-checking; may remove in production
-    assert type(oldpos) == list, "oldpos is not a list"
-    assert type(newpos) == list, "newpos is not a list"
-    assert len(oldpos) == len(newpos), "{} and {} do not have the same length".format(oldpos, newpos)
-    for a,b in zip(oldpos, newpos):
-        assert type(a) == list, "element of oldpos {} is not a list".format(a)
-        assert type(b) == list, "element of newpos {} is not a list".format(b)
-        assert len(a) == len(b), "{} and {} do not have the same length".format(a,b)
+    # type-checking:
+    if __debug__:
+        if type(oldpos) is not list: raise TypeError('oldpos is not a list')
+        if type(newpos) is not list: raise TypeError('newpos is not a list')
+        if len(oldpos) != len(newpos): raise IndexError("{} and {} do not have the same length".format(oldpos, newpos))
+        for a,b in zip(oldpos, newpos):
+            if type(a) is not list: raise TypeError("element of oldpos {} is not a list".format(a))
+            if type(b) is not list: raise TypeError("element of newpos {} is not a list".format(b))
+            if len(a) != len(b): raise IndexError("{} and {} do not have the same length".format(a,b))
     # Work with the shortest possible list for identifying translations
     maxlen = 0
     atomindex = 0
@@ -117,6 +118,12 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
             if not np.issubdtype(other.dtype, int): raise TypeError
         return GroupOp(self.rot, self.trans + other, self.cartrot, self.indexmap)
 
+    def __mul__(self, other):
+        """Multiply two group operations to produce a new group operation"""
+        if __debug__:
+            if type(other) is not GroupOp: raise TypeError
+        return self
+
 
 class Crystal(object):
     """
@@ -142,23 +149,23 @@ class Crystal(object):
         """
         # Do some basic type checking and "formatting"
         self.lattice = None
-        if type(lattice) == list:
-            assert len(lattice) == 3, "lattice is a list, but does not contain 3 members"
+        if type(lattice) is list:
+            if len(lattice) != 3: raise TypeError('lattice is a list, but does not contain 3 members')
             self.lattice = np.array(lattice).T
-        if type(lattice) == np.ndarray:
+        if type(lattice) is np.ndarray:
             self.lattice = lattice
-        assert self.lattice is not None, "lattice is not a recognized type"
-        assert self.lattice.shape == (3,3), "lattice contains vectors that are not 3 dimensional"
-        assert type(basis) is list, "basis needs to be a list or list of lists"
+        if self.lattice is None: raise TypeError('lattice is not a recognized type')
+        if self.lattice.shape != (3,3): raise TypeError('lattice contains vectors that are not 3 dimensional')
+        if type(basis) is not list: raise TypeError('basis needs to be a list or list of lists')
         if type(basis[0]) == np.ndarray:
             for u in basis:
-                assert type(u) is np.ndarray, "{} in {} is not an array".format(u, basis)
+                if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, basis))
             self.basis = [ [incell(u) for u in basis] ]
         else:
             for elem in basis:
-                assert type(elem) is list, "{} in basis is not a list".format(elem)
+                if type(elem) is not list: raise TypeError("{} in basis is not a list".format(elem))
                 for u in elem:
-                    assert type(u) is np.ndarray, "{} in {} is not an array".format(u, elem)
+                    if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, elem))
             self.basis = [ [ incell(u) for u in atombasis] for atombasis in basis]
         self.reduce() # clean up basis as needed
         self.minlattice()  # clean up lattice vectors as needed
