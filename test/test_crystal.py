@@ -33,13 +33,24 @@ class GroupOperationTests(unittest.TestCase):
         self.cartrot = np.array([[0.,1.,0.],
                                  [1.,0.,0.],
                                  [0.,0.,1.]])
-        self.carttrans = np.array([0.,0.,0.])
         self.indexmap = [[0]]
-        self.mirrorop = crystal.GroupOp(self.rot,self.trans,self.cartrot,self.carttrans,self.indexmap)
+        self.mirrorop = crystal.GroupOp(self.rot,self.trans,self.cartrot,self.indexmap)
+        self.ident = crystal.GroupOp(np.eye(3, dtype=int), np.array([0.,0.,0.]), np.eye(3), [[0]])
 
-    def testMirrordirect(self):
-        """Does our mirror operation work correctly on a cartesian direction?"""
-        self.assertTrue(True)
+    def testEquality(self):
+        """Can we check if two group operations are equal?"""
+        with self.assertRaises(TypeError):
+            self.mirrorop == self.rot
+        self.assertEqual(self.mirrorop.incell(), self.mirrorop)
+
+    def testAddition(self):
+        """Can we add a vector to our group operation and get a new one?"""
+        with self.assertRaises(TypeError):
+            self.mirrorop + 0
+        v1 = np.array([1,0,0])
+        newop = self.mirrorop + v1
+        mirroroptrans = crystal.GroupOp(self.rot,self.trans + v1,self.cartrot,self.indexmap)
+        self.assertEqual(newop, mirroroptrans)
 
 
 class CrystalClassTests(unittest.TestCase):

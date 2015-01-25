@@ -671,7 +671,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
                          (self.vecstar.Nvstars, self.NNstar.Nstars))
         self.assertEqual(np.shape(omega1NN),
                          (self.vecstar.Nvstars, self.NNstar.Nstars))
-        self.assertIs(gen1prob.dtype, np.dtype('int64')) # needs to be for indexing
+        self.assertTrue(np.issubdtype(gen1prob.dtype, int)) # needs to be for indexing
         # make sure that we don't have -1 as our endpoint probability for any ds that are used.
         for b1ds, o1ds, b1p in zip(bias1ds, omega1ds, gen1prob):
             for bds, ods, p in zip(b1ds, o1ds, b1p):

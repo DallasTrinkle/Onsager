@@ -79,14 +79,43 @@ def maptranslation(oldpos, newpos):
         return None, None
 
 
-class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot carttrans indexmap')):
+class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     """
     A class corresponding to a group operation. Based on namedtuple, so it is immutable.
+
+    Intended to be used in combination with Crystal, we have a few operations that
+    can be defined out-of-the-box.
+
+    :param rot: np.array(3,3) integer idempotent matrix
+    :param trans: np.array(3) real vector
+    :param cartrot: np.array(3,3) real unitary matrix
+    :param indexmap: list of list, containing the atom mapping
     """
 
-    def __call__(self, arg):
-        """Apply the group operation to the argument"""
-        return np.dot(self.cartrot, arg)
+    def incell(self):
+        """Return a version of groupop where the translation is in the unit cell"""
+        return GroupOp(self.rot, incell(self.trans), self.cartrot, self.indexmap)
+
+    def __eq__(self, other):
+        """Test for equality--we use numpy.isclose for comparison, since that's what we usually care about"""
+        if __debug__:
+            if type(other) is not GroupOp: raise TypeError
+        return np.all(self.rot == other.rot) and \
+               np.all(np.isclose(self.trans, other.trans)) and \
+               np.all(np.isclose(self.cartrot, other.rot)) and \
+               self.indexmap == other.indexmap
+
+    def __ne__(self, other):
+        """Inequality == not __eq__"""
+        return not self.__eq__(other)
+
+    def __add__(self, other):
+        """Add a translation to our group operation"""
+        if __debug__:
+            if type(other) is not np.ndarray: raise TypeError
+            if other.shape != (3,): raise TypeError
+            if not np.issubdtype(other.dtype, int): raise TypeError
+        return GroupOp(self.rot, self.trans + other, self.cartrot, self.indexmap)
 
 
 class Crystal(object):
@@ -299,7 +328,6 @@ class Crystal(object):
                     groupops.append(GroupOp(super,
                                             trans,
                                             np.dot(self.lattice, np.dot(super,invlatt)),
-                                            np.dot(self.lattice, trans),
                                             indexmap))
         return groupops
 
