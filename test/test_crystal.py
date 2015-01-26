@@ -330,8 +330,8 @@ class CrystalClassTests(unittest.TestCase):
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
         self.assertEqual(indexmap, None)
 
-    def testfccgroupops(self):
-        """Test out that we can apply group operations"""
+    def testfccgroupops_directions(self):
+        """Test out that we can apply group operations to directions"""
         crys = crystal.Crystal(self.fcclatt, self.basis)
         # 1. direction
         direc = np.array([2.,0.,0.])
@@ -346,6 +346,9 @@ class CrystalClassTests(unittest.TestCase):
         self.assertEqual(count[0], 8) ## antiparallel
         self.assertEqual(count[1], 32) ## perpendicular
         self.assertEqual(count[2], 8) ## parallel
+
+    def testomegagroupops_positions(self):
+        """Test out that we can apply group operations to positions"""
         # 2. position = lattice vector + 2-tuple atom-index
         basis = [[np.array([0.,0.,0.]),
                   np.array([1./3.,2./3.,0.5]),
@@ -358,3 +361,9 @@ class CrystalClassTests(unittest.TestCase):
                 rotpos = crys.g_direc(g, pos)
                 self.assertTrue(np.all(np.isclose(rotpos,
                                                   crys.cartpos(*crys.g_pos(g, lattvec, ind)))))
+            # test point group operations:
+            for g in crys.pointG[ind[0]][ind[1]]:
+                origin = np.zeros(3, dtype=int)
+                rotlatt, rotind = crys.g_pos(g, origin, ind)
+                self.assertTrue(np.all(rotlatt == origin))
+                self.assertEqual(rotind, ind)
