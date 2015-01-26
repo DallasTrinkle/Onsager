@@ -141,57 +141,49 @@ class CrystalClassTests(unittest.TestCase):
     def isspacegroup(self, crys):
         """Check that the space group obeys all group definitions: not fast."""
         # 1. Contains the identity: O(group size)
-        identpresent = False
+        identity = None
         for g in crys.g:
             if np.all(g.rot == np.eye(3, dtype=int) ):
-                identpresent = True
+                identity = g
                 self.assertTrue(np.all(np.isclose(g.trans, 0)),
                                 msg="Identity has bad translation: {}".format(g.trans))
                 for atommap in g.indexmap:
                     for i, j in enumerate(atommap):
                         self.assertTrue(i==j,
                                         msg="Identity has bad indexmap: {}".format(g.indexmap))
-        self.assertTrue(identpresent,
-                        msg="Missing identity")
+        self.assertTrue(identity is not None, msg="Missing identity")
         # 2. Check for inverses: O(group size^2)
         for g in crys.g:
-            invrot = np.linalg.inv(g.rot)
-            invtrans = crystal.inhalf(-np.dot(invrot,g.trans))
-            invcartrot = g.cartrot.T
+            inverse = g.inv().inhalf()
             invpresent = False
             for gp in crys.g:
-                if np.all(np.isclose(gp.rot, invrot)):
-                    if np.all(np.isclose(gp.trans, invtrans)):
+                if np.all(np.isclose(gp.rot, inverse.rot)):
+                    if np.all(np.isclose(gp.trans, inverse.trans)):
                         invpresent = True
-                        self.assertTrue(np.all(np.isclose(gp.cartrot, invcartrot)),
-                                        msg="Inverse rotation not unitary?\n{} vs\n{}".format(gp.cartrot, invcartrot))
-                        for atomlist0, atomlist1 in zip(g.indexmap, gp.indexmap):
-                            for i,j in enumerate(atomlist0):
-                                self.assertTrue(atomlist1[j] == i,
-                                                msg="Bad inverse index mapping:\n{} vs {}".format(g.indexmap,
-                                                                                                  gp.indexmap))
+                        self.assertTrue(np.all(np.isclose(gp.cartrot, inverse.cartrot)),
+                                        msg="Inverse rotation not unitary?\n{} vs\n{}".format(gp.cartrot,
+                                                                                              inverse.cartrot))
+                        self.assertEqual(gp.indexmap, inverse.indexmap,
+                                         msg="Bad inverse index mapping:\n{} vs {}".format(g.indexmap,
+                                                                                           gp.indexmap))
             self.assertTrue(invpresent,
                             msg="Missing inverse for op\n{}|{}\nShould be:\n{}|{}".format(g.rot, g.trans,
-                                                                                          invrot, invtrans))
+                                                                                          inverse.rot, inverse.trans))
         # 3. Closed under multiplication: g.g': O(group size^3)
         for g in crys.g:
             for gp in crys.g:
-                rot = np.dot(g.rot, gp.rot)
-                trans = crystal.inhalf(g.trans + np.dot(g.rot, gp.trans))
-                indexmap = []
-                for atomlist0, atomlist1 in zip(g.indexmap, gp.indexmap):
-                    indexmap.append([atomlist0[i] for i in atomlist1])
+                product = (g*gp).inhalf()
                 prodpresent = False
                 for h in crys.g:
-                    if np.all(np.isclose(h.rot, rot)):
-                        if np.all(np.isclose(h.trans, trans)):
+                    if np.all(np.isclose(h.rot, product.rot)):
+                        if np.all(np.isclose(h.trans, product.trans)):
+                            self.assertTrue(np.all(np.isclose(h.cartrot, product.cartrot)))
                             prodpresent = True
-                            for atomlist0, atomlist1 in zip(h.indexmap, indexmap):
-                                self.assertTrue(atomlist0 == atomlist1,
-                                                msg="Bad product index mapping:\n {} vs {}".format(h.indexmap,
-                                                                                                   indexmap))
+                            self.assertEqual(h.indexmap, product.indexmap,
+                                             msg="Bad productindex mapping:\n{} vs {}".format(h.indexmap,
+                                                                                              product.indexmap))
                 self.assertTrue(prodpresent,
-                                msg="Missing product op:\n{}|{}".format(rot, trans))
+                                msg="Missing product op:\n{}|{}".format(product.rot, product.trans))
 
     def testscMetric(self):
         """Does the simple cubic lattice have the right volume and metric?"""

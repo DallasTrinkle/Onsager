@@ -100,11 +100,16 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         """Return a version of groupop where the translation is in the unit cell"""
         return GroupOp(self.rot, incell(self.trans), self.cartrot, self.indexmap)
 
+    def inhalf(self):
+        """Return a version of groupop where the translation is in the centered unit cell"""
+        return GroupOp(self.rot, inhalf(self.trans), self.cartrot, self.indexmap)
+
     def __eq__(self, other):
         """Test for equality--we use numpy.isclose for comparison, since that's what we usually care about"""
         if __debug__:
             if type(other) is not GroupOp: raise TypeError
-        return np.all(self.rot == other.rot) and \
+        return isinstance(other, self.__class__) and \
+               np.all(self.rot == other.rot) and \
                np.all(np.isclose(self.trans, other.trans)) and \
                np.all(np.isclose(self.cartrot, other.rot)) and \
                self.indexmap == other.indexmap
@@ -129,13 +134,11 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         """Multiply two group operations to produce a new group operation"""
         if __debug__:
             if type(other) is not GroupOp: raise TypeError
-        indexmap = []
-        for atomlist0, atomlist1 in zip(self.indexmap, other.indexmap):
-            indexmap.append([atomlist0[i] for i in atomlist1])
         return GroupOp(np.dot(self.rot, other.rot),
                        np.dot(self.rot, other.trans) + self.trans,
                        np.dot(self.cartrot, other.cartrot),
-                       indexmap)
+                       [ [atomlist0[i] for i in atomlist1]
+                         for atomlist0, atomlist1 in zip(self.indexmap, other.indexmap)])
 
     def inv(self):
         """Construct and return the inverse of the group operation"""
@@ -211,7 +214,7 @@ class Crystal(object):
         # translate by -1/2 * trans for inversion
         self.basis = [[incell(u - 0.5 * trans) for u in atomlist] for atomlist in self.basis]
         # now, check for "aesthetics" of our basis choice
-        shift = np.array([0., 0., 0.])
+        shift = np.zeros(3)
         for d in xrange(3):
             if np.any([np.isclose(u[d], 0) for atomlist in self.basis for u in atomlist]):
                 shift[d] = 0
