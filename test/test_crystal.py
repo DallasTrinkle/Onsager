@@ -283,22 +283,22 @@ class CrystalClassTests(unittest.TestCase):
         """Do we correctly map out our atom position (lattice vector + indices) in cartesian coord.?"""
         crys = crystal.Crystal(self.fcclatt, self.basis)
         lattvect = np.array([2, -1, 3])
-        for index in crys.atomindices:
-            b = crys.basis[index[0]][index[1]]
+        for ind in crys.atomindices:
+            b = crys.basis[ind[0]][ind[1]]
             pos = crys.lattice[:,0]*(lattvect[0] + b[0]) + \
                   crys.lattice[:,1]*(lattvect[1] + b[1]) + \
                   crys.lattice[:,2]*(lattvect[2] + b[2])
-            self.assertTrue(np.all(np.isclose(pos, crys.atompos(lattvect, index))))
+            self.assertTrue(np.all(np.isclose(pos, crys.cartpos(lattvect, ind))))
         basis = [[np.array([0.,0.,0.]),
                   np.array([1./3.,2./3.,0.5]),
                   np.array([2./3.,1./3.,0.5])]]
         crys = crystal.Crystal(self.hexlatt, basis)
-        for index in crys.atomindices:
-            b = crys.basis[index[0]][index[1]]
+        for ind in crys.atomindices:
+            b = crys.basis[ind[0]][ind[1]]
             pos = crys.lattice[:,0]*(lattvect[0] + b[0]) + \
                   crys.lattice[:,1]*(lattvect[1] + b[1]) + \
                   crys.lattice[:,2]*(lattvect[2] + b[2])
-            self.assertTrue(np.all(np.isclose(pos, crys.atompos(lattvect, index))))
+            self.assertTrue(np.all(np.isclose(pos, crys.cartpos(lattvect, ind))))
 
     def testmaptrans(self):
         """Does our map translation operate correctly?"""
@@ -347,3 +347,14 @@ class CrystalClassTests(unittest.TestCase):
         self.assertEqual(count[1], 32) ## perpendicular
         self.assertEqual(count[2], 8) ## parallel
         # 2. position = lattice vector + 2-tuple atom-index
+        basis = [[np.array([0.,0.,0.]),
+                  np.array([1./3.,2./3.,0.5]),
+                  np.array([2./3.,1./3.,0.5])]]
+        crys = crystal.Crystal(self.hexlatt, basis)
+        lattvec = np.array([-2, 3, 1])
+        for ind in crys.atomindices:
+            pos = crys.cartpos(lattvec, ind)
+            for g in crys.G:
+                rotpos = crys.g_direc(g, pos)
+                self.assertTrue(np.all(np.isclose(rotpos,
+                                                  crys.cartpos(*crys.g_pos(g, lattvec, ind)))))

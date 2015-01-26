@@ -137,7 +137,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         return GroupOp(self.rot, self.trans + other, self.cartrot, self.indexmap)
 
     def __sub__(self, other):
-        """Add a translation to our group operation"""
+        """Add a (negative) translation to our group operation"""
         return self.__add__(-other)
 
     def __mul__(self, other):
@@ -203,6 +203,7 @@ class Crystal(object):
             self.basis = [[incell(u) for u in atombasis] for atombasis in basis]
         self.reduce()  # clean up basis as needed
         self.minlattice()  # clean up lattice vectors as needed
+        self.invlatt = np.linalg.inv(self.lattice)
         # this lets us, in a flat list, enumerate over indices of atoms as needed
         self.atomindices = [(atomtype, atomindex)
                             for atomtype,atomlist in enumerate(self.basis)
@@ -348,7 +349,6 @@ class Crystal(object):
         Generate all of the space group operations.
         :return: list of group operations
         """
-        invlatt = np.linalg.inv(self.lattice)
         groupops = []
         supercellvect = [np.array((n0, n1, n2))
                          for n0 in xrange(-1, 2)
@@ -372,18 +372,18 @@ class Crystal(object):
                 if indexmap is not None:
                     groupops.append(GroupOp(super,
                                             trans,
-                                            np.dot(self.lattice, np.dot(super, invlatt)),
+                                            np.dot(self.lattice, np.dot(super, self.invlatt)),
                                             indexmap))
         return frozenset(groupops)
 
-    def atompos(self, lattvec, index):
+    def cartpos(self, lattvec, ind):
         """
-        Return the cartesian coordinates of an atom specified by its lattice
+        Return the cartesian coordinates of an atom specified by its lattice and index
         :param lattvec: 3-vector (integer) lattice vector in direct coordinates
-        :param index: two-tuple index specifying the atom: (atomtype, atomindex)
+        :param ind: two-tuple index specifying the atom: (atomtype, atomindex)
         :return: 3-vector (float) in Cartesian coordinates
         """
-        return np.dot(self.lattice, lattvec + self.basis[index[0]][index[1]])
+        return np.dot(self.lattice, lattvec + self.basis[ind[0]][ind[1]])
 
     def g_direc(self, g, direc):
         """
@@ -396,6 +396,23 @@ class Crystal(object):
             if type(g) is not GroupOp: raise TypeError
             if type(direc) is not np.ndarray: raise TypeError
         return np.dot(g.cartrot, direc)
+
+    def g_pos(self, g, lattvec, ind):
+        """
+        Apply a space group operation to an atom position specified by its lattice and index
+        :param g: group operation (GroupOp)
+        :param lattvec: 3-vector (integer) lattice vector in direct coordinates
+        :param ind: two-tuple index specifying the atom: (atomtype, atomindex)
+        :return: 3-vector (integer) lattice vector in direct coordinates, index
+        """
+        if __debug__:
+            if type(g) is not GroupOp: raise TypeError
+            if type(lattvec) is not np.ndarray: raise TypeError
+        rotlatt = np.dot(g.rot, lattvec)
+        rotind = (ind[0], g.indexmap[ind[0]][ind[1]])
+        delu = (np.round(np.dot(g.rot, self.basis[ind[0]][ind[1]]) + g.trans -
+                         self.basis[rotind[0]][rotind[1]])).astype(int)
+        return rotlatt + delu, rotind
 
     def genpoint(self):
         """
