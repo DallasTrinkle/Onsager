@@ -422,7 +422,8 @@ class Crystal(object):
         """
         if self.N == 1:
             return [[self.G]]
-        return [[frozenset([g
+        origin = np.zeros(3, dtype=int)
+        return [[frozenset([g - self.g_pos(g, origin, (atomtypeindex, atomindex))[0]
                             for g in self.G
                             if g.indexmap[atomtypeindex][atomindex] == atomindex])
                  for atomindex in range(len(atomlist))]
