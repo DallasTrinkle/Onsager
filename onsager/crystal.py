@@ -111,7 +111,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         return isinstance(other, self.__class__) and \
                np.all(self.rot == other.rot) and \
                np.all(np.isclose(self.trans, other.trans)) and \
-               np.all(np.isclose(self.cartrot, other.rot)) and \
+               np.all(np.isclose(self.cartrot, other.cartrot)) and \
                self.indexmap == other.indexmap
 
     def __ne__(self, other):
@@ -206,7 +206,7 @@ class Crystal(object):
         self.N = sum(len(atomlist) for atomlist in self.basis)
         self.volume, self.metric = self.calcmetric()
         self.center()  # should do before gengroup so that inversion is centered at origin
-        self.g = self.gengroup()  # do before genpoint
+        self.G = self.gengroup()  # do before genpoint
         self.pointindex = self.genpoint()
 
     def center(self):
@@ -378,7 +378,7 @@ class Crystal(object):
         structure of our basis.
         :return: list of list of indices of group operations that leave a site unchanged
         """
-        return [[[gind for gind, g in enumerate(self.g)
+        return [[[gind for gind, g in enumerate(self.G)
                   if g.indexmap[atomtypeindex][atomindex] == atomindex]
                  for atomindex in range(len(atomlist))]
                 for atomtypeindex, atomlist in enumerate(self.basis)]
