@@ -13,17 +13,20 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 import collections
 
+
 def incell(vec):
     """
     Returns the vector inside the unit cell (in [0,1)**3)
     """
     return vec - np.floor(vec)
 
+
 def inhalf(vec):
     """
     Returns the vector inside the centered cell (in [-0.5,0.5)**3)
     """
-    return vec - np.floor(vec+0.5)
+    return vec - np.floor(vec + 0.5)
+
 
 def maptranslation(oldpos, newpos):
     """
@@ -43,10 +46,10 @@ def maptranslation(oldpos, newpos):
         if type(oldpos) is not list: raise TypeError('oldpos is not a list')
         if type(newpos) is not list: raise TypeError('newpos is not a list')
         if len(oldpos) != len(newpos): raise IndexError("{} and {} do not have the same length".format(oldpos, newpos))
-        for a,b in zip(oldpos, newpos):
+        for a, b in zip(oldpos, newpos):
             if type(a) is not list: raise TypeError("element of oldpos {} is not a list".format(a))
             if type(b) is not list: raise TypeError("element of newpos {} is not a list".format(b))
-            if len(a) != len(b): raise IndexError("{} and {} do not have the same length".format(a,b))
+            if len(a) != len(b): raise IndexError("{} and {} do not have the same length".format(a, b))
     # Work with the shortest possible list for identifying translations
     maxlen = 0
     atomindex = 0
@@ -66,7 +69,7 @@ def maptranslation(oldpos, newpos):
             maplist = []
             for rua in atomlist1:
                 for j, ub in enumerate(atomlist0):
-                    if np.all(np.isclose(inhalf(ub-rua-trans), 0)):
+                    if np.all(np.isclose(inhalf(ub - rua - trans), 0)):
                         maplist.append(j)
                         break
             if len(maplist) != len(atomlist0):
@@ -113,10 +116,14 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     def __add__(self, other):
         """Add a translation to our group operation"""
         if __debug__:
-            if type(other) is not np.ndarray: raise TypeError
-            if other.shape != (3,): raise TypeError
-            if not np.issubdtype(other.dtype, int): raise TypeError
+            if type(other) is not np.ndarray: raise TypeError('Can only add a translation to a group operation')
+            if other.shape != (3,): raise IndexError('Can only add a 3 dimensional vector')
+            if not np.issubdtype(other.dtype, int): raise TypeError('Can only add a lattice vector translation')
         return GroupOp(self.rot, self.trans + other, self.cartrot, self.indexmap)
+
+    def __sub__(self, other):
+        """Add a translation to our group operation"""
+        return self.__add__(-other)
 
     def __mul__(self, other):
         """Multiply two group operations to produce a new group operation"""
@@ -133,11 +140,11 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     def inv(self):
         """Construct and return the inverse of the group operation"""
         inverse = (np.round(np.linalg.inv(self.rot))).astype(int)
-        indexmap = [ []]
-        for atomlist0, atomlist1 in zip(self.indexmap, other.indexmap):
-            indexmap.append([atomlist0[i] for i in atomlist1])
-
-
+        return GroupOp(inverse,
+                       -np.dot(inverse, self.trans),
+                       self.cartrot.T,
+                       [ [ x for i,x in sorted([(y,j) for j,y in enumerate(atomlist)])]
+                         for atomlist in self.indexmap])
 
 class Crystal(object):
     """
@@ -169,24 +176,24 @@ class Crystal(object):
         if type(lattice) is np.ndarray:
             self.lattice = lattice
         if self.lattice is None: raise TypeError('lattice is not a recognized type')
-        if self.lattice.shape != (3,3): raise TypeError('lattice contains vectors that are not 3 dimensional')
+        if self.lattice.shape != (3, 3): raise TypeError('lattice contains vectors that are not 3 dimensional')
         if type(basis) is not list: raise TypeError('basis needs to be a list or list of lists')
         if type(basis[0]) == np.ndarray:
             for u in basis:
                 if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, basis))
-            self.basis = [ [incell(u) for u in basis] ]
+            self.basis = [[incell(u) for u in basis]]
         else:
             for elem in basis:
                 if type(elem) is not list: raise TypeError("{} in basis is not a list".format(elem))
                 for u in elem:
                     if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, elem))
-            self.basis = [ [ incell(u) for u in atombasis] for atombasis in basis]
-        self.reduce() # clean up basis as needed
+            self.basis = [[incell(u) for u in atombasis] for atombasis in basis]
+        self.reduce()  # clean up basis as needed
         self.minlattice()  # clean up lattice vectors as needed
         self.N = sum(len(atomlist) for atomlist in self.basis)
         self.volume, self.metric = self.calcmetric()
-        self.center() # should do before gengroup so that inversion is centered at origin
-        self.g = self.gengroup() # do before genpoint
+        self.center()  # should do before gengroup so that inversion is centered at origin
+        self.g = self.gengroup()  # do before genpoint
         self.pointindex = self.genpoint()
 
     def center(self):
@@ -195,24 +202,24 @@ class Crystal(object):
         """
         # trivial case:
         if self.N == 1:
-            self.basis = [[ np.array([0., 0., 0.]) ]]
+            self.basis = [[np.array([0., 0., 0.])]]
             return
         # else, invert positions!
-        trans, indexmap = maptranslation(self.basis, [ [-u for u in atomlist] for atomlist in self.basis])
+        trans, indexmap = maptranslation(self.basis, [[-u for u in atomlist] for atomlist in self.basis])
         if indexmap is None:
             return
         # translate by -1/2 * trans for inversion
-        self.basis = [ [ incell(u-0.5*trans) for u in atomlist] for atomlist in self.basis]
+        self.basis = [[incell(u - 0.5 * trans) for u in atomlist] for atomlist in self.basis]
         # now, check for "aesthetics" of our basis choice
-        shift = np.array([0.,0.,0.])
+        shift = np.array([0., 0., 0.])
         for d in xrange(3):
-            if np.any([ np.isclose(u[d],0) for atomlist in self.basis for u in atomlist ]):
+            if np.any([np.isclose(u[d], 0) for atomlist in self.basis for u in atomlist]):
                 shift[d] = 0
-            elif np.any([ np.isclose(u[d],0.5) for atomlist in self.basis for u in atomlist ]):
+            elif np.any([np.isclose(u[d], 0.5) for atomlist in self.basis for u in atomlist]):
                 shift[d] = 0.5
-            elif sum([ 1 for atomlist in self.basis for u in atomlist if u[d] < 0.25 or u[d] > 0.75]) > self.N/2:
+            elif sum([1 for atomlist in self.basis for u in atomlist if u[d] < 0.25 or u[d] > 0.75]) > self.N / 2:
                 shift[d] = 0.5
-        self.basis = [ [ incell(atom + shift) for atom in atomlist] for atomlist in self.basis]
+        self.basis = [[incell(atom + shift) for atom in atomlist] for atomlist in self.basis]
 
     def reduce(self):
         """
@@ -235,7 +242,7 @@ class Crystal(object):
             trans = True
             for atomlist in self.basis:
                 for u in atomlist:
-                    if np.all([ not np.all(np.isclose(inhalf(u+t-v), 0)) for v in atomlist]):
+                    if np.all([not np.all(np.isclose(inhalf(u + t - v), 0)) for v in atomlist]):
                         trans = False
                         break
             if trans:
@@ -246,7 +253,7 @@ class Crystal(object):
         # 1. determine what the new lattice needs to look like.
         for d in xrange(3):
             super = np.eye(3)
-            super[:,d] = t[:]
+            super[:, d] = t[:]
             if np.linalg.det(super) != 0:
                 break
         invsuper = np.linalg.inv(super)
@@ -257,7 +264,7 @@ class Crystal(object):
             newatomlist = []
             for u in atomlist:
                 v = incell(np.dot(invsuper, u))
-                if np.all([ not np.all(np.isclose(v, v1)) for v1 in newatomlist]):
+                if np.all([not np.all(np.isclose(v, v1)) for v1 in newatomlist]):
                     newatomlist.append(v)
             newbasis.append(newatomlist)
         self.basis = newbasis
@@ -270,7 +277,7 @@ class Crystal(object):
         :return: atomic basis
         """
         invsuper = np.linalg.inv(super)
-        return [ [ incell(np.dot(invsuper, u)) for u in atomlist] for atomlist in self.basis]
+        return [[incell(np.dot(invsuper, u)) for u in atomlist] for atomlist in self.basis]
 
     def minlattice(self):
         """
@@ -280,13 +287,13 @@ class Crystal(object):
 
         Works recursively.
         """
-        magnlist = sorted( (np.dot(v,v), idx) for idx, v in enumerate(self.lattice.T) )
-        super = np.zeros((3,3), dtype=int)
+        magnlist = sorted((np.dot(v, v), idx) for idx, v in enumerate(self.lattice.T))
+        super = np.zeros((3, 3), dtype=int)
         for i, (magn, j) in enumerate(magnlist):
             super[j, i] = 1
         # check that we have a right-handed lattice
         if np.linalg.det(self.lattice) * np.linalg.det(super) < 0:
-            super[:,2] = -super[:,2]
+            super[:, 2] = -super[:, 2]
         if not np.all(super == np.eye(3, dtype=int)):
             self.lattice = np.dot(self.lattice, super)
             self.basis = self.remapbasis(super)
@@ -295,15 +302,15 @@ class Crystal(object):
         modified = False
         # check the possible vector reductions
         asq = np.dot(self.lattice.T, self.lattice)
-        u = np.around([asq[0,1]/asq[0,0], asq[0,2]/asq[0,0], asq[1,2]/asq[1,1]])
+        u = np.around([asq[0, 1] / asq[0, 0], asq[0, 2] / asq[0, 0], asq[1, 2] / asq[1, 1]])
         if u[0] != 0:
-            super[0,1] = -int(u[0])
+            super[0, 1] = -int(u[0])
             modified = True
         elif u[1] != 0:
-            super[0,2] = -int(u[1])
+            super[0, 2] = -int(u[1])
             modified = True
         elif u[2] != 0:
-            super[1,2] = -int(u[2])
+            super[1, 2] = -int(u[2])
             modified = True
 
         if not modified:
@@ -331,24 +338,24 @@ class Crystal(object):
                          for n1 in xrange(-1, 2)
                          for n2 in xrange(-1, 2)
                          if (n0, n1, n2) != (0, 0, 0)]
-        matchvect = [ [ u for u in supercellvect
-                        if np.isclose(np.dot(u, np.dot(self.metric, u)),
-                                      self.metric[d,d]) ] for d in xrange(3) ]
-        for super in [ np.array((r0, r1, r2)).T
-                       for r0 in matchvect[0]
-                       for r1 in matchvect[1]
-                       for r2 in matchvect[2] ]:
+        matchvect = [[u for u in supercellvect
+                      if np.isclose(np.dot(u, np.dot(self.metric, u)),
+                                    self.metric[d, d])] for d in xrange(3)]
+        for super in [np.array((r0, r1, r2)).T
+                      for r0 in matchvect[0]
+                      for r1 in matchvect[1]
+                      for r2 in matchvect[2]]:
             if abs(np.linalg.det(super)) == 1:
                 if np.all(np.isclose(np.dot(super.T, np.dot(self.metric, super)), self.metric)):
                     # possible operation--need to check the atomic positions
                     trans, indexmap = maptranslation(self.basis,
-                                                     [[ np.dot(super, u)
-                                                        for u in atomlist]
-                                                        for atomlist in self.basis])
+                                                     [[np.dot(super, u)
+                                                       for u in atomlist]
+                                                      for atomlist in self.basis])
                     if indexmap is None: continue
                     groupops.append(GroupOp(super,
                                             trans,
-                                            np.dot(self.lattice, np.dot(super,invlatt)),
+                                            np.dot(self.lattice, np.dot(super, invlatt)),
                                             indexmap))
         return groupops
 
@@ -358,7 +365,7 @@ class Crystal(object):
         structure of our basis.
         :return: list of list of indices of group operations that leave a site unchanged
         """
-        return [ [ [ gind for gind, g in enumerate(self.g)
-                     if g.indexmap[atomtypeindex][atomindex] == atomindex ]
-                   for atomindex in range(len(atomlist))]
-                 for atomtypeindex, atomlist in enumerate(self.basis) ]
+        return [[[gind for gind, g in enumerate(self.g)
+                  if g.indexmap[atomtypeindex][atomindex] == atomindex]
+                 for atomindex in range(len(atomlist))]
+                for atomtypeindex, atomlist in enumerate(self.basis)]

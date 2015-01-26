@@ -29,13 +29,13 @@ class GroupOperationTests(unittest.TestCase):
         self.rot = np.array([[0,1,0],
                              [1,0,0],
                              [0,0,1]])
-        self.trans = np.array([0.,0.,0.])
+        self.trans = np.zeros(3)
         self.cartrot = np.array([[0.,1.,0.],
                                  [1.,0.,0.],
                                  [0.,0.,1.]])
         self.indexmap = [[0]]
         self.mirrorop = crystal.GroupOp(self.rot,self.trans,self.cartrot,self.indexmap)
-        self.ident = crystal.GroupOp(np.eye(3, dtype=int), np.array([0.,0.,0.]), np.eye(3), [[0]])
+        self.ident = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), [[0]])
 
     def testEquality(self):
         """Can we check if two group operations are equal?"""
@@ -51,6 +51,7 @@ class GroupOperationTests(unittest.TestCase):
         newop = self.mirrorop + v1
         mirroroptrans = crystal.GroupOp(self.rot,self.trans + v1,self.cartrot,self.indexmap)
         self.assertEqual(newop, mirroroptrans)
+        self.assertTrue(np.all(np.isclose((self.ident - v1).trans, -v1)))
 
     def testMultiplication(self):
         """Does group operation multiplication work correctly?"""
@@ -58,14 +59,21 @@ class GroupOperationTests(unittest.TestCase):
         v1 = np.array([1,0,0])
         trans = self.ident + v1
         self.assertEqual(trans*trans, self.ident + 2*v1)
-        rot3 = crystal.GroupOp(np.eye(3, dtype=int), np.array([0,0,0]), np.eye(3), [[1,2,0]])
-        ident3 = crystal.GroupOp(np.eye(3, dtype=int), np.array([0,0,0]), np.eye(3), [[0,1,2]])
+        rot3 = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), [[1,2,0]])
+        ident3 = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), [[0,1,2]])
         self.assertEqual(rot3*rot3*rot3, ident3)
 
     def testInversion(self):
         """Is the product with the inverse equal to identity?"""
+        self.assertEqual(self.ident.inv, self.ident.inv)
         self.assertEqual(self.mirrorop*(self.mirrorop.inv()), self.ident)
-
+        v1 = np.array([1,0,0])
+        trans = self.ident + v1
+        self.assertEqual(trans.inv(), self.ident - v1)
+        inversion = crystal.GroupOp(-np.eye(3,dtype=int), np.zeros(3), -np.eye(3), [[0]])
+        self.assertEqual(inversion.inv(), inversion)
+        invtrans = inversion + v1
+        self.assertEqual(invtrans.inv(), invtrans)
 
 
 class CrystalClassTests(unittest.TestCase):
