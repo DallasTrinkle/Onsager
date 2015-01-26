@@ -118,6 +118,11 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         """Inequality == not __eq__"""
         return not self.__eq__(other)
 
+    def __hash__(self):
+        """Hash, so that we can make sets of group operations"""
+        return reduce(lambda x,y: x^y, [256, 128, 64, 32, 16, 8, 4, 2, 1] * self.rot.reshape((9,))) ^ \
+          reduce(lambda x,y: x^y, [hash(x) for x in self.trans])
+
     def __add__(self, other):
         """Add a translation to our group operation"""
         if __debug__:
@@ -360,7 +365,7 @@ class Crystal(object):
                                             trans,
                                             np.dot(self.lattice, np.dot(super, invlatt)),
                                             indexmap))
-        return groupops
+        return set(groupops)
 
     def genpoint(self):
         """
