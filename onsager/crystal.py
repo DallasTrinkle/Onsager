@@ -120,8 +120,13 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
 
     def __hash__(self):
         """Hash, so that we can make sets of group operations"""
-        return reduce(lambda x,y: x^y, [256, 128, 64, 32, 16, 8, 4, 2, 1] * self.rot.reshape((9,))) ^ \
-          reduce(lambda x,y: x^y, [hash(x) for x in self.trans])
+        ### we are a little conservative, and only use the rotation to define the hash. This means
+        ### we will get collisions for the same rotation but different translations. The reason is
+        ### that __eq__ uses "isclose" on our translations, and we don't have a good way to handle
+        ### that in a hash function. We lose a little bit on efficiency if we construct a set that
+        ### has a whole lot of translation operations, but that's not usually what we will do.
+        return reduce(lambda x,y: x^y, [256, 128, 64, 32, 16, 8, 4, 2, 1] * self.rot.reshape((9,)))
+        # ^ reduce(lambda x,y: x^y, [hash(x) for x in self.trans])
 
     def __add__(self, other):
         """Add a translation to our group operation"""
@@ -352,20 +357,20 @@ class Crystal(object):
         for super in [np.array((r0, r1, r2)).T
                       for r0 in matchvect[0]
                       for r1 in matchvect[1]
-                      for r2 in matchvect[2]]:
-            if abs(np.linalg.det(super)) == 1:
-                if np.all(np.isclose(np.dot(super.T, np.dot(self.metric, super)), self.metric)):
-                    # possible operation--need to check the atomic positions
-                    trans, indexmap = maptranslation(self.basis,
-                                                     [[np.dot(super, u)
-                                                       for u in atomlist]
-                                                      for atomlist in self.basis])
-                    if indexmap is None: continue
+                      for r2 in matchvect[2]
+                      if abs(np.inner(r0, np.cross(r1, r2))) == 1]:
+            if np.all(np.isclose(np.dot(super.T, np.dot(self.metric, super)), self.metric)):
+                # possible operation--need to check the atomic positions
+                trans, indexmap = maptranslation(self.basis,
+                                                 [[np.dot(super, u)
+                                                   for u in atomlist]
+                                                  for atomlist in self.basis])
+                if indexmap is not None:
                     groupops.append(GroupOp(super,
                                             trans,
                                             np.dot(self.lattice, np.dot(super, invlatt)),
                                             indexmap))
-        return set(groupops)
+        return frozenset(groupops)
 
     def genpoint(self):
         """
