@@ -156,19 +156,19 @@ class CrystalClassTests(unittest.TestCase):
         # 2. Check for inverses: O(group size^2)
         for g in crys.G:
             inverse = g.inv().inhalf()
-            self.assertTrue(inverse in crys.G,
-                            msg="Missing inverse op:\n{}\n{}|{}^-1 =\n{}\n{}|{}".format(
-                                    g.rot, g.cartrot, g.trans,
-                                    inverse.rot, inverse.cartrot, inverse.trans))
+            self.assertIn(inverse, crys.G,
+                          msg="Missing inverse op:\n{}\n{}|{}^-1 =\n{}\n{}|{}".format(
+                              g.rot, g.cartrot, g.trans,
+                              inverse.rot, inverse.cartrot, inverse.trans))
         # 3. Closed under multiplication: g.g': O(group size^3)
         for g in crys.G:
             for gp in crys.G:
                 product = (g*gp).inhalf()
-                self.assertTrue(product in crys.G,
-                                msg="Missing product op:\n{}\n{}|{} *\n{}\n{}|{} = \n{}\n{}|{}".format(
-                                    g.rot, g.cartrot, g.trans,
-                                    gp.rot, gp.cartrot, gp.trans,
-                                    product.rot, product.cartrot, product.trans))
+                self.assertIn(product, crys.G,
+                              msg="Missing product op:\n{}\n{}|{} *\n{}\n{}|{} = \n{}\n{}|{}".format(
+                                  g.rot, g.cartrot, g.trans,
+                                  gp.rot, gp.cartrot, gp.trans,
+                                  product.rot, product.cartrot, product.trans))
 
     def testscMetric(self):
         """Does the simple cubic lattice have the right volume and metric?"""
@@ -250,8 +250,8 @@ class CrystalClassTests(unittest.TestCase):
         #     print g.rot
         #     print g.cartrot, g.trans, g.indexmap
         self.isspacegroup(crys)
-        self.assertEqual(len(crys.pointindex[0][0]), 12)
-        self.assertEqual(len(crys.pointindex[0][1]), 12)
+        self.assertEqual(len(crys.pointG[0][0]), 12)
+        self.assertEqual(len(crys.pointG[0][1]), 12)
 
     def testscgroupops(self):
         """Do we have 48 space group operations?"""
@@ -265,7 +265,8 @@ class CrystalClassTests(unittest.TestCase):
     def testfccpointgroup(self):
         """Test out that we generate point groups correctly"""
         crys = crystal.Crystal(self.fcclatt, self.basis)
-        self.assertEqual(sorted(crys.pointindex[0][0]), range(48))
+        for g in crys.G:
+            self.assertIn(g, crys.pointG[0][0])
 
     def testomegagroupops(self):
         """Build the omega lattice; make sure the space group is correct"""
@@ -274,8 +275,30 @@ class CrystalClassTests(unittest.TestCase):
                   np.array([2./3.,1./3.,0.5])]]
         crys = crystal.Crystal(self.hexlatt, basis)
         self.assertEqual(crys.N, 3)
+        self.assertEqual(crys.atomindices, [(0,0), (0,1), (0,2)])
         self.assertEqual(len(crys.G), 24)
         self.isspacegroup(crys)
+
+    def testcartesianposition(self):
+        """Do we correctly map out our atom position (lattice vector + indices) in cartesian coord.?"""
+        crys = crystal.Crystal(self.fcclatt, self.basis)
+        lattvect = np.array([2, -1, 3])
+        for index in crys.atomindices:
+            b = crys.basis[index[0]][index[1]]
+            pos = crys.lattice[:,0]*(lattvect[0] + b[0]) + \
+                  crys.lattice[:,1]*(lattvect[1] + b[1]) + \
+                  crys.lattice[:,2]*(lattvect[2] + b[2])
+            self.assertTrue(np.all(np.isclose(pos, crys.atompos(lattvect, index))))
+        basis = [[np.array([0.,0.,0.]),
+                  np.array([1./3.,2./3.,0.5]),
+                  np.array([2./3.,1./3.,0.5])]]
+        crys = crystal.Crystal(self.hexlatt, basis)
+        for index in crys.atomindices:
+            b = crys.basis[index[0]][index[1]]
+            pos = crys.lattice[:,0]*(lattvect[0] + b[0]) + \
+                  crys.lattice[:,1]*(lattvect[1] + b[1]) + \
+                  crys.lattice[:,2]*(lattvect[2] + b[2])
+            self.assertTrue(np.all(np.isclose(pos, crys.atompos(lattvect, index))))
 
     def testmaptrans(self):
         """Does our map translation operate correctly?"""
@@ -306,3 +329,21 @@ class CrystalClassTests(unittest.TestCase):
         newbasis = [[np.array([0.,0.,0.]), np.array([-1./4.,-1./2.,-1./2.])]]
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
         self.assertEqual(indexmap, None)
+
+    def testfccgroupops(self):
+        """Test out that we can apply group operations"""
+        crys = crystal.Crystal(self.fcclatt, self.basis)
+        # 1. direction
+        direc = np.array([2.,0.,0.])
+        direc2 = np.dot(direc, direc)
+        count = np.zeros(3, dtype=int)
+        for g in crys.G:
+            rotdirec = crys.g_direc(g, direc)
+            self.assertAlmostEqual(np.dot(rotdirec, rotdirec), direc2)
+            costheta = np.dot(rotdirec, direc)/direc2
+            self.assertTrue(np.isclose(costheta, 1) or np.isclose(costheta, 0) or np.isclose(costheta, -1))
+            count[int(round(costheta+1))] += 1
+        self.assertEqual(count[0], 8) ## antiparallel
+        self.assertEqual(count[1], 32) ## perpendicular
+        self.assertEqual(count[2], 8) ## parallel
+        # 2. position = lattice vector + 2-tuple atom-index

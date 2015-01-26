@@ -203,11 +203,15 @@ class Crystal(object):
             self.basis = [[incell(u) for u in atombasis] for atombasis in basis]
         self.reduce()  # clean up basis as needed
         self.minlattice()  # clean up lattice vectors as needed
-        self.N = sum(len(atomlist) for atomlist in self.basis)
+        # this lets us, in a flat list, enumerate over indices of atoms as needed
+        self.atomindices = [(atomtype, atomindex)
+                            for atomtype,atomlist in enumerate(self.basis)
+                            for atomindex in range(len(atomlist))]
+        self.N = len(self.atomindices)
         self.volume, self.metric = self.calcmetric()
         self.center()  # should do before gengroup so that inversion is centered at origin
         self.G = self.gengroup()  # do before genpoint
-        self.pointindex = self.genpoint()
+        self.pointG = self.genpoint()
 
     def center(self):
         """
@@ -372,13 +376,37 @@ class Crystal(object):
                                             indexmap))
         return frozenset(groupops)
 
+    def atompos(self, lattvec, index):
+        """
+        Return the cartesian coordinates of an atom specified by its lattice
+        :param lattvec: 3-vector (integer) lattice vector in direct coordinates
+        :param index: two-tuple index specifying the atom: (atomtype, atomindex)
+        :return: 3-vector (float) in Cartesian coordinates
+        """
+        return np.dot(self.lattice, lattvec + self.basis[index[0]][index[1]])
+
+    def g_direc(self, g, direc):
+        """
+        Apply a space group operation to a direction
+        :param g: group operation (GroupOp)
+        :param direc: 3-vector direction
+        :return: 3-vector direction
+        """
+        if __debug__:
+            if type(g) is not GroupOp: raise TypeError
+            if type(direc) is not np.ndarray: raise TypeError
+        return np.dot(g.cartrot, direc)
+
     def genpoint(self):
         """
         Generate our point group indices. Done with crazy list comprehension due to the
         structure of our basis.
-        :return: list of list of indices of group operations that leave a site unchanged
+        :return: list of sets of point group operations that leave a site unchanged
         """
-        return [[[gind for gind, g in enumerate(self.G)
-                  if g.indexmap[atomtypeindex][atomindex] == atomindex]
+        if self.N == 1:
+            return [[self.G]]
+        return [[frozenset([g
+                            for g in self.G
+                            if g.indexmap[atomtypeindex][atomindex] == atomindex])
                  for atomindex in range(len(atomlist))]
                 for atomtypeindex, atomlist in enumerate(self.basis)]
