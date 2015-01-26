@@ -160,20 +160,6 @@ class CrystalClassTests(unittest.TestCase):
                             msg="Missing inverse op:\n{}\n{}|{}^-1 =\n{}\n{}|{}".format(
                                     g.rot, g.cartrot, g.trans,
                                     inverse.rot, inverse.cartrot, inverse.trans))
-            invpresent = False
-            for gp in crys.G:
-                if np.all(np.isclose(gp.rot, inverse.rot)):
-                    if np.all(np.isclose(gp.trans, inverse.trans)):
-                        invpresent = True
-                        self.assertTrue(np.all(np.isclose(gp.cartrot, inverse.cartrot)),
-                                        msg="Inverse rotation not unitary?\n{} vs\n{}".format(gp.cartrot,
-                                                                                              inverse.cartrot))
-                        self.assertEqual(gp.indexmap, inverse.indexmap,
-                                         msg="Bad inverse index mapping:\n{} vs {}".format(g.indexmap,
-                                                                                           gp.indexmap))
-            self.assertTrue(invpresent,
-                            msg="Missing inverse for op\n{}|{}\nShould be:\n{}|{}".format(g.rot, g.trans,
-                                                                                          inverse.rot, inverse.trans))
         # 3. Closed under multiplication: g.g': O(group size^3)
         for g in crys.G:
             for gp in crys.G:
