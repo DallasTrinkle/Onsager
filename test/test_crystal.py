@@ -288,7 +288,7 @@ class CrystalClassTests(unittest.TestCase):
             pos = crys.lattice[:,0]*(lattvect[0] + b[0]) + \
                   crys.lattice[:,1]*(lattvect[1] + b[1]) + \
                   crys.lattice[:,2]*(lattvect[2] + b[2])
-            self.assertTrue(np.all(np.isclose(pos, crys.cartpos(lattvect, ind))))
+            self.assertTrue(np.all(np.isclose(pos, crys.pos2cart(lattvect, ind))))
         basis = [[np.array([0.,0.,0.]),
                   np.array([1./3.,2./3.,0.5]),
                   np.array([2./3.,1./3.,0.5])]]
@@ -298,7 +298,7 @@ class CrystalClassTests(unittest.TestCase):
             pos = crys.lattice[:,0]*(lattvect[0] + b[0]) + \
                   crys.lattice[:,1]*(lattvect[1] + b[1]) + \
                   crys.lattice[:,2]*(lattvect[2] + b[2])
-            self.assertTrue(np.all(np.isclose(pos, crys.cartpos(lattvect, ind))))
+            self.assertTrue(np.all(np.isclose(pos, crys.pos2cart(lattvect, ind))))
 
     def testmaptrans(self):
         """Does our map translation operate correctly?"""
@@ -356,17 +356,16 @@ class CrystalClassTests(unittest.TestCase):
         crys = crystal.Crystal(self.hexlatt, basis)
         lattvec = np.array([-2, 3, 1])
         for ind in crys.atomindices:
-            pos = crys.cartpos(lattvec, ind)
+            pos = crys.pos2cart(lattvec, ind)
             for g in crys.G:
                 # testing g_pos: (transform an atomic position)
                 rotpos = crys.g_direc(g, pos)
                 self.assertTrue(np.all(np.isclose(rotpos,
-                                                  crys.cartpos(*crys.g_pos(g, lattvec, ind)))))
+                                                  crys.pos2cart(*crys.g_pos(g, lattvec, ind)))))
                 # testing g_vect: (transform a vector position in the crystal)
-                # TODO: add inverses of cartpos and cartvect
                 rotlatt, rotind = crys.g_pos(g, lattvec, ind)
                 rotlatt2, u = crys.g_vect(g, lattvec, crys.basis[ind[0]][ind[1]])
-                self.assertTrue(np.all(np.isclose(rotpos, crys.cartvect(rotlatt2, u))))
+                self.assertTrue(np.all(np.isclose(rotpos, crys.unit2cart(rotlatt2, u))))
                 self.assertTrue(np.all(rotlatt == rotlatt2))
                 self.assertTrue(np.all(np.isclose(u, crys.basis[rotind[0]][rotind[1]])))
 
@@ -376,3 +375,17 @@ class CrystalClassTests(unittest.TestCase):
                 rotlatt, rotind = crys.g_pos(g, origin, ind)
                 self.assertTrue(np.all(rotlatt == origin))
                 self.assertEqual(rotind, ind)
+
+    def testinverspos(self):
+        """Test the inverses of pos2cart and unit2cart"""
+        basis = [[np.array([0.,0.,0.]),
+                  np.array([1./3.,2./3.,0.5]),
+                  np.array([2./3.,1./3.,0.5])]]
+        crys = crystal.Crystal(self.hexlatt, basis)
+        lattvec = np.array([-2, 3, 1])
+        for ind in crys.atomindices:
+            lattback, uback = crys.cart2unit(crys.pos2cart(lattvec, ind))
+            self.assertTrue(np.all(lattback == lattvec))
+            self.assertTrue(np.all(np.isclose(uback, crys.basis[ind[0]][ind[1]])))
+            lattback, indback = crys.cart2pos(crys.pos2cart(lattvec, ind))
+            self.assertTrue()

@@ -376,7 +376,7 @@ class Crystal(object):
                                             indexmap))
         return frozenset(groupops)
 
-    def cartpos(self, lattvec, ind):
+    def pos2cart(self, lattvec, ind):
         """
         Return the cartesian coordinates of an atom specified by its lattice and index
         :param lattvec: 3-vector (integer) lattice vector in direct coordinates
@@ -385,7 +385,7 @@ class Crystal(object):
         """
         return np.dot(self.lattice, lattvec + self.basis[ind[0]][ind[1]])
 
-    def cartvect(self, lattvec, uvec):
+    def unit2cart(self, lattvec, uvec):
         """
         Return the cartesian coordinates of a position specified by its lattice and
         unit cell coordinates
@@ -394,6 +394,27 @@ class Crystal(object):
         :return: 3-vector (float) in Cartesian coordinates
         """
         return np.dot(self.lattice, lattvec + uvec)
+
+    def cart2unit(self, v):
+        """
+        Return the lattvec and unit cell coord. corresponding to a position
+        in cartesian coord.
+        :param v: 3-vector (float) position in Cartesian coordinates
+        :return: 3-vector (integer) lattice vector in direct coordinates,
+         3-vector (float) inside unit cell
+        """
+        u = np.dot(self.invlatt, v)
+        return None, None
+
+    def cart2pos(self, v):
+        """
+        Return the lattvec and index corresponding to an atomic position in cartesian coord.
+        :param v: 3-vector (float) position in Cartesian coordinates
+        :return: 3-vector (integer) lattice vector in direct coordinates, index tuple
+         of corresponding atom.
+         Returns None on tuple if no match
+        """
+        return None, None
 
     def g_direc(self, g, direc):
         """
