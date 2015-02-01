@@ -187,7 +187,7 @@ class Crystal(object):
             if len(lattice) != 3: raise TypeError('lattice is a list, but does not contain 3 members')
             self.lattice = np.array(lattice).T
         if type(lattice) is np.ndarray:
-            self.lattice = lattice
+            self.lattice = np.array(lattice)
         if self.lattice is None: raise TypeError('lattice is not a recognized type')
         if self.lattice.shape != (3, 3): raise TypeError('lattice contains vectors that are not 3 dimensional')
         if type(basis) is not list: raise TypeError('basis needs to be a list or list of lists')
@@ -210,6 +210,8 @@ class Crystal(object):
                             for atomindex in range(len(atomlist))]
         self.N = len(self.atomindices)
         self.volume, self.metric = self.calcmetric()
+        self.reciplatt = 2.*np.pi*self.invlatt.T
+        self.BZvol = abs(np.linalg.det(self.reciplatt))
         self.center()  # should do before gengroup so that inversion is centered at origin
         self.G = self.gengroup()  # do before genpoint
         self.pointG = self.genpoint()

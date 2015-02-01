@@ -403,6 +403,7 @@ class CrystalClassTests(unittest.TestCase):
         Wyckoffind = {frozenset([(0,0)]),
                       frozenset([(0,1), (0,2)])}
         self.assertEqual(crys.Wyckoff, Wyckoffind)
+        # now ask it to generate the set of all equivalent points
 
     def testNNfcc(self):
         """Test of the nearest neighbor construction"""
