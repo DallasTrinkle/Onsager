@@ -404,7 +404,8 @@ class Crystal(object):
          3-vector (float) inside unit cell
         """
         u = np.dot(self.invlatt, v)
-        return None, None
+        ucell = incell(u)
+        return (u-ucell).astype(int), ucell
 
     def cart2pos(self, v):
         """
@@ -414,7 +415,13 @@ class Crystal(object):
          of corresponding atom.
          Returns None on tuple if no match
         """
-        return None, None
+        latt, u = self.cart2unit(v)
+        indlist = [ind for ind in self.atomindices
+                   if np.all(np.isclose(u, self.basis[ind[0]][ind[1]]))]
+        if len(indlist) != 1:
+            return latt, None
+        else:
+            return latt, indlist[0]
 
     def g_direc(self, g, direc):
         """
@@ -462,7 +469,7 @@ class Crystal(object):
         rotlatt = np.dot(g.rot, lattvec)
         rotu = np.dot(g.rot, uvec)
         incellu = incell(rotu)
-        return rotlatt + (np.round(rotu - incellu)), incellu
+        return rotlatt + (np.round(rotu - incellu)).astype(int), incellu
 
     def genpoint(self):
         """

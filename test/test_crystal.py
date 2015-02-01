@@ -388,4 +388,5 @@ class CrystalClassTests(unittest.TestCase):
             self.assertTrue(np.all(lattback == lattvec))
             self.assertTrue(np.all(np.isclose(uback, crys.basis[ind[0]][ind[1]])))
             lattback, indback = crys.cart2pos(crys.pos2cart(lattvec, ind))
-            self.assertTrue()
+            self.assertTrue(np.all(lattback == lattvec))
+            self.assertEqual(indback,ind)
