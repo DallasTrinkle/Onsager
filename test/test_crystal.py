@@ -390,3 +390,20 @@ class CrystalClassTests(unittest.TestCase):
             lattback, indback = crys.cart2pos(crys.pos2cart(lattvec, ind))
             self.assertTrue(np.all(lattback == lattvec))
             self.assertEqual(indback,ind)
+        lattback, indback = crys.cart2pos(np.array([0.25*self.a0, 0.25*self.a0, 0.]))
+        self.assertIsNone(indback)
+
+    def testWyckoff(self):
+        """Test grouping for Wyckoff positions"""
+        basis = [[np.array([0.,0.,0.]),
+                  np.array([1./3.,2./3.,0.5]),
+                  np.array([2./3.,1./3.,0.5])]]
+        crys = crystal.Crystal(self.hexlatt, basis)
+        # crys.Wyckoff : frozen set of frozen sets of tuples that are all equivalent
+        Wyckoffind = {frozenset([(0,0)]),
+                      frozenset([(0,1), (0,2)])}
+        self.assertEqual(crys.Wyckoff, Wyckoffind)
+
+    def testNNfcc(self):
+        """Test of the nearest neighbor construction"""
+        self.assertTrue(False)

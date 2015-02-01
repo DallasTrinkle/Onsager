@@ -213,6 +213,7 @@ class Crystal(object):
         self.center()  # should do before gengroup so that inversion is centered at origin
         self.G = self.gengroup()  # do before genpoint
         self.pointG = self.genpoint()
+        self.Wyckoff = self.genWyckoffsets()
 
     def center(self):
         """
@@ -485,3 +486,16 @@ class Crystal(object):
                             if g.indexmap[atomtypeindex][atomindex] == atomindex])
                  for atomindex in range(len(atomlist))]
                 for atomtypeindex, atomlist in enumerate(self.basis)]
+
+    def genWyckoffsets(self):
+        """
+        Generate our Wykcoff sets.
+        :return: set of sets of tuples of positions that correspond to identical Wyckoff positions
+        """
+        if self.N == 1:
+            return frozenset([frozenset([(0,0)])])
+        # this is a little suboptimal if our basis is huge--it leans heavily
+        # on the construction of sets to make the checks easy.
+        return frozenset([ frozenset([ (ind[0], g.indexmap[ind[0]][ind[1]])
+                                       for g in self.G])
+                           for ind in self.atomindices])
