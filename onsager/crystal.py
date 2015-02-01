@@ -385,6 +385,16 @@ class Crystal(object):
         """
         return np.dot(self.lattice, lattvec + self.basis[ind[0]][ind[1]])
 
+    def cartvect(self, lattvec, uvec):
+        """
+        Return the cartesian coordinates of a position specified by its lattice and
+        unit cell coordinates
+        :param lattvec: 3-vector (integer) lattice vector in direct coordinates
+        :param uvec: 3-vector (float) unit cell vector in direct coordinates
+        :return: 3-vector (float) in Cartesian coordinates
+        """
+        return np.dot(self.lattice, lattvec + uvec)
+
     def g_direc(self, g, direc):
         """
         Apply a space group operation to a direction
@@ -413,6 +423,25 @@ class Crystal(object):
         delu = (np.round(np.dot(g.rot, self.basis[ind[0]][ind[1]]) + g.trans -
                          self.basis[rotind[0]][rotind[1]])).astype(int)
         return rotlatt + delu, rotind
+
+    def g_vect(self, g, lattvec, uvec):
+        """
+        Apply a space group operation to a vector position specified by its lattice and a location
+        in the unit cell in direct coordinates
+        :param g:  group operation (GroupOp)
+        :param lattvec: 3-vector (integer) lattice vector in direct coordinates
+        :param uvec: 3-vector (float) vector in direct coordinates
+        :return: 3-vector (integer) lattice vector in direct coordinates, location in unit cell in
+         direct coordinates
+        """
+        if __debug__:
+            if type(g) is not GroupOp: raise TypeError
+            if type(lattvec) is not np.ndarray: raise TypeError
+            if type(uvec) is not np.ndarray: raise TypeError
+        rotlatt = np.dot(g.rot, lattvec)
+        rotu = np.dot(g.rot, uvec)
+        incellu = incell(rotu)
+        return rotlatt + (np.round(rotu - incellu)), incellu
 
     def genpoint(self):
         """

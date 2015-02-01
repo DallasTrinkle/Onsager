@@ -358,9 +358,18 @@ class CrystalClassTests(unittest.TestCase):
         for ind in crys.atomindices:
             pos = crys.cartpos(lattvec, ind)
             for g in crys.G:
+                # testing g_pos: (transform an atomic position)
                 rotpos = crys.g_direc(g, pos)
                 self.assertTrue(np.all(np.isclose(rotpos,
                                                   crys.cartpos(*crys.g_pos(g, lattvec, ind)))))
+                # testing g_vect: (transform a vector position in the crystal)
+                # TODO: add inverses of cartpos and cartvect
+                rotlatt, rotind = crys.g_pos(g, lattvec, ind)
+                rotlatt2, u = crys.g_vect(g, lattvec, crys.basis[ind[0]][ind[1]])
+                self.assertTrue(np.all(np.isclose(rotpos, crys.cartvect(rotlatt2, u))))
+                self.assertTrue(np.all(rotlatt == rotlatt2))
+                self.assertTrue(np.all(np.isclose(u, crys.basis[rotind[0]][rotind[1]])))
+
             # test point group operations:
             for g in crys.pointG[ind[0]][ind[1]]:
                 origin = np.zeros(3, dtype=int)
