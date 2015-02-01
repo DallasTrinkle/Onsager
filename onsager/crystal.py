@@ -501,3 +501,15 @@ class Crystal(object):
         return frozenset([ frozenset([ (ind[0], g.indexmap[ind[0]][ind[1]])
                                        for g in self.G])
                            for ind in self.atomindices])
+
+    def Wyckoffpos(self, uvec):
+        """
+        Generates all the equivalent Wyckoff positions for a unit cell vector.
+        :param uvec: 3-vector (float) vector in direct coordinates
+        :return: frozen set of equivalent Wyckoff positions
+        """
+        lis = []
+        for u in [ incell(np.dot(g.rot, uvec)) for g in self.G]:
+            if not np.any([np.all(np.isclose(u, u1)) for u1 in lis]):
+                lis.append(u)
+        return lis

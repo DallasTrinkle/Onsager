@@ -404,6 +404,15 @@ class CrystalClassTests(unittest.TestCase):
                       frozenset([(0,1), (0,2)])}
         self.assertEqual(crys.Wyckoff, Wyckoffind)
         # now ask it to generate the set of all equivalent points
+        for wyckset in crys.Wyckoff:
+            for ind in wyckset:
+                # construct our own Wyckoff set using cart2pos...
+                wyckset2 = crys.Wyckoffpos(crys.basis[ind[0]][ind[1]])
+                # test equality:
+                for i in wyckset:
+                    self.assertTrue(np.any([np.all(np.isclose(crys.basis[i[0]][i[1]], u)) for u in wyckset2]))
+                for u in wyckset2:
+                    self.assertTrue(np.any([np.all(np.isclose(crys.basis[i[0]][i[1]], u)) for i in wyckset]))
 
     def testNNfcc(self):
         """Test of the nearest neighbor construction"""
