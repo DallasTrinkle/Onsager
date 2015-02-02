@@ -416,4 +416,9 @@ class CrystalClassTests(unittest.TestCase):
 
     def testNNfcc(self):
         """Test of the nearest neighbor construction"""
-        self.assertTrue(False)
+        crys = crystal.Crystal(self.fcclatt, self.basis)
+        nnlist = crys.nnlist((0,0), 0.9*self.a0)
+        self.assertEqual(len(nnlist), 12)
+        for x in nnlist:
+            self.assertTrue(np.isclose(np.dot(x,x), 0.5*self.a0*self.a0))
+

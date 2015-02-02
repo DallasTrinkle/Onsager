@@ -513,3 +513,27 @@ class Crystal(object):
             if not np.any([np.all(np.isclose(u, u1)) for u1 in lis]):
                 lis.append(u)
         return lis
+
+    def nnlist(self, ind, cutoff):
+        """
+        Generate the nearest neighbor list for a given cutoff
+        :param ind: tuple index for atom
+        :param cutoff:  distance cutoff
+        :return: list of nearest neighbor vectors
+        """
+        r2 = cutoff*cutoff
+        nmax = [int(np.round(np.sqrt(self.metric[i,i])))+1
+                for i in range(3)]
+        supervect = [ np.array([n0, n1, n2])
+                      for n0 in xrange(-nmax[0],nmax[0]+1)
+                      for n1 in xrange(-nmax[1],nmax[1]+1)
+                      for n2 in xrange(-nmax[2],nmax[2]+1) ]
+        lis = []
+        u0 = self.basis[ind[0]][ind[1]]
+        for u1 in self.basis[ind[0]]:
+            du = u1-u0
+            for n in supervect:
+                dx = self.unit2cart(n, du)
+                if np.dot(dx, dx) > 0 and np.dot(dx,dx) < r2:
+                    lis.append(dx)
+        return lis
