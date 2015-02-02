@@ -516,7 +516,9 @@ class Crystal(object):
 
     def nnlist(self, ind, cutoff):
         """
-        Generate the nearest neighbor list for a given cutoff
+        Generate the nearest neighbor list for a given cutoff. Only consider
+        neighbor vectors for atoms of the same type. Returns a list of
+        cartesian vectors.
         :param ind: tuple index for atom
         :param cutoff:  distance cutoff
         :return: list of nearest neighbor vectors
