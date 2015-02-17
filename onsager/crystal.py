@@ -539,3 +539,20 @@ class Crystal(object):
                 if np.dot(dx, dx) > 0 and np.dot(dx,dx) < r2:
                     lis.append(dx)
         return lis
+
+
+### code to work with YAML; use crystal.yaml to call--may need to change in the future
+###  NOTE: deep=True is THE KEY here for reading
+### hat-tip: https://stackoverflow.com/questions/19439765/is-there-a-way-to-construct-an-object-using-pyyaml-construct-mapping-after-all-n
+import yaml
+
+NDARRAY_YAMLTAG = u'!numpy.ndarray'
+def ndarray_representer(dumper, data):
+    """Output a numpy array"""
+    return dumper.represent_sequence(NDARRAY_YAMLTAG, data.tolist())
+
+def ndarray_constructor(loader, node):
+    return np.array(loader.construct_sequence(node, deep=True))
+
+yaml.add_representer(np.ndarray, ndarray_representer)
+yaml.add_constructor(NDARRAY_YAMLTAG, ndarray_constructor)

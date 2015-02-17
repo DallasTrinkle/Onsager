@@ -422,3 +422,17 @@ class CrystalClassTests(unittest.TestCase):
         for x in nnlist:
             self.assertTrue(np.isclose(np.dot(x,x), 0.5*self.a0*self.a0))
 
+class YAMLTests(unittest.TestCase):
+    """Tests to make sure we can use YAML to write and read our classes."""
+    def testarrayYAML(self):
+        """Test that we can write and read an array"""
+        for a in [1, np.array([1.,0.,0.]), np.eye(3, dtype=float), np.eye(3, dtype=int)]:
+            # we could do this with one call; if we want to add tests for the format later
+            # they should go in between here.
+            awrite = crystal.yaml.dump(a)
+            aread = crystal.yaml.load(awrite)
+            self.assertTrue(np.all(np.isclose(a, aread)))
+
+    def testGroupOpYAML(self):
+        """Test that we can write and read a GroupOp"""
+        self.assertTrue(False)
