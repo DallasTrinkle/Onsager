@@ -106,8 +106,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
 
     def __eq__(self, other):
         """Test for equality--we use numpy.isclose for comparison, since that's what we usually care about"""
-        if __debug__:
-            if type(other) is not GroupOp: raise TypeError
+        # if not type(other) is not GroupOp: return False
         return isinstance(other, self.__class__) and \
                np.all(self.rot == other.rot) and \
                np.all(np.isclose(self.trans, other.trans)) and \
@@ -556,3 +555,16 @@ def ndarray_constructor(loader, node):
 
 yaml.add_representer(np.ndarray, ndarray_representer)
 yaml.add_constructor(NDARRAY_YAMLTAG, ndarray_constructor)
+
+GROUPOP_YAMLTAG = u'!GroupOp'
+def GroupOp_representer(dumper, data):
+    """Output a GroupOp"""
+    # asdict() returns an OrderedDictionary
+    return dumper.represent_mapping(GROUPOP_YAMLTAG, dict(data._asdict()))
+
+def GroupOp_constructor(loader, node):
+    return np.array(loader.construct_sequence(node, deep=True))
+
+yaml.add_representer(GroupOp, GroupOp_representer)
+yaml.add_constructor(GROUPOP_YAMLTAG, GroupOp_constructor)
+

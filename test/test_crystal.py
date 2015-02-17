@@ -39,8 +39,7 @@ class GroupOperationTests(unittest.TestCase):
 
     def testEquality(self):
         """Can we check if two group operations are equal?"""
-        with self.assertRaises(TypeError):
-            self.mirrorop == self.rot
+        self.assertNotEqual(self.mirrorop, self.rot)
         self.assertEqual(self.mirrorop.incell(), self.mirrorop)
         # self.assertEqual(self.mirrorop.__hash__(), (self.mirrorop + np.array([1,0,0])).__hash__())
 
@@ -435,4 +434,11 @@ class YAMLTests(unittest.TestCase):
 
     def testGroupOpYAML(self):
         """Test that we can write and read a GroupOp"""
+        g = crystal.GroupOp(np.eye(3,dtype=int),
+                            np.array([0.,0.,0.]),
+                            np.eye(3),
+                            [[0]])
+        # crystal.yaml.add_representer(crystal.GroupOp, crystal.GroupOp_representer)
+        gwrite = crystal.yaml.dump(g)
+        print gwrite
         self.assertTrue(False)
