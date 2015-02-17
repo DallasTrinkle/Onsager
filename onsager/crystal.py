@@ -559,11 +559,12 @@ yaml.add_constructor(NDARRAY_YAMLTAG, ndarray_constructor)
 GROUPOP_YAMLTAG = u'!GroupOp'
 def GroupOp_representer(dumper, data):
     """Output a GroupOp"""
-    # asdict() returns an OrderedDictionary
+    # asdict() returns an OrderedDictionary, so pass through dict()
     return dumper.represent_mapping(GROUPOP_YAMLTAG, dict(data._asdict()))
 
 def GroupOp_constructor(loader, node):
-    return np.array(loader.construct_sequence(node, deep=True))
+    # ** turns the dictionary into parameters for GroupOp constructor
+    return GroupOp(**loader.construct_mapping(node, deep=True))
 
 yaml.add_representer(GroupOp, GroupOp_representer)
 yaml.add_constructor(GROUPOP_YAMLTAG, GroupOp_constructor)

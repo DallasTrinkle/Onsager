@@ -440,5 +440,5 @@ class YAMLTests(unittest.TestCase):
                             [[0]])
         # crystal.yaml.add_representer(crystal.GroupOp, crystal.GroupOp_representer)
         gwrite = crystal.yaml.dump(g)
-        print gwrite
-        self.assertTrue(False)
+        gread = crystal.yaml.load(gwrite)
+        self.assertEqual(g, gread)
