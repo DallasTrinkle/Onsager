@@ -231,7 +231,7 @@ class Crystal(object):
         self.N = len(self.atomindices)
         self.volume, self.metric = self.calcmetric()
         self.reciplatt = 2.*np.pi*self.invlatt.T
-        self.BZvol = abs(np.linalg.det(self.reciplatt))
+        self.BZvol = abs(float(np.linalg.det(self.reciplatt)))
         self.center()  # should do before gengroup so that inversion is centered at origin
         self.G = self.gengroup()  # do before genpoint
         self.pointG = self.genpoint()
@@ -365,7 +365,7 @@ class Crystal(object):
         Computes the volume of the cell and the metric tensor
         :return: volume, metric tensor
         """
-        return abs(np.linalg.det(self.lattice)), np.dot(self.lattice.T, self.lattice)
+        return abs(float(np.linalg.det(self.lattice))), np.dot(self.lattice.T, self.lattice)
 
     def gengroup(self):
         """

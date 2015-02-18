@@ -433,7 +433,7 @@ class YAMLTests(unittest.TestCase):
             self.assertTrue(np.all(np.isclose(a, aread)))
             self.assertIsInstance(aread, np.ndarray)
 
-    def testSet(self):
+    def testSetYAML(self):
         """Test that we can use YAML to write and read a frozenset"""
         for a in [frozenset([]), frozenset([1]), frozenset([0,1,1]), frozenset(range(10))]:
             awrite = crystal.yaml.dump(a)
@@ -452,3 +452,35 @@ class YAMLTests(unittest.TestCase):
         gread = crystal.yaml.load(gwrite)
         self.assertEqual(g, gread)
         self.assertIsInstance(gread, crystal.GroupOp)
+
+    def testCrystalYAML(self):
+        """Test that we can write and read a crystal"""
+        a0 = 2.5
+        c_a = np.sqrt(8./3.)
+        hexlatt = a0*np.array([[0.5, 0.5, 0],
+                               [-np.sqrt(0.75), np.sqrt(0.75), 0],
+                               [0, 0, c_a]])
+        basis = [[np.array([0.,0.,0.]),
+                  np.array([1./3.,2./3.,0.5]),
+                  np.array([2./3.,1./3.,0.5])]]
+        crys = crystal.Crystal(hexlatt, basis)
+        cryswrite = crystal.yaml.dump(crys)
+        crysread = crystal.yaml.load(cryswrite)
+        print crys
+        print crysread
+        print cryswrite
+        self.assertIsInstance(crysread, crystal.Crystal)
+        self.assertTrue(np.all(np.isclose(crys.lattice, crysread.lattice)))
+        self.assertTrue(np.all(np.isclose(crys.invlatt, crysread.invlatt)))
+        self.assertTrue(np.all(np.isclose(crys.reciplatt, crysread.reciplatt)))
+        self.assertTrue(np.all(np.isclose(crys.metric, crysread.metric)))
+        self.assertEqual(crys.N, crysread.N)
+        self.assertTrue(np.all(np.isclose(crys.basis, crysread.basis)))
+        self.assertEqual(crys.G, crysread.G)
+        self.assertAlmostEqual(crys.volume, crysread.volume)
+        self.assertAlmostEqual(crys.BZvol, crysread.BZvol)
+        self.assertEqual(crys.atomindices, crysread.atomindices)
+        self.assertEqual(crys.pointG, crysread.pointG)
+        self.assertEqual(crys.Wyckoff, crysread.Wyckoff)
+
+
