@@ -425,12 +425,21 @@ class YAMLTests(unittest.TestCase):
     """Tests to make sure we can use YAML to write and read our classes."""
     def testarrayYAML(self):
         """Test that we can write and read an array"""
-        for a in [1, np.array([1.,0.,0.]), np.eye(3, dtype=float), np.eye(3, dtype=int)]:
+        for a in [np.array([1]), np.array([1.,0.,0.]), np.eye(3, dtype=float), np.eye(3, dtype=int)]:
             # we could do this with one call; if we want to add tests for the format later
             # they should go in between here.
             awrite = crystal.yaml.dump(a)
             aread = crystal.yaml.load(awrite)
             self.assertTrue(np.all(np.isclose(a, aread)))
+            self.assertIsInstance(aread, np.ndarray)
+
+    def testSet(self):
+        """Test that we can use YAML to write and read a frozenset"""
+        for a in [frozenset([]), frozenset([1]), frozenset([0,1,1]), frozenset(range(10))]:
+            awrite = crystal.yaml.dump(a)
+            aread = crystal.yaml.load(awrite)
+            self.assertEqual(a, aread)
+            self.assertIsInstance(aread, frozenset)
 
     def testGroupOpYAML(self):
         """Test that we can write and read a GroupOp"""
@@ -442,3 +451,4 @@ class YAMLTests(unittest.TestCase):
         gwrite = crystal.yaml.dump(g)
         gread = crystal.yaml.load(gwrite)
         self.assertEqual(g, gread)
+        self.assertIsInstance(gread, crystal.GroupOp)

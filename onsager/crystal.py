@@ -12,6 +12,13 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 import collections
+import yaml ### use crystal.yaml to call--may need to change in the future
+
+# YAML tags:
+# interfaces are either at the bottom, or staticmethods in the corresponding object
+NDARRAY_YAMLTAG = u'!numpy.ndarray'
+GROUPOP_YAMLTAG = u'!GroupOp'
+#FROZENSET_YAMLTAG = u'!set'
 
 
 def incell(vec):
@@ -157,6 +164,20 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
                        self.cartrot.T,
                        [ [ x for i,x in sorted([(y,j) for j,y in enumerate(atomlist)])]
                          for atomlist in self.indexmap])
+
+    @staticmethod
+    def GroupOp_representer(dumper, data):
+        """Output a GroupOp"""
+        # asdict() returns an OrderedDictionary, so pass through dict()
+        return dumper.represent_mapping(GROUPOP_YAMLTAG, dict(data._asdict()))
+
+    @staticmethod
+    def GroupOp_constructor(loader, node):
+        """Construct a GroupOp from YAML"""
+        # ** turns the dictionary into parameters for GroupOp constructor
+        return GroupOp(**loader.construct_mapping(node, deep=True))
+
+
 
 class Crystal(object):
     """
@@ -540,32 +561,20 @@ class Crystal(object):
         return lis
 
 
-### code to work with YAML; use crystal.yaml to call--may need to change in the future
-###  NOTE: deep=True is THE KEY here for reading
-### hat-tip: https://stackoverflow.com/questions/19439765/is-there-a-way-to-construct-an-object-using-pyyaml-construct-mapping-after-all-n
-import yaml
-
-NDARRAY_YAMLTAG = u'!numpy.ndarray'
+# YAML interfaces for types outside of this module
 def ndarray_representer(dumper, data):
     """Output a numpy array"""
     return dumper.represent_sequence(NDARRAY_YAMLTAG, data.tolist())
 
+### NOTE: deep=True is THE KEY here for reading
+### hat-tip: https://stackoverflow.com/questions/19439765/is-there-a-way-to-construct-an-object-using-pyyaml-construct-mapping-after-all-n
 def ndarray_constructor(loader, node):
     return np.array(loader.construct_sequence(node, deep=True))
 
+# YAML registration:
 yaml.add_representer(np.ndarray, ndarray_representer)
 yaml.add_constructor(NDARRAY_YAMLTAG, ndarray_constructor)
 
-GROUPOP_YAMLTAG = u'!GroupOp'
-def GroupOp_representer(dumper, data):
-    """Output a GroupOp"""
-    # asdict() returns an OrderedDictionary, so pass through dict()
-    return dumper.represent_mapping(GROUPOP_YAMLTAG, dict(data._asdict()))
-
-def GroupOp_constructor(loader, node):
-    # ** turns the dictionary into parameters for GroupOp constructor
-    return GroupOp(**loader.construct_mapping(node, deep=True))
-
-yaml.add_representer(GroupOp, GroupOp_representer)
-yaml.add_constructor(GROUPOP_YAMLTAG, GroupOp_constructor)
+yaml.add_representer(GroupOp, GroupOp.GroupOp_representer)
+yaml.add_constructor(GROUPOP_YAMLTAG, GroupOp.GroupOp_constructor)
 
