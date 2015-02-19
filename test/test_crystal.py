@@ -466,9 +466,6 @@ class YAMLTests(unittest.TestCase):
         crys = crystal.Crystal(hexlatt, basis)
         cryswrite = crystal.yaml.dump(crys)
         crysread = crystal.yaml.load(cryswrite)
-        print crys
-        print crysread
-        print cryswrite
         self.assertIsInstance(crysread, crystal.Crystal)
         self.assertTrue(np.all(np.isclose(crys.lattice, crysread.lattice)))
         self.assertTrue(np.all(np.isclose(crys.invlatt, crysread.invlatt)))
