@@ -95,5 +95,5 @@ if __name__ == '__main__':
     Lijcalc = FiveFreqFreqCalc(FCClatt.lattice(), FCClatt.NNvect())
     print '#w0 #w1 #w2 #w3 #w4 #Lvv #Lss #Lsv #L1vv'
     for w in w_array:
-        L0vv, Lss, Lsv, L1vv = Lijcalc.Lij(w[0], w[1], w[2], w[3], w[4])
+        L0vv, Lss, Lsv, L1vv = Lijcalc.Lij(*w) # w[0], w[1], w[2], w[3], w[4]
         print w[0], w[1], w[2], w[3], w[4], L0vv[0, 0], Lss[0, 0], Lsv[0, 0], L1vv[0, 0]
