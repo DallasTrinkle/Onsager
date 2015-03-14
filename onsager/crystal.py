@@ -237,6 +237,33 @@ class Crystal(object):
         self.pointG = self.genpoint()
         self.Wyckoff = self.genWyckoffsets()
 
+    def __repr__(self):
+        """String representation of crystal (lattice + basis)"""
+        return 'Crystal(' + repr(self.lattice).replace('\n','').replace('\t','') + ',' + repr(self.basis) + ')'
+
+    def __str__(self):
+        """Human-readable version of crystal (lattice + basis)"""
+        str = "#Lattice:\n  a1 = {}\n  a2 = {}\n  a3 = {}\n#Basis:".format(
+            self.lattice.T[0], self.lattice.T[1], self.lattice.T[2])
+        for chemind, atoms in enumerate(self.basis):
+            for atomind, pos in enumerate(atoms):
+                str = str + "\n  {}.{} = {}".format(chemind+1, atomind+1, pos)
+        return str
+
+    @classmethod
+    def fromdict(cls, yamldict):
+        """
+        Creates a Crystal object from a YAML-created dictionary
+        :param yamldict: dictionary; must contain 'lattice' (using *row* vectors!) and 'basis';
+        can contain optional 'lattice_constant'
+        :return: Crystal(lattice.T, basis)
+        """
+        if 'lattice' not in yamldict: raise IndexError('{} does not contain "lattice"'.format(yamldict))
+        if 'basis' not in yamldict: raise IndexError('{} does not contain "basis"'.format(yamldict))
+        lattice_constant = 1.
+        if 'lattice_constant' in yamldict: lattice_constant = yamldict['lattice_constant']
+        return Crystal((lattice_constant*yamldict['lattice']).T, yamldict['basis'])
+
     def center(self):
         """
         Center the atoms in the cell if there is an inversion operation present.

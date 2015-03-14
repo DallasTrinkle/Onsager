@@ -480,4 +480,41 @@ class YAMLTests(unittest.TestCase):
         self.assertEqual(crys.pointG, crysread.pointG)
         self.assertEqual(crys.Wyckoff, crysread.Wyckoff)
 
+    def testCrystalYAMLsimplified(self):
+        """Test that we can read a simplified crystal input"""
+        a0 = 2.5
+        c_a = np.sqrt(8./3.)
+        hexlatt = a0*np.array([[0.5, 0.5, 0],
+                               [-np.sqrt(0.75), np.sqrt(0.75), 0],
+                               [0, 0, c_a]])
+        basis = [[np.array([0.,0.,0.]),
+                  np.array([1./3.,2./3.,0.5]),
+                  np.array([2./3.,1./3.,0.5])]]
+        crys = crystal.Crystal(hexlatt, basis)
+        yamlstr = """lattice_constant: 2.5
+lattice: !numpy.ndarray
+- [0.5, -0.8660254037844386, 0]
+- [0.5,  0.8660254037844386, 0]
+- [0.0, 0.0, 1.6329931618554521]
+basis:
+- - !numpy.ndarray [0.0, 0.0, 0.0]
+  - !numpy.ndarray [0.3333333333333333, 0.6666666666666666, 0.5]
+  - !numpy.ndarray [0.6666666666666666, 0.3333333333333333, 0.5]
+chemistry:
+- Ti"""
+        crysread = crystal.Crystal.fromdict(crystal.yaml.load(yamlstr))
+        self.assertIsInstance(crysread, crystal.Crystal)
+        self.assertTrue(np.all(np.isclose(crys.lattice, crysread.lattice)))
+        self.assertTrue(np.all(np.isclose(crys.invlatt, crysread.invlatt)))
+        self.assertTrue(np.all(np.isclose(crys.reciplatt, crysread.reciplatt)))
+        self.assertTrue(np.all(np.isclose(crys.metric, crysread.metric)))
+        self.assertEqual(crys.N, crysread.N)
+        self.assertTrue(np.all(np.isclose(crys.basis, crysread.basis)))
+        self.assertEqual(crys.G, crysread.G)
+        self.assertAlmostEqual(crys.volume, crysread.volume)
+        self.assertAlmostEqual(crys.BZvol, crysread.BZvol)
+        self.assertEqual(crys.atomindices, crysread.atomindices)
+        self.assertEqual(crys.pointG, crysread.pointG)
+        self.assertEqual(crys.Wyckoff, crysread.Wyckoff)
+
 
