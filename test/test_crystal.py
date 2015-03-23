@@ -87,6 +87,8 @@ class GroupOperationTests(unittest.TestCase):
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
         self.assertEqual(rottype, 1) # should be the identity
         self.assertTrue(np.all(np.isclose(eigenvect, np.eye(3))))
+        basis = crystal.VectorBasis(rottype, eigenvect)
+        self.assertEqual(basis[0], 3) # should be a sphere
 
         # inversion
         rot = -np.eye(3)
@@ -94,6 +96,8 @@ class GroupOperationTests(unittest.TestCase):
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
         self.assertEqual(rottype, -2) # should be the identity
         self.assertTrue(np.all(np.isclose(eigenvect, np.eye(3))))
+        basis = crystal.VectorBasis(rottype, eigenvect)
+        self.assertEqual(basis[0], 0) # should be a point
 
         # mirror through the y=x line: (x,y) -> (y,x)
         rot = np.array([[0.,1.,0.],[1.,0.,0.],[0.,0.,1.]])
@@ -102,6 +106,9 @@ class GroupOperationTests(unittest.TestCase):
         self.assertEqual(rottype, -1)
         self.assertTrue(np.isclose(abs(np.dot(eigenvect[0],
                                               np.array([1/np.sqrt(2), -1/np.sqrt(2),0]))), 1))
+        basis = crystal.VectorBasis(rottype, eigenvect)
+        self.assertEqual(basis[0], 2) # should be a plane
+        self.assertTrue(np.all(np.isclose(basis[1], eigenvect[0])))
 
         # three-fold rotation around the body-center
         rot = np.array([[0.,1.,0.],[0.,0.,1.],[1.,0.,0.]])
@@ -110,6 +117,9 @@ class GroupOperationTests(unittest.TestCase):
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
         self.assertTrue(np.isclose(abs(np.dot(eigenvect[0],
                                               np.array([1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3)]))), 1))
+        basis = crystal.VectorBasis(rottype, eigenvect)
+        self.assertEqual(basis[0], 1) # should be a line
+        self.assertTrue(np.all(np.isclose(basis[1], eigenvect[0])))
 
     def testCombineVectorBasis(self):
         """Test our ability to combine a few vector basis choices"""

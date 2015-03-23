@@ -239,6 +239,19 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         return GroupOp(**loader.construct_mapping(node, deep=True))
 
 
+def VectorBasis(rottype, eigenvect):
+    """
+    Returns a vector basis corresponding to the optype and eigenvectors for a GroupOp
+    :param rottype: output from eigen()
+    :param eigenvect: eigenvectors
+    :return: (dim, vect) -- dimensionality (0..3), vector defining line direction (1) or plane normal (2)
+    """
+    # edge cases first:
+    if rottype == 1: return (3, np.zeros(3)) # sphere (identity)
+    if rottype == -2: return (0, np.zeros(3)) # point (inversion)
+    if rottype == -1: return (2, eigenvect[0]) # plane (pure mirror)
+    return (1, eigenvect[0]) # line (all others--there's a rotation axis involved
+
 def CombineBasis(b1, b2):
     """
     Combines (intersects) two vector spaces into one.
