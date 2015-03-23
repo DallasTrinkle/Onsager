@@ -486,6 +486,27 @@ class CrystalClassTests(unittest.TestCase):
                 for u in wyckset2:
                     self.assertTrue(np.any([np.all(np.isclose(crys.basis[i[0]][i[1]], u)) for i in wyckset]))
 
+    def testVectorBasis(self):
+        """Test for the generation of a vector basis for sites in a crystal: oct. + tet."""
+        # start with HCP, then "build out" a lattice that includes interstitial sites
+        basis = [[np.array([1./3.,2./3.,0.25]),
+                  np.array([2./3.,1./3.,0.75])]]
+        HCPcrys = crystal.Crystal(self.hexlatt, basis)
+        octset = HCPcrys.Wyckoffpos(np.array([0., 0., 0.5]))
+        tetset = HCPcrys.Wyckoffpos(np.array([1./3., 2./3., 0.5]))
+        self.assertEqual(len(octset), 2)
+        self.assertEqual(len(tetset), 4)
+        # now, build up HCP + interstitials (which are of a *different chemistry*)
+        HCP_intercrys = crystal.Crystal(self.hexlatt, basis + [octset + tetset])
+        for i in range(2):
+            vbas = HCP_intercrys.VectorBasis((1,i)) # for our octahedral site
+            self.assertEqual(vbas[0], 0) # should be a point
+        for i in range(2, 6):
+            vbas = HCP_intercrys.VectorBasis((1,i)) # for our tetrahedal sites
+            self.assertEqual(vbas[0], 1) # should be a line
+            self.assertEqual(vbas[0][0], 0) # pointing vertically up
+            self.assertEqual(vbas[0][1], 0) # pointing vertically up
+
     def testNNfcc(self):
         """Test of the nearest neighbor construction"""
         crys = crystal.Crystal(self.fcclatt, self.basis)
@@ -493,6 +514,7 @@ class CrystalClassTests(unittest.TestCase):
         self.assertEqual(len(nnlist), 12)
         for x in nnlist:
             self.assertTrue(np.isclose(np.dot(x,x), 0.5*self.a0*self.a0))
+
 
 class YAMLTests(unittest.TestCase):
     """Tests to make sure we can use YAML to write and read our classes."""

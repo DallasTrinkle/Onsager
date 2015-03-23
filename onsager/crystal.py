@@ -621,7 +621,7 @@ class Crystal(object):
             if type(lattvec) is not np.ndarray: raise TypeError
             if type(uvec) is not np.ndarray: raise TypeError
         rotlatt = np.dot(g.rot, lattvec)
-        rotu = np.dot(g.rot, uvec)
+        rotu = np.dot(g.rot, uvec) + g.trans
         incellu = incell(rotu)
         return rotlatt + (np.round(rotu - incellu)).astype(int), incellu
 
@@ -657,13 +657,23 @@ class Crystal(object):
         """
         Generates all the equivalent Wyckoff positions for a unit cell vector.
         :param uvec: 3-vector (float) vector in direct coordinates
-        :return: frozen set of equivalent Wyckoff positions
+        :return: list of equivalent Wyckoff positions
         """
         lis = []
-        for u in [ incell(np.dot(g.rot, uvec)) for g in self.G]:
+        zero = np.zeros(3, dtype=int)
+        for u in [ self.g_vect(g, zero, uvec)[1] for g in self.G]:
             if not np.any([np.all(np.isclose(u, u1)) for u1 in lis]):
                 lis.append(u)
         return lis
+
+    def VectorBasis(self, ind):
+        """
+        Generates the vector basis corresponding to an atomic site
+        :param ind: tuple index for atom
+        :return: (dim, vect) -- dimension of basis, vector = normal for plane, direction for line
+        """
+        # need to work with the point group operations for the site
+        return (3, np.zeros(3))
 
     def nnlist(self, ind, cutoff):
         """
