@@ -165,6 +165,67 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
                        [ [ x for i,x in sorted([(y,j) for j,y in enumerate(atomlist)])]
                          for atomlist in self.indexmap])
 
+    def eigen(self):
+        """Returns the type of group operation (single integer) and eigenvectors.
+        1 = identity
+        2, 3, 4, 6 = n- fold rotation around an axis
+        negative = rotation + mirror operation, perpendicular to axis
+        "special cases": -1 = mirror, -2 = inversion
+
+        eigenvect[0] = axis of rotation / mirror
+        eigenvect[1], eigenvect[2] = orthonormal vectors to define the plane giving a right-handed
+          coordinate system and where rotation around [0] is positive, and the positive imaginary
+          eigenvector for the complex eigenvalue is [1] + i [2].
+        """
+        tr = np.int(np.round(self.cartrot.trace()))
+        if np.linalg.det(self.cartrot) > 0:
+            det = 1
+            optype = (2, 3, 4, 6, 1)[tr + 1] # trace determines the rotation type
+        else:
+            det = -1
+            optype = (-2, -3, -4, -6, -1)[tr + 3] # trace determines the rotation type
+        # two trivial cases: identity, inversion:
+        if optype == 1 or optype == -2:
+            return optype, np.eye(3)
+        # otherwise, there's an axis to find:
+        vmat = np.eye(3)
+        vsum = np.zeros((3,3))
+        if det>0:
+            for n in range(optype):
+                vsum += vmat
+                vmat = np.dot(self.cartrot, vmat)
+        else:
+            for n in range((0, 6, 4, 3, 2)[tr + 3]): #
+                vsum += vmat
+                vmat = -np.dot(self.cartrot, vmat)
+        # vmat *should* equal identity if we didn't fail...
+        if __debug__:
+            if not np.all(np.isclose(vmat, np.eye(3))): raise ArithmeticError('eigenvalue analysis fail')
+        vsum *= 1./n
+        # now the columns of vsum should either be (a) our rotation / mirror axis, or (b) zero
+        eig0 = vsum[:,0]
+        magn0 = np.dot(eig0, eig0)
+        if magn0 < 1e-2:
+            eig0 = vsum[:,1]
+            magn0 = np.dot(eig0, eig0)
+            if magn0 < 1e-2:
+                eig0 = vsum[:,2]
+                magn0 = np.dot(eig0, eig0)
+        eig0 /= np.sqrt(magn0)
+        # now, construct the other two directions:
+        if abs(eig0[2]) < 0.75:
+            eig1 = np.array([eig0[1], -eig0[0], 0])
+        else:
+            eig1 = np.array([-eig[2], 0, eig0[0]])
+        eig1 /= np.sqrt(np.dot(eig1, eig1))
+        eig2 = np.cross(eig0, eig1)
+        # we have a right-handed coordinate system; test that we have a positive rotation around the axis
+        if abs(optype) > 2:
+            if np.dot(eig2, np.dot(self.cartrot, eig1)) > 0:
+                eig0 = -eig0
+                eig2 = -eig2
+        return optype, [eig0, eig1, eig2]
+
     @staticmethod
     def GroupOp_representer(dumper, data):
         """Output a GroupOp"""
