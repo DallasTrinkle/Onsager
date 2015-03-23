@@ -251,7 +251,7 @@ def CombineBasis(b1, b2):
     if b2[0] == 3: return b1
     if b1[0] == 0: return b1
     if b2[0] == 0: return b2
-    return b1
+    return b2
 
 class Crystal(object):
     """

@@ -120,7 +120,9 @@ class GroupOperationTests(unittest.TestCase):
         line1 = (1, np.array([1., 0., 0.]))
         for t in [sphere, point, plane1, line1]:
             self.assertEqual(crystal.CombineBasis(t, t)[0], t[0])
-
+        res = crystal.CombineBasis(line1, plane1)
+        self.assertEqual(res[0], 1) # should be a line
+        self.assertTrue(np.isclose(abs(np.dot(res[1], line1[1])), 1))
 
 
 class CrystalClassTests(unittest.TestCase):
