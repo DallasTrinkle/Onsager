@@ -504,8 +504,8 @@ class CrystalClassTests(unittest.TestCase):
         for i in range(2, 6):
             vbas = HCP_intercrys.VectorBasis((1,i)) # for our tetrahedal sites
             self.assertEqual(vbas[0], 1) # should be a line
-            self.assertEqual(vbas[0][0], 0) # pointing vertically up
-            self.assertEqual(vbas[0][1], 0) # pointing vertically up
+            self.assertEqual(vbas[1][0], 0) # pointing vertically up
+            self.assertEqual(vbas[1][1], 0) # pointing vertically up
 
     def testNNfcc(self):
         """Test of the nearest neighbor construction"""

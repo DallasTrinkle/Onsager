@@ -512,11 +512,11 @@ class Crystal(object):
         matchvect = [[u for u in supercellvect
                       if np.isclose(np.dot(u, np.dot(self.metric, u)),
                                     self.metric[d, d])] for d in xrange(3)]
-        for super in [np.array((r0, r1, r2)).T
+        for super in (np.array((r0, r1, r2)).T
                       for r0 in matchvect[0]
                       for r1 in matchvect[1]
                       for r2 in matchvect[2]
-                      if abs(np.inner(r0, np.cross(r1, r2))) == 1]:
+                      if abs(np.inner(r0, np.cross(r1, r2))) == 1):
             if np.all(np.isclose(np.dot(super.T, np.dot(self.metric, super)), self.metric)):
                 # possible operation--need to check the atomic positions
                 trans, indexmap = maptranslation(self.basis,
@@ -661,7 +661,7 @@ class Crystal(object):
         """
         lis = []
         zero = np.zeros(3, dtype=int)
-        for u in [ self.g_vect(g, zero, uvec)[1] for g in self.G]:
+        for u in ( self.g_vect(g, zero, uvec)[1] for g in self.G ):
             if not np.any([np.all(np.isclose(u, u1)) for u1 in lis]):
                 lis.append(u)
         return lis
@@ -673,7 +673,9 @@ class Crystal(object):
         :return: (dim, vect) -- dimension of basis, vector = normal for plane, direction for line
         """
         # need to work with the point group operations for the site
-        return (3, np.zeros(3))
+        return reduce(CombineBasis,
+                      [ VectorBasis(*g.eigen()) for g in self.pointG[ind[0]][ind[1]] ] )
+        # , (3, np.zeros(3)) -- don't need initial value; if there's only one group op, it's identity
 
     def nnlist(self, ind, cutoff):
         """
