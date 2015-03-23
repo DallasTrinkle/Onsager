@@ -244,14 +244,31 @@ def CombineBasis(b1, b2):
     Combines (intersects) two vector spaces into one.
     :param b1: (dim, vect) -- dimensionality (0..3), vector defining line direction (1) or plane normal (2)
     :param b2: (dim, vect)
-    :return: (dim, vect
+    :return: (dim, vect)
     """
     # edge cases first
-    if b1[0] == 3: return b2
+    if b1[0] == 3: return b2 # sphere with anything
     if b2[0] == 3: return b1
-    if b1[0] == 0: return b1
+    if b1[0] == 0: return b1 # point with anything
     if b2[0] == 0: return b2
-    return b2
+    if b1[0] == b2[0]:
+        if abs(np.dot(b1[1], b2[1])) > (1.-1e-8): # parallel vectors
+            return b1 # equal bases
+        else: # vectors not equal...
+            if b1[0] == 1: # for a line, that's death:
+                return (0, np.zeros(3))
+            else: # for a plane, need the mutual line:
+                v = np.cross(b1[1], b2[1])
+                return (1, v/np.sqrt(np.dot(v,v)))
+    # finally: one is a plane, other is a line:
+    if abs(np.dot(b1[1], b2[1])) > 1e-8: # if the vectors are not perpendicular, death:
+        return (0, np.zeros(3))
+    else: # return whichever is a line:
+        if b1[0] == 1:
+            return b1
+        else:
+            return b2
+
 
 class Crystal(object):
     """
