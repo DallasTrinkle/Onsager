@@ -75,6 +75,42 @@ class GroupOperationTests(unittest.TestCase):
         invtrans = inversion + v1
         self.assertEqual(invtrans.inv(), invtrans)
 
+    def testGroupAnalysis(self):
+        """If we determine the eigenvalues / vectors of a group operation, are they what we expect?"""
+        # This is entirely dictated by the cartrot part of a GroupOp, so we will only look at that
+        # identity
+        # rotation type: 1 = identity; 2..6 : 2- .. 6- fold rotation; negation includes a
+        # perpendicular mirror
+        # therefore: a single mirror is -1, and inversion is -2 (since 2-fold rotation + mirror = i)
+        rot = np.eye(3)
+        rottype, eigenvect = (crystal.GroupOp(self.rot, self.trans, rot, self.indexmap)).eigen()
+        self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
+        self.assertEqual(rottype, 1) # should be the identity
+        self.assertTrue(np.all(np.isclose(eigenvect, np.eye(3))))
+
+        # inversion
+        rot = -np.eye(3)
+        rottype, eigenvect = (crystal.GroupOp(self.rot, self.trans, rot, self.indexmap)).eigen()
+        self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
+        self.assertEqual(rottype, -2) # should be the identity
+        self.assertTrue(np.all(np.isclose(eigenvect, np.eye(3))))
+
+        # mirror through the y=-x line: (x,y) -> (y,x)
+        rot = np.array([[0.,1.,0.],[1.,0.,0.],[0.,0.,1.]])
+        rottype, eigenvect = (crystal.GroupOp(self.rot, self.trans, rot, self.indexmap)).eigen()
+        self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
+        self.assertEqual(rottype, -1)
+        self.assertTrue(np.isclose(abs(np.dot(eigenvect[0], np.array([np.sqrt(2), np.sqrt(2),0]))), 1))
+
+        # three-fold rotation around the body-center
+        rot = np.array([[0.,1.,0.],[0.,0.,1.],[1.,0.,0.]])
+        rottype, eigenvect = (crystal.GroupOp(self.rot, self.trans, rot, self.indexmap)).eigen()
+        self.assertEqual(rottype, 3)
+        self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
+        self.assertTrue(np.isclose(abs(np.dot(eigenvect[0], np.array([np.sqrt(3), np.sqrt(3),np.sqrt(3)]))), 1))
+
+
+
 
 class CrystalClassTests(unittest.TestCase):
     """Tests for the crystal class and symmetry analysis."""
