@@ -239,6 +239,20 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         return GroupOp(**loader.construct_mapping(node, deep=True))
 
 
+def CombineBasis(b1, b2):
+    """
+    Combines (intersects) two vector spaces into one.
+    :param b1: (dim, vect) -- dimensionality (0..3), vector defining line direction (1) or plane normal (2)
+    :param b2: (dim, vect)
+    :return: (dim, vect
+    """
+    # edge cases first
+    if b1[0] == 3: return b2
+    if b2[0] == 3: return b1
+    if b1[0] == 0: return b1
+    if b2[0] == 0: return b2
+    return b1
+
 class Crystal(object):
     """
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.
