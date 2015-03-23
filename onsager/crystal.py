@@ -216,7 +216,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         if abs(eig0[2]) < 0.75:
             eig1 = np.array([eig0[1], -eig0[0], 0])
         else:
-            eig1 = np.array([-eig[2], 0, eig0[0]])
+            eig1 = np.array([-eig0[2], 0, eig0[0]])
         eig1 /= np.sqrt(np.dot(eig1, eig1))
         eig2 = np.cross(eig0, eig1)
         # we have a right-handed coordinate system; test that we have a positive rotation around the axis
@@ -237,7 +237,6 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         """Construct a GroupOp from YAML"""
         # ** turns the dictionary into parameters for GroupOp constructor
         return GroupOp(**loader.construct_mapping(node, deep=True))
-
 
 
 class Crystal(object):

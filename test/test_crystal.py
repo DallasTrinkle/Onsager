@@ -95,21 +95,19 @@ class GroupOperationTests(unittest.TestCase):
         self.assertEqual(rottype, -2) # should be the identity
         self.assertTrue(np.all(np.isclose(eigenvect, np.eye(3))))
 
-        # mirror through the y=-x line: (x,y) -> (y,x)
+        # mirror through the y=x line: (x,y) -> (y,x)
         rot = np.array([[0.,1.,0.],[1.,0.,0.],[0.,0.,1.]])
         rottype, eigenvect = (crystal.GroupOp(self.rot, self.trans, rot, self.indexmap)).eigen()
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
         self.assertEqual(rottype, -1)
-        self.assertTrue(np.isclose(abs(np.dot(eigenvect[0], np.array([np.sqrt(2), np.sqrt(2),0]))), 1))
+        self.assertTrue(np.isclose(abs(np.dot(eigenvect[0], np.array([1/np.sqrt(2), -1/np.sqrt(2),0]))), 1))
 
         # three-fold rotation around the body-center
         rot = np.array([[0.,1.,0.],[0.,0.,1.],[1.,0.,0.]])
         rottype, eigenvect = (crystal.GroupOp(self.rot, self.trans, rot, self.indexmap)).eigen()
         self.assertEqual(rottype, 3)
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
-        self.assertTrue(np.isclose(abs(np.dot(eigenvect[0], np.array([np.sqrt(3), np.sqrt(3),np.sqrt(3)]))), 1))
-
-
+        self.assertTrue(np.isclose(abs(np.dot(eigenvect[0], np.array([1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3)]))), 1))
 
 
 class CrystalClassTests(unittest.TestCase):
