@@ -117,12 +117,26 @@ class GroupOperationTests(unittest.TestCase):
         sphere = (3, np.zeros(3))
         point = (0, np.zeros(3))
         plane1 = (2, np.array([0., 0., 1.]))
+        plane2 = (2, np.array([1., 1., 1.])/np.sqrt(3))
         line1 = (1, np.array([1., 0., 0.]))
-        for t in [sphere, point, plane1, line1]:
+        line2 = (1, np.array([0., 1., 0.]))
+        line3 = (1, np.array([1., -1., 0.])/np.sqrt(2))
+
+        for t in [sphere, point, plane1, plane2, line1, line2, line3]:
             self.assertEqual(crystal.CombineBasis(t, t)[0], t[0])
         res = crystal.CombineBasis(line1, plane1)
         self.assertEqual(res[0], 1) # should be a line
         self.assertTrue(np.isclose(abs(np.dot(res[1], line1[1])), 1))
+        res = crystal.CombineBasis(plane1, plane2)
+        self.assertEqual(res[0], 1) # should be a line
+        self.assertTrue(np.isclose(abs(np.dot(res[1], line3[1])), 1))
+        res = crystal.CombineBasis(plane1, line1)
+        self.assertEqual(res[0], 1) # should be a line
+        self.assertTrue(np.isclose(abs(np.dot(res[1], line1[1])), 1))
+        res = crystal.CombineBasis(plane2, line1)
+        self.assertEqual(res[0], 0) # should be a point
+        res = crystal.CombineBasis(line1, line2)
+        self.assertEqual(res[0], 0) # should be a point
 
 
 class CrystalClassTests(unittest.TestCase):
