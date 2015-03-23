@@ -100,14 +100,26 @@ class GroupOperationTests(unittest.TestCase):
         rottype, eigenvect = (crystal.GroupOp(self.rot, self.trans, rot, self.indexmap)).eigen()
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
         self.assertEqual(rottype, -1)
-        self.assertTrue(np.isclose(abs(np.dot(eigenvect[0], np.array([1/np.sqrt(2), -1/np.sqrt(2),0]))), 1))
+        self.assertTrue(np.isclose(abs(np.dot(eigenvect[0],
+                                              np.array([1/np.sqrt(2), -1/np.sqrt(2),0]))), 1))
 
         # three-fold rotation around the body-center
         rot = np.array([[0.,1.,0.],[0.,0.,1.],[1.,0.,0.]])
         rottype, eigenvect = (crystal.GroupOp(self.rot, self.trans, rot, self.indexmap)).eigen()
         self.assertEqual(rottype, 3)
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
-        self.assertTrue(np.isclose(abs(np.dot(eigenvect[0], np.array([1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3)]))), 1))
+        self.assertTrue(np.isclose(abs(np.dot(eigenvect[0],
+                                              np.array([1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3)]))), 1))
+
+    def testCombineVectorBasis(self):
+        """Test our ability to combine a few vector basis choices"""
+        # these are all (d, vect) tuples that we work with
+        sphere = (3, np.zeros(3))
+        point = (0, np.zeros(3))
+        plane1 = (2, np.array([0., 0., 1.]))
+        line1 = (1, np.array([1., 0., 0.]))
+        for t in [sphere, point, plane1, line1]:
+            self.assertTrue(crystal.CombineBasis(t, t)[0], t[0])
 
 
 class CrystalClassTests(unittest.TestCase):
