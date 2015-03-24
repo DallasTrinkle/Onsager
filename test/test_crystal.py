@@ -93,6 +93,9 @@ class GroupOperationTests(unittest.TestCase):
         self.assertEqual(len(tensorbasis), 6) # should be 6 unique symmetric tensors
         for t in tensorbasis:
             self.assertTrue(np.all(t == t.T), msg="{} is not symmetric".format(t))
+            for t2 in tensorbasis:
+                if np.any(t2 != t):
+                    self.assertAlmostEqual(np.dot(t.flatten(), t2.flatten()), 0)
 
         # inversion
         rot = -np.eye(3)
@@ -106,6 +109,10 @@ class GroupOperationTests(unittest.TestCase):
         self.assertEqual(len(tensorbasis), 6) # should be 6 unique symmetric tensors
         for t in tensorbasis:
             self.assertTrue(np.all(t == t.T), msg="{} is not symmetric".format(t))
+            self.assertAlmostEqual(np.dot(t.flatten(), t.flatten()), 1)
+            for t2 in tensorbasis:
+                if np.any(t2 != t):
+                    self.assertAlmostEqual(np.dot(t.flatten(), t2.flatten()), 0)
 
         # mirror through the y=x line: (x,y) -> (y,x)
         rot = np.array([[0.,1.,0.],[1.,0.,0.],[0.,0.,1.]])
@@ -128,6 +135,10 @@ class GroupOperationTests(unittest.TestCase):
             rott = np.dot(rot, np.dot(t, rot.T))
             self.assertTrue(np.all(np.isclose(t, rott)),
                             msg="\n{}\nis not unchanged with\n{}\n{}".format(t, rot, rott))
+            self.assertAlmostEqual(np.dot(t.flatten(), t.flatten()), 1)
+            for t2 in tensorbasis:
+                if np.any(t2 != t):
+                    self.assertAlmostEqual(np.dot(t.flatten(), t2.flatten()), 0)
 
         # three-fold rotation around the body-center
         rot = np.array([[0.,1.,0.],[0.,0.,1.],[1.,0.,0.]])
@@ -148,6 +159,10 @@ class GroupOperationTests(unittest.TestCase):
             rott = np.dot(rot, np.dot(t, rot.T))
             self.assertTrue(np.all(np.isclose(t, rott)),
                             msg="\n{}\nis not unchanged with\n{}\n{}".format(t, rot, rott))
+            self.assertAlmostEqual(np.dot(t.flatten(), t.flatten()), 1)
+            for t2 in tensorbasis:
+                if np.any(t2 != t):
+                    self.assertAlmostEqual(np.dot(t.flatten(), t2.flatten()), 0)
 
     def testCombineVectorBasis(self):
         """Test our ability to combine a few vector basis choices"""
@@ -529,11 +544,17 @@ class CrystalClassTests(unittest.TestCase):
         for i in range(2):
             vbas = HCP_intercrys.VectorBasis((1,i)) # for our octahedral site
             self.assertEqual(vbas[0], 0) # should be a point
+            tbas = HCP_intercrys.SymmTensorBasis((1,i))
+            self.assertEqual(len(tbas), 1)
+            self.assertTrue(np.all(np.isclose(tbas[0], np.eye(3))))
         for i in range(2, 6):
             vbas = HCP_intercrys.VectorBasis((1,i)) # for our tetrahedal sites
             self.assertEqual(vbas[0], 1) # should be a line
             self.assertEqual(vbas[1][0], 0) # pointing vertically up
             self.assertEqual(vbas[1][1], 0) # pointing vertically up
+            tbas = HCP_intercrys.SymmTensorBasis((1,i))
+            self.assertEqual(len(tbas), 2)
+            # self.assertTrue(np.all(np.isclose(tbas[0], np.eye(3))))
 
     def testNNfcc(self):
         """Test of the nearest neighbor construction"""

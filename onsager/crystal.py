@@ -322,6 +322,30 @@ def CombineVectorBasis(b1, b2):
         else:
             return b2
 
+def CombineTensorBasis(b1, b2, symmetric=True):
+    """
+    Combines (intersects) two tensor spaces into one; uses SVD to compute null space.
+    :param b1: list of tensors
+    :param b2: list of tensors
+    :return: list of tensors
+    """
+    # edge cases first (empty or full basis)
+    if len(b1) == 0: return b1
+    if len(b2) == 0: return b2
+    if len(b1) == b1[0].size: return b2
+    if len(b2) == b2[0].size: return b1
+    # make the combined matrix with the two column spaces D = [b1 b2], then
+    # find its nullspace
+    u, s, vh = np.linalg.svd(np.array([v.flatten() for v in b1] + [v.flatten() for v in b2]).T)
+    # this is sneaky: the first is to pull out the size of the nullspace, the second slices
+    # the part of b1 that we have to deal with, but then we have to *renormalize* these vectors
+    # by multiplying by sqrt(2), since the slice in each vector space would be normalized.
+    nullspace = vh[sum(s>=1e-8):,0:len(b1)]*np.sqrt(2)
+    # now to reconstruct our normalized basis from those
+    # list comprehension to run over the elements of our nullspace, and the
+    # generator in the sum to construct the basis
+    return [ sum(b1[i]*alpha for i,alpha in enumerate(v)) for v in nullspace ]
+
 
 class Crystal(object):
     """
