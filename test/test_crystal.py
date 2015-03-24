@@ -584,6 +584,27 @@ class CrystalClassTests(unittest.TestCase):
                     self.assertAlmostEqual(0, tij)
                 self.assertAlmostEqual(t[0,0], t[1,1])
 
+    def testJumpNetwork(self):
+        """Test for the generation of our jump network between octahedral and tetrahedral sites."""
+        # start with HCP, then "build out" a lattice that includes interstitial sites
+        basis = [[np.array([1./3.,2./3.,0.25]),
+                  np.array([2./3.,1./3.,0.75])]]
+        HCPcrys = crystal.Crystal(self.hexlatt, basis)
+        octset = HCPcrys.Wyckoffpos(np.array([0., 0., 0.5]))
+        tetset = HCPcrys.Wyckoffpos(np.array([1./3., 2./3., 0.625]))
+        self.assertEqual(len(octset), 2)
+        self.assertEqual(len(tetset), 4)
+        # now, build up HCP + interstitials (which are of a *different chemistry*)
+        HCP_intercrys = crystal.Crystal(self.hexlatt, basis + [octset + tetset])
+        jumpnetwork = HCP_intercrys.jumpnetwork(1, self.a0*0.7) # tuned to avoid t->t in basal plane
+        self.assertEqual(len(jumpnetwork), 2) # should contain o->t/t->o and t->t networks
+        self.assertEqual(sorted(len(t) for t in jumpnetwork), [4, 24])
+        # print crystal.yaml.dump(jumpnetwork)
+        # for i, t in enumerate(jumpnetwork):
+        #     print i, len(t)
+        #     for ij, dx in t:
+        #         print "{} -> {}: {}".format(ij[0], ij[1], dx)
+
     def testNNfcc(self):
         """Test of the nearest neighbor construction"""
         crys = crystal.Crystal(self.fcclatt, self.basis)

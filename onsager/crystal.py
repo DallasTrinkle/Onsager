@@ -778,6 +778,53 @@ class Crystal(object):
                     lis.append(dx)
         return lis
 
+    def jumpnetwork(self, chem, cutoff):
+        """
+        Generate the full jump network for a specific chemical index, out to a cutoff. Organized
+        by symmetry-unique transitions. Note that i->j and j->i are always related to one-another,
+        but by equivalence of transition state, not symmetry.
+
+        :param chem: index corresponding to the chemistry to consider
+        :param cutoff: distance cutoff
+        :return: list of symmetry-unique transitions; each is a list of tuples:
+          ((i,j), dx) corresponding to jump from i->j with vector dx
+        """
+        # should we consider changing the lists to tuples? Not sure if there's any efficiency gain
+        def inlist(tup, dx, lis):
+            """Determines if (i,j), dx is in our list"""
+            # a little confusing: run through all transition tuples, see if we find our example
+            return any( tup == ij and np.all(np.isclose(dx, v)) for translist in lis for ij, v in translist )
+
+        r2 = cutoff*cutoff
+        nmax = [int(np.round(np.sqrt(self.metric[i,i])))+1
+                for i in range(3)]
+        supervect = [ np.array([n0, n1, n2])
+                      for n0 in xrange(-nmax[0],nmax[0]+1)
+                      for n1 in xrange(-nmax[1],nmax[1]+1)
+                      for n2 in xrange(-nmax[2],nmax[2]+1) ]
+        lis = []
+        center = np.zeros(3, dtype=int)
+        for i, u0 in enumerate(self.basis[chem]):
+            for j, u1 in enumerate(self.basis[chem]):
+                du = u1-u0
+                for n in supervect:
+                    dx = self.unit2cart(n, du)
+                    if np.dot(dx, dx) > 0 and np.dot(dx,dx) < r2:
+                        # we have a valid transition; first check that we haven't already looked at it
+                        if not inlist((i,j), dx, lis):
+                            trans = []
+                            for g in self.G:
+                                # rotate through all combinations of i->j using space group symmetry
+                                R1, ind1 = self.g_pos(g, center, (chem, i))
+                                R2, ind2 = self.g_pos(g, n, (chem, j))
+                                tup = (ind1[1], ind2[1])
+                                dx = self.pos2cart(R2,ind2) - self.pos2cart(R1,ind1)
+                                if not any( tup == ij and np.all(np.isclose(dx, v)) for ij, v in trans):
+                                    trans.append((tup, dx))
+                                    trans.append(((tup[1], tup[0]), -dx))
+                            lis.append(trans)
+        return lis
+
 
 # YAML interfaces for types outside of this module
 def ndarray_representer(dumper, data):
