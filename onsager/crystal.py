@@ -432,6 +432,16 @@ class Crystal(object):
         if 'lattice_constant' in yamldict: lattice_constant = yamldict['lattice_constant']
         return Crystal((lattice_constant*yamldict['lattice']).T, yamldict['basis'])
 
+    def simpleYAML(self):
+        """
+        Creates a simplified YAML dump, in case we don't want to output the full symmetry analysis
+        :return: YAML dump
+        """
+        return yaml.dump({'lattice_constant': 1.0,
+                          'lattice': self.lattice.T,
+                          'basis': self.basis,
+                          'chemistry': [ len(chem) for chem in self.basis ]})
+
     def center(self):
         """
         Center the atoms in the cell if there is an inversion operation present.
@@ -824,6 +834,17 @@ class Crystal(object):
                                     trans.append(((tup[1], tup[0]), -dx))
                             lis.append(trans)
         return lis
+
+    def sitelist(self, chem):
+        """
+        Return a list of lists of Wyckoff-related sites for a given chemistry.
+        Done with a single list comprehension--useful as input for diffusion calculation
+        :param chem: index corresponding to chemistry to consider
+        :return: list of lists of indices that are equivalent by symmetry
+        """
+        return [ sorted(i for c,i in l)  # strips out the chemistry index; sorted for readability
+                 for l in [list(s) for s in self.Wyckoff]  # converts to list of lists
+                 if l[0][0] == chem ]  # select only those with correct chemistry
 
 
 # YAML interfaces for types outside of this module
