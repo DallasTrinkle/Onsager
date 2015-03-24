@@ -195,10 +195,23 @@ class GroupOperationTests(unittest.TestCase):
         """Test the intersection of tensor bases"""
         fullbasis = crystal.SymmTensorBasis(1, np.eye(3)) # full basis (identity)
         yzbasis = crystal.SymmTensorBasis(-1, np.eye(3)) # mirror through the x axis
+        xzbasis = crystal.SymmTensorBasis(-1, [np.array([0.,1.,0.]), np.array([0.,0.,1.]), np.array([1.,0.,0.])])
         rotbasis =  crystal.SymmTensorBasis(3, np.eye(3)) # 120 deg rot through the x axis
-        for b in [fullbasis, yzbasis, rotbasis]:
+        rotbasis2 = crystal.SymmTensorBasis(3, [np.array([0.,0.,1.]), np.array([1.,0.,0.]), np.array([0.,1.,0.])])
+        for b in [fullbasis, yzbasis, xzbasis, rotbasis, rotbasis2]:
             combbasis = crystal.CombineTensorBasis(fullbasis, b)
             self.assertEqual(len(b), len(combbasis))
+            combbasis = crystal.CombineTensorBasis(b, fullbasis)
+            self.assertEqual(len(b), len(combbasis))
+        combbasis = crystal.CombineTensorBasis(yzbasis, rotbasis)
+        self.assertEqual(len(combbasis), len(crystal.CombineTensorBasis(rotbasis, yzbasis)))
+        self.assertEqual(len(combbasis), len(rotbasis)) # should be two left here
+        combbasis = crystal.CombineTensorBasis(rotbasis, rotbasis2)
+        self.assertEqual(len(combbasis), 1) # if there's only one, it has to be 1/sqrt(3).
+        self.assertAlmostEqual(1, abs(np.dot(combbasis[0].flatten(), np.eye(3).flatten()/np.sqrt(3))))
+        combbasis = crystal.CombineTensorBasis(yzbasis, xzbasis)
+        self.assertEqual(len(combbasis), 3)
+
 
 
 class CrystalClassTests(unittest.TestCase):
