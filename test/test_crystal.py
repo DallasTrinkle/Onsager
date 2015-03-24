@@ -552,7 +552,7 @@ class CrystalClassTests(unittest.TestCase):
                     self.assertTrue(np.any([np.all(np.isclose(crys.basis[i[0]][i[1]], u)) for i in wyckset]))
 
     def testVectorBasis(self):
-        """Test for the generation of a vector basis for sites in a crystal: oct. + tet."""
+        """Test for the generation of a vector (and tensor) basis for sites in a crystal: oct. + tet."""
         # start with HCP, then "build out" a lattice that includes interstitial sites
         basis = [[np.array([1./3.,2./3.,0.25]),
                   np.array([2./3.,1./3.,0.75])]]
@@ -567,9 +567,11 @@ class CrystalClassTests(unittest.TestCase):
             vbas = HCP_intercrys.VectorBasis((1,i)) # for our octahedral site
             self.assertEqual(vbas[0], 0) # should be a point
             tbas = HCP_intercrys.SymmTensorBasis((1,i))
-            print tbas
-            self.assertEqual(len(tbas), 1)
-            self.assertTrue(np.isclose(abs(np.dot(tbas[0].flatten(), np.eye(3).flatten()/np.sqrt(3))), 1))
+            self.assertEqual(len(tbas), 2)
+            for t in tbas:
+                for tij in (t[i,j] for i in xrange(3) for j in xrange(3) if i!=j):
+                    self.assertAlmostEqual(0, tij)
+                self.assertAlmostEqual(t[0,0], t[1,1])
         for i in range(2, 6):
             vbas = HCP_intercrys.VectorBasis((1,i)) # for our tetrahedal sites
             self.assertEqual(vbas[0], 1) # should be a line
@@ -577,7 +579,10 @@ class CrystalClassTests(unittest.TestCase):
             self.assertEqual(vbas[1][1], 0) # pointing vertically up
             tbas = HCP_intercrys.SymmTensorBasis((1,i))
             self.assertEqual(len(tbas), 2)
-            # self.assertTrue(np.all(np.isclose(tbas[0], np.eye(3))))
+            for t in tbas:
+                for tij in (t[i,j] for i in xrange(3) for j in xrange(3) if i!=j):
+                    self.assertAlmostEqual(0, tij)
+                self.assertAlmostEqual(t[0,0], t[1,1])
 
     def testNNfcc(self):
         """Test of the nearest neighbor construction"""

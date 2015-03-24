@@ -280,7 +280,7 @@ def SymmTensorBasis(rottype, eigenvect):
                 SymmTensorCross(np.array([0.,1.,0.]), np.array([0.,0.,1.])), #yz
                 SymmTensorCross(np.array([1.,0.,0.]), np.array([0.,0.,1.])), #zx
                 SymmTensorCross(np.array([1.,0.,0.]), np.array([0.,1.,0.]))] #xy
-    if rottype == -1 or rottype == -2:
+    if rottype == -1 or rottype == 2:
         # mirror plane or 2-fold rotation:
         # 4 symmetric tensors: e0 x e0, e1 x e1, e2 x e2, e1 x e2
         return [SymmTensor1(eigenvect[0]),
