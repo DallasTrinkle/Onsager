@@ -89,6 +89,10 @@ class GroupOperationTests(unittest.TestCase):
         self.assertTrue(np.all(np.isclose(eigenvect, np.eye(3))))
         basis = crystal.VectorBasis(rottype, eigenvect)
         self.assertEqual(basis[0], 3) # should be a sphere
+        tensorbasis = crystal.SymmTensorBasis(rottype, eigenvect) # at some point in the future, generalize
+        self.assertEqual(len(tensorbasis), 6) # should be 6 unique symmetric tensors
+        for t in tensorbasis:
+            self.assertTrue(np.all(t == t.T), msg="{} is not symmetric".format(t))
 
         # inversion
         rot = -np.eye(3)
@@ -98,6 +102,10 @@ class GroupOperationTests(unittest.TestCase):
         self.assertTrue(np.all(np.isclose(eigenvect, np.eye(3))))
         basis = crystal.VectorBasis(rottype, eigenvect)
         self.assertEqual(basis[0], 0) # should be a point
+        tensorbasis = crystal.SymmTensorBasis(rottype, eigenvect) # at some point in the future, generalize
+        self.assertEqual(len(tensorbasis), 6) # should be 6 unique symmetric tensors
+        for t in tensorbasis:
+            self.assertTrue(np.all(t == t.T), msg="{} is not symmetric".format(t))
 
         # mirror through the y=x line: (x,y) -> (y,x)
         rot = np.array([[0.,1.,0.],[1.,0.,0.],[0.,0.,1.]])
@@ -106,9 +114,20 @@ class GroupOperationTests(unittest.TestCase):
         self.assertEqual(rottype, -1)
         self.assertTrue(np.isclose(abs(np.dot(eigenvect[0],
                                               np.array([1/np.sqrt(2), -1/np.sqrt(2),0]))), 1))
+        self.assertTrue(np.all(np.isclose(-eigenvect[0], np.dot(rot, eigenvect[0])))) # inverts
+        self.assertTrue(np.all(np.isclose(eigenvect[1], np.dot(rot, eigenvect[1])))) # leaves unchanged
+        self.assertTrue(np.all(np.isclose(eigenvect[2], np.dot(rot, eigenvect[2])))) # leaves unchanged
         basis = crystal.VectorBasis(rottype, eigenvect)
         self.assertEqual(basis[0], 2) # should be a plane
         self.assertTrue(np.all(np.isclose(basis[1], eigenvect[0])))
+        tensorbasis = crystal.SymmTensorBasis(rottype, eigenvect) # at some point in the future, generalize
+        self.assertEqual(len(tensorbasis), 4) # should be 4 unique symmetric tensors
+        for t in tensorbasis:
+            # check symmetry, and remaining unchanged with operations
+            self.assertTrue(np.all(t == t.T), msg="{} is not symmetric".format(t))
+            rott = np.dot(rot, np.dot(t, rot.T))
+            self.assertTrue(np.all(np.isclose(t, rott)),
+                            msg="\n{}\nis not unchanged with\n{}\n{}".format(t, rot, rott))
 
         # three-fold rotation around the body-center
         rot = np.array([[0.,1.,0.],[0.,0.,1.],[1.,0.,0.]])
@@ -117,9 +136,18 @@ class GroupOperationTests(unittest.TestCase):
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
         self.assertTrue(np.isclose(abs(np.dot(eigenvect[0],
                                               np.array([1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3)]))), 1))
+        self.assertTrue(np.all(np.isclose(eigenvect[0], np.dot(rot, eigenvect[0])))) # our rotation axis
         basis = crystal.VectorBasis(rottype, eigenvect)
         self.assertEqual(basis[0], 1) # should be a line
         self.assertTrue(np.all(np.isclose(basis[1], eigenvect[0])))
+        tensorbasis = crystal.SymmTensorBasis(rottype, eigenvect) # at some point in the future, generalize
+        self.assertEqual(len(tensorbasis), 2) # should be 2 unique symmetric tensors
+        for t in tensorbasis:
+            # check symmetry, and remaining unchanged with operations
+            self.assertTrue(np.all(t == t.T), msg="{} is not symmetric".format(t))
+            rott = np.dot(rot, np.dot(t, rot.T))
+            self.assertTrue(np.all(np.isclose(t, rott)),
+                            msg="\n{}\nis not unchanged with\n{}\n{}".format(t, rot, rott))
 
     def testCombineVectorBasis(self):
         """Test our ability to combine a few vector basis choices"""
@@ -133,19 +161,19 @@ class GroupOperationTests(unittest.TestCase):
         line3 = (1, np.array([1., -1., 0.])/np.sqrt(2))
 
         for t in [sphere, point, plane1, plane2, line1, line2, line3]:
-            self.assertEqual(crystal.CombineBasis(t, t)[0], t[0])
-        res = crystal.CombineBasis(line1, plane1)
+            self.assertEqual(crystal.CombineVectorBasis(t, t)[0], t[0])
+        res = crystal.CombineVectorBasis(line1, plane1)
         self.assertEqual(res[0], 1) # should be a line
         self.assertTrue(np.isclose(abs(np.dot(res[1], line1[1])), 1))
-        res = crystal.CombineBasis(plane1, plane2)
+        res = crystal.CombineVectorBasis(plane1, plane2)
         self.assertEqual(res[0], 1) # should be a line
         self.assertTrue(np.isclose(abs(np.dot(res[1], line3[1])), 1))
-        res = crystal.CombineBasis(plane1, line1)
+        res = crystal.CombineVectorBasis(plane1, line1)
         self.assertEqual(res[0], 1) # should be a line
         self.assertTrue(np.isclose(abs(np.dot(res[1], line1[1])), 1))
-        res = crystal.CombineBasis(plane2, line1)
+        res = crystal.CombineVectorBasis(plane2, line1)
         self.assertEqual(res[0], 0) # should be a point
-        res = crystal.CombineBasis(line1, line2)
+        res = crystal.CombineVectorBasis(line1, line2)
         self.assertEqual(res[0], 0) # should be a point
 
 

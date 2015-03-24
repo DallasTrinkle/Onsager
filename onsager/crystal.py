@@ -252,7 +252,47 @@ def VectorBasis(rottype, eigenvect):
     if rottype == -1: return (2, eigenvect[0]) # plane (pure mirror)
     return (1, eigenvect[0]) # line (all others--there's a rotation axis involved
 
-def CombineBasis(b1, b2):
+def SymmTensorBasis(rottype, eigenvect):
+    """
+    Returns a symmetric second-rank tensor basis corresponding to the optype and eigenvectors
+    for a GroupOp
+    :param rottype: output from eigen()
+    :param eigenvect: eigenvectors
+    :return: list of 2nd-rank symmetric tensors making up the basis
+    """
+    def SymmTensor1(v1):
+        """Make a normalized, symmetric tensor from two vectors"""
+        return np.outer(v1, v1)
+
+    def SymmTensor2(v1, v2):
+        """Make a normalized, symmetric tensor from two vectors"""
+        return (np.outer(v1, v1) + np.outer(v2, v2))/np.sqrt(2)
+
+    def SymmTensorCross(v1, v2):
+        """Make a normalized, symmetric tensor from two vectors"""
+        return (np.outer(v1, v2) + np.outer(v2, v1))/np.sqrt(2)
+
+    if rottype == 1 or rottype == -2:
+        # identity / inversion: all symmetric tensors
+        return [SymmTensor1(np.array([1.,0.,0.])), # xx
+                SymmTensor1(np.array([0.,1.,0.])), # yy
+                SymmTensor1(np.array([0.,0.,1.])), # zz
+                SymmTensorCross(np.array([0.,1.,0.]), np.array([0.,0.,1.])), #yz
+                SymmTensorCross(np.array([1.,0.,0.]), np.array([0.,0.,1.])), #zx
+                SymmTensorCross(np.array([1.,0.,0.]), np.array([0.,1.,0.]))] #xy
+    if rottype == -1 or rottype == -2:
+        # mirror plane or 2-fold rotation:
+        # 4 symmetric tensors: e0 x e0, e1 x e1, e2 x e2, e1 x e2
+        return [SymmTensor1(eigenvect[0]),
+                SymmTensor1(eigenvect[1]),
+                SymmTensor1(eigenvect[2]),
+                SymmTensorCross(eigenvect[1], eigenvect[2])]
+    # else: 3-, 4-, or 6-fold rotation (with or without mirror):
+    # 2 symmetric tensors: e0 x e0, e1 x e1 + e2 x e2
+    return [SymmTensor1(eigenvect[0]),
+            SymmTensor2(eigenvect[1], eigenvect[2])]
+
+def CombineVectorBasis(b1, b2):
     """
     Combines (intersects) two vector spaces into one.
     :param b1: (dim, vect) -- dimensionality (0..3), vector defining line direction (1) or plane normal (2)
@@ -673,7 +713,7 @@ class Crystal(object):
         :return: (dim, vect) -- dimension of basis, vector = normal for plane, direction for line
         """
         # need to work with the point group operations for the site
-        return reduce(CombineBasis,
+        return reduce(CombineVectorBasis,
                       [ VectorBasis(*g.eigen()) for g in self.pointG[ind[0]][ind[1]] ] )
         # , (3, np.zeros(3)) -- don't need initial value; if there's only one group op, it's identity
 
