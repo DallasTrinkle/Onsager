@@ -741,6 +741,17 @@ class Crystal(object):
                       [ VectorBasis(*g.eigen()) for g in self.pointG[ind[0]][ind[1]] ] )
         # , (3, np.zeros(3)) -- don't need initial value; if there's only one group op, it's identity
 
+    def SymmTensorBasis(self, ind):
+        """
+        Generates the symmetric tensor basis corresponding to an atomic site
+        :param ind: tuple index for atom
+        :return: (dim, vect) -- dimension of basis, vector = normal for plane, direction for line
+        """
+        # need to work with the point group operations for the site
+        return reduce(CombineTensorBasis,
+                      [ SymmTensorBasis(*g.eigen()) for g in self.pointG[ind[0]][ind[1]] ] )
+        # , (3, np.zeros(3)) -- don't need initial value; if there's only one group op, it's identity
+
     def nnlist(self, ind, cutoff):
         """
         Generate the nearest neighbor list for a given cutoff. Only consider

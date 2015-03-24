@@ -191,6 +191,15 @@ class GroupOperationTests(unittest.TestCase):
         res = crystal.CombineVectorBasis(line1, line2)
         self.assertEqual(res[0], 0) # should be a point
 
+    def testCombineTensorBasis(self):
+        """Test the intersection of tensor bases"""
+        fullbasis = crystal.SymmTensorBasis(1, np.eye(3)) # full basis (identity)
+        yzbasis = crystal.SymmTensorBasis(-1, np.eye(3)) # mirror through the x axis
+        rotbasis =  crystal.SymmTensorBasis(3, np.eye(3)) # 120 deg rot through the x axis
+        for b in [fullbasis, yzbasis, rotbasis]:
+            combbasis = crystal.CombineTensorBasis(fullbasis, b)
+            self.assertEqual(len(b), len(combbasis))
+
 
 class CrystalClassTests(unittest.TestCase):
     """Tests for the crystal class and symmetry analysis."""
@@ -545,8 +554,9 @@ class CrystalClassTests(unittest.TestCase):
             vbas = HCP_intercrys.VectorBasis((1,i)) # for our octahedral site
             self.assertEqual(vbas[0], 0) # should be a point
             tbas = HCP_intercrys.SymmTensorBasis((1,i))
+            print tbas
             self.assertEqual(len(tbas), 1)
-            self.assertTrue(np.all(np.isclose(tbas[0], np.eye(3))))
+            self.assertTrue(np.isclose(abs(np.dot(tbas[0].flatten(), np.eye(3).flatten()/np.sqrt(3))), 1))
         for i in range(2, 6):
             vbas = HCP_intercrys.VectorBasis((1,i)) # for our tetrahedal sites
             self.assertEqual(vbas[0], 1) # should be a line
