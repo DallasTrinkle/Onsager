@@ -327,6 +327,34 @@ class InterstitialTests(unittest.TestCase):
         self.assertEqual(len(self.HCP_jumpnetwork), 2)
         self.assertEqual(len(self.FCC_jumpnetwork), 1)
 
+    def testGroupOps(self):
+        """Do we have reasonable group op. lists?"""
+        center = np.zeros(3, dtype=int)
+        for D in [self.Dfcc, self.Dhcp]:
+            for sites, groups in zip(D.sitelist, D.sitegroupops):
+                i0 = sites[0]
+                for site, g in zip(sites, groups):
+                    # group operation g transforms the site (c, i0) into (c, i)
+                    R, (c,i) = D.crys.g_pos(g, center, (D.chem, i0))
+                    self.assertEqual(site, i)
+            for jumps, groups in zip(D.jumpnetwork, D.jumpgroupops):
+                (i0, j0), dx0 = jumps[0]
+                for ((i, j), dx), g in zip(jumps, groups):
+                    R, (c,inew) = D.crys.g_pos(g, center, (D.chem, i0))
+                    R, (c,jnew) = D.crys.g_pos(g, center, (D.chem, j0))
+                    dxnew = D.crys.g_direc(g, dx0)
+                    if inew==i:
+                        failmsg = "({},{}), {} != ({},{}), {}".format(inew,jnew,dxnew, i, j, dx)
+                        self.assertEqual(inew, i, msg=failmsg)
+                        self.assertEqual(jnew, j, msg=failmsg)
+                        self.assertTrue(np.allclose(dxnew, dx), msg=failmsg)
+                    else:
+                        # reverse transition
+                        failmsg = "({},{}), {} != ({},{}), {}".format(inew,jnew,dxnew, j, i, -dx)
+                        self.assertEqual(inew, j, msg=failmsg)
+                        self.assertEqual(jnew, i, msg=failmsg)
+                        self.assertTrue(np.allclose(dxnew, -dx), msg=failmsg)
+
     def testSiteProb(self):
         """Do we correctly construct our site probabilities?"""
         # HCP first

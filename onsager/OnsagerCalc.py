@@ -165,10 +165,10 @@ class Interstitial(object):
                     # AND against the possibilty that we are looking at the reverse jump too
                     if (g.indexmap[self.chem][i0] == i \
                         and g.indexmap[self.chem][j0] == j
-                        and np.allclose(dx0, np.dot(g.cartrot, dx)) ) or \
+                        and np.allclose(dx, np.dot(g.cartrot, dx0)) ) or \
                             (g.indexmap[self.chem][i0] == j
                              and g.indexmap[self.chem][j0] == i
-                             and np.allclose(dx0, -np.dot(g.cartrot, dx)) ):
+                             and np.allclose(dx, -np.dot(g.cartrot, dx0)) ):
                         oplist.append(g)
                         break
             groupops.append(oplist)
