@@ -23,6 +23,7 @@ quite easily.
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
+from scipy.linalg import pinv2
 import stars
 import GFcalc
 import crystal
@@ -63,6 +64,11 @@ class Interstitial(object):
         self.jumpnetwork = jumpnetwork
         self.VectorBasis, self.VV = self.generateVectorBasis()
         self.NV = len(self.VectorBasis)
+        # quick check to see if our projected omega matrix will be invertible
+        self.omega_invertible = True
+        if self.NV > 0:
+            self.omega_invertible = all( np.all(np.isclose(np.sum(v, axis=0), np.zeros(3)))
+                                         for v in self.VectorBasis)
 
     def sitelistYAML(self):
         """Dumps a "sample" YAML formatted version of the sitelist with data to be entered"""
@@ -128,8 +134,10 @@ class Interstitial(object):
         # the ij tuple in each transition list is the i->j pair
         # invmap[i] tells you which Wyckoff position i maps to (in the sitelist)
         invrho = np.array([ np.exp(betaene[w])/pre[w] for i,w in enumerate(self.invmap)])
-        return [[ pT*invrho[i]*np.exp(-beT) for (i,j), dx in t ]
-            for t, pT, beT in zip(self.jumpnetwork, preT, betaeneT)]
+        return [ [ arr*invrho[i] for (i,j), dx in t ]
+            for t, arr in zip(self.jumpnetwork,
+                              [ pT*np.exp(-beT)
+                                for pT, beT in zip(preT, betaeneT) ])]
 
     def diffusivity(self, pre, betaene, preT, betaeneT):
         """
@@ -173,7 +181,14 @@ class Interstitial(object):
                 bias_v[a] = np.trace(np.dot(bias_i.T, va))
                 for b, vb in enumerate(self.VectorBasis):
                     omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
-
+            if self.omega_invertible:
+                # invertible, so just use solve for speed:
+                gamma_v = np.linalg.solve(omega_v, bias_v)
+            else:
+                # pseudoinverse required:
+                gamma_v = np.dot(pinv2(omega_v), bias_v)
+            for b, g, VV in zip(bias_v, gamma_v, self.VV):
+                D0 += b*g*VV
         return D0
 
     def elastodiffusion(self, pre, betaene, dipole, preT, betaeneT, dipoleT):
