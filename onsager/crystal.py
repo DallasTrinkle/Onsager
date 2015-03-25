@@ -76,7 +76,7 @@ def maptranslation(oldpos, newpos):
             maplist = []
             for rua in atomlist1:
                 for j, ub in enumerate(atomlist0):
-                    if np.all(np.isclose(inhalf(ub - rua - trans), 0)):
+                    if np.allclose(inhalf(ub - rua - trans), 0):
                         maplist.append(j)
                         break
             if len(maplist) != len(atomlist0):
@@ -116,8 +116,8 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         # if not type(other) is not GroupOp: return False
         return isinstance(other, self.__class__) and \
                np.all(self.rot == other.rot) and \
-               np.all(np.isclose(self.trans, other.trans)) and \
-               np.all(np.isclose(self.cartrot, other.cartrot)) and \
+               np.allclose(self.trans, other.trans) and \
+               np.allclose(self.cartrot, other.cartrot) and \
                self.indexmap == other.indexmap
 
     def __ne__(self, other):
@@ -200,7 +200,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
                 vmat = -np.dot(self.cartrot, vmat)
         # vmat *should* equal identity if we didn't fail...
         if __debug__:
-            if not np.all(np.isclose(vmat, np.eye(3))): raise ArithmeticError('eigenvalue analysis fail')
+            if not np.allclose(vmat, np.eye(3)): raise ArithmeticError('eigenvalue analysis fail')
         vsum *= 1./n
         # now the columns of vsum should either be (a) our rotation / mirror axis, or (b) zero
         eig0 = vsum[:,0]
@@ -488,7 +488,7 @@ class Crystal(object):
             trans = True
             for atomlist in self.basis:
                 for u in atomlist:
-                    if np.all([not np.all(np.isclose(inhalf(u + t - v), 0)) for v in atomlist]):
+                    if np.all([not np.allclose(inhalf(u + t - v), 0) for v in atomlist]):
                         trans = False
                         break
             if trans:
@@ -510,7 +510,7 @@ class Crystal(object):
             newatomlist = []
             for u in atomlist:
                 v = incell(np.dot(invsuper, u))
-                if np.all([not np.all(np.isclose(v, v1)) for v1 in newatomlist]):
+                if np.all([not np.allclose(v, v1) for v1 in newatomlist]):
                     newatomlist.append(v)
             newbasis.append(newatomlist)
         self.basis = newbasis
@@ -591,7 +591,7 @@ class Crystal(object):
                       for r1 in matchvect[1]
                       for r2 in matchvect[2]
                       if abs(np.inner(r0, np.cross(r1, r2))) == 1):
-            if np.all(np.isclose(np.dot(super.T, np.dot(self.metric, super)), self.metric)):
+            if np.allclose(np.dot(super.T, np.dot(self.metric, super)), self.metric):
                 # possible operation--need to check the atomic positions
                 trans, indexmap = maptranslation(self.basis,
                                                  [[np.dot(super, u)
@@ -645,7 +645,7 @@ class Crystal(object):
         """
         latt, u = self.cart2unit(v)
         indlist = [ind for ind in self.atomindices
-                   if np.all(np.isclose(u, self.basis[ind[0]][ind[1]]))]
+                   if np.allclose(u, self.basis[ind[0]][ind[1]])]
         if len(indlist) != 1:
             return latt, None
         else:
@@ -736,7 +736,7 @@ class Crystal(object):
         lis = []
         zero = np.zeros(3, dtype=int)
         for u in ( self.g_vect(g, zero, uvec)[1] for g in self.G ):
-            if not np.any([np.all(np.isclose(u, u1)) for u1 in lis]):
+            if not np.any([np.allclose(u, u1) for u1 in lis]):
                 lis.append(u)
         return lis
 
@@ -803,7 +803,7 @@ class Crystal(object):
         def inlist(tup, dx, lis):
             """Determines if (i,j), dx is in our list"""
             # a little confusing: run through all transition tuples, see if we find our example
-            return any( tup == ij and np.all(np.isclose(dx, v)) for translist in lis for ij, v in translist )
+            return any( tup == ij and np.allclose(dx, v) for translist in lis for ij, v in translist )
 
         r2 = cutoff*cutoff
         nmax = [int(np.round(np.sqrt(self.metric[i,i])))+1
@@ -829,7 +829,7 @@ class Crystal(object):
                                 R2, ind2 = self.g_pos(g, n, (chem, j))
                                 tup = (ind1[1], ind2[1])
                                 dx = self.pos2cart(R2,ind2) - self.pos2cart(R1,ind1)
-                                if not any( tup == ij and np.all(np.isclose(dx, v)) for ij, v in trans):
+                                if not any( tup == ij and np.allclose(dx, v) for ij, v in trans):
                                     trans.append((tup, dx))
                                     trans.append(((tup[1], tup[0]), -dx))
                             lis.append(trans)

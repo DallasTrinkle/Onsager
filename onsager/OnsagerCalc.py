@@ -23,7 +23,7 @@ quite easily.
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-from scipy.linalg import pinv2
+from scipy.linalg import pinv2, solve
 import stars
 import GFcalc
 import crystal
@@ -65,24 +65,29 @@ class Interstitial(object):
         self.VectorBasis, self.VV = self.generateVectorBasis()
         self.NV = len(self.VectorBasis)
         # quick check to see if our projected omega matrix will be invertible
+        # only really needed if we have a non-empty vector basis
         self.omega_invertible = True
         if self.NV > 0:
-            self.omega_invertible = all( np.all(np.isclose(np.sum(v, axis=0), np.zeros(3)))
-                                         for v in self.VectorBasis)
+            # invertible if inversion is present
+            self.omega_invertible = any( np.allclose(g.cartrot, -np.eye(3)) for g in crys.G )
+            # self.omega_invertible = all( np.all(np.isclose(np.sum(v, axis=0), np.zeros(3)))
+            #                              for v in self.VectorBasis)
 
-    def sitelistYAML(self):
+    @staticmethod
+    def sitelistYAML(sitelist):
         """Dumps a "sample" YAML formatted version of the sitelist with data to be entered"""
-        return crystal.yaml.dump({'Dipole': [np.zeros(3,3) for w in self.sitelist],
-                                  'Energy': [0 for w in self.sitelist],
-                                  'Prefactor': [1 for w in self.sitelist],
-                                  'sitelist': self.sitelist})
+        return crystal.yaml.dump({'Dipole': [np.zeros(3,3) for w in sitelist],
+                                  'Energy': [0 for w in sitelist],
+                                  'Prefactor': [1 for w in sitelist],
+                                  'sitelist': sitelist})
 
-    def jumpnetworkYAML(self):
+    @staticmethod
+    def jumpnetworkYAML(jumpnetwork):
         """Dumps a "sample" YAML formatted version of the jumpnetwork with data to be entered"""
-        return crystal.yaml.dump({'DipoleT': [np.zeros(3,3) for t in self.jumpnetwork],
-                                  'EnergyT': [0 for t in self.jumpnetwork],
-                                  'PrefactorT': [1 for t in self.jumpnetwork],
-                                  'jumpnetwork': self.jumpnetwork})
+        return crystal.yaml.dump({'DipoleT': [np.zeros(3,3) for t in jumpnetwork],
+                                  'EnergyT': [0 for t in jumpnetwork],
+                                  'PrefactorT': [1 for t in jumpnetwork],
+                                  'jumpnetwork': jumpnetwork})
 
     def generateVectorBasis(self):
         """
@@ -183,7 +188,7 @@ class Interstitial(object):
                     omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
             if self.omega_invertible:
                 # invertible, so just use solve for speed:
-                gamma_v = np.linalg.solve(omega_v, bias_v)
+                gamma_v = -solve(-omega_v, bias_v, sympos=True) # technically *negative* definite
             else:
                 # pseudoinverse required:
                 gamma_v = np.dot(pinv2(omega_v), bias_v)
