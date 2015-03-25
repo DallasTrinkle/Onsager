@@ -62,8 +62,6 @@ class Interstitial(object):
             for i in w:
                 self.invmap[i] = ind
         self.jumpnetwork = jumpnetwork
-        self.sitegroupops = self.generateSiteGroupOps() # list of group ops to take first rep. into whole list
-        self.jumpgroupops = self.generateJumpGroupOps() # list of group ops to take first rep. into whole list
         self.VectorBasis, self.VV = self.generateVectorBasis()
         self.NV = len(self.VectorBasis)
         # quick check to see if our projected omega matrix will be invertible
@@ -74,6 +72,11 @@ class Interstitial(object):
             self.omega_invertible = any( np.allclose(g.cartrot, -np.eye(3)) for g in crys.G )
             # self.omega_invertible = all( np.all(np.isclose(np.sum(v, axis=0), np.zeros(3)))
             #                              for v in self.VectorBasis)
+        # these pieces are needed in order to compute the elastodiffusion tensor
+        self.sitegroupops = self.generateSiteGroupOps() # list of group ops to take first rep. into whole list
+        self.jumpgroupops = self.generateJumpGroupOps() # list of group ops to take first rep. into whole list
+        self.siteSymmTensorBasis = self.generateSiteSymmTensorBasis() # projections for *first rep. only*
+        self.jumpSymmTensorBasis = self.generateJumpSymmTensorBasis() # projections for *first rep. only*
 
     @staticmethod
     def sitelistYAML(sitelist):
@@ -173,6 +176,32 @@ class Interstitial(object):
                         break
             groupops.append(oplist)
         return groupops
+
+    def generateSiteSymmTensorBasis(self):
+        """
+        Generates a list of symmetric tensor bases for the first representative site
+        in our site list.
+        :return: list of symmetric bases
+        """
+        return [self.crys.SymmTensorBasis((self.chem, sites[0])) for sites in self.sitelist]
+
+    def generateJumpSymmTensorBasis(self):
+        """
+        Generates a list of symmetric tensor bases for the first representative transition
+        in our jump network
+        :return: list of symmetric bases
+        """
+        # there is probably another way to do a list comprehension here, but that
+        # will likely be nigh unreadable.
+        lis = []
+        for jumps in self.jumpnetwork:
+            (i,j), dx = jumps[0]
+            lis.append(reduce(crystal.CombineTensorBasis,
+                              [crystal.SymmTensorBasis(*g.eigen())
+                               for g in self.crys.pointG[self.chem][i]
+                               if g.indexmap[self.chem][j] == j and \
+                               np.allclose(np.dot(g.cartrot, dx), dx) ]))
+        return lis
 
     def siteprob(self, pre, betaene):
         """Returns our site probabilities, normalized, as a vector"""
