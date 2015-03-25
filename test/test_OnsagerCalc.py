@@ -355,6 +355,20 @@ class InterstitialTests(unittest.TestCase):
                         self.assertEqual(jnew, i, msg=failmsg)
                         self.assertTrue(np.allclose(dxnew, -dx), msg=failmsg)
 
+    def testSymmBasis(self):
+        """Do we have a reasonable symmetric tensor basis?"""
+        for basis in self.Dfcc.siteSymmTensorBasis:
+            self.assertEqual(len(basis), 1)
+        for basis in self.Dfcc.jumpSymmTensorBasis:
+            self.assertEqual(len(basis), 2)
+        for basis in self.Dhcp.siteSymmTensorBasis:
+            self.assertEqual(len(basis), 2)
+        for basis, jumps in zip(self.Dhcp.jumpSymmTensorBasis, self.Dhcp.jumpnetwork):
+            if len(jumps) == 4:
+                self.assertEqual(len(basis), 2)
+            else:
+                self.assertEqual(len(basis), 4)
+
     def testSiteProb(self):
         """Do we correctly construct our site probabilities?"""
         # HCP first
