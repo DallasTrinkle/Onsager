@@ -508,3 +508,9 @@ class InterstitialTests(unittest.TestCase):
             self.assertTrue(np.allclose(dip, np.eye(3)))
         self.assertTrue(np.allclose(dipoleT[0], jumpdipoles[0][0]))
         self.assertTrue(np.allclose(np.trace(dipoleT[0])*np.eye(3)/3., sum(jumpdipoles[0])/len(jumpdipoles[0])))
+        for ((i,j), dx), dipole in zip(self.Dfcc.jumpnetwork[0], jumpdipoles[0]):
+            self.assertTrue(np.allclose(-0.5*np.eye(3) + 2.*np.outer(dx, dx), dipole))
+
+    def testElastodiffusion(self):
+        """Test whether we can correctly compute the elastodiffusion tensor; compare with finite difference"""
+        self.assertTrue(False)
