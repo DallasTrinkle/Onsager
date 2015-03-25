@@ -25,9 +25,187 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 import stars
 import GFcalc
+import crystal
 
 
-class VacancyMediated:
+class Interstitial(object):
+    """
+    A class to compute interstitial diffusivity; uses structure of crystal to do most
+    of the heavy lifting in terms of symmetry, etc.
+    """
+    def __init__(self, crys, chem, sitelist, jumpnetwork):
+        """
+        Initialization; takes an underlying crystal, a choice of atomic chemistry,
+        a corresponding Wyckoff site list and jump network.
+
+        Parameters
+        ----------
+        crys : Crystal object
+
+        chem : integer
+            index into the basis of crys, corresponding to the chemical element that hops
+
+        sitelist : list of lists of indices
+            site indices where the atom may hop; grouped by symmetry equivalency
+
+        jumpnetwork : list of lists of tuples: ( (i, j), dx )
+            symmetry unique transitions; each list is all of the possible transitions
+            from site i to site j with jump vector dx; includes i->j and j->i
+        """
+        self.crys = crys
+        self.chem = chem
+        self.sitelist = sitelist
+        self.N = sum(1 for w in sitelist for i in w)
+        self.invmap = [0 for w in sitelist for i in w]
+        for ind,w in sitelist:
+            for i in w:
+                self.invmap[i] = ind
+        self.jumpnetwork = jumpnetwork
+        self.VectorBasis, self.VV = self.generateVectorBasis()
+        self.NV = len(self.VectorBasis)
+
+    def sitelistYAML(self):
+        """Dumps a "sample" YAML formatted version of the sitelist with data to be entered"""
+        return crystal.yaml.dump({'Dipole': [np.zeros(3,3) for w in self.sitelist],
+                                  'Energy': [0 for w in self.sitelist],
+                                  'Prefactor': [1 for w in self.sitelist],
+                                  'sitelist': self.sitelist})
+
+    def jumpnetworkYAML(self):
+        """Dumps a "sample" YAML formatted version of the jumpnetwork with data to be entered"""
+        return crystal.yaml.dump({'DipoleT': [np.zeros(3,3) for t in self.jumpnetwork],
+                                  'EnergyT': [0 for t in self.jumpnetwork],
+                                  'PrefactorT': [1 for t in self.jumpnetwork],
+                                  'jumpnetwork': self.jumpnetwork})
+
+    def generateVectorBasis(self):
+        """
+        Generate our full vector basis, using the information from our crystal
+        :return: list of our unique vector basis lattice functions, normalized
+        """
+        def vectlist(vb):
+            """Returns a list of orthonormal vectors corresponding to our vector basis
+            :param vb: (dim, v)
+            :return: list of vectors
+            """
+            if vb[0] == 0: return []
+            if vb[0] == 1: return [vb[1]]
+            if vb[0] == 2:
+                # now, construct the other two directions:
+                norm = vb[1]
+                if abs(norm[2]) < 0.75:
+                    v1 = np.array([norm[1], -norm[0], 0])
+                else:
+                    v1 = np.array([-norm[2], 0, norm[0]])
+                v1 /= np.sqrt(np.dot(v1, v1))
+                v2 = np.cross(norm, v1)
+                return [v1, v2]
+            if vb[0] == 3: return [np.array([1.,0.,0.]),
+                                   np.array([0.,1.,0.]),
+                                   np.array([0.,0.,1.])]
+
+        lis = []
+        lisVV = []
+        for s in self.sitelist:
+            for v in vectlist(self.crys.VectorBasis((self.chem, s[0]))):
+                v /= np.sqrt(len(s)) # additional normalization
+                # we have some constructing to do... first, make the vector we want to use
+                vb = np.zeros((self.N, 3))
+                for g in self.crys.G:
+                    # what site do we land on, and what's the vector? (this is slight overkill)
+                    vb[g.indexmap[self.chem][s[0]]] = self.crys.g_direc(g, v)
+                lis.append(vb)
+                lisVV.append(np.dot(vb.T, vb))
+        return lis, lisVV
+
+    def siteprob(self, pre, betaene):
+        """Returns our site probabilities, normalized, as a vector"""
+        rho = np.array([ pre[w]*np.exp(-betaene[w]) for i,w in enumerate(self.invmap)])
+        return rho/sum(rho)
+
+    def ratelist(self, pre, betaene, preT, betaeneT):
+        """Returns a list of lists of rates, matched to jumpnetwork"""
+        # the ij tuple in each transition list is the i->j pair
+        # invmap[i] tells you which Wyckoff position i maps to (in the sitelist)
+        invrho = np.array([ np.exp(betaene[w])/pre[w] for i,w in enumerate(self.invmap)])
+        return [[ pT*invrho[i]*np.exp(-beT) for (i,j), dx in t ]
+            for t, pT, beT in zip(self.jumpnetwork, preT, betaeneT)]
+
+    def diffusivity(self, pre, betaene, preT, betaeneT):
+        """
+        Computes the diffusivity for our element given prefactors and energies/kB T.
+        The input list order corresponds to the sitelist and jumpnetwork
+
+        Parameters
+        ----------
+        pre : list of prefactors for unique sites
+        betaene : list of site energies divided by kB T
+        preT : list of prefactors for transition states
+        betaeneT: list of transition state energies divided by kB T
+
+        Returns
+        -------
+        D[3,3] : diffusivity as 3x3 tensor
+        """
+        if __debug__:
+            if len(pre) != len(self.sitelist): raise IndexError("length of prefactor {} doesn't match sitelist".format(pre))
+            if len(betaene) != len(self.sitelist): raise IndexError("length of energies {} doesn't match sitelist".format(betaene))
+            if len(preT) != len(self.jumpnetwork): raise IndexError("length of prefactor {} doesn't match jump network".format(preT))
+            if len(betaeneT) != len(self.jumpnetwork): raise IndexError("length of energies {} doesn't match jump network".format(betaeneT))
+        rho = self.siteprob(pre, betaene)
+        sqrtrho = np.sqrt(rho)
+        invsqrtrho = 1./sqrtrho
+        ratelist = self.ratelist(pre, betaene, preT, betaeneT)
+        omega_ij = np.zeros((self.N, self.N))
+        bias_i = np.zeros((self.N, 3))
+        D0 = np.zeros((3,3))
+        for transitionset, rates in zip(self.jumpnetwork, ratelist):
+            for ((i,j), dx), rate in zip(transitionset, rates):
+                omega_ij[i, j] += sqrtrho[i]*invsqrtrho[j]*rate
+                omega_ij[i, i] -= rate
+                bias_i[i] += sqrtrho[i]*rate*dx
+                D0 += 0.5*np.outer(dx, dx)*rho[i]*rate
+        if self.NV > 0:
+            # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
+            omega_v = np.zeros((self.NV, self.NV))
+            bias_v = np.zeros(self.NV)
+            for a, va in enumerate(self.VectorBasis):
+                bias_v[a] = np.trace(np.dot(bias_i.T, vb))
+                for b, vb in enumerate(self.VectorBasis):
+                    omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
+
+        return D0
+
+    def elastodiffusion(self, pre, betaene, dipole, preT, betaeneT, dipoleT):
+        """
+        Computes the elastodiffusion tensor for our element given prefactors, energies/kB T,
+        and elastic dipoles/kB T
+        The input list order corresponds to the sitelist and jumpnetwork
+
+        Parameters
+        ----------
+        pre : list of prefactors for unique sites
+        betaene : list of site energies divided by kB T
+        dipole: list of elastic dipoles divided by kB T
+        preT : list of prefactors for transition states
+        betaeneT: list of transition state energies divided by kB T
+        dipoleT: list of elastic dipoles divided by kB T
+
+        Returns
+        -------
+        D[3,3], dD[3,3,3,3] : diffusivity as 3x3 tensor and elastodiffusion tensor as 3x3x3x3 tensor
+        """
+        if __debug__:
+            if len(pre) != len(self.sitelist): raise IndexError("length of prefactor {} doesn't match sitelist".format(pre))
+            if len(betaene) != len(self.sitelist): raise IndexError("length of energies {} doesn't match sitelist".format(betaene))
+            if len(dipole) != len(self.sitelist): raise IndexError("length of dipoles {} doesn't match sitelist".format(dipole))
+            if len(preT) != len(self.jumpnetwork): raise IndexError("length of prefactor {} doesn't match jump network".format(preT))
+            if len(betaeneT) != len(self.jumpnetwork): raise IndexError("length of energies {} doesn't match jump network".format(betaeneT))
+            if len(dipoleT) != len(self.jumpnetwork): raise IndexError("length of dipoles {} doesn't match jump network".format(dipoleT))
+        return np.eye(3), np.zeros((3,3,3,3))
+
+
+class VacancyMediated(object):
     """
     A class to compute vacancy-mediated solute transport coefficients, specifically
     L_vv (vacancy diffusion), L_ss (solute), and L_sv (off-diagonal). As part of that,
