@@ -223,11 +223,11 @@ class Interstitial(object):
         Returns a list of the elastic dipole on each site, given the dipoles
         for the representatives
         :param dipoles: list of dipoles for the first representative site
-        :return: list of dipole for each site
+        :return: array of dipole for each site [site][3][3]
         """
         # difficult to do with list comprehension since we're mapping from Wyckoff positions
         # to site indices; need to create the "blank" list first, then map into it.
-        lis = [0] * self.N # blank list to index into
+        lis = np.zeros((self.N, 3, 3)) # blank list to index into
         for dipole, basis, sites, groupops in zip(dipoles, self.siteSymmTensorBasis,
                                                   self.sitelist, self.sitegroupops):
             symmdipole = crystal.ProjectTensorBasis(dipole, basis)
@@ -243,8 +243,11 @@ class Interstitial(object):
         :param dipoles: list of dipoles for the first representative transition
         :return: lists of lists of dipole for each transition
         """
-        return [ [ dipole for (i,j), dx in t ]
-                 for t, dipole in zip(self.jumpnetwork, dipoles) ]
+        # symmetrize them first via projection
+        symmdipoles = [ crystal.ProjectTensorBasis(dipole, basis)
+                        for dipole, basis in zip(dipoles, self.jumpSymmTensorBasis)]
+        return [ [ self.crys.g_tensor(g, dipole) for g in groupops ]
+                 for groupops, dipole in zip(self.jumpgroupops, symmdipoles) ]
 
     def diffusivity(self, pre, betaene, preT, betaeneT):
         """
