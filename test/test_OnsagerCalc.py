@@ -345,9 +345,59 @@ class InterstitialTests(unittest.TestCase):
         pre = np.zeros(self.Dfcc.N)
         BE = np.zeros(self.Dfcc.N)
         pre[self.Dfcc.invmap[0]] = preoct
-        pre[self.Dfcc.invmap[2]] = pretet
+        pre[self.Dfcc.invmap[1]] = pretet
         BE[self.Dfcc.invmap[0]] = BEoct
-        BE[self.Dfcc.invmap[2]] = BEtet
-        # With this, we have 4 sites total, and they should all have equal probability: so 1/4 is the answer.
+        BE[self.Dfcc.invmap[1]] = BEtet
+        # With this, we have 3 sites total, and they should all have equal probability: so 1/3 is the answer.
         self.assertTrue(np.allclose(np.ones(self.Dfcc.N)/self.Dfcc.N, self.Dfcc.siteprob(pre, BE)))
+
+    def testRatelist(self):
+        """Do we correctly construct our rates?"""
+        # FCC first
+        preoct = 1
+        pretet = 2
+        BEoct = 0
+        BEtet = np.log(2) # so exp(-beta*E) = 1/2
+        preTrans = 10
+        BETrans = np.log(10) # so that our rate should be 10*exp(-BET) / (1*exp(0)) = 1
+        pre = np.zeros(self.Dfcc.N)
+        BE = np.zeros(self.Dfcc.N)
+        pre[self.Dfcc.invmap[0]] = preoct
+        pre[self.Dfcc.invmap[1]] = pretet
+        BE[self.Dfcc.invmap[0]] = BEoct
+        BE[self.Dfcc.invmap[1]] = BEtet
+        preT = np.array([preTrans])
+        BET = np.array([BETrans])
+        self.assertTrue(all( np.isclose(rate, 1)
+                             for ratelist in self.Dfcc.ratelist(pre, BE, preT, BET)
+                             for rate in ratelist))
+        # try changing the prefactor for tetrahedral...
+        pre[self.Dfcc.invmap[1]] = 1
+        ratelist = self.Dfcc.ratelist(pre, BE, preT, BET)
+        for ((i, j), dx), rate in zip(self.Dfcc.jumpnetwork[0], ratelist[0]):
+            if i==0: self.assertAlmostEqual(rate, 1) # oct->tet
+            else:    self.assertAlmostEqual(rate, 2) # tet->oct
+
+        # HCP
+        pre = np.zeros(self.Dhcp.N)
+        BE = np.zeros(self.Dhcp.N)
+        pre[self.Dhcp.invmap[0]] = preoct
+        pre[self.Dhcp.invmap[2]] = pretet
+        BE[self.Dhcp.invmap[0]] = BEoct
+        BE[self.Dhcp.invmap[2]] = BEtet
+        preT = np.zeros(len(self.Dhcp.jumpnetwork))
+        BET = np.zeros(len(self.Dhcp.jumpnetwork))
+        for i, jump in enumerate(self.Dhcp.jumpnetwork):
+            if len(jump) == 4:
+                preT[i] = 100
+                BET[i] = np.log(10)
+            else:
+                preT[i] = 10
+                BET[i] = np.log(10)
+        # oct->tet jumps have rate 1, tet->tet jumps have rate 10.
+        ratelist = self.Dhcp.ratelist(pre, BE, preT, BET)
+        for jumps, rates in zip(self.Dhcp.jumpnetwork, ratelist):
+            for ((i, j), dx), rate in zip(jumps, rates):
+                if i<2 or j<2: self.assertAlmostEqual(rate, 1) # oct->tet
+                else:          self.assertAlmostEqual(rate, 10) # tet->oct
 
