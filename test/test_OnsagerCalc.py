@@ -316,3 +316,13 @@ class InterstitialTests(unittest.TestCase):
         self.assertEqual(self.Dfcc.NV, 0)
         self.assertTrue(self.Dfcc.omega_invertible)
 
+    def testInverseMap(self):
+        """Do we correctly construct the inverse map?"""
+        for D in [self.Dhcp, self.Dfcc]:
+            for i,w in enumerate(D.invmap):
+                self.assertTrue(any(i==j for j in D.sitelist[w]))
+        self.assertEqual(len(self.HCP_sitelist), 2)
+        self.assertEqual(len(self.FCC_sitelist), 2)
+        self.assertEqual(len(self.HCP_jumpnetwork), 2)
+        self.assertEqual(len(self.FCC_jumpnetwork), 1)
+
