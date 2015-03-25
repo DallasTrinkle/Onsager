@@ -327,7 +327,7 @@ class Interstitial(object):
             if len(preT) != len(self.jumpnetwork): raise IndexError("length of prefactor {} doesn't match jump network".format(preT))
             if len(betaeneT) != len(self.jumpnetwork): raise IndexError("length of energies {} doesn't match jump network".format(betaeneT))
             if len(dipoleT) != len(self.jumpnetwork): raise IndexError("length of dipoles {} doesn't match jump network".format(dipoleT))
-        return np.eye(3), np.zeros((3,3,3,3))
+        return self.diffusivity(pre, betaene, preT, betaeneT), np.zeros((3,3,3,3))
 
 
 class VacancyMediated(object):

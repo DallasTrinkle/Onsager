@@ -513,4 +513,59 @@ class InterstitialTests(unittest.TestCase):
 
     def testElastodiffusion(self):
         """Test whether we can correctly compute the elastodiffusion tensor; compare with finite difference"""
+        # FCC first:
+        preoct = 1.
+        pretet = 2.
+        BEoct = 0.
+        BEtet = np.log(2) # so exp(-beta*E) = 1/2
+        preTrans = 10.
+        BETrans = np.log(10) # so that our rate should be 10*exp(-BET) / (1*exp(0)) = 1
+        pre = np.zeros(len(self.FCC_sitelist))
+        BE = np.zeros(len(self.FCC_sitelist))
+        pre[self.Dfcc.invmap[0]] = preoct
+        pre[self.Dfcc.invmap[1]] = pretet
+        BE[self.Dfcc.invmap[0]] = BEoct
+        BE[self.Dfcc.invmap[1]] = BEtet
+        preT = np.array([preTrans])
+        BET = np.array([BETrans])
+
+        octP = 1e-4
+        tetP = -1e-4
+        transPpara = 2e-4
+        transPperp = -1.5e-4
+        dipole = [ octP*np.eye(3), tetP*np.eye(3) ]
+        (i,j), dx = self.Dfcc.jumpnetwork[0][0] # our representative jump
+        dipoleT = [ transPperp*np.eye(3) + (transPpara-transPperp)*np.outer(dx, dx)/np.dot(dx, dx)]
+        sitedipoles = self.Dfcc.siteDipoles(dipole)
+        jumpdipoles = self.Dfcc.jumpDipoles(dipoleT)
+
+        # strain
+        eps = 1e-4
+        strainmat = eps*np.array([[0.,0.,0],[0.,0.,0,],[0.,0.,1.]])
+        strainedFCC = crystal.Crystal(np.dot(np.eye(3) + strainmat, self.fcclatt),
+                                      [[np.zeros(3)],
+                                       [np.array([0.5,0.5,-0.5]),
+                                        np.array([0.25,0.25,0.25]),
+                                        np.array([0.75,0.75,0.75])]])
+        strainedFCC_jumpnetwork = strainedFCC.jumpnetwork(1, self.a0*0.5)
+        strainedFCC_sitelist = strainedFCC.sitelist(1)
+        strainedDfcc =OnsagerCalc.Interstitial(strainedFCC, 1, strainedFCC_sitelist, strainedFCC_jumpnetwork)
+        strainedBE = np.zeros(len(strainedFCC_sitelist))
+        # apply dipoles to site energies:
+        strainedBE[strainedDfcc.invmap[0]] = BEoct + np.sum(sitedipoles[strainedDfcc.invmap[0]] * strainmat)
+        strainedBE[strainedDfcc.invmap[1]] = BEtet + np.sum(sitedipoles[strainedDfcc.invmap[0]] * strainmat)
+        strainedBET = np.zeros(len(strainedFCC_jumpnetwork))
+        strainedpreT = np.zeros(len(strainedFCC_jumpnetwork))
+        # this gets more complicated... just work it "by hand"
+        for ind, jumps in enumerate(strainedFCC_jumpnetwork):
+            (i,j), dx = jumps[0]
+            strainedpreT[ind] = preTrans
+            strainedBET[ind] = BETrans + np.sum((transPperp*np.eye(3) +
+                                                 (transPpara-transPperp)*np.outer(dx, dx)/np.dot(dx, dx))*strainmat)
+        D0, Dp = self.Dfcc.elastodiffusion(pre, BE, dipole, preT, BET, dipoleT)
+        Deps = strainedDfcc.diffusivity(pre, strainedBE, strainedpreT, strainedBET)
+        print (Deps-D0)/eps
+        print np.tensordot(Dp, strainmat, axes=((2,3), (0,1)))/eps
+        self.assertTrue(np.allclose(Deps-D0, np.tensordot(Dp, strainmat, axes=((2,3), (0,1)))))
+
         self.assertTrue(False)
