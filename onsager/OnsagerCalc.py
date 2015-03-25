@@ -170,7 +170,7 @@ class Interstitial(object):
             omega_v = np.zeros((self.NV, self.NV))
             bias_v = np.zeros(self.NV)
             for a, va in enumerate(self.VectorBasis):
-                bias_v[a] = np.trace(np.dot(bias_i.T, vb))
+                bias_v[a] = np.trace(np.dot(bias_i.T, va))
                 for b, vb in enumerate(self.VectorBasis):
                     omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
 
