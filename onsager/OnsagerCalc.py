@@ -62,6 +62,8 @@ class Interstitial(object):
             for i in w:
                 self.invmap[i] = ind
         self.jumpnetwork = jumpnetwork
+        self.sitegroupops = self.generateSiteGroupOps() # list of group ops to take first rep. into whole list
+        self.jumpgroupops = self.generateJumpGroupOps() # list of group ops to take first rep. into whole list
         self.VectorBasis, self.VV = self.generateVectorBasis()
         self.NV = len(self.VectorBasis)
         # quick check to see if our projected omega matrix will be invertible
@@ -128,6 +130,49 @@ class Interstitial(object):
                 lis.append(vb)
                 lisVV.append(np.dot(vb.T, vb))
         return lis, lisVV
+
+    def generateSiteGroupOps(self):
+        """
+        Generates a list of group operations that transform the first site in each site list
+        into all of the other members
+        :return: list of list of group ops that mirrors the structure of site list
+        """
+        groupops = []
+        for sites in self.sitelist:
+            i0 = sites[0]
+            oplist = []
+            for i in sites:
+                for g in self.crys.G:
+                    if g.indexmap[self.chem][i0] == i:
+                        oplist.append(g)
+                        break
+            groupops.append(oplist)
+        return groupops
+
+    def generateJumpGroupOps(self):
+        """
+        Generates a list of group operations that transform the first jump in the jump
+        network into all of the other members
+        :return: list of list of group ops that mirrors the structure of jumpnetwork
+        """
+        groupops = []
+        for jumps in self.jumpnetwork:
+            (i0,j0), dx0 = jumps[0]
+            oplist = []
+            for (i,j), dx in jumps:
+                for g in self.crys.G:
+                    # more complex: have to check the tuple (i,j) *and* the rotation of dx
+                    # AND against the possibilty that we are looking at the reverse jump too
+                    if (g.indexmap[self.chem][i0] == i \
+                        and g.indexmap[self.chem][j0] == j
+                        and np.allclose(dx0, np.dot(g.cartrot, dx)) ) or \
+                            (g.indexmap[self.chem][i0] == j
+                             and g.indexmap[self.chem][j0] == i
+                             and np.allclose(dx0, -np.dot(g.cartrot, dx)) ):
+                        oplist.append(g)
+                        break
+            groupops.append(oplist)
+        return groupops
 
     def siteprob(self, pre, betaene):
         """Returns our site probabilities, normalized, as a vector"""
