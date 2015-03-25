@@ -188,7 +188,7 @@ class Interstitial(object):
                     omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
             if self.omega_invertible:
                 # invertible, so just use solve for speed:
-                gamma_v = -solve(-omega_v, bias_v, sympos=True) # technically *negative* definite
+                gamma_v = -solve(-omega_v, bias_v, sym_pos=True) # technically *negative* definite
             else:
                 # pseudoinverse required:
                 gamma_v = np.dot(pinv2(omega_v), bias_v)

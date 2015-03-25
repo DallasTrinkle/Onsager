@@ -334,8 +334,8 @@ class InterstitialTests(unittest.TestCase):
         pretet = 2
         BEoct = 0
         BEtet = np.log(2) # so exp(-beta*E) = 1/2
-        pre = np.zeros(self.Dhcp.N)
-        BE = np.zeros(self.Dhcp.N)
+        pre = np.zeros(len(self.HCP_sitelist))
+        BE = np.zeros(len(self.HCP_sitelist))
         pre[self.Dhcp.invmap[0]] = preoct
         pre[self.Dhcp.invmap[2]] = pretet
         BE[self.Dhcp.invmap[0]] = BEoct
@@ -343,8 +343,8 @@ class InterstitialTests(unittest.TestCase):
         # With this, we have 6 sites total, and they should all have equal probability: so 1/6 is the answer.
         self.assertTrue(np.allclose(np.ones(self.Dhcp.N)/self.Dhcp.N, self.Dhcp.siteprob(pre, BE)))
         # FCC
-        pre = np.zeros(self.Dfcc.N)
-        BE = np.zeros(self.Dfcc.N)
+        pre = np.zeros(len(self.FCC_sitelist))
+        BE = np.zeros(len(self.FCC_sitelist))
         pre[self.Dfcc.invmap[0]] = preoct
         pre[self.Dfcc.invmap[1]] = pretet
         BE[self.Dfcc.invmap[0]] = BEoct
@@ -361,8 +361,8 @@ class InterstitialTests(unittest.TestCase):
         BEtet = np.log(2) # so exp(-beta*E) = 1/2
         preTrans = 10
         BETrans = np.log(10) # so that our rate should be 10*exp(-BET) / (1*exp(0)) = 1
-        pre = np.zeros(self.Dfcc.N)
-        BE = np.zeros(self.Dfcc.N)
+        pre = np.zeros(len(self.FCC_sitelist))
+        BE = np.zeros(len(self.FCC_sitelist))
         pre[self.Dfcc.invmap[0]] = preoct
         pre[self.Dfcc.invmap[1]] = pretet
         BE[self.Dfcc.invmap[0]] = BEoct
@@ -380,21 +380,25 @@ class InterstitialTests(unittest.TestCase):
             else:    self.assertAlmostEqual(rate, 2) # tet->oct
 
         # HCP
-        pre = np.zeros(self.Dhcp.N)
-        BE = np.zeros(self.Dhcp.N)
+        pre = np.zeros(len(self.HCP_sitelist))
+        BE = np.zeros(len(self.HCP_sitelist))
         pre[self.Dhcp.invmap[0]] = preoct
         pre[self.Dhcp.invmap[2]] = pretet
         BE[self.Dhcp.invmap[0]] = BEoct
         BE[self.Dhcp.invmap[2]] = BEtet
+        preTransOT = 10.
+        preTransTT = 100.
+        BETransOT = np.log(10.)
+        BETransTT = np.log(10.)
         preT = np.zeros(len(self.Dhcp.jumpnetwork))
         BET = np.zeros(len(self.Dhcp.jumpnetwork))
         for i, jump in enumerate(self.Dhcp.jumpnetwork):
             if len(jump) == 4:
-                preT[i] = 100
-                BET[i] = np.log(10)
+                preT[i] = preTransTT
+                BET[i] = BETransTT
             else:
-                preT[i] = 10
-                BET[i] = np.log(10)
+                preT[i] = preTransOT
+                BET[i] = BETransOT
         # oct->tet jumps have rate 1, tet->tet jumps have rate 10.
         ratelist = self.Dhcp.ratelist(pre, BE, preT, BET)
         for jumps, rates in zip(self.Dhcp.jumpnetwork, ratelist):
@@ -402,3 +406,49 @@ class InterstitialTests(unittest.TestCase):
                 if i<2 or j<2: self.assertAlmostEqual(rate, 1) # oct->tet
                 else:          self.assertAlmostEqual(rate, 10) # tet->oct
 
+    def testDiffusivity(self):
+        """Diffusivity"""
+        # What we all came for...
+        preoct = 1.
+        pretet = 2.
+        BEoct = 0.
+        BEtet = np.log(2) # so exp(-beta*E) = 1/2
+        preTrans = 10.
+        BETrans = np.log(10) # so that our rate should be 10*exp(-BET) / (1*exp(0)) = 1
+        pre = np.zeros(len(self.FCC_sitelist))
+        BE = np.zeros(len(self.FCC_sitelist))
+        pre[self.Dfcc.invmap[0]] = preoct
+        pre[self.Dfcc.invmap[1]] = pretet
+        BE[self.Dfcc.invmap[0]] = BEoct
+        BE[self.Dfcc.invmap[1]] = BEtet
+        preT = np.array([preTrans])
+        BET = np.array([BETrans])
+
+        Dfcc_anal = 0.5*self.a0**2 *preTrans*np.exp(-BETrans)/(preoct*np.exp(-BEoct) + 2*pretet*np.exp(-BEtet))
+        self.assertTrue(np.allclose(Dfcc_anal*np.eye(3), self.Dfcc.diffusivity(pre, BE, preT, BET)))
+
+        # HCP
+        pre = np.zeros(len(self.HCP_sitelist))
+        BE = np.zeros(len(self.HCP_sitelist))
+        pre[self.Dhcp.invmap[0]] = preoct
+        pre[self.Dhcp.invmap[2]] = pretet
+        BE[self.Dhcp.invmap[0]] = BEoct
+        BE[self.Dhcp.invmap[2]] = BEtet
+        preTransOT = 10.
+        preTransTT = 100.
+        BETransOT = np.log(10.)
+        BETransTT = np.log(10.)
+        preT = np.zeros(len(self.Dhcp.jumpnetwork))
+        BET = np.zeros(len(self.Dhcp.jumpnetwork))
+        for i, jump in enumerate(self.Dhcp.jumpnetwork):
+            if len(jump) == 4:
+                preT[i] = preTransTT
+                BET[i] = BETransTT
+            else:
+                preT[i] = preTransOT
+                BET[i] = BETransOT
+        Dhcp_basal = self.a0**2 * preTransOT*np.exp(-BETransOT)/(preoct*np.exp(-BEoct) + 2*pretet*np.exp(-BEtet))
+        Dhcp_c = 0.75*self.c_a**2 * Dhcp_basal/ (3*preTransOT/preTransTT * np.exp(-BETransOT+BETransTT) + 2)
+        D = self.Dhcp.diffusivity(pre, BE, preT, BET)
+        self.assertTrue(np.allclose(np.array([[Dhcp_basal,0,0],[0,Dhcp_basal,0],[0,0,Dhcp_c]]), D),
+                        msg="Diffusivity doesn't match:\n{}\nnot {} and {}".format(D, Dhcp_basal,Dhcp_c))
