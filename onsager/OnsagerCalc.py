@@ -58,7 +58,7 @@ class Interstitial(object):
         self.sitelist = sitelist
         self.N = sum(1 for w in sitelist for i in w)
         self.invmap = [0 for w in sitelist for i in w]
-        for ind,w in sitelist:
+        for ind,w in enumerate(sitelist):
             for i in w:
                 self.invmap[i] = ind
         self.jumpnetwork = jumpnetwork

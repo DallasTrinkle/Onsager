@@ -12,6 +12,7 @@ import onsager.FCClatt as FCClatt
 import onsager.KPTmesh as KPTmesh
 import numpy as np
 import onsager.OnsagerCalc as OnsagerCalc
+import onsager.crystal as crystal
 
 
 # Setup for orthorhombic, simple cubic, and FCC cells; different than test_stars
@@ -275,3 +276,43 @@ class BCCBaseTests(SCBaseTests):
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
         self.D0 = self.GF.D2[0, 0]
         self.correl = 0.727
+
+
+class InterstitialTests(unittest.TestCase):
+    """Tests for our interstitial diffusion calculator"""
+
+    def setUp(self):
+        # Both HCP and FCC diffusion networks with octahedral and tetrahedral sites
+        self.a0 = 3
+        self.c_a = np.sqrt(8./3.)
+        self.fcclatt = self.a0*np.array([[0, 0.5, 0.5],
+                                         [0.5, 0, 0.5],
+                                         [0.5, 0.5, 0]])
+        self.hexlatt = self.a0*np.array([[0.5, 0.5, 0],
+                                         [-np.sqrt(0.75), np.sqrt(0.75), 0],
+                                         [0, 0, self.c_a]])
+        basis = [[np.array([1./3.,2./3.,0.25]),
+                  np.array([2./3.,1./3.,0.75])]]
+        HCPcrys = crystal.Crystal(self.hexlatt, basis)
+        octset = HCPcrys.Wyckoffpos(np.array([0., 0., 0.5]))
+        tetset = HCPcrys.Wyckoffpos(np.array([1./3., 2./3., 0.625]))
+        # now, build up HCP + interstitials (which are of a *different chemistry*)
+        self.HCP_intercrys = crystal.Crystal(self.hexlatt, basis + [octset + tetset])
+        self.HCP_jumpnetwork = self.HCP_intercrys.jumpnetwork(1, self.a0*0.7) # tuned to avoid t->t in basal plane
+        self.HCP_sitelist = self.HCP_intercrys.sitelist(1)
+        self.Dhcp = OnsagerCalc.Interstitial(self.HCP_intercrys, 1, self.HCP_sitelist, self.HCP_jumpnetwork)
+        self.FCC_intercrys = crystal.Crystal(self.fcclatt, [[np.zeros(3)],
+                                                            [np.array([0.5,0.5,-0.5]),
+                                                             np.array([0.25,0.25,0.25]),
+                                                             np.array([0.75,0.75,0.75])]])
+        self.FCC_jumpnetwork = self.FCC_intercrys.jumpnetwork(1, self.a0*0.5)
+        self.FCC_sitelist = self.FCC_intercrys.sitelist(1)
+        self.Dfcc = OnsagerCalc.Interstitial(self.FCC_intercrys, 1, self.FCC_sitelist, self.FCC_jumpnetwork)
+
+    def testVectorBasis(self):
+        """Do we correctly analyze our crystals regarding their symmetry?"""
+        self.assertEqual(self.Dhcp.NV, 1)
+        self.assertTrue(self.Dhcp.omega_invertible)
+        self.assertEqual(self.Dfcc.NV, 0)
+        self.assertTrue(self.Dfcc.omega_invertible)
+
