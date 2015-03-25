@@ -346,6 +346,16 @@ def CombineTensorBasis(b1, b2, symmetric=True):
     # generator in the sum to construct the basis
     return [ sum(b1[i]*alpha for i,alpha in enumerate(v)) for v in nullspace ]
 
+def ProjectTensorBasis(tensor, basis):
+    """
+    Given a tensor, project it onto the basis.
+    :param tensor: tensor
+    :param basis: list consisting of an orthonormal basis
+    :return: tensor, projected
+    """
+    if __debug__:
+        if tensor.shape != basis[0].shape: raise TypeError("Tensor and basis not compatible")
+    return sum( b*np.sum(tensor*b) for b in basis )
 
 class Crystal(object):
     """
@@ -673,7 +683,7 @@ class Crystal(object):
         if __debug__:
             if type(g) is not GroupOp: raise TypeError
             if type(tensor) is not np.ndarray: raise TypeError
-            if tensor.shape is not (3,3): raise TypeError
+            if tensor.shape != (3,3): raise TypeError
         return np.dot(g.cartrot, np.dot(tensor, g.cartrot.T))
 
     def g_pos(self, g, lattvec, ind):

@@ -507,3 +507,4 @@ class InterstitialTests(unittest.TestCase):
         for dip in sitedipoles:
             self.assertTrue(np.allclose(dip, np.eye(3)))
         self.assertTrue(np.allclose(dipoleT[0], jumpdipoles[0][0]))
+        self.assertTrue(np.allclose(np.trace(dipoleT[0])*np.eye(3)/3., sum(jumpdipoles[0])/len(jumpdipoles[0])))

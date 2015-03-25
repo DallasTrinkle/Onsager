@@ -225,7 +225,16 @@ class Interstitial(object):
         :param dipoles: list of dipoles for the first representative site
         :return: list of dipole for each site
         """
-        return [ dipoles[w] for i,w in enumerate(self.invmap) ]
+        # difficult to do with list comprehension since we're mapping from Wyckoff positions
+        # to site indices; need to create the "blank" list first, then map into it.
+        lis = [0] * self.N # blank list to index into
+        for dipole, basis, sites, groupops in zip(dipoles, self.siteSymmTensorBasis,
+                                                  self.sitelist, self.sitegroupops):
+            symmdipole = crystal.ProjectTensorBasis(dipole, basis)
+            for i, g in zip(sites, groupops):
+                lis[i] = self.crys.g_tensor(g, symmdipole)
+        return lis
+        # return [ dipoles[w] for i,w in enumerate(self.invmap) ]
 
     def jumpDipoles(self, dipoles):
         """
