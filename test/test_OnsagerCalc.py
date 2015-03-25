@@ -504,3 +504,6 @@ class InterstitialTests(unittest.TestCase):
         dipoleT = [ -0.5*np.eye(3) + 2.*np.outer(dx, dx)] # this should remain unchanged
         sitedipoles = self.Dfcc.siteDipoles(dipole)
         jumpdipoles = self.Dfcc.jumpDipoles(dipoleT)
+        for dip in sitedipoles:
+            self.assertTrue(np.allclose(dip, np.eye(3)))
+        self.assertTrue(np.allclose(dipoleT[0], jumpdipoles[0][0]))
