@@ -326,3 +326,28 @@ class InterstitialTests(unittest.TestCase):
         self.assertEqual(len(self.HCP_jumpnetwork), 2)
         self.assertEqual(len(self.FCC_jumpnetwork), 1)
 
+    def testSiteProb(self):
+        """Do we correctly construct our site probabilities?"""
+        # HCP first
+        preoct = 1
+        pretet = 2
+        BEoct = 0
+        BEtet = np.log(2) # so exp(-beta*E) = 1/2
+        pre = np.zeros(self.Dhcp.N)
+        BE = np.zeros(self.Dhcp.N)
+        pre[self.Dhcp.invmap[0]] = preoct
+        pre[self.Dhcp.invmap[2]] = pretet
+        BE[self.Dhcp.invmap[0]] = BEoct
+        BE[self.Dhcp.invmap[2]] = BEtet
+        # With this, we have 6 sites total, and they should all have equal probability: so 1/6 is the answer.
+        self.assertTrue(np.allclose(np.ones(self.Dhcp.N)/self.Dhcp.N, self.Dhcp.siteprob(pre, BE)))
+        # FCC
+        pre = np.zeros(self.Dfcc.N)
+        BE = np.zeros(self.Dfcc.N)
+        pre[self.Dfcc.invmap[0]] = preoct
+        pre[self.Dfcc.invmap[2]] = pretet
+        BE[self.Dfcc.invmap[0]] = BEoct
+        BE[self.Dfcc.invmap[2]] = BEtet
+        # With this, we have 4 sites total, and they should all have equal probability: so 1/4 is the answer.
+        self.assertTrue(np.allclose(np.ones(self.Dfcc.N)/self.Dfcc.N, self.Dfcc.siteprob(pre, BE)))
+
