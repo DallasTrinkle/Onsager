@@ -218,6 +218,25 @@ class Interstitial(object):
                               [ pT*np.exp(-beT)
                                 for pT, beT in zip(preT, betaeneT) ])]
 
+    def siteDipoles(self, dipoles):
+        """
+        Returns a list of the elastic dipole on each site, given the dipoles
+        for the representatives
+        :param dipoles: list of dipoles for the first representative site
+        :return: list of dipole for each site
+        """
+        return [ dipoles[w] for i,w in enumerate(self.invmap) ]
+
+    def jumpDipoles(self, dipoles):
+        """
+        Returns a list of the elastic dipole for each transition, given the dipoles
+        for the representatives
+        :param dipoles: list of dipoles for the first representative transition
+        :return: lists of lists of dipole for each transition
+        """
+        return [ [ dipole for (i,j), dx in t ]
+                 for t, dipole in zip(self.jumpnetwork, dipoles) ]
+
     def diffusivity(self, pre, betaene, preT, betaeneT):
         """
         Computes the diffusivity for our element given prefactors and energies/kB T.

@@ -494,3 +494,13 @@ class InterstitialTests(unittest.TestCase):
         D = self.Dhcp.diffusivity(pre, BE, preT, BET)
         self.assertTrue(np.allclose(np.array([[Dhcp_basal,0,0],[0,Dhcp_basal,0],[0,0,Dhcp_c]]), D),
                         msg="Diffusivity doesn't match:\n{}\nnot {} and {}".format(D, Dhcp_basal,Dhcp_c))
+
+    def testSymmTensorMapping(self):
+        """Do we correctly map our elastic dipoles onto sites and transitions?"""
+        # put a little "error" in from our calculation... shouldn't really be present
+        dipole = [np.array([[1.,1e-4, -2e-4],[1e-4,1.,3e-4],[-2e-4, 3e-4, 1.]]),
+                  np.array([[1.,1e-4, -2e-4],[1e-4,1.,3e-4],[-2e-4, 3e-4, 1.]])]
+        (i,j), dx = self.Dfcc.jumpnetwork[0][0] # our representative jump
+        dipoleT = [ -0.5*np.eye(3) + 2.*np.outer(dx, dx)] # this should remain unchanged
+        sitedipoles = self.Dfcc.siteDipoles(dipole)
+        jumpdipoles = self.Dfcc.jumpDipoles(dipoleT)
