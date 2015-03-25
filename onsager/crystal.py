@@ -663,6 +663,19 @@ class Crystal(object):
             if type(direc) is not np.ndarray: raise TypeError
         return np.dot(g.cartrot, direc)
 
+    def g_tensor(self, g, tensor):
+        """
+        Apply a space group operation to a 2nd-rank tensor
+        :param g: group operation (GroupOp)
+        :param tensor: 2nd-rank tensor
+        :return: 2nd-rank tensor
+        """
+        if __debug__:
+            if type(g) is not GroupOp: raise TypeError
+            if type(tensor) is not np.ndarray: raise TypeError
+            if tensor.shape is not (3,3): raise TypeError
+        return np.dot(g.cartrot, np.dot(tensor, g.cartrot.T))
+
     def g_pos(self, g, lattvec, ind):
         """
         Apply a space group operation to an atom position specified by its lattice and index
