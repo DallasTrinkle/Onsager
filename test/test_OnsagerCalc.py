@@ -313,6 +313,7 @@ class InterstitialTests(unittest.TestCase):
         """Do we correctly analyze our crystals regarding their symmetry?"""
         self.assertEqual(self.Dhcp.NV, 1)
         self.assertTrue(self.Dhcp.omega_invertible)
+        self.assertTrue(np.allclose(self.Dhcp.VV[0], np.array([[0,0,0],[0,0,0],[0,0,1]])))
         self.assertEqual(self.Dfcc.NV, 0)
         self.assertTrue(self.Dfcc.omega_invertible)
 
