@@ -581,7 +581,7 @@ class InterstitialTests(unittest.TestCase):
         BEoct = 0.
         BEtet = np.log(2) # so exp(-beta*E) = 1/2
         preTransOT = 10.
-        preTransTT = 100.
+        preTransTT = 15
         BETransOT = np.log(10.)
         BETransTT = np.log(10.)
 
@@ -669,4 +669,4 @@ finite difference:
 {}
 elastodiffusion:
 {}""".format(strainmat, D0, (Deps-D0)/eps, Deps0)
-            self.assertTrue(np.allclose((Deps-D0)/eps, Deps0, rtol=eps, atol=eps), msg=failmsg)
+            self.assertTrue(np.allclose((Deps-D0)/eps, Deps0, rtol=2*eps, atol=2*eps), msg=failmsg)
