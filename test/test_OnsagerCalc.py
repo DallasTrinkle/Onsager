@@ -288,23 +288,21 @@ class InterstitialTests(unittest.TestCase):
         self.fcclatt = self.a0*np.array([[0, 0.5, 0.5],
                                          [0.5, 0, 0.5],
                                          [0.5, 0.5, 0]])
+        self.fccbasis = [[np.zeros(3)], [np.array([0.5,0.5,-0.5]),
+                                         np.array([0.25,0.25,0.25]),
+                                         np.array([0.75,0.75,0.75])]]
         self.hexlatt = self.a0*np.array([[0.5, 0.5, 0],
                                          [-np.sqrt(0.75), np.sqrt(0.75), 0],
                                          [0, 0, self.c_a]])
-        basis = [[np.array([1./3.,2./3.,0.25]),
-                  np.array([2./3.,1./3.,0.75])]]
-        HCPcrys = crystal.Crystal(self.hexlatt, basis)
-        octset = HCPcrys.Wyckoffpos(np.array([0., 0., 0.5]))
-        tetset = HCPcrys.Wyckoffpos(np.array([1./3., 2./3., 0.625]))
-        # now, build up HCP + interstitials (which are of a *different chemistry*)
-        self.HCP_intercrys = crystal.Crystal(self.hexlatt, basis + [octset + tetset])
+        self.hcpbasis = [[np.array([1./3.,2./3.,0.25]),np.array([2./3.,1./3.,0.75])],
+                         [np.array([0.,0.,0.]), np.array([0.,0.,0.5]),
+                          np.array([1./3.,2./3.,0.625]), np.array([1./3.,2./3.,0.875]),
+                          np.array([2./3.,1./3.,0.125]), np.array([2./3.,1./3.,0.375])]]
+        self.HCP_intercrys = crystal.Crystal(self.hexlatt, self.hcpbasis)
         self.HCP_jumpnetwork = self.HCP_intercrys.jumpnetwork(1, self.a0*0.7) # tuned to avoid t->t in basal plane
         self.HCP_sitelist = self.HCP_intercrys.sitelist(1)
         self.Dhcp = OnsagerCalc.Interstitial(self.HCP_intercrys, 1, self.HCP_sitelist, self.HCP_jumpnetwork)
-        self.FCC_intercrys = crystal.Crystal(self.fcclatt, [[np.zeros(3)],
-                                                            [np.array([0.5,0.5,-0.5]),
-                                                             np.array([0.25,0.25,0.25]),
-                                                             np.array([0.75,0.75,0.75])]])
+        self.FCC_intercrys = crystal.Crystal(self.fcclatt, self.fccbasis)
         self.FCC_jumpnetwork = self.FCC_intercrys.jumpnetwork(1, self.a0*0.5)
         self.FCC_sitelist = self.FCC_intercrys.sitelist(1)
         self.Dfcc = OnsagerCalc.Interstitial(self.FCC_intercrys, 1, self.FCC_sitelist, self.FCC_jumpnetwork)
@@ -511,8 +509,8 @@ class InterstitialTests(unittest.TestCase):
         for ((i,j), dx), dipole in zip(self.Dfcc.jumpnetwork[0], jumpdipoles[0]):
             self.assertTrue(np.allclose(-0.5*np.eye(3) + 2.*np.outer(dx, dx), dipole))
 
-    def testElastodiffusion(self):
-        """Test whether we can correctly compute the elastodiffusion tensor; compare with finite difference"""
+    def testFCCElastodiffusion(self):
+        """Elastodiffusion tensor without correlation; compare with finite difference"""
         # FCC first:
         preoct = 1.
         pretet = 0.5
@@ -542,6 +540,7 @@ class InterstitialTests(unittest.TestCase):
         jumpdipoles = self.Dfcc.jumpDipoles(dipoleT)
 
         # strain
+        D0, Dp = self.Dfcc.elastodiffusion(pre, BE, dipole, preT, BET, dipoleT)
         eps = 1e-4
         for straintype in [ np.array([[1.,0.,0],[0.,0.,0,],[0.,0.,0.]]),
                             np.array([[0.,0.,0],[0.,1.,0,],[0.,0.,0.]]),
@@ -550,11 +549,7 @@ class InterstitialTests(unittest.TestCase):
                             np.array([[0.,0.,0.5],[0.,0.,0,],[0.5,0.,0.]]),
                             np.array([[0.,0.5,0],[0.5,0.,0,],[0.,0.,0.]]) ]:
             strainmat = eps*straintype
-            strainedFCC = crystal.Crystal(np.dot(np.eye(3) + strainmat, self.fcclatt),
-                                          [[np.zeros(3)],
-                                           [np.array([0.5,0.5,-0.5]),
-                                            np.array([0.25,0.25,0.25]),
-                                            np.array([0.75,0.75,0.75])]])
+            strainedFCC = crystal.Crystal(np.dot(np.eye(3) + strainmat, self.fcclatt), self.fccbasis)
             strainedFCC_jumpnetwork = strainedFCC.jumpnetwork(1, self.a0*0.5)
             strainedFCC_sitelist = strainedFCC.sitelist(1)
             strainedDfcc =OnsagerCalc.Interstitial(strainedFCC, 1, strainedFCC_sitelist, strainedFCC_jumpnetwork)
@@ -571,11 +566,107 @@ class InterstitialTests(unittest.TestCase):
                 strainedpreT[ind] = preTrans
                 dip = transPperp*np.eye(3) +(transPpara-transPperp)*np.outer(dx0, dx0)/np.dot(dx0, dx0)
                 strainedBET[ind] = BETrans + np.sum(dip*strainmat)
-            D0, Dp = self.Dfcc.elastodiffusion(pre, BE, dipole, preT, BET, dipoleT)
             Deps = strainedDfcc.diffusivity(pre, strainedBE, strainedpreT, strainedBET)
-            # print D0
-            # print (Deps-D0)/eps
-            # print np.tensordot(Dp, strainmat, axes=((2,3), (0,1)))/eps
-            self.assertTrue(np.allclose((Deps-D0)/eps,
-                                        np.tensordot(Dp, strainmat, axes=((2,3), (0,1)))/eps,
-                                        rtol=eps, atol=eps))
+            Deps0 = np.tensordot(Dp, strainmat, axes=((2,3), (0,1)))/eps
+            failmsg = "strainmatrix:\n{}\nD0:\n{}\nfinite difference:\n{}".format(strainmat,
+                                                                                  D0, (Deps-D0)/eps, Deps0)
+            self.assertTrue(np.allclose((Deps-D0)/eps, Deps0, rtol=eps, atol=eps), msg=failmsg)
+
+    def testHCPElastodiffusion(self):
+        """Elastodiffusion tensor with correlation; compare with finite difference"""
+        # HCP first:
+        # HCP
+        preoct = 1.
+        pretet = 0.5
+        BEoct = 0.
+        BEtet = np.log(2) # so exp(-beta*E) = 1/2
+        preTransOT = 10.
+        preTransTT = 100.
+        BETransOT = np.log(10.)
+        BETransTT = np.log(10.)
+
+        pre = np.zeros(len(self.HCP_sitelist))
+        BE = np.zeros(len(self.HCP_sitelist))
+        pre[self.Dhcp.invmap[0]] = preoct
+        pre[self.Dhcp.invmap[2]] = pretet
+        BE[self.Dhcp.invmap[0]] = BEoct
+        BE[self.Dhcp.invmap[2]] = BEtet
+        preT = np.zeros(len(self.Dhcp.jumpnetwork))
+        BET = np.zeros(len(self.Dhcp.jumpnetwork))
+        for i, jump in enumerate(self.Dhcp.jumpnetwork):
+            if len(jump) == 4:
+                preT[i] = preTransTT
+                BET[i] = BETransTT
+            else:
+                preT[i] = preTransOT
+                BET[i] = BETransOT
+
+        octPb = 0 # 1e-4
+        octPc = 0 # 2e-4
+        tetPb = 0 # -1e-4
+        tetPc = 0 # -2e-4
+        transPpara = 0 # 3e-4
+        transPperp = 0 # -1.5e-4
+        dipole = [0, 0]
+        dipole[self.Dhcp.invmap[0]] = np.array([[octPb,0,0],[0,octPb,0],[0,0,octPc]])
+        dipole[self.Dhcp.invmap[2]] = np.array([[tetPb,0,0],[0,tetPb,0],[0,0,tetPc]])
+        dipoleT = []
+        for jumps in self.Dhcp.jumpnetwork:
+            (i,j), dx = jumps[0] # our representative jump
+            dipoleT.append(transPperp*np.eye(3) + (transPpara-transPperp)*np.outer(dx, dx)/np.dot(dx, dx))
+        sitedipoles = self.Dhcp.siteDipoles(dipole)
+        jumpdipoles = self.Dhcp.jumpDipoles(dipoleT)
+
+        # strain
+        eps = 1e-5
+        D0, Dp = self.Dhcp.elastodiffusion(pre, BE, dipole, preT, BET, dipoleT)
+        for straintype in [ np.array([[1.,0.,0],[0.,0.,0,],[0.,0.,0.]]),
+                            np.array([[0.,0.,0],[0.,1.,0,],[0.,0.,0.]]),
+                            np.array([[0.,0.,0],[0.,0.,0,],[0.,0.,1.]]),
+                            np.array([[0.,0.,0],[0.,0.,0.5],[0.,0.5,0.]]),
+                            np.array([[0.,0.,0.5],[0.,0.,0,],[0.5,0.,0.]]),
+                            np.array([[0.,0.5,0],[0.5,0.,0,],[0.,0.,0.]]) ]:
+            strainmat = eps*straintype
+            strainedHCP = crystal.Crystal(np.dot(np.eye(3) + strainmat, self.hexlatt), self.hcpbasis)
+            strainedHCP_jumpnetwork = strainedHCP.jumpnetwork(1, self.a0*0.7)
+            strainedHCP_sitelist = strainedHCP.sitelist(1)
+            strainedDhcp =OnsagerCalc.Interstitial(strainedHCP, 1, strainedHCP_sitelist, strainedHCP_jumpnetwork)
+            strainedpre = np.zeros(len(strainedHCP_sitelist))
+            strainedBE = np.zeros(len(strainedHCP_sitelist))
+            # apply dipoles to site energies:
+            for octind in xrange(2):
+                strainedpre[strainedDhcp.invmap[octind]] = preoct
+                strainedBE[strainedDhcp.invmap[octind]] = BEoct + np.sum(sitedipoles[octind] * strainmat)
+            for tetind in xrange(2,6):
+                strainedpre[strainedDhcp.invmap[tetind]] = pretet
+                strainedBE[strainedDhcp.invmap[tetind]] = BEtet + np.sum(sitedipoles[tetind] * strainmat)
+            strainedBET = np.zeros(len(strainedHCP_jumpnetwork))
+            strainedpreT = np.zeros(len(strainedHCP_jumpnetwork))
+            # this gets more complicated...
+            for ind, jumps in enumerate(strainedHCP_jumpnetwork):
+                (i,j), dx = jumps[0]
+                dx0 = np.dot(np.linalg.inv(np.eye(3) + strainmat), dx)
+                dip = transPperp*np.eye(3) +(transPpara-transPperp)*np.outer(dx0, dx0)/np.dot(dx0, dx0)
+                if i>=2 and j>=2:
+                    strainedpreT[ind] = preTransTT
+                    strainedBET[ind] = BETransTT + np.sum(dip*strainmat)
+                else:
+                    strainedpreT[ind] = preTransOT
+                    strainedBET[ind] = BETransOT + np.sum(dip*strainmat)
+            print strainedHCP_sitelist
+            print strainedBE
+            print strainedpre
+            print strainedBET
+            print strainedpreT
+            Deps = strainedDhcp.diffusivity(strainedpre, strainedBE, strainedpreT, strainedBET)
+            Deps0 = np.tensordot(Dp, strainmat, axes=((2,3), (0,1)))/eps
+            failmsg = """
+strainmatrix:
+{}
+D0:
+{}
+finite difference:
+{}
+elastodiffusion:
+{}""".format(strainmat, D0, (Deps-D0)/eps, Deps0)
+            self.assertTrue(np.allclose((Deps-D0)/eps, Deps0, rtol=eps, atol=eps), msg=failmsg)
