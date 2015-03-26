@@ -601,9 +601,9 @@ class InterstitialTests(unittest.TestCase):
                 BET[i] = BETransOT
 
         octPb = 1e-4
-        octPc = 0 # 2e-4
-        tetPb = 0 # -1e-4
-        tetPc = 0 # -2e-4
+        octPc = 2e-4
+        tetPb = -1e-4
+        tetPc = -2e-4
         transPpara = 0 # 3e-4
         transPperp = 0 # -1.5e-4
         dipole = [0, 0]

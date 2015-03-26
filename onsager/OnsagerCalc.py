@@ -362,8 +362,8 @@ class Interstitial(object):
             for ((i,j), dx), rate, dipole in zip(transitionset, rates, dipoles):
                 omega_ij[i, j] += sqrtrho[i]*invsqrtrho[j]*rate
                 omega_ij[i, i] -= rate
-                domega_ij[i, j] -= omega_ij[i,j]*(dipole - 0.5*(sitedipoles[i] + sitedipoles[j]))
-                domega_ij[i, i] += rate*(dipole - sitedipoles[i])
+                domega_ij[i, j] += omega_ij[i,j]*(dipole - 0.5*(sitedipoles[i] + sitedipoles[j]))
+                domega_ij[i, i] -= rate*(dipole - sitedipoles[i])
                 bias_i[i] += sqrtrho[i]*rate*dx
                 biasP_i[i] += vector_tensor_outer(-sqrtrho[i]*rate*dx, dipole - 0.5*(dipoleave+sitedipoles[i]))
                 D0 += 0.5*np.outer(dx, dx)*rho[i]*rate
@@ -375,13 +375,17 @@ class Interstitial(object):
             domega_v = np.zeros((self.NV, self.NV, 3,3))
             biasP_v = np.zeros((self.NV, 3,3))
             for a, va in enumerate(self.VectorBasis):
-                bias_v[a] = np.trace(np.dot(bias_i.T, va))
-                biasP_v[a] = np.tensordot(biasP_i, va, [(0,1),(0,1)])
+                bias_v[a] = np.tensordot(bias_i, va, ((0,1),(0,1))) # can also use trace(dot(bias_i.T, va))
+                biasP_v[a] = np.tensordot(biasP_i, va, ((0,1),(0,1)))
                 for b, vb in enumerate(self.VectorBasis):
-                    omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
-                    domega_v[a,b] = np.tensordot(va, np.tensordot(domega_ij, vb, [(1),(0)]), [(0,1),(0,1)])
+                    omega_v[a,b] = np.tensordot(va, np.tensordot(omega_ij, vb, ((1),(0))), ((0,1),(0,1)))
+                    domega_v[a,b] = np.tensordot(va, np.tensordot(domega_ij, vb, ((1),(0))), ((0,1),(0,3)))
+                    # omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
+                    # for c,d in ((c,d) for c in xrange(3) for d in xrange(3)):
+                    #     domega_v[a,b, c,d] = np.trace(np.dot(va.T, np.dot(domega_ij[:,:,c,d], vb)))
             gamma_v = self.bias_solver(omega_v, bias_v)
-            dg = np.tensordot(domega_v, gamma_v,[(0),(0)])
+            dg = np.tensordot(domega_v, gamma_v,((0),(0)))
+            # dg = np.zeros((self.NV, 3,3))
             D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
             for a,b,c,d in ((a,b,c,d) for a in xrange(3) for b in xrange(3) for c in xrange(3) for d in xrange(3)):
                 Dp[a,b,c,d] += np.dot(np.dot(self.VV, biasP_v[:,c,d]), gamma_v)[a,b] + \
