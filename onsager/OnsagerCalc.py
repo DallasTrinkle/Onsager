@@ -121,7 +121,6 @@ class Interstitial(object):
                                    np.array([0.,0.,1.])]
 
         lis = []
-        lisVV = []
         for s in self.sitelist:
             for v in vectlist(self.crys.VectorBasis((self.chem, s[0]))):
                 v /= np.sqrt(len(s)) # additional normalization
@@ -131,8 +130,12 @@ class Interstitial(object):
                     # what site do we land on, and what's the vector? (this is slight overkill)
                     vb[g.indexmap[self.chem][s[0]]] = self.crys.g_direc(g, v)
                 lis.append(vb)
-                lisVV.append(np.dot(vb.T, vb))
-        return lis, lisVV
+        # need the *full matrix of this tensor*
+        VV = np.zeros((3,3,len(lis),len(lis)))
+        for i,vb_i in enumerate(lis):
+            for j,vb_j in enumerate(lis):
+                VV[:,:,i,j] = np.dot(vb_i.T, vb_j)
+        return lis, VV
 
     def generateSiteGroupOps(self):
         """
@@ -297,8 +300,7 @@ class Interstitial(object):
             else:
                 # pseudoinverse required:
                 gamma_v = np.dot(pinv2(omega_v), bias_v)
-            for b, g, VV in zip(bias_v, gamma_v, self.VV):
-                D0 += b*g*VV
+            D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
         return D0
 
     def elastodiffusion(self, pre, betaene, dipole, preT, betaeneT, dipoleT):
@@ -367,8 +369,7 @@ class Interstitial(object):
             else:
                 # pseudoinverse required:
                 gamma_v = np.dot(pinv2(omega_v), bias_v)
-            for b, g, VV in zip(bias_v, gamma_v, self.VV):
-                D0 += b*g*VV
+            D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
 
         for a,b,c,d in ((a,b,c,d) for a in xrange(3) for b in xrange(3) for c in xrange(3) for d in xrange(3)):
             if a==d:

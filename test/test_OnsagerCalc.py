@@ -311,7 +311,7 @@ class InterstitialTests(unittest.TestCase):
         """Do we correctly analyze our crystals regarding their symmetry?"""
         self.assertEqual(self.Dhcp.NV, 1)
         self.assertTrue(self.Dhcp.omega_invertible)
-        self.assertTrue(np.allclose(self.Dhcp.VV[0], np.array([[0,0,0],[0,0,0],[0,0,1]])))
+        self.assertTrue(np.allclose(self.Dhcp.VV[:,:,0,0], np.array([[0,0,0],[0,0,0],[0,0,1]])))
         self.assertEqual(self.Dfcc.NV, 0)
         self.assertTrue(self.Dfcc.omega_invertible)
 
@@ -574,14 +574,13 @@ class InterstitialTests(unittest.TestCase):
 
     def testHCPElastodiffusion(self):
         """Elastodiffusion tensor with correlation; compare with finite difference"""
-        # HCP first:
-        # HCP
+        # HCP; note: *uncorrelated* requires lambda(t->t) = 1.5*lambda(t->o)
         preoct = 1.
         pretet = 0.5
         BEoct = 0.
         BEtet = np.log(2) # so exp(-beta*E) = 1/2
         preTransOT = 10.
-        preTransTT = 15
+        preTransTT = 100.
         BETransOT = np.log(10.)
         BETransTT = np.log(10.)
 
@@ -653,11 +652,11 @@ class InterstitialTests(unittest.TestCase):
                 else:
                     strainedpreT[ind] = preTransOT
                     strainedBET[ind] = BETransOT + np.sum(dip*strainmat)
-            print strainedHCP_sitelist
-            print strainedBE
-            print strainedpre
-            print strainedBET
-            print strainedpreT
+            # print strainedHCP_sitelist
+            # print strainedBE
+            # print strainedpre
+            # print strainedBET
+            # print strainedpreT
             Deps = strainedDhcp.diffusivity(strainedpre, strainedBE, strainedpreT, strainedBET)
             Deps0 = np.tensordot(Dp, strainmat, axes=((2,3), (0,1)))/eps
             failmsg = """
