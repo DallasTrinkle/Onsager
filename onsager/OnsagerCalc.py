@@ -205,14 +205,14 @@ class Interstitial(object):
 
     def siteprob(self, pre, betaene):
         """Returns our site probabilities, normalized, as a vector"""
-        rho = np.array([ pre[w]*np.exp(-betaene[w]) for i,w in enumerate(self.invmap)])
+        rho = np.array([ pre[w]*np.exp(-betaene[w]) for w in self.invmap])
         return rho/sum(rho)
 
     def ratelist(self, pre, betaene, preT, betaeneT):
         """Returns a list of lists of rates, matched to jumpnetwork"""
         # the ij tuple in each transition list is the i->j pair
         # invmap[i] tells you which Wyckoff position i maps to (in the sitelist)
-        invrho = np.array([ np.exp(betaene[w])/pre[w] for i,w in enumerate(self.invmap)])
+        invrho = np.array([ np.exp(betaene[w])/pre[w] for w in self.invmap])
         return [ [ arr*invrho[i] for (i,j), dx in t ]
             for t, arr in zip(self.jumpnetwork,
                               [ pT*np.exp(-beT)
@@ -320,6 +320,13 @@ class Interstitial(object):
         -------
         D[3,3], dD[3,3,3,3] : diffusivity as 3x3 tensor and elastodiffusion tensor as 3x3x3x3 tensor
         """
+        def tensorouter(a, b):
+            """Construct the outer product of a and b"""
+            ab = np.zeros((3,3,3,3))
+            for i,j,k,l in ((i,j,k,l) for i in xrange(3) for j in xrange(3) for k in xrange(3) for l in xrange(3)):
+                ab[i,j,k,l] = a[i,j]*b[k,l]
+            return ab
+
         if __debug__:
             if len(pre) != len(self.sitelist): raise IndexError("length of prefactor {} doesn't match sitelist".format(pre))
             if len(betaene) != len(self.sitelist): raise IndexError("length of energies {} doesn't match sitelist".format(betaene))
@@ -327,8 +334,42 @@ class Interstitial(object):
             if len(preT) != len(self.jumpnetwork): raise IndexError("length of prefactor {} doesn't match jump network".format(preT))
             if len(betaeneT) != len(self.jumpnetwork): raise IndexError("length of energies {} doesn't match jump network".format(betaeneT))
             if len(dipoleT) != len(self.jumpnetwork): raise IndexError("length of dipoles {} doesn't match jump network".format(dipoleT))
-        D0 = self.diffusivity(pre, betaene, preT, betaeneT)
+        rho = self.siteprob(pre, betaene)
+        sqrtrho = np.sqrt(rho)
+        invsqrtrho = 1./sqrtrho
+        ratelist = self.ratelist(pre, betaene, preT, betaeneT)
+        omega_ij = np.zeros((self.N, self.N))
+        bias_i = np.zeros((self.N, 3))
+        sitedipoles = self.siteDipoles(dipole)
+        jumpdipoles = self.jumpDipoles(dipoleT)
+        dipoleave = np.tensordot(rho, sitedipoles, [(0), (0)]) # average dipole
+
+        D0 = np.zeros((3,3))
         Dp = np.zeros((3,3,3,3))
+        for transitionset, rates, dipoles in zip(self.jumpnetwork, ratelist, jumpdipoles):
+            for ((i,j), dx), rate, dipole in zip(transitionset, rates, dipoles):
+                omega_ij[i, j] += sqrtrho[i]*invsqrtrho[j]*rate
+                omega_ij[i, i] -= rate
+                bias_i[i] += sqrtrho[i]*rate*dx
+                D0 += 0.5*np.outer(dx, dx)*rho[i]*rate
+                Dp += -0.5*tensorouter(np.outer(dx, dx)*rho[i]*rate, dipole - dipoleave)
+        if self.NV > 0:
+            # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
+            omega_v = np.zeros((self.NV, self.NV))
+            bias_v = np.zeros(self.NV)
+            for a, va in enumerate(self.VectorBasis):
+                bias_v[a] = np.trace(np.dot(bias_i.T, va))
+                for b, vb in enumerate(self.VectorBasis):
+                    omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
+            if self.omega_invertible:
+                # invertible, so just use solve for speed:
+                gamma_v = -solve(-omega_v, bias_v, sym_pos=True) # technically *negative* definite
+            else:
+                # pseudoinverse required:
+                gamma_v = np.dot(pinv2(omega_v), bias_v)
+            for b, g, VV in zip(bias_v, gamma_v, self.VV):
+                D0 += b*g*VV
+
         for a,b,c,d in ((a,b,c,d) for a in xrange(3) for b in xrange(3) for c in xrange(3) for d in xrange(3)):
             if a==d:
                 Dp[a,b,c,d] += D0[b,c]
