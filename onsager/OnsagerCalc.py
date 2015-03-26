@@ -323,7 +323,14 @@ class Interstitial(object):
         -------
         D[3,3], dD[3,3,3,3] : diffusivity as 3x3 tensor and elastodiffusion tensor as 3x3x3x3 tensor
         """
-        def tensorouter(a, b):
+        def vector_tensor_outer(v,a):
+            """Construct the outer product of v and a"""
+            va = np.zeros((3,3,3))
+            for i,j,k in ((i,j,k) for i in xrange(3) for j in xrange(3) for k in xrange(3)):
+                va[i,j,k] = v[i]*a[j,k]
+            return va
+
+        def tensor_tensor_outer(a, b):
             """Construct the outer product of a and b"""
             ab = np.zeros((3,3,3,3))
             for i,j,k,l in ((i,j,k,l) for i in xrange(3) for j in xrange(3) for k in xrange(3) for l in xrange(3)):
@@ -343,6 +350,8 @@ class Interstitial(object):
         ratelist = self.ratelist(pre, betaene, preT, betaeneT)
         omega_ij = np.zeros((self.N, self.N))
         bias_i = np.zeros((self.N, 3))
+        biasP_i = np.zeros((self.N, 3,3,3))
+        domega_ij = np.zeros((self.N, self.N, 3,3))
         sitedipoles = self.siteDipoles(dipole)
         jumpdipoles = self.jumpDipoles(dipoleT)
         dipoleave = np.tensordot(rho, sitedipoles, [(0), (0)]) # average dipole
@@ -353,19 +362,31 @@ class Interstitial(object):
             for ((i,j), dx), rate, dipole in zip(transitionset, rates, dipoles):
                 omega_ij[i, j] += sqrtrho[i]*invsqrtrho[j]*rate
                 omega_ij[i, i] -= rate
+                domega_ij[i, j] -= omega_ij[i,j]*(dipole - 0.5*(sitedipoles[i] + sitedipoles[j]))
+                domega_ij[i, i] += rate*(dipole - sitedipoles[i])
                 bias_i[i] += sqrtrho[i]*rate*dx
+                biasP_i[i] += vector_tensor_outer(-sqrtrho[i]*rate*dx, dipole - 0.5*(dipoleave+sitedipoles[i]))
                 D0 += 0.5*np.outer(dx, dx)*rho[i]*rate
-                Dp += -0.5*tensorouter(np.outer(dx, dx)*rho[i]*rate, dipole - dipoleave)
+                Dp += -0.5*tensor_tensor_outer(np.outer(dx, dx)*rho[i]*rate, dipole - dipoleave)
         if self.NV > 0:
             # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
             omega_v = np.zeros((self.NV, self.NV))
             bias_v = np.zeros(self.NV)
+            domega_v = np.zeros((self.NV, self.NV, 3,3))
+            biasP_v = np.zeros((self.NV, 3,3))
             for a, va in enumerate(self.VectorBasis):
                 bias_v[a] = np.trace(np.dot(bias_i.T, va))
+                biasP_v[a] = np.tensordot(biasP_i, va, [(0,1),(0,1)])
                 for b, vb in enumerate(self.VectorBasis):
                     omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
+                    domega_v[a,b] = np.tensordot(va, np.tensordot(domega_ij, vb, [(1),(0)]), [(0,1),(0,1)])
             gamma_v = self.bias_solver(omega_v, bias_v)
+            dg = np.tensordot(domega_v, gamma_v,[(0),(0)])
             D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
+            for a,b,c,d in ((a,b,c,d) for a in xrange(3) for b in xrange(3) for c in xrange(3) for d in xrange(3)):
+                Dp[a,b,c,d] += np.dot(np.dot(self.VV, biasP_v[:,c,d]), gamma_v)[a,b] + \
+                               np.dot(np.dot(self.VV, gamma_v), biasP_v[:,c,d])[a,b] + \
+                               np.dot(np.dot(self.VV, gamma_v), dg[:,c,d])[a,b]
 
         for a,b,c,d in ((a,b,c,d) for a in xrange(3) for b in xrange(3) for c in xrange(3) for d in xrange(3)):
             if a==d:

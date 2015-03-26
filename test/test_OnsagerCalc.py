@@ -600,7 +600,7 @@ class InterstitialTests(unittest.TestCase):
                 preT[i] = preTransOT
                 BET[i] = BETransOT
 
-        octPb = 0 # 1e-4
+        octPb = 1e-4
         octPc = 0 # 2e-4
         tetPb = 0 # -1e-4
         tetPc = 0 # -2e-4
