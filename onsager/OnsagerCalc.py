@@ -72,6 +72,12 @@ class Interstitial(object):
             self.omega_invertible = any( np.allclose(g.cartrot, -np.eye(3)) for g in crys.G )
             # self.omega_invertible = all( np.all(np.isclose(np.sum(v, axis=0), np.zeros(3)))
             #                              for v in self.VectorBasis)
+        if self.omega_invertible:
+            # invertible, so just use solve for speed (omega is technically *negative* definite)
+            self.bias_solver = lambda omega,b: -solve(-omega, b, sym_pos=True)
+        else:
+            # pseudoinverse required:
+            self.bias_solver = lambda omega,b: np.dot(pinv2(omega), b)
         # these pieces are needed in order to compute the elastodiffusion tensor
         self.sitegroupops = self.generateSiteGroupOps() # list of group ops to take first rep. into whole list
         self.jumpgroupops = self.generateJumpGroupOps() # list of group ops to take first rep. into whole list
@@ -294,12 +300,7 @@ class Interstitial(object):
                 bias_v[a] = np.trace(np.dot(bias_i.T, va))
                 for b, vb in enumerate(self.VectorBasis):
                     omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
-            if self.omega_invertible:
-                # invertible, so just use solve for speed:
-                gamma_v = -solve(-omega_v, bias_v, sym_pos=True) # technically *negative* definite
-            else:
-                # pseudoinverse required:
-                gamma_v = np.dot(pinv2(omega_v), bias_v)
+            gamma_v = self.bias_solver(omega_v, bias_v)
             D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
         return D0
 
@@ -363,12 +364,7 @@ class Interstitial(object):
                 bias_v[a] = np.trace(np.dot(bias_i.T, va))
                 for b, vb in enumerate(self.VectorBasis):
                     omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
-            if self.omega_invertible:
-                # invertible, so just use solve for speed:
-                gamma_v = -solve(-omega_v, bias_v, sym_pos=True) # technically *negative* definite
-            else:
-                # pseudoinverse required:
-                gamma_v = np.dot(pinv2(omega_v), bias_v)
+            gamma_v = self.bias_solver(omega_v, bias_v)
             D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
 
         for a,b,c,d in ((a,b,c,d) for a in xrange(3) for b in xrange(3) for c in xrange(3) for d in xrange(3)):
