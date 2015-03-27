@@ -629,7 +629,7 @@ class InterstitialTests(unittest.TestCase):
                 self.assertTrue(np.allclose(dip, d))
 
         # strain
-        eps = 1e-5
+        eps = 1e-4
         D0, Dp = self.Dhcp.elastodiffusion(pre, BE, dipole, preT, BET, dipoleT)
         for straintype in [ np.array([[1.,0.,0],[0.,0.,0,],[0.,0.,0.]]),
                             np.array([[0.,0.,0],[0.,1.,0,],[0.,0.,0.]]),
@@ -642,7 +642,10 @@ class InterstitialTests(unittest.TestCase):
             strainedHCPpos = crystal.Crystal(np.dot(np.eye(3) + strainmat, self.hexlatt), self.hcpbasis)
             strainedHCPpos_jumpnetwork = strainedHCPpos.jumpnetwork(1, self.a0*0.7)
             strainedHCPpos_sitelist = strainedHCPpos.sitelist(1)
-            strainedDhcppos =OnsagerCalc.Interstitial(strainedHCPpos, 1, strainedHCPpos_sitelist, strainedHCPpos_jumpnetwork)
+            strainedDhcppos = OnsagerCalc.Interstitial(strainedHCPpos, 1,
+                                                       strainedHCPpos_sitelist,
+                                                       strainedHCPpos_jumpnetwork)
+            self.assertTrue(strainedDhcppos.omega_invertible)
 
             strainedpospre = np.zeros(len(strainedHCPpos_sitelist))
             strainedposBE = np.zeros(len(strainedHCPpos_sitelist))
@@ -670,7 +673,10 @@ class InterstitialTests(unittest.TestCase):
             strainedHCPneg = crystal.Crystal(np.dot(np.eye(3) - strainmat, self.hexlatt), self.hcpbasis)
             strainedHCPneg_jumpnetwork = strainedHCPneg.jumpnetwork(1, self.a0*0.7)
             strainedHCPneg_sitelist = strainedHCPneg.sitelist(1)
-            strainedDhcpneg =OnsagerCalc.Interstitial(strainedHCPneg, 1, strainedHCPneg_sitelist, strainedHCPneg_jumpnetwork)
+            strainedDhcpneg = OnsagerCalc.Interstitial(strainedHCPneg, 1,
+                                                       strainedHCPneg_sitelist,
+                                                       strainedHCPneg_jumpnetwork)
+            self.assertTrue(strainedDhcpneg.omega_invertible)
 
             strainednegpre = np.zeros(len(strainedHCPneg_sitelist))
             strainednegBE = np.zeros(len(strainedHCPneg_sitelist))
