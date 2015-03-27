@@ -87,7 +87,7 @@ if __name__ == '__main__':
         # otherwise... we need to parse our YAML file, and get to work
         with open(args.yaml_input, "r") as in_f:
             dict_def = crystal.yaml.load(in_f)
-            crys = crystal.fromdict(dict_def) # pull out the crystal part of the YAML
+            crys = crystal.Crystal.fromdict(dict_def) # pull out the crystal part of the YAML
             # sites:
             sitelist = dict_def['sitelist']
             pre = dict_def['Prefactor']
