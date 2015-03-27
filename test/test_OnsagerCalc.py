@@ -303,7 +303,7 @@ class InterstitialTests(unittest.TestCase):
         self.HCP_sitelist = self.HCP_intercrys.sitelist(1)
         self.Dhcp = OnsagerCalc.Interstitial(self.HCP_intercrys, 1, self.HCP_sitelist, self.HCP_jumpnetwork)
         self.FCC_intercrys = crystal.Crystal(self.fcclatt, self.fccbasis)
-        self.FCC_jumpnetwork = self.FCC_intercrys.jumpnetwork(1, self.a0*0.5)
+        self.FCC_jumpnetwork = self.FCC_intercrys.jumpnetwork(1, self.a0*0.48)
         self.FCC_sitelist = self.FCC_intercrys.sitelist(1)
         self.Dfcc = OnsagerCalc.Interstitial(self.FCC_intercrys, 1, self.FCC_sitelist, self.FCC_jumpnetwork)
 
@@ -527,10 +527,10 @@ class InterstitialTests(unittest.TestCase):
         preT = np.array([preTrans])
         BET = np.array([BETrans])
 
-        octP = 1e-1
-        tetP = -1e-1
-        transPpara = 2e-1
-        transPperp = -1.5e-1
+        octP = 0 # 1.
+        tetP = 0 # -1.
+        transPpara = 0 # 0.5
+        transPperp = 0 # -0.5
         dipole = [0, 0]
         dipole[self.Dfcc.invmap[0]] = octP*np.eye(3)
         dipole[self.Dfcc.invmap[1]] = tetP*np.eye(3)
@@ -549,28 +549,74 @@ class InterstitialTests(unittest.TestCase):
                             np.array([[0.,0.,0.5],[0.,0.,0,],[0.5,0.,0.]]),
                             np.array([[0.,0.5,0],[0.5,0.,0,],[0.,0.,0.]]) ]:
             strainmat = eps*straintype
-            strainedFCC = crystal.Crystal(np.dot(np.eye(3) + strainmat, self.fcclatt), self.fccbasis)
-            strainedFCC_jumpnetwork = strainedFCC.jumpnetwork(1, self.a0*0.5)
-            strainedFCC_sitelist = strainedFCC.sitelist(1)
-            strainedDfcc =OnsagerCalc.Interstitial(strainedFCC, 1, strainedFCC_sitelist, strainedFCC_jumpnetwork)
-            strainedBE = np.zeros(len(strainedFCC_sitelist))
+            strainedFCCpos = crystal.Crystal(np.dot(np.eye(3) + strainmat, self.fcclatt), self.fccbasis)
+            strainedFCCpos_jumpnetwork = strainedFCCpos.jumpnetwork(1, self.a0*0.48)
+            strainedFCCpos_sitelist = strainedFCCpos.sitelist(1)
+            strainedDfccpos = OnsagerCalc.Interstitial(strainedFCCpos, 1,
+                                                       strainedFCCpos_sitelist,
+                                                       strainedFCCpos_jumpnetwork)
+            self.assertTrue(strainedDfccpos.omega_invertible)
+
+            strainedpospre = np.zeros(len(strainedFCCpos_sitelist))
+            strainedposBE = np.zeros(len(strainedFCCpos_sitelist))
             # apply dipoles to site energies:
-            strainedBE[strainedDfcc.invmap[0]] = BEoct + np.sum(sitedipoles[0] * strainmat)
-            strainedBE[strainedDfcc.invmap[1]] = BEtet + np.sum(sitedipoles[1] * strainmat)
-            strainedBET = np.zeros(len(strainedFCC_jumpnetwork))
-            strainedpreT = np.zeros(len(strainedFCC_jumpnetwork))
-            # this gets more complicated... just work it "by hand"
-            for ind, jumps in enumerate(strainedFCC_jumpnetwork):
+            for octind in xrange(1):
+                strainedpospre[strainedDfccpos.invmap[octind]] = preoct
+                strainedposBE[strainedDfccpos.invmap[octind]] = BEoct + np.sum(sitedipoles[octind] * strainmat)
+            for tetind in xrange(1,3):
+                strainedpospre[strainedDfccpos.invmap[tetind]] = pretet
+                strainedposBE[strainedDfccpos.invmap[tetind]] = BEtet + np.sum(sitedipoles[tetind] * strainmat)
+            strainedposBET = np.zeros(len(strainedFCCpos_jumpnetwork))
+            strainedpospreT = np.zeros(len(strainedFCCpos_jumpnetwork))
+            # this gets more complicated...
+            for ind, jumps in enumerate(strainedFCCpos_jumpnetwork):
                 (i,j), dx = jumps[0]
-                dx0 = np.dot(np.linalg.inv(np.eye(3) + strainmat), dx)
-                strainedpreT[ind] = preTrans
+                dx0 = np.linalg.solve(np.eye(3) + strainmat, dx)
                 dip = transPperp*np.eye(3) +(transPpara-transPperp)*np.outer(dx0, dx0)/np.dot(dx0, dx0)
-                strainedBET[ind] = BETrans + np.sum(dip*strainmat)
-            Deps = strainedDfcc.diffusivity(pre, strainedBE, strainedpreT, strainedBET)
+                strainedpospreT[ind] = preTrans
+                strainedposBET[ind] = BETrans + np.sum(dip*strainmat)
+
+            strainedFCCneg = crystal.Crystal(np.dot(np.eye(3) - strainmat, self.fcclatt), self.fccbasis)
+            strainedFCCneg_jumpnetwork = strainedFCCneg.jumpnetwork(1, self.a0*0.48)
+            strainedFCCneg_sitelist = strainedFCCneg.sitelist(1)
+            strainedDfccneg = OnsagerCalc.Interstitial(strainedFCCneg, 1,
+                                                       strainedFCCneg_sitelist,
+                                                       strainedFCCneg_jumpnetwork)
+            self.assertTrue(strainedDfccneg.omega_invertible)
+
+            strainednegpre = np.zeros(len(strainedFCCneg_sitelist))
+            strainednegBE = np.zeros(len(strainedFCCneg_sitelist))
+            # apply dipoles to site energies:
+            for octind in xrange(1):
+                strainednegpre[strainedDfccneg.invmap[octind]] = preoct
+                strainednegBE[strainedDfccneg.invmap[octind]] = BEoct - np.sum(sitedipoles[octind] * strainmat)
+            for tetind in xrange(1,3):
+                strainednegpre[strainedDfccneg.invmap[tetind]] = pretet
+                strainednegBE[strainedDfccneg.invmap[tetind]] = BEtet - np.sum(sitedipoles[tetind] * strainmat)
+            strainednegBET = np.zeros(len(strainedFCCneg_jumpnetwork))
+            strainednegpreT = np.zeros(len(strainedFCCneg_jumpnetwork))
+            # this gets more complicated...
+            for ind, jumps in enumerate(strainedFCCneg_jumpnetwork):
+                (i,j), dx = jumps[0]
+                dx0 = np.linalg.solve(np.eye(3) - strainmat, dx)
+                dip = transPperp*np.eye(3) +(transPpara-transPperp)*np.outer(dx0, dx0)/np.dot(dx0, dx0)
+                strainednegpreT[ind] = preTrans
+                strainednegBET[ind] = BETrans - np.sum(dip*strainmat)
+            Deps = strainedDfccpos.diffusivity(strainedpospre, strainedposBE, strainedpospreT, strainedposBET) -\
+                   strainedDfccneg.diffusivity(strainednegpre, strainednegBE, strainednegpreT, strainednegBET)
+
+            Deps /= 2*eps
             Deps0 = np.tensordot(Dp, strainmat, axes=((2,3), (0,1)))/eps
-            failmsg = "strainmatrix:\n{}\nD0:\n{}\nfinite difference:\n{}".format(strainmat,
-                                                                                  D0, (Deps-D0)/eps, Deps0)
-            self.assertTrue(np.allclose((Deps-D0)/eps, Deps0, rtol=eps, atol=eps), msg=failmsg)
+            failmsg = """
+strainmatrix:
+{}
+D0:
+{}
+finite difference:
+{}
+elastodiffusion:
+{}""".format(strainmat, D0, Deps, Deps0)
+            self.assertTrue(np.allclose(Deps, Deps0, rtol=2*eps, atol=2*eps), msg=failmsg)
 
     def testHCPElastodiffusion(self):
         """Elastodiffusion tensor with correlation; compare with finite difference"""
@@ -637,7 +683,7 @@ class InterstitialTests(unittest.TestCase):
                             np.array([[0.,0.,0],[0.,0.,0.5],[0.,0.5,0.]]),
                             np.array([[0.,0.,0.5],[0.,0.,0,],[0.5,0.,0.]]),
                             np.array([[0.,0.5,0],[0.5,0.,0,],[0.,0.,0.]]) ]:
-            # let's try doing +- finite difference for a more accurate comparison:
+            # now doing +- finite difference for a more accurate comparison:
             strainmat = eps*straintype
             strainedHCPpos = crystal.Crystal(np.dot(np.eye(3) + strainmat, self.hexlatt), self.hcpbasis)
             strainedHCPpos_jumpnetwork = strainedHCPpos.jumpnetwork(1, self.a0*0.7)
@@ -700,11 +746,6 @@ class InterstitialTests(unittest.TestCase):
                 else:
                     strainednegpreT[ind] = preTransOT
                     strainednegBET[ind] = BETransOT - np.sum(dip*strainmat)
-            # print strainedHCP_sitelist
-            # print strainedBE
-            # print strainedpre
-            # print strainedBET
-            # print strainedpreT
             Deps = strainedDhcppos.diffusivity(strainedpospre, strainedposBE, strainedpospreT, strainedposBET) -\
                    strainedDhcpneg.diffusivity(strainednegpre, strainednegBE, strainednegpreT, strainednegBET)
             Deps /= 2.*eps

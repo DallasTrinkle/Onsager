@@ -373,32 +373,22 @@ class Interstitial(object):
             omega_v = np.zeros((self.NV, self.NV))
             bias_v = np.zeros(self.NV)
             domega_v = np.zeros((self.NV, self.NV, 3,3))
-            # biasP_v = np.zeros((self.NV, 3,3))
             # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
             for a, va in enumerate(self.VectorBasis):
                 bias_v[a] = np.tensordot(bias_i, va, ((0,1),(0,1))) # can also use trace(dot(bias_i.T, va))
-                # biasP_v[a] = np.tensordot(biasP_i, va, ((0,1),(0,1)))
                 for b, vb in enumerate(self.VectorBasis):
                     omega_v[a,b] = np.tensordot(va, np.tensordot(omega_ij, vb, ((1),(0))), ((0,1),(0,1)))
                     domega_v[a,b] = np.tensordot(va, np.tensordot(domega_ij, vb, ((1),(0))), ((0,1),(0,3)))
-                    # omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
-                    # for c,d in ((c,d) for c in xrange(3) for d in xrange(3)):
-                    #     domega_v[a,b, c,d] = np.trace(np.dot(va.T, np.dot(domega_ij[:,:,c,d], vb)))
             gamma_v = self.bias_solver(omega_v, bias_v)
             dg = np.tensordot(domega_v, gamma_v,((1),(0)))
             # need to project gamma_v *back onto* our sites; not sure if we can just do with a dot since
             # self.VectorBasis is a list of Nx3 matrices
             gamma_i = sum( g*va for g, va in zip(gamma_v, self.VectorBasis) )
-            # dg = np.zeros((self.NV, 3,3))
             D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
             for c,d in ((c,d) for c in xrange(3) for d in xrange(3)):
                 Dp[:,:,c,d] += np.tensordot(gamma_i, biasP_i[:,:,c,d], ((0),(0))) + \
                                np.tensordot(biasP_i[:,:,c,d], gamma_i, ((0),(0)))
             Dp += np.tensordot(np.tensordot(self.VV, gamma_v, ((3),(0))), dg, ((2),(0)))
-            # for a,b,c,d in ((a,b,c,d) for a in xrange(3) for b in xrange(3) for c in xrange(3) for d in xrange(3)):
-            #     Dp[a,b,c,d] += np.dot(np.dot(self.VV[a,b,:,:], gamma_v), 2*biasP_v[:,c,d] + dg[:,c,d])
-            #                    # np.dot(np.dot(self.VV[a,b,:,:], gamma_v), )
-            #                    # np.dot(np.dot(self.VV[a,b,:,:], biasP_v[:,c,d]), gamma_v) + \
 
         for a,b,c,d in ((a,b,c,d) for a in xrange(3) for b in xrange(3) for c in xrange(3) for d in xrange(3)):
             if a==d:
