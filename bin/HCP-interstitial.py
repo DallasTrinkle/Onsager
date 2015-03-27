@@ -1,0 +1,89 @@
+#!/usr/bin/env python
+"""
+Example script using OnsagerCalc to compute the elasto-diffusion tensor for
+an interstitial (in an HCP crystal). It also shows how to both construct an
+input YAML file, and read from that same YAML file as input. It's actually
+*extremely general*--if you pass it the appropriate YAML input, it will run
+it *regardless of whether it corresponds to an HCP crystal*.
+"""
+
+__author__ = 'Dallas R. Trinkle'
+
+import numpy as np
+from onsager import crystal
+from onsager import OnsagerCalc
+
+def outputYAML(a0, c_a, z=1./8.):
+    """
+    Generates YAML file corresponding to our HCP lattice with octahedral and tetrahedrals.
+    :param a0: lattice constant
+    :param c_a: c/a ratio
+    :param z: distance of tetrahedral from basal plane (unit cell coordinates)
+    :return: YAML string containing the *short* version, along with jump networks
+    """
+    # Note: alternatively, we could construct our HCP crystal *then* generate Wyckoff positions
+    hexlatt = a0*np.array([[0.5, 0.5, 0],
+                           [-np.sqrt(0.75), np.sqrt(0.75), 0],
+                           [0, 0, c_a]])
+    hcpbasis = [[np.array([1./3.,2./3.,1./4.]),np.array([2./3.,1./3.,3./4.])],
+                [np.array([0.,0.,0.]), np.array([0.,0.,0.5]),
+                 np.array([1./3.,2./3.,3./4.-z]), np.array([1./3.,2./3.,3./4.+z]),
+                 np.array([2./3.,1./3.,1./4.-z]), np.array([2./3.,1./3.,1./4.+z])]]
+    HCP = crystal.Crystal(hexlatt, hcpbasis)
+    # these cutoffs are for: o->t, t->t, o->o along c
+    # (preferably all below a). The t->t should be shortest, and o->o the longest
+    cutoff = 1.01*a0*max(np.sqrt(1./3.+c_a**2/64), 2*z*c_a, 0.5*c_a)
+    if __debug__:
+        if cutoff > a0: raise AssertionError('Geometry such that we will include basal jumps')
+        if np.abs(z) > 0.25: raise AssertionError('Tetrahedral parameter out of range (>1/4)')
+        if np.abs(z) < 1e-2: raise AssertionError('Tetrahedral parameter out of range (approx. 0)')
+    return """# Input format for a crystal, followed by sitelist and jumpnetwork.
+# Notes:
+# 1. !numpy.ndarray tag is used to specifically identify numpy arrays;
+#    should be used for both the lattice and basis entries
+# 2. lattice is in a more "readable" format using *row* vectors; the
+#    actual Crystal object stores the lattice with *column* vectors,
+#    so after import, this matrix will be transposed.
+# 3. lattice_constant is optional; it is used to scale lattice on input.
+# 4. the basis is a list of lists; the lists are broken up in terms
+#    of chemistry (see the chemistry list)
+# 5. chemistry is a list of names of the unique species in the crystal;
+#    it is entirely optional, and not used to construct the crystal object
+# 6. the sitelist and jumpnetwork have entries for energies, elastic dipoles
+#    and prefactors; each are for the *first element in the lists* as a
+#    representative.
+# 7. the tag interstitial defines which site is the interstitial element.
+interstitial: 1
+""" + \
+           HCP.simpleYAML() + \
+           OnsagerCalc.Interstitial.sitelistYAML(HCP.sitelist(1)) + \
+           OnsagerCalc.Interstitial.jumpnetworkYAML(HCP.jumpnetwork(1, cutoff))
+
+
+if __name__ == '__main__':
+    import argparse
+    parser=argparse.ArgumentParser(
+        description='Compute elastodiffusion tensor for interstitials; temperatures (K) read from stdin',
+        epilog='output as T (diffusion tensor) (elastodiffusion)')
+    parser.add_argument('--yaml', '-y', action='store_true',
+                        help='Output YAML file corresponding to an HCP o/t network')
+    parser.add_argument('-a', type=float, default=3.0,
+                        help='basal lattice constant')
+    parser.add_argument('-c', type=float, default=np.sqrt(8./3.),
+                        help='c/a ratio')
+    parser.add_argument('-z', type=float, default=1./8.,
+                        help='z parameter specifying distance from basal plane for tetrahedrals')
+    parser.add_argument('yaml_input',
+                        help='YAML formatted file containing all information about interstitial crystal/lattice')
+    parser.add_argument('--eV', action='store_true',
+                        help='Assume that T is input as kB T, in (same units as energies/dipoles)')
+    args = parser.parse_args()
+
+    if args.yaml:
+        # generate YAML input
+        print outputYAML(args.a, args.c, args.z)
+    else:
+        # otherwise... we need to parse our YAML file, and get to work
+        with open(args.yaml_input, "r") as in_f:
+            dict_def = crystal.yaml.load(in_f)
+
