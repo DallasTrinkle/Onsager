@@ -96,7 +96,7 @@ if __name__ == '__main__':
             # jumps
             jumpnetwork = dict_def['jumpnetwork']
             preT = dict_def['PrefactorT']
-            eneT = dict_def['Energy']
+            eneT = dict_def['EnergyT']
             dipoleT = dict_def['DipoleT']
             # we don't do any checking here... just dive on in
             chem = dict_def['interstitial']
