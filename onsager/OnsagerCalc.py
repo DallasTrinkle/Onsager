@@ -175,7 +175,7 @@ class Interstitial(object):
                 for g in self.crys.G:
                     # more complex: have to check the tuple (i,j) *and* the rotation of dx
                     # AND against the possibilty that we are looking at the reverse jump too
-                    if (g.indexmap[self.chem][i0] == i \
+                    if (g.indexmap[self.chem][i0] == i
                         and g.indexmap[self.chem][j0] == j
                         and np.allclose(dx, np.dot(g.cartrot, dx0)) ) or \
                             (g.indexmap[self.chem][i0] == j
@@ -360,20 +360,21 @@ class Interstitial(object):
         Dp = np.zeros((3,3,3,3))
         for transitionset, rates, dipoles in zip(self.jumpnetwork, ratelist, jumpdipoles):
             for ((i,j), dx), rate, dipole in zip(transitionset, rates, dipoles):
-                omega_ij[i, j] += sqrtrho[i]*invsqrtrho[j]*rate
+                symmrate = sqrtrho[i]*invsqrtrho[j]*rate
+                omega_ij[i, j] += symmrate
                 omega_ij[i, i] -= rate
-                domega_ij[i, j] += omega_ij[i,j]*(dipole - 0.5*(sitedipoles[i] + sitedipoles[j]))
+                domega_ij[i, j] += symmrate*(dipole - 0.5*(sitedipoles[i] + sitedipoles[j]))
                 domega_ij[i, i] -= rate*(dipole - sitedipoles[i])
                 bias_i[i] += sqrtrho[i]*rate*dx
-                biasP_i[i] += vector_tensor_outer(-sqrtrho[i]*rate*dx, dipole - 0.5*(dipoleave+sitedipoles[i]))
+                biasP_i[i] += vector_tensor_outer(-sqrtrho[i]*rate*dx, dipole - 0.5*(sitedipoles[i] + dipoleave))
                 D0 += 0.5*np.outer(dx, dx)*rho[i]*rate
                 Dp += -0.5*tensor_tensor_outer(np.outer(dx, dx)*rho[i]*rate, dipole - dipoleave)
         if self.NV > 0:
-            # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
             omega_v = np.zeros((self.NV, self.NV))
             bias_v = np.zeros(self.NV)
             domega_v = np.zeros((self.NV, self.NV, 3,3))
             biasP_v = np.zeros((self.NV, 3,3))
+            # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
             for a, va in enumerate(self.VectorBasis):
                 bias_v[a] = np.tensordot(bias_i, va, ((0,1),(0,1))) # can also use trace(dot(bias_i.T, va))
                 biasP_v[a] = np.tensordot(biasP_i, va, ((0,1),(0,1)))
@@ -384,13 +385,14 @@ class Interstitial(object):
                     # for c,d in ((c,d) for c in xrange(3) for d in xrange(3)):
                     #     domega_v[a,b, c,d] = np.trace(np.dot(va.T, np.dot(domega_ij[:,:,c,d], vb)))
             gamma_v = self.bias_solver(omega_v, bias_v)
-            dg = np.tensordot(domega_v, gamma_v,((0),(0)))
+            dg = np.tensordot(domega_v, gamma_v,((1),(0)))
             # dg = np.zeros((self.NV, 3,3))
             D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
-            for a,b,c,d in ((a,b,c,d) for a in xrange(3) for b in xrange(3) for c in xrange(3) for d in xrange(3)):
-                Dp[a,b,c,d] += np.dot(np.dot(self.VV, biasP_v[:,c,d]), gamma_v)[a,b] + \
-                               np.dot(np.dot(self.VV, gamma_v), biasP_v[:,c,d])[a,b] + \
-                               np.dot(np.dot(self.VV, gamma_v), dg[:,c,d])[a,b]
+            Dp += np.tensordot(np.tensordot(self.VV, gamma_v, ((3),(0))), 2*biasP_v+dg, ((2),(0)))
+            # for a,b,c,d in ((a,b,c,d) for a in xrange(3) for b in xrange(3) for c in xrange(3) for d in xrange(3)):
+            #     Dp[a,b,c,d] += np.dot(np.dot(self.VV[a,b,:,:], gamma_v), 2*biasP_v[:,c,d] + dg[:,c,d])
+            #                    # np.dot(np.dot(self.VV[a,b,:,:], gamma_v), )
+            #                    # np.dot(np.dot(self.VV[a,b,:,:], biasP_v[:,c,d]), gamma_v) + \
 
         for a,b,c,d in ((a,b,c,d) for a in xrange(3) for b in xrange(3) for c in xrange(3) for d in xrange(3)):
             if a==d:

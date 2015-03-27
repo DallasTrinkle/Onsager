@@ -580,7 +580,7 @@ class InterstitialTests(unittest.TestCase):
         BEoct = 0.
         BEtet = np.log(2) # so exp(-beta*E) = 1/2
         preTransOT = 10.
-        preTransTT = 100.
+        preTransTT = 10.
         BETransOT = np.log(10.)
         BETransTT = np.log(10.)
 
@@ -600,24 +600,36 @@ class InterstitialTests(unittest.TestCase):
                 preT[i] = preTransOT
                 BET[i] = BETransOT
 
-        octPb = 1e-1
-        octPc = 2e-1
-        tetPb = -1e-1
-        tetPc = -2e-1
-        transPpara = 3e-1
-        transPperp = -1.5e-1
+        octPb = 1.
+        octPc = 2.
+        tetPb = -1.
+        tetPc = -2.
+        transPpara = 0.5
+        transPperp = -0.5
         dipole = [0, 0]
         dipole[self.Dhcp.invmap[0]] = np.array([[octPb,0,0],[0,octPb,0],[0,0,octPc]])
         dipole[self.Dhcp.invmap[2]] = np.array([[tetPb,0,0],[0,tetPb,0],[0,0,tetPc]])
         dipoleT = []
+        # use the same dipole expression for all jumps:
         for jumps in self.Dhcp.jumpnetwork:
             (i,j), dx = jumps[0] # our representative jump
             dipoleT.append(transPperp*np.eye(3) + (transPpara-transPperp)*np.outer(dx, dx)/np.dot(dx, dx))
         sitedipoles = self.Dhcp.siteDipoles(dipole)
         jumpdipoles = self.Dhcp.jumpDipoles(dipoleT)
+        # test that site dipoles are created correctly
+        for i, d in enumerate(sitedipoles):
+            if i<2:
+                self.assertTrue(np.allclose(d, np.array([[octPb,0,0],[0,octPb,0],[0,0,octPc]])))
+            else:
+                self.assertTrue(np.allclose(d, np.array([[tetPb,0,0],[0,tetPb,0],[0,0,tetPc]])))
+        # test that jump dipoles are created correctly
+        for jumps, dipoles in zip(self.Dhcp.jumpnetwork, jumpdipoles):
+            for (ij, dx), d in zip(jumps, dipoles):
+                dip = transPperp*np.eye(3) + (transPpara-transPperp)*np.outer(dx, dx)/np.dot(dx, dx)
+                self.assertTrue(np.allclose(dip, d))
 
         # strain
-        eps = 1e-4
+        eps = 1e-5
         D0, Dp = self.Dhcp.elastodiffusion(pre, BE, dipole, preT, BET, dipoleT)
         for straintype in [ np.array([[1.,0.,0],[0.,0.,0,],[0.,0.,0.]]),
                             np.array([[0.,0.,0],[0.,1.,0,],[0.,0.,0.]]),
@@ -646,7 +658,7 @@ class InterstitialTests(unittest.TestCase):
             # this gets more complicated...
             for ind, jumps in enumerate(strainedHCPpos_jumpnetwork):
                 (i,j), dx = jumps[0]
-                dx0 = np.dot(np.linalg.inv(np.eye(3) + strainmat), dx)
+                dx0 = np.linalg.solve(np.eye(3) + strainmat, dx)
                 dip = transPperp*np.eye(3) +(transPpara-transPperp)*np.outer(dx0, dx0)/np.dot(dx0, dx0)
                 if i>=2 and j>=2:
                     strainedpospreT[ind] = preTransTT
@@ -674,7 +686,7 @@ class InterstitialTests(unittest.TestCase):
             # this gets more complicated...
             for ind, jumps in enumerate(strainedHCPneg_jumpnetwork):
                 (i,j), dx = jumps[0]
-                dx0 = np.dot(np.linalg.inv(np.eye(3) - strainmat), dx)
+                dx0 = np.linalg.solve(np.eye(3) - strainmat, dx)
                 dip = transPperp*np.eye(3) +(transPpara-transPperp)*np.outer(dx0, dx0)/np.dot(dx0, dx0)
                 if i>=2 and j>=2:
                     strainednegpreT[ind] = preTransTT
