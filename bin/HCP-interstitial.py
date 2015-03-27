@@ -77,7 +77,8 @@ if __name__ == '__main__':
                         help='YAML formatted file containing all information about interstitial crystal/lattice')
     parser.add_argument('--eV', action='store_true',
                         help='Assume that T is input as kB T, in (same units as energies/dipoles)')
-    args = parser.parse_args()
+    # we use parse_known_args so that "extra" is our additional arguments, which can be files of T to read in
+    args, extra = parser.parse_known_args()
 
     if args.yaml:
         # generate YAML input
@@ -86,4 +87,34 @@ if __name__ == '__main__':
         # otherwise... we need to parse our YAML file, and get to work
         with open(args.yaml_input, "r") as in_f:
             dict_def = crystal.yaml.load(in_f)
-
+            crys = crystal.fromdict(dict_def) # pull out the crystal part of the YAML
+            # sites:
+            sitelist = dict_def['sitelist']
+            pre = dict_def['Prefactor']
+            ene = dict_def['Energy']
+            dipole = dict_def['Dipole']
+            # jumps
+            jumpnetwork = dict_def['jumpnetwork']
+            preT = dict_def['PrefactorT']
+            eneT = dict_def['Energy']
+            dipoleT = dict_def['DipoleT']
+            # we don't do any checking here... just dive on in
+            chem = dict_def['interstitial']
+            # create our calculator
+            interstitial = OnsagerCalc.Interstitial(crys, chem, sitelist, jumpnetwork)
+            if args.eV:
+                kB = 1.
+            else:
+                from scipy.constants import physical_constants
+                kB = physical_constants['Boltzmann constant in eV/K'][0]
+            # now read through stdin, taking each entry as a temperature
+            import fileinput
+            for line in fileinput.input(extra):
+                T = float(line)
+                beta = 1./(kB*T)
+                BE = [ beta*E for E in ene ]
+                beta_dip = [ beta*dip for dip in dipole ]
+                BET = [ beta*ET for ET in eneT ]
+                beta_dipT = [ beta*dipT for dipT in dipoleT ]
+                D0, Dp = interstitial.elastodiffusion(pre, BE, beta_dip, preT, BET, beta_dipT)
+                print "{} {} {}".format(T, D0[0,0], D0[2,2])
