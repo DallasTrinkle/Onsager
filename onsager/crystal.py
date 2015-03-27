@@ -442,13 +442,13 @@ class Crystal(object):
         if 'lattice_constant' in yamldict: lattice_constant = yamldict['lattice_constant']
         return Crystal((lattice_constant*yamldict['lattice']).T, yamldict['basis'])
 
-    def simpleYAML(self):
+    def simpleYAML(self, a0=1.0):
         """
         Creates a simplified YAML dump, in case we don't want to output the full symmetry analysis
         :return: YAML dump
         """
-        return yaml.dump({'lattice_constant': 1.0,
-                          'lattice': self.lattice.T,
+        return yaml.dump({'lattice_constant': a0,
+                          'lattice': self.lattice.T/a0,
                           'basis': self.basis,
                           'chemistry': [ len(chem) for chem in self.basis ]})
 

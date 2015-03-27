@@ -55,7 +55,7 @@ def outputYAML(a0, c_a, z=1./8.):
 # 7. the tag interstitial defines which site is the interstitial element.
 interstitial: 1
 """ + \
-           HCP.simpleYAML() + \
+           HCP.simpleYAML(a0) + \
            OnsagerCalc.Interstitial.sitelistYAML(HCP.sitelist(1)) + \
            OnsagerCalc.Interstitial.jumpnetworkYAML(HCP.jumpnetwork(1, cutoff))
 

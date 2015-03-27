@@ -87,7 +87,7 @@ class Interstitial(object):
     @staticmethod
     def sitelistYAML(sitelist):
         """Dumps a "sample" YAML formatted version of the sitelist with data to be entered"""
-        return crystal.yaml.dump({'Dipole': [np.zeros(3,3) for w in sitelist],
+        return crystal.yaml.dump({'Dipole': [np.zeros((3,3)) for w in sitelist],
                                   'Energy': [0 for w in sitelist],
                                   'Prefactor': [1 for w in sitelist],
                                   'sitelist': sitelist})
@@ -95,7 +95,7 @@ class Interstitial(object):
     @staticmethod
     def jumpnetworkYAML(jumpnetwork):
         """Dumps a "sample" YAML formatted version of the jumpnetwork with data to be entered"""
-        return crystal.yaml.dump({'DipoleT': [np.zeros(3,3) for t in jumpnetwork],
+        return crystal.yaml.dump({'DipoleT': [np.zeros((3,3)) for t in jumpnetwork],
                                   'EnergyT': [0 for t in jumpnetwork],
                                   'PrefactorT': [1 for t in jumpnetwork],
                                   'jumpnetwork': jumpnetwork})
