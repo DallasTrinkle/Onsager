@@ -493,6 +493,22 @@ class InterstitialTests(unittest.TestCase):
         self.assertTrue(np.allclose(np.array([[Dhcp_basal,0,0],[0,Dhcp_basal,0],[0,0,Dhcp_c]]), D),
                         msg="Diffusivity doesn't match:\n{}\nnot {} and {}".format(D, Dhcp_basal,Dhcp_c))
 
+    def testBias(self):
+        """Quick check that the bias and correction are computed correctly"""
+        rumpledcrys = crystal.Crystal(np.array([[2.,0.,0.],[0.,1.,0.],[0.,0.,10.]]),
+                                      [np.array([0.,0.,0.]), np.array([0.5,0,0.1])])
+        sitelist = rumpledcrys.sitelist(0)
+        jumpnetwork = rumpledcrys.jumpnetwork(0, 1.5)
+        diffuser = OnsagerCalc.Interstitial(rumpledcrys, 0, sitelist, jumpnetwork)
+        pre = np.array([1,]*len(sitelist))
+        BE = np.array([0,]*len(sitelist))
+        preT = np.array([1,]*len(jumpnetwork))
+        BET = np.array([0,]*len(jumpnetwork))
+        D0 = diffuser.diffusivity(pre, BE, preT, BET)
+        # despite the fact that there are jumps that go +z and -z, the diffusivity for this
+        # rumpled 2D crystal should be exactly 0 in any z component
+        self.assertTrue(np.allclose(D0[:,2], 0))
+
     def testSymmTensorMapping(self):
         """Do we correctly map our elastic dipoles onto sites and transitions?"""
         # put a little "error" in from our calculation... shouldn't really be present
