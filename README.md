@@ -25,6 +25,12 @@ The tests for the package are include in test; tests.py will run all of the test
 in the directory with verbosity level 2. This can be time-consuming (on the order
 of tens of minutes) to run all tests.
 
+The newest update (0.2) includes an improved "crystal" class to handle a general
+crystal type, with full space group symmetry, and associated analysis; and an
+Interstitial class within OnsagerCalc that can compute diffusion and the
+elastodiffusion (derivative of diffusion with respect to strain) tensors. These
+also include YAML support for input as well as output of classes.
+
 Contributors
 ============
 Dallas R. Trinkle, initial design.
