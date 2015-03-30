@@ -689,15 +689,11 @@ elastodiffusion:
         # strain
         eps = 1e-4
         D0, Dp = self.Dhcp.elastodiffusion(pre, BE, dipole, preT, BET, dipoleT)
-        for straintype in [ np.array([[1.,0.,0],[0.,0.,0,],[0.,0.,0.]]),
-                            np.array([[0.,0.,0],[0.,1.,0,],[0.,0.,0.]]),
-                            np.array([[0.,0.,0],[0.,0.,0,],[0.,0.,1.]]),
-                            np.array([[0.,0.,0],[0.,0.,0.5],[0.,0.5,0.]]),
-                            np.array([[0.,0.,0.5],[0.,0.,0,],[0.5,0.,0.]]),
-                            np.array([[0.,0.5,0],[0.5,0.,0,],[0.,0.,0.]]) ]:
+        # use Voigtstrain to run through the 6 strains; np.eye(6) generates 6 unit vectors
+        for straintype in [ crystal.Voigtstrain(*s) for s in np.eye(6) ]:
             # now doing +- finite difference for a more accurate comparison:
             strainmat = eps*straintype
-            strainedHCPpos = crystal.Crystal(np.dot(np.eye(3) + strainmat, self.hexlatt), self.hcpbasis)
+            strainedHCPpos = self.HCP_intercrys.strain(strainmat)
             strainedHCPpos_jumpnetwork = strainedHCPpos.jumpnetwork(1, self.a0*0.7)
             strainedHCPpos_sitelist = strainedHCPpos.sitelist(1)
             strainedDhcppos = OnsagerCalc.Interstitial(strainedHCPpos, 1,
@@ -710,10 +706,10 @@ elastodiffusion:
             # apply dipoles to site energies:
             for octind in xrange(2):
                 strainedpospre[strainedDhcppos.invmap[octind]] = preoct
-                strainedposBE[strainedDhcppos.invmap[octind]] = BEoct + np.sum(sitedipoles[octind] * strainmat)
+                strainedposBE[strainedDhcppos.invmap[octind]] = BEoct - np.sum(sitedipoles[octind] * strainmat)
             for tetind in xrange(2,6):
                 strainedpospre[strainedDhcppos.invmap[tetind]] = pretet
-                strainedposBE[strainedDhcppos.invmap[tetind]] = BEtet + np.sum(sitedipoles[tetind] * strainmat)
+                strainedposBE[strainedDhcppos.invmap[tetind]] = BEtet - np.sum(sitedipoles[tetind] * strainmat)
             strainedposBET = np.zeros(len(strainedHCPpos_jumpnetwork))
             strainedpospreT = np.zeros(len(strainedHCPpos_jumpnetwork))
             # this gets more complicated...
@@ -723,12 +719,12 @@ elastodiffusion:
                 dip = transPperp*np.eye(3) +(transPpara-transPperp)*np.outer(dx0, dx0)/np.dot(dx0, dx0)
                 if i>=2 and j>=2:
                     strainedpospreT[ind] = preTransTT
-                    strainedposBET[ind] = BETransTT + np.sum(dip*strainmat)
+                    strainedposBET[ind] = BETransTT - np.sum(dip*strainmat)
                 else:
                     strainedpospreT[ind] = preTransOT
-                    strainedposBET[ind] = BETransOT + np.sum(dip*strainmat)
+                    strainedposBET[ind] = BETransOT - np.sum(dip*strainmat)
 
-            strainedHCPneg = crystal.Crystal(np.dot(np.eye(3) - strainmat, self.hexlatt), self.hcpbasis)
+            strainedHCPneg = self.HCP_intercrys.strain(-strainmat)
             strainedHCPneg_jumpnetwork = strainedHCPneg.jumpnetwork(1, self.a0*0.7)
             strainedHCPneg_sitelist = strainedHCPneg.sitelist(1)
             strainedDhcpneg = OnsagerCalc.Interstitial(strainedHCPneg, 1,
@@ -741,10 +737,10 @@ elastodiffusion:
             # apply dipoles to site energies:
             for octind in xrange(2):
                 strainednegpre[strainedDhcpneg.invmap[octind]] = preoct
-                strainednegBE[strainedDhcpneg.invmap[octind]] = BEoct - np.sum(sitedipoles[octind] * strainmat)
+                strainednegBE[strainedDhcpneg.invmap[octind]] = BEoct + np.sum(sitedipoles[octind] * strainmat)
             for tetind in xrange(2,6):
                 strainednegpre[strainedDhcpneg.invmap[tetind]] = pretet
-                strainednegBE[strainedDhcpneg.invmap[tetind]] = BEtet - np.sum(sitedipoles[tetind] * strainmat)
+                strainednegBE[strainedDhcpneg.invmap[tetind]] = BEtet + np.sum(sitedipoles[tetind] * strainmat)
             strainednegBET = np.zeros(len(strainedHCPneg_jumpnetwork))
             strainednegpreT = np.zeros(len(strainedHCPneg_jumpnetwork))
             # this gets more complicated...
@@ -754,10 +750,10 @@ elastodiffusion:
                 dip = transPperp*np.eye(3) +(transPpara-transPperp)*np.outer(dx0, dx0)/np.dot(dx0, dx0)
                 if i>=2 and j>=2:
                     strainednegpreT[ind] = preTransTT
-                    strainednegBET[ind] = BETransTT - np.sum(dip*strainmat)
+                    strainednegBET[ind] = BETransTT + np.sum(dip*strainmat)
                 else:
                     strainednegpreT[ind] = preTransOT
-                    strainednegBET[ind] = BETransOT - np.sum(dip*strainmat)
+                    strainednegBET[ind] = BETransOT + np.sum(dip*strainmat)
             Deps = strainedDhcppos.diffusivity(strainedpospre, strainedposBE, strainedpospreT, strainedposBET) -\
                    strainedDhcpneg.diffusivity(strainednegpre, strainednegBE, strainednegpreT, strainednegBET)
             Deps /= 2.*eps
