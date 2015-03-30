@@ -111,6 +111,19 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         """Return a version of groupop where the translation is in the centered unit cell"""
         return GroupOp(self.rot, inhalf(self.trans), self.cartrot, self.indexmap)
 
+    def __str__(self):
+        """Human-readable version of groupop"""
+        str = "#Rotation (lattice, cartesian):\n {}\t{}\n {}\t{}\n {}\t{}\n#Translation: {}\n#Indexmap:".format(
+            self.rot[0], self.cartrot[0],
+            self.rot[1], self.cartrot[1],
+            self.rot[2], self.cartrot[2],
+            self.trans)
+        for chemind, atoms in enumerate(self.indexmap):
+            for origind, finalind in enumerate(atoms):
+                str = str + "\n  {chem}.{o} -> {chem}.{f}".format(chem=chemind+1,
+                                                                  o=origind+1, f=finalind+1)
+        return str
+
     def __eq__(self, other):
         """Test for equality--we use numpy.isclose for comparison, since that's what we usually care about"""
         # if not type(other) is not GroupOp: return False
