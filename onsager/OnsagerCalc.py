@@ -363,12 +363,12 @@ class Interstitial(object):
                 symmrate = sqrtrho[i]*invsqrtrho[j]*rate
                 omega_ij[i, j] += symmrate
                 omega_ij[i, i] -= rate
-                domega_ij[i, j] += symmrate*(dipole - 0.5*(sitedipoles[i] + sitedipoles[j]))
-                domega_ij[i, i] -= rate*(dipole - sitedipoles[i])
+                domega_ij[i, j] -= symmrate*(dipole - 0.5*(sitedipoles[i] + sitedipoles[j]))
+                domega_ij[i, i] += rate*(dipole - sitedipoles[i])
                 bias_i[i] += sqrtrho[i]*rate*dx
-                biasP_i[i] += vector_tensor_outer(-sqrtrho[i]*rate*dx, dipole - 0.5*(sitedipoles[i] + dipoleave))
+                biasP_i[i] += vector_tensor_outer(sqrtrho[i]*rate*dx, dipole - 0.5*(sitedipoles[i] + dipoleave))
                 D0 += 0.5*np.outer(dx, dx)*rho[i]*rate
-                Dp += -0.5*tensor_tensor_outer(np.outer(dx, dx)*rho[i]*rate, dipole - dipoleave)
+                Dp += 0.5*tensor_tensor_outer(np.outer(dx, dx)*rho[i]*rate, dipole - dipoleave)
         if self.NV > 0:
             omega_v = np.zeros((self.NV, self.NV))
             bias_v = np.zeros(self.NV)

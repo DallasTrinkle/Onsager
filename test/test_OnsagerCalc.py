@@ -543,10 +543,10 @@ class InterstitialTests(unittest.TestCase):
         preT = np.array([preTrans])
         BET = np.array([BETrans])
 
-        octP = 0 # 1.
-        tetP = 0 # -1.
-        transPpara = 0 # 0.5
-        transPperp = 0 # -0.5
+        octP = 1.
+        tetP = -1.
+        transPpara = 0.5
+        transPperp = -0.5
         dipole = [0, 0]
         dipole[self.Dfcc.invmap[0]] = octP*np.eye(3)
         dipole[self.Dfcc.invmap[1]] = tetP*np.eye(3)
@@ -558,14 +558,10 @@ class InterstitialTests(unittest.TestCase):
         # strain
         D0, Dp = self.Dfcc.elastodiffusion(pre, BE, dipole, preT, BET, dipoleT)
         eps = 1e-4
-        for straintype in [ np.array([[1.,0.,0],[0.,0.,0,],[0.,0.,0.]]),
-                            np.array([[0.,0.,0],[0.,1.,0,],[0.,0.,0.]]),
-                            np.array([[0.,0.,0],[0.,0.,0,],[0.,0.,1.]]),
-                            np.array([[0.,0.,0],[0.,0.,0.5],[0.,0.5,0.]]),
-                            np.array([[0.,0.,0.5],[0.,0.,0,],[0.5,0.,0.]]),
-                            np.array([[0.,0.5,0],[0.5,0.,0,],[0.,0.,0.]]) ]:
+        # use Voigtstrain to run through the 6 strains; np.eye(6) generates 6 unit vectors
+        for straintype in [ crystal.Voigtstrain(*s) for s in np.eye(6) ]:
             strainmat = eps*straintype
-            strainedFCCpos = crystal.Crystal(np.dot(np.eye(3) + strainmat, self.fcclatt), self.fccbasis)
+            strainedFCCpos = self.FCC_intercrys.strain(strainmat)
             strainedFCCpos_jumpnetwork = strainedFCCpos.jumpnetwork(1, self.a0*0.48)
             strainedFCCpos_sitelist = strainedFCCpos.sitelist(1)
             strainedDfccpos = OnsagerCalc.Interstitial(strainedFCCpos, 1,
@@ -578,10 +574,10 @@ class InterstitialTests(unittest.TestCase):
             # apply dipoles to site energies:
             for octind in xrange(1):
                 strainedpospre[strainedDfccpos.invmap[octind]] = preoct
-                strainedposBE[strainedDfccpos.invmap[octind]] = BEoct + np.sum(sitedipoles[octind] * strainmat)
+                strainedposBE[strainedDfccpos.invmap[octind]] = BEoct - np.sum(sitedipoles[octind] * strainmat)
             for tetind in xrange(1,3):
                 strainedpospre[strainedDfccpos.invmap[tetind]] = pretet
-                strainedposBE[strainedDfccpos.invmap[tetind]] = BEtet + np.sum(sitedipoles[tetind] * strainmat)
+                strainedposBE[strainedDfccpos.invmap[tetind]] = BEtet - np.sum(sitedipoles[tetind] * strainmat)
             strainedposBET = np.zeros(len(strainedFCCpos_jumpnetwork))
             strainedpospreT = np.zeros(len(strainedFCCpos_jumpnetwork))
             # this gets more complicated...
@@ -590,9 +586,9 @@ class InterstitialTests(unittest.TestCase):
                 dx0 = np.linalg.solve(np.eye(3) + strainmat, dx)
                 dip = transPperp*np.eye(3) +(transPpara-transPperp)*np.outer(dx0, dx0)/np.dot(dx0, dx0)
                 strainedpospreT[ind] = preTrans
-                strainedposBET[ind] = BETrans + np.sum(dip*strainmat)
+                strainedposBET[ind] = BETrans - np.sum(dip*strainmat)
 
-            strainedFCCneg = crystal.Crystal(np.dot(np.eye(3) - strainmat, self.fcclatt), self.fccbasis)
+            strainedFCCneg = self.FCC_intercrys.strain(-strainmat)
             strainedFCCneg_jumpnetwork = strainedFCCneg.jumpnetwork(1, self.a0*0.48)
             strainedFCCneg_sitelist = strainedFCCneg.sitelist(1)
             strainedDfccneg = OnsagerCalc.Interstitial(strainedFCCneg, 1,
@@ -605,10 +601,10 @@ class InterstitialTests(unittest.TestCase):
             # apply dipoles to site energies:
             for octind in xrange(1):
                 strainednegpre[strainedDfccneg.invmap[octind]] = preoct
-                strainednegBE[strainedDfccneg.invmap[octind]] = BEoct - np.sum(sitedipoles[octind] * strainmat)
+                strainednegBE[strainedDfccneg.invmap[octind]] = BEoct + np.sum(sitedipoles[octind] * strainmat)
             for tetind in xrange(1,3):
                 strainednegpre[strainedDfccneg.invmap[tetind]] = pretet
-                strainednegBE[strainedDfccneg.invmap[tetind]] = BEtet - np.sum(sitedipoles[tetind] * strainmat)
+                strainednegBE[strainedDfccneg.invmap[tetind]] = BEtet + np.sum(sitedipoles[tetind] * strainmat)
             strainednegBET = np.zeros(len(strainedFCCneg_jumpnetwork))
             strainednegpreT = np.zeros(len(strainedFCCneg_jumpnetwork))
             # this gets more complicated...
@@ -617,7 +613,7 @@ class InterstitialTests(unittest.TestCase):
                 dx0 = np.linalg.solve(np.eye(3) - strainmat, dx)
                 dip = transPperp*np.eye(3) +(transPpara-transPperp)*np.outer(dx0, dx0)/np.dot(dx0, dx0)
                 strainednegpreT[ind] = preTrans
-                strainednegBET[ind] = BETrans - np.sum(dip*strainmat)
+                strainednegBET[ind] = BETrans + np.sum(dip*strainmat)
             Deps = strainedDfccpos.diffusivity(strainedpospre, strainedposBE, strainedpospreT, strainedposBET) -\
                    strainedDfccneg.diffusivity(strainednegpre, strainednegBE, strainednegpreT, strainednegBET)
 
