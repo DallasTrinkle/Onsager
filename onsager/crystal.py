@@ -357,6 +357,21 @@ def ProjectTensorBasis(tensor, basis):
         if tensor.shape != basis[0].shape: raise TypeError("Tensor and basis not compatible")
     return sum( b*np.sum(tensor*b) for b in basis )
 
+
+def Voigtstrain(e1, e2, e3, e4, e5, e6):
+    """
+    Returns a symmetric strain tensor from the Voigt reduced strain values.
+    :param e1: xx
+    :param e2: yy
+    :param e3: zz
+    :param e4: yz + zx
+    :param e5: zx + xz
+    :param e6: xy + yx
+    :return: symmetric strain tensor
+    """
+    return np.array([[e1,0.5*e6,0.5*e5],[0.5*e6,e2,0.5*e4],[0.5*e5,0.5*e4,e3]])
+
+
 class Crystal(object):
     """
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.
@@ -451,6 +466,39 @@ class Crystal(object):
                           'lattice': self.lattice.T/a0,
                           'basis': self.basis,
                           'chemistry': [ len(chem) for chem in self.basis ]})
+
+    # a few "convenient" lattices
+    @classmethod
+    def FCC(cls, a0):
+        """
+        Create a face-centered cubic crystal with lattice constant a0
+        :param a0: lattice constant
+        :return: FCC crystal
+        """
+        return Crystal(np.array([[0.,0.5,0.5],[0.5,0.,0.5],[0.5,0.5,0.]])*a0, [np.zeros(3)])
+
+    @classmethod
+    def BCC(cls, a0):
+        """
+        Create a body-centered cubic crystal with lattice constant a0
+        :param a0: lattice constant
+        :return: BCC crystal
+        """
+        return Crystal(np.array([[-0.5,0.5,0.5],[0.5,-0.5,0.5],[0.5,0.5,-0.5]])*a0, [np.zeros(3)])
+
+    @classmethod
+    def HCP(cls, a0, c_a=np.sqrt(8./3.)):
+        """
+        Create a hexagonal closed packed crystal with lattice constant a0, c/a ratio c_a
+        :param a0: lattice constant
+        :param c_a: c/a ratio
+        :return: HCP crystal
+        """
+        return Crystal(np.array([[0.5,0.5,0.],
+                                 [-np.sqrt(0.75),np.sqrt(0.75),0.],
+                                 [0.,0.,c_a]])*a0,
+                                 [np.array([1./3.,2./3.,1./4.]),
+                                  np.array([2./3.,1./3.,3./4])])
 
     def center(self):
         """
@@ -613,6 +661,38 @@ class Crystal(object):
                                             np.dot(self.lattice, np.dot(super, self.invlatt)),
                                             indexmap))
         return frozenset(groupops)
+
+    def strain(self, eps):
+        """
+        Returns a new Crystal object that is a strained version of the current.
+        :param eps: strain tensor
+        :return: new Crystal object, strained
+        """
+        if __debug__:
+            if type(eps) is not np.ndarray or eps.shape != (3,3):
+                raise TypeError('strain is not a 3x3 tensor')
+        return Crystal(np.dot(np.eye(3) + eps, self.lattice), self.basis)
+
+    def addbasis(self, basis):
+        """
+        Returns a new Crystal object that contains additional sites (assumed to be new chemistry).
+        This is intended to "add in" interstitial sites. Note: if the symmetry is to be
+        maintained, should be the output from Wyckoffpos().
+        :param basis: list (or list of lists) of new sites
+        :return: new Crystal object, with additional sites
+        """
+        if type(basis) is not list: raise TypeError('basis needs to be a list or list of lists')
+        if type(basis[0]) == np.ndarray:
+            for u in basis:
+                if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, basis))
+            newbasis = [[incell(u) for u in basis]]
+        else:
+            for elem in basis:
+                if type(elem) is not list: raise TypeError("{} in basis is not a list".format(elem))
+                for u in elem:
+                    if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, elem))
+            newbasis = [[incell(u) for u in atombasis] for atombasis in basis]
+        return Crystal(self.lattice, self.basis + newbasis)
 
     def pos2cart(self, lattvec, ind):
         """
