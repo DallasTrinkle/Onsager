@@ -31,6 +31,8 @@ Interstitial class within OnsagerCalc that can compute diffusion and the
 elastodiffusion (derivative of diffusion with respect to strain) tensors. These
 also include YAML support for input as well as output of classes.
 
+Update 0.2.1: corrected a sign error in the definition of elastic dipole.
+
 Contributors
 ============
 Dallas R. Trinkle, initial design.

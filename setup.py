@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
     name = 'onsager',
     packages = ['onsager', 'test'], # including the test?
-    version = '0.2',
+    version = '0.2.1',
     description = 'A package to compute Onsager coefficients for vacancy-mediated diffusion and interstitial elastodiffusion tensors',
     author = 'Dallas R. Trinkle',
     author_email = 'dtrinkle@illinois.edu',
