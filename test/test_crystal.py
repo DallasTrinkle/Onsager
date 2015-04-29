@@ -601,7 +601,7 @@ class CrystalClassTests(unittest.TestCase):
         self.assertEqual(len(tetset), 4)
         # now, build up HCP + interstitials (which are of a *different chemistry*)
         HCP_intercrys = crystal.Crystal(self.hexlatt, basis + [octset + tetset])
-        jumpnetwork = HCP_intercrys.jumpnetwork(1, self.a0*0.7) # tuned to avoid t->t in basal plane
+        jumpnetwork = HCP_intercrys.jumpnetwork(1, self.a0*0.8, 0.5*self.a0) # tuned to avoid t->t in basal plane
         self.assertEqual(len(jumpnetwork), 2) # should contain o->t/t->o and t->t networks
         self.assertEqual(sorted(len(t) for t in jumpnetwork), [4, 24])
         # print crystal.yaml.dump(jumpnetwork)

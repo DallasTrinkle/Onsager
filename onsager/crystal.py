@@ -444,6 +444,7 @@ class Crystal(object):
                             for atomtype,atomlist in enumerate(self.basis)
                             for atomindex in range(len(atomlist))]
         self.N = len(self.atomindices)
+        self.Nchem = len(self.basis)
         self.volume, self.metric = self.calcmetric()
         self.reciplatt = 2.*np.pi*self.invlatt.T
         self.BZvol = abs(float(np.linalg.det(self.reciplatt)))
@@ -913,14 +914,16 @@ class Crystal(object):
                     lis.append(dx)
         return lis
 
-    def jumpnetwork(self, chem, cutoff):
+    def jumpnetwork(self, chem, cutoff, closestdistance=0):
         """
         Generate the full jump network for a specific chemical index, out to a cutoff. Organized
         by symmetry-unique transitions. Note that i->j and j->i are always related to one-another,
-        but by equivalence of transition state, not symmetry.
+        but by equivalence of transition state, not symmetry. Now updated with closest-distance
+        parameter.
 
         :param chem: index corresponding to the chemistry to consider
         :param cutoff: distance cutoff
+        :param closestdistance: closest distance allowed in transition (can be a list)
         :return: list of symmetry-unique transitions; each is a list of tuples:
           ((i,j), dx) corresponding to jump from i->j with vector dx
         """
@@ -958,6 +961,36 @@ class Crystal(object):
                                     trans.append((tup, dx))
                                     trans.append(((tup[1], tup[0]), -dx))
                             lis.append(trans)
+        # now for collision detection:
+        if type(closestdistance) is list:
+            # quick sanity check to make sure we don't include collision detection on
+            # our interstitial site
+            closest2list = [ x**2 if c != chem else -1. for c,x in enumerate(closestdistance)]
+        else:
+            closest2list = [ closestdistance**2 if c != chem else -1. for c in range(self.Nchem)]
+        for c, mindist2 in enumerate(closest2list):
+            if mindist2 < 0:
+                # skip the negative distances; we still check 0 because straight line paths
+                # through sites should (probably) still be excluded
+                continue
+            for u0 in self.basis[c]:
+                for n in supervect:
+                    # check each transition in the list (we need to do list(lis) because
+                    # we will modify lis in place with remove's, and its dangerous to pull
+                    # off as we iterate through:
+                    for trans in list(lis):
+                        t = trans[0] # representative transition
+                        dx = t[1]
+                        # take our starting point relative to the first item in the tuple
+                        xRa = self.unit2cart(n, u0-self.basis[chem][t[0][0]])
+                        xRa2 = np.dot(xRa, xRa)
+                        xRa_dx = np.dot(xRa, dx)
+                        dx2 = np.dot(dx, dx)
+                        if 0 <= xRa_dx and xRa_dx <= dx2:
+                            d2 = (xRa2*dx2 - xRa_dx*xRa_dx)/dx2
+                            if np.isclose(d2, mindist2) or d2 < mindist2:
+                                lis.remove(trans)
+
         return lis
 
     def sitelist(self, chem):
