@@ -125,6 +125,13 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
                                                                   o=origind+1, f=finalind+1)
         return str
 
+    def _asdict(self):
+        """Return a proper dict"""
+        return {'rot': self.rot,
+                'trans': self.trans,
+                'cartrot': self.cartrot,
+                'indexmap': self.indexmap}
+
     def __eq__(self, other):
         """Test for equality--we use numpy.isclose for comparison, since that's what we usually care about"""
         # if not type(other) is not GroupOp: return False
@@ -145,7 +152,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         ### that __eq__ uses "isclose" on our translations, and we don't have a good way to handle
         ### that in a hash function. We lose a little bit on efficiency if we construct a set that
         ### has a whole lot of translation operations, but that's not usually what we will do.
-        return reduce(lambda x,y: x^y, [256, 128, 64, 32, 16, 8, 4, 2, 1] * self.rot.reshape((9,)))
+        return int(reduce(lambda x,y: x^y, [256, 128, 64, 32, 16, 8, 4, 2, 1] * self.rot.reshape((9,))))
         # ^ reduce(lambda x,y: x^y, [hash(x) for x in self.trans])
 
     def __add__(self, other):
@@ -244,7 +251,8 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     def GroupOp_representer(dumper, data):
         """Output a GroupOp"""
         # asdict() returns an OrderedDictionary, so pass through dict()
-        return dumper.represent_mapping(GROUPOP_YAMLTAG, dict(data._asdict()))
+        # had to rewrite _asdict() for some reason...?
+        return dumper.represent_mapping(GROUPOP_YAMLTAG, data._asdict())
 
     @staticmethod
     def GroupOp_constructor(loader, node):
