@@ -60,9 +60,9 @@ class KPTmesh:
         dN = np.array([1. / x for x in Nmesh])
         # use a list comprehension to iterate and build:
         self.kptfull = np.array([np.dot(self.rlattice, (n0 * dN[0], n1 * dN[1], n2 * dN[2]))
-                                 for n0 in range(-Nmesh[0] / 2 + 1, Nmesh[0] / 2 + 1)
-                                 for n1 in range(-Nmesh[1] / 2 + 1, Nmesh[1] / 2 + 1)
-                                 for n2 in range(-Nmesh[2] / 2 + 1, Nmesh[2] / 2 + 1)])
+                                 for n0 in range(-Nmesh[0] // 2 + 1, Nmesh[0] // 2 + 1)
+                                 for n1 in range(-Nmesh[1] // 2 + 1, Nmesh[1] // 2 + 1)
+                                 for n2 in range(-Nmesh[2] // 2 + 1, Nmesh[2] // 2 + 1)])
         # run through list to ensure that all k-points are inside the BZ
         Gmin = min([np.dot(G, G) for G in self.BZG])
         for i, k in enumerate(self.kptfull):
