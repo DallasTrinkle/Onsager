@@ -88,7 +88,7 @@ class StarTests(unittest.TestCase):
 
     def testStarConsistent(self):
         """Check that the counts (Npts, Nstars) make sense, with Nshells = 1..4"""
-        for n in xrange(1,5):
+        for n in range(1,5):
             self.star.generate(n)
             self.assertEqual(self.star.Npts, sum([len(s) for s in self.star.stars]))
             for s in self.star.stars:
@@ -165,7 +165,7 @@ class CubicStarTests(StarTests):
 
     def testStarConsistent(self):
         """Check that the counts (Npts, Nstars) make sense for cubic, with Nshells = 1..4"""
-        for n in xrange(1,5):
+        for n in range(1,5):
             self.star.generate(n)
             self.assertEqual(self.star.Npts, sum([len(s) for s in self.star.stars]))
             for s in self.star.stars:
@@ -246,7 +246,7 @@ class DoubleStarTests(unittest.TestCase):
 
     def testPairIndices(self):
         """Check that our pair indexing works correctly for Nshell=1..3"""
-        for nshells in xrange(1, 4):
+        for nshells in range(1, 4):
             self.star.generate(nshells)
             self.dstar.generate(self.star)
             for pair in self.dstar.pairs:
@@ -254,7 +254,7 @@ class DoubleStarTests(unittest.TestCase):
 
     def testDoubleStarindices(self):
         """Check that our double-star indexing works correctly for Nshell=1..3"""
-        for nshells in xrange(1, 4):
+        for nshells in range(1, 4):
             self.star.generate(nshells)
             self.dstar.generate(self.star)
             for pair in self.dstar.pairs:
@@ -409,10 +409,10 @@ class VectorStarGFlinearTests(unittest.TestCase):
                          (self.vecstar.Nvstars, self.vecstar.Nvstars, self.star2.Nstars + 1))
         gexpand = np.zeros(self.star2.Nstars + 1)
         gexpand[0] = self.GF.GF(np.zeros(3))
-        for i in xrange(self.star2.Nstars):
+        for i in range(self.star2.Nstars):
             gexpand[i + 1] = self.GF.GF(self.star2.stars[i][0])
-        for i in xrange(self.vecstar.Nvstars):
-            for j in xrange(self.vecstar.Nvstars):
+        for i in range(self.vecstar.Nvstars):
+            for j in range(self.vecstar.Nvstars):
                 # test the construction
                 self.assertAlmostEqual(sum(GFexpand[i, j, :]), 0)
                 g = 0
@@ -514,8 +514,8 @@ class VectorStarOmegalinearTests(unittest.TestCase):
                     om1expand[nd] = rate
                     break
         # print om1expand
-        for i in xrange(self.vecstar.Nvstars):
-            for j in xrange(self.vecstar.Nvstars):
+        for i in range(self.vecstar.Nvstars):
+            for j in range(self.vecstar.Nvstars):
                 # test the construction
                 om1 = 0
                 for Ri, vi in zip(self.vecstar.vecpos[i], self.vecstar.vecvec[i]):
@@ -557,7 +557,7 @@ class VectorStarOmega2linearTests(unittest.TestCase):
         rate2expand = self.vecstar.rate2expansion(self.NNstar)
         self.assertEqual(np.shape(rate2expand),
                          (self.vecstar.Nvstars, self.vecstar.Nvstars, self.NNstar.Nstars))
-        for i in xrange(self.vecstar.Nvstars):
+        for i in range(self.vecstar.Nvstars):
             # test the construction
             om2 = 0
             for Ri, vi in zip(self.vecstar.vecpos[i], self.vecstar.vecvec[i]):
@@ -567,10 +567,10 @@ class VectorStarOmega2linearTests(unittest.TestCase):
                         om2 += -2. * np.dot(vi, vi) * rate
                         break
             self.assertAlmostEqual(om2, np.dot(rate2expand[i, i, :], om2expand))
-            for j in xrange(self.vecstar.Nvstars):
+            for j in range(self.vecstar.Nvstars):
                 if j != i:
-                    for d in xrange(self.NNstar.Nstars):
-                        self.assertAlmostEquals(0, rate2expand[i, j, d])
+                    for d in range(self.NNstar.Nstars):
+                        self.assertAlmostEqual(0, rate2expand[i, j, d])
         # print(np.dot(rate2expand, om2expand))
 
 
@@ -615,8 +615,8 @@ class VectorStarBias2linearTests(unittest.TestCase):
             # test the construction
             for Ri, vi in zip(svpos, svvec):
                 biasveccomp[self.star.pointindex(Ri), :] = om2*vi
-        for i in xrange(self.star.Npts):
-            for d in xrange(3):
+        for i in range(self.star.Npts):
+            for d in range(3):
                 self.assertAlmostEqual(biasvec[i, d], biasveccomp[i, d])
         # print(biasvec)
         # print(np.dot(bias2expand, om2expand))
@@ -708,7 +708,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
             for Ri, vi in zip(svpos, svvec):
                 biasveccomp[self.star.pointindex(Ri), :] += om_b*vi
                 omega1onsitecomp[self.star.pointindex(Ri)] += om_on # * np.dot(vi, vi)
-        for i in xrange(self.star.Npts):
+        for i in range(self.star.Npts):
             omega1onsitecomp[i] /= probsqrt[self.star.index[i]]
         # this is a little confusing, but we need to take into account the multiplicity;
         # this has to do with how we're building out the onsite matrix, and that there
@@ -731,7 +731,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
             self.assertAlmostEqual(omega1onsite[i], omega1onsitecomp[i],
                                    msg='Did not match onsite point[{}] {} where {} != {}'.format(
                                        i, pt, omega1onsite[i], omega1onsitecomp[i]))
-            for d in xrange(3):
+            for d in range(3):
                 self.assertAlmostEqual(biasvec[i, d], biasveccomp[i, d],
                                        msg='Did not match point[{}] {} direction {} where {} != {}'.format(
                                            i, pt, d, biasvec[i, d], biasveccomp[i, d]))

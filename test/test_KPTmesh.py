@@ -25,8 +25,8 @@ class KPTMeshTests(unittest.TestCase):
         """Have we correctly constructed the reciprocal lattice vectors?"""
         dotprod = np.dot(self.kptmesh.rlattice.T, self.kptmesh.lattice)
         dotprod0 = 2. * np.pi * np.eye(3)
-        for a in xrange(3):
-            for b in xrange(3):
+        for a in range(3):
+            for b in range(3):
                 self.assertAlmostEqual(dotprod[a, b], dotprod0[a, b])
 
     def testKPTvolume(self):
@@ -106,7 +106,7 @@ class KPTMeshTests(unittest.TestCase):
         kptfull, wtfull = self.kptmesh.fullmesh()
         self.assertAlmostEqual(sum(wtfull * [np.cos(sum(k)) for k in kptfull]),
                                sum(wts * [np.cos(sum(k)) for k in kpts]))
-        self.assertNotAlmostEquals(sum(wtfull * [np.cos(k[0]) for k in kptfull]),
+        self.assertNotAlmostEqual(sum(wtfull * [np.cos(k[0]) for k in kptfull]),
                                    sum(wts * [np.cos(k[0]) for k in kpts]))
 
     def testKPT_integration(self):

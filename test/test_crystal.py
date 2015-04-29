@@ -569,7 +569,7 @@ class CrystalClassTests(unittest.TestCase):
             tbas = HCP_intercrys.SymmTensorBasis((1,i))
             self.assertEqual(len(tbas), 2)
             for t in tbas:
-                for tij in (t[i,j] for i in xrange(3) for j in xrange(3) if i!=j):
+                for tij in (t[i,j] for i in range(3) for j in range(3) if i!=j):
                     self.assertAlmostEqual(0, tij)
                 self.assertAlmostEqual(t[0,0], t[1,1])
         for i in range(2, 6):
@@ -580,7 +580,7 @@ class CrystalClassTests(unittest.TestCase):
             tbas = HCP_intercrys.SymmTensorBasis((1,i))
             self.assertEqual(len(tbas), 2)
             for t in tbas:
-                for tij in (t[i,j] for i in xrange(3) for j in xrange(3) if i!=j):
+                for tij in (t[i,j] for i in range(3) for j in range(3) if i!=j):
                     self.assertAlmostEqual(0, tij)
                 self.assertAlmostEqual(t[0,0], t[1,1])
 
@@ -628,7 +628,7 @@ class YAMLTests(unittest.TestCase):
 
     def testSetYAML(self):
         """Test that we can use YAML to write and read a frozenset"""
-        for a in [frozenset([]), frozenset([1]), frozenset([0,1,1]), frozenset(range(10))]:
+        for a in [frozenset([]), frozenset([1]), frozenset([0,1,1]), frozenset(list(range(10)))]:
             awrite = crystal.yaml.dump(a)
             aread = crystal.yaml.load(awrite)
             self.assertEqual(a, aread)

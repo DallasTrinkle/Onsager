@@ -77,7 +77,7 @@ class BaseTests(unittest.TestCase):
         self.assertEqual(len(jumplist), self.Njumps)
         for j in jumplist:
             self.assertTrue(any([ (v == j).all() for v in self.NNvect]))
-        for thermo, nint, nom1, nGF in zip(range(len(self.Ninteract)),
+        for thermo, nint, nom1, nGF in zip(list(range(len(self.Ninteract))),
                                            self.Ninteract,
                                            self.Nomega1,
                                            self.NGF):
@@ -572,10 +572,10 @@ class InterstitialTests(unittest.TestCase):
             strainedpospre = np.zeros(len(strainedFCCpos_sitelist))
             strainedposBE = np.zeros(len(strainedFCCpos_sitelist))
             # apply dipoles to site energies:
-            for octind in xrange(1):
+            for octind in range(1):
                 strainedpospre[strainedDfccpos.invmap[octind]] = preoct
                 strainedposBE[strainedDfccpos.invmap[octind]] = BEoct - np.sum(sitedipoles[octind] * strainmat)
-            for tetind in xrange(1,3):
+            for tetind in range(1,3):
                 strainedpospre[strainedDfccpos.invmap[tetind]] = pretet
                 strainedposBE[strainedDfccpos.invmap[tetind]] = BEtet - np.sum(sitedipoles[tetind] * strainmat)
             strainedposBET = np.zeros(len(strainedFCCpos_jumpnetwork))
@@ -599,10 +599,10 @@ class InterstitialTests(unittest.TestCase):
             strainednegpre = np.zeros(len(strainedFCCneg_sitelist))
             strainednegBE = np.zeros(len(strainedFCCneg_sitelist))
             # apply dipoles to site energies:
-            for octind in xrange(1):
+            for octind in range(1):
                 strainednegpre[strainedDfccneg.invmap[octind]] = preoct
                 strainednegBE[strainedDfccneg.invmap[octind]] = BEoct + np.sum(sitedipoles[octind] * strainmat)
-            for tetind in xrange(1,3):
+            for tetind in range(1,3):
                 strainednegpre[strainedDfccneg.invmap[tetind]] = pretet
                 strainednegBE[strainedDfccneg.invmap[tetind]] = BEtet + np.sum(sitedipoles[tetind] * strainmat)
             strainednegBET = np.zeros(len(strainedFCCneg_jumpnetwork))
@@ -704,10 +704,10 @@ elastodiffusion:
             strainedpospre = np.zeros(len(strainedHCPpos_sitelist))
             strainedposBE = np.zeros(len(strainedHCPpos_sitelist))
             # apply dipoles to site energies:
-            for octind in xrange(2):
+            for octind in range(2):
                 strainedpospre[strainedDhcppos.invmap[octind]] = preoct
                 strainedposBE[strainedDhcppos.invmap[octind]] = BEoct - np.sum(sitedipoles[octind] * strainmat)
-            for tetind in xrange(2,6):
+            for tetind in range(2,6):
                 strainedpospre[strainedDhcppos.invmap[tetind]] = pretet
                 strainedposBE[strainedDhcppos.invmap[tetind]] = BEtet - np.sum(sitedipoles[tetind] * strainmat)
             strainedposBET = np.zeros(len(strainedHCPpos_jumpnetwork))
@@ -735,10 +735,10 @@ elastodiffusion:
             strainednegpre = np.zeros(len(strainedHCPneg_sitelist))
             strainednegBE = np.zeros(len(strainedHCPneg_sitelist))
             # apply dipoles to site energies:
-            for octind in xrange(2):
+            for octind in range(2):
                 strainednegpre[strainedDhcpneg.invmap[octind]] = preoct
                 strainednegBE[strainedDhcpneg.invmap[octind]] = BEoct + np.sum(sitedipoles[octind] * strainmat)
-            for tetind in xrange(2,6):
+            for tetind in range(2,6):
                 strainednegpre[strainedDhcpneg.invmap[tetind]] = pretet
                 strainednegBE[strainedDhcpneg.invmap[tetind]] = BEtet + np.sum(sitedipoles[tetind] * strainmat)
             strainednegBET = np.zeros(len(strainedHCPneg_jumpnetwork))

@@ -49,5 +49,5 @@ class LatticeTests(unittest.TestCase):
         invlatt = np.linalg.inv(self.lattice)
         for vec in self.NNvect:
             uvec = np.dot(invlatt, vec)
-            for d in xrange(3):
+            for d in range(3):
                 self.assertAlmostEqual(uvec[d], round(uvec[d]))
