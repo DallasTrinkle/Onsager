@@ -24,9 +24,10 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 from scipy.linalg import pinv2, solve
-import stars
-import GFcalc
-import crystal
+from . import stars
+from . import GFcalc
+from . import crystal
+from functools import reduce
 
 
 class Interstitial(object):
@@ -326,14 +327,14 @@ class Interstitial(object):
         def vector_tensor_outer(v,a):
             """Construct the outer product of v and a"""
             va = np.zeros((3,3,3))
-            for i,j,k in ((i,j,k) for i in xrange(3) for j in xrange(3) for k in xrange(3)):
+            for i,j,k in ((i,j,k) for i in range(3) for j in range(3) for k in range(3)):
                 va[i,j,k] = v[i]*a[j,k]
             return va
 
         def tensor_tensor_outer(a, b):
             """Construct the outer product of a and b"""
             ab = np.zeros((3,3,3,3))
-            for i,j,k,l in ((i,j,k,l) for i in xrange(3) for j in xrange(3) for k in xrange(3) for l in xrange(3)):
+            for i,j,k,l in ((i,j,k,l) for i in range(3) for j in range(3) for k in range(3) for l in range(3)):
                 ab[i,j,k,l] = a[i,j]*b[k,l]
             return ab
 
@@ -385,12 +386,12 @@ class Interstitial(object):
             # self.VectorBasis is a list of Nx3 matrices
             gamma_i = sum( g*va for g, va in zip(gamma_v, self.VectorBasis) )
             D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
-            for c,d in ((c,d) for c in xrange(3) for d in xrange(3)):
+            for c,d in ((c,d) for c in range(3) for d in range(3)):
                 Dp[:,:,c,d] += np.tensordot(gamma_i, biasP_i[:,:,c,d], ((0),(0))) + \
                                np.tensordot(biasP_i[:,:,c,d], gamma_i, ((0),(0)))
             Dp += np.tensordot(np.tensordot(self.VV, gamma_v, ((3),(0))), dg, ((2),(0)))
 
-        for a,b,c,d in ((a,b,c,d) for a in xrange(3) for b in xrange(3) for c in xrange(3) for d in xrange(3)):
+        for a,b,c,d in ((a,b,c,d) for a in range(3) for b in range(3) for c in range(3) for d in range(3)):
             if a==d:
                 Dp[a,b,c,d] += D0[b,c]
             if b==c:

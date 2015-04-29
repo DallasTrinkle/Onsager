@@ -13,11 +13,12 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 import collections
 import yaml ### use crystal.yaml to call--may need to change in the future
+from functools import reduce
 
 # YAML tags:
 # interfaces are either at the bottom, or staticmethods in the corresponding object
-NDARRAY_YAMLTAG = u'!numpy.ndarray'
-GROUPOP_YAMLTAG = u'!GroupOp'
+NDARRAY_YAMLTAG = '!numpy.ndarray'
+GROUPOP_YAMLTAG = '!GroupOp'
 #FROZENSET_YAMLTAG = u'!set'
 
 
@@ -529,7 +530,7 @@ class Crystal(object):
         self.basis = [[incell(u - 0.5 * trans) for u in atomlist] for atomlist in self.basis]
         # now, check for "aesthetics" of our basis choice
         shift = np.zeros(3)
-        for d in xrange(3):
+        for d in range(3):
             if np.any([np.isclose(u[d], 0) for atomlist in self.basis for u in atomlist]):
                 shift[d] = 0
             elif np.any([np.isclose(u[d], 0.5) for atomlist in self.basis for u in atomlist]):
@@ -568,7 +569,7 @@ class Crystal(object):
             return
         # reduce that lattice and basis
         # 1. determine what the new lattice needs to look like.
-        for d in xrange(3):
+        for d in range(3):
             super = np.eye(3)
             super[:, d] = t[:]
             if np.linalg.det(super) != 0:
@@ -650,13 +651,13 @@ class Crystal(object):
         """
         groupops = []
         supercellvect = [np.array((n0, n1, n2))
-                         for n0 in xrange(-1, 2)
-                         for n1 in xrange(-1, 2)
-                         for n2 in xrange(-1, 2)
+                         for n0 in range(-1, 2)
+                         for n1 in range(-1, 2)
+                         for n2 in range(-1, 2)
                          if (n0, n1, n2) != (0, 0, 0)]
         matchvect = [[u for u in supercellvect
                       if np.isclose(np.dot(u, np.dot(self.metric, u)),
-                                    self.metric[d, d])] for d in xrange(3)]
+                                    self.metric[d, d])] for d in range(3)]
         for super in (np.array((r0, r1, r2)).T
                       for r0 in matchvect[0]
                       for r1 in matchvect[1]
@@ -891,9 +892,9 @@ class Crystal(object):
         nmax = [int(np.round(np.sqrt(self.metric[i,i])))+1
                 for i in range(3)]
         supervect = [ np.array([n0, n1, n2])
-                      for n0 in xrange(-nmax[0],nmax[0]+1)
-                      for n1 in xrange(-nmax[1],nmax[1]+1)
-                      for n2 in xrange(-nmax[2],nmax[2]+1) ]
+                      for n0 in range(-nmax[0],nmax[0]+1)
+                      for n1 in range(-nmax[1],nmax[1]+1)
+                      for n2 in range(-nmax[2],nmax[2]+1) ]
         lis = []
         u0 = self.basis[ind[0]][ind[1]]
         for u1 in self.basis[ind[0]]:
@@ -925,9 +926,9 @@ class Crystal(object):
         nmax = [int(np.round(np.sqrt(self.metric[i,i])))+1
                 for i in range(3)]
         supervect = [ np.array([n0, n1, n2])
-                      for n0 in xrange(-nmax[0],nmax[0]+1)
-                      for n1 in xrange(-nmax[1],nmax[1]+1)
-                      for n2 in xrange(-nmax[2],nmax[2]+1) ]
+                      for n0 in range(-nmax[0],nmax[0]+1)
+                      for n1 in range(-nmax[1],nmax[1]+1)
+                      for n2 in range(-nmax[2],nmax[2]+1) ]
         lis = []
         center = np.zeros(3, dtype=int)
         for i, u0 in enumerate(self.basis[chem]):

@@ -16,7 +16,7 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 import scipy as sp
 from scipy import special
-import KPTmesh
+from . import KPTmesh
 
 
 def DFTfunc(NNvect, rates):
@@ -78,10 +78,10 @@ def D4(NNvect, rates):
         3x3x3x3 matrix (4th rank tensor) that can be dotted into q to get FT.
     """
     D4 = np.zeros((3, 3, 3, 3))
-    for a in xrange(3):
-        for b in xrange(3):
-            for c in xrange(3):
-                for d in xrange(3):
+    for a in range(3):
+        for b in range(3):
+            for c in range(3):
+                for d in range(3):
                     D4[a, b, c, d] = 1. / 24. * sum(
                         NNvect[:, a] * NNvect[:, b] * NNvect[:, c] * NNvect[:, d] * rates[:])
     return D4
@@ -329,7 +329,7 @@ def ConstructExpToIndex():
         (n1, n2, n3)
     """
     ExpToIndex = 15 * np.ones((5, 5, 5), dtype=int)
-    for i in xrange(15):
+    for i in range(15):
         ExpToIndex[tuple(PowerExpansion[i])] = i
     return ExpToIndex
 
@@ -352,10 +352,10 @@ def D4toNNN(D4):
         expansion coefficients in terms of powers
     """
     D15 = np.zeros(15)
-    for a in xrange(3):
-        for b in xrange(3):
-            for c in xrange(3):
-                for d in xrange(3):
+    for a in range(3):
+        for b in range(3):
+            for c in range(3):
+                for d in range(3):
                     tup = (a, b, c, d)
                     D15[ExpToIndex[tup.count(0), tup.count(1), tup.count(2)]] += D4[tup]
     return D15
@@ -404,10 +404,10 @@ def RotateD4(D4, di, ei):
     """
     Drot4 = np.zeros((3, 3, 3, 3))
     diinvsqrt = 1. / np.sqrt(di)
-    for a in xrange(3):
-        for b in xrange(3):
-            for c in xrange(3):
-                for d in xrange(3):
+    for a in range(3):
+        for b in range(3):
+            for c in range(3):
+                for d in range(3):
                     Drot4[a, b, c, d] = (diinvsqrt[a] * diinvsqrt[b] * diinvsqrt[c] * diinvsqrt[d] *
                                          np.dot(ei[a],
                                                 np.dot(ei[b],
@@ -498,17 +498,17 @@ def ConstructPowerFT():
     # First up, our onsite terms, for the symmetric cases:
     # <004>
     vec = (0, 0, 4)
-    for l in xrange(3):
-        for s1 in xrange(3):
-            for s2 in xrange(3):
+    for l in range(3):
+        for s1 in range(3):
+            for s2 in range(3):
                 PowerFT[l,
                         ExpToIndex[rotatetuple(vec, s1)],
                         ExpToIndex[rotatetuple(vec, s2)]] = F44[l, s1, s2]
     # <220>
     vec = (2, 2, 0)
-    for l in xrange(3):
-        for s1 in xrange(3):
-            for s2 in xrange(3):
+    for l in range(3):
+        for s1 in range(3):
+            for s2 in range(3):
                 PowerFT[l,
                         ExpToIndex[rotatetuple(vec, s1)],
                         ExpToIndex[rotatetuple(vec, s2)]] = F22[l, s1, s2]
@@ -516,9 +516,9 @@ def ConstructPowerFT():
     # <400>/<220> mixed terms:
     vec1 = (0, 0, 4)
     vec2 = (2, 2, 0)
-    for l in xrange(3):
-        for s1 in xrange(3):
-            for s2 in xrange(3):
+    for l in range(3):
+        for s1 in range(3):
+            for s2 in range(3):
                 PowerFT[l,
                         ExpToIndex[rotatetuple(vec1, s1)],
                         ExpToIndex[rotatetuple(vec2, s2)]] = F42[l, s1, s2]
@@ -528,10 +528,10 @@ def ConstructPowerFT():
 
     # <013>/<031>/<211>; now, F13 indexes which of those three vectors we need
     veclist = ( (0, 1, 3), (0, 3, 1), (2, 1, 1) )
-    for l in xrange(3):
-        for v1 in xrange(3):
-            for v2 in xrange(3):
-                for s1 in xrange(3):
+    for l in range(3):
+        for v1 in range(3):
+            for v2 in range(3):
+                for s1 in range(3):
                     PowerFT[l,
                             ExpToIndex[rotatetuple(veclist[v1], s1)],
                             ExpToIndex[rotatetuple(veclist[v2], s1)]] = F13[l, v1, v2]
@@ -579,7 +579,7 @@ class GFcalc:
         self.di, self.ei = calcDE(self.D2)
         # get the rotated D15 (from D4) with p_i version, and FT version
         self.D15 = D4toNNN(RotateD4(D4(NNvect, rates), self.di, self.ei))
-        self.D15FT = np.array([np.dot(PowerFT[i], self.D15) for i in xrange(3)])
+        self.D15FT = np.array([np.dot(PowerFT[i], self.D15) for i in range(3)])
         # determine pmax: find smallest p value at BZ faces, then
         self.pmax = np.sqrt(min([eval2(G, self.D2) for G in self.kptmesh.BZG])/
                             -np.log(1e-11))

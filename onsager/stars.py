@@ -518,8 +518,8 @@ class VectorStarSet:
         if not isinstance(starGF, StarSet):
             raise TypeError('need a star')
         GFexpansion = np.zeros((self.Nvstars, self.Nvstars, starGF.Nstars+1))
-        for i in xrange(self.Nvstars):
-            for j in xrange(self.Nvstars):
+        for i in range(self.Nvstars):
+            for j in range(self.Nvstars):
                 if i <= j :
                     for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
                         for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
@@ -554,8 +554,8 @@ class VectorStarSet:
         if not isinstance(NNstar, StarSet):
             raise TypeError('need a star')
         rate0expansion = np.zeros((self.Nvstars, self.Nvstars, NNstar.Nstars))
-        for i in xrange(self.Nvstars):
-            for j in xrange(self.Nvstars):
+        for i in range(self.Nvstars):
+            for j in range(self.Nvstars):
                 if i <= j :
                     for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
                         for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
@@ -592,8 +592,8 @@ class VectorStarSet:
         if not isinstance(dstar, DoubleStarSet):
             raise TypeError('need a double star')
         rate1expansion = np.zeros((self.Nvstars, self.Nvstars, dstar.Ndstars))
-        for i in xrange(self.Nvstars):
-            for j in xrange(self.Nvstars):
+        for i in range(self.Nvstars):
+            for j in range(self.Nvstars):
                 if i <= j :
                     for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
                         for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
@@ -627,7 +627,7 @@ class VectorStarSet:
         if not isinstance(NNstar, StarSet):
             raise TypeError('need a star')
         rate2expansion = np.zeros((self.Nvstars, self.Nvstars, NNstar.Nstars))
-        for i in xrange(self.Nvstars):
+        for i in range(self.Nvstars):
             # this is a diagonal matrix, so...
             ind = NNstar.starindex(self.vecpos[i][0])
             if ind != -1:
@@ -653,7 +653,7 @@ class VectorStarSet:
         if not isinstance(NNstar, StarSet):
             raise TypeError('need a star')
         bias2expansion = np.zeros((self.Nvstars, NNstar.Nstars))
-        for i in xrange(self.Nvstars):
+        for i in range(self.Nvstars):
             ind = NNstar.starindex(self.vecpos[i][0])
             if ind != -1:
                 bias2expansion[i, ind] = np.dot(self.vecpos[i][0], self.vecvec[i][0])*len(NNstar.stars[ind])
@@ -710,7 +710,7 @@ class VectorStarSet:
         omega1NN = np.zeros((self.Nvstars, NNstar.Nstars))
 
         # run through the star-vectors
-        for i, svR, svv in zip(range(self.Nvstars),
+        for i, svR, svv in zip(list(range(self.Nvstars)),
                                self.vecpos, self.vecvec):
             # run through the NN stars
             p1 = dstar.star.pointindex(svR[0]) # first half of our pair

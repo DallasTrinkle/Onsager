@@ -34,9 +34,9 @@ def NNvect():
         nearest neighbor vectors
     """
     return np.array([(n0, n1, n2)
-                     for n0 in xrange(-1, 2)
-                     for n1 in xrange(-1, 2)
-                     for n2 in xrange(-1, 2)
+                     for n0 in range(-1, 2)
+                     for n1 in range(-1, 2)
+                     for n2 in range(-1, 2)
                      if (n0, n1, n2) != (0, 0, 0) and (n0 + n1 + n2) % 2 == 0],
                     dtype=float)
 
@@ -57,8 +57,8 @@ def invlist(NNvect):
     """
     z = np.shape(NNvect)[0]
     invlist = np.empty((z), dtype=int)
-    for k1 in xrange(z):
-        for k2 in xrange(z):
+    for k1 in range(z):
+        for k2 in range(z):
             if all((NNvect[k1] + NNvect[k2]) == (0, 0, 0)):
                 invlist[k1] = k2
     return invlist

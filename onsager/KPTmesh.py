@@ -60,9 +60,9 @@ class KPTmesh:
         dN = np.array([1. / x for x in Nmesh])
         # use a list comprehension to iterate and build:
         self.kptfull = np.array([np.dot(self.rlattice, (n0 * dN[0], n1 * dN[1], n2 * dN[2]))
-                                 for n0 in xrange(-Nmesh[0] / 2 + 1, Nmesh[0] / 2 + 1)
-                                 for n1 in xrange(-Nmesh[1] / 2 + 1, Nmesh[1] / 2 + 1)
-                                 for n2 in xrange(-Nmesh[2] / 2 + 1, Nmesh[2] / 2 + 1)])
+                                 for n0 in range(-Nmesh[0] / 2 + 1, Nmesh[0] / 2 + 1)
+                                 for n1 in range(-Nmesh[1] / 2 + 1, Nmesh[1] / 2 + 1)
+                                 for n2 in range(-Nmesh[2] / 2 + 1, Nmesh[2] / 2 + 1)])
         # run through list to ensure that all k-points are inside the BZ
         Gmin = min([np.dot(G, G) for G in self.BZG])
         for i, k in enumerate(self.kptfull):
@@ -144,9 +144,9 @@ class KPTmesh:
         groupops = []
         invrlatt = np.linalg.inv(self.rlattice)
         supercellvect = [np.array((n0, n1, n2))
-                         for n0 in xrange(-1, 2)
-                         for n1 in xrange(-1, 2)
-                         for n2 in xrange(-1, 2)
+                         for n0 in range(-1, 2)
+                         for n1 in range(-1, 2)
+                         for n2 in range(-1, 2)
                          if (n0, n1, n2) != (0, 0, 0)]
         for g in [np.dot(self.rlattice, np.dot(nmat, invrlatt))
                   for nmat in [np.array((n0, n1, n2))
@@ -206,9 +206,9 @@ class KPTmesh:
         # Start with a list of possible vectors; add those that define the BZ...
         BZG = []
         for nv in [[n0, n1, n2]
-                   for n0 in xrange(-3, 4)
-                   for n1 in xrange(-3, 4)
-                   for n2 in xrange(-3, 4)
+                   for n0 in range(-3, 4)
+                   for n1 in range(-3, 4)
+                   for n2 in range(-3, 4)
                    if (n0, n1, n2) != (0, 0, 0)]:
             vec = np.dot(self.lattice, nv)
             if self.incell(vec, BZG, threshold=0): BZG.append(np.dot(self.rlattice, nv))

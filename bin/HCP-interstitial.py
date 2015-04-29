@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     if args.yaml:
         # generate YAML input
-        print outputYAML(args.a, args.c, args.z)
+        print(outputYAML(args.a, args.c, args.z))
     else:
         # otherwise... we need to parse our YAML file, and get to work
         with open(args.yaml_input, "r") as in_f:
@@ -117,4 +117,4 @@ if __name__ == '__main__':
                 BET = [ beta*ET for ET in eneT ]
                 beta_dipT = [ beta*dipT for dipT in dipoleT ]
                 D0, Dp = interstitial.elastodiffusion(pre, BE, beta_dip, preT, BET, beta_dipT)
-                print "{} {} {}".format(T, D0[0,0], D0[2,2])
+                print("{} {} {}".format(T, D0[0,0], D0[2,2]))
