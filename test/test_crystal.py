@@ -75,6 +75,11 @@ class GroupOperationTests(unittest.TestCase):
         invtrans = inversion + v1
         self.assertEqual(invtrans.inv(), invtrans)
 
+    def testHash(self):
+        """Can we construct a frozenset? --requires __hash__"""
+        fr = frozenset([self.ident, self.mirrorop])
+        self.assertTrue(len(fr), 2)
+
     def testGroupAnalysis(self):
         """If we determine the eigenvalues / vectors of a group operation, are they what we expect?"""
         # This is entirely dictated by the cartrot part of a GroupOp, so we will only look at that
