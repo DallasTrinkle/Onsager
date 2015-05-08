@@ -121,8 +121,8 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
             self.trans)
         for chemind, atoms in enumerate(self.indexmap):
             for origind, finalind in enumerate(atoms):
-                str = str + "\n  {chem}.{o} -> {chem}.{f}".format(chem=chemind+1,
-                                                                  o=origind+1, f=finalind+1)
+                str = str + "\n  {chem}.{o} -> {chem}.{f}".format(chem=chemind,
+                                                                  o=origind, f=finalind)
         return str
 
     def _asdict(self):
@@ -463,7 +463,7 @@ class Crystal(object):
             self.lattice.T[0], self.lattice.T[1], self.lattice.T[2])
         for chemind, atoms in enumerate(self.basis):
             for atomind, pos in enumerate(atoms):
-                str = str + "\n  {}.{} = {}".format(chemind+1, atomind+1, pos)
+                str = str + "\n  {}.{} = {}".format(chemind, atomind, pos)
         return str
 
     @classmethod
