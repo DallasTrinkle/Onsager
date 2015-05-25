@@ -290,14 +290,27 @@ class Interstitial(object):
         invsqrtrho = 1./sqrtrho
         ratelist = self.ratelist(pre, betaene, preT, betaeneT)
         omega_ij = np.zeros((self.N, self.N))
+        domega_ij = np.zeros((self.N, self.N))
         bias_i = np.zeros((self.N, 3))
+        dbias_i = np.zeros((self.N, 3))
         D0 = np.zeros((3,3))
-        for transitionset, rates in zip(self.jumpnetwork, ratelist):
+        Db = np.zeros((3,3))
+        # bookkeeping for energies:
+        siteene = np.array([ betaene[w] for w in self.invmap])
+        # transene = [ [ bET for (i,j), dx in t ] for t, bET in zip(self.jumpnetwork, betaeneT)]
+        Eave = np.dot(rho, siteene)
+
+        for transitionset, rates, bET in zip(self.jumpnetwork, ratelist, betaeneT):
             for ((i,j), dx), rate in zip(transitionset, rates):
-                omega_ij[i, j] += sqrtrho[i]*invsqrtrho[j]*rate
+                symmrate = sqrtrho[i]*invsqrtrho[j]*rate
+                omega_ij[i, j] += symmrate
                 omega_ij[i, i] -= rate
+                domega_ij[i, j] += symmrate*(bET - 0.5*(siteene[i]+siteene[j]))
+                domega_ij[i, i] -= rate*(bET - siteene[i])
                 bias_i[i] += sqrtrho[i]*rate*dx
+                dbias_i[i] += sqrtrho[i]*rate*dx*(bET - 0.5*(siteene[i]+Eave))
                 D0 += 0.5*np.outer(dx, dx)*rho[i]*rate
+                Db += 0.5*np.outer(dx, dx)*rho[i]*rate*(bET - Eave)
         if self.NV > 0:
             # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
             omega_v = np.zeros((self.NV, self.NV))
@@ -309,7 +322,7 @@ class Interstitial(object):
             gamma_v = self.bias_solver(omega_v, bias_v)
             D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
         if CalcDeriv:
-            return D0, np.zeros((3,3))
+            return D0, Db
         else:
             return D0
 
