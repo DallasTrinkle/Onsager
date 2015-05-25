@@ -493,6 +493,62 @@ class InterstitialTests(unittest.TestCase):
         self.assertTrue(np.allclose(np.array([[Dhcp_basal,0,0],[0,Dhcp_basal,0],[0,0,Dhcp_c]]), D),
                         msg="Diffusivity doesn't match:\n{}\nnot {} and {}".format(D, Dhcp_basal,Dhcp_c))
 
+    def testDiffusivityBarrier(self):
+        """Diffusivity barriers"""
+        # What we all came for...
+        preoct = 1.
+        pretet = 2.
+        BEoct = 0.
+        BEtet = np.log(2) # so exp(-beta*E) = 1/2
+        preTrans = 10.
+        BETrans = np.log(10) # so that our rate should be 10*exp(-BET) / (1*exp(0)) = 1
+        pre = np.zeros(len(self.FCC_sitelist))
+        BE = np.zeros(len(self.FCC_sitelist))
+        pre[self.Dfcc.invmap[0]] = preoct
+        pre[self.Dfcc.invmap[1]] = pretet
+        BE[self.Dfcc.invmap[0]] = BEoct
+        BE[self.Dfcc.invmap[1]] = BEtet
+        preT = np.array([preTrans])
+        BET = np.array([BETrans])
+
+        # Dfcc_anal = 0.5*self.a0**2 *preTrans*np.exp(-BETrans)/(preoct*np.exp(-BEoct) + 2*pretet*np.exp(-BEtet))
+        Dfcc, DfccE = self.Dfcc.diffusivity(pre, BE, preT, BET, CalcDeriv=True)
+        # rather than use inv and dot, we use solve; NOTE: we compute the derivative and NOT the
+        # logarithmic derivative in case Dfcc is, e.g., 2D so has no diffusivity in a particular direction
+        Eb = np.linalg.solve(Dfcc, DfccE)
+        failmsg = """
+Energy barrier tensor:
+{}
+BETrans: {}  BEoct: {}  BEtet: {}
+""".format(Eb, BETrans, BEoct, BEtet)
+        self.assertTrue(np.allclose(BETrans*np.eye(3), Eb), msg=failmsg)
+
+        # HCP
+        pre = np.zeros(len(self.HCP_sitelist))
+        BE = np.zeros(len(self.HCP_sitelist))
+        pre[self.Dhcp.invmap[0]] = preoct
+        pre[self.Dhcp.invmap[2]] = pretet
+        BE[self.Dhcp.invmap[0]] = BEoct
+        BE[self.Dhcp.invmap[2]] = BEtet
+        preTransOT = 10.
+        preTransTT = 100.
+        BETransOT = np.log(10.)
+        BETransTT = np.log(10.)
+        preT = np.zeros(len(self.Dhcp.jumpnetwork))
+        BET = np.zeros(len(self.Dhcp.jumpnetwork))
+        for i, jump in enumerate(self.Dhcp.jumpnetwork):
+            if len(jump) == 4:
+                preT[i] = preTransTT
+                BET[i] = BETransTT
+            else:
+                preT[i] = preTransOT
+                BET[i] = BETransOT
+        Dhcp_basal = self.a0**2 * preTransOT*np.exp(-BETransOT)/(preoct*np.exp(-BEoct) + 2*pretet*np.exp(-BEtet))
+        Dhcp_c = 0.75*self.c_a**2 * Dhcp_basal/ (3*preTransOT/preTransTT * np.exp(-BETransOT+BETransTT) + 2)
+        D = self.Dhcp.diffusivity(pre, BE, preT, BET)
+        self.assertTrue(np.allclose(np.array([[Dhcp_basal,0,0],[0,Dhcp_basal,0],[0,0,Dhcp_c]]), D),
+                        msg="Diffusivity doesn't match:\n{}\nnot {} and {}".format(D, Dhcp_basal,Dhcp_c))
+
     def testBias(self):
         """Quick check that the bias and correction are computed correctly"""
         rumpledcrys = crystal.Crystal(np.array([[2.,0.,0.],[0.,1.,0.],[0.,0.,10.]]),

@@ -259,9 +259,11 @@ class Interstitial(object):
         return [ [ self.crys.g_tensor(g, dipole) for g in groupops ]
                  for groupops, dipole in zip(self.jumpgroupops, symmdipoles) ]
 
-    def diffusivity(self, pre, betaene, preT, betaeneT):
+    def diffusivity(self, pre, betaene, preT, betaeneT, CalcDeriv = False):
         """
         Computes the diffusivity for our element given prefactors and energies/kB T.
+        Also returns the negative derivative of diffusivity with respect to beta (used to compute
+        the activation barrier tensor) if CalcDeriv = True
         The input list order corresponds to the sitelist and jumpnetwork
 
         Parameters
@@ -273,7 +275,10 @@ class Interstitial(object):
 
         Returns
         -------
-        D[3,3] : diffusivity as 3x3 tensor
+        if CalcDeriv:
+          D[3,3], DE[3,3] : diffusivity as 3x3 tensor, diffusivity times activation barrier
+        else:
+          D[3,3] : diffusivity as 3x3 tensor
         """
         if __debug__:
             if len(pre) != len(self.sitelist): raise IndexError("length of prefactor {} doesn't match sitelist".format(pre))
@@ -303,7 +308,10 @@ class Interstitial(object):
                     omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
             gamma_v = self.bias_solver(omega_v, bias_v)
             D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
-        return D0
+        if CalcDeriv:
+            return D0, np.zeros((3,3))
+        else:
+            return D0
 
     def elastodiffusion(self, pre, betaene, dipole, preT, betaeneT, dipoleT):
         """
