@@ -314,13 +314,22 @@ class Interstitial(object):
         if self.NV > 0:
             # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
             omega_v = np.zeros((self.NV, self.NV))
+            domega_v = np.zeros((self.NV, self.NV))
             bias_v = np.zeros(self.NV)
+            dbias_v = np.zeros(self.NV)
             for a, va in enumerate(self.VectorBasis):
                 bias_v[a] = np.trace(np.dot(bias_i.T, va))
+                dbias_v[a] = np.trace(np.dot(dbias_i.T, va))
                 for b, vb in enumerate(self.VectorBasis):
                     omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
+                    domega_v[a,b] = np.trace(np.dot(va.T, np.dot(domega_ij, vb)))
             gamma_v = self.bias_solver(omega_v, bias_v)
+            dgamma_v = np.dot(domega_v, gamma_v)
             D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
+            Db += np.dot(np.dot(self.VV, dbias_v), gamma_v) \
+                  + np.dot(np.dot(self.VV, gamma_v), dbias_v) \
+                  - np.dot(np.dot(self.VV, gamma_v), dgamma_v)
+
         if CalcDeriv:
             return D0, Db
         else:
