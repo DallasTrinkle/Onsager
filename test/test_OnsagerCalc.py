@@ -511,7 +511,8 @@ class InterstitialTests(unittest.TestCase):
         preT = np.array([preTrans])
         BET = np.array([BETrans])
 
-        # Dfcc_anal = 0.5*self.a0**2 *preTrans*np.exp(-BETrans)/(preoct*np.exp(-BEoct) + 2*pretet*np.exp(-BEtet))
+        Eave = (preoct*np.exp(-BEoct)*BEoct + 2*pretet*np.exp(-BEtet)*BEtet)/\
+               (preoct*np.exp(-BEoct) + 2*pretet*np.exp(-BEtet))
         Dfcc, DfccE = self.Dfcc.diffusivity(pre, BE, preT, BET, CalcDeriv=True)
         # rather than use inv and dot, we use solve; NOTE: we compute the derivative and NOT the
         # logarithmic derivative in case Dfcc is, e.g., 2D so has no diffusivity in a particular direction
@@ -519,9 +520,9 @@ class InterstitialTests(unittest.TestCase):
         failmsg = """
 Energy barrier tensor:
 {}
-BETrans: {}  BEoct: {}  BEtet: {}
-""".format(Eb, BETrans, BEoct, BEtet)
-        self.assertTrue(np.allclose(BETrans*np.eye(3), Eb), msg=failmsg)
+BETrans: {}  BEoct: {}  BEtet: {}  Eave: {}
+""".format(Eb, BETrans, BEoct, BEtet, Eave)
+        self.assertTrue(np.allclose((BETrans-Eave)*np.eye(3), Eb), msg=failmsg)
 
         # HCP
         pre = np.zeros(len(self.HCP_sitelist))
