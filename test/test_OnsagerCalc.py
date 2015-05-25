@@ -553,7 +553,9 @@ BETrans: {}  BEoct: {}  BEtet: {}  Eave: {}
         Eb_anal = np.eye(3)
         Eb_anal[0,0] = BETransOT - Eave
         Eb_anal[1,1] = BETransOT - Eave
-        Eb_anal[2,2] = BETransOT - Eave
+        lambdaTO = preTransOT/pretet * np.exp(BETransOT - BEtet)
+        lambdaTT = preTransTT/pretet * np.exp(BETransTT - BEtet)
+        Eb_anal[2,2] = (3*lambdaTO*BETransTT + 2*lambdaTT*BETransOT)/(3*lambdaTO + 2*lambdaTT) - Eave
         failmsg = """
 Energy barrier tensor:
 {}
