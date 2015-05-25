@@ -544,11 +544,24 @@ BETrans: {}  BEoct: {}  BEtet: {}  Eave: {}
             else:
                 preT[i] = preTransOT
                 BET[i] = BETransOT
-        Dhcp_basal = self.a0**2 * preTransOT*np.exp(-BETransOT)/(preoct*np.exp(-BEoct) + 2*pretet*np.exp(-BEtet))
-        Dhcp_c = 0.75*self.c_a**2 * Dhcp_basal/ (3*preTransOT/preTransTT * np.exp(-BETransOT+BETransTT) + 2)
-        D = self.Dhcp.diffusivity(pre, BE, preT, BET)
-        self.assertTrue(np.allclose(np.array([[Dhcp_basal,0,0],[0,Dhcp_basal,0],[0,0,Dhcp_c]]), D),
-                        msg="Diffusivity doesn't match:\n{}\nnot {} and {}".format(D, Dhcp_basal,Dhcp_c))
+        Eave = (preoct*np.exp(-BEoct)*BEoct + 2*pretet*np.exp(-BEtet)*BEtet)/\
+               (preoct*np.exp(-BEoct) + 2*pretet*np.exp(-BEtet))
+        Dhcp, DhcpE = self.Dhcp.diffusivity(pre, BE, preT, BET, CalcDeriv=True)
+        # rather than use inv and dot, we use solve; NOTE: we compute the derivative and NOT the
+        # logarithmic derivative in case Dfcc is, e.g., 2D so has no diffusivity in a particular direction
+        Eb = np.linalg.solve(Dhcp, DhcpE)
+        Eb_anal = np.eye(3)
+        Eb_anal[0,0] = BETransOT - Eave
+        Eb_anal[1,1] = BETransOT - Eave
+        Eb_anal[2,2] = BETransOT - Eave
+        failmsg = """
+Energy barrier tensor:
+{}
+Analytic:
+{}
+BETrans: {}  BEoct: {}  BEtet: {}  Eave: {}
+""".format(Eb, Eb_anal, BETrans, BEoct, BEtet, Eave)
+        self.assertTrue(np.allclose(Eb_anal, Eb), msg=failmsg)
 
     def testBias(self):
         """Quick check that the bias and correction are computed correctly"""
