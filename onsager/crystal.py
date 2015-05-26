@@ -177,6 +177,18 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
                        [ [atomlist0[i] for i in atomlist1]
                          for atomlist0, atomlist1 in zip(self.indexmap, other.indexmap)])
 
+    def __sane__(self):
+        """Return true if the cartrot and rot are consistent and 'sane'"""
+        tr = self.rot.trace()
+        det = np.int(np.round(np.linalg.det(self.rot)))
+        # consistency:
+        if np.int(np.round(self.cartrot.trace())) != tr: return False
+        if np.int(np.round(np.linalg.det(self.cartrot))) != det: return False
+        # sanity:
+        if abs(det) != 1 : return False
+        if det*tr < -1 or det*tr > 3 : return False
+        return True
+
     def inv(self):
         """Construct and return the inverse of the group operation"""
         inverse = (np.round(np.linalg.inv(self.rot))).astype(int)
@@ -198,8 +210,11 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
           coordinate system and where rotation around [0] is positive, and the positive imaginary
           eigenvector for the complex eigenvalue is [1] + i [2].
         """
-        tr = np.int(np.round(self.cartrot.trace()))
-        if np.linalg.det(self.cartrot) > 0:
+        if __debug__:
+            if not self.__sane__():
+                raise ValueError('Bad GroupOp:\n{}'.format(self))
+        tr = np.int(self.rot.trace())
+        if np.linalg.det(self.rot) > 0:
             det = 1
             optype = (2, 3, 4, 6, 1)[tr + 1] # trace determines the rotation type
         else:

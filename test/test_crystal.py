@@ -87,8 +87,9 @@ class GroupOperationTests(unittest.TestCase):
         # rotation type: 1 = identity; 2..6 : 2- .. 6- fold rotation; negation includes a
         # perpendicular mirror
         # therefore: a single mirror is -1, and inversion is -2 (since 2-fold rotation + mirror = i)
-        rot = np.eye(3)
-        rottype, eigenvect = (crystal.GroupOp(self.rot, self.trans, rot, self.indexmap)).eigen()
+        rot = np.eye(3, dtype=int)
+        cartrot = np.eye(3)
+        rottype, eigenvect = (crystal.GroupOp(rot, self.trans, cartrot, self.indexmap)).eigen()
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
         self.assertEqual(rottype, 1) # should be the identity
         self.assertTrue(np.allclose(eigenvect, np.eye(3)))
@@ -103,8 +104,9 @@ class GroupOperationTests(unittest.TestCase):
                     self.assertAlmostEqual(np.dot(t.flatten(), t2.flatten()), 0)
 
         # inversion
-        rot = -np.eye(3)
-        rottype, eigenvect = (crystal.GroupOp(self.rot, self.trans, rot, self.indexmap)).eigen()
+        rot = -np.eye(3, dtype=int)
+        cartrot = -np.eye(3)
+        rottype, eigenvect = (crystal.GroupOp(rot, self.trans, cartrot, self.indexmap)).eigen()
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
         self.assertEqual(rottype, -2) # should be the identity
         self.assertTrue(np.allclose(eigenvect, np.eye(3)))
@@ -120,8 +122,9 @@ class GroupOperationTests(unittest.TestCase):
                     self.assertAlmostEqual(np.dot(t.flatten(), t2.flatten()), 0)
 
         # mirror through the y=x line: (x,y) -> (y,x)
-        rot = np.array([[0.,1.,0.],[1.,0.,0.],[0.,0.,1.]])
-        rottype, eigenvect = (crystal.GroupOp(self.rot, self.trans, rot, self.indexmap)).eigen()
+        rot = np.array([[0,1,0],[1,0,0],[0,0,1]])
+        cartrot = np.array([[0.,1.,0.],[1.,0.,0.],[0.,0.,1.]])
+        rottype, eigenvect = (crystal.GroupOp(rot, self.trans, cartrot, self.indexmap)).eigen()
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
         self.assertEqual(rottype, -1)
         self.assertTrue(np.isclose(abs(np.dot(eigenvect[0],
@@ -146,8 +149,9 @@ class GroupOperationTests(unittest.TestCase):
                     self.assertAlmostEqual(np.dot(t.flatten(), t2.flatten()), 0)
 
         # three-fold rotation around the body-center
-        rot = np.array([[0.,1.,0.],[0.,0.,1.],[1.,0.,0.]])
-        rottype, eigenvect = (crystal.GroupOp(self.rot, self.trans, rot, self.indexmap)).eigen()
+        rot = np.array([[0,1,0],[0,0,1],[1,0,0]])
+        cartrot = np.array([[0.,1.,0.],[0.,0.,1.],[1.,0.,0.]])
+        rottype, eigenvect = (crystal.GroupOp(rot, self.trans, cartrot, self.indexmap)).eigen()
         self.assertEqual(rottype, 3)
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
         self.assertTrue(np.isclose(abs(np.dot(eigenvect[0],
