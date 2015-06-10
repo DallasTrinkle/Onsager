@@ -33,6 +33,38 @@ HeaderString = """# Input format for a crystal, followed by sitelist and jumpnet
 interstitial: 1
 """
 
+def FCCoutputYAML(a0):
+    """
+    Generates YAML file corresponding to our FCC lattice with octahedral and tetrahedrals.
+    :param a0: lattice constant
+    :return: YAML string containing the *short* version, along with jump networks
+    """
+    FCC = crystal.Crystal.FCC(a0)
+    FCCinter = FCC.addbasis(FCC.Wyckoffpos(np.array([0.5,0.5,0.5])) +
+                            FCC.Wyckoffpos(np.array([0.25,0.25,0.25])))
+    # this cutoffs is for: o->t
+    cutoff = 0.5*a0
+    return HeaderString + \
+           FCCinter.simpleYAML(a0) + \
+           OnsagerCalc.Interstitial.sitelistYAML(FCCinter.sitelist(1)) + \
+           OnsagerCalc.Interstitial.jumpnetworkYAML(FCCinter.jumpnetwork(1, cutoff))
+
+def BCCoutputYAML(a0):
+    """
+    Generates YAML file corresponding to our BCC lattice with octahedral and tetrahedrals.
+    :param a0: lattice constant
+    :return: YAML string containing the *short* version, along with jump networks
+    """
+    BCC = crystal.Crystal.BCC(a0)
+    BCCinter = BCC.addbasis(BCC.Wyckoffpos(np.array([0.5,0.5,0.5])) +
+                            BCC.Wyckoffpos(np.array([0.25,0.25,0.25])))
+    # this cutoffs is for: o->t and t-> networks
+    cutoff = 0.5*a0
+    return HeaderString + \
+           BCCinter.simpleYAML(a0) + \
+           OnsagerCalc.Interstitial.sitelistYAML(BCCinter.sitelist(1)) + \
+           OnsagerCalc.Interstitial.jumpnetworkYAML(BCCinter.jumpnetwork(1, cutoff))
+
 def HCPoutputYAML(a0, c_a, z=1./8.):
     """
     Generates YAML file corresponding to our HCP lattice with octahedral and tetrahedrals.
