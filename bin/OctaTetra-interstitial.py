@@ -100,9 +100,9 @@ if __name__ == '__main__':
     parser=argparse.ArgumentParser(
         description='Compute elastodiffusion tensor for interstitials; temperatures (K) read from stdin',
         epilog='output as T (diffusion tensor) (elastodiffusion)')
-    parser.add_argument('--yaml', '-y', action='store_true',
-                        help='Output YAML file corresponding to an HCP o/t network')
-    parser.add_argument('-a', type=float, default=3.0,
+    parser.add_argument('--yaml', '-y', choices=['FCC', 'BCC', 'HCP'],
+                        help='Output YAML file corresponding to an o/t network')
+    parser.add_argument('-a', type=float, default=1.0,
                         help='basal lattice constant')
     parser.add_argument('-c', type=float, default=np.sqrt(8./3.),
                         help='c/a ratio')
@@ -117,7 +117,14 @@ if __name__ == '__main__':
 
     if args.yaml:
         # generate YAML input
-        print(HCPoutputYAML(args.a, args.c, args.z))
+        if args.yaml == 'FCC':
+            print(FCCoutputYAML(args.a))
+        elif args.yaml == 'BCC':
+            print(BCCoutputYAML(args.a))
+        elif args.yaml == 'HCP':
+            print(HCPoutputYAML(args.a, args.c, args.z))
+        else:
+            parser.print_help()
     else:
         # otherwise... we need to parse our YAML file, and get to work
         with open(args.yaml_input, "r") as in_f:
