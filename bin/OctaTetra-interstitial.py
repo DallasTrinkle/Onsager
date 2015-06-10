@@ -56,10 +56,10 @@ def BCCoutputYAML(a0):
     :return: YAML string containing the *short* version, along with jump networks
     """
     BCC = crystal.Crystal.BCC(a0)
-    BCCinter = BCC.addbasis(BCC.Wyckoffpos(np.array([0.5,0.5,0.5])) +
-                            BCC.Wyckoffpos(np.array([0.25,0.25,0.25])))
+    BCCinter = BCC.addbasis(BCC.Wyckoffpos(np.array([0.5,0.5,0.])) +
+                            BCC.Wyckoffpos(np.array([0.25,0.5,0.75])))
     # this cutoffs is for: o->t and t-> networks
-    cutoff = 0.5*a0
+    cutoff = 0.4*a0
     return HeaderString + \
            BCCinter.simpleYAML(a0) + \
            OnsagerCalc.Interstitial.sitelistYAML(BCCinter.sitelist(1)) + \
