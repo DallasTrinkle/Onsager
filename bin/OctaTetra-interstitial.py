@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 """
 Example script using OnsagerCalc to compute the elasto-diffusion tensor for
-an interstitial (in an HCP crystal). It also shows how to both construct an
-input YAML file, and read from that same YAML file as input. It's actually
-*extremely general*--if you pass it the appropriate YAML input, it will run
-it *regardless of whether it corresponds to an HCP crystal*.
+an interstitial. It also shows how to both construct an input YAML file for
+an FCC, BCC, or HCP crystal with octahedral / tetrahedral network, and
+read from that same YAML file as input. It's actually *extremely general*--if
+you pass it the appropriate YAML input, it will run it *regardless of whether
+it corresponds to a YAML file it generated*.
 """
 
 __author__ = 'Dallas R. Trinkle'
@@ -13,7 +14,7 @@ import numpy as np
 from onsager import crystal
 from onsager import OnsagerCalc
 
-def outputYAML(a0, c_a, z=1./8.):
+def HCPoutputYAML(a0, c_a, z=1./8.):
     """
     Generates YAML file corresponding to our HCP lattice with octahedral and tetrahedrals.
     :param a0: lattice constant
@@ -82,7 +83,7 @@ if __name__ == '__main__':
 
     if args.yaml:
         # generate YAML input
-        print(outputYAML(args.a, args.c, args.z))
+        print(HCPoutputYAML(args.a, args.c, args.z))
     else:
         # otherwise... we need to parse our YAML file, and get to work
         with open(args.yaml_input, "r") as in_f:
