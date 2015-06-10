@@ -14,6 +14,25 @@ import numpy as np
 from onsager import crystal
 from onsager import OnsagerCalc
 
+HeaderString = """# Input format for a crystal, followed by sitelist and jumpnetwork.
+# Notes:
+# 1. !numpy.ndarray tag is used to specifically identify numpy arrays;
+#    should be used for both the lattice and basis entries
+# 2. lattice is in a more "readable" format using *row* vectors; the
+#    actual Crystal object stores the lattice with *column* vectors,
+#    so after import, this matrix will be transposed.
+# 3. lattice_constant is optional; it is used to scale lattice on input.
+# 4. the basis is a list of lists; the lists are broken up in terms
+#    of chemistry (see the chemistry list)
+# 5. chemistry is a list of names of the unique species in the crystal;
+#    it is entirely optional, and not used to construct the crystal object
+# 6. the sitelist and jumpnetwork have entries for energies, elastic dipoles
+#    and prefactors; each are for the *first element in the lists* as a
+#    representative.
+# 7. the tag interstitial defines which site is the interstitial element.
+interstitial: 1
+"""
+
 def HCPoutputYAML(a0, c_a, z=1./8.):
     """
     Generates YAML file corresponding to our HCP lattice with octahedral and tetrahedrals.
@@ -38,24 +57,7 @@ def HCPoutputYAML(a0, c_a, z=1./8.):
         if cutoff > a0: raise AssertionError('Geometry such that we will include basal jumps')
         if np.abs(z) > 0.25: raise AssertionError('Tetrahedral parameter out of range (>1/4)')
         if np.abs(z) < 1e-2: raise AssertionError('Tetrahedral parameter out of range (approx. 0)')
-    return """# Input format for a crystal, followed by sitelist and jumpnetwork.
-# Notes:
-# 1. !numpy.ndarray tag is used to specifically identify numpy arrays;
-#    should be used for both the lattice and basis entries
-# 2. lattice is in a more "readable" format using *row* vectors; the
-#    actual Crystal object stores the lattice with *column* vectors,
-#    so after import, this matrix will be transposed.
-# 3. lattice_constant is optional; it is used to scale lattice on input.
-# 4. the basis is a list of lists; the lists are broken up in terms
-#    of chemistry (see the chemistry list)
-# 5. chemistry is a list of names of the unique species in the crystal;
-#    it is entirely optional, and not used to construct the crystal object
-# 6. the sitelist and jumpnetwork have entries for energies, elastic dipoles
-#    and prefactors; each are for the *first element in the lists* as a
-#    representative.
-# 7. the tag interstitial defines which site is the interstitial element.
-interstitial: 1
-""" + \
+    return HeaderString + \
            HCP.simpleYAML(a0) + \
            OnsagerCalc.Interstitial.sitelistYAML(HCP.sitelist(1)) + \
            OnsagerCalc.Interstitial.jumpnetworkYAML(HCP.jumpnetwork(1, cutoff))
