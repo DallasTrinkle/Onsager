@@ -99,7 +99,7 @@ if __name__ == '__main__':
     import argparse
     parser=argparse.ArgumentParser(
         description='Compute elastodiffusion tensor for interstitials; temperatures (K) read from stdin',
-        epilog='output as T (diffusion tensor) (elastodiffusion)')
+        epilog='output: T Dxx Dzz Exx Ezz d11 d33 d12 d13 d31 d44 d66')
     parser.add_argument('--yaml', '-y', choices=['FCC', 'BCC', 'HCP'],
                         help='Output YAML file corresponding to an o/t network')
     parser.add_argument('-a', type=float, default=1.0,
