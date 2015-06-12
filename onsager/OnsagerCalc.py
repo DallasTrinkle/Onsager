@@ -215,18 +215,32 @@ class Interstitial(object):
 
     def siteprob(self, pre, betaene):
         """Returns our site probabilities, normalized, as a vector"""
-        rho = np.array([ pre[w]*np.exp(-betaene[w]) for w in self.invmap])
+        # be careful to make sure that we don't under-/over-flow on beta*ene
+        minbetaene = min(betaene)
+        rho = np.array([ pre[w]*np.exp(minbetaene-betaene[w]) for w in self.invmap])
         return rho/sum(rho)
 
     def ratelist(self, pre, betaene, preT, betaeneT):
         """Returns a list of lists of rates, matched to jumpnetwork"""
         # the ij tuple in each transition list is the i->j pair
         # invmap[i] tells you which Wyckoff position i maps to (in the sitelist)
-        invrho = np.array([ np.exp(betaene[w])/pre[w] for w in self.invmap])
-        return [ [ arr*invrho[i] for (i,j), dx in t ]
-            for t, arr in zip(self.jumpnetwork,
-                              [ pT*np.exp(-beT)
-                                for pT, beT in zip(preT, betaeneT) ])]
+        # trying to avoid under-/over-flow
+        siteene = np.array([ betaene[w] for w in self.invmap])
+        sitepre = np.array([ pre[w] for w in self.invmap])
+        return [ [ pT*np.exp(siteene[i]-beT)/sitepre[i]
+                   for (i,j), dx in t ]
+                 for t, pT, beT in zip(self.jumpnetwork, preT, betaeneT) ]
+
+    def symmratelist(self, pre, betaene, preT, betaeneT):
+        """Returns a list of lists of symmetrized rates, matched to jumpnetwork"""
+        # the ij tuple in each transition list is the i->j pair
+        # invmap[i] tells you which Wyckoff position i maps to (in the sitelist)
+        # trying to avoid under-/over-flow
+        siteene = np.array([ betaene[w] for w in self.invmap])
+        sitepre = np.array([ pre[w] for w in self.invmap])
+        return [ [ pT*np.exp(0.5*siteene[i]+0.5*siteene[j]-beT)/np.sqrt(sitepre[i]*sitepre[j])
+                   for (i,j), dx in t ]
+                 for t, pT, beT in zip(self.jumpnetwork, preT, betaeneT) ]
 
     def siteDipoles(self, dipoles):
         """
@@ -287,8 +301,8 @@ class Interstitial(object):
             if len(betaeneT) != len(self.jumpnetwork): raise IndexError("length of energies {} doesn't match jump network".format(betaeneT))
         rho = self.siteprob(pre, betaene)
         sqrtrho = np.sqrt(rho)
-        invsqrtrho = 1./sqrtrho
         ratelist = self.ratelist(pre, betaene, preT, betaeneT)
+        symmratelist = self.symmratelist(pre, betaene, preT, betaeneT)
         omega_ij = np.zeros((self.N, self.N))
         domega_ij = np.zeros((self.N, self.N))
         bias_i = np.zeros((self.N, 3))
@@ -300,9 +314,9 @@ class Interstitial(object):
         # transene = [ [ bET for (i,j), dx in t ] for t, bET in zip(self.jumpnetwork, betaeneT)]
         Eave = np.dot(rho, siteene)
 
-        for transitionset, rates, bET in zip(self.jumpnetwork, ratelist, betaeneT):
-            for ((i,j), dx), rate in zip(transitionset, rates):
-                symmrate = sqrtrho[i]*invsqrtrho[j]*rate
+        for transitionset, rates, symmrates, bET in zip(self.jumpnetwork, ratelist, symmratelist, betaeneT):
+            for ((i,j), dx), rate, symmrate in zip(transitionset, rates, symmrates):
+                # symmrate = sqrtrho[i]*invsqrtrho[j]*rate
                 omega_ij[i, j] += symmrate
                 omega_ij[i, i] -= rate
                 domega_ij[i, j] += symmrate*(bET - 0.5*(siteene[i]+siteene[j]))
@@ -377,8 +391,8 @@ class Interstitial(object):
             if len(dipoleT) != len(self.jumpnetwork): raise IndexError("length of dipoles {} doesn't match jump network".format(dipoleT))
         rho = self.siteprob(pre, betaene)
         sqrtrho = np.sqrt(rho)
-        invsqrtrho = 1./sqrtrho
         ratelist = self.ratelist(pre, betaene, preT, betaeneT)
+        symmratelist = self.symmratelist(pre, betaene, preT, betaeneT)
         omega_ij = np.zeros((self.N, self.N))
         bias_i = np.zeros((self.N, 3))
         biasP_i = np.zeros((self.N, 3,3,3))
@@ -389,9 +403,9 @@ class Interstitial(object):
 
         D0 = np.zeros((3,3))
         Dp = np.zeros((3,3,3,3))
-        for transitionset, rates, dipoles in zip(self.jumpnetwork, ratelist, jumpdipoles):
-            for ((i,j), dx), rate, dipole in zip(transitionset, rates, dipoles):
-                symmrate = sqrtrho[i]*invsqrtrho[j]*rate
+        for transitionset, rates, symmrates, dipoles in zip(self.jumpnetwork, ratelist, symmratelist, jumpdipoles):
+            for ((i,j), dx), rate, symmrate, dipole in zip(transitionset, rates, symmrates, dipoles):
+                # symmrate = sqrtrho[i]*invsqrtrho[j]*rate
                 omega_ij[i, j] += symmrate
                 omega_ij[i, i] -= rate
                 domega_ij[i, j] -= symmrate*(dipole - 0.5*(sitedipoles[i] + sitedipoles[j]))
