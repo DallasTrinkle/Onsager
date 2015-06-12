@@ -1,0 +1,207 @@
+# Input format for a crystal, followed by sitelist and jumpnetwork.
+# Notes:
+# 1. !numpy.ndarray tag is used to specifically identify numpy arrays;
+#    should be used for both the lattice and basis entries
+# 2. lattice is in a more "readable" format using *row* vectors; the
+#    actual Crystal object stores the lattice with *column* vectors,
+#    so after import, this matrix will be transposed.
+# 3. lattice_constant is optional; it is used to scale lattice on input.
+# 4. the basis is a list of lists; the lists are broken up in terms
+#    of chemistry (see the chemistry list)
+# 5. chemistry is a list of names of the unique species in the crystal;
+#    it is entirely optional, and not used to construct the crystal object
+# 6. the sitelist and jumpnetwork have entries for energies, elastic dipoles
+#    and prefactors; each are for the *first element in the lists* as a
+#    representative.
+# 7. the tag interstitial defines which site is the interstitial element.
+interstitial: 1
+lattice_constant: 3.0
+lattice: !numpy.ndarray
+- [-0.5, 0.5, 0.5]
+- [0.5, -0.5, 0.5]
+- [0.5, 0.5, -0.5]
+basis:
+- - !numpy.ndarray [0.0, 0.0, 0.0]
+- - !numpy.ndarray [0.5, 0.5, 0.0]
+  - !numpy.ndarray [0.5, 0.0, 0.5]
+  - !numpy.ndarray [0.0, 0.5, 0.5]
+  - !numpy.ndarray [0.5, 0.25, 0.75]
+  - !numpy.ndarray [0.75, 0.25, 0.5]
+  - !numpy.ndarray [0.25, 0.75, 0.5]
+  - !numpy.ndarray [0.5, 0.75, 0.25]
+  - !numpy.ndarray [0.75, 0.5, 0.25]
+  - !numpy.ndarray [0.25, 0.5, 0.75]
+chemistry:
+- Fe
+- C
+# oct first then tet
+sitelist:
+- [0, 1, 2]
+- [3, 4, 5, 6, 7, 8]
+Energy: [0, 0]
+Prefactor: [1, 1]
+Dipole:
+- !numpy.ndarray
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+- !numpy.ndarray
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+EnergyT: [0, 0]
+PrefactorT: [1, 1]
+DipoleT:
+- !numpy.ndarray
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+- !numpy.ndarray
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+jumpnetwork:
+- - !!python/tuple
+    - !!python/tuple [0, 7]
+    - !numpy.ndarray [0.0, 0.75, 0.0]
+  - !!python/tuple
+    - !!python/tuple [7, 0]
+    - !numpy.ndarray [-0.0, -0.75, -0.0]
+  - !!python/tuple
+    - !!python/tuple [1, 4]
+    - !numpy.ndarray [0.0, 0.0, 0.75]
+  - !!python/tuple
+    - !!python/tuple [4, 1]
+    - !numpy.ndarray [-0.0, -0.0, -0.75]
+  - !!python/tuple
+    - !!python/tuple [1, 3]
+    - !numpy.ndarray [0.75, 0.0, 0.0]
+  - !!python/tuple
+    - !!python/tuple [3, 1]
+    - !numpy.ndarray [-0.75, -0.0, -0.0]
+  - !!python/tuple
+    - !!python/tuple [2, 8]
+    - !numpy.ndarray [0.0, 0.75, 0.0]
+  - !!python/tuple
+    - !!python/tuple [8, 2]
+    - !numpy.ndarray [-0.0, -0.75, -0.0]
+  - !!python/tuple
+    - !!python/tuple [1, 6]
+    - !numpy.ndarray [-0.75, 0.0, 0.0]
+  - !!python/tuple
+    - !!python/tuple [6, 1]
+    - !numpy.ndarray [0.75, -0.0, -0.0]
+  - !!python/tuple
+    - !!python/tuple [1, 5]
+    - !numpy.ndarray [0.0, 0.0, -0.75]
+  - !!python/tuple
+    - !!python/tuple [5, 1]
+    - !numpy.ndarray [-0.0, -0.0, 0.75]
+  - !!python/tuple
+    - !!python/tuple [0, 6]
+    - !numpy.ndarray [0.75, 0.0, 0.0]
+  - !!python/tuple
+    - !!python/tuple [6, 0]
+    - !numpy.ndarray [-0.75, -0.0, -0.0]
+  - !!python/tuple
+    - !!python/tuple [2, 5]
+    - !numpy.ndarray [0.0, 0.0, 0.75]
+  - !!python/tuple
+    - !!python/tuple [5, 2]
+    - !numpy.ndarray [-0.0, -0.0, -0.75]
+  - !!python/tuple
+    - !!python/tuple [0, 3]
+    - !numpy.ndarray [-0.75, 0.0, 0.0]
+  - !!python/tuple
+    - !!python/tuple [3, 0]
+    - !numpy.ndarray [0.75, -0.0, -0.0]
+  - !!python/tuple
+    - !!python/tuple [2, 4]
+    - !numpy.ndarray [0.0, 0.0, -0.75]
+  - !!python/tuple
+    - !!python/tuple [4, 2]
+    - !numpy.ndarray [-0.0, -0.0, 0.75]
+  - !!python/tuple
+    - !!python/tuple [0, 8]
+    - !numpy.ndarray [0.0, -0.75, 0.0]
+  - !!python/tuple
+    - !!python/tuple [8, 0]
+    - !numpy.ndarray [-0.0, 0.75, -0.0]
+  - !!python/tuple
+    - !!python/tuple [2, 7]
+    - !numpy.ndarray [0.0, -0.75, 0.0]
+  - !!python/tuple
+    - !!python/tuple [7, 2]
+    - !numpy.ndarray [-0.0, 0.75, -0.0]
+- - !!python/tuple
+    - !!python/tuple [7, 4]
+    - !numpy.ndarray [0.0, 0.75, -0.75]
+  - !!python/tuple
+    - !!python/tuple [4, 7]
+    - !numpy.ndarray [-0.0, -0.75, 0.75]
+  - !!python/tuple
+    - !!python/tuple [3, 8]
+    - !numpy.ndarray [0.75, -0.75, 0.0]
+  - !!python/tuple
+    - !!python/tuple [8, 3]
+    - !numpy.ndarray [-0.75, 0.75, -0.0]
+  - !!python/tuple
+    - !!python/tuple [6, 7]
+    - !numpy.ndarray [-0.75, 0.75, 0.0]
+  - !!python/tuple
+    - !!python/tuple [7, 6]
+    - !numpy.ndarray [0.75, -0.75, -0.0]
+  - !!python/tuple
+    - !!python/tuple [5, 8]
+    - !numpy.ndarray [0.0, 0.75, -0.75]
+  - !!python/tuple
+    - !!python/tuple [8, 5]
+    - !numpy.ndarray [-0.0, -0.75, 0.75]
+  - !!python/tuple
+    - !!python/tuple [6, 8]
+    - !numpy.ndarray [-0.75, -0.75, 0.0]
+  - !!python/tuple
+    - !!python/tuple [8, 6]
+    - !numpy.ndarray [0.75, 0.75, -0.0]
+  - !!python/tuple
+    - !!python/tuple [6, 5]
+    - !numpy.ndarray [0.75, 0.0, -0.75]
+  - !!python/tuple
+    - !!python/tuple [5, 6]
+    - !numpy.ndarray [-0.75, -0.0, 0.75]
+  - !!python/tuple
+    - !!python/tuple [3, 4]
+    - !numpy.ndarray [-0.75, 0.0, 0.75]
+  - !!python/tuple
+    - !!python/tuple [4, 3]
+    - !numpy.ndarray [0.75, -0.0, -0.75]
+  - !!python/tuple
+    - !!python/tuple [4, 6]
+    - !numpy.ndarray [-0.75, 0.0, -0.75]
+  - !!python/tuple
+    - !!python/tuple [6, 4]
+    - !numpy.ndarray [0.75, -0.0, 0.75]
+  - !!python/tuple
+    - !!python/tuple [4, 8]
+    - !numpy.ndarray [0.0, 0.75, 0.75]
+  - !!python/tuple
+    - !!python/tuple [8, 4]
+    - !numpy.ndarray [-0.0, -0.75, -0.75]
+  - !!python/tuple
+    - !!python/tuple [3, 5]
+    - !numpy.ndarray [-0.75, 0.0, -0.75]
+  - !!python/tuple
+    - !!python/tuple [5, 3]
+    - !numpy.ndarray [0.75, -0.0, 0.75]
+  - !!python/tuple
+    - !!python/tuple [7, 5]
+    - !numpy.ndarray [0.0, 0.75, 0.75]
+  - !!python/tuple
+    - !!python/tuple [5, 7]
+    - !numpy.ndarray [-0.0, -0.75, -0.75]
+  - !!python/tuple
+    - !!python/tuple [7, 3]
+    - !numpy.ndarray [-0.75, -0.75, 0.0]
+  - !!python/tuple
+    - !!python/tuple [3, 7]
+    - !numpy.ndarray [0.75, 0.75, -0.0]

@@ -17,6 +17,11 @@
 # NOTE: we removed (by hand) the extra o->t transition that crossed the basal plane
 # and also rearranged the site list so that it's oct first, then tet
 interstitial: 1
+lattice_constant: 3.0
+lattice: !numpy.ndarray
+- [0.5, -0.8660254037844387, 0.0]
+- [0.5, 0.8660254037844387, 0.0]
+- [0.0, 0.0, 1.6329931618554518]
 basis:
 - - !numpy.ndarray [0.3333333333333333, 0.6666666666666666, 0.25]
   - !numpy.ndarray [0.6666666666666666, 0.3333333333333333, 0.75]
@@ -29,15 +34,12 @@ basis:
 chemistry:
 - Mg
 - O
-lattice: !numpy.ndarray
-- [0.5, -0.8660254037844387, 0.0]
-- [0.5, 0.8660254037844387, 0.0]
-- [0.0, 0.0, 1.6329931618554518]
-lattice_constant: 3.0
 # oct first, then tet
 sitelist:
 - [0, 1]
 - [2, 3, 4, 5]
+Energy: [0, 1]
+Prefactor: [1, 1]
 Dipole:
 - !numpy.ndarray
   - [0.0, 0.0, 0.0]
@@ -47,8 +49,6 @@ Dipole:
   - [0.0, 0.0, 0.0]
   - [0.0, 0.0, 0.0]
   - [0.0, 0.0, 0.0]
-Energy: [0, 1]
-Prefactor: [1, 1]
 # o-o (along c), o-t, t-t (along c)
 # remember: these are the values for the TRANSITION STATES
 EnergyT: [3, 1.5, 1.25]
