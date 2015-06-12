@@ -151,6 +151,7 @@ if __name__ == '__main__':
                 kB = physical_constants['Boltzmann constant in eV/K'][0]
             # now read through stdin, taking each entry as a temperature
             import fileinput
+            print("#T #Dxx #Dzz #Exx #Ezz #d11 #d33 #d12 #d13 #d31 #d44 #d66")
             for line in fileinput.input(extra):
                 T = float(line)
                 beta = 1./(kB*T)
@@ -158,5 +159,15 @@ if __name__ == '__main__':
                 beta_dip = [ beta*dip for dip in dipole ]
                 BET = [ beta*ET for ET in eneT ]
                 beta_dipT = [ beta*dipT for dipT in dipoleT ]
+                D0, DB = interstitial.diffusivity(pre, BE, preT, BET, True) # calculate deriv. wrt beta
                 D0, Dp = interstitial.elastodiffusion(pre, BE, beta_dip, preT, BET, beta_dipT)
-                print("{} {} {}".format(T, D0[0,0], D0[2,2]))
+                Eact = np.linalg.solve(beta*D0, DB)
+                print("{} {} {} {} {} {} {} {} {} {} {} {}".format(T, D0[0,0], D0[2,2],
+                                                                   Eact[0,0], Eact[2,2],
+                                                                   Dp[0,0,0,0],
+                                                                   Dp[2,2,2,2],
+                                                                   Dp[0,0,1,1],
+                                                                   Dp[0,0,2,2],
+                                                                   Dp[2,2,0,0],
+                                                                   Dp[1,2,1,2],
+                                                                   Dp[0,1,0,1]))
