@@ -629,6 +629,18 @@ BETrans: {}  BEoct: {}  BEtet: {}  Eave: {}
 
         # strain
         D0, Dp = self.Dfcc.elastodiffusion(pre, BE, dipole, preT, BET, dipoleT)
+        # test for correct symmetry of our tensors:
+        for i in range(3):
+            for j in range(3):
+                self.assertAlmostEqual(D0[i,j], D0[j,i], msg="{}\nnot symmetric".format(D0))
+                for k in range(3):
+                    for l in range(3):
+                        self.assertAlmostEqual(Dp[i,j,k,l], Dp[j,i,k,l],
+                                               msg="{}{}{}{} != {}{}{}{}\n{}\nnot symmetric".format(i,j,k,l, j,i,k,l, Dp))
+                        self.assertAlmostEqual(Dp[i,j,k,l], Dp[i,j,l,k],
+                                               msg="{}{}{}{} != {}{}{}{}\n{}\nnot symmetric".format(i,j,k,l, i,j,l,k, Dp))
+                        self.assertAlmostEqual(Dp[i,j,k,l], Dp[j,i,l,k],
+                                               msg="{}{}{}{} != {}{}{}{}\n{}\nnot symmetric".format(i,j,k,l, j,i,l,k, Dp))
         eps = 1e-4
         # use Voigtstrain to run through the 6 strains; np.eye(6) generates 6 unit vectors
         for straintype in [ crystal.Voigtstrain(*s) for s in np.eye(6) ]:
@@ -761,6 +773,18 @@ elastodiffusion:
         # strain
         eps = 1e-4
         D0, Dp = self.Dhcp.elastodiffusion(pre, BE, dipole, preT, BET, dipoleT)
+        # test for correct symmetry of our tensors:
+        for i in range(3):
+            for j in range(3):
+                self.assertAlmostEqual(D0[i,j], D0[j,i], msg="{}\nnot symmetric".format(D0))
+                for k in range(3):
+                    for l in range(3):
+                        self.assertAlmostEqual(Dp[i,j,k,l], Dp[j,i,k,l],
+                                               msg="{}{}{}{} != {}{}{}{}\n{}\nnot symmetric".format(i,j,k,l, j,i,k,l, Dp))
+                        self.assertAlmostEqual(Dp[i,j,k,l], Dp[i,j,l,k],
+                                               msg="{}{}{}{} != {}{}{}{}\n{}\nnot symmetric".format(i,j,k,l, i,j,l,k, Dp))
+                        self.assertAlmostEqual(Dp[i,j,k,l], Dp[j,i,l,k],
+                                               msg="{}{}{}{} != {}{}{}{}\n{}\nnot symmetric".format(i,j,k,l, j,i,l,k, Dp))
         # use Voigtstrain to run through the 6 strains; np.eye(6) generates 6 unit vectors
         for straintype in [ crystal.Voigtstrain(*s) for s in np.eye(6) ]:
             # now doing +- finite difference for a more accurate comparison:

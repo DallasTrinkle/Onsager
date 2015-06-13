@@ -436,10 +436,14 @@ class Interstitial(object):
             Dp += np.tensordot(np.tensordot(self.VV, gamma_v, ((3),(0))), dg, ((2),(0)))
 
         for a,b,c,d in ((a,b,c,d) for a in range(3) for b in range(3) for c in range(3) for d in range(3)):
+            if a==c:
+                Dp[a,b,c,d] += 0.5*D0[b,d]
             if a==d:
-                Dp[a,b,c,d] += D0[b,c]
+                Dp[a,b,c,d] += 0.5*D0[b,c]
             if b==c:
-                Dp[a,b,c,d] += D0[a,d]
+                Dp[a,b,c,d] += 0.5*D0[a,d]
+            if b==d:
+                Dp[a,b,c,d] += 0.5*D0[a,c]
         return D0, Dp
 
 
