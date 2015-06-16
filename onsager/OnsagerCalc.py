@@ -175,7 +175,7 @@ class Interstitial(object):
             for (i,j), dx in jumps:
                 for g in self.crys.G:
                     # more complex: have to check the tuple (i,j) *and* the rotation of dx
-                    # AND against the possibilty that we are looking at the reverse jump too
+                    # AND against the possibility that we are looking at the reverse jump too
                     if (g.indexmap[self.chem][i0] == i
                         and g.indexmap[self.chem][j0] == j
                         and np.allclose(dx, np.dot(g.cartrot, dx0)) ) or \
@@ -206,11 +206,17 @@ class Interstitial(object):
         lis = []
         for jumps in self.jumpnetwork:
             (i,j), dx = jumps[0]
+            # more complex: have to check the tuple (i,j) *and* the rotation of dx
+            # AND against the possibility that we are looking at the reverse jump too
             lis.append(reduce(crystal.CombineTensorBasis,
                               [crystal.SymmTensorBasis(*g.eigen())
-                               for g in self.crys.pointG[self.chem][i]
-                               if g.indexmap[self.chem][j] == j and \
-                               np.allclose(np.dot(g.cartrot, dx), dx) ]))
+                               for g in self.crys.G
+                               if (g.indexmap[self.chem][i] == i and
+                                   g.indexmap[self.chem][j] == j and
+                                   np.allclose(dx, np.dot(g.cartrot, dx)) ) or
+                               (g.indexmap[self.chem][i] == j and
+                                g.indexmap[self.chem][j] == i and
+                                np.allclose(dx, -np.dot(g.cartrot, dx)) ) ] ) )
         return lis
 
     def siteprob(self, pre, betaene):
