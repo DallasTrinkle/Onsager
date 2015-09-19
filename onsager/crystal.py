@@ -76,8 +76,8 @@ def maptranslation(oldpos, newpos):
             if not foundmap: break
             maplist = []
             for rua in atomlist1:
-                for j, ub in enumerate(atomlist0):
-                    if np.allclose(inhalf(ub - rua - trans), 0):
+                for j, uj in enumerate(atomlist0):
+                    if np.allclose(inhalf(uj - rua - trans), 0):
                         maplist.append(j)
                         break
             if len(maplist) != len(atomlist0):
@@ -114,16 +114,16 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
 
     def __str__(self):
         """Human-readable version of groupop"""
-        str = "#Rotation (lattice, cartesian):\n {}\t{}\n {}\t{}\n {}\t{}\n#Translation: {}\n#Indexmap:".format(
+        str_rep = "#Rotation (lattice, cartesian):\n {}\t{}\n {}\t{}\n {}\t{}\n#Translation: {}\n#Indexmap:".format(
             self.rot[0], self.cartrot[0],
             self.rot[1], self.cartrot[1],
             self.rot[2], self.cartrot[2],
             self.trans)
         for chemind, atoms in enumerate(self.indexmap):
             for origind, finalind in enumerate(atoms):
-                str = str + "\n  {chem}.{o} -> {chem}.{f}".format(chem=chemind,
+                str_rep = str_rep + "\n  {chem}.{o} -> {chem}.{f}".format(chem=chemind,
                                                                   o=origind, f=finalind)
-        return str
+        return str_rep
 
     def _asdict(self):
         """Return a proper dict"""
@@ -474,12 +474,12 @@ class Crystal(object):
 
     def __str__(self):
         """Human-readable version of crystal (lattice + basis)"""
-        str = "#Lattice:\n  a1 = {}\n  a2 = {}\n  a3 = {}\n#Basis:".format(
+        str_rep = "#Lattice:\n  a1 = {}\n  a2 = {}\n  a3 = {}\n#Basis:".format(
             self.lattice.T[0], self.lattice.T[1], self.lattice.T[2])
         for chemind, atoms in enumerate(self.basis):
             for atomind, pos in enumerate(atoms):
-                str = str + "\n  {}.{} = {}".format(chemind, atomind, pos)
-        return str
+                str_rep = str_rep + "\n  {}.{} = {}".format(chemind, atomind, pos)
+        return str_rep
 
     @classmethod
     def fromdict(cls, yamldict):
@@ -594,12 +594,12 @@ class Crystal(object):
         # reduce that lattice and basis
         # 1. determine what the new lattice needs to look like.
         for d in range(3):
-            super = np.eye(3)
-            super[:, d] = t[:]
-            if np.linalg.det(super) != 0:
+            supercell = np.eye(3)
+            supercell[:, d] = t[:]
+            if np.linalg.det(supercell) != 0:
                 break
-        invsuper = np.linalg.inv(super)
-        self.lattice = np.dot(self.lattice, super)
+        invsuper = np.linalg.inv(supercell)
+        self.lattice = np.dot(self.lattice, supercell)
         # 2. update the basis
         newbasis = []
         for atomlist in self.basis:
@@ -612,13 +612,13 @@ class Crystal(object):
         self.basis = newbasis
         self.reduce()
 
-    def remapbasis(self, super):
+    def remapbasis(self, supercell):
         """
         Takes the basis definition, and using a supercell definition, returns a new basis
-        :param super: integer array[3,3]
+        :param supercell: integer array[3,3]
         :return: atomic basis
         """
-        invsuper = np.linalg.inv(super)
+        invsuper = np.linalg.inv(supercell)
         return [[incell(np.dot(invsuper, u)) for u in atomlist] for atomlist in self.basis]
 
     def minlattice(self):
@@ -682,21 +682,21 @@ class Crystal(object):
         matchvect = [[u for u in supercellvect
                       if np.isclose(np.dot(u, np.dot(self.metric, u)),
                                     self.metric[d, d])] for d in range(3)]
-        for super in (np.array((r0, r1, r2)).T
+        for supercell in (np.array((r0, r1, r2)).T
                       for r0 in matchvect[0]
                       for r1 in matchvect[1]
                       for r2 in matchvect[2]
                       if abs(np.inner(r0, np.cross(r1, r2))) == 1):
-            if np.allclose(np.dot(super.T, np.dot(self.metric, super)), self.metric):
+            if np.allclose(np.dot(supercell.T, np.dot(self.metric, supercell)), self.metric):
                 # possible operation--need to check the atomic positions
                 trans, indexmap = maptranslation(self.basis,
-                                                 [[np.dot(super, u)
+                                                 [[np.dot(supercell, u)
                                                    for u in atomlist]
                                                   for atomlist in self.basis])
                 if indexmap is not None:
-                    groupops.append(GroupOp(super,
+                    groupops.append(GroupOp(supercell,
                                             trans,
-                                            np.dot(self.lattice, np.dot(super, self.invlatt)),
+                                            np.dot(self.lattice, np.dot(supercell, self.invlatt)),
                                             indexmap))
         return frozenset(groupops)
 
@@ -779,7 +779,8 @@ class Crystal(object):
         else:
             return latt, indlist[0]
 
-    def g_direc(self, g, direc):
+    @staticmethod
+    def g_direc(g, direc):
         """
         Apply a space group operation to a direction
         :param g: group operation (GroupOp)
@@ -791,7 +792,8 @@ class Crystal(object):
             if type(direc) is not np.ndarray: raise TypeError
         return np.dot(g.cartrot, direc)
 
-    def g_tensor(self, g, tensor):
+    @staticmethod
+    def g_tensor(g, tensor):
         """
         Apply a space group operation to a 2nd-rank tensor
         :param g: group operation (GroupOp)
@@ -821,7 +823,8 @@ class Crystal(object):
                          self.basis[rotind[0]][rotind[1]])).astype(int)
         return rotlatt + delu, rotind
 
-    def g_vect(self, g, lattvec, uvec):
+    @staticmethod
+    def g_vect(g, lattvec, uvec):
         """
         Apply a space group operation to a vector position specified by its lattice and a location
         in the unit cell in direct coordinates
@@ -1001,7 +1004,7 @@ class Crystal(object):
                         xRa2 = np.dot(xRa, xRa)
                         xRa_dx = np.dot(xRa, dx)
                         dx2 = np.dot(dx, dx)
-                        if 0 <= xRa_dx and xRa_dx <= dx2:
+                        if 0 <= xRa_dx <= dx2:
                             d2 = (xRa2*dx2 - xRa_dx*xRa_dx)/dx2
                             if np.isclose(d2, mindist2) or d2 < mindist2:
                                 lis.remove(trans)
