@@ -71,6 +71,7 @@ class PowerExpansionTests(unittest.TestCase):
         fnu = { (n,l): createExpansion(n) for (n,l) in self.c.nl() } # or could do this in previous loop
 
         c2 = 2.*self.c
+        c3 = self.c + self.c
 
         for u in [ np.zeros(3), np.array([1., 0., 0.]), np.array([0., 1., 0.]), np.array([0., 0., 1.]),
                    np.array([0.234, -0.85, 1.25]),
@@ -91,3 +92,5 @@ class PowerExpansionTests(unittest.TestCase):
                             msg="Failure for call with dictionary for {}\n{} != {}".format(u, value, dictsum))
             self.assertTrue(np.all(np.isclose(2*value, c2(u, fval))),
                             msg="Failure with scalar multiply?")
+            self.assertTrue(np.all(np.isclose(2*value, c3(u, fval))),
+                            msg="Failure with addition?")

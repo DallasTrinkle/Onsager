@@ -252,6 +252,11 @@ class Taylor3D(object):
                     cn[p] += vnpow[p]*coeff
         return tuple(c)
 
+    # for sorting our coefficient lists:
+    @classmethod
+    def __sortkey(cls, entry):
+        return (entry[0]+entry[1]/cls.Lmax)
+
     __INITIALIZED__ = False
     # these are all *class* parameters, not object parameters: they are computed
     # and defined once for the entire class. It means that once, in your code, you *choose*
@@ -277,8 +282,6 @@ class Taylor3D(object):
         cls.Lproj = cls.makeLprojections()
         cls.directmult = cls.makedirectmult()
         cls.powercoeff = cls.makepowercoeff()
-        # function for sorting our coefficients. Since it's a bound function, it gets passed self:
-        cls.sortkey = lambda self, entry: (entry[0]+entry[1]/cls.Lmax)
         cls.__INITIALIZED__ = True
 
     def __init__(self, coefflist = [], Lmax = 4):
@@ -303,7 +306,7 @@ class Taylor3D(object):
                 raise ArithmeticError("Can only use addterms to include non-occuring powers")
             else:
                 self.coefflist.append(coeff)
-        self.coefflist.sort(key=self.sortkey)
+        self.coefflist.sort(key=self.__sortkey)
 
     # def __call__(self, *args, **kwargs):
     def __call__(self, u, fnu=None):
@@ -330,7 +333,7 @@ class Taylor3D(object):
         Returns a list of (n,l) pairs in the coefflist
         :return nl_list: all of the (n,l) pairs that are present in our coefflist
         """
-        return sorted([ (n,l) for (n,l,coeff) in self.coefflist], key=self.sortkey)
+        return sorted([ (n,l) for (n,l,coeff) in self.coefflist], key=self.__sortkey)
 
     @classmethod
     def sumcoeff(cls, a, b, alpha=1, beta=1, inplace=False):
@@ -382,7 +385,7 @@ class Taylor3D(object):
                     # can just append in place: need to be careful, since we have a tuple
                     coeff = cmatch[2]
                     coeff[:cls.powlrange[blmax]][:cls.powlrange[blmax]] += cpow
-        c.sort(key=sortkey)
+        c.sort(key=cls.__sortkey)
         return c
 
     def __add__(self, other):
@@ -500,7 +503,7 @@ class Taylor3D(object):
                         # can just append in place: need to be careful, since we have a tuple
                         coeff = cmatch[2]
                         coeff[:cls.powlrange[clmax]][:cls.powlrange[clmax]] += cpow
-        c.sort(key=sortkey)
+        c.sort(key=cls.__sortkey)
         return c
 
     def __mul__(self, other):
