@@ -244,9 +244,9 @@ class Taylor3D(object):
         for n in range(N+1):
             c.append([(n, n, np.zeros((cls.powlrange[n],) + basis[0][0].shape, dtype=complex))])
         for coeff, vect in basis:
-            pexp = powexp(cls.Lmax, NN, cls.pow2ind, vect, normalize=False)[0]
+            pexp = cls.powexp(vect, normalize=False)
             for n in range(N+1):
-                vnpow = (powercoeff[n]*pexp)[:cls.powlrange[n]]
+                vnpow = (cls.powercoeff[n]*pexp)[:cls.powlrange[n]]
                 cn = c[n][0][2]
                 for p in range(cls.powlrange[n]):
                     cn[p] += vnpow[p]*coeff
@@ -451,7 +451,7 @@ class Taylor3D(object):
                 cpow = np.zeros((cls.powlrange[clmax],) + cshape, dtype=complex)
                 for pa in range(cls.powlrange[almax]):
                     for pb in range(cls.powlrange[blmax]):
-                        cpow[direcmult[pa][pb]] += np.dot(apow[pa], bpow[pb])
+                        cpow[cls.direcmult[pa][pb]] += np.dot(apow[pa], bpow[pb])
                 # now add it into the list
                 matched = False
                 for cmatch in c:
