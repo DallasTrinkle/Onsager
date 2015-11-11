@@ -17,6 +17,8 @@ class PowerExpansionTests(unittest.TestCase):
         """initial setup for testing"""
         self.phi = np.pi*0.2234
         self.theta = np.pi*0.7261
+        self.c = T3D()
+        self.c2 = T3D()
 
     def testExpansionYlmpow(self):
         """Test the expansion of Ylm into powers"""

@@ -60,15 +60,7 @@ class Taylor3D(object):
                 Ylm2ind[l][m] = ind
                 ind2Ylm[ind][0], ind2Ylm[ind][1] = l,m
                 ind += 1
-        return (NYlm, Npower), pow2ind, ind2pow, Ylm2ind, ind2Ylm, powlrange
-
-    # these are all *class* parameters, not object parameters: they are computed
-    # and defined once for the entire class. We "hardcode" for Lmax = 4; that's the
-    # case we need for our GF code, so this keeps it optimal. There's probably a much
-    # more pythonic way to do this; however, absent any real obvious use case for Lmax > 4
-    # I'm leaving it as is:
-    Lmax = 4
-    NYlm, Npower, pow2ind, ind2pow, Ylm2ind, ind2Ylm, powlrange = Taylor3D.makeindexPowerYlm(Lmax)
+        return NYlm, Npower, pow2ind, ind2pow, Ylm2ind, ind2Ylm, powlrange
 
     @classmethod
     def makeYlmpow(cls):
@@ -96,8 +88,6 @@ class Taylor3D(object):
                     Ylmpow[ind][p] = (-1)**(-m) * Ylmpow[indpos][p].conjugate()
         return Ylmpow
 
-    Ylmpow = Taylor3D.makeYlmpow()
-
     @classmethod
     def makepowYlm(cls):
         """
@@ -107,22 +97,17 @@ class Taylor3D(object):
         :return powYlm[p][lm]: expansion of powers in Ylm; uses indexing scheme above
         """
         powYlm = np.zeros((cls.Npower, cls.NYlm), dtype=complex)
-        Cp = np.zeros((cls.Lmax+1, 2*cls.Lmax+1))
-        Cm = np.zeros((cls.Lmax+1, 2*cls.Lmax+1))
-        Spp = np.zeros((cls.Lmax+1, 2*cls.Lmax+1))
-        Spm = np.zeros((cls.Lmax+1, 2*cls.Lmax+1))
-        Smp = np.zeros((cls.Lmax+1, 2*cls.Lmax+1))
-        Smm = np.zeros((cls.Lmax+1, 2*cls.Lmax+1))
-        for l,m in ((l,m) for l in range(cls.Lmax+1) for m in range(-l,l+1)):
+        Cp = np.zeros((cls.Lmax, 2*cls.Lmax-1))
+        Cm = np.zeros((cls.Lmax, 2*cls.Lmax-1))
+        Sp = np.zeros((cls.Lmax, 2*cls.Lmax-1))
+        Sm = np.zeros((cls.Lmax, 2*cls.Lmax-1))
+        # because this is for our recursion relations, we only need to work to Lmax-1 !
+        for l,m in ((l,m) for l in range(cls.Lmax) for m in range(-l,l+1)):
             Cp[l][m] = np.sqrt((l-m+1)*(l+m+1)/((2*l+1)*(2*l+3)))
-            Spp[l][m] = 0.5*np.sqrt((l+m+1)*(l+m+2)/((2*l+1)*(2*l+3)))
-            Spm[l][m] = 0.5*np.sqrt((l-m+1)*(l-m+2)/((2*l+1)*(2*l+3)))
-            if l>0 and -l < m < l:
-                Cm[l][m] = 0.5*np.sqrt((l-m)*(l+m)/((2*l-1)*(2*l+1)))
-                if m < l-1:
-                    Smp[l][m] = 0.5*np.sqrt((l-m)*(l-m-1)/((2*l-1)*(2*l+1)))
-                if m > -l+1:
-                    Smm[l][m] = 0.5*np.sqrt((l+m)*(l+m-1)/((2*l-1)*(2*l+1)))
+            Sp[l][m] = 0.5*np.sqrt((l+m+1)*(l+m+2)/((2*l+1)*(2*l+3)))
+            if l>0: # and -l < m < l:
+                Cm[l][m] = np.sqrt((l-m)*(l+m)/((2*l-1)*(2*l+1)))
+                Sm[l][m] = 0.5*np.sqrt((l-m)*(l-m-1)/((2*l-1)*(2*l+1)))
 
         # first, prime the pump with 1
         powYlm[cls.pow2ind[0][0][0]][cls.Ylm2ind[0][0]] = np.sqrt(4*np.pi)
@@ -145,28 +130,26 @@ class Taylor3D(object):
                 indlow = cls.pow2ind[n0][n1-1][n2]
                 for l,m in ((l,m) for l in range(lmax) for m in range(-l,l+1)):
                     plm = powYlm[indlow][cls.Ylm2ind[l][m]]
-                    powYlm[ind][cls.Ylm2ind[l+1][m+1]] += 1.j*Spp[l][m]**plm
-                    powYlm[ind][cls.Ylm2ind[l+1][m-1]] += 1.j*Spm[l][m]*plm
-                    if l>0:
-                        if m < l-1:
-                            powYlm[ind][cls.Ylm2ind[l-1][m+1]] += -1.j*Smp[l][m]*plm
-                        if m > -l+1:
-                            powYlm[ind][cls.Ylm2ind[l-1][m-1]] += -1.j*Smm[l][m]*plm
+                    powYlm[ind][cls.Ylm2ind[l+1][m+1]] += 1.j*Sp[l][m]*plm
+                    powYlm[ind][cls.Ylm2ind[l+1][m-1]] += 1.j*Sp[l][-m]*plm
+                    # if l>0:
+                    if m < l-1:
+                        powYlm[ind][cls.Ylm2ind[l-1][m+1]] += -1.j*Sm[l][m]*plm
+                    if m > -l+1:
+                        powYlm[ind][cls.Ylm2ind[l-1][m-1]] += -1.j*Sm[l][-m]*plm
             elif n0>0:
                 # we can recurse up from n0-1, n1, n2
                 indlow = cls.pow2ind[n0-1][n1][n2]
                 for l,m in ((l,m) for l in range(lmax) for m in range(-l,l+1)):
                     plm = powYlm[indlow][cls.Ylm2ind[l][m]]
-                    powYlm[ind][cls.Ylm2ind[l+1][m+1]] += -Spp[l][m]*plm
-                    powYlm[ind][cls.Ylm2ind[l+1][m-1]] += Spm[l][m]*plm
-                    if l>0:
-                        if m < l-1:
-                            powYlm[ind][cls.Ylm2ind[l-1][m+1]] += Smp[l][m]*plm
-                        if m > -l+1:
-                            powYlm[ind][cls.Ylm2ind[l-1][m-1]] += -Smm[l][m]*plm
+                    powYlm[ind][cls.Ylm2ind[l+1][m+1]] += -Sp[l][m]*plm
+                    powYlm[ind][cls.Ylm2ind[l+1][m-1]] += Sp[l][-m]*plm
+                    # if l>0:
+                    if m < l-1:
+                        powYlm[ind][cls.Ylm2ind[l-1][m+1]] += Sm[l][m]*plm
+                    if m > -l+1:
+                        powYlm[ind][cls.Ylm2ind[l-1][m-1]] += -Sm[l][-m]*plm
         return powYlm
-
-    powYlm = Taylor3D.makepowYlm()
 
     @classmethod
     def makeLprojections(cls):
@@ -186,8 +169,6 @@ class Taylor3D(object):
             projL[l] = np.dot(cls.powYlm, np.dot(projLYlm[l], cls.Ylmpow)).real
         return projL
 
-    projL = Taylor3D.makeLprojections()
-
     @classmethod
     def makedirectmult(cls):
         """
@@ -199,8 +180,6 @@ class Taylor3D(object):
             if sum(nsum) <= cls.Lmax:
                 directmult[p0][p1] = cls.pow2ind[nsum[0]][nsum[1]][nsum[2]]
         return directmult
-
-    directmult = Taylor3D.makedirectmult()
 
     @classmethod
     def powexp(cls, u, normalize=True):
@@ -241,12 +220,10 @@ class Taylor3D(object):
             for n1 in range(cls.Lmax+1):
                 for n2 in range(cls.Lmax+1):
                     n = n0+n1+n2
-                    if n<=N:
+                    if n<=cls.Lmax:
                         powercoeff[n][cls.pow2ind[n0][n1][n2]] = \
                             factorial(n,True)/(factorial(n0,True)*factorial(n1,True)*factorial(n2,True))
         return powercoeff
-
-    powercoeff = Taylor3D.makepowercoeff()
 
     @classmethod
     def constructexpansion(cls, basis, N=-1):
@@ -275,12 +252,41 @@ class Taylor3D(object):
                     cn[p] += vnpow[p]*coeff
         return tuple(c)
 
-    def __init__(self, coefflist = []):
+    __INITIALIZED__ = False
+    # these are all *class* parameters, not object parameters: they are computed
+    # and defined once for the entire class. It means that once, in your code, you *choose*
+    # a value for Lmax, you are stuck with it. This is a choice: it makes compatibility between
+    # the expansions easy, for a minor loss in flexibility.
+    @classmethod
+    def __initTaylor3Dindexing__(cls, Lmax):
+        """
+        This calls *all* the class methods defined above, and stores them *for the class*
+        This is intended to be done *once*
+        :param Lmax: maximum power / orbital angular momentum
+        """
+        if cls.__INITIALIZED__:
+            # we only need initialize our class once!
+            return
+        cls.Lmax = Lmax
+        cls.NYlm, cls.Npower, \
+        cls.pow2ind, cls.ind2pow, \
+        cls.Ylm2ind, cls.ind2Ylm, \
+        cls.powlrange = cls.makeindexPowerYlm(Lmax)
+        cls.Ylmpow = cls.makeYlmpow()
+        cls.powYlm = cls.makepowYlm()
+        cls.Lproj = cls.makeLprojections()
+        cls.directmult = cls.makedirectmult()
+        cls.powercoeff = cls.makepowercoeff()
+        cls.__INITIALIZED__ = True
+
+    def __init__(self, coefflist = [], Lmax = 4):
         """
         Initializes a Taylor3D object, with coefflist (default = empty)
 
-        :param coefflist: list((n, lmax, powexpansion)). No type checking
+        :param coefflist: list((n, lmax, powexpansion)). No type checking; default empty
+        :param Lmax: maximum power / orbital angular momentum
         """
+        self.__initTaylor3Dindexing__(Lmax)
         self.coefflist = coefflist
 
     def addterms(self, coefflist):
