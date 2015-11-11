@@ -277,6 +277,8 @@ class Taylor3D(object):
         cls.Lproj = cls.makeLprojections()
         cls.directmult = cls.makedirectmult()
         cls.powercoeff = cls.makepowercoeff()
+        # function for sorting our coefficients. Since it's a bound function, it gets passed self:
+        cls.sortkey = lambda self, entry: (entry[0]+entry[1]/cls.Lmax)
         cls.__INITIALIZED__ = True
 
     def __init__(self, coefflist = [], Lmax = 4):
@@ -301,7 +303,34 @@ class Taylor3D(object):
                 raise ArithmeticError("Can only use addterms to include non-occuring powers")
             else:
                 self.coefflist.append(coeff)
-        self.coefflist.sort(key = lambda entry: entry[0])
+        self.coefflist.sort(key=self.sortkey)
+
+    # def __call__(self, *args, **kwargs):
+    def __call__(self, u, fnu=None):
+        """
+        Method for evaluating our 3D Taylor expansion. We have two approaches: if we are
+        passed a dictionary in fnu that will map (n,l) tuple pairs to either (a) values or
+        (b) functions of a single parameter umagn, then we will compute and return the
+        function value. Otherwise, we return a dictionary mapping (n,l) tuple pairs into
+        values, and leave it at that.
+        :param u: three vector to evaluate; may (or may not) be normalized
+        :param fnu: dictionary of (n,l): value or function pairs.
+        :return value or dictionary: depending on fnu; default is dictionary
+        """
+        u0, umagn = self.powexp(u)
+        if fnu is not None:
+            fval = [ fnu[(n,l)](umagn) if callable(fnu[(n,l)]) else fnu[(n,l)]
+                     for (n, l, coeff) in self.coefflist]
+            return np.sum( fv*np.tensordot(u0[:self.powlrange[l]], coeff, axes=1) for fv, (n,l , coeff) in zip(fval, self.coefflist) )
+        # otherwise, create a dictionary!
+        return { (n,l): np.tensordot(u0[:self.powlrange[l]], coeff, axes=1) for n, l, coeff in self.coefflist}
+
+    def nl(self):
+        """
+        Returns a list of (n,l) pairs in the coefflist
+        :return nl_list: all of the (n,l) pairs that are present in our coefflist
+        """
+        return sorted([ (n,l) for (n,l,coeff) in self.coefflist], key=self.sortkey)
 
     @classmethod
     def sumcoeff(cls, a, b, alpha=1, beta=1, inplace=False):
@@ -353,7 +382,7 @@ class Taylor3D(object):
                     # can just append in place: need to be careful, since we have a tuple
                     coeff = cmatch[2]
                     coeff[:cls.powlrange[blmax]][:cls.powlrange[blmax]] += cpow
-        c.sort(key=lambda entry: entry[0])
+        c.sort(key=sortkey)
         return c
 
     def __add__(self, other):
@@ -471,7 +500,7 @@ class Taylor3D(object):
                         # can just append in place: need to be careful, since we have a tuple
                         coeff = cmatch[2]
                         coeff[:cls.powlrange[clmax]][:cls.powlrange[clmax]] += cpow
-        c.sort(key=lambda entry: entry[0])
+        c.sort(key=sortkey)
         return c
 
     def __mul__(self, other):
