@@ -112,9 +112,9 @@ class PowerExpansionTests(unittest.TestCase):
         def createExpansion(n):
             return lambda u: u**n / PE.factorial(n, True)
 
-        a = PE.Taylor3D()
-        print("c: ", a.coefflist)
-        print(c.constructexpansion(self.basis, N=2))
+        c = T3D([])
+        # print("c: ", c.coefflist)
+        # print(c.constructexpansion(self.basis, N=2))
         for coeff in c.constructexpansion(self.basis, N=2):
             c.addterms(coeff)
         c2 = c * c
