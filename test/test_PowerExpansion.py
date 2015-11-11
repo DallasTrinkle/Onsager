@@ -57,7 +57,7 @@ class PowerExpansionTests(unittest.TestCase):
                                         msg="Projection failure for {}\n{} != {}".format(T3D.ind2pow[p], uproj, utest[p]))
 
     def testEvaluation(self):
-        """Test out the evaluation functions in an expansion"""
+        """Test out the evaluation functions in an expansion, including with scalar multiply and addition"""
         def approxexp(u):
             """4th order expansion of exp(u)"""
             return 1 + u*(1 + u*(0.5 + u*(1/6 + u/24)))
@@ -72,6 +72,10 @@ class PowerExpansionTests(unittest.TestCase):
 
         c2 = 2.*self.c
         c3 = self.c + self.c
+        c4 = c2 - self.c
+        ### NOTE! We have to do it *this way*; otherwise, it will try to use the sum in np.array,
+        ### and that WILL NOT WORK with our expansion.
+        c5 = self.c + np.eye(2)
 
         for u in [ np.zeros(3), np.array([1., 0., 0.]), np.array([0., 1., 0.]), np.array([0., 0., 1.]),
                    np.array([0.234, -0.85, 1.25]),
@@ -94,3 +98,54 @@ class PowerExpansionTests(unittest.TestCase):
                             msg="Failure with scalar multiply?")
             self.assertTrue(np.all(np.isclose(2*value, c3(u, fval))),
                             msg="Failure with addition?")
+            self.assertTrue(np.all(np.isclose(value, c4(u, fval))),
+                            msg="Failure with subtraction?")
+            self.assertTrue(np.all(np.isclose(value + np.eye(2), c5(u, fval))),
+                            msg="Failure with scalar addition?")
+
+    def testProduct(self):
+        """Test out the evaluation functions in an expansion, including with scalar multiply and addition"""
+        def approxexp(u):
+            """4th order expansion of exp(u)"""
+            return 1 + u*(1 + u*(0.5 + u*(1/6 + u/24)))
+        def createExpansion(n):
+            return lambda u: u**n / PE.factorial(n, True)
+
+        for coeff in self.c.constructexpansion(self.basis):
+            self.c.addterms(coeff)
+        for (n,l) in self.c.nl():
+            self.assertEqual(n, l)
+        fnu = { (n,l): createExpansion(n) for (n,l) in self.c.nl() } # or could do this in previous loop
+
+        c2 = 2.*self.c
+        c3 = self.c + self.c
+        c4 = c2 - self.c
+        ### NOTE! We have to do it *this way*; otherwise, it will try to use the sum in np.array,
+        ### and that WILL NOT WORK with our expansion.
+        c5 = self.c + np.eye(2)
+
+        for u in [ np.zeros(3), np.array([1., 0., 0.]), np.array([0., 1., 0.]), np.array([0., 0., 1.]),
+                   np.array([0.234, -0.85, 1.25]),
+                   np.array([1.24, 0.71, -0.98])]:
+            umagn = np.sqrt(np.dot(u, u))
+            fval = { nl: f(umagn) for nl,f in fnu.items()}
+            # comparison value:
+            value = sum(pre*approxexp(np.dot(u, vec)) for pre, vec in self.basis)
+            valsum = self.c(u, fval)
+            funcsum = self.c(u, fnu)
+            dictsum = sum( fval[k]*v for k,v in self.c(u).items())
+
+            self.assertTrue(np.all(np.isclose(value, valsum)),
+                            msg="Failure for call with values for {}\n{} != {}".format(u, value, valsum))
+            self.assertTrue(np.all(np.isclose(value, funcsum)),
+                            msg="Failure for call with function for {}\n{} != {}".format(u, value, funcsum))
+            self.assertTrue(np.all(np.isclose(value, dictsum)),
+                            msg="Failure for call with dictionary for {}\n{} != {}".format(u, value, dictsum))
+            self.assertTrue(np.all(np.isclose(2*value, c2(u, fval))),
+                            msg="Failure with scalar multiply?")
+            self.assertTrue(np.all(np.isclose(2*value, c3(u, fval))),
+                            msg="Failure with addition?")
+            self.assertTrue(np.all(np.isclose(value, c4(u, fval))),
+                            msg="Failure with subtraction?")
+            self.assertTrue(np.all(np.isclose(value + np.eye(2), c5(u, fval))),
+                            msg="Failure with scalar addition?")

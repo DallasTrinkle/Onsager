@@ -391,38 +391,38 @@ class Taylor3D(object):
     def __add__(self, other):
         """Add a set of Taylor expansions"""
         # if we're passed an array, just take it in stride
-        if hasattr(other, 'shape'): other = (0, 0, other.reshape((1,) + other.shape))
+        if hasattr(other, 'shape'): other = [(0, 0, other.reshape((1,) + other.shape))]
         return Taylor3D(self.sumcoeff(self, other))
 
     def __radd__(self, other):
         """Add a set of Taylor expansions"""
         # if we're passed an array, just take it in stride
-        if hasattr(other, 'shape'): other = (0, 0, other.reshape((1,) + other.shape))
+        if hasattr(other, 'shape'): other = [(0, 0, other.reshape((1,) + other.shape))]
         return Taylor3D(self.sumcoeff(self, other))
 
     def __iadd__(self, other):
         """Add a set of Taylor expansions"""
         # if we're passed an array, just take it in stride
-        if hasattr(other, 'shape'): other = (0, 0, other.reshape((1,) + other.shape))
+        if hasattr(other, 'shape'): other = [(0, 0, other.reshape((1,) + other.shape))]
         self.sumcoeff(self, other, inplace=True)
         return self
 
     def __sub__(self, other):
         """Subtract a set of Taylor expansions"""
         # if we're passed an array, just take it in stride
-        if hasattr(other, 'shape'): other = (0, 0, other.reshape((1,) + other.shape))
+        if hasattr(other, 'shape'): other = [(0, 0, other.reshape((1,) + other.shape))]
         return Taylor3D(self.sumcoeff(self, other, 1, -1))
 
     def __rsub__(self, other):
         """Subtract a set of Taylor expansions"""
         # if we're passed an array, just take it in stride
-        if hasattr(other, 'shape'): other = (0, 0, other.reshape((1,) + other.shape))
+        if hasattr(other, 'shape'): other = [(0, 0, other.reshape((1,) + other.shape))]
         return Taylor3D(self.sumcoeff(self, other, -1, 1))
 
     def __isub__(self, other):
         """Subtract a set of Taylor expansions"""
         # if we're passed an array, just take it in stride
-        if hasattr(other, 'shape'): other = (0, 0, other.reshape((1,) + other.shape))
+        if hasattr(other, 'shape'): other = [(0, 0, other.reshape((1,) + other.shape))]
         self.sumcoeff(self, other, 1, -1, inplace=True)
         return self
 
