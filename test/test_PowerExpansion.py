@@ -64,18 +64,19 @@ class PowerExpansionTests(unittest.TestCase):
         def createExpansion(n):
             return lambda u: u**n / PE.factorial(n, True)
 
-        for coeff in self.c.constructexpansion(self.basis):
-            self.c.addterms(coeff)
-        for (n,l) in self.c.nl():
+        c = T3D()
+        for coeff in c.constructexpansion(self.basis):
+            c.addterms(coeff)
+        for (n,l) in c.nl():
             self.assertEqual(n, l)
-        fnu = { (n,l): createExpansion(n) for (n,l) in self.c.nl() } # or could do this in previous loop
+        fnu = { (n,l): createExpansion(n) for (n,l) in c.nl() } # or could do this in previous loop
 
-        c2 = 2.*self.c
-        c3 = self.c + self.c
-        c4 = c2 - self.c
+        c2 = 2.*c
+        c3 = c + c
+        c4 = c2 - c
         ### NOTE! We have to do it *this way*; otherwise, it will try to use the sum in np.array,
         ### and that WILL NOT WORK with our expansion.
-        c5 = self.c + np.eye(2)
+        c5 = c + np.eye(2)
 
         for u in [ np.zeros(3), np.array([1., 0., 0.]), np.array([0., 1., 0.]), np.array([0., 0., 1.]),
                    np.array([0.234, -0.85, 1.25]),
@@ -84,9 +85,9 @@ class PowerExpansionTests(unittest.TestCase):
             fval = { nl: f(umagn) for nl,f in fnu.items()}
             # comparison value:
             value = sum(pre*approxexp(np.dot(u, vec)) for pre, vec in self.basis)
-            valsum = self.c(u, fval)
-            funcsum = self.c(u, fnu)
-            dictsum = sum( fval[k]*v for k,v in self.c(u).items())
+            valsum = c(u, fval)
+            funcsum = c(u, fnu)
+            dictsum = sum( fval[k]*v for k,v in c(u).items())
 
             self.assertTrue(np.all(np.isclose(value, valsum)),
                             msg="Failure for call with values for {}\n{} != {}".format(u, value, valsum))
@@ -111,18 +112,15 @@ class PowerExpansionTests(unittest.TestCase):
         def createExpansion(n):
             return lambda u: u**n / PE.factorial(n, True)
 
-        for coeff in self.c.constructexpansion(self.basis):
-            self.c.addterms(coeff)
-        for (n,l) in self.c.nl():
+        a = PE.Taylor3D()
+        print("c: ", a.coefflist)
+        print(c.constructexpansion(self.basis, N=2))
+        for coeff in c.constructexpansion(self.basis, N=2):
+            c.addterms(coeff)
+        c2 = c * c
+        for (n,l) in c2.nl():
             self.assertEqual(n, l)
-        fnu = { (n,l): createExpansion(n) for (n,l) in self.c.nl() } # or could do this in previous loop
-
-        c2 = 2.*self.c
-        c3 = self.c + self.c
-        c4 = c2 - self.c
-        ### NOTE! We have to do it *this way*; otherwise, it will try to use the sum in np.array,
-        ### and that WILL NOT WORK with our expansion.
-        c5 = self.c + np.eye(2)
+        fnu = { (n,l): createExpansion(n) for (n,l) in c2.nl() } # or could do this in previous loop
 
         for u in [ np.zeros(3), np.array([1., 0., 0.]), np.array([0., 1., 0.]), np.array([0., 0., 1.]),
                    np.array([0.234, -0.85, 1.25]),
@@ -131,9 +129,14 @@ class PowerExpansionTests(unittest.TestCase):
             fval = { nl: f(umagn) for nl,f in fnu.items()}
             # comparison value:
             value = sum(pre*approxexp(np.dot(u, vec)) for pre, vec in self.basis)
-            valsum = self.c(u, fval)
-            funcsum = self.c(u, fnu)
-            dictsum = sum( fval[k]*v for k,v in self.c(u).items())
+            valsum = c(u, fval)
+            funcsum = c(u, fnu)
+            dictsum = sum( fval[k]*v for k,v in c(u).items())
+
+            value2 = np.dot(value2, value2)
+            valsum2 = c2(u, fval)
+            funcsum2 = c2(u, fnu)
+            dictsum2 = sum( fval[k]*v for k,v in c2(u).items())
 
             self.assertTrue(np.all(np.isclose(value, valsum)),
                             msg="Failure for call with values for {}\n{} != {}".format(u, value, valsum))
@@ -141,11 +144,10 @@ class PowerExpansionTests(unittest.TestCase):
                             msg="Failure for call with function for {}\n{} != {}".format(u, value, funcsum))
             self.assertTrue(np.all(np.isclose(value, dictsum)),
                             msg="Failure for call with dictionary for {}\n{} != {}".format(u, value, dictsum))
-            self.assertTrue(np.all(np.isclose(2*value, c2(u, fval))),
-                            msg="Failure with scalar multiply?")
-            self.assertTrue(np.all(np.isclose(2*value, c3(u, fval))),
-                            msg="Failure with addition?")
-            self.assertTrue(np.all(np.isclose(value, c4(u, fval))),
-                            msg="Failure with subtraction?")
-            self.assertTrue(np.all(np.isclose(value + np.eye(2), c5(u, fval))),
-                            msg="Failure with scalar addition?")
+
+            self.assertTrue(np.all(np.isclose(value2, valsum2)),
+                            msg="Failure for call with values for {}\n{} != {}".format(u, value2, valsum2))
+            self.assertTrue(np.all(np.isclose(value2, funcsum2)),
+                            msg="Failure for call with function for {}\n{} != {}".format(u, value2, funcsum2))
+            self.assertTrue(np.all(np.isclose(value2, dictsum2)),
+                            msg="Failure for call with dictionary for {}\n{} != {}".format(u, value2, dictsum2))
