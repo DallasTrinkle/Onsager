@@ -26,7 +26,7 @@ def incell(vec):
     """
     Returns the vector inside the unit cell (in [0,1)**3)
     """
-    return vec - np.floor(vec)
+    return vec - np.floor(vec + 1.0e-8)
 
 
 def inhalf(vec):
