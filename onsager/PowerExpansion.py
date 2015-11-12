@@ -294,6 +294,12 @@ class Taylor3D(object):
         self.__initTaylor3Dindexing__(Lmax)
         self.coefflist = [ (n, l, c.copy()) for n,l,c in coefflist ]
 
+    def copy(self):
+        """
+        Returns a copy of the current expansion
+        """
+        return Taylor3D(self.coefflist)
+
     def __str__(self):
         """
         String representation for "pretty printing"
@@ -317,7 +323,7 @@ class Taylor3D(object):
         # getattr is here *in case* someone passes us a Taylor3D type object...
         for coeff in getattr(coefflist, 'coefflist', coefflist):
             if any( coeff[0] == c[0] for c in self.coefflist ):
-                raise ArithmeticError("Can only use addterms to include non-occuring powers")
+                raise ArithmeticError("Can only use addterms to include new powers; use + instead")
             else:
                 self.coefflist.append((coeff[0], coeff[1], coeff[2].copy()))
         self.coefflist.sort(key=self.__sortkey)
@@ -470,6 +476,48 @@ class Taylor3D(object):
         return ca
 
     @classmethod
+    def tensorproductcoeff(cls, c, a, leftmultiply=True):
+        """
+        Multiplies an coefficient expansion a by a scalar c
+        :param c: array *or* dictionary mapping (n,l) to arrays
+        :param a = list((n, lmax, powexpansion): expansion of function in powers
+        :param leftmultiply: tensordot(c,a) vs. tensordot(a,c)
+        :return coefflist: c.a (or a.c)
+        """
+        acoeff = getattr(a, 'coefflist', a)
+        ca = []
+        for an, almax, apow in acoeff:
+            if isinstance(c, dict): cmult = c[(an, almax)]
+            else: cmult = c
+            if leftmultiply:
+                # tricky because of layout of apow
+                shape = (apow.shape[0], ) + cmult.shape[:-1] + apow.shape[2:]
+                mat = np.zeros(shape, dtype=complex)
+                for p in range(cls.powlrange[almax]):
+                    mat[p] = np.tensordot(cmult, apow[p], axes=1)
+                ca.append((an, almax, mat))
+            else: ca.append((an, almax, np.tensordot(apow, cmult, axes=(-1,0))))
+        return ca
+
+    def ldot(self, c):
+        """Returns c.self"""
+        return Taylor3D(self.tensorproductcoeff(c, self))
+
+    def rdot(self, c):
+        """Returns self.c"""
+        return Taylor3D(self.tensorproductcoeff(c, self, leftmultiply=False))
+
+    def ildot(self, c):
+        """Computes c.self in place"""
+        self.coefflist = self.tensorproductcoeff(c, self)
+        return self
+
+    def irdot(self, c):
+        """Computes self.c in place"""
+        self.coefflist = self.tensorproductcoeff(c, self, leftmultiply=False)
+        return self
+
+    @classmethod
     def coeffproductcoeff(cls, a, b):
         """
         Takes a direction expansion a and b, and returns the product expansion.
@@ -502,11 +550,11 @@ class Taylor3D(object):
                 cpow = np.zeros((cls.powlrange[clmax],) + cshape, dtype=complex)
                 for pa in range(cls.powlrange[almax]):
                     for pb in range(cls.powlrange[blmax]):
-                        cpow[cls.directmult[pa][pb]] += np.dot(apow[pa], bpow[pb])
+                        cpow[cls.directmult[pa][pb]] += np.tensordot(apow[pa], bpow[pb], axes=1)
                 # now add it into the list
                 matched = False
                 for cmatch in c:
-                    if cmatch[0] == bn:
+                    if cmatch[0] == cn:
                         matched = True
                         break
                 if not matched:

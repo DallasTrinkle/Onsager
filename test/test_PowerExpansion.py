@@ -71,12 +71,18 @@ class PowerExpansionTests(unittest.TestCase):
             self.assertEqual(n, l)
         fnu = { (n,l): createExpansion(n) for (n,l) in c.nl() } # or could do this in previous loop
 
-        c2 = 2.*c
+        # c2 = 2*c
+        c2 = c.copy()
+        c2 *= 2
         c3 = c + c
         c4 = c2 - c
         ### NOTE! We have to do it *this way*; otherwise, it will try to use the sum in np.array,
         ### and that WILL NOT WORK with our expansion.
         c5 = c + np.eye(2)
+        prod = np.array([[-4.2, 2.67],[1.3, 3.21]])
+        c6 = c.ldot(prod)
+        c7 = c.copy()
+        c7.irdot(prod)
 
         for u in [ np.zeros(3), np.array([1., 0., 0.]), np.array([0., 1., 0.]), np.array([0., 0., 1.]),
                    np.array([0.234, -0.85, 1.25]),
@@ -103,6 +109,10 @@ class PowerExpansionTests(unittest.TestCase):
                             msg="Failure with subtraction?")
             self.assertTrue(np.all(np.isclose(value + np.eye(2), c5(u, fval))),
                             msg="Failure with scalar addition?")
+            self.assertTrue(np.all(np.isclose(np.dot(prod,value), c6(u, fval))),
+                            msg="Failure with tensor dot product?")
+            self.assertTrue(np.all(np.isclose(np.dot(value,prod), c7(u, fval))),
+                            msg="Failure with tensor dot product inplace?")
 
     def testProduct(self):
         """Test out the evaluation functions in an expansion, including with scalar multiply and addition"""
@@ -118,10 +128,8 @@ class PowerExpansionTests(unittest.TestCase):
         # print(c.constructexpansion(self.basis, N=2))
         for coeff in c.constructexpansion(self.basis, N=2):
             c.addterms(coeff)
-        c *= { (n,l): 1./PE.factorial(n, True) for (n,l) in c.nl() } # scalar multiply to match the expansion
-        print("c:\n", c)
+        c *= { (n,l): 1./PE.factorial(n, True) for (n,l) in c.nl() } # scalar multiply to create a Taylor expansion for exp
         c2 = c * c
-        print("c^2:\n", c2)
         for (n,l) in c2.nl():
             self.assertEqual(n, l)
         fnu = { (n,l): createExpansion(n) for (n,l) in c2.nl() } # or could do this in previous loop
