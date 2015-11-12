@@ -292,7 +292,21 @@ class Taylor3D(object):
         :param Lmax: maximum power / orbital angular momentum
         """
         self.__initTaylor3Dindexing__(Lmax)
-        self.coefflist = coefflist
+        self.coefflist = [ (n, l, c.copy()) for n,l,c in coefflist ]
+
+    def __str__(self):
+        """
+        String representation for "pretty printing"
+        """
+        strrep = ""
+        for n, l, coeff in self.coefflist:
+            strrep = strrep + "f^({}, {})(u)*(".format(n,l)
+            for p in range(self.powlrange[l]):
+                if not np.all(np.isclose(coeff[p], 0)):
+                    strrep = strrep + "\n{} x^{} y^{} z^{}".format(coeff[p],
+                      self.ind2pow[p][0], self.ind2pow[p][1], self.ind2pow[p][2])
+            strrep = strrep + " )\n"
+        return strrep
 
     def addterms(self, coefflist):
         """
@@ -305,7 +319,7 @@ class Taylor3D(object):
             if any( coeff[0] == c[0] for c in self.coefflist ):
                 raise ArithmeticError("Can only use addterms to include non-occuring powers")
             else:
-                self.coefflist.append(coeff)
+                self.coefflist.append((coeff[0], coeff[1], coeff[2].copy()))
         self.coefflist.sort(key=self.__sortkey)
 
     # def __call__(self, *args, **kwargs):
@@ -430,38 +444,43 @@ class Taylor3D(object):
     def scalarproductcoeff(cls, c, a, inplace=False):
         """
         Multiplies an coefficient expansion a by a scalar c
-        :param: c
-            scalar
-        :param: a = list((n, lmax, powexpansion)
-            expansion of function in powers
+        :param c: scalar *or* dictionary mapping (n,l) to scalars
+        :param a = list((n, lmax, powexpansion): expansion of function in powers
         :param inplace: modify a in place?
         :return coefflist: c*a
         """
         acoeff = getattr(a, 'coefflist', a)
         if inplace:
-            for an, almax, apow in acoeff:
-                apow *= c
+            if isinstance(c, dict):
+                for an, almax, apow in acoeff:
+                    apow *= c[(an, almax)]
+            else:
+                for an, almax, apow in acoeff:
+                    apow *= c
             ca = a
         else:
             # create new expansion
             ca = []
-            for an, almax, apow in acoeff:
-                ca.append((an, almax, c*apow))
+            if isinstance(c, dict):
+                for an, almax, apow in acoeff:
+                    ca.append((an, almax, c[(an, almax)]*apow))
+            else:
+                for an, almax, apow in acoeff:
+                    ca.append((an, almax, c*apow))
         return ca
 
     @classmethod
     def coeffproductcoeff(cls, a, b):
         """
         Takes a direction expansion a and b, and returns the product expansion.
-        :param: a, b = list((n, lmax, powexpansion)
+        :param a, b = list((n, lmax, powexpansion):
             written as a series of coefficients; n defines the magnitude function, which
             is additive; lmax is the largest cumulative power of coefficients, and
             powexpansion is a numpy array that can multiplied. We assume that a and b
             have consistent shapes throughout--we *do not test this*; runtime will likely
             fail if not true. The entries in the list are *tuples* of n, lmax, pow
 
-        :return: c = list((n, lmax, powexpansion))
-            product of a and b
+        :return c = list((n, lmax, powexpansion)): product of a and b
         """
         # a little pythonic magic to work with *either* a list, or an object with a coefflist
         acoeff = getattr(a, 'coefflist', a) # fallback to a if not there... which assumes it's a list
@@ -483,7 +502,7 @@ class Taylor3D(object):
                 cpow = np.zeros((cls.powlrange[clmax],) + cshape, dtype=complex)
                 for pa in range(cls.powlrange[almax]):
                     for pb in range(cls.powlrange[blmax]):
-                        cpow[cls.direcmult[pa][pb]] += np.dot(apow[pa], bpow[pb])
+                        cpow[cls.directmult[pa][pb]] += np.dot(apow[pa], bpow[pb])
                 # now add it into the list
                 matched = False
                 for cmatch in c:
@@ -510,9 +529,9 @@ class Taylor3D(object):
         """
         Multiply our expansion
         :param other:
-        :return: our expansion
+        :return our expansion:
         """
-        if isinstance(other, Number) or hasattr(other, 'shape'):
+        if isinstance(other, Number) or hasattr(other, 'shape') or isinstance(other, dict):
             coeff = self.scalarproductcoeff(other, self)
         else:
             coeff = self.coeffproductcoeff(self, other)
@@ -522,9 +541,9 @@ class Taylor3D(object):
         """
         Multiply our expansion
         :param other:
-        :return: our expansion
+        :return our expansion:
         """
-        if isinstance(other, Number) or hasattr(other, 'shape'):
+        if isinstance(other, Number) or hasattr(other, 'shape') or isinstance(other, dict):
             coeff = self.scalarproductcoeff(other, self)
         else:
             coeff = self.coeffproductcoeff(self, other)

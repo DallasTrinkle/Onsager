@@ -107,17 +107,21 @@ class PowerExpansionTests(unittest.TestCase):
     def testProduct(self):
         """Test out the evaluation functions in an expansion, including with scalar multiply and addition"""
         def approxexp(u):
-            """4th order expansion of exp(u)"""
-            return 1 + u*(1 + u*(0.5 + u*(1/6 + u/24)))
+            """2nd order expansion of exp(u)"""
+            # return 1 + u*(1 + u*(0.5 + u*(1/6 + u/24)))
+            return 1 + u*(1 + u*0.5)
         def createExpansion(n):
-            return lambda u: u**n / PE.factorial(n, True)
+            return lambda u: u**n
 
-        c = T3D([])
+        c = T3D()
         # print("c: ", c.coefflist)
         # print(c.constructexpansion(self.basis, N=2))
         for coeff in c.constructexpansion(self.basis, N=2):
             c.addterms(coeff)
+        c *= { (n,l): 1./PE.factorial(n, True) for (n,l) in c.nl() } # scalar multiply to match the expansion
+        print("c:\n", c)
         c2 = c * c
+        print("c^2:\n", c2)
         for (n,l) in c2.nl():
             self.assertEqual(n, l)
         fnu = { (n,l): createExpansion(n) for (n,l) in c2.nl() } # or could do this in previous loop
@@ -133,7 +137,7 @@ class PowerExpansionTests(unittest.TestCase):
             funcsum = c(u, fnu)
             dictsum = sum( fval[k]*v for k,v in c(u).items())
 
-            value2 = np.dot(value2, value2)
+            value2 = np.dot(value, value)
             valsum2 = c2(u, fval)
             funcsum2 = c2(u, fnu)
             dictsum2 = sum( fval[k]*v for k,v in c2(u).items())
