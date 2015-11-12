@@ -8,6 +8,10 @@ analytically calculated IFT for the Green function.
 Really designed to get used by other code.
 """
 
+# TODO: reduction of expansion (consolidate n terms, reduce l if possible after projection)
+# TODO: projection expansion (strict (n,l) pairs)
+# TODO: test both, and test inversion expansion series
+
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
@@ -226,7 +230,7 @@ class Taylor3D(object):
         return powercoeff
 
     @classmethod
-    def constructexpansion(cls, basis, N=-1):
+    def constructexpansion(cls, basis, N=-1, pre=None):
         """
         Takes a "basis" for constructing an expansion -- list of vectors and matrices --
         and constructs the expansions up to power N (default = Lmax)
@@ -234,12 +238,14 @@ class Taylor3D(object):
         :param basis = list((coeffmatrix, vect)): expansions to create;
           sum(coeffmatrix * (vect*q)^n), for powers n = 0..N
         :param N: maximum power to consider; for N=-1, use Lmax
+        :param pre: list of prefactors, defining the Taylor expansion. Default = 1
 
         :returns list((n, lmax, powexpansion)), ... : our expansion, as input to create
           Taylor3D objects
         """
         if N<0: N=cls.Lmax
-        # in principle, we should precompute this once...
+        if pre is None:
+            pre = [ 1 for n in range(N+1) ]
         c = []
         for n in range(N+1):
             c.append([(n, n, np.zeros((cls.powlrange[n],) + basis[0][0].shape, dtype=complex))])
@@ -249,7 +255,7 @@ class Taylor3D(object):
                 vnpow = (cls.powercoeff[n]*pexp)[:cls.powlrange[n]]
                 cn = c[n][0][2]
                 for p in range(cls.powlrange[n]):
-                    cn[p] += vnpow[p]*coeff
+                    cn[p] += pre[n]*vnpow[p]*coeff
         return tuple(c)
 
     # for sorting our coefficient lists:
