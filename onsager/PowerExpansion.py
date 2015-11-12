@@ -596,3 +596,69 @@ class Taylor3D(object):
         else:
             coeff = self.coeffproductcoeff(self, other)
         return Taylor3D(coeff)
+
+    @classmethod
+    def inversecoeff(cls, a, Nmax=0):
+        """
+        Takes a direction expansion , and returns the inversion expansion (approximated
+        based on the Taylor expansion of 1/(1-x) = sum_i=0^infinity x^i, or
+        (A + B)^-1 = ((1+BA^-1)A)^-1 = A^-1(1-(-BA^1))^-1 = A^1 sum_i=0 (-BA^-1)^n
+        :param a = list((n, lmax, powexpansion):
+            written as a series of coefficients; n defines the magnitude function, which
+            is additive; lmax is the largest cumulative power of coefficients, and
+            powexpansion is a numpy array that can multiplied. We assume that a and b
+            have consistent shapes throughout--we *do not test this*; runtime will likely
+            fail if not true. The entries in the list are *tuples* of n, lmax, pow
+        :param Nmax: maximum remaining n value in expansion. Default value of 0 means
+          up to a discontinuity correction in an inversion, but higher (or lower) values are
+          possible.
+
+        :return c = list((n, lmax, powexpansion)): inverse of a
+
+        NOTE: assumes SMALLEST n coefficient is the leading order; only works if that coefficient
+         is also isotropic (l=0). Otherwise, raises an error
+        NOTE: there is no sanity check on whether Nmax is reasonable given the expansion and Lmax
+         values; caveat emptor
+        """
+        # a little pythonic magic to work with *either* a list, or an object with a coefflist
+        acoeff = sorted(getattr(a, 'coefflist', a), key=cls.__sortkey) # fallback to a if not there... which assumes it's a list
+        if acoeff[0][1] != 0:
+            raise ArithmeticError('Cannot invert expansion: leading-order term {} has l={}'.format(acoeff[0], acoeff[1]))
+        lead = acoeff[0]
+        leadinvmat = np.linalg.inv(lead[2][0])
+        leadinvpow = -lead[0]
+        c = [(leadinvpow, 0, leadinvmat.copy().reshape(lead[2].shape))]
+        if len(acoeff) == 1: # trivial case
+            return c
+        else:
+            if leadinvpow + acoeff[1][0] <= 0:
+                raise ArithmeticError('Cannot invert expansion: second term has same power as leading-order term?')
+        tail = [ (n+leadinvpow, l, -coeff)
+            for n,l,coeff in cls.tensorproductcoeff(acoeff[1:], leadinvmat, leftmultiply=True)]
+        # now we can calculate the number of terms necessary:
+        # leadinvpow + n*(tail[0][0]) >= Nmax
+        Nseries = (Nmax - leadinvpow)/tail[0][0]
+        # prime the pump: leadinvmat = A, tail = -AB^-1
+        cls.sumcoeff(c, [ (n+leadinvpow, l, coeff)
+                          for n,l,coeff in
+                          cls.tensorproductcoeff(acoeff[1:], leadinvmat, leftmultiply=False)
+                          if n+leadinvpow <= Nmax],
+                     inplace=True)
+        tailn = [(n, l, coeff.copy()) for n,l,coeff in tail]
+        for npower in range(2,Nseries+1):
+            # trim out the powers that are too large once they become too large:
+            tailn = [ (n, l, coeff) for n, l, coeff in cls.coeffproductcoeff(tailn, tail)
+                      if n+leadinvpow <= Nmax ]
+            cls.sumcoeff(c, [ (n+leadinvpow, l, coeff)
+                              for n,l,coeff in
+                              cls.tensorproductcoeff(acoeff[1:], leadinvmat, leftmultiply=False)],
+                         inplace=True)
+        return c
+
+    def inv(self, Nmax=0):
+        """
+        Return the inverse of the expansion, up to order Nmax
+        :param Nmax: maximum order in the inverse expansion
+        :return: Taylor series of inverse
+        """
+        return Taylor3D(self.inversecoeff(self, Nmax))
