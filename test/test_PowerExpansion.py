@@ -115,7 +115,7 @@ class PowerExpansionTests(unittest.TestCase):
                             msg="Failure with tensor dot product inplace?")
 
     def testProduct(self):
-        """Test out the evaluation functions in an expansion, including with scalar multiply and addition"""
+        """Test out the evaluation functions in an expansion, using coefficient products"""
         def approxexp(u):
             """2nd order expansion of exp(u)"""
             # return 1 + u*(1 + u*(0.5 + u*(1/6 + u/24)))
@@ -163,3 +163,85 @@ class PowerExpansionTests(unittest.TestCase):
                             msg="Failure for call with function for {}\n{} != {}".format(u, value2, funcsum2))
             self.assertTrue(np.all(np.isclose(value2, dictsum2)),
                             msg="Failure for call with dictionary for {}\n{} != {}".format(u, value2, dictsum2))
+
+    def testReduceExpand(self):
+        """Test our reduction and expansion operations"""
+        def approxexp(u):
+            """4th order expansion of exp(u)"""
+            return 1 + u*(1 + u*(0.5 + u*(1/6 + u/24)))
+        def createExpansion(n):
+            return lambda u: u**n
+
+        c = T3D(T3D.constructexpansion(self.basis, N=4, pre=(0,1,1/2,1/6,1/24)))
+        c2 = c.copy()
+        c2.reduce()
+        # check the reduction: should be just two terms remaining: n=2, n=4
+        self.assertEqual(len(c2.coefflist), 2)
+        for n, l, coeff in c2.coefflist:
+            self.assertTrue( n == 2 or n == 4)
+            if n==2:
+                self.assertEqual(l, 2)
+            else:
+                self.assertEqual(l, 4)
+        c3 = c2.copy()
+        c3.separate()
+        # now should have 2 + 3 = 5 terms
+        self.assertEqual(len(c3.coefflist), 5)
+        for n, l, coeff in c3.coefflist:
+            self.assertTrue( n == 2 or n == 4)
+            if n==2:
+                self.assertTrue(l == 0 or l == 2)
+            else:
+                self.assertTrue(l == 0 or l == 2 or l == 4)
+
+        print("c: ", c)
+        print("c2: ", c2)
+        print("c3: ", c3)
+
+        # a little tricky to make sure we get ALL the functions (instead of making multiple dictionaries)
+        fnu = { (n,l): createExpansion(n) for (n,l) in c.nl() } # or could do this in previous loop
+        for (n,l) in c3.nl():
+            if (n,l) not in fnu:
+                fnu[(n,l)] = createExpansion(n)
+
+        for u in [ np.zeros(3), np.array([1., 0., 0.]), np.array([0., 1., 0.]), np.array([0., 0., 1.]),
+                   np.array([0.234, -0.85, 1.25]),
+                   np.array([1.24, 0.71, -0.98])]:
+            umagn = np.sqrt(np.dot(u, u))
+            # compare values:
+            self.assertTrue(np.all(np.isclose(c(u, fnu), c2(u, fnu))),
+                                   msg="Failure on reduce:\n{} != {}".format(c(u,fnu), c2(u,fnu)))
+            self.assertTrue(np.all(np.isclose(c(u, fnu), c3(u, fnu))),
+                                   msg="Failure on expand:\n{} != {}".format(c(u,fnu), c3(u,fnu)))
+
+    def testInverse(self):
+        """Test our inverse expansion"""
+        # This is *very tricky* because the inverse expansion is *strictly* a Taylor series;
+        # it won't be exact. Should be up to order u^2
+        def approxexp(u):
+            """4th order expansion of exp(u)"""
+            return 1 + u*(1 + u*(0.5 + u*(1/6 + u/24)))
+        def createExpansion(n):
+            return lambda u: u**n
+
+        c = T3D(T3D.constructexpansion(self.basis, N=4, pre=(0,1,1/2,1/6,1/24)))
+        c.reduce()
+        cinv = c.inv(Nmax=0) # since c ~ x^2, cinv ~ 1/x^2, and L=4 should take us to x^0
+        print("c: ", c)
+        print("cinv: ", cinv)
+
+        fnu = { (n,l): createExpansion(n) for (n,l) in c.nl() } # or could do this in previous loop
+        for (n,l) in cinv.nl():
+            if (n,l) not in fnu:
+                fnu[(n,l)] = createExpansion(n)
+
+        for u in [ np.array([0.01, 0., 0.]), np.array([0., 0.01, 0.]), np.array([0., 0., 0.01]),
+                   np.array([0.00234, -0.0085, 0.0125]),
+                   np.array([0.0124, 0.0071, -0.0098])]:
+            umagn = np.sqrt(np.dot(u, u))
+            cval = c(u, fnu)
+            cinvval = cinv(u, fnu)
+            cval_inv = np.dot(cval, cinvval) - np.eye(2)
+            # cval_directinv = np.linalg.inv(cval)
+            self.assertTrue(np.all(abs(cval_inv) < umagn*umagn),
+                            msg="cinv * c != 1?\nc={}\ncinv={}\nc*cinv-1={}".format(cval, cinvval, cval_inv))
