@@ -261,13 +261,16 @@ class Taylor3D(object):
     # for sorting our coefficient lists:
     @classmethod
     def __sortkey(cls, entry):
-        return (entry[0]+entry[1]/cls.Lmax)
+        return (entry[0]+entry[1]/(cls.Lmax+1))
 
     __INITIALIZED__ = False
     # these are all *class* parameters, not object parameters: they are computed
     # and defined once for the entire class. It means that once, in your code, you *choose*
     # a value for Lmax, you are stuck with it. This is a choice: it makes compatibility between
     # the expansions easy, for a minor loss in flexibility.
+    # Note: I believe, given the way we've set this up, that it *could* be modified to
+    # allow for Lmax to be *increased* as necessary, and all of the structures should be
+    # "backwards compatible". That said, this has not been tested.
     @classmethod
     def __initTaylor3Dindexing__(cls, Lmax):
         """
