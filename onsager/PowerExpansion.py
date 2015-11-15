@@ -170,7 +170,10 @@ class Taylor3D(object):
             projLYlm[l][lm][lm] = 1. # l,m is part of l
             projLYlm[-1][lm][lm] = 1. # all part of the sum
         for l in range(cls.Lmax+2):
-            projL[l] = np.dot(cls.powYlm, np.dot(projLYlm[l], cls.Ylmpow)).real
+            # projL[l] = np.dot(cls.powYlm, np.dot(projLYlm[l], cls.Ylmpow)).real
+            projL[l] = np.tensordot(cls.Ylmpow,
+                                    np.tensordot(projLYlm[l], cls.powYlm, axes=(1,1)),
+                                    axes=(0,0)).real
         return projL
 
     @classmethod
@@ -397,7 +400,7 @@ class Taylor3D(object):
             # now add it into the list
             cpow = beta*bpow
             matched = False
-            for cmatch in c:
+            for coeffindex, cmatch in enumerate(c):
                 if cmatch[0] == bn:
                     matched = True
                     break
@@ -408,12 +411,12 @@ class Taylor3D(object):
                 clmax0 = cmatch[1]
                 if blmax > clmax0:
                     # need to replace cmatch with a new tuple
-                    cpow[:cls.powlrange[clmax0]][:cls.powlrange[clmax0]] += cmatch[2]
-                    cmatch = (bn, blmax, cpow)
+                    cpow[:cls.powlrange[clmax0]] += cmatch[2]
+                    c[coeffindex] = (bn, blmax, cpow)
                 else:
                     # can just append in place: need to be careful, since we have a tuple
                     coeff = cmatch[2]
-                    coeff[:cls.powlrange[blmax]][:cls.powlrange[blmax]] += cpow
+                    coeff[:cls.powlrange[blmax]] += cpow
         c.sort(key=cls.__sortkey)
         return c
 
@@ -562,7 +565,7 @@ class Taylor3D(object):
                         cpow[cls.directmult[pa][pb]] += np.tensordot(apow[pa], bpow[pb], axes=1)
                 # now add it into the list
                 matched = False
-                for cmatch in c:
+                for coeffindex, cmatch in enumerate(c):
                     if cmatch[0] == cn:
                         matched = True
                         break
@@ -573,12 +576,12 @@ class Taylor3D(object):
                     clmax0 = cmatch[1]
                     if clmax > clmax0:
                         # need to replace cmatch with a new tuple
-                        cpow[:cls.powlrange[clmax0]][:cls.powlrange[clmax0]] += cmatch[2]
-                        cmatch = (cn, clmax, cpow)
+                        cpow[:cls.powlrange[clmax0]] += cmatch[2]
+                        c[coeffindex] = (cn, clmax, cpow)
                     else:
                         # can just append in place: need to be careful, since we have a tuple
                         coeff = cmatch[2]
-                        coeff[:cls.powlrange[clmax]][:cls.powlrange[clmax]] += cpow
+                        coeff[:cls.powlrange[clmax]] += cpow
         c.sort(key=cls.__sortkey)
         return c
 
@@ -632,7 +635,7 @@ class Taylor3D(object):
         # a little pythonic magic to work with *either* a list, or an object with a coefflist
         acoeff = sorted(getattr(a, 'coefflist', a), key=cls.__sortkey) # fallback to a if not there... which assumes it's a list
         if acoeff[0][1] != 0:
-            raise ArithmeticError('Cannot invert expansion: leading-order term {} has l={}'.format(acoeff[0], acoeff[1]))
+            raise ArithmeticError('Cannot invert expansion: leading-order term {} has l={}'.format(acoeff[0][0], acoeff[0][1]))
         lead = acoeff[0]
         leadinvmat = np.linalg.inv(lead[2][0])
         leadinvpow = -lead[0]
@@ -672,23 +675,62 @@ class Taylor3D(object):
         """
         return Taylor3D(self.inversecoeff(self, Nmax))
 
+    @classmethod
+    def reducecoeff(cls, a, inplace=False):
+        """
+        Projects coefficients through Ylm space, then eliminates any zero contributions
+        (including possible reduction in l values, too).
+        :param a = list((n, lmax, powexpansion): expansion of function in powers
+        :param inplace: modify a in place?
+        :return coefflist: a
+        """
+        acoeff = getattr(a, 'coefflist', a)
+        if inplace:
+            ra = acoeff
+        else:
+            ra = [ (n, l, c.copy()) for (n,l,c) in acoeff ]
+        projector = cls.Lproj[-1]
+        dellist = []
+        for coeffindex,(n, l, c) in enumerate(ra):
+            # first, project
+            c = np.tensordot(projector[:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
+            # print(c)
+            # now, systematically attempt to reduce the l value
+            if np.allclose(c, 0):
+                # occasionally, it gets reduced to zero:
+                dellist.append(coeffindex)
+            else:
+                # then we have something to look at... systematically attempt to drop l:
+                # check in blocks
+                for lmin in range(l, -1, -1):
+                    if not np.allclose(c[cls.powlrange[lmin-1]:cls.powlrange[lmin]],0):
+                        break
+                # reduce! Note: we do this *every time* because c is the projected version of our coeff.
+                ra[coeffindex] = (n, lmin, c[:cls.powlrange[lmin]].copy())
+        # finally, let's deal with our delete list; do this by popping, and in reverse index order
+        dellist.reverse()
+        for ind in dellist:
+            ra.pop(ind)
+        return ra
+
     def reduce(self):
         """
         Reduce the coefficients: eliminate any n that has zero coefficients, collect all of
         the same values of n together. Done in place.
         """
-        pass
+        self.reducecoeff(self.coefflist, inplace=True)
+        return self
 
     def collect(self):
         """
         Collect the coefficients: combine all similar (n,*) values, regardless of l values,
         by summation.
         """
-        pass
+        return self
 
     def separate(self):
         """
         Separate out the coefficients into (n,l) terms where *only* l contributions
-        appear in each
-        :return:
+        appear in each.
         """
+        return self
