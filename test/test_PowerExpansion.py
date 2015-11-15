@@ -150,8 +150,6 @@ class PowerExpansionTests(unittest.TestCase):
             return lambda u: u**n
 
         c = T3D()
-        # print("c: ", c.coefflist)
-        # print(c.constructexpansion(self.basis, N=2))
         for coeff in c.constructexpansion(self.basis, N=2):
             c.addterms(coeff)
         c *= { (n,l): 1./PE.factorial(n, True) for (n,l) in c.nl() } # scalar multiply to create a Taylor expansion for exp
@@ -221,10 +219,6 @@ class PowerExpansionTests(unittest.TestCase):
             else:
                 self.assertTrue(l == 0 or l == 2 or l == 4)
 
-        # print("c: ", c)
-        # print("c2: ", c2)
-        # print("c3: ", c3)
-
         # a little tricky to make sure we get ALL the functions (instead of making multiple dictionaries)
         fnu = { (n,l): createExpansion(n) for (n,l) in c.nl() } # or could do this in previous loop
         for (n,l) in c3.nl():
@@ -260,11 +254,8 @@ class PowerExpansionTests(unittest.TestCase):
         ]
 
         c = T3D([c[0] for c in T3D.constructexpansion(cubicbasis, N=4, pre=(0,1,1/2,1/6,1/24))])
-        print("c: ", c)
         c.reduce()
-        print("c(reduced): ", c)
         cinv = c.inv(Nmax=0) # since c ~ x^2, cinv ~ 1/x^2, and L=4 should take us to x^0
-        print("cinv: ", cinv)
 
         fnu = { (n,l): createExpansion(n) for (n,l) in c.nl() } # or could do this in previous loop
         for (n,l) in cinv.nl():
@@ -279,9 +270,5 @@ class PowerExpansionTests(unittest.TestCase):
             cinvval = cinv(u, fnu)
             cval_inv = np.dot(cval, cinvval) - np.eye(2)
             # cval_directinv = np.linalg.inv(cval)
-            print("u: {}".format(u))
-            print("cval:\n{}".format(cval))
-            print("cinvval:\n{}".format(cinvval))
-            print("cval_inv:\n{}".format(cval_inv))
             self.assertTrue(np.all(abs(cval_inv) < (1/120)*umagn**4),
                             msg="cinv * c != 1?\nc={}\ncinv={}\nc*cinv-1={}".format(cval, cinvval, cval_inv))
