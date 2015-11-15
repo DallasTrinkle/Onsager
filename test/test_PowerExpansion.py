@@ -271,13 +271,17 @@ class PowerExpansionTests(unittest.TestCase):
             if (n,l) not in fnu:
                 fnu[(n,l)] = createExpansion(n)
 
-        for u in [ np.array([0.01, 0., 0.]), np.array([0., 0.01, 0.]), np.array([0., 0., 0.01]),
-                   np.array([0.00234, -0.0085, 0.0125]),
-                   np.array([0.0124, 0.0071, -0.0098])]:
+        for u in [ np.array([0.25, 0., 0.]), np.array([0., 0.1, 0.]), np.array([0., 0., 0.1]),
+                   np.array([0.0234, -0.085, 0.125]),
+                   np.array([0.124, 0.071, -0.098])]:
             umagn = np.sqrt(np.dot(u, u))
             cval = c(u, fnu)
             cinvval = cinv(u, fnu)
             cval_inv = np.dot(cval, cinvval) - np.eye(2)
             # cval_directinv = np.linalg.inv(cval)
-            self.assertTrue(np.all(abs(cval_inv) < 1e-2*umagn*umagn),
+            print("u: {}".format(u))
+            print("cval:\n{}".format(cval))
+            print("cinvval:\n{}".format(cinvval))
+            print("cval_inv:\n{}".format(cval_inv))
+            self.assertTrue(np.all(abs(cval_inv) < (1/120)*umagn**4),
                             msg="cinv * c != 1?\nc={}\ncinv={}\nc*cinv-1={}".format(cval, cinvval, cval_inv))
