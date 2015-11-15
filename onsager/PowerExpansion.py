@@ -53,16 +53,16 @@ class Taylor3D(object):
             for n1 in range(l+1):
                 for n2 in range(l+1-n1):
                     n3 = l-n1-n2
-                    pow2ind[n1][n2][n3] = ind
-                    ind2pow[ind][0], ind2pow[ind][1], ind2pow[ind][2] = n1,n2,n3
+                    pow2ind[n1,n2,n3] = ind
+                    ind2pow[ind,0], ind2pow[ind,1], ind2pow[ind,2] = n1,n2,n3
                     ind += 1
             powlrange[l] = ind
         # next, Ylm values
         ind = 0
         for l in range(Lmax+1):
             for m in range(-l, l+1):
-                Ylm2ind[l][m] = ind
-                ind2Ylm[ind][0], ind2Ylm[ind][1] = l,m
+                Ylm2ind[l,m] = ind
+                ind2Ylm[ind,0], ind2Ylm[ind,1] = l,m
                 ind += 1
         return NYlm, Npower, pow2ind, ind2pow, Ylm2ind, ind2Ylm, powlrange
 
@@ -76,7 +76,7 @@ class Taylor3D(object):
         for l in range(cls.Lmax+1):
             # do the positive m first; then easily swap to get the negative m
             for m in range(l+1):
-                ind = cls.Ylm2ind[l][m]
+                ind = cls.Ylm2ind[l,m]
                 pre = (-1)**m * np.sqrt((2*l+1)*factorial(l-m,True)/
                                         (4*np.pi*factorial(l+m,True)))
                 for k in range((l+m+1)//2, l+1):
@@ -84,12 +84,12 @@ class Taylor3D(object):
                          (2**l*factorial(2*k-l-m,True)*factorial(k,True)*factorial(l-k,True))
                     for j in range(m+1):
                         xy = factorial(m,True)/(factorial(j,True)*factorial(m-j,True))
-                        Ylmpow[ind][cls.pow2ind[j][m-j][2*k-l-m]] = pre*zz*xy*(1.j)**(m-j)
+                        Ylmpow[ind,cls.pow2ind[j,m-j,2*k-l-m]] = pre*zz*xy*(1.j)**(m-j)
             for m in range(-l,0):
-                ind = cls.Ylm2ind[l][m]
-                indpos = cls.Ylm2ind[l][-m]
+                ind = cls.Ylm2ind[l,m]
+                indpos = cls.Ylm2ind[l,-m]
                 for p in range(cls.Npower):
-                    Ylmpow[ind][p] = (-1)**(-m) * Ylmpow[indpos][p].conjugate()
+                    Ylmpow[ind,p] = (-1)**(-m) * Ylmpow[indpos,p].conjugate()
         return Ylmpow
 
     @classmethod
@@ -107,52 +107,52 @@ class Taylor3D(object):
         Sm = np.zeros((cls.Lmax, 2*cls.Lmax-1))
         # because this is for our recursion relations, we only need to work to Lmax-1 !
         for l,m in ((l,m) for l in range(cls.Lmax) for m in range(-l,l+1)):
-            Cp[l][m] = np.sqrt((l-m+1)*(l+m+1)/((2*l+1)*(2*l+3)))
-            Sp[l][m] = 0.5*np.sqrt((l+m+1)*(l+m+2)/((2*l+1)*(2*l+3)))
+            Cp[l,m] = np.sqrt((l-m+1)*(l+m+1)/((2*l+1)*(2*l+3)))
+            Sp[l,m] = 0.5*np.sqrt((l+m+1)*(l+m+2)/((2*l+1)*(2*l+3)))
             if l>0: # and -l < m < l:
-                Cm[l][m] = np.sqrt((l-m)*(l+m)/((2*l-1)*(2*l+1)))
-                Sm[l][m] = 0.5*np.sqrt((l-m)*(l-m-1)/((2*l-1)*(2*l+1)))
+                Cm[l,m] = np.sqrt((l-m)*(l+m)/((2*l-1)*(2*l+1)))
+                Sm[l,m] = 0.5*np.sqrt((l-m)*(l-m-1)/((2*l-1)*(2*l+1)))
 
         # first, prime the pump with 1
-        powYlm[cls.pow2ind[0][0][0]][cls.Ylm2ind[0][0]] = np.sqrt(4*np.pi)
+        powYlm[cls.pow2ind[0,0,0],cls.Ylm2ind[0,0]] = np.sqrt(4*np.pi)
         for n0,n1,n2 in ((n0,n1,n2) for n0 in range(cls.Lmax+1)
                          for n1 in range(cls.Lmax+1)
                          for n2 in range(cls.Lmax+1)
                          if 0 < n0+n1+n2 <= cls.Lmax):
-            ind = cls.pow2ind[n0][n1][n2]
+            ind = cls.pow2ind[n0,n1,n2]
             lmax = n0+n1+n2
             if n2>0:
                 # we can recurse up from n0, n1, n2-1
-                indlow = cls.pow2ind[n0][n1][n2-1]
+                indlow = cls.pow2ind[n0,n1,n2-1]
                 for l,m in ((l,m) for l in range(lmax) for m in range(-l,l+1)):
-                    plm = powYlm[indlow][cls.Ylm2ind[l][m]]
-                    powYlm[ind][cls.Ylm2ind[l+1][m]] += Cp[l][m]*plm
+                    plm = powYlm[indlow,cls.Ylm2ind[l,m]]
+                    powYlm[ind,cls.Ylm2ind[l+1,m]] += Cp[l,m]*plm
                     if l>0 and -l < m < l:
-                        powYlm[ind][cls.Ylm2ind[l-1][m]] += Cm[l][m]*plm
+                        powYlm[ind,cls.Ylm2ind[l-1,m]] += Cm[l,m]*plm
             elif n1>0:
                 # we can recurse up from n0, n1-1, n2
-                indlow = cls.pow2ind[n0][n1-1][n2]
+                indlow = cls.pow2ind[n0,n1-1,n2]
                 for l,m in ((l,m) for l in range(lmax) for m in range(-l,l+1)):
-                    plm = powYlm[indlow][cls.Ylm2ind[l][m]]
-                    powYlm[ind][cls.Ylm2ind[l+1][m+1]] += 1.j*Sp[l][m]*plm
-                    powYlm[ind][cls.Ylm2ind[l+1][m-1]] += 1.j*Sp[l][-m]*plm
+                    plm = powYlm[indlow,cls.Ylm2ind[l,m]]
+                    powYlm[ind,cls.Ylm2ind[l+1,m+1]] += 1.j*Sp[l,m]*plm
+                    powYlm[ind,cls.Ylm2ind[l+1,m-1]] += 1.j*Sp[l,-m]*plm
                     # if l>0:
                     if m < l-1:
-                        powYlm[ind][cls.Ylm2ind[l-1][m+1]] += -1.j*Sm[l][m]*plm
+                        powYlm[ind,cls.Ylm2ind[l-1,m+1]] += -1.j*Sm[l,m]*plm
                     if m > -l+1:
-                        powYlm[ind][cls.Ylm2ind[l-1][m-1]] += -1.j*Sm[l][-m]*plm
+                        powYlm[ind,cls.Ylm2ind[l-1,m-1]] += -1.j*Sm[l,-m]*plm
             elif n0>0:
                 # we can recurse up from n0-1, n1, n2
-                indlow = cls.pow2ind[n0-1][n1][n2]
+                indlow = cls.pow2ind[n0-1,n1,n2]
                 for l,m in ((l,m) for l in range(lmax) for m in range(-l,l+1)):
-                    plm = powYlm[indlow][cls.Ylm2ind[l][m]]
-                    powYlm[ind][cls.Ylm2ind[l+1][m+1]] += -Sp[l][m]*plm
-                    powYlm[ind][cls.Ylm2ind[l+1][m-1]] += Sp[l][-m]*plm
+                    plm = powYlm[indlow,cls.Ylm2ind[l,m]]
+                    powYlm[ind,cls.Ylm2ind[l+1,m+1]] += -Sp[l,m]*plm
+                    powYlm[ind,cls.Ylm2ind[l+1,m-1]] += Sp[l,-m]*plm
                     # if l>0:
                     if m < l-1:
-                        powYlm[ind][cls.Ylm2ind[l-1][m+1]] += Sm[l][m]*plm
+                        powYlm[ind,cls.Ylm2ind[l-1,m+1]] += Sm[l,m]*plm
                     if m > -l+1:
-                        powYlm[ind][cls.Ylm2ind[l-1][m-1]] += -Sm[l][-m]*plm
+                        powYlm[ind,cls.Ylm2ind[l-1,m-1]] += -Sm[l,-m]*plm
         return powYlm
 
     @classmethod
@@ -166,9 +166,9 @@ class Taylor3D(object):
         projL = np.zeros((cls.Lmax+2, cls.Npower, cls.Npower))
         projLYlm = np.zeros((cls.Lmax+2, cls.NYlm, cls.NYlm), dtype=complex)
         for l,m in ((l,m) for l in range(0,cls.Lmax+1) for m in range(-l, l+1)):
-            lm = cls.Ylm2ind[l][m]
-            projLYlm[l][lm][lm] = 1. # l,m is part of l
-            projLYlm[-1][lm][lm] = 1. # all part of the sum
+            lm = cls.Ylm2ind[l,m]
+            projLYlm[l,lm,lm] = 1. # l,m is part of l
+            projLYlm[-1,lm,lm] = 1. # all part of the sum
         for l in range(cls.Lmax+2):
             # projL[l] = np.dot(cls.powYlm, np.dot(projLYlm[l], cls.Ylmpow)).real
             projL[l] = np.tensordot(cls.Ylmpow,
@@ -185,7 +185,7 @@ class Taylor3D(object):
         for (p0,p1) in ((p0,p1) for p0 in range(cls.Npower) for p1 in range(cls.Npower)):
             nsum = cls.ind2pow[p0] + cls.ind2pow[p1]
             if sum(nsum) <= cls.Lmax:
-                directmult[p0][p1] = cls.pow2ind[nsum[0]][nsum[1]][nsum[2]]
+                directmult[p0,p1] = cls.pow2ind[nsum[0],nsum[1],nsum[2]]
         return directmult
 
     @classmethod
@@ -200,19 +200,19 @@ class Taylor3D(object):
         umagn = np.sqrt(np.dot(u, u))
         upow = np.zeros(cls.Npower)
         if umagn < 1e-8:
-            upow[cls.pow2ind[0][0][0]] = 1.
+            upow[cls.pow2ind[0,0,0]] = 1.
             umagn = 0.
         else:
             u0 = u.copy()
             if normalize: u0 /= umagn
             xyz = np.ones((cls.Lmax+1,3))
             for n in range(1,cls.Lmax+1):
-                xyz[n][:] = xyz[n-1][:]*u0[:]
+                xyz[n,:] = xyz[n-1,:]*u0[:]
             for n0,n1,n2 in ((n0,n1,n2) for n0 in range(cls.Lmax+1)
                              for n1 in range(cls.Lmax+1)
                              for n2 in range(cls.Lmax+1)
                              if n0+n1+n2 <= cls.Lmax):
-                upow[cls.pow2ind[n0][n1][n2]] = xyz[n0][0]*xyz[n1][1]*xyz[n2][2]
+                upow[cls.pow2ind[n0,n1,n2]] = xyz[n0,0]*xyz[n1,1]*xyz[n2,2]
         if normalize: return upow, umagn
         else: return upow
 
@@ -228,7 +228,7 @@ class Taylor3D(object):
                 for n2 in range(cls.Lmax+1):
                     n = n0+n1+n2
                     if n<=cls.Lmax:
-                        powercoeff[n][cls.pow2ind[n0][n1][n2]] = \
+                        powercoeff[n,cls.pow2ind[n0,n1,n2]] = \
                             factorial(n,True)/(factorial(n0,True)*factorial(n1,True)*factorial(n2,True))
         return powercoeff
 
@@ -322,7 +322,7 @@ class Taylor3D(object):
             for p in range(self.powlrange[l]):
                 if not np.all(np.isclose(coeff[p], 0)):
                     strrep = strrep + "\n{} x^{} y^{} z^{}".format(coeff[p],
-                      self.ind2pow[p][0], self.ind2pow[p][1], self.ind2pow[p][2])
+                      self.ind2pow[p,0], self.ind2pow[p,1], self.ind2pow[p,2])
             strrep = strrep + " )\n"
         return strrep
 
@@ -562,7 +562,7 @@ class Taylor3D(object):
                 cpow = np.zeros((cls.powlrange[clmax],) + cshape, dtype=complex)
                 for pa in range(cls.powlrange[almax]):
                     for pb in range(cls.powlrange[blmax]):
-                        cpow[cls.directmult[pa][pb]] += np.tensordot(apow[pa], bpow[pb], axes=1)
+                        cpow[cls.directmult[pa,pb]] += np.tensordot(apow[pa], bpow[pb], axes=1)
                 # now add it into the list
                 matched = False
                 for coeffindex, cmatch in enumerate(c):

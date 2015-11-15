@@ -40,7 +40,7 @@ class PowerExpansionTests(unittest.TestCase):
             Ylm0 = np.zeros(T3D.NYlm, dtype=complex)
             # Ylm as power expansions
             for lm in range(T3D.NYlm):
-                l, m = T3D.ind2Ylm[lm][0], T3D.ind2Ylm[lm][1]
+                l, m = T3D.ind2Ylm[lm,0], T3D.ind2Ylm[lm,1]
                 Ylm0[lm] = sph_harm(m, l, theta, phi)
                 Ylmexp = np.dot(T3D.Ylmpow[lm], utest)
                 self.assertAlmostEquals(Ylm0[lm], Ylmexp,
@@ -50,11 +50,27 @@ class PowerExpansionTests(unittest.TestCase):
                 pYlm = np.dot(T3D.powYlm[p], Ylm0)
                 self.assertAlmostEquals(utest[p], pYlm,
                                         msg="Failure for powYlm {}; theta={}, phi={}\n{} != {}".format(T3D.ind2pow[p], theta, phi, utest[p], pYlm))
-            # projection (note that Lproj is not symmetric)
+            # projection (note that Lproj is not symmetric): so this test ensures that v.u and (proj.v).u
+            # give the same value
             uproj = np.tensordot(T3D.Lproj[-1], utest, axes=(0,0))
             for p in range(T3D.NYlm):
                 self.assertAlmostEquals(utest[p], uproj[p],
                                         msg="Projection failure for {}\n{} != {}".format(T3D.ind2pow[p], uproj[p], utest[p]))
+
+    def testProjection(self):
+        """Test that the L-projections are correct"""
+        # Try to do this sequentially
+        for tup in [(0,0,0), (1,0,0), (0,1,0), (0,0,1)]:
+            v = np.zeros(T3D.Npower)
+            v[T3D.pow2ind[tup]] = 1.
+            Pv = np.tensordot(T3D.Lproj[-1], v, axes=1)
+            self.assertTrue(np.allclose(v, Pv))
+            for l in range(T3D.Lmax+1):
+                Pv = np.tensordot(T3D.Lproj[l], v, axes=1)
+                if l == sum(tup):
+                    self.assertTrue(np.allclose(v, Pv))
+                else:
+                    self.assertTrue(np.allclose(Pv,0))
 
     def testEvaluation(self):
         """Test out the evaluation functions in an expansion, including with scalar multiply and addition"""
