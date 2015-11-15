@@ -64,13 +64,23 @@ class PowerExpansionTests(unittest.TestCase):
             v = np.zeros(T3D.Npower)
             v[T3D.pow2ind[tup]] = 1.
             Pv = np.tensordot(T3D.Lproj[-1], v, axes=1)
+            # now, try with multiplying by x^2+y^2+z^2:
+            vxyz = np.zeros(T3D.Npower)
+            vxyz[T3D.pow2ind[tup[0]+2,tup[1],tup[2]]] = 1.
+            vxyz[T3D.pow2ind[tup[0],tup[1]+2,tup[2]]] = 1.
+            vxyz[T3D.pow2ind[tup[0],tup[1],tup[2]+2]] = 1.
+            Pvxyz = np.tensordot(T3D.Lproj[-1], vxyz, axes=1)
             self.assertTrue(np.allclose(v, Pv))
+            self.assertTrue(np.allclose(v, Pvxyz))
             for l in range(T3D.Lmax+1):
                 Pv = np.tensordot(T3D.Lproj[l], v, axes=1)
+                Pvxyz = np.tensordot(T3D.Lproj[l], vxyz, axes=1)
                 if l == sum(tup):
                     self.assertTrue(np.allclose(v, Pv))
+                    self.assertTrue(np.allclose(v, Pvxyz))
                 else:
                     self.assertTrue(np.allclose(Pv,0))
+                    self.assertTrue(np.allclose(Pvxyz,0))
 
     def testEvaluation(self):
         """Test out the evaluation functions in an expansion, including with scalar multiply and addition"""
@@ -211,9 +221,9 @@ class PowerExpansionTests(unittest.TestCase):
             else:
                 self.assertTrue(l == 0 or l == 2 or l == 4)
 
-        print("c: ", c)
-        print("c2: ", c2)
-        print("c3: ", c3)
+        # print("c: ", c)
+        # print("c2: ", c2)
+        # print("c3: ", c3)
 
         # a little tricky to make sure we get ALL the functions (instead of making multiple dictionaries)
         fnu = { (n,l): createExpansion(n) for (n,l) in c.nl() } # or could do this in previous loop
@@ -269,5 +279,5 @@ class PowerExpansionTests(unittest.TestCase):
             cinvval = cinv(u, fnu)
             cval_inv = np.dot(cval, cinvval) - np.eye(2)
             # cval_directinv = np.linalg.inv(cval)
-            self.assertTrue(np.all(abs(cval_inv) < umagn*umagn),
+            self.assertTrue(np.all(abs(cval_inv) < 1e-2*umagn*umagn),
                             msg="cinv * c != 1?\nc={}\ncinv={}\nc*cinv-1={}".format(cval, cinvval, cval_inv))

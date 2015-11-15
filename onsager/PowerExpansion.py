@@ -368,6 +368,35 @@ class Taylor3D(object):
         return sorted([ (n,l) for (n,l,coeff) in self.coefflist], key=self.__sortkey)
 
     @classmethod
+    def scalarproductcoeff(cls, c, a, inplace=False):
+        """
+        Multiplies an coefficient expansion a by a scalar c
+        :param c: scalar *or* dictionary mapping (n,l) to scalars
+        :param a = list((n, lmax, powexpansion): expansion of function in powers
+        :param inplace: modify a in place?
+        :return coefflist: c*a
+        """
+        acoeff = getattr(a, 'coefflist', a)
+        if inplace:
+            if isinstance(c, dict):
+                for an, almax, apow in acoeff:
+                    apow *= c[(an, almax)]
+            else:
+                for an, almax, apow in acoeff:
+                    apow *= c
+            ca = a
+        else:
+            # create new expansion
+            ca = []
+            if isinstance(c, dict):
+                for an, almax, apow in acoeff:
+                    ca.append((an, almax, c[(an, almax)]*apow))
+            else:
+                for an, almax, apow in acoeff:
+                    ca.append((an, almax, c*apow))
+        return ca
+
+    @classmethod
     def sumcoeff(cls, a, b, alpha=1, beta=1, inplace=False):
         """
         Takes Taylor3D expansion a and b, and returns the sum of the expansions.
@@ -387,6 +416,8 @@ class Taylor3D(object):
         # a little pythonic magic to work with *either* a list, or an object with a coefflist
         acoeff = getattr(a, 'coefflist', a) # fallback to a if not there... which assumes it's a list
         bcoeff = getattr(b, 'coefflist', b) # fallback to b if not there... which assumes it's a list
+        if len(bcoeff) == 0: return cls.scalarproductcoeff(alpha, acoeff, inplace)
+        if len(acoeff) == 0: return cls.scalarproductcoeff(beta, bcoeff, inplace)
         ashape = acoeff[0][2].shape
         bshape = bcoeff[0][2].shape
         if ashape[1:] != bshape[1:]:
@@ -457,35 +488,6 @@ class Taylor3D(object):
         if hasattr(other, 'shape'): other = [(0, 0, other.reshape((1,) + other.shape))]
         self.sumcoeff(self, other, 1, -1, inplace=True)
         return self
-
-    @classmethod
-    def scalarproductcoeff(cls, c, a, inplace=False):
-        """
-        Multiplies an coefficient expansion a by a scalar c
-        :param c: scalar *or* dictionary mapping (n,l) to scalars
-        :param a = list((n, lmax, powexpansion): expansion of function in powers
-        :param inplace: modify a in place?
-        :return coefflist: c*a
-        """
-        acoeff = getattr(a, 'coefflist', a)
-        if inplace:
-            if isinstance(c, dict):
-                for an, almax, apow in acoeff:
-                    apow *= c[(an, almax)]
-            else:
-                for an, almax, apow in acoeff:
-                    apow *= c
-            ca = a
-        else:
-            # create new expansion
-            ca = []
-            if isinstance(c, dict):
-                for an, almax, apow in acoeff:
-                    ca.append((an, almax, c[(an, almax)]*apow))
-            else:
-                for an, almax, apow in acoeff:
-                    ca.append((an, almax, c*apow))
-        return ca
 
     @classmethod
     def tensorproductcoeff(cls, c, a, leftmultiply=True):
@@ -634,9 +636,9 @@ class Taylor3D(object):
         """
         # a little pythonic magic to work with *either* a list, or an object with a coefflist
         acoeff = sorted(getattr(a, 'coefflist', a), key=cls.__sortkey) # fallback to a if not there... which assumes it's a list
-        if acoeff[0][1] != 0:
-            raise ArithmeticError('Cannot invert expansion: leading-order term {} has l={}'.format(acoeff[0][0], acoeff[0][1]))
         lead = acoeff[0]
+        if lead[1] != 0:
+            raise ValueError('Cannot invert expansion: leading-order term {} has l={}>0'.format(lead[0], lead[1]))
         leadinvmat = np.linalg.inv(lead[2][0])
         leadinvpow = -lead[0]
         c = [(leadinvpow, 0, leadinvmat.copy().reshape(lead[2].shape))]
@@ -644,16 +646,16 @@ class Taylor3D(object):
             return c
         else:
             if leadinvpow + acoeff[1][0] <= 0:
-                raise ArithmeticError('Cannot invert expansion: second term has same power as leading-order term?')
+                raise ValueError('Cannot invert expansion: second term has same power as leading-order term?')
         tail = [ (n+leadinvpow, l, -coeff)
-            for n,l,coeff in cls.tensorproductcoeff(acoeff[1:], leadinvmat, leftmultiply=True)]
+            for n,l,coeff in cls.tensorproductcoeff(leadinvmat, acoeff[1:], leftmultiply=True)]
         # now we can calculate the number of terms necessary:
         # leadinvpow + n*(tail[0][0]) >= Nmax
-        Nseries = (Nmax - leadinvpow)/tail[0][0]
+        Nseries = (Nmax - leadinvpow)//tail[0][0]
         # prime the pump: leadinvmat = A, tail = -AB^-1
         cls.sumcoeff(c, [ (n+leadinvpow, l, coeff)
                           for n,l,coeff in
-                          cls.tensorproductcoeff(acoeff[1:], leadinvmat, leftmultiply=False)
+                          cls.tensorproductcoeff(leadinvmat, tail, leftmultiply=False)
                           if n+leadinvpow <= Nmax],
                      inplace=True)
         tailn = [(n, l, coeff.copy()) for n,l,coeff in tail]
@@ -663,7 +665,7 @@ class Taylor3D(object):
                       if n+leadinvpow <= Nmax ]
             cls.sumcoeff(c, [ (n+leadinvpow, l, coeff)
                               for n,l,coeff in
-                              cls.tensorproductcoeff(acoeff[1:], leadinvmat, leftmultiply=False)],
+                              cls.tensorproductcoeff(leadinvmat, tail, leftmultiply=False)],
                          inplace=True)
         return c
 
