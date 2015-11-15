@@ -172,7 +172,8 @@ class PowerExpansionTests(unittest.TestCase):
         def createExpansion(n):
             return lambda u: u**n
 
-        c = T3D(T3D.constructexpansion(self.basis, N=4, pre=(0,1,1/2,1/6,1/24)))
+        c = T3D([c[0] for c in T3D.constructexpansion(self.basis, N=4, pre=(0,1,1/2,1/6,1/24))])
+        self.assertEqual(len(c.coefflist), 5) # should have all n from 0 to 4
         c2 = c.copy()
         c2.reduce()
         # check the reduction: should be just two terms remaining: n=2, n=4
@@ -224,7 +225,7 @@ class PowerExpansionTests(unittest.TestCase):
         def createExpansion(n):
             return lambda u: u**n
 
-        c = T3D(T3D.constructexpansion(self.basis, N=4, pre=(0,1,1/2,1/6,1/24)))
+        c = T3D([c[0] for c in T3D.constructexpansion(self.basis, N=4, pre=(0,1,1/2,1/6,1/24))])
         c.reduce()
         cinv = c.inv(Nmax=0) # since c ~ x^2, cinv ~ 1/x^2, and L=4 should take us to x^0
         print("c: ", c)

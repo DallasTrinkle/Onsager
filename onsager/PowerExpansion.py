@@ -671,3 +671,24 @@ class Taylor3D(object):
         :return: Taylor series of inverse
         """
         return Taylor3D(self.inversecoeff(self, Nmax))
+
+    def reduce(self):
+        """
+        Reduce the coefficients: eliminate any n that has zero coefficients, collect all of
+        the same values of n together. Done in place.
+        """
+        pass
+
+    def collect(self):
+        """
+        Collect the coefficients: combine all similar (n,*) values, regardless of l values,
+        by summation.
+        """
+        pass
+
+    def separate(self):
+        """
+        Separate out the coefficients into (n,l) terms where *only* l contributions
+        appear in each
+        :return:
+        """
