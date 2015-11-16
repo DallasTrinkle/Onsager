@@ -218,6 +218,13 @@ class PowerExpansionTests(unittest.TestCase):
                 self.assertTrue(l == 0 or l == 2)
             else:
                 self.assertTrue(l == 0 or l == 2 or l == 4)
+            # also check that the only non-zero terms for a given l are value are those values
+            if l==0: lmin = 0
+            else: lmin = T3D.powlrange[l-1]
+            lmax = T3D.powlrange[l]
+            self.assertTrue(np.allclose(coeff[0:lmin], 0))
+            self.assertTrue(np.allclose(coeff[lmax:T3D.Npower], 0))
+            self.assertFalse(np.allclose(coeff[lmin:lmax], 0))
 
         # a little tricky to make sure we get ALL the functions (instead of making multiple dictionaries)
         fnu = { (n,l): createExpansion(n) for (n,l) in c.nl() } # or could do this in previous loop

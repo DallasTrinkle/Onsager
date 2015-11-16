@@ -723,16 +723,96 @@ class Taylor3D(object):
         self.reducecoeff(self.coefflist, inplace=True)
         return self
 
+    @classmethod
+    def collectcoeff(cls, a, inplace=False):
+        """
+        Projects coefficients through Ylm space, one by one. Assumes they've already been
+        "collected" first.
+        :param a = list((n, lmax, powexpansion): expansion of function in powers
+        :param inplace: modify a in place?
+        :return coefflist: a
+        """
+        acoeff = getattr(a, 'coefflist', a)
+        return acoeff
+        if inplace:
+            ra = acoeff
+        else:
+            ra = [ (n, l, c.copy()) for (n,l,c) in acoeff ]
+        projector = cls.Lproj[-1]
+        dellist = []
+        for coeffindex,(n, l, c) in enumerate(ra):
+            # first, project
+            c = np.tensordot(projector[:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
+            # print(c)
+            # now, systematically attempt to reduce the l value
+            if np.allclose(c, 0):
+                # occasionally, it gets reduced to zero:
+                dellist.append(coeffindex)
+            else:
+                # then we have something to look at... systematically attempt to drop l:
+                # check in blocks
+                for lmin in range(l, -1, -1):
+                    if not np.allclose(c[cls.powlrange[lmin-1]:cls.powlrange[lmin]],0):
+                        break
+                # reduce! Note: we do this *every time* because c is the projected version of our coeff.
+                ra[coeffindex] = (n, lmin, c[:cls.powlrange[lmin]].copy())
+        # finally, let's deal with our delete list; do this by popping, and in reverse index order
+        dellist.reverse()
+        for ind in dellist:
+            ra.pop(ind)
+        return ra
+
     def collect(self):
         """
         Collect the coefficients: combine all similar (n,*) values, regardless of l values,
         by summation.
         """
+        self.collectcoeff(self.coefflist, inplace=True)
         return self
+
+    @classmethod
+    def separatecoeff(cls, a, inplace=False):
+        """
+        Projects coefficients through Ylm space, one by one. Assumes they've already been
+        "collected" first.
+        :param a = list((n, lmax, powexpansion): expansion of function in powers
+        :param inplace: modify a in place?
+        :return coefflist: a
+        """
+        acoeff = getattr(a, 'coefflist', a)
+        return acoeff
+        if inplace:
+            ra = acoeff
+        else:
+            ra = [ (n, l, c.copy()) for (n,l,c) in acoeff ]
+        projector = cls.Lproj[-1]
+        dellist = []
+        for coeffindex,(n, l, c) in enumerate(ra):
+            # first, project
+            c = np.tensordot(projector[:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
+            # print(c)
+            # now, systematically attempt to reduce the l value
+            if np.allclose(c, 0):
+                # occasionally, it gets reduced to zero:
+                dellist.append(coeffindex)
+            else:
+                # then we have something to look at... systematically attempt to drop l:
+                # check in blocks
+                for lmin in range(l, -1, -1):
+                    if not np.allclose(c[cls.powlrange[lmin-1]:cls.powlrange[lmin]],0):
+                        break
+                # reduce! Note: we do this *every time* because c is the projected version of our coeff.
+                ra[coeffindex] = (n, lmin, c[:cls.powlrange[lmin]].copy())
+        # finally, let's deal with our delete list; do this by popping, and in reverse index order
+        dellist.reverse()
+        for ind in dellist:
+            ra.pop(ind)
+        return ra
 
     def separate(self):
         """
         Separate out the coefficients into (n,l) terms where *only* l contributions
         appear in each.
         """
+        self.separatecoeff(self.coefflist, inplace=True)
         return self
