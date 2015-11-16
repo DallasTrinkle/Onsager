@@ -208,6 +208,7 @@ class PowerExpansionTests(unittest.TestCase):
                 self.assertEqual(l, 2)
             else:
                 self.assertEqual(l, 4)
+        print("c2:\n{}".format(c2))
         c3 = c2.copy()
         c3.separate()
         # now should have 2 + 3 = 5 terms

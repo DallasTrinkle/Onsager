@@ -715,58 +715,51 @@ class Taylor3D(object):
             ra.pop(ind)
         return ra
 
+    @classmethod
+    def collectcoeff(cls, a, inplace=False):
+        """
+        Collects coefficients: sums up all the common n values. Best to be done *after*
+        reduce is called.
+        :param a = list((n, lmax, powexpansion): expansion of function in powers
+        :param inplace: modify a in place?
+        :return coefflist: a
+        """
+        acoeff = getattr(a, 'coefflist', a)
+        if inplace:
+            ca = acoeff
+        else:
+            ca = [ (n, l, c.copy()) for (n,l,c) in acoeff ]
+        # so: the sort is such that all of the common n values are in ascending order
+        # *and* ascending l order. Makes collecting very easy:
+        ca.sort(key=cls.__sortkey)
+        projector = cls.Lproj[-1]
+        dellist = [] # indices to be eliminated
+        for coeffindex,(n, l, c) in enumerate(ca):
+            # first, project
+            c = np.tensordot(projector[:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
+            if np.allclose(c, 0):
+                # if we have zero coefficients, remove from the list
+                dellist.append(coeffindex)
+            else:
+                if coeffindex < len(ca)-1:
+                    if ca[coeffindex+1][0] == n:
+                        # same n, so collect:
+                        ca[coeffindex+1][2][:cls.powlrange[l]] += c
+                        dellist.append(coeffindex)
+                    else:
+                        ca[coeffindex] = (n, l, c.copy())
+        # finally, let's deal with our delete list; do this by popping, and in reverse index order
+        dellist.reverse()
+        for ind in dellist:
+            ca.pop(ind)
+        return ca
+
     def reduce(self):
         """
         Reduce the coefficients: eliminate any n that has zero coefficients, collect all of
         the same values of n together. Done in place.
         """
         self.reducecoeff(self.coefflist, inplace=True)
-        return self
-
-    @classmethod
-    def collectcoeff(cls, a, inplace=False):
-        """
-        Projects coefficients through Ylm space, one by one. Assumes they've already been
-        "collected" first.
-        :param a = list((n, lmax, powexpansion): expansion of function in powers
-        :param inplace: modify a in place?
-        :return coefflist: a
-        """
-        acoeff = getattr(a, 'coefflist', a)
-        return acoeff
-        if inplace:
-            ra = acoeff
-        else:
-            ra = [ (n, l, c.copy()) for (n,l,c) in acoeff ]
-        projector = cls.Lproj[-1]
-        dellist = []
-        for coeffindex,(n, l, c) in enumerate(ra):
-            # first, project
-            c = np.tensordot(projector[:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
-            # print(c)
-            # now, systematically attempt to reduce the l value
-            if np.allclose(c, 0):
-                # occasionally, it gets reduced to zero:
-                dellist.append(coeffindex)
-            else:
-                # then we have something to look at... systematically attempt to drop l:
-                # check in blocks
-                for lmin in range(l, -1, -1):
-                    if not np.allclose(c[cls.powlrange[lmin-1]:cls.powlrange[lmin]],0):
-                        break
-                # reduce! Note: we do this *every time* because c is the projected version of our coeff.
-                ra[coeffindex] = (n, lmin, c[:cls.powlrange[lmin]].copy())
-        # finally, let's deal with our delete list; do this by popping, and in reverse index order
-        dellist.reverse()
-        for ind in dellist:
-            ra.pop(ind)
-        return ra
-
-    def collect(self):
-        """
-        Collect the coefficients: combine all similar (n,*) values, regardless of l values,
-        by summation.
-        """
         self.collectcoeff(self.coefflist, inplace=True)
         return self
 
