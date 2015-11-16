@@ -813,3 +813,32 @@ class Taylor3D(object):
         """
         self.separatecoeff(self.coefflist, inplace=True)
         return self
+
+    @classmethod
+    def truncatecoeff(cls, a, Nmax, inplace=False):
+        """
+        Remove the coefficients above a given Nmax; normally returns a new object
+        :param Nmax: maximum coefficient to include
+        :param a = list((n, lmax, powexpansion): expansion of function in powers
+        :param inplace: do it in place?
+        """
+        acoeff = getattr(a, 'coefflist', a)
+        if inplace:
+            for ind in range(len(acoeff)-1, -1, -1):
+                if acoeff[ind][0] > Nmax:
+                    acoeff.pop(ind)
+            return acoeff
+        else:
+            return [(n, l, c.copy()) for (n, l, c) in acoeff if n <= Nmax]
+
+    def truncate(self, Nmax, inplace=False):
+        """
+        Remove the coefficients above a given Nmax; normally returns a new object
+        :param Nmax: maximum coefficient to include
+        :param inplace: do it in place?
+        """
+        if inplace:
+            self.truncatecoeff(self.coefflist, Nmax, inplace)
+            return self
+        else:
+            return Taylor3D(self.truncatecoeff(self.coefflist, Nmax))

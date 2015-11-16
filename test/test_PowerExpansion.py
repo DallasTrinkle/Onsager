@@ -299,3 +299,14 @@ class PowerExpansionTests(unittest.TestCase):
             # cval_directinv = np.linalg.inv(cval)
             self.assertTrue(np.all(abs(cval_inv) < (1/120)*umagn**4),
                             msg="cinv * c != 1?\nc={}\ncinv={}\nc*cinv-1={}".format(cval, cinvval, cval_inv))
+
+    def testTruncation(self):
+        """Make sure truncation works how we expect"""
+        c = T3D([nlc[0] for nlc in T3D.constructexpansion(self.basis, N=4)])
+        c.reduce()
+        self.assertEqual(max( n for n,l,c in c.coefflist), 4)
+        c2 = c.truncate(2)
+        self.assertEqual(max( n for n,l,c in c2.coefflist), 2)
+        self.assertEqual(max( n for n,l,c in c.coefflist), 4)
+        c.truncate(2, inplace=True)
+        self.assertEqual(max( n for n,l,c in c.coefflist), 2)
