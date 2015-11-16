@@ -227,6 +227,12 @@ class PowerExpansionTests(unittest.TestCase):
             # self.assertTrue(np.allclose(coeff[0:lmin], 0))
             self.assertTrue(np.allclose(coeff[lmax:T3D.Npower], 0))
             self.assertFalse(np.allclose(coeff[lmin:lmax], 0))
+            Ylmcoeff = np.tensordot(T3D.powYlm[:T3D.powlrange[l],:], coeff, axes=(0,0)) # now in Ylm
+            lmin = l**2
+            lmax = (l+1)**2
+            self.assertTrue(np.allclose(Ylmcoeff[0:lmin], 0))
+            self.assertFalse(np.allclose(Ylmcoeff[lmin:lmax], 0))
+            self.assertTrue(np.allclose(Ylmcoeff[lmax:T3D.NYlm], 0))
 
         # a little tricky to make sure we get ALL the functions (instead of making multiple dictionaries)
         fnu = { (n,l): createExpansion(n) for (n,l) in c.nl() } # or could do this in previous loop
