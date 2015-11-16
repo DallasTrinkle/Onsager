@@ -417,7 +417,13 @@ class Taylor3D(object):
         acoeff = getattr(a, 'coefflist', a) # fallback to a if not there... which assumes it's a list
         bcoeff = getattr(b, 'coefflist', b) # fallback to b if not there... which assumes it's a list
         if len(bcoeff) == 0: return cls.scalarproductcoeff(alpha, acoeff, inplace)
-        if len(acoeff) == 0: return cls.scalarproductcoeff(beta, bcoeff, inplace)
+        if len(acoeff) == 0:
+            if not inplace:
+                return cls.scalarproductcoeff(beta, bcoeff, inplace)
+            else:
+                for entry in cls.scalarproductcoeff(beta, bcoeff, inplace=False):
+                    acoeff.append(entry)
+                return acoeff
         ashape = acoeff[0][2].shape
         bshape = bcoeff[0][2].shape
         if ashape[1:] != bshape[1:]:

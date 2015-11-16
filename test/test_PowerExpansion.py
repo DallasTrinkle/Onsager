@@ -243,6 +243,18 @@ class PowerExpansionTests(unittest.TestCase):
                                    msg="Failure on reduce:\n{} != {}".format(c(u,fnu), c2(u,fnu)))
             self.assertTrue(np.allclose(c(u, fnu), c3(u, fnu)),
                                    msg="Failure on expand:\n{} != {}".format(c(u,fnu), c3(u,fnu)))
+        # do a test of projection using some random coefficients
+        coeffrand = np.random.uniform(-1, 1, T3D.Npower)
+        coeffrand.shape = (T3D.Npower, 1, 1)
+        crand = T3D([(0, T3D.Lmax, coeffrand)])
+        crand.separate()
+        for (n, l, c) in crand.coefflist:
+            Ylmcoeff = np.tensordot(T3D.powYlm[:T3D.powlrange[l],:], c, axes=(0,0)) # now in Ylm
+            lmin = l**2
+            lmax = (l+1)**2
+            self.assertTrue(np.allclose(Ylmcoeff[0:lmin], 0))
+            self.assertFalse(np.allclose(Ylmcoeff[lmin:lmax], 0))
+            self.assertTrue(np.allclose(Ylmcoeff[lmax:T3D.NYlm], 0))
 
     def testInverse(self):
         """Test our inverse expansion"""
