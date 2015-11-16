@@ -767,40 +767,38 @@ class Taylor3D(object):
     def separatecoeff(cls, a, inplace=False):
         """
         Projects coefficients through Ylm space, one by one. Assumes they've already been
-        "collected" first.
+        reduced and collected first; if not, could lead to duplicated (n,l) entries in list, which
+        is inefficient (should still *evaluate* the same, just with extra steps). After this,
+        each (n,l) term *only* contains terms equal to l, rather than terms <= l.
         :param a = list((n, lmax, powexpansion): expansion of function in powers
         :param inplace: modify a in place?
         :return coefflist: a
         """
         acoeff = getattr(a, 'coefflist', a)
-        return acoeff
         if inplace:
-            ra = acoeff
+            sa = acoeff
         else:
-            ra = [ (n, l, c.copy()) for (n,l,c) in acoeff ]
-        projector = cls.Lproj[-1]
+            sa = [ (n, l, c.copy()) for (n,l,c) in acoeff ]
         dellist = []
-        for coeffindex,(n, l, c) in enumerate(ra):
+        # we're going to append to sa, so... if you DON'T do this, you get an infinite loop:
+        for coeffindex,(n, l, c) in enumerate(sa[:len(sa)]):
             # first, project
-            c = np.tensordot(projector[:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
-            # print(c)
-            # now, systematically attempt to reduce the l value
-            if np.allclose(c, 0):
-                # occasionally, it gets reduced to zero:
-                dellist.append(coeffindex)
+            for l0 in range(l):
+                cl0 = np.tensordot(cls.Lproj[l0][:cls.powlrange[l],:cls.powlrange[l]],
+                                   c, axes=1)[:cls.powlrange[l0]]
+                if not np.allclose(cl0, 0):
+                    sa.append((n, l0, cl0))
+            c = np.tensordot(cls.Lproj[l][:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
+            if not np.allclose(c, 0):
+                sa[coeffindex] = (n, l, c) # this *should not be zero* but just in case...
             else:
-                # then we have something to look at... systematically attempt to drop l:
-                # check in blocks
-                for lmin in range(l, -1, -1):
-                    if not np.allclose(c[cls.powlrange[lmin-1]:cls.powlrange[lmin]],0):
-                        break
-                # reduce! Note: we do this *every time* because c is the projected version of our coeff.
-                ra[coeffindex] = (n, lmin, c[:cls.powlrange[lmin]].copy())
+                dellist.append(coeffindex)
         # finally, let's deal with our delete list; do this by popping, and in reverse index order
         dellist.reverse()
         for ind in dellist:
-            ra.pop(ind)
-        return ra
+            sa.pop(ind)
+        sa.sort(key=cls.__sortkey)
+        return sa
 
     def separate(self):
         """
