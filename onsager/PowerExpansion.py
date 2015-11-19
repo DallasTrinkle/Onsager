@@ -343,8 +343,31 @@ class Taylor3D(object):
             keyt = (key,)
         else:
             keyt = key
-        print(key)
         return Taylor3D([(n, l, c[(slice(0,None,None),) + keyt]) for n,l,c in self.coefflist], nodeepcopy=True)
+
+    def __setitem__(self, key, value):
+        """
+        Indexes (or even slices) into our Taylor expansion and "sets"; really only intended to work
+        with another Taylor expansion
+        :param key: indices for our Taylor expansion
+        :param value: assignment value; really, should be
+        :return: Taylor expansion after indexing
+        """
+        if not hasattr(value, "coefflist"):
+            raise ValueError("Can only do setitem ([...] = ) with another Taylor3D on the rhs")
+        if type(key) is not tuple:
+            keyt = (key,)
+        else:
+            keyt = key
+        for nv, lv, cv in value.coefflist:
+            matched = False
+            for n, l, c in self.coefflist:
+                if n == nv and l == lv:
+                    matched = True
+                    c[(slice(0,None,None),) + keyt] = cv
+            if not matched:
+                raise ValueError("Attempted to do setitem where the rhs contains terms not present in lhs")
+        return self
 
     def __str__(self):
         """
@@ -539,6 +562,9 @@ class Taylor3D(object):
         :return coefflist: c.a (or a.c)
         """
         acoeff = getattr(a, 'coefflist', a)
+        if isinstance(c, Number) or \
+                (isinstance(c, dict) and isinstance(c[(acoeff[0][0],acoeff[0][1])], Number)):
+            return cls.scalarproductcoeff(c, a, inplace=False)
         ca = []
         for an, almax, apow in acoeff:
             if isinstance(c, dict): cmult = c[(an, almax)]
@@ -590,9 +616,17 @@ class Taylor3D(object):
         c = []
         ashape = acoeff[0][2].shape
         bshape = bcoeff[0][2].shape
-        if ashape[-1] != bshape[1]:
-            raise TypeError('Unable to multiply--not compatible')
-        cshape = ashape[1:-1] + bshape[2:] # weird piece of python to find the shape of a*b
+        scalarmult = False
+        if len(ashape) == 1:
+            cshape = bshape[1:]
+            scalarmult = True
+        elif len(bshape) == 1:
+            cshape = ashape[1:]
+            scalarmult = True
+        else:
+            if ashape[-1] != bshape[1]:
+                raise TypeError('Unable to multiply--not compatible')
+            cshape = ashape[1:-1] + bshape[2:] # weird piece of python to find the shape of a*b
         for an, almax, apow in acoeff:
             for bn, blmax, bpow in bcoeff:
                 cn = an+bn
@@ -604,7 +638,10 @@ class Taylor3D(object):
                 cpow = np.zeros((cls.powlrange[clmax],) + cshape, dtype=complex)
                 for pa in range(cls.powlrange[almax]):
                     for pb in range(cls.powlrange[blmax]):
-                        cpow[cls.directmult[pa,pb]] += np.tensordot(apow[pa], bpow[pb], axes=1)
+                        if scalarmult:
+                            cpow[cls.directmult[pa,pb]] += apow[pa]*bpow[pb]
+                        else:
+                            cpow[cls.directmult[pa,pb]] += np.tensordot(apow[pa], bpow[pb], axes=1)
                 # now add it into the list
                 matched = False
                 for coeffindex, cmatch in enumerate(c):
@@ -679,7 +716,10 @@ class Taylor3D(object):
         lead = acoeff[0]
         if lead[1] != 0:
             raise ValueError('Cannot invert expansion: leading-order term {} has l={}>0'.format(lead[0], lead[1]))
-        leadinvmat = np.linalg.inv(lead[2][0])
+        if len(lead[2].shape) == 1:
+            leadinvmat = 1/lead[2][0]
+        else:
+            leadinvmat = np.linalg.inv(lead[2][0])
         leadinvpow = -lead[0]
         c = [(leadinvpow, 0, leadinvmat.copy().reshape(lead[2].shape))]
         if len(acoeff) == 1: # trivial case
@@ -692,7 +732,7 @@ class Taylor3D(object):
         # now we can calculate the number of terms necessary:
         # leadinvpow + n*(tail[0][0]) >= Nmax
         Nseries = (Nmax - leadinvpow)//tail[0][0]
-        # prime the pump: leadinvmat = A, tail = -AB^-1
+        # prime the pump: leadinvmat = A^-1, tail = -A^-1 B
         cls.sumcoeff(c, [ (n+leadinvpow, l, coeff)
                           for n,l,coeff in
                           cls.tensorproductcoeff(leadinvmat, tail, leftmultiply=False)
@@ -705,7 +745,7 @@ class Taylor3D(object):
                       if n+leadinvpow <= Nmax ]
             cls.sumcoeff(c, [ (n+leadinvpow, l, coeff)
                               for n,l,coeff in
-                              cls.tensorproductcoeff(leadinvmat, tail, leftmultiply=False)],
+                              cls.tensorproductcoeff(leadinvmat, tailn, leftmultiply=False)],
                          inplace=True)
         return c
 

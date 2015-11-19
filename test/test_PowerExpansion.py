@@ -326,7 +326,25 @@ class PowerExpansionTests(unittest.TestCase):
                    np.array([0.124, 0.071, -0.098])]:
             cval = c(u, fnu)
             c00val = c00(u, fnu)
-            print("cval:    {}".format(cval))
-            print("c00val: {}".format(c00val))
             self.assertEqual(cval[0,0], c00val)
+        # now, an assignment test. This will be funky; first, we do a "copy" operation so that
+        # c00 is clean--it is no longer a "view" or slice of c, but it's own thing.
+        c00 = c00.copy()
+        # now, set the 0,0 value to be twice what it was before:
+        c[0,0] = 2.*c00
+        for u in [ np.array([0.25, 0., 0.]), np.array([0., 0.1, 0.]), np.array([0., 0., 0.1]),
+                   np.array([0.0234, -0.085, 0.125]),
+                   np.array([0.124, 0.071, -0.098])]:
+            cval = c(u, fnu)
+            c00val = c00(u, fnu)
+            self.assertEqual(cval[0,0], 2.*c00val)
+        c00inv = c00.inv(Nmax=4)
+        c00inv.reduce()
+        for u in [ np.array([0.025, 0., 0.]), np.array([0., 0.025, 0.]), np.array([0., 0., 0.025]),
+                   np.array([0.0234, -0.05, 0.05]),
+                   np.array([-0.024, 0.041, -0.033])]:
+            c00val = c00(u, fnu)
+            c00invval = c00inv(u, fnu)
+            self.assertAlmostEqual(c00val*c00invval, 1)
+
 
