@@ -296,21 +296,55 @@ class Taylor3D(object):
         cls.powercoeff = cls.makepowercoeff()
         cls.__INITIALIZED__ = True
 
-    def __init__(self, coefflist = [], Lmax = 4):
+    def __init__(self, coefflist = [], Lmax = 4, nodeepcopy=False):
         """
         Initializes a Taylor3D object, with coefflist (default = empty)
 
         :param coefflist: list((n, lmax, powexpansion)). No type checking; default empty
         :param Lmax: maximum power / orbital angular momentum
+        :param nodeepcopy: true if we don't want to copy the matrices on creation of object
+          (i.e., deep copy, which is the default)
+        Note: deep copy is strongly preferred. The *only* real reason to use nodeepcopy is
+        when returning slices / indexing in arrays, but even then we have to be careful about
+        doing things like reductions, etc., that modify matrices *in place*. We always copy
+        the list, but that doesn't make copies of the underlying matrices.
         """
         self.__initTaylor3Dindexing__(Lmax)
-        self.coefflist = [ (n, l, c.copy()) for n,l,c in coefflist ]
+        if nodeepcopy:
+            self.coefflist = coefflist.copy()
+        else:
+            self.coefflist = [ (n, l, c.copy()) for n,l,c in coefflist ]
 
     def copy(self):
         """
         Returns a copy of the current expansion
         """
         return Taylor3D(self.coefflist)
+
+    @classmethod
+    def zeros(cls, nmin, nmax, shape):
+        """
+        Constructs (and returns) a "zero" Taylor expansion with the prescribed shape.
+        This will be useful for doing slicing assignments.
+        :param nmin: minimum value of n
+        :param nmax: maximum value of n (inclusive)
+        :param shape: shape of matrix, as zeros would expect.
+        :return: Taylor3D, with a zero coefficient list
+        """
+        return
+
+    def __getitem__(self, key):
+        """
+        Indexes (or even slices) into our Taylor expansion.
+        :param key: indices for our Taylor expansion
+        :return: Taylor expansion after indexing
+        """
+        if type(key) is not tuple:
+            keyt = (key,)
+        else:
+            keyt = key
+        print(key)
+        return Taylor3D([(n, l, c[(slice(0,None,None),) + keyt]) for n,l,c in self.coefflist], nodeepcopy=True)
 
     def __str__(self):
         """
@@ -335,7 +369,7 @@ class Taylor3D(object):
         # getattr is here *in case* someone passes us a Taylor3D type object...
         for coeff in getattr(coefflist, 'coefflist', coefflist):
             if any( coeff[0] == c[0] for c in self.coefflist ):
-                raise ArithmeticError("Can only use addterms to include new powers; use + instead")
+                raise ValueError("Can only use addterms to include new powers; use + instead")
             else:
                 self.coefflist.append((coeff[0], coeff[1], coeff[2].copy()))
         self.coefflist.sort(key=self.__sortkey)

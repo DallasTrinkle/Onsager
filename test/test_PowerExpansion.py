@@ -310,3 +310,23 @@ class PowerExpansionTests(unittest.TestCase):
         self.assertEqual(max( n for n,l,c in c.coefflist), 4)
         c.truncate(2, inplace=True)
         self.assertEqual(max( n for n,l,c in c.coefflist), 2)
+
+    def testIndexingSlicing(self):
+        """Can we index into our expansions to get a new expansion? Can we slice? Can we assign?"""
+        def createExpansion(n):
+            return lambda u: u**n
+
+        newbasis = [(np.array([[1.,6.,5.],[5.,2.,4.],[5.,4.,3.]]), np.array([2/3.,1/3,-1/2]))]
+        c = T3D([nlc[0] for nlc in T3D.constructexpansion(newbasis, N=4)])
+        fnu = { (n,l):createExpansion(n) for n in range(5) for l in range(5) }
+        # now we have something to work with. We should have a basis from n=0 up to n=4 of 3x3 matrices.
+        c00 = c[0,0]
+        for u in [ np.array([0.25, 0., 0.]), np.array([0., 0.1, 0.]), np.array([0., 0., 0.1]),
+                   np.array([0.0234, -0.085, 0.125]),
+                   np.array([0.124, 0.071, -0.098])]:
+            cval = c(u, fnu)
+            c00val = c00(u, fnu)
+            print("cval:    {}".format(cval))
+            print("c00val: {}".format(c00val))
+            self.assertEqual(cval[0,0], c00val)
+
