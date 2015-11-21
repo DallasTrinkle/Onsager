@@ -36,13 +36,14 @@ class Taylor3D(object):
         :return ind2pow[n]: powers for a given index
         :return Ylm2ind[l][m]: (l,m) to index
         :return ind2Ylm[lm]: (l,m) for a given index
-        :return powlrange[l]: upper limit of power indices for a given l value
+        :return powlrange[l]: upper limit of power indices for a given l value; note: [-1] = 0
         """
         # first, the counts
         NYlm = (Lmax+1)**2
         Npower = NYlm + ((Lmax+1)*Lmax*(Lmax-1))//6
         # indexing arrays
-        powlrange = np.zeros(Lmax+1, dtype=int)
+        powlrange = np.zeros(Lmax+2, dtype=int)
+        powlrange[-1] = 0
         pow2ind = -np.ones((Lmax+1,Lmax+1,Lmax+1), dtype=int)
         ind2pow = np.zeros((Npower, 3), dtype=int)
         Ylm2ind = -np.ones((Lmax+1, 2*Lmax+1), dtype=int)
@@ -181,7 +182,7 @@ class Taylor3D(object):
         """
         :return direcmult[p][p']: index that corresponds to the multiplication of power indices p and p'
         """
-        directmult = np.zeros((cls.Npower, cls.Npower), dtype=int)
+        directmult = -np.ones((cls.Npower, cls.Npower), dtype=int)
         for (p0,p1) in ((p0,p1) for p0 in range(cls.Npower) for p1 in range(cls.Npower)):
             nsum = cls.ind2pow[p0] + cls.ind2pow[p1]
             if sum(nsum) <= cls.Lmax:
@@ -260,6 +261,47 @@ class Taylor3D(object):
                 for p in range(cls.powlrange[n]):
                     cn[p] += pre[n]*vnpow[p]*coeff
         return tuple(c)
+
+    @classmethod
+    def rotatedirections(cls, qptrans):
+        """
+        Takes a transformation matrix qptrans, where q[i] = sum_j qptrans[i][j] p[j], and
+        returns the Npow x Npow transformation matrix for the new components in terms of
+        the old.
+        :param qptrans: 3x3 matrix
+        :return: Npow x Npow transformation matrix [original pow][new pow]
+        """
+        powtrans = np.zeros((cls.Npower, cls.Npower))
+        # l = 0 case
+        powtrans[0,0] = 1
+        # single q value cases
+        for i in range(3):
+            qi_pow = cls.powexp(qptrans[i,:], normalize=False)
+            for n in range(1,cls.Lmax+1):
+                powtrans[cls.pow2ind[(0,)*i + (n,) + (0,)*(2-i)],:] = cls.powercoeff[n]*qi_pow
+        # pairs of q cases: we get qi^ni qj^nj by direct multiplication
+        # triplet is done inside the loop: q1^n1 q2^n2 q3^n3 = (q1^n1 q2^n2) (q3^n3)
+        for i in range(3):
+            for j in range(i+1,3):
+                for ni in range(1,cls.Lmax+1):
+                    powi = cls.pow2ind[(0,)*i + (ni,) + (0,)*(2-i)]
+                    for nj in range(1, cls.Lmax+1-ni):
+                        powj = cls.pow2ind[(0,)*j + (nj,) + (0,)*(2-j)]
+                        powij = cls.pow2ind[(0,)*i + (ni,) + (0,)*(j-i-1) + (nj,) + (0,)*(2-j)]
+                        # multiply the pair!
+                        for pi in range(cls.powlrange[ni-1],cls.powlrange[ni]):
+                            for pj in range(cls.powlrange[nj-1], cls.powlrange[nj]):
+                                powtrans[powij,cls.directmult[pi,pj]] += powtrans[powi,pi]*powtrans[powj,pj]
+                        if j == 1:
+                            # do the triplet
+                            # k = 2 (instead of explicitly writing another loop)
+                            for nk in range(1,cls.Lmax+1-ni-nj):
+                                powk = cls.pow2ind[0,0,nk]
+                                powijk = cls.pow2ind[ni,nj,nk]
+                                for pij in range(cls.powlrange[ni+nj-1],cls.powlrange[ni+nj]):
+                                    for pk in range(cls.powlrange[nk-1], cls.powlrange[nk]):
+                                        powtrans[powijk,cls.directmult[pij,pk]] += powtrans[powij,pij]*powtrans[powk,pk]
+        return powtrans
 
     # for sorting our coefficient lists:
     @classmethod
@@ -452,6 +494,31 @@ class Taylor3D(object):
                 for an, almax, apow in acoeff:
                     ca.append((an, almax, c*apow))
         return ca
+
+    @classmethod
+    def rotatecoeff(cls, a, powtrans, inplace=False):
+        """
+        Return a rotated version of the expansion.
+        :param a: coefficiant list
+        :param powtrans: Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation
+        :return: coefficient list, rotated
+        """
+        acoeff = getattr(a, 'coefflist', a)
+        if not inplace:
+            return [(n,l,np.tensordot(powtrans[:cls.powlrange[l],:cls.powlrange[l]], c, axes=(0,0)))
+                    for n,l,c in acoeff]
+        else:
+            for i,(n,l,c) in enumerate(acoeff):
+                acoeff[i] = (n,l,np.tensordot(powtrans[:cls.powlrange[l],:cls.powlrange[l]], c))
+            return acoeff
+
+    def rotate(self, powtrans):
+        """
+        Return a rotated version of the expansion.
+        :param powtrans: Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation
+        :return: coefficient list, rotated
+        """
+        return Taylor3D(self.rotatecoeff(self.coefflist, powtrans))
 
     @classmethod
     def sumcoeff(cls, a, b, alpha=1, beta=1, inplace=False):
