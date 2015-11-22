@@ -18,7 +18,6 @@ import scipy as sp
 from scipy import special
 from . import KPTmesh
 
-
 def DFTfunc(NNvect, rates):
     """
     Returns a Fourier-transform function given the NNvect and rates
@@ -542,7 +541,7 @@ def ConstructPowerFT():
 PowerFT = ConstructPowerFT()
 
 
-class GFcalc:
+class GFcalc(object):
     def __init__(self, lattice, NNvect, rates, Nmax = 4):
         """
         Initialize GF calculator with NN vector lists and rates
@@ -722,3 +721,35 @@ class GFcalc:
                 gcache[1].append(Rp)
         self.Gcache.append(gcache)
         return G
+
+
+from . import crystal
+from . import PowerExpansion
+
+class GFCrystalcalc(object):
+    """
+    Class calculator for the Green function, designed to work with the Crystal class.
+    """
+    def __init__(self, crys, chem, sitelist, jumpnetwork, Nmax=4):
+        """
+        Initializes our calculator with the appropriate topology / connectivity. Doesn't
+        require, at this point, the site probabilities or transition rates to be known.
+        :param crys: Crystal object
+        :param chem: index identifying the diffusing species
+        :param sitelist: list, grouped into Wyckoff common positions, of unique sites
+        :param jumpnetwork: list of unique transitions as lists of ((i,j), dx)
+        :param Nmax: maximum range as estimator for kpt mesh generation
+        """
+        self.crys = crys
+        self.chem = chem
+        self.sitelist = sitelist
+        self.N = sum(1 for w in sitelist for i in w)
+        self.invmap = [0 for w in sitelist for i in w]
+        for ind,w in enumerate(sitelist):
+            for i in w:
+                self.invmap[i] = ind
+        self.jumpnetwork = jumpnetwork
+        # generate a kptmesh
+        # generate the Taylor expansion coefficients for each jump
+        # generate the Fourier transformation for each jump
+        # for each site in sitelist, the linear expansion in jumps
