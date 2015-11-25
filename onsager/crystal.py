@@ -1082,7 +1082,7 @@ class Crystal(object):
                             for n2 in range(-Nmesh[2] // 2 + 1, Nmesh[2] // 2 + 1)])
         # run through list to ensure that all k-points are inside the BZ
         Gmin = min(np.dot(G, G) for G in self.BZG)
-        for k in enumerate(kptfull):
+        for k in kptfull:
             if np.dot(k, k) >= Gmin:
                 for G in self.BZG:
                     if np.dot(k, G) > np.dot(G, G):
