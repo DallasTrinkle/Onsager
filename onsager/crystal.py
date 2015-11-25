@@ -463,6 +463,7 @@ class Crystal(object):
         self.volume, self.metric = self.calcmetric()
         self.reciplatt = 2.*np.pi*self.invlatt.T
         self.BZvol = abs(float(np.linalg.det(self.reciplatt)))
+        self.BZG = self.genBZG()
         self.center()  # should do before gengroup so that inversion is centered at origin
         self.G = self.gengroup()  # do before genpoint
         self.pointG = self.genpoint()
@@ -493,7 +494,7 @@ class Crystal(object):
         if 'basis' not in yamldict: raise IndexError('{} does not contain "basis"'.format(yamldict))
         lattice_constant = 1.
         if 'lattice_constant' in yamldict: lattice_constant = yamldict['lattice_constant']
-        return Crystal((lattice_constant*yamldict['lattice']).T, yamldict['basis'])
+        return cls((lattice_constant*yamldict['lattice']).T, yamldict['basis'])
 
     def simpleYAML(self, a0=1.0):
         """
@@ -513,7 +514,7 @@ class Crystal(object):
         :param a0: lattice constant
         :return: FCC crystal
         """
-        return Crystal(np.array([[0.,0.5,0.5],[0.5,0.,0.5],[0.5,0.5,0.]])*a0, [np.zeros(3)])
+        return cls(np.array([[0.,0.5,0.5],[0.5,0.,0.5],[0.5,0.5,0.]])*a0, [np.zeros(3)])
 
     @classmethod
     def BCC(cls, a0):
@@ -522,7 +523,7 @@ class Crystal(object):
         :param a0: lattice constant
         :return: BCC crystal
         """
-        return Crystal(np.array([[-0.5,0.5,0.5],[0.5,-0.5,0.5],[0.5,0.5,-0.5]])*a0, [np.zeros(3)])
+        return cls(np.array([[-0.5,0.5,0.5],[0.5,-0.5,0.5],[0.5,0.5,-0.5]])*a0, [np.zeros(3)])
 
     @classmethod
     def HCP(cls, a0, c_a=np.sqrt(8./3.)):
@@ -532,7 +533,7 @@ class Crystal(object):
         :param c_a: c/a ratio
         :return: HCP crystal
         """
-        return Crystal(np.array([[0.5,0.5,0.],
+        return cls(np.array([[0.5,0.5,0.],
                                  [-np.sqrt(0.75),np.sqrt(0.75),0.],
                                  [0.,0.,c_a]])*a0,
                                  [np.array([1./3.,2./3.,1./4.]),
@@ -667,6 +668,35 @@ class Crystal(object):
         :return: volume, metric tensor
         """
         return abs(float(np.linalg.det(self.lattice))), np.dot(self.lattice.T, self.lattice)
+
+    def inBZ(self, vec, BZG=None, threshold=1e-5):
+        """
+        Tells us if vec is inside our set of defining points.
+        :param vec: array [3], vector to be tested
+        :param BGZ: array [:,3], optional (default = self.BZG), array of vectors that define the BZ
+        :param threshold: double, optional, threshold to use for "equality"
+        :return: False if outside the BZ, True otherwise
+        """
+        if BZG is None: BZG = self.BZG
+        # checks that vec.G < G^2 for all G (and throws out the option that vec == G, in case threshold == 0)
+        return all([np.dot(vec, G) < (np.dot(G, G) + threshold) for G in BZG if not np.all(vec == G)])
+
+    def genBZG(self):
+        """
+        Generates the reciprocal lattice G points that define the Brillouin zone.
+        :return: array of G vectors that define the BZ, in Cartesian coordinates
+        """
+        # Start with a list of possible vectors; add those that define the BZ...
+        BZG = []
+        for nv in [[n0, n1, n2]
+                   for n0 in range(-3, 4)
+                   for n1 in range(-3, 4)
+                   for n2 in range(-3, 4)
+                   if (n0, n1, n2) != (0, 0, 0)]:
+            vec = np.dot(self.lattice, nv)
+            if self.inBZ(vec, BZG, threshold=0): BZG.append(np.dot(self.reciplatt, nv))
+        # ... and use a list comprehension to only keep those that still remain
+        return np.array([0.5 * vec for vec in BZG if self.inBZ(vec, BZG, threshold=0)])
 
     def gengroup(self):
         """
@@ -842,6 +872,17 @@ class Crystal(object):
         rotu = np.dot(g.rot, uvec) + g.trans
         incellu = incell(rotu)
         return rotlatt + (np.round(rotu - incellu)).astype(int), incellu
+
+    def g_direc_equivalent(self, d1, d2, threshold=1e-8):
+        """
+        Tells us if two directions are equivalent by according to the space group
+        :param d1: direction one (array[3])
+        :param d2: direction two (array[3])
+        :param threshold: threshold for equality
+
+        :return: True if equivalent by a point group operation
+        """
+        return any(np.allclose(d1, self.g_direc(g, d2), rtol=0, atol=threshold) for g in self.G)
 
     def genpoint(self):
         """
@@ -1021,6 +1062,77 @@ class Crystal(object):
         return [ sorted(i for c,i in l)  # strips out the chemistry index; sorted for readability
                  for l in [list(s) for s in self.Wyckoff]  # converts to list of lists
                  if l[0][0] == chem ]  # select only those with correct chemistry
+
+    def fullkptmesh(self, Nmesh):
+        """
+        Creates a k-point mesh of density given by Nmesh; does not symmetrize but does put the
+        k-points inside the BZ. Does not return any *weights* as every point is equally weighted.
+
+        :param Nmesh: mesh divisions Nmesh[0] x Nmesh[1] x Nmesh[2]
+
+        :return kpt: array[Nkpt][3] of kpoints
+        """
+        Nkpt = np.product(Nmesh)
+        if Nkpt == 0: return
+        dN = np.array([1 / x for x in Nmesh])
+        # use a list comprehension to iterate and build:
+        kptfull = np.array([np.dot(self.reciplatt, (n0 * dN[0], n1 * dN[1], n2 * dN[2]))
+                            for n0 in range(-Nmesh[0] // 2 + 1, Nmesh[0] // 2 + 1)
+                            for n1 in range(-Nmesh[1] // 2 + 1, Nmesh[1] // 2 + 1)
+                            for n2 in range(-Nmesh[2] // 2 + 1, Nmesh[2] // 2 + 1)])
+        # run through list to ensure that all k-points are inside the BZ
+        Gmin = min(np.dot(G, G) for G in self.BZG)
+        for k in enumerate(kptfull):
+            if np.dot(k, k) >= Gmin:
+                for G in self.BZG:
+                    if np.dot(k, G) > np.dot(G, G):
+                        k -= 2. * G
+        return kptfull
+
+    def reducekptmesh(self, kptfull, threshold=1e-8):
+        """
+        Takes a fully expanded mesh, and reduces it by symmetry. Assumes every point is
+        equally weighted. We would need a different (more complicated) algorithm if not true...
+        :param kptfull: array[Nkpt][3] of kpoints
+        :param threshold: threshold for symmetry equality
+
+        :return kptsymm: array[Nsymm][3] of kpoints
+        :return weight: array[Nsymm] of weights (integrates to 1)
+        """
+        kptlist = list(kptfull)
+        Nkpt = len(kptlist)
+        kptlist.sort(key=lambda k: np.vdot(k, k))
+        k2_indices = []
+        k2old = np.vdot(kptlist[0], kptlist[0])
+        for i, k2 in enumerate([np.vdot(k, k) for k in kptlist]):
+            if k2 > (k2old + threshold):
+                k2_indices.append(i)
+                k2old = k2
+        k2_indices.append(Nkpt)
+        # k2_indices now contains a list of indices with the same magnitudes
+        kptsym = []
+        wsym = []  # unscaled at this point
+        kmin = 0
+        basewt = 1 / Nkpt
+        for kmax in k2_indices:
+            complist = []
+            wtlist = []
+            for k in kptlist[kmin:kmax]:
+                match = False
+                for i, kcomp in enumerate(complist):
+                    if self.g_direc_equivalent(k, kcomp, threshold):
+                        # update weight, kick out
+                        wtlist[i] += basewt
+                        match = True
+                        continue
+                if not match:
+                    # new symmetry point!
+                    complist.append(k)
+                    wtlist.append(basewt)
+            kptsym += complist
+            wsym += wtlist
+            kmin = kmax
+        return np.array(kptsym),np.array(wsym)
 
 
 # YAML interfaces for types outside of this module
