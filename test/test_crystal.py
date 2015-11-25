@@ -719,4 +719,91 @@ chemistry:
         self.assertEqual(crys.pointG, crysread.pointG)
         self.assertEqual(crys.Wyckoff, crysread.Wyckoff)
 
+class KPTgentest(unittest.TestCase):
+    """Tests for KPT mesh pieces of Crystal class"""
+    def setUp(self):
+        self.a0 = 1.0
+        self.sclatt = self.a0*np.eye(3)
+        self.basis = [np.array([0.,0.,0.])]
+        self.crys = crystal.Crystal(self.sclatt, self.basis)
+        self.N = (4, 4, 4)
 
+    def testKPTreciprocallattice(self):
+        """Have we correctly constructed the reciprocal lattice vectors?"""
+        dotprod = np.dot(self.crys.reciplatt.T, self.crys.lattice)
+        dotprod0 = 2. * np.pi * np.eye(3)
+        for a in range(3):
+            for b in range(3):
+                self.assertAlmostEqual(dotprod[a, b], dotprod0[a, b])
+
+    def testKPTconstruct(self):
+        """Can we construct a mesh with the correct number of points?"""
+        # reset
+        kpts = self.crys.fullkptmesh(self.N)
+        self.assertEqual(kpts.shape[0], np.product(self.N))
+        self.assertEqual(kpts.shape[1], 3)
+
+    def testKPT_BZ_Gpoints(self):
+        """Do we have the correct G points that define the BZ?"""
+        self.assertEqual(np.shape(self.crys.BZG), (6, 3))
+        self.assertTrue(any(all((np.pi, 0, 0) == x) for x in self.crys.BZG))
+        self.assertTrue(any(all((-np.pi, 0, 0) == x) for x in self.crys.BZG))
+        self.assertTrue(any(all((0, np.pi, 0) == x) for x in self.crys.BZG))
+        self.assertTrue(any(all((0, -np.pi, 0) == x) for x in self.crys.BZG))
+        self.assertTrue(any(all((0, 0, np.pi) == x) for x in self.crys.BZG))
+        self.assertTrue(any(all((0, 0, -np.pi) == x) for x in self.crys.BZG))
+        self.assertFalse(any(all((0, 0, 0) == x) for x in self.crys.BZG))
+        vec = np.array((1, 1, 1))
+        self.assertTrue(self.crys.inBZ(vec))
+        vec = np.array((4, 0, -4))
+        self.assertFalse(self.crys.inBZ(vec))
+
+    def testKPT_fullmesh_points(self):
+        """Are the points in the k-point mesh that we expect to see?"""
+        kpts = self.crys.fullkptmesh(self.N)
+        self.assertTrue(any(all((2. * np.pi / self.N[0], 0, 0) == x) for x in kpts))
+
+    def testKPT_insideBZ(self):
+        """Do we only have points that are inside the BZ?"""
+        for q in self.crys.fullkptmesh(self.N):
+            self.assertTrue(self.crys.inBZ(q),
+                            msg="Failed with vector {} not in BZ".format(q))
+
+    def testKPT_IRZ(self):
+        """Do we produce a correct irreducible wedge?"""
+        Nkpt = np.prod(self.N)
+        kptfull = self.crys.fullkptmesh(self.N)
+        kpts, wts = self.crys.reducekptmesh(kptfull) # self.crys.fullkptmesh(self.N)
+        for i, k in enumerate(kpts):
+            # We want to determine what the weight for each point should be, and compare
+            # dealing with the BZ edges is complicated; so we skip that in our tests
+            if all([np.dot(k, G) < (np.dot(G, G) - 1e-8) for G in self.crys.BZG]):
+                basewt = 1. / Nkpt
+                sortk = sorted(k)
+                basewt *= (2 ** (3 - list(k).count(0)))
+                if sortk[0] != sortk[1] and sortk[1] != sortk[2]:
+                    basewt *= 6
+                elif sortk[0] != sortk[1] or sortk[1] != sortk[2]:
+                    basewt *= 3
+                self.assertAlmostEqual(basewt, wts[i])
+        # integration test
+        wtfull = np.array((1/Nkpt ,)*Nkpt)
+        self.assertAlmostEqual(sum(wtfull * [np.cos(sum(k)) for k in kptfull]),
+                               sum(wts * [np.cos(sum(k)) for k in kpts]))
+        self.assertNotAlmostEqual(sum(wtfull * [np.cos(k[0]) for k in kptfull]),
+                                   sum(wts * [np.cos(k[0]) for k in kpts]))
+
+    def testKPT_integration(self):
+        """Do we get integral values that we expect? 1/(2pi)^3 int cos(kx+ky+kz)^3 = 1/2"""
+        Nkpt = np.prod(self.N)
+        kptfull = self.crys.fullkptmesh(self.N)
+        wtfull = np.array((1/Nkpt ,)*Nkpt)
+        kpts, wts = self.crys.reducekptmesh(kptfull) # self.crys.fullkptmesh(self.N)
+        self.assertAlmostEqual(sum(wtfull * [np.cos(sum(k)) ** 2 for k in kptfull]), 0.5)
+        self.assertAlmostEqual(sum(wts * [np.cos(sum(k)) ** 2 for k in kpts]), 0.5)
+        self.assertAlmostEqual(sum(wtfull * [np.cos(sum(k)) for k in kptfull]), 0)
+        self.assertAlmostEqual(sum(wts * [np.cos(sum(k)) for k in kpts]), 0)
+        # Note: below we have the true values of the integral, but these should disagree
+        # due to numerical error.
+        self.assertNotAlmostEqual(sum(wtfull * [sum(k) ** 2 for k in kptfull]), 9.8696044010893586188)
+        self.assertNotAlmostEqual(sum(wts * [sum(k) ** 2 for k in kpts]), 9.8696044010893586188)
