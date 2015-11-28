@@ -745,18 +745,21 @@ class GFCrystalcalc(object):
         """
         self.crys = crys
         self.chem = chem
-        self.sitelist = sitelist
+        self.sitelist = sitelist.copy()
         self.N = sum(1 for w in sitelist for i in w)
         self.invmap = [0 for w in sitelist for i in w]
         for ind,w in enumerate(sitelist):
             for i in w:
                 self.invmap[i] = ind
+        # note: currently, we don't store jumpnetwork. If we want to rewrite the class
+        # to allow a new kpoint mesh to be generated "on the fly", we'd need to store
+        # a copy for regeneration
         # self.jumpnetwork = jumpnetwork
         # generate a kptmesh
         self.Nkpt = [4*Nmax, 4*Nmax, 4*Nmax]
         self.kpts, self.wts = crys.reducekptmesh(crys.fullkptmesh(self.Nkpt))
         # generate the Fourier transformation for each jump
-        # also includes the multiplicity for the onsite terms
+        # also includes the multiplicity for the onsite terms (site expansion)
         self.FTjumps, self.SEjumps = self.FourierTransformJumps(jumpnetwork, self.N, self.kpts)
         # generate the Taylor expansion coefficients for each jump
         self.T3Djumps = self.TaylorExpandJumps(jumpnetwork, self.N)
@@ -801,3 +804,46 @@ class GFCrystalcalc(object):
             T3Djumps.append(T3D(c))
         return T3Djumps
 
+    def siteprob(self, pre, betaene):
+        """Returns our site probabilities, normalized, as a vector"""
+        # be careful to make sure that we don't under-/over-flow on beta*ene
+        minbetaene = min(betaene)
+        rho = np.array([ pre[w]*np.exp(minbetaene-betaene[w]) for w in self.invmap])
+        return rho/sum(rho)
+
+    def ratelist(self, pre, betaene, preT, betaeneT):
+        """Returns a list of lists of rates, matched to jumpnetwork"""
+        # the ij tuple in each transition list is the i->j pair
+        # invmap[i] tells you which Wyckoff position i maps to (in the sitelist)
+        # trying to avoid under-/over-flow
+        siteene = np.array([ betaene[w] for w in self.invmap])
+        sitepre = np.array([ pre[w] for w in self.invmap])
+        return [ [ pT*np.exp(siteene[i]-beT)/sitepre[i]
+                   for (i,j), dx in t ]
+                 for t, pT, beT in zip(self.jumpnetwork, preT, betaeneT) ]
+
+    def symmratelist(self, pre, betaene, preT, betaeneT):
+        """Returns a list of lists of symmetrized rates, matched to jumpnetwork"""
+        # the ij tuple in each transition list is the i->j pair
+        # invmap[i] tells you which Wyckoff position i maps to (in the sitelist)
+        # trying to avoid under-/over-flow
+        siteene = np.array([ betaene[w] for w in self.invmap])
+        sitepre = np.array([ pre[w] for w in self.invmap])
+        return [ [ pT*np.exp(0.5*siteene[i]+0.5*siteene[j]-beT)/np.sqrt(sitepre[i]*sitepre[j])
+                   for (i,j), dx in t ]
+                 for t, pT, beT in zip(self.jumpnetwork, preT, betaeneT) ]
+
+    def SetRates(self, pre, betaene, preT, betaeneT):
+        """
+        (Re)sets the rates, given the prefactors and Arrhenius factors for the sites and
+        transitions, using the ordering according to sitelist and jumpnetwork. Initiates all of
+        the calculations so that GF calculation is (fairly) efficient for each input.
+        :param pre: list of prefactors for site probabilities
+        :param betaene: list of beta*E (energy/kB T) for each site
+        :param preT: list of prefactors for transition states
+        :param betaeneT: list of beta*ET (energy/kB T) for each transition state
+        :return:
+        """
+        rho = self.siteprob(pre, betaene)
+        # I think we need to store *something* about the jumpnetwork; maybe just one i-j pair
+        # for each jump?
