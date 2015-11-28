@@ -725,6 +725,9 @@ class GFcalc(object):
 
 from . import crystal
 from . import PowerExpansion
+# two quick shortcuts
+T3D = PowerExpansion.Taylor3D
+factorial = PowerExpansion.factorial
 
 class GFCrystalcalc(object):
     """
@@ -748,8 +751,53 @@ class GFCrystalcalc(object):
         for ind,w in enumerate(sitelist):
             for i in w:
                 self.invmap[i] = ind
-        self.jumpnetwork = jumpnetwork
+        # self.jumpnetwork = jumpnetwork
         # generate a kptmesh
-        # generate the Taylor expansion coefficients for each jump
+        self.Nkpt = [4*Nmax, 4*Nmax, 4*Nmax]
+        self.kpts, self.wts = crys.reducekptmesh(crys.fullkptmesh(self.Nkpt))
         # generate the Fourier transformation for each jump
-        # for each site in sitelist, the linear expansion in jumps
+        # also includes the multiplicity for the onsite terms
+        self.FTjumps, self.SEjumps = self.FourierTransformJumps(jumpnetwork, self.N, self.kpts)
+        # generate the Taylor expansion coefficients for each jump
+        self.T3Djumps = self.TaylorExpandJumps(jumpnetwork, self.N)
+
+    def FourierTransformJumps(self, jumpnetwork, N, kpts):
+        """
+        Generate the Fourier transform coefficients for each jump
+        :param jumpnetwork: list of unique transitions, as lists of ((i,j), dx)
+        :param N: number of sites
+        :param kpts: array[Nkpt][3], in Cartesian (same coord. as dx)
+        :return: array[Njump][Nkpt][Nsite][Nsite] of FT of the jump network
+        :return: array[Njump][Nsite] multiplicity of jump on each site
+        """
+        if type(kpts) is np.ndarray: Nkpt = kpts.shape[0]
+        else: Nkpt = len(kpts)
+        FTjumps = np.zeros((len(jumpnetwork),N,N,Nkpt), dtype=complex)
+        SEjumps = np.zeros((len(jumpnetwork), N), dtype=complex)
+        for J,jumplist in enumerate(jumpnetwork):
+            for (i,j), dx in jumplist:
+                FTjumps[J,:,i,j] = np.exp(1.j*np.dot(kpts, dx))
+                SEjumps[J,i,j] += 1
+        return FTjumps, SEjumps
+
+    def TaylorExpandJumps(self, jumpnetwork, N):
+        """
+        Generate the Taylor expansion coefficients for each jump
+        :param jumpnetwork: list of unique transitions, as lists of ((i,j), dx)
+        :param N: number of sites
+        :return: list of Taylor3D expansions of the jump network
+        """
+        T3D() # need to do just to initialize the class; if already initialized, won't do anything
+        # Taylor expansion coefficients for exp(1j*x) = (1j)^n/n!
+        pre = ((1j)**n/factorial(n, True) for n in range(T3D.Lmax+1))
+        T3Djumps = []
+        for jumplist in jumpnetwork:
+            # coefficients; we use tuples because we'll be successively adding to the coefficients in place
+            c = [(n, n, np.zeros((T3D.powlrange[n], N, N), dtype=complex)) for n in range(T3D.Lmax+1)]
+            for (i,j), dx in jumplist:
+                pexp = T3D.powexp(dx, normalize=False)
+                for n in range(T3D.Lmax+1):
+                    (c[n][2])[:,i,j] += pre[n]*(T3D.powercoeff[n]*pexp)[:T3D.powlrange[n]]
+            T3Djumps.append(T3D(c))
+        return T3Djumps
+
