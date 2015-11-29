@@ -373,7 +373,7 @@ class Taylor3D(object):
         :param shape: shape of matrix, as zeros would expect.
         :return: Taylor3D, with a zero coefficient list
         """
-        return
+        return cls([ (n,0,np.zeros((1,) + shape)) for n in range(nmin, nmax+1)])
 
     def __getitem__(self, key):
         """
@@ -589,6 +589,8 @@ class Taylor3D(object):
 
     def __radd__(self, other):
         """Add a set of Taylor expansions"""
+        # note: sum(), without a start value, uses 0, which then will call __radd__:
+        if other == 0: return self.copy()
         # if we're passed an array, just take it in stride
         if hasattr(other, 'shape'): other = [(0, 0, other.reshape((1,) + other.shape))]
         return Taylor3D(self.sumcoeff(self, other))

@@ -725,6 +725,7 @@ class GFcalc(object):
 
 from . import crystal
 from . import PowerExpansion
+import itertools
 # two quick shortcuts
 T3D = PowerExpansion.Taylor3D
 factorial = PowerExpansion.factorial
@@ -746,7 +747,8 @@ class GFCrystalcalc(object):
         self.crys = crys
         self.chem = chem
         self.sitelist = sitelist.copy()
-        self.N = sum(1 for w in sitelist for i in w)
+        # self.N = sum(1 for w in sitelist for i in w)
+        self.N = sum(len(w) for w in sitelist)
         self.invmap = [0 for w in sitelist for i in w]
         for ind,w in enumerate(sitelist):
             for i in w:
@@ -763,6 +765,10 @@ class GFCrystalcalc(object):
         self.FTjumps, self.SEjumps = self.FourierTransformJumps(jumpnetwork, self.N, self.kpts)
         # generate the Taylor expansion coefficients for each jump
         self.T3Djumps = self.TaylorExpandJumps(jumpnetwork, self.N)
+        # tuple of the Wyckoff site indices for each jump (needed to make symmrate)
+        self.jumppairs = ((self.invmap(jumplist[0][0]),
+                           self.invmap(jumplist[0][1]))
+            for jumplist in jumpnetwork)
 
     def FourierTransformJumps(self, jumpnetwork, N, kpts):
         """
@@ -771,16 +777,16 @@ class GFCrystalcalc(object):
         :param N: number of sites
         :param kpts: array[Nkpt][3], in Cartesian (same coord. as dx)
         :return: array[Njump][Nkpt][Nsite][Nsite] of FT of the jump network
-        :return: array[Njump][Nsite] multiplicity of jump on each site
+        :return: array[Nsite][Njump] multiplicity of jump on each site
         """
         if type(kpts) is np.ndarray: Nkpt = kpts.shape[0]
         else: Nkpt = len(kpts)
-        FTjumps = np.zeros((len(jumpnetwork),N,N,Nkpt), dtype=complex)
-        SEjumps = np.zeros((len(jumpnetwork), N), dtype=complex)
+        FTjumps = np.zeros((len(jumpnetwork),Nkpt,N,N), dtype=complex)
+        SEjumps = np.zeros((N, len(jumpnetwork)), dtype=int)
         for J,jumplist in enumerate(jumpnetwork):
             for (i,j), dx in jumplist:
                 FTjumps[J,:,i,j] = np.exp(1.j*np.dot(kpts, dx))
-                SEjumps[J,i,j] += 1
+                SEjumps[i,J] += 1
         return FTjumps, SEjumps
 
     def TaylorExpandJumps(self, jumpnetwork, N):
@@ -804,34 +810,17 @@ class GFCrystalcalc(object):
             T3Djumps.append(T3D(c))
         return T3Djumps
 
-    def siteprob(self, pre, betaene):
+    def SiteProbs(self, pre, betaene):
         """Returns our site probabilities, normalized, as a vector"""
         # be careful to make sure that we don't under-/over-flow on beta*ene
         minbetaene = min(betaene)
         rho = np.array([ pre[w]*np.exp(minbetaene-betaene[w]) for w in self.invmap])
         return rho/sum(rho)
 
-    def ratelist(self, pre, betaene, preT, betaeneT):
-        """Returns a list of lists of rates, matched to jumpnetwork"""
-        # the ij tuple in each transition list is the i->j pair
-        # invmap[i] tells you which Wyckoff position i maps to (in the sitelist)
-        # trying to avoid under-/over-flow
-        siteene = np.array([ betaene[w] for w in self.invmap])
-        sitepre = np.array([ pre[w] for w in self.invmap])
-        return [ [ pT*np.exp(siteene[i]-beT)/sitepre[i]
-                   for (i,j), dx in t ]
-                 for t, pT, beT in zip(self.jumpnetwork, preT, betaeneT) ]
-
-    def symmratelist(self, pre, betaene, preT, betaeneT):
+    def SymmRates(self, pre, betaene, preT, betaeneT):
         """Returns a list of lists of symmetrized rates, matched to jumpnetwork"""
-        # the ij tuple in each transition list is the i->j pair
-        # invmap[i] tells you which Wyckoff position i maps to (in the sitelist)
-        # trying to avoid under-/over-flow
-        siteene = np.array([ betaene[w] for w in self.invmap])
-        sitepre = np.array([ pre[w] for w in self.invmap])
-        return [ [ pT*np.exp(0.5*siteene[i]+0.5*siteene[j]-beT)/np.sqrt(sitepre[i]*sitepre[j])
-                   for (i,j), dx in t ]
-                 for t, pT, beT in zip(self.jumpnetwork, preT, betaeneT) ]
+        return np.array([ pT*np.exp(0.5*betaene[w0]+0.5*betaene[w1]-beT)/np.sqrt(pre[w0]*pre[w1])
+                 for (w0, w1), pT, beT in zip(self.jumppairs, preT, betaeneT) ])
 
     def SetRates(self, pre, betaene, preT, betaeneT):
         """
@@ -844,6 +833,19 @@ class GFCrystalcalc(object):
         :param betaeneT: list of beta*ET (energy/kB T) for each transition state
         :return:
         """
-        rho = self.siteprob(pre, betaene)
-        # I think we need to store *something* about the jumpnetwork; maybe just one i-j pair
-        # for each jump?
+        self.rho = self.SiteProbs(pre, betaene)
+        self.symmrate = self.SymmRates(pre, betaene, preT, betaeneT)
+        self.onsite = -np.diag([sum(self.SEjumps[i,J]*pretrans/pre[wi]*np.exp(betaene[wi]-BET)
+                           for J,pretrans,BET in zip(itertools.count(), preT, betaeneT))
+                       for i,wi in enumerate(self.invmap)])
+        self.omega_kij = np.dot(self.symmrate, self.FTjumps)
+        self.omega_kij[:] += self.onsite # adds it to every point
+        self.omega_Taylor = sum(symmrate*expansion
+                                for symmrate,expansion in zip(self.symmrate, self.T3Djumps))
+        self.omega_Taylor += self.onsite
+        # 1. Diagonalize onsite terms
+        # 2. Calculate D
+        # 3. Doubly rotate the Taylor expansion
+        # 4. Invert Taylor expansion
+        # 5. Invert Fourier expansion
+        # 6. Subtract off Taylor expansion to leave semicontinuum piece

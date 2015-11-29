@@ -109,6 +109,7 @@ class PowerExpansionTests(unittest.TestCase):
         c6 = c.ldot(prod)
         c7 = c.copy()
         c7.irdot(prod)
+        sum([c, c2, c3]) # tests whether we can use sum
 
         for u in [ np.zeros(3), np.array([1., 0., 0.]), np.array([0., 1., 0.]), np.array([0., 0., 1.]),
                    np.array([0.234, -0.85, 1.25]),
