@@ -726,6 +726,7 @@ class GFcalc(object):
 from . import crystal
 from . import PowerExpansion
 import itertools
+from numpy import linalg as LA
 # two quick shortcuts
 T3D = PowerExpansion.Taylor3D
 factorial = PowerExpansion.factorial
@@ -748,8 +749,9 @@ class GFCrystalcalc(object):
         self.chem = chem
         self.sitelist = sitelist.copy()
         # self.N = sum(1 for w in sitelist for i in w)
+        # self.invmap = [0 for w in sitelist for i in w]
         self.N = sum(len(w) for w in sitelist)
-        self.invmap = [0 for w in sitelist for i in w]
+        self.invmap = [0 for i in range(self.N)]
         for ind,w in enumerate(sitelist):
             for i in w:
                 self.invmap[i] = ind
@@ -766,8 +768,7 @@ class GFCrystalcalc(object):
         # generate the Taylor expansion coefficients for each jump
         self.T3Djumps = self.TaylorExpandJumps(jumpnetwork, self.N)
         # tuple of the Wyckoff site indices for each jump (needed to make symmrate)
-        self.jumppairs = ((self.invmap(jumplist[0][0]),
-                           self.invmap(jumplist[0][1]))
+        self.jumppairs = ((self.invmap[jumplist[0][0]], self.invmap[jumplist[0][1]])
             for jumplist in jumpnetwork)
 
     def FourierTransformJumps(self, jumpnetwork, N, kpts):
@@ -838,14 +839,64 @@ class GFCrystalcalc(object):
         self.onsite = -np.diag([sum(self.SEjumps[i,J]*pretrans/pre[wi]*np.exp(betaene[wi]-BET)
                            for J,pretrans,BET in zip(itertools.count(), preT, betaeneT))
                        for i,wi in enumerate(self.invmap)])
-        self.omega_kij = np.dot(self.symmrate, self.FTjumps)
-        self.omega_kij[:] += self.onsite # adds it to every point
+        self.omega_qij = np.dot(self.symmrate, self.FTjumps)
+        self.omega_qij[:] += self.onsite # adds it to every point
         self.omega_Taylor = sum(symmrate*expansion
                                 for symmrate,expansion in zip(self.symmrate, self.T3Djumps))
         self.omega_Taylor += self.onsite
-        # 1. Diagonalize onsite terms
+        # 1. Diagonalize gamma point value; use to rotate to diffusive / relaxive, and reduce
+        self.r, self.vr = self.DiagGamma()
+        if not np.isclose(self.r[0],0): raise ArithmeticError("No equilibrium solution to rates?")
+        # 1.a. rotate
+        self.omega_Taylor_ROT = (self.omega_Taylor.ldot(self.vr.T)).rdot(self.vr)
+        # 1.b. slice up the blocks, and reduce
+        self.omega_Taylor_dd = self.omega_Taylor_ROT[0:1,0:1].copy()
+        self.omega_Taylor_dr = self.omega_Taylor_ROT[0:1,1:].copy()
+        self.omega_Taylor_rd = self.omega_Taylor_ROT[1:,0:1].copy()
+        self.omega_Taylor_rr = self.omega_Taylor_ROT[1:,1:].copy()
+        for t in [self.omega_Taylor_dd, self.omega_Taylor_dr,
+                  self.omega_Taylor_rd, self.omega_Taylor_rr]:
+            t.reduce()
+        # 1.c. construct the diffusion Taylor expansion
+        self.omega_Taylor_D = self.omega_Taylor_dd - \
+                              self.omega_Taylor_dr*self.omega_Taylor_rr.inv()*self.omega_Taylor_rd
+        self.omega_Taylor_D.truncate(T3D.Lmax, inplace=True)
+        self.omega_Taylor_D.reduce()
         # 2. Calculate D
-        # 3. Doubly rotate the Taylor expansion
+        self.D = 0
+        self.D = self.Diffusivity()
+        # 3. Spatially rotate the Taylor expansion
         # 4. Invert Taylor expansion
         # 5. Invert Fourier expansion
         # 6. Subtract off Taylor expansion to leave semicontinuum piece
+
+    def DiagGamma(self, omega = None):
+        """
+        Diagonalize the gamma point (q=0) term
+        :param omega: optional; the Taylor expansion to use. If None, use self.omega_Taylor
+        :return: array of eigenvalues (r) and array of eigenvectors (vr) where vr[:,i] is the vector
+         for eigenvalue r[i], and the r are sorted from 0 to decreasing values.
+        """
+        if omega is None:
+            omega = self.omega_Taylor
+        gammacoeff = None
+        for (n, l, coeff) in omega.coefflist:
+            if n<0: raise ValueError("Taylor expansion has terms below n=0?")
+            if n==0:
+                if l != 0: raise ValueError("n=0 term has angular dependence? l != 0")
+                gammacoeff = -coeff[0]
+                break
+        if gammacoeff is None:
+            # missing onsite term--indicates that it's been reduced to 0
+            # should ONLY happen if we have a Bravais lattice, e.g.
+            gammacoeff = np.zeros((self.N, self.N), dtype=complex)
+        r, vr = LA.eigh(gammacoeff)
+        return -r, vr
+
+    def Diffusivity(self):
+        """
+        Return the diffusivity; compute it if it's not already known. Uses omega_Taylor_dr
+        to compute with maximum efficiency.
+        :return: D [3,3] array
+        """
+        if self.D != 0: return self.D
