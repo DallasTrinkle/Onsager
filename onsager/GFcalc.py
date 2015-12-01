@@ -726,6 +726,7 @@ class GFcalc(object):
 from . import crystal
 from . import PowerExpansion as PE
 import itertools
+import collections
 from numpy import linalg as LA
 from scipy.special import hyp1f1, gamma
 # two quick shortcuts
@@ -756,6 +757,8 @@ class GFCrystalcalc(object):
         for ind,w in enumerate(sitelist):
             for i in w:
                 self.invmap[i] = ind
+        self.groups_ij = self.BreakdownGroups()
+        self.NG = len(self.crys.G)  # number of group operations
         # note: currently, we don't store jumpnetwork. If we want to rewrite the class
         # to allow a new kpoint mesh to be generated "on the fly", we'd need to store
         # a copy for regeneration
@@ -814,12 +817,37 @@ class GFCrystalcalc(object):
             T3Djumps.append(T3D(c))
         return T3Djumps
 
-    def SiteProbs(self, pre, betaene):
-        """Returns our site probabilities, normalized, as a vector"""
-        # be careful to make sure that we don't under-/over-flow on beta*ene
-        minbetaene = min(betaene)
-        rho = np.array([ pre[w]*np.exp(minbetaene-betaene[w]) for w in self.invmap])
-        return rho/sum(rho)
+    def BreakdownGroups(self):
+        """
+        Takes in a crystal, and a chemistry, and constructs the indexing breakdown for each
+        (i,j) pair.
+        :return: tuples within tuples: each [i][j] = tuple of named tuples, with
+          indexpair = (g(i), g(j)) tuple of mapped indices, and groupops = set of group ops
+        """
+        # start with a bunch of empty lists
+        grouplist = collections.namedtuple('grouplist', 'indexpair groupops')
+        groups_ij = [ [[] for j in range(self.N)] for i in range(self.N)]
+        for g in self.crys.G:
+            indexmap = g.indexmap[self.chem]
+            for i in range(self.N):
+                gi = indexmap[i]
+                for j in range(self.N):
+                    gj = indexmap[j]
+                    match = False
+                    indexpair = (gi, gj)
+                    for gl in groups_ij[i][j]:
+                        if gl.indexpair == indexpair:
+                            gl.groupops.append(g)
+                            match = True
+                    if not match:
+                        groups_ij[i][j].append(grouplist(indexpair = indexpair, groupops = [g]))
+        # convert into tuples:
+        return tuple(
+            tuple(
+                tuple(grouplist(indexpair=gl.indexpair, groupops=frozenset(gl.groupops))
+                      for gl in groups_ij[i][j])
+                for j in range(self.N))
+            for i in range(self.N))
 
     def SymmRates(self, pre, betaene, preT, betaeneT):
         """Returns a list of lists of symmetrized rates, matched to jumpnetwork"""
@@ -849,7 +877,6 @@ class GFCrystalcalc(object):
                   ((np.pi**1.5)*(2**(3+l))*gamma(b))
             return lambda u: pre* u**l * hyp1f1(a,b, -(u*half_pm)**2)
 
-        self.rho = self.SiteProbs(pre, betaene)
         self.symmrate = self.SymmRates(pre, betaene, preT, betaeneT)
         self.escape = -np.diag([sum(self.SEjumps[i,J]*pretrans/pre[wi]*np.exp(betaene[wi]-BET)
                            for J,pretrans,BET in zip(itertools.count(), preT, betaeneT))
@@ -878,10 +905,13 @@ class GFCrystalcalc(object):
             self.pqtrans[i,:] *= np.sqrt(self.d[i])
             self.uxtrans[i,:] /= np.sqrt(self.d[i])
         powtrans = T3D.rotatedirections(self.qptrans)
+        print(oT_D)
         for t in [oT_dd, oT_dr, oT_rd, oT_rr, oT_D]:
-            t.rotate(powtrans)
+            t.irotate(powtrans)  # rotate in place
             t.reduce()
-        if oT_D.coefflist[0][1] != 0: raise ArithmeticError("Problem isotropizing D?")
+        if oT_D.coefflist[0][1] != 0:
+            print(oT_D)
+            raise ArithmeticError("Problem isotropizing D?")
         # 4. Invert Taylor expansion using block inversion formula, and truncate at n=0
         gT_rotate = self.BlockInvertOmegaTaylor(oT_dd, oT_dr, oT_rd, oT_rr, oT_D)
         self.g_Taylor = (gT_rotate.ldot(self.vr)).rdot(self.vr.T)
@@ -909,15 +939,16 @@ class GFCrystalcalc(object):
                                  for j in range(self.N))
                            for i in range(self.N))
 
-    def exp_dxq(self, dx):
+    def exp_dxq(self, dx, groupset):
         """
         Return the array of exp(-i q.dx) evaluated over the q-points, and accounting for symmetry
-        :param dx:
+        :param dx: vector
+        :param groupset: set of group operations
         :return: array of exp(-i q.dx) evaluated symmetrically
         """
         # kpts[k,3] .. g_dx_array[NR, 3]
-        g_dx_array = np.array([self.crys.g_direc(g, dx) for g in self.crys.G])
-        return np.average(np.exp(-1j*np.tensordot(self.kpts, g_dx_array, axes=(1,1))), axis=1)
+        g_dx_array = np.array([self.crys.g_direc(g, dx) for g in groupset])
+        return np.sum(np.exp(-1j*np.tensordot(self.kpts, g_dx_array, axes=(1,1))), axis=1)
 
     def __call__(self, i, j, dx):
         """
@@ -928,12 +959,15 @@ class GFCrystalcalc(object):
         :return: Green function
         """
         if self.D is 0: raise ValueError("Need to SetRates first")
-        # evaluate Fourier transform component:
-        gIFT = np.dot(self.wts, self.gsc_ijq[i,j]*self.exp_dxq(dx))
-        if not np.isclose(gIFT.imag, 0): raise ArithmeticError("Got complex IFT?")
+        # evaluate Fourier transform component (now with better space group treatment!)
+        gIFT = 0
+        for gl in self.groups_ij[i][j]:
+            gIFT += np.dot(self.wts, self.gsc_ijq[gl.indexpair]*self.exp_dxq(dx, gl.groupops))
+        gIFT /= self.NG
+        if not np.isclose(gIFT.imag, 0): raise ArithmeticError("Got complex IFT? {}".format(gIFT))
         # evaluate Taylor expansion component:
         gTaylor = self.gT_ij[i][j](np.dot(self.uxtrans, dx), self.g_Taylor_fnlu)
-        if not np.isclose(gTaylor.imag, 0): raise ArithmeticError("Got complex IFT from Taylor?")
+        if not np.isclose(gTaylor.imag, 0): raise ArithmeticError("Got complex IFT from Taylor? {}".format(gTaylor))
         # combine:
         return (gIFT+gTaylor).real
 

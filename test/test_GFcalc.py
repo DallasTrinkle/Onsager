@@ -770,8 +770,9 @@ class GreenFuncCrystalTests(unittest.TestCase):
 
     def testHCP(self):
         """Test on HCP"""
-        HCP_GF = GFcalc.GFCrystalcalc(self.HCP, 0, self.HCP_sitelist, self.HCP_jumpnetwork)
+        HCP_GF = GFcalc.GFCrystalcalc(self.HCP, 0, self.HCP_sitelist, self.HCP_jumpnetwork, Nmax=6)
         HCP_GF.SetRates([1],[0],[1,1],[0,0])  # one unique site, two types of jumps
+        # print(HCP_GF.Diffusivity())
         # make some basic vectors:
         hcp_basal = self.HCP.pos2cart(np.array([1.,0.,0.]), (0,0)) - \
                     self.HCP.pos2cart(np.array([0.,0.,0.]), (0,0))
@@ -780,12 +781,30 @@ class GreenFuncCrystalTests(unittest.TestCase):
         hcp_zero = np.zeros(3)
         for R in [hcp_zero, hcp_basal, hcp_pyram]:
             self.assertAlmostEqual(HCP_GF(0,0,R), HCP_GF(1,1,R), places=15)
-        GF_new = HCP_GF(0,0,R)
-        GF_new2 = HCP_GF(1,1,R)
-            print("R={}: dG= {}  G_orig= {}  G_new= {}".format(R, GF_new-GF_orig, GF_orig, GF_new))
-            self.assertAlmostEqual(GF_new, GF_new2, places=15)
-            self.assertAlmostEqual(GF_orig, GF_new, places=5,
-                                   msg="Failed for R={}".format(R))
+        self.assertAlmostEqual(HCP_GF(0,0,hcp_basal), HCP_GF(0,0,-hcp_basal), places=15)
+        self.assertAlmostEqual(HCP_GF(0,1,hcp_pyram), HCP_GF(1,0,-hcp_pyram), places=15)
+        g0 = HCP_GF(0,0,hcp_zero)
+        gbasal = HCP_GF(0,0,hcp_basal)
+        gpyram = HCP_GF(0,1,hcp_pyram)
+        self.assertAlmostEqual(-12*g0 + 6*gbasal + 6*gpyram, 1, places=4)
+        # Try again, but with different rates:
+        HCP_GF.SetRates([1],[0],[1,3],[0,0])  # one unique site, two types of jumps
+        g0 = HCP_GF(0,0,hcp_zero)
+        gw = 0
+        for jumplist, omega in zip(self.HCP_jumpnetwork, HCP_GF.symmrate):
+            for (i,j), dx in jumplist:
+                if (i==0):
+                    gw += omega*(HCP_GF(i,j,dx) - g0)
+        self.assertAlmostEqual(gw, 1, places=4)
+
+        # for jumplist in self.HCP_jumpnetwork:
+        #     for (i,j), dx in jumplist:
+        #         if (i==0):
+        #             print("g({},{},{}) = {}".format(i,j,dx,HCP_GF(i,j,dx)))
+        # print("g0: {}".format(g0))
+        # print("gb: {}".format(gbasal))
+        # print("gp: {}".format(gpyram))
+
 
 
 # DocTests... we use this for the small "utility" functions, rather than writing

@@ -526,7 +526,8 @@ class Taylor3D(object):
                     for n,l,c in acoeff]
         else:
             for i,(n,l,c) in enumerate(acoeff):
-                acoeff[i] = (n,l,np.tensordot(powtrans[:cls.powlrange[l],:cls.powlrange[l]], c))
+                acoeff[i] = (n,l,np.tensordot(powtrans[:cls.powlrange[l],:cls.powlrange[l]], c,
+                                              axes=(0,0)))
             return acoeff
 
     def rotate(self, powtrans):
@@ -536,6 +537,15 @@ class Taylor3D(object):
         :return: coefficient list, rotated
         """
         return Taylor3D(self.rotatecoeff(self.coefflist, powtrans))
+
+    def irotate(self, powtrans):
+        """
+        Rotate in place.
+        :param powtrans: Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation
+        :return: self
+        """
+        self.rotatecoeff(self.coefflist, powtrans, inplace=True)
+        return self
 
     @classmethod
     def sumcoeff(cls, a, b, alpha=1, beta=1, inplace=False):
