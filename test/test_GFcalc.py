@@ -765,12 +765,27 @@ class GreenFuncCrystalTests(unittest.TestCase):
             GF_orig = old_FCC_GF.GF(R)
             GF_new = FCC_GF(0,0,R)
             # print("R={}: dG= {}  G_orig= {}  G_new= {}".format(R, GF_new-GF_orig, GF_orig, GF_new))
-            self.assertAlmostEqual(FCC_GF(0,0, R), old_FCC_GF.GF(R), places=5,
+            self.assertAlmostEqual(GF_orig, GF_new, places=5,
                                    msg="Failed for R={}".format(R))
 
     def testHCP(self):
         """Test on HCP"""
         HCP_GF = GFcalc.GFCrystalcalc(self.HCP, 0, self.HCP_sitelist, self.HCP_jumpnetwork)
+        HCP_GF.SetRates([1],[0],[1,1],[0,0])  # one unique site, two types of jumps
+        # make some basic vectors:
+        hcp_basal = self.HCP.pos2cart(np.array([1.,0.,0.]), (0,0)) - \
+                    self.HCP.pos2cart(np.array([0.,0.,0.]), (0,0))
+        hcp_pyram = self.HCP.pos2cart(np.array([0.,0.,0.]), (0,1)) - \
+                    self.HCP.pos2cart(np.array([0.,0.,0.]), (0,0))
+        hcp_zero = np.zeros(3)
+        for R in [hcp_zero, hcp_basal, hcp_pyram]:
+            self.assertAlmostEqual(HCP_GF(0,0,R), HCP_GF(1,1,R), places=15)
+        GF_new = HCP_GF(0,0,R)
+        GF_new2 = HCP_GF(1,1,R)
+            print("R={}: dG= {}  G_orig= {}  G_new= {}".format(R, GF_new-GF_orig, GF_orig, GF_new))
+            self.assertAlmostEqual(GF_new, GF_new2, places=15)
+            self.assertAlmostEqual(GF_orig, GF_new, places=5,
+                                   msg="Failed for R={}".format(R))
 
 
 # DocTests... we use this for the small "utility" functions, rather than writing

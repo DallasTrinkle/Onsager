@@ -471,6 +471,19 @@ class Taylor3D(object):
         return sorted([ (n,l) for (n,l,coeff) in self.coefflist], key=self.__sortkey)
 
     @classmethod
+    def negcoeff(cls, a):
+        """
+        Negates a coefficient expansion a
+        :param a = list((n, lmax, powexpansion): expansion of function in powers
+        :return coefflist: -a
+        """
+        acoeff = getattr(a, 'coefflist', a)
+        nega = []
+        for an, almax, apow in acoeff:
+            nega.append((an, almax, -apow))
+        return nega
+
+    @classmethod
     def scalarproductcoeff(cls, c, a, inplace=False):
         """
         Multiplies an coefficient expansion a by a scalar c
@@ -584,6 +597,14 @@ class Taylor3D(object):
                     coeff[:cls.powlrange[blmax]] += cpow
         c.sort(key=cls.__sortkey)
         return c
+
+    def __pos__(self):
+        """Return +T3D"""
+        return self.copy()
+
+    def __neg__(self):
+        """Return -T3D"""
+        return Taylor3D(self.negcoeff(self))
 
     def __add__(self, other):
         """Add a set of Taylor expansions"""
