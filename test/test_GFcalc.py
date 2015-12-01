@@ -727,6 +727,24 @@ class GFCalcObjectTestsDistortedFCC(GFCalcObjectTestsSC):
         self.rates = np.array((1./12.,) * 12)
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
 
+class GreenFuncCrystalTests(unittest.TestCase):
+    """Test new implementation of GF calculator, based on Crystal class"""
+    def setUp(self):
+        self.FCC = GFcalc.crystal.Crystal.FCC(1.)
+        self.HCP = GFcalc.crystal.Crystal.HCP(1., np.sqrt(8/3))
+        self.FCC_sitelist = self.FCC.sitelist(0)
+        self.FCC_jumpnetwork = self.FCC.jumpnetwork(0, 0.75)
+        self.HCP_sitelist = self.HCP.sitelist(0)
+        self.HCP_jumpnetwork = self.HCP.jumpnetwork(0, 1.01)
+
+    def testFCC(self):
+        """Test on FCC"""
+        FCC_GF = GFcalc.GFCrystalcalc(self.FCC, 0, self.FCC_sitelist, self.FCC_jumpnetwork)
+
+    def testHCP(self):
+        """Test on HCP"""
+        HCP_GF = GFcalc.GFCrystalcalc(self.HCP, 0, self.HCP_sitelist, self.HCP_jumpnetwork)
+
 
 # DocTests... we use this for the small "utility" functions, rather than writing
 # explicit tests; doctests are compatible with unittests, so we're good here.

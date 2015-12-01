@@ -884,13 +884,14 @@ class GFCrystalcalc(object):
         self.g_Taylor_fnlu = {(n,l): create_fnlu(n, l, self.pmax, prefactor) for (n,l) in self.g_Taylor.nl()}
         # 5. Invert Fourier expansion
         gsc_qij = np.zeros_like(self.omega_qij)
-        for q, om_q, g_q in zip(self.kpts, self.omega_qij, gsc_qij):
+        for qind, q in enumerate(self.kpts):
             if np.allclose(q, 0):
                 # gamma point... need to treat separately
-                gsc_q = (-1/self.pmax**2)*np.outer(self.vr[:,0], self.vr[:,0])
+                gsc_qij[qind] = (-1/self.pmax**2)*np.outer(self.vr[:,0], self.vr[:,0])
             else:
                 # invert, subtract off Taylor expansion to leave semicontinuum piece
-                gsc_q = np.linalg.inv(om_q) - self.g_Taylor(np.dot(self.pqtrans, q), g_Taylor_fnlp)
+                gsc_qij[qind] = np.linalg.inv(self.omega_qij[qind]) \
+                                - self.g_Taylor(np.dot(self.pqtrans, q), g_Taylor_fnlp)
         # 6. Slice the pieces we want for fast(er) evaluation (since we specify i and j in evaluation)
         self.gsc_ijq = np.zeros((self.N, self.N, self.Nkpt), dtype=complex)
         for i in range(self.N):
