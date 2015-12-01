@@ -789,7 +789,7 @@ class GFCrystalcalc(object):
         SEjumps = np.zeros((N, len(jumpnetwork)), dtype=int)
         for J,jumplist in enumerate(jumpnetwork):
             for (i,j), dx in jumplist:
-                FTjumps[J,:,i,j] = np.exp(1.j*np.dot(kpts, dx))
+                FTjumps[J,:,i,j] += np.exp(1.j*np.dot(kpts, dx))
                 SEjumps[i,J] += 1
         return FTjumps, SEjumps
 
@@ -839,11 +839,16 @@ class GFCrystalcalc(object):
         """
         def create_fnlp(n, l, pm):
             inv_pmax = 1/pm
-            return lambda p: np.exp(-(p*inv_pmax)**2)
+            return lambda p: (p**n)*np.exp(-(p*inv_pmax)**2)
         def create_fnlu(n, l, pm, prefactor):
-            pre = (-1j)**l *prefactor*(pm**(3+n+l))*\
-                  gamma((3+l+n)/2)/((2*np.pi)**1.5*(2**l)*gamma(3/2+l))
-            return lambda u: pre* u**l * hyp1f1((3+l+n)/2, 3/2+l, -(u*pm*0.5)**2)
+            # prefactor = V/sqrt(d1 d2 d3)
+            a = (3+l+n)/2
+            b = 3/2 + l
+            half_pm = 0.5*pm
+            pre = (-1j)**l *prefactor*(pm**(3+n+l))*gamma(a)/\
+                  ((np.pi**1.5)*(2**(3+l))*gamma(b))
+            return lambda u: pre* u**l * hyp1f1(a,b, -(u*half_pm)**2)
+
         self.rho = self.SiteProbs(pre, betaene)
         self.symmrate = self.SymmRates(pre, betaene, preT, betaeneT)
         self.escape = -np.diag([sum(self.SEjumps[i,J]*pretrans/pre[wi]*np.exp(betaene[wi]-BET)
@@ -864,8 +869,7 @@ class GFCrystalcalc(object):
         self.D = self.Diffusivity(oT_D)
         # 3. Spatially rotate the Taylor expansion
         self.d, self.e = LA.eigh(self.D)
-        # TODO: remove call to eval2 so that this is self-contained
-        self.pmax = np.sqrt(min([eval2(G, self.D) for G in self.crys.BZG])/-np.log(1e-11))
+        self.pmax = np.sqrt(min([np.dot(G,np.dot(G,self.D)) for G in self.crys.BZG])/-np.log(1e-11))
         self.qptrans = self.e.copy()
         self.pqtrans = self.e.T.copy()
         self.uxtrans = self.e.T.copy()
@@ -926,8 +930,10 @@ class GFCrystalcalc(object):
         if self.D is 0: raise ValueError("Need to SetRates first")
         # evaluate Fourier transform component:
         gIFT = np.dot(self.wts, self.gsc_ijq[i,j]*self.exp_dxq(dx))
+        if not np.isclose(gIFT.imag, 0): raise ArithmeticError("Got complex IFT?")
         # evaluate Taylor expansion component:
         gTaylor = self.gT_ij[i][j](np.dot(self.uxtrans, dx), self.g_Taylor_fnlu)
+        if not np.isclose(gTaylor.imag, 0): raise ArithmeticError("Got complex IFT from Taylor?")
         # combine:
         return (gIFT+gTaylor).real
 

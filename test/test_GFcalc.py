@@ -741,12 +741,32 @@ class GreenFuncCrystalTests(unittest.TestCase):
         """Test on FCC"""
         FCC_GF = GFcalc.GFCrystalcalc(self.FCC, 0, self.FCC_sitelist, self.FCC_jumpnetwork, Nmax=4)
         FCC_GF.SetRates([1],[0],[1],[0])
-        print(FCC_GF.Diffusivity())
+        # for qind, q in enumerate(FCC_GF.kpts):
+        #     print("{}: omega= {}  gf_disc= {}".format(q,
+        #                                               FCC_GF.omega_qij[qind,0,0],
+        #                                               FCC_GF.gsc_ijq[0,0,qind]))
+        # test the pole function:
+        for u in np.linspace(0,5,21):
+            pole_orig = FCC_GF.crys.volume*GFcalc.poleFT(FCC_GF.d, u, FCC_GF.pmax)
+            pole_new = FCC_GF.g_Taylor_fnlu[(-2,0)](u).real
+            self.assertAlmostEqual(pole_orig, pole_new, places=15, msg="Pole (-2,0) failed for u={}".format(u))
+        # test the discontinuity function:
+        for u in np.linspace(0,5,21):
+            disc_orig = FCC_GF.crys.volume*(FCC_GF.pmax/(2*np.sqrt(np.pi)))**3*\
+                        np.exp(-(0.5*u*FCC_GF.pmax)**2)/np.sqrt(np.product(FCC_GF.d))
+            disc_new = FCC_GF.g_Taylor_fnlu[(0,0)](u).real
+            self.assertAlmostEqual(disc_orig, disc_new, places=15, msg="Disc (0,0) failed for u={}".format(u))
+        # test the GF evaluation against the original
         NNvect = np.array([dx for (i,j), dx in self.FCC_jumpnetwork[0]])
         rates = np.array([1 for jump in NNvect])
         old_FCC_GF = GFcalc.GFcalc(self.FCC.lattice, NNvect, rates)
-        for R in [np.array([0,0,0])]:
-            self.assertAlmostEqual(FCC_GF(0,0, R), old_FCC_GF.GF(R))
+        for R in [np.array([0.,0.,0.]), np.array([0.5, 0.5, 0.]), np.array([0.5, 0., 0.5]), \
+                 np.array([1.,0.,0.]), np.array([1.,0.5,0.5])]:
+            GF_orig = old_FCC_GF.GF(R)
+            GF_new = FCC_GF(0,0,R)
+            # print("R={}: dG= {}  G_orig= {}  G_new= {}".format(R, GF_new-GF_orig, GF_orig, GF_new))
+            self.assertAlmostEqual(FCC_GF(0,0, R), old_FCC_GF.GF(R), places=5,
+                                   msg="Failed for R={}".format(R))
 
     def testHCP(self):
         """Test on HCP"""
