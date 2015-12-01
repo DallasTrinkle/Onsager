@@ -364,16 +364,20 @@ class Taylor3D(object):
         return Taylor3D(self.coefflist)
 
     @classmethod
-    def zeros(cls, nmin, nmax, shape):
+    def zeros(cls, nmin, nmax, shape, dtype=complex):
         """
         Constructs (and returns) a "zero" Taylor expansion with the prescribed shape.
-        This will be useful for doing slicing assignments.
+        This will be useful for doing slicing assignments. Because of the manner in
+        which slicing works for assignment, we create what looks like a *lot* of
+        zeros, by explicitly making the full range of l values.
         :param nmin: minimum value of n
         :param nmax: maximum value of n (inclusive)
         :param shape: shape of matrix, as zeros would expect.
         :return: Taylor3D, with a zero coefficient list
         """
-        return cls([ (n,0,np.zeros((1,) + shape)) for n in range(nmin, nmax+1)])
+        return cls([ (n,l,np.zeros((cls.powlrange[l],) + shape, dtype=dtype))
+                     for n in range(nmin, nmax+1)
+                     for l in range(0, cls.Lmax+1)])
 
     def __getitem__(self, key):
         """

@@ -727,6 +727,7 @@ from . import crystal
 from . import PowerExpansion
 import itertools
 from numpy import linalg as LA
+from scipy.special import hyp1f1, gamma
 # two quick shortcuts
 T3D = PowerExpansion.Taylor3D
 factorial = PowerExpansion.factorial
@@ -770,6 +771,7 @@ class GFCrystalcalc(object):
         # tuple of the Wyckoff site indices for each jump (needed to make symmrate)
         self.jumppairs = ((self.invmap[jumplist[0][0]], self.invmap[jumplist[0][1]])
             for jumplist in jumpnetwork)
+        self.D = 0  # we don't yet know the diffusivity
 
     def FourierTransformJumps(self, jumpnetwork, N, kpts):
         """
@@ -834,41 +836,96 @@ class GFCrystalcalc(object):
         :param betaeneT: list of beta*ET (energy/kB T) for each transition state
         :return:
         """
+        def create_fnlp(n, l, pm):
+            inv_pmax = 1/pm
+            return lambda u: np.exp(-(u*inv_pmax)**2)
+        def create_fnlu(n, l, pm, prefactor):
+            pre = (-1j)**l *prefactor*(pm**(3+n+l))*\
+                  gamma((3+l+n)/2)/((2*np.pi)**1.5*2**l*gamma(3/2+l))
+            return lambda u: pre* u**l * hyp1f1((3+l+n)/2, 3/2+l, -(u*pm*0.5)**2)
         self.rho = self.SiteProbs(pre, betaene)
         self.symmrate = self.SymmRates(pre, betaene, preT, betaeneT)
-        self.onsite = -np.diag([sum(self.SEjumps[i,J]*pretrans/pre[wi]*np.exp(betaene[wi]-BET)
+        self.escape = -np.diag([sum(self.SEjumps[i,J]*pretrans/pre[wi]*np.exp(betaene[wi]-BET)
                            for J,pretrans,BET in zip(itertools.count(), preT, betaeneT))
                        for i,wi in enumerate(self.invmap)])
         self.omega_qij = np.dot(self.symmrate, self.FTjumps)
-        self.omega_qij[:] += self.onsite # adds it to every point
+        self.omega_qij[:] += self.escape # adds it to every point
         self.omega_Taylor = sum(symmrate*expansion
                                 for symmrate,expansion in zip(self.symmrate, self.T3Djumps))
-        self.omega_Taylor += self.onsite
+        self.omega_Taylor += self.escape
         # 1. Diagonalize gamma point value; use to rotate to diffusive / relaxive, and reduce
         self.r, self.vr = self.DiagGamma()
         if not np.isclose(self.r[0],0): raise ArithmeticError("No equilibrium solution to rates?")
-        # 1.a. rotate
-        self.omega_Taylor_ROT = (self.omega_Taylor.ldot(self.vr.T)).rdot(self.vr)
-        # 1.b. slice up the blocks, and reduce
-        self.omega_Taylor_dd = self.omega_Taylor_ROT[0:1,0:1].copy()
-        self.omega_Taylor_dr = self.omega_Taylor_ROT[0:1,1:].copy()
-        self.omega_Taylor_rd = self.omega_Taylor_ROT[1:,0:1].copy()
-        self.omega_Taylor_rr = self.omega_Taylor_ROT[1:,1:].copy()
-        for t in [self.omega_Taylor_dd, self.omega_Taylor_dr,
-                  self.omega_Taylor_rd, self.omega_Taylor_rr]:
-            t.reduce()
-        # 1.c. construct the diffusion Taylor expansion
-        self.omega_Taylor_D = self.omega_Taylor_dd - \
-                              self.omega_Taylor_dr*self.omega_Taylor_rr.inv()*self.omega_Taylor_rd
-        self.omega_Taylor_D.truncate(T3D.Lmax, inplace=True)
-        self.omega_Taylor_D.reduce()
+        self.omega_Taylor_rotate = (self.omega_Taylor.ldot(self.vr.T)).rdot(self.vr)
+        oT_dd, oT_dr, oT_rd, oT_rr, oT_D = self.BlockRotateOmegaTaylor(self.omega_Taylor_rotate)
         # 2. Calculate D
-        self.D = 0
-        self.D = self.Diffusivity()
+        self.D = self.Diffusivity(oT_D)
         # 3. Spatially rotate the Taylor expansion
-        # 4. Invert Taylor expansion
+        self.d, self.e = LA.eigh(self.D)
+        self.pmax = np.sqrt(min([eval2(G, self.D) for G in self.crys.BZG])/-np.log(1e-11))
+        self.qptrans = self.e.copy()
+        self.pqtrans = self.e.T.copy()
+        self.uxtrans = self.e.T.copy()
+        for i in range(3):
+            self.qptrans[:,i] /= np.sqrt(self.d[i])
+            self.pqtrans[i,:] *= np.sqrt(self.d[i])
+            self.uxtrans[i,:] /= np.sqrt(self.d[i])
+        powtrans = T3D.rotatedirections(self.qptrans)
+        for t in [oT_dd, oT_dr, oT_rd, oT_rr, oT_D]:
+            t.rotate(powtrans)
+            t.reduce()
+        if oT_D.coefflist[0][1] != 0: raise ArithmeticError("Problem isotropizing D?")
+        # 4. Invert Taylor expansion using block inversion formula, and truncate at n=0
+        gT_rotate = self.BlockInvertOmegaTaylor(oT_dd, oT_dr, oT_rd, oT_rr, oT_D)
+        self.g_Taylor = (gT_rotate.ldot(self.vr)).rdot(self.vr.T)
+        self.g_Taylor.separate()
+        g_Taylor_fnlp = {(n,l): create_fnlp(n, l, self.pmax) for (n,l) in self.g_Taylor.nl()}
+        prefactor = self.crys.volume/np.sqrt(np.product(self.d))
+        self.g_Taylor_fnlu = {(n,l): create_fnlu(n, l, self.pmax, prefactor) for (n,l) in self.g_Taylor.nl()}
         # 5. Invert Fourier expansion
-        # 6. Subtract off Taylor expansion to leave semicontinuum piece
+        gsc_qij = np.zeros_like(self.omega_qij)
+        for q, om_q, g_q in zip(self.kpts, self.omega_qij, gsc_qij):
+            if np.allclose(q, 0):
+                # gamma point... need to treat separately
+                gsc_q = (-1/self.pmax**2)*np.outer(self.vr[:,0], self.vr[:,0])
+            else:
+                # invert, subtract off Taylor expansion to leave semicontinuum piece
+                gsc_q = np.linalg.inv(om_q) - self.g_Taylor(np.dot(self.pqtrans, q), g_Taylor_fnlp)
+        # 6. Slice the pieces we want for fast(er) evaluation (since we specify i and j in evaluation)
+        self.gsc_ijq = np.zeros((self.N, self.N, self.Nkpt), dtype=complex)
+        for i in range(self.N):
+            for j in range(self.N):
+                self.gsc_ijq[i,j,:] = gsc_qij[:,i,j]
+        # since we can't make an array, use tuples of tuples to do gT_ij[i][j]
+        self.gT_ij = ((self.g_Taylor[i][j].copy().reduce().seperate()
+                       for j in range(self.N))
+                      for i in range(self.N))
+
+    def exp_dxq(self, dx):
+        """
+        Return the array of exp(-i q.dx) evaluated over the q-points, and accounting for symmetry
+        :param dx:
+        :return: array of exp(-i q.dx) evaluated symmetrically
+        """
+        # kpts[k,3] .. g_dx_array[NR, 3]
+        g_dx_array = np.array([self.crys.g_direc(g, dx) for g in self.crys.G])
+        return np.average(np.exp(-1j*np.tensordot(self.kpts, g_dx_array, axes=(1,1))), axis=1)
+
+    def __call__(self, i, j, dx):
+        """
+        Evaluate the Green function from site i to site j, separated by vector dx
+        :param i: site index
+        :param j: site index
+        :param dx: vector pointing from i to j (can include lattice contributions)
+        :return: Green function
+        """
+        if self.D == 0: raise ValueError("Need to SetRates first")
+        # evaluate Fourier transform component:
+        gIFT = np.dot(self.wts, self.gsc_ijq[i,j]*self.exp_dxq(dx))
+        # evaluate Taylor expansion component:
+        gTaylor = self.gT_ij[i][j](np.dot(self.uxtrans, dx), self.g_Taylor_fnlu)
+        # combine:
+        return (gIFT+gTaylor).real
 
     def DiagGamma(self, omega = None):
         """
@@ -893,10 +950,64 @@ class GFCrystalcalc(object):
         r, vr = LA.eigh(gammacoeff)
         return -r, vr
 
-    def Diffusivity(self):
+    def Diffusivity(self, omega_Taylor_D = None):
         """
-        Return the diffusivity; compute it if it's not already known. Uses omega_Taylor_dr
+        Return the diffusivity, or compute it if it's not already known. Uses omega_Taylor_D
         to compute with maximum efficiency.
+        :param omega_Taylor_D: Taylor expansion of the diffusivity component
         :return: D [3,3] array
         """
-        if self.D != 0: return self.D
+        if self.D != 0 and omega_Taylor_D is None: return self.D
+        if self.D == 0 and omega_Taylor_D is None: raise ValueError("Need omega_Taylor_D value")
+        D = np.zeros((3,3))
+        for (n,l,c) in omega_Taylor_D:
+            if n < 2: raise ValueError("Reduced Taylor expansion for D doesn't begin with n==2")
+            if n == 2:
+                # first up: constant term (if present)
+                D += np.eye(3) * c[0,0,0]
+                # next: l == 2 contributions
+                if l >= 2:
+                    # done in this way so that we get the 1/2 for the off-diagonal, and the 1 for diagonal
+                    for t in ((i,j) for i in range(3) for j in range(i, 3)):
+                        ind = T3D.pow2ind[t.count(0), t.count(1), t.count(2)]  # count the powers
+                        D[t] += 0.5*c[ind, 0, 0]
+                        D[t[1], t[0]] += 0.5*c[ind, 0, 0]
+        # note: the "D" constructed this way will be negative! (as it is -q.D.q)
+        return -D
+
+    def BlockRotateOmegaTaylor(self, omega_Taylor_rotate):
+        """
+        Returns block partitioned Taylor expansion of a rotated omega Taylor expansion.
+        :param omega_Taylor_rotate: rotated into diffusive [0] / relaxive [1:] basis
+        :return: dd, dr, rd, rr, and D = dd - dr*rr^-1*rd blocks
+        """
+        dd = omega_Taylor_rotate[0:1,0:1].copy()
+        dr = omega_Taylor_rotate[0:1,1:].copy()
+        rd = omega_Taylor_rotate[1:,0:1].copy()
+        rr = omega_Taylor_rotate[1:,1:].copy()
+        for t in [dd, dr, rd, rr]: t.reduce()
+        D = dd - dr*rr.inv()*rd
+        D.truncate(T3D.Lmax, inplace=True)
+        D.reduce()
+        return dd, dr, rd, rr, D
+
+    def BlockInvertOmegaTaylor(self, dd, dr, rd, rr, D):
+        """
+        Returns block inverted omega as a Taylor expansion, up to Nmax = 0 (discontinuity
+        correction). Needs to be rotated such that leading order of D is isotropic.
+        :param dd: diffusive/diffusive block (upper left)
+        :param dr: diffusive/relaxive block (lower left)
+        :param rd: relaxive/diffusive block (upper right)
+        :param rr: relaxive/relaxive block (lower right)
+        :param D: dd - dr*rr^-1*rd (diffusion)
+        :return: Taylor expansion of g in block form, and reduced (collected terms)
+        """
+        gT = T3D.zeros(-2,0, (self.N, self.N))  # where we'll place our Taylor expansion
+        D_inv = D.inv()
+        rr_inv = rr.inv()
+        gT[0:1,0:1] = D_inv.truncate(0)
+        gT[0:1,1:] = -(D_inv*dr*rr_inv).truncate(0)
+        gT[1:,0:1] = -(rr_inv*rd*D_inv).truncate(0)
+        gT[1:,1:] = (rr_inv + rr_inv*rd*D_inv*dr*rr_inv).truncate(0)
+        return gT.reduce()
+
