@@ -560,7 +560,7 @@ class Taylor3D(object):
         if not inplace:
             c = [(an, almax, alpha*apow) for (an, almax, apow) in acoeff]
         else:
-            c = a
+            c = acoeff
         for bn, blmax, bpow in bcoeff:
             # now add it into the list
             cpow = beta*bpow

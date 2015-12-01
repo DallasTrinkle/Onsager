@@ -739,7 +739,14 @@ class GreenFuncCrystalTests(unittest.TestCase):
 
     def testFCC(self):
         """Test on FCC"""
-        FCC_GF = GFcalc.GFCrystalcalc(self.FCC, 0, self.FCC_sitelist, self.FCC_jumpnetwork)
+        FCC_GF = GFcalc.GFCrystalcalc(self.FCC, 0, self.FCC_sitelist, self.FCC_jumpnetwork, Nmax=4)
+        FCC_GF.SetRates([1],[0],[1],[0])
+        print(FCC_GF.Diffusivity())
+        NNvect = np.array([dx for (i,j), dx in self.FCC_jumpnetwork[0]])
+        rates = np.array([1 for jump in NNvect])
+        old_FCC_GF = GFcalc.GFcalc(self.FCC.lattice, NNvect, rates)
+        for R in [np.array([0,0,0])]:
+            self.assertAlmostEqual(FCC_GF(0,0, R), old_FCC_GF.GF(R))
 
     def testHCP(self):
         """Test on HCP"""

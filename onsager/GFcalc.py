@@ -724,13 +724,13 @@ class GFcalc(object):
 
 
 from . import crystal
-from . import PowerExpansion
+from . import PowerExpansion as PE
 import itertools
 from numpy import linalg as LA
 from scipy.special import hyp1f1, gamma
 # two quick shortcuts
-T3D = PowerExpansion.Taylor3D
-factorial = PowerExpansion.factorial
+T3D = PE.Taylor3D
+factorial = PE.factorial
 
 class GFCrystalcalc(object):
     """
@@ -761,15 +761,16 @@ class GFCrystalcalc(object):
         # a copy for regeneration
         # self.jumpnetwork = jumpnetwork
         # generate a kptmesh
-        self.Nkpt = [4*Nmax, 4*Nmax, 4*Nmax]
-        self.kpts, self.wts = crys.reducekptmesh(crys.fullkptmesh(self.Nkpt))
+        self.kptgrid = (4*Nmax, 4*Nmax, 4*Nmax)
+        self.kpts, self.wts = crys.reducekptmesh(crys.fullkptmesh(self.kptgrid))
+        self.Nkpt = self.kpts.shape[0]
         # generate the Fourier transformation for each jump
         # also includes the multiplicity for the onsite terms (site expansion)
         self.FTjumps, self.SEjumps = self.FourierTransformJumps(jumpnetwork, self.N, self.kpts)
         # generate the Taylor expansion coefficients for each jump
         self.T3Djumps = self.TaylorExpandJumps(jumpnetwork, self.N)
         # tuple of the Wyckoff site indices for each jump (needed to make symmrate)
-        self.jumppairs = ((self.invmap[jumplist[0][0]], self.invmap[jumplist[0][1]])
+        self.jumppairs = tuple((self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
             for jumplist in jumpnetwork)
         self.D = 0  # we don't yet know the diffusivity
 
@@ -801,7 +802,7 @@ class GFCrystalcalc(object):
         """
         T3D() # need to do just to initialize the class; if already initialized, won't do anything
         # Taylor expansion coefficients for exp(1j*x) = (1j)^n/n!
-        pre = ((1j)**n/factorial(n, True) for n in range(T3D.Lmax+1))
+        pre = np.array([(1j)**n/factorial(n, True) for n in range(T3D.Lmax+1)])
         T3Djumps = []
         for jumplist in jumpnetwork:
             # coefficients; we use tuples because we'll be successively adding to the coefficients in place
@@ -838,21 +839,22 @@ class GFCrystalcalc(object):
         """
         def create_fnlp(n, l, pm):
             inv_pmax = 1/pm
-            return lambda u: np.exp(-(u*inv_pmax)**2)
+            return lambda p: np.exp(-(p*inv_pmax)**2)
         def create_fnlu(n, l, pm, prefactor):
             pre = (-1j)**l *prefactor*(pm**(3+n+l))*\
-                  gamma((3+l+n)/2)/((2*np.pi)**1.5*2**l*gamma(3/2+l))
+                  gamma((3+l+n)/2)/((2*np.pi)**1.5*(2**l)*gamma(3/2+l))
             return lambda u: pre* u**l * hyp1f1((3+l+n)/2, 3/2+l, -(u*pm*0.5)**2)
         self.rho = self.SiteProbs(pre, betaene)
         self.symmrate = self.SymmRates(pre, betaene, preT, betaeneT)
         self.escape = -np.diag([sum(self.SEjumps[i,J]*pretrans/pre[wi]*np.exp(betaene[wi]-BET)
                            for J,pretrans,BET in zip(itertools.count(), preT, betaeneT))
                        for i,wi in enumerate(self.invmap)])
-        self.omega_qij = np.dot(self.symmrate, self.FTjumps)
+        self.omega_qij = np.tensordot(self.symmrate, self.FTjumps, axes=(0,0))
         self.omega_qij[:] += self.escape # adds it to every point
         self.omega_Taylor = sum(symmrate*expansion
                                 for symmrate,expansion in zip(self.symmrate, self.T3Djumps))
         self.omega_Taylor += self.escape
+
         # 1. Diagonalize gamma point value; use to rotate to diffusive / relaxive, and reduce
         self.r, self.vr = self.DiagGamma()
         if not np.isclose(self.r[0],0): raise ArithmeticError("No equilibrium solution to rates?")
@@ -862,6 +864,7 @@ class GFCrystalcalc(object):
         self.D = self.Diffusivity(oT_D)
         # 3. Spatially rotate the Taylor expansion
         self.d, self.e = LA.eigh(self.D)
+        # TODO: remove call to eval2 so that this is self-contained
         self.pmax = np.sqrt(min([eval2(G, self.D) for G in self.crys.BZG])/-np.log(1e-11))
         self.qptrans = self.e.copy()
         self.pqtrans = self.e.T.copy()
@@ -890,7 +893,7 @@ class GFCrystalcalc(object):
                 gsc_qij[qind] = (-1/self.pmax**2)*np.outer(self.vr[:,0], self.vr[:,0])
             else:
                 # invert, subtract off Taylor expansion to leave semicontinuum piece
-                gsc_qij[qind] = np.linalg.inv(self.omega_qij[qind]) \
+                gsc_qij[qind] = np.linalg.inv(self.omega_qij[qind,:,:]) \
                                 - self.g_Taylor(np.dot(self.pqtrans, q), g_Taylor_fnlp)
         # 6. Slice the pieces we want for fast(er) evaluation (since we specify i and j in evaluation)
         self.gsc_ijq = np.zeros((self.N, self.N, self.Nkpt), dtype=complex)
@@ -898,9 +901,9 @@ class GFCrystalcalc(object):
             for j in range(self.N):
                 self.gsc_ijq[i,j,:] = gsc_qij[:,i,j]
         # since we can't make an array, use tuples of tuples to do gT_ij[i][j]
-        self.gT_ij = ((self.g_Taylor[i][j].copy().reduce().seperate()
-                       for j in range(self.N))
-                      for i in range(self.N))
+        self.gT_ij = tuple(tuple(self.g_Taylor[i,j].copy().reduce().separate()
+                                 for j in range(self.N))
+                           for i in range(self.N))
 
     def exp_dxq(self, dx):
         """
@@ -920,7 +923,7 @@ class GFCrystalcalc(object):
         :param dx: vector pointing from i to j (can include lattice contributions)
         :return: Green function
         """
-        if self.D == 0: raise ValueError("Need to SetRates first")
+        if self.D is 0: raise ValueError("Need to SetRates first")
         # evaluate Fourier transform component:
         gIFT = np.dot(self.wts, self.gsc_ijq[i,j]*self.exp_dxq(dx))
         # evaluate Taylor expansion component:
@@ -958,21 +961,21 @@ class GFCrystalcalc(object):
         :param omega_Taylor_D: Taylor expansion of the diffusivity component
         :return: D [3,3] array
         """
-        if self.D != 0 and omega_Taylor_D is None: return self.D
-        if self.D == 0 and omega_Taylor_D is None: raise ValueError("Need omega_Taylor_D value")
+        if self.D is not 0 and omega_Taylor_D is None: return self.D
+        if self.D is 0 and omega_Taylor_D is None: raise ValueError("Need omega_Taylor_D value")
         D = np.zeros((3,3))
-        for (n,l,c) in omega_Taylor_D:
+        for (n,l,c) in omega_Taylor_D.coefflist:
             if n < 2: raise ValueError("Reduced Taylor expansion for D doesn't begin with n==2")
             if n == 2:
                 # first up: constant term (if present)
-                D += np.eye(3) * c[0,0,0]
+                D += np.eye(3) * c[0,0,0].real
                 # next: l == 2 contributions
                 if l >= 2:
                     # done in this way so that we get the 1/2 for the off-diagonal, and the 1 for diagonal
                     for t in ((i,j) for i in range(3) for j in range(i, 3)):
                         ind = T3D.pow2ind[t.count(0), t.count(1), t.count(2)]  # count the powers
-                        D[t] += 0.5*c[ind, 0, 0]
-                        D[t[1], t[0]] += 0.5*c[ind, 0, 0]
+                        D[t] += 0.5*c[ind, 0, 0].real
+                        D[t[1], t[0]] += 0.5*c[ind, 0, 0].real
         # note: the "D" constructed this way will be negative! (as it is -q.D.q)
         return -D
 
@@ -987,7 +990,10 @@ class GFCrystalcalc(object):
         rd = omega_Taylor_rotate[1:,0:1].copy()
         rr = omega_Taylor_rotate[1:,1:].copy()
         for t in [dd, dr, rd, rr]: t.reduce()
-        D = dd - dr*rr.inv()*rd
+        if self.N > 1:
+            D = dd - dr*rr.inv()*rd
+        else:
+            D = dd.copy()
         D.truncate(T3D.Lmax, inplace=True)
         D.reduce()
         return dd, dr, rd, rr, D
@@ -1005,10 +1011,11 @@ class GFCrystalcalc(object):
         """
         gT = T3D.zeros(-2,0, (self.N, self.N))  # where we'll place our Taylor expansion
         D_inv = D.inv()
-        rr_inv = rr.inv()
         gT[0:1,0:1] = D_inv.truncate(0)
-        gT[0:1,1:] = -(D_inv*dr*rr_inv).truncate(0)
-        gT[1:,0:1] = -(rr_inv*rd*D_inv).truncate(0)
-        gT[1:,1:] = (rr_inv + rr_inv*rd*D_inv*dr*rr_inv).truncate(0)
+        if self.N > 1:
+            rr_inv = rr.inv()
+            gT[0:1,1:] = -(D_inv*dr*rr_inv).truncate(0)
+            gT[1:,0:1] = -(rr_inv*rd*D_inv).truncate(0)
+            gT[1:,1:] = (rr_inv + rr_inv*rd*D_inv*dr*rr_inv).truncate(0)
         return gT.reduce()
 
