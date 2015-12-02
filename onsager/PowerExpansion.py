@@ -531,18 +531,26 @@ class Taylor3D(object):
     @classmethod
     def rotatecoeff(cls, a, npowtrans, inplace=False):
         """
-        Return a rotated version of the expansion.
+        Return a rotated version of the expansion. Needs to use pad to work with reduced representations.
         :param a: coefficiant list
         :param npowtrans: Lmax+1 x Npow x Npow matrix, of [n,oldpow,newpow] corresponding to the rotation
         :return: coefficient list, rotated
         """
         acoeff = getattr(a, 'coefflist', a)
+        if len(acoeff) == 0: return acoeff
+        # needed to make padding easier: we only pad the first axis corresponding to our powers
+        padtuple = ((0,0),)*(len(acoeff[0][2].shape)-1)
         if not inplace:
-            return [(n,l,np.tensordot(npowtrans[n,:cls.powlrange[l],:cls.powlrange[l]], c, axes=(0,0)))
+            return [(n,n,np.tensordot(npowtrans[n,:cls.powlrange[n],:cls.powlrange[n]],
+                                      np.pad(c, ((0,cls.powlrange[n]-cls.powlrange[l]),) + padtuple,
+                                             mode='constant'),
+                                      axes=(0,0)))
                     for n,l,c in acoeff]
         else:
             for i,(n,l,c) in enumerate(acoeff):
-                acoeff[i] = (n,l,np.tensordot(npowtrans[n,:cls.powlrange[l],:cls.powlrange[l]], c,
+                acoeff[i] = (n,n,np.tensordot(npowtrans[n,:cls.powlrange[n],:cls.powlrange[n]],
+                                      np.pad(c, ((0,cls.powlrange[n]-cls.powlrange[l]),) + padtuple,
+                                             mode='constant'),
                                               axes=(0,0)))
             return acoeff
 

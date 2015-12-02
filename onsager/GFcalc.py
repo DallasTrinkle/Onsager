@@ -905,15 +905,10 @@ class GFCrystalcalc(object):
             self.pqtrans[i,:] *= np.sqrt(self.d[i])
             self.uxtrans[i,:] /= np.sqrt(self.d[i])
         powtrans = T3D.rotatedirections(self.qptrans)
-        print(oT_D)
-        print("D:\n{}".format(self.D))
-        print("d: {}".format(self.d))
         for t in [oT_dd, oT_dr, oT_rd, oT_rr, oT_D]:
             t.irotate(powtrans)  # rotate in place
             t.reduce()
-        if oT_D.coefflist[0][1] != 0:
-            print(oT_D)
-            raise ArithmeticError("Problem isotropizing D?")
+        if oT_D.coefflist[0][1] != 0: raise ArithmeticError("Problem isotropizing D?")
         # 4. Invert Taylor expansion using block inversion formula, and truncate at n=0
         gT_rotate = self.BlockInvertOmegaTaylor(oT_dd, oT_dr, oT_rd, oT_rr, oT_D)
         self.g_Taylor = (gT_rotate.ldot(self.vr)).rdot(self.vr.T)
