@@ -308,9 +308,15 @@ class Taylor3D(object):
                                         powtrans[powijk,cls.directmult[pij,pk]] += powtrans[powij,pij]*powtrans[powk,pk]
         npowtrans = np.zeros((cls.Lmax+1, cls.Npower, cls.Npower))
         for n in range(cls.Lmax+1):
-            p0 = cls.powlrange[n-1]
-            p1 = cls.powlrange[n]
-            npowtrans[n,p0:p1,p0:p1] = powtrans[p0:p1,p0:p1]
+            prange = slice(cls.powlrange[n-1], cls.powlrange[n])
+            npowtrans[n,prange,prange] = powtrans[prange,prange]
+            # now, work on lower values (n-2, n-4, ...)
+            for m in range(n-2,-1,-2):
+                # powers that sum up to m:
+                for tup in [(n0,n1,m-n0-n1) for n0 in range(m+1) for n1 in range(m-n0+1)]:
+                    npowtrans[n,cls.pow2ind[tup],:] = npowtrans[n,cls.pow2ind[tup[0]+2,tup[1],tup[2]],:] + \
+                                                      npowtrans[n,cls.pow2ind[tup[0],tup[1]+2,tup[2]],:] + \
+                                                      npowtrans[n,cls.pow2ind[tup[0],tup[1],tup[2]+2],:]
         return npowtrans
 
     # for sorting our coefficient lists:
@@ -523,20 +529,20 @@ class Taylor3D(object):
         return ca
 
     @classmethod
-    def rotatecoeff(cls, a, powtrans, inplace=False):
+    def rotatecoeff(cls, a, npowtrans, inplace=False):
         """
         Return a rotated version of the expansion.
         :param a: coefficiant list
-        :param powtrans: Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation
+        :param npowtrans: Lmax+1 x Npow x Npow matrix, of [n,oldpow,newpow] corresponding to the rotation
         :return: coefficient list, rotated
         """
         acoeff = getattr(a, 'coefflist', a)
         if not inplace:
-            return [(n,l,np.tensordot(powtrans[n,:cls.powlrange[l],:cls.powlrange[l]], c, axes=(0,0)))
+            return [(n,l,np.tensordot(npowtrans[n,:cls.powlrange[l],:cls.powlrange[l]], c, axes=(0,0)))
                     for n,l,c in acoeff]
         else:
             for i,(n,l,c) in enumerate(acoeff):
-                acoeff[i] = (n,l,np.tensordot(powtrans[n,:cls.powlrange[l],:cls.powlrange[l]], c,
+                acoeff[i] = (n,l,np.tensordot(npowtrans[n,:cls.powlrange[l],:cls.powlrange[l]], c,
                                               axes=(0,0)))
             return acoeff
 

@@ -372,6 +372,7 @@ class PowerExpansionTests(unittest.TestCase):
                 self.assertAlmostEqual(crot(u, fnu)[0,0], crotdirect(u, fnu)[0,0],
                                        msg="Failed before reduce()")
         # now, a more detailed test: do a reduce.
+        c2 = c.copy()
         c.reduce()
         for rot in [np.eye(3), 2.*np.eye(3), 0.5*np.eye(3),
                     np.array([[1.25,0.5,0.25],[-0.25,0.9,0.5],[-0.75,-0.4,0.6]]),
@@ -384,8 +385,10 @@ class PowerExpansionTests(unittest.TestCase):
                        np.array([0., 0., 1.2]),
                        np.array([0.234, -0.5, 0.5]),
                        np.array([-0.24, 0.41, -1.3])]:
+                self.assertAlmostEqual(c(u, fnu)[0,0], c2(u, fnu)[0,0],
+                                       msg="Failure in reduce() to produce equal function values?")
                 self.assertAlmostEqual(crot(u, fnu)[0,0], crotdirect(u, fnu)[0,0],
-                                       msg="Failed after reduce()")
+                                       msg="Failed after reduce() for\n{}".format(rot))
 
 
 
