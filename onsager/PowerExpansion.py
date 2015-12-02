@@ -268,8 +268,13 @@ class Taylor3D(object):
         Takes a transformation matrix qptrans, where q[i] = sum_j qptrans[i][j] p[j], and
         returns the Npow x Npow transformation matrix for the new components in terms of
         the old.
+        NOTE: This is more complex than one might first realize. If we only work with cases
+        where all of the entries for a given power n have those same n (that is, not reduced),
+        then this works. However, we run into problems with *reductions*: e.g., for n=2, the
+        power x^0 y^0 z^0 is, in reality, x^2+y^2+z^2, and hence *it must be transformed*.
         :param qptrans: 3x3 matrix
-        :return: Npow x Npow transformation matrix [original pow][new pow]
+        :return: Lmax +1 x Npow x Npow transformation matrix [n][original pow][new pow] for
+        each n from 0 up to Lmax
         """
         powtrans = np.zeros((cls.Npower, cls.Npower))
         # l = 0 case
@@ -301,7 +306,12 @@ class Taylor3D(object):
                                 for pij in range(cls.powlrange[ni+nj-1],cls.powlrange[ni+nj]):
                                     for pk in range(cls.powlrange[nk-1], cls.powlrange[nk]):
                                         powtrans[powijk,cls.directmult[pij,pk]] += powtrans[powij,pij]*powtrans[powk,pk]
-        return powtrans
+        npowtrans = np.zeros((cls.Lmax+1, cls.Npower, cls.Npower))
+        for n in range(cls.Lmax+1):
+            p0 = cls.powlrange[n-1]
+            p1 = cls.powlrange[n]
+            npowtrans[n,p0:p1,p0:p1] = powtrans[p0:p1,p0:p1]
+        return npowtrans
 
     # for sorting our coefficient lists:
     @classmethod
@@ -522,11 +532,11 @@ class Taylor3D(object):
         """
         acoeff = getattr(a, 'coefflist', a)
         if not inplace:
-            return [(n,l,np.tensordot(powtrans[:cls.powlrange[l],:cls.powlrange[l]], c, axes=(0,0)))
+            return [(n,l,np.tensordot(powtrans[n,:cls.powlrange[l],:cls.powlrange[l]], c, axes=(0,0)))
                     for n,l,c in acoeff]
         else:
             for i,(n,l,c) in enumerate(acoeff):
-                acoeff[i] = (n,l,np.tensordot(powtrans[:cls.powlrange[l],:cls.powlrange[l]], c,
+                acoeff[i] = (n,l,np.tensordot(powtrans[n,:cls.powlrange[l],:cls.powlrange[l]], c,
                                               axes=(0,0)))
             return acoeff
 

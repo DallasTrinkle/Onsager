@@ -355,6 +355,8 @@ class PowerExpansionTests(unittest.TestCase):
 
         newbasis = [(0.89*np.eye(1), np.array([2/3.,1/3,-1/2]))]
         c = T3D([nlc[0] for nlc in T3D.constructexpansion(newbasis, N=4)])
+        # does this still work if we do this?
+        # c.reduce()
         fnu = { (n,l):createExpansion(n) for n in range(5) for l in range(5) }
         for rot in [np.eye(3), 2.*np.eye(3), 0.5*np.eye(3),
                     np.array([[1.25,0.5,0.25],[-0.25,0.9,0.5],[-0.75,-0.4,0.6]]),
@@ -367,7 +369,23 @@ class PowerExpansionTests(unittest.TestCase):
                        np.array([0., 0., 1.2]),
                        np.array([0.234, -0.5, 0.5]),
                        np.array([-0.24, 0.41, -1.3])]:
-                self.assertAlmostEqual(crot(u, fnu)[0,0], crotdirect(u, fnu)[0,0])
+                self.assertAlmostEqual(crot(u, fnu)[0,0], crotdirect(u, fnu)[0,0],
+                                       msg="Failed before reduce()")
+        # now, a more detailed test: do a reduce.
+        c.reduce()
+        for rot in [np.eye(3), 2.*np.eye(3), 0.5*np.eye(3),
+                    np.array([[1.25,0.5,0.25],[-0.25,0.9,0.5],[-0.75,-0.4,0.6]]),
+                    np.array([[0.,1.,0.],[-1.,0.,0.],[0.,0.,1.]])]:
+            rotbasis = [(newbasis[0][0], np.dot(newbasis[0][1], rot))]
+            crotdirect = T3D([nlc[0] for nlc in T3D.constructexpansion(rotbasis, N=4)])
+            crot = c.rotate(c.rotatedirections(rot))
+            for u in [ np.array([1.2, 0., 0.]),
+                       np.array([0., 1.2, 0.]),
+                       np.array([0., 0., 1.2]),
+                       np.array([0.234, -0.5, 0.5]),
+                       np.array([-0.24, 0.41, -1.3])]:
+                self.assertAlmostEqual(crot(u, fnu)[0,0], crotdirect(u, fnu)[0,0],
+                                       msg="Failed after reduce()")
 
 
 

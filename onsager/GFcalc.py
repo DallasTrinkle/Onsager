@@ -906,6 +906,8 @@ class GFCrystalcalc(object):
             self.uxtrans[i,:] /= np.sqrt(self.d[i])
         powtrans = T3D.rotatedirections(self.qptrans)
         print(oT_D)
+        print("D:\n{}".format(self.D))
+        print("d: {}".format(self.d))
         for t in [oT_dd, oT_dr, oT_rd, oT_rr, oT_D]:
             t.irotate(powtrans)  # rotate in place
             t.reduce()
