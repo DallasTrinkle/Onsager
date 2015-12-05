@@ -45,15 +45,44 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
     :param dx: Cartesian vector pointing from first to second member of pair
     """
 
+    @classmethod
+    def zero(cls):
+        """Return the "zero" state"""
+        return cls(i=-1, j=-1, R=np.zeros(3, dtype=int), dx=np.zeros(3))
+
+    @classmethod
+    def fromcrys(cls, crys, chem, ij, dx):
+        """Convert (i,j), dx into PairState"""
+        return cls(i=ij[0],
+                   j=ij[1],
+                   R=np.round(np.dot(crys.invlatt,dx) + crys.basis[chem][ij[1]] - crys.basis[chem][ij[0]]).astype(int),
+                   dx=dx)
+
+    @classmethod
+    def fromcrys_latt(cls, crys, chem, ij, R):
+        """Convert (i,j), R into PairState"""
+        return cls(i=ij[0],
+                   j=ij[1],
+                   R=R,
+                   dx=np.dot(crys.lattice, R + crys.basis[chem][ij[1]] - crys.basis[chem][ij[0]]))
+
     def _asdict(self):
         """Return a proper dict"""
         return {'i': self.i, 'j': self.j, 'R': self.R, 'dx': self.dx}
 
+    def __sane__(self, crys, chem):
+        """Determine if the dx value makes sense given everything else..."""
+        return np.allclose(self.dx, np.dot(crys.lattice, crys.basis[chem][self.j] + self.R - crys.basis[chem][self.i]))
+
+    def iszero(self):
+        """Quicker than self == PairState.zero()"""
+        return self.i == self.j and np.all(self.R == 0)
+
     def __eq__(self, other):
-        """Test for equality--we use numpy.isclose for comparison, since that's what we usually care about"""
+        """Test for equality--we don't bother checking dx"""
         return isinstance(other, self.__class__) and \
-            self.i == other.i and self.j == other.j and np.all(self.R == other.R) \
-               and np.isclose(self.dx, other.dx)
+            self.i == other.i and self.j == other.j and np.all(self.R == other.R)
+            #   and np.isclose(self.dx, other.dx)
 
     def __ne__(self, other):
         """Inequality == not __eq__"""
@@ -105,15 +134,6 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         return self.__class__(i=other.j, j=self.j, R=self.R-other.R, dx=self.dx - other.dx)
 
     @classmethod
-    def zero(cls):
-        """Return the zero version"""
-        return cls(i=-1, j=-1, R=np.zeros(3, dtype=int), dx=np.zeros(3))
-
-    def iszero(self):
-        """Quicker than self == PairState.zero()"""
-        return self.i == self.j and np.all(self.R == 0)
-
-    @classmethod
     def sortkey(cls, entry):
         return np.dot(entry.dx, entry.dx)
 
@@ -135,24 +155,30 @@ class StarSet:
     """
     A class to construct stars, and be able to efficiently index.
     """
-    def __init__(self, jumpnetwork_latt, crys, chem, Nshells=0):
+    def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False):
         """
-        Initiates a star set generator for a given jumpnetwork_latt, crystal, and specified
+        Initiates a star set generator for a given jumpnetwork, crystal, and specified
         chemical index.
 
-        :param jumpnetwork_latt: list of symmetry unique jumps, as a list of list of tuples
+        :param jumpnetwork: list of symmetry unique jumps, as a list of list of tuples; either
+          ((i,j), dx) for jump from i to j with displacement dx, or
           ((i,j), R) for jump from i in unit cell 0 -> j in unit cell R
         :param crys: crystal where jumps take place
         :param chem: chemical index of atom to consider jumps
         :param Nshells: number of shells to generate
+        :param lattice: which form does the jumpnetwork take?
         """
-        self.jumpnetwork_latt = jumpnetwork_latt
-        # flatten the list, and convert to PairStates:
-        self.jumplist = [PairState(i=i, j=j, dx=dx, \
-                                   R=np.round(np.dot(crys.invlatt,dx) + \
-                                              crys.basis[chem][j] - \
-                                              crys.basis[chem][i]).astype(int))
-                         for (i,j), dx in sum(jumpnetwork_latt, [])]
+        self.jumpnetwork_index = []  # list of list of indices into...
+        self.jumplist = []  # list of our jumps, as PairStates
+        ind = 0
+        for jlist in jumpnetwork:
+            self.jumpnetwork_index.append([])
+            for ij, v in jlist:
+                self.jumpnetwork_index[-1].append(ind)
+                ind += 1
+                if lattice: PS = PairState.fromcrys_latt(crys, chem, ij, v)
+                else: PS = PairState.fromcrys(crys, chem, ij, v)
+                self.jumplist.append(PS)
         self.crys = crys
         self.chem = chem
         self.Nshells = self.generate(Nshells)
@@ -161,17 +187,13 @@ class StarSet:
         """
         Construct the points and the stars in the set.
         :param Nshells: number of shells to generate; this is interpreted as subsequent
-          "sums" of jumpnetwork_latt
+          "sums" of jumplist (as we need the solute to be connected to the vacancy by at least one jump)
         :param threshold: threshold for determining equality with symmetry
         """
-        if Nshells == 0:
-            self.Nshells = 0
-            self.Nstars = 0
-            self.Npts = 0
-            return
-        if Nshells == getattr(self, 'Nshells', 0): return
+        if Nshells == getattr(self, 'Nshells', -1): return
         self.Nshells = Nshells
-        self.states = self.jumplist.copy()
+        if Nshells > 0: self.states = self.jumplist.copy()
+        else: self.states = []
         lastshell = list(self.states)
         for i in range(Nshells-1):
             # add all NNvect to last shell produced, always excluding 0
