@@ -1052,6 +1052,22 @@ class Crystal(object):
 
         return lis
 
+    def jumpnetwork2lattice(self, chem, jumpnetwork):
+        """
+        Convert a "standard" jumpnetwork (that specifies displacement vectors dx) into a lattice
+        representation, where we replace dx with the lattice vector from i to j.
+
+        :param chem: index corresponding to the chemistry to consider
+        :param jumpnetwork: list of symmetry-unique transitions; each is a list of tuples:
+          ((i,j), dx) corresponding to jump from i->j with vector dx
+        :return: list of symmetry-unique transitions; each is a list of tuples:
+          ((i,j), R) corresponding to jump from i in unit cell 0 -> j in unit cell R
+        """
+        return [ [ ((i,j),
+                    np.round(np.dot(self.invlatt, dx)+self.basis[chem][i]-self.basis[chem][j]).astype(int))
+                   for (i,j), dx in jumplist]
+                 for jumplist in jumpnetwork]
+
     def sitelist(self, chem):
         """
         Return a list of lists of Wyckoff-related sites for a given chemistry.

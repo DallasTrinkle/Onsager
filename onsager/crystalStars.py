@@ -25,105 +25,208 @@ The big changes are:
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
+import collections
+from . import crystal
+
+# YAML tags
+PAIRSTATE_YAMLTAG = '!PairState'
+
+class PairState(collections.namedtuple('PairState', 'i j R dx')):
+    """
+    A class corresponding to a "pair" state; in this case, a solute-vacancy pair, but can
+    also be a transition state pair. The solute (or initial state) is in unit cell 0, in position
+    indexed i; the vacancy (or final state) is in unit cell R, in position indexed j.
+    The cartesian vector dx connects them. We can add and subtract, negate, and "endpoint"
+    subtract (useful for determining what Green function entry to use)
+
+    :param i: index of the first member of the pair (solute)
+    :param j: index of the second member of the pair (vacancy)
+    :param R: lattice vector pointing from unit cell of i to unit cell of j
+    :param dx: Cartesian vector pointing from first to second member of pair
+    """
+
+    def _asdict(self):
+        """Return a proper dict"""
+        return {'i': self.i, 'j': self.j, 'R': self.R, 'dx': self.dx}
+
+    def __eq__(self, other):
+        """Test for equality--we use numpy.isclose for comparison, since that's what we usually care about"""
+        return isinstance(other, self.__class__) and \
+            self.i == other.i and self.j == other.j and np.all(self.R == other.R) \
+               and np.isclose(self.dx, other.dx)
+
+    def __ne__(self, other):
+        """Inequality == not __eq__"""
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        """Hash, so that we can make sets of states"""
+        return self.i ^ (self.j << 1) ^ (self.R[0] << 2) ^ (self.R[1] << 3) ^ (self.R[2] << 4)
+
+    def __add__(self, other):
+        """Add two states: works if and only if self.j == other.i
+        (i,j) R + (j,k) R' = (i,k) R+R'  : works for thinking about transitions...
+        """
+        if not isinstance(other, self.__class__): return NotImplemented
+        if self.iszero(): return other
+        if other.iszero(): return self
+        if self.j != other.i:
+            raise ArithmeticError('Can only add matching endpoints: ({} {})+({} {}) not compatible'.format(self.i, self.j, other.i, other.j))
+        if self.i == other.j and np.all(self.R == -other.R):
+            return self.zero()
+        return self.__class__(i=self.i, j=other.j, R=self.R+other.R, dx=self.dx+other.dx)
+
+    def __neg__(self):
+        """Negation of state (swap members of pair)
+        - (i,j) R = (j,i) -R
+        Note: a + (-a) == (-a) + a == 0 because we define what "zero" is.
+        """
+        return self.__class__(i=self.j, j=self.i, R=-self.R, dx=-self.dx)
+
+    def __sub__(self, other):
+        """Add a negative:
+        (i,j) R - (k,j) R' = (i,k) R-R'
+        Note: this means that (a-b) + b = a, but b + (a-b) is an error. (b-a) + a = b
+        """
+        if not isinstance(other, self.__class__): return NotImplemented
+        return self.__add__(-other)
+
+    def __xor__(self, other):
+        """Subtraction on the endpoints (sort of the "opposite" of a-b)
+        (i,j) R ^ (i,k) R' = (k,j) R-R'
+        Note: b + (a^b) = b but (a^b) + b is an error. a + (b^a) = a
+        """
+        if not isinstance(other, self.__class__): return NotImplemented
+        if self.iszero(): raise ArithmeticError('Cannot endpoint substract from zero')
+        if other.iszero(): raise ArithmeticError('Cannot endpoint subtract zero')
+        if self.i != other.i:
+            raise ArithmeticError('Can only endpoint subtract matching starts: ({} {})^({} {}) not compatible'.format(self.i, self.j, other.i, other.j))
+        if self == other: return self.zero()
+        return self.__class__(i=other.j, j=self.j, R=self.R-other.R, dx=self.dx - other.dx)
+
+    @classmethod
+    def zero(cls):
+        """Return the zero version"""
+        return cls(i=-1, j=-1, R=np.zeros(3, dtype=int), dx=np.zeros(3))
+
+    def iszero(self):
+        """Quicker than self == PairState.zero()"""
+        return self.i == self.j and np.all(self.R == 0)
+
+    @classmethod
+    def sortkey(cls, entry):
+        return np.dot(entry.dx, entry.dx)
+
+    @staticmethod
+    def PairState_representer(dumper, data):
+        """Output a PairState"""
+        # asdict() returns an OrderedDictionary, so pass through dict()
+        # had to rewrite _asdict() for some reason...?
+        return dumper.represent_mapping(PAIRSTATE_YAMLTAG, data._asdict())
+
+    @staticmethod
+    def PairState_constructor(loader, node):
+        """Construct a GroupOp from YAML"""
+        # ** turns the dictionary into parameters for GroupOp constructor
+        return PairState(**loader.construct_mapping(node, deep=True))
 
 
 class StarSet:
     """
     A class to construct stars, and be able to efficiently index.
     """
-    def __init__(self, NNvect, groupops, Nshells=0):
+    def __init__(self, jumpnetwork_latt, crys, chem, Nshells=0):
         """
-        Initiates a star-generator for a given set of nearest-neighbor vectors
-        and group operations. Explicitly *excludes* the trivial star R=0.
+        Initiates a star set generator for a given jumpnetwork_latt, crystal, and specified
+        chemical index.
 
-        Parameters
-        ----------
-        NNvect : array [:, 3]
-            set of nearest-neighbor vectors; will also be used to generate indexing
-
-        groupops : array [:, 3, 3]
-            point group operations, in Cartesian coordinates
-
-        Nshells : integer, optional
-            number of shells to generate
+        :param jumpnetwork_latt: list of symmetry unique jumps, as a list of list of tuples
+          ((i,j), R) for jump from i in unit cell 0 -> j in unit cell R
+        :param crys: crystal where jumps take place
+        :param chem: chemical index of atom to consider jumps
+        :param Nshells: number of shells to generate
         """
-        self.NNvect = NNvect
-        self.groupops = groupops
-        self.Nshells = 0
-        self.generate(Nshells)
+        self.jumpnetwork_latt = jumpnetwork_latt
+        # flatten the list, and convert to PairStates:
+        self.jumplist = [PairState(i=i, j=j, dx=dx, \
+                                   R=np.round(np.dot(crys.invlatt,dx) + \
+                                              crys.basis[chem][j] - \
+                                              crys.basis[chem][i]).astype(int))
+                         for (i,j), dx in sum(jumpnetwork_latt, [])]
+        self.crys = crys
+        self.chem = chem
+        self.Nshells = self.generate(Nshells)
 
     def generate(self, Nshells, threshold=1e-8):
         """
-        Construct the actual points and stars.
-
-        Parameters
-        ----------
-        Nshells : integer
-            number of shells to generate
-
-        threshold : float, optional
-            threshold for determining equality with symmetry
-
-        Notes
-        -----
-        This code is rather similar to what's in KPTmesh.
+        Construct the points and the stars in the set.
+        :param Nshells: number of shells to generate; this is interpreted as subsequent
+          "sums" of jumpnetwork_latt
+        :param threshold: threshold for determining equality with symmetry
         """
         if Nshells == 0:
             self.Nshells = 0
             self.Nstars = 0
             self.Npts = 0
             return
-        if Nshells == self.Nshells:
-            return
+        if Nshells == getattr(self, 'Nshells', 0): return
         self.Nshells = Nshells
-        # list of all vectors to consider
-        vectlist = [v for v in self.NNvect]
-        lastshell = list(vectlist)
+        self.states = self.jumplist.copy()
+        lastshell = list(self.states)
         for i in range(Nshells-1):
             # add all NNvect to last shell produced, always excluding 0
             # lastshell = [v1+v2 for v1 in lastshell for v2 in self.NNvect if not all(abs(v1 + v2) < threshold)]
             nextshell = []
-            for v1 in lastshell:
-                for v2 in self.NNvect:
-                    v = v1 + v2
-                    if not all(abs(v) < threshold):
-                        if not any([all(abs(v - vi) < threshold) for vi in vectlist]):
-                            nextshell.append(v)
-                            vectlist.append(v)
+            for s1 in lastshell:
+                for s2 in self.jumplist:
+                    try:
+                        s = s1 + s2
+                        if not s.iszero():
+                            if not any(s == st for st in self.states):
+                                nextshell.append(s)
+                                self.states.append(s)
+                    except:
+                        # this allows us to use the addition check, and we silently ignore when it fails
+                        pass
             lastshell = nextshell
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
-        vectlist.sort(key=lambda x: np.vdot(x, x))
+        self.states.sort(key=self.states.sortkey)
         x2_indices = []
-        x2old = np.vdot(vectlist[0], vectlist[0])
-        for i, x2 in enumerate([np.vdot(x, x) for x in vectlist]):
+        x2old = np.dot(self.states[0].dx, self.states[0].dx)
+        for i, x2 in enumerate([np.dot(st.dx, st.dx) for st in self.states]):
             if x2 > (x2old + threshold):
                 x2_indices.append(i)
                 x2old = x2
-        x2_indices.append(len(vectlist))
+        x2_indices.append(len(self.states))
         # x2_indices now contains a list of indices with the same magnitudes
         self.stars = []
         xmin = 0
         for xmax in x2_indices:
             complist_stars = [] # for finding unique stars
-            for x in vectlist[xmin:xmax]:
+            for xi in range(xmin, xmax):
+                x = self.states[xi]
                 # is this a new rep. for a unique star?
                 match = False
                 for i, s in enumerate(complist_stars):
-                    if self.symmatch(x, s[0], threshold):
+                    if self.symmatch(x, self.states[s[0]], threshold):
                         # update star
-                        complist_stars[i].append(x)
+                        complist_stars[i].append(xi)
                         match = True
                         continue
                 if not match:
                     # new symmetry point!
-                    complist_stars.append([x])
+                    complist_stars.append([xi])
             self.stars += complist_stars
             xmin=xmax
-        self.pts = np.array(vectlist)
         self.Nstars = len(self.stars)
-        self.Npts = len(self.pts)
-        self.index = None
-        self.generateindices()
+        self.Nstates = len(self.states)
+        # generate index: which star is each state a member of?
+        self.index = np.zeros(self.Nstates, dtype=int)
+        for si, star in enumerate(self.stars):
+            for xi in star:
+                self.index[xi] = si
+
+    ### LEFT OFF HERE
 
     def combine(self, s1, s2, threshold=1e-8):
         """
@@ -165,22 +268,6 @@ class StarSet:
                 if not all(g1.flat == g2.flat) or not all(g1.flat == g3.flat):
                     raise ArithmeticError('Cannot combine two stars that are using different point groups')
         self.generate(s1.Nshells + s2.Nshells, threshold)
-
-    def generateindices(self):
-        """
-        Generates the star indices for the set of points, if not already generated
-        """
-        if self.index is not None:
-            return
-        self.index = np.empty(self.Npts, dtype=int)
-        self.index[:] = -1
-        for i, v in enumerate(self.pts):
-            for ns, s in enumerate(self.stars):
-                if np.dot(v, v) != np.dot(s[0], s[0]):
-                    continue
-                if any([all(v == v1) for v1 in s]):
-                    self.index[i] = ns
-                    break
 
     def starindex(self, x, threshold=1e-8):
         """
@@ -758,3 +845,7 @@ class VectorStarSet:
                         if gen1bias[i, ind] != sind:
                             raise ArithmeticError('Inconsistent DoubleStar endpoints found')
         return bias1ds, omega1ds, gen1bias, bias1NN, omega1NN
+
+crystal.yaml.add_representer(PairState, PairState.PairState_representer)
+crystal.yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
+
