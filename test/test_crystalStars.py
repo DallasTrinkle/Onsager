@@ -36,8 +36,8 @@ def cubicrates():
     return np.array([1./6.])
 
 def setupFCC():
-    lattice = crystal.Crystal.FCC(1.)
-    jumpnetwork = lattice.jumpnetwork(0, np.sqrt(0.5)+0.01)
+    lattice = crystal.Crystal.FCC(2.)
+    jumpnetwork = lattice.jumpnetwork(0, 2.*np.sqrt(0.5)+0.01)
     return lattice, jumpnetwork
 
 def FCCrates():
@@ -213,35 +213,39 @@ class CubicStarTests(StarTests):
             self.assertEqual(None, self.starset.stateindex(stars.PairState.zero()))
 
             for s in self.starset.stars:
-                x = self.starset.states[s[0]].R
+                x = np.sort(abs(self.starset.states[s[0]].dx))
                 num = (2 ** (3 - list(x).count(0)))
-                if x[0] != x[1] and x[1] != x[2]:
+                if not np.isclose(x[0], x[1]) and not np.isclose(x[1], x[2]):
                     num *= 6
-                elif x[0] != x[1] or x[1] != x[2]:
+                elif not np.isclose(x[0], x[1]) or not np.isclose(x[1], x[2]):
                     num *= 3
-                self.assertEqual(num, len(s))
+                self.assertEqual(num, len(s),
+                                 msg='Count for {} should be {}, got {}'.format(
+                                     self.starset.states[s[0]].dx, num, len(s)))
 
 
 class FCCStarTests(CubicStarTests):
     """Set of tests that our star code is behaving correctly for FCC"""
 
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
+        self.crys, self.jumpnetwork = setupFCC()
+        self.chem = 0
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testStarCount(self):
         """Check that the counts (Npts, Nstars) make sense for FCC, with Nshells = 1, 2, 3"""
         # 110
-        self.star.generate(1)
-        self.assertEqual(self.star.Nstars, 1)
-        self.assertEqual(self.star.Npts, np.shape(self.NNvect)[0])
+        self.starset.generate(1)
+        self.assertEqual(self.starset.Nstars, 1)
+        self.assertEqual(self.starset.Nstates, 12)
 
         # 110, 200, 211, 220
-        self.star.generate(2)
-        self.assertEqual(self.star.Nstars, 4)
+        self.starset.generate(2)
+        self.assertEqual(self.starset.Nstars, 4)
 
         # 110, 200, 211, 220, 310, 321, 330, 222
-        self.star.generate(3)
-        self.assertEqual(self.star.Nstars, 8)
+        self.starset.generate(3)
+        self.assertEqual(self.starset.Nstars, 8)
 
 
 class DoubleStarTests(unittest.TestCase):
