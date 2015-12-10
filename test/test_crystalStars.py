@@ -318,100 +318,99 @@ class VectorStarTests(unittest.TestCase):
         self.chem = 0
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
-    def TESTVectorStarGenerate(self):
+    def testVectorStarGenerate(self):
         """Can we generate star-vectors that make sense?"""
-        self.star.generate(1)
-        self.vecstar.generate(self.star)
-        self.assertTrue(self.vecstar.Nvstars>0)
+        self.starset.generate(1)
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        self.assertTrue(self.vecstarset.Nvstars>0)
 
     def VectorStarConsistent(self, nshells):
         """Do the star vectors obey the definition?"""
-        self.star.generate(nshells)
-        self.vecstar.generate(self.star)
-        for s, vec in zip(self.vecstar.vecpos, self.vecstar.vecvec):
-            for R, v in zip(s, vec):
-                for g in self.groupops:
-                    Rrot = np.dot(g, R)
-                    vrot = np.dot(g, v)
-                    for R1, v1 in zip(s, vec):
-                        if (abs(R1 - Rrot) < 1e-8).all():
-                            self.assertTrue((abs(v1 - vrot) < 1e-8).all())
+        self.starset.generate(nshells)
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        for s, vec in zip(self.vecstarset.vecpos, self.vecstarset.vecvec):
+            for si, v in zip(s, vec):
+                PS = self.starset.states[si]
+                for g in self.crys.G:
+                    gsi = self.starset.stateindex(PS.g(self.crys, self.chem, g))
+                    vrot = self.crys.g_direc(g, v)
+                    for si1, v1 in zip(s, vec):
+                        if gsi == si1: self.assertTrue(np.allclose(v1, vrot))
 
     def VectorStarOrthonormal(self, nshells):
         """Are the star vectors orthonormal?"""
-        self.star.generate(nshells)
-        self.vecstar.generate(self.star)
-        for s1, v1 in zip(self.vecstar.vecpos, self.vecstar.vecvec):
-            for s2, v2 in zip(self.vecstar.vecpos, self.vecstar.vecvec):
-                if (s1[0] == s2[0]).all():
-                    dp = 0
-                    for vv1, vv2 in zip(v1, v2):
-                        dp += np.dot(vv1, vv2)
-                    if (v1[0] == v2[0]).all():
+        self.starset.generate(1)
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        for s1, v1 in zip(self.vecstarset.vecpos, self.vecstarset.vecvec):
+            for s2, v2 in zip(self.vecstarset.vecpos, self.vecstarset.vecvec):
+                if s1[0] == s2[0]:
+                    dp = sum(np.dot(vv1, vv2) for vv1, vv2 in zip(v1, v2))
+                    if np.allclose(v1[0], v2[0]):
                         self.assertAlmostEqual(1., dp,
                                                msg='Failed normality for {}/{} and {}/{}'.format(
-                                                   s1[0], v1[0], s2[0], v2[0]
-                                               ))
+                                                   self.starset.states[s1[0]], v1[0],
+                                                       self.starset.states[s2[0]], v2[0]))
                     else:
                         self.assertAlmostEqual(0., dp,
                                                msg='Failed orthogonality for {}/{} and {}/{}'.format(
-                                                   s1[0], v1[0], s2[0], v2[0]
-                                               ))
+                                                   self.starset.states[s1[0]], v1[0],
+                                                       self.starset.states[s2[0]], v2[0]))
 
-    def TESTVectorStarConsistent(self):
+    def testVectorStarConsistent(self):
         """Do the star vectors obey the definition?"""
         self.VectorStarConsistent(2)
 
-    def TESTVectorStarOrthonormal(self):
+    def testVectorStarOrthonormal(self):
         self.VectorStarOrthonormal(2)
 
-    def TESTVectorStarCount(self):
+    def testVectorStarCount(self):
         """Does our star vector count make any sense?"""
-        self.star.generate(1)
-        self.vecstar.generate(self.star)
-        self.assertEqual(self.vecstar.Nvstars, 3)
+        self.starset.generate(1)
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        self.assertEqual(self.vecstarset.Nvstars, 3)
 
-    def TESTVectorStarOuterProduct(self):
+    def testVectorStarOuterProduct(self):
         """Do we generate the correct outer products for our star-vectors (symmetry checks)?"""
-        self.star.generate(1)
-        self.vecstar.generate(self.star)
-        self.assertEqual(np.shape(self.vecstar.outer), (3, 3, self.vecstar.Nvstars, self.vecstar.Nvstars))
+        self.starset.generate(1)
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        self.assertEqual(np.shape(self.vecstarset.outer),
+                         (3, 3, self.vecstarset.Nvstars, self.vecstarset.Nvstars))
         # check our diagonal blocks first:
-        for outer in [self.vecstar.outer[:, :, i, i]
-                      for i in range(self.vecstar.Nvstars)]:
+        for outer in [self.vecstarset.outer[:, :, i, i]
+                      for i in range(self.vecstarset.Nvstars)]:
             self.assertAlmostEqual(np.trace(outer), 1)
             # should also be symmetric:
-            for g in self.groupops:
-                g_out_gT = np.dot(g, np.dot(outer, g.T))
-                self.assertTrue((abs(outer - g_out_gT) < 1e-8).all())
+            for g in self.crys.G:
+                g_out_gT = self.crys.g_tensor(g, outer)
+                self.assertTrue(np.allclose(g_out_gT, outer))
         # off-diagonal terms now
-        for outer in [self.vecstar.outer[:, :, i, j]
-                      for i in range(self.vecstar.Nvstars)
-                      for j in range(self.vecstar.Nvstars)
+        for outer in [self.vecstarset.outer[:, :, i, j]
+                      for i in range(self.vecstarset.Nvstars)
+                      for j in range(self.vecstarset.Nvstars)
                       if i != j]:
             self.assertAlmostEqual(np.trace(outer), 0)
             # should also be symmetric:
-            for g in self.groupops:
-                g_out_gT = np.dot(g, np.dot(outer, g.T))
-                self.assertTrue((abs(outer - g_out_gT) < 1e-8).all())
-        for i, (sRv0, svv0) in enumerate(zip(self.vecstar.vecpos, self.vecstar.vecvec)):
-            for j, (sRv1, svv1) in enumerate(zip(self.vecstar.vecpos, self.vecstar.vecvec)):
+            for g in self.crys.G:
+                g_out_gT = self.crys.g_tensor(g, outer)
+                self.assertTrue(np.allclose(g_out_gT, outer))
+        for i, (s0, svv0) in enumerate(zip(self.vecstarset.vecpos, self.vecstarset.vecvec)):
+            for j, (s1, svv1) in enumerate(zip(self.vecstarset.vecpos, self.vecstarset.vecvec)):
                 testouter = np.zeros((3, 3))
-                if (sRv0[0] == sRv1[0]).all():
+                if s0[0] == s1[0]:
                     # we have the same underlying star to work with, so...
                     for v0, v1 in zip(svv0, svv1):
                         testouter += np.outer(v0, v1)
-                self.assertTrue((abs(self.vecstar.outer[:, :, i, j] - testouter) < 1e-8).all(),
+                self.assertTrue(np.allclose(self.vecstarset.outer[:, :, i, j], testouter),
                                 msg='Failed for vector stars {} and {}:\n{} !=\n{}'.format(
-                                    i, j, outer, testouter
-                                ))
+                                    i, j, outer, testouter))
 
 
 class VectorStarFCCTests(VectorStarTests):
     """Set of tests that our VectorStar class is behaving correctly, for FCC"""
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.vecstar = stars.VectorStarSet(self.star)
+        self.crys, self.jumpnetwork = setupFCC()
+        self.chem = 0
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def TESTVectorStarCount(self):
         """Does our star vector count make any sense?"""
