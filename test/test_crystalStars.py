@@ -247,66 +247,78 @@ class FCCStarTests(CubicStarTests):
         self.starset.generate(3)
         self.assertEqual(self.starset.Nstars, 8)
 
-
-class DoubleStarTests(unittest.TestCase):
-    """Set of tests that our DoubleStar class is behaving correctly."""
+# replaced DoubleStarTests
+class JumpNetworkTests(unittest.TestCase):
+    """Set of tests that our JumpNetwork is behaving correctly."""
+    longMessage = False
 
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.dstar = stars.DoubleStarSet()
+        self.crys, self.jumpnetwork = setupFCC()
+        self.chem = 0
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
-    def testDoubleStarGeneration(self):
-        """Can we generate a double-star?"""
-        self.star.generate(1)
-        self.dstar.generate(self.star)
-        self.assertTrue(self.dstar.Ndstars > 0)
-        self.assertTrue(self.dstar.Npairs > 0)
+    def testJumpNetworkGeneration(self):
+        """Can we generate jumpnetworks?"""
+        self.starset.generate(1)
+        jumpnetwork1, jt, sp = self.starset.jumpnetwork_omega1()
+        self.assertEqual(len(jumpnetwork1),1)
+        self.assertEqual(jt[0], 0)
+        self.assertEqual(sp[0], (0,0))
+        jumpnetwork2, jt, sp = self.starset.jumpnetwork_omega2()
+        self.assertEqual(len(jumpnetwork2),1)
+        self.assertEqual(len(jumpnetwork2[0]), len(self.jumpnetwork[0]))
+        self.assertEqual(jt[0], 0)
+        self.assertEqual(sp[0], (0,0))
 
-    def testDoubleStarCount(self):
-        """Check that the counts (Npts, Nstars) make sense for FCC, with Nshells = 1, 2"""
+    def testJumpNetworkCount(self):
+        """Check that the counts in the jumpnetwork make sense for FCC, with Nshells = 1, 2"""
         # each of the 12 <110> pairs to 101, 10-1, 011, 01-1 = 4, so should be 48 pairs
         # (which includes "double counting": i->j and j->i)
         # but *all* of those 48 are all equivalent to each other by symmetry: one double-star.
-        self.star.generate(1)
-        self.dstar.generate(self.star)
-        self.assertEqual(self.dstar.Npairs, 48)
-        self.assertEqual(self.dstar.Ndstars, 1)
+        self.starset.generate(1)
+        jumpnetwork, jt, sp = self.starset.jumpnetwork_omega1()
+        self.assertEqual(len(jumpnetwork), 1)
+        self.assertEqual(len(jumpnetwork[0]), 48)
         # Now have four stars (110, 200, 211, 220), so this means
         # 12 <110> pairs to 11 (no 000!); 12*11
         # 6 <200> pairs to 110, 101, 1-10, 10-1; 211, 21-1, 2-11, 2-1-1 = 8; 6*8
         # 24 <211> pairs to 110, 101; 200; 112, 121; 202, 220 = 7; 24*7
         # 12 <220> pairs to 110; 12-1, 121, 21-1, 211 = 5; 12*5
         # unique pairs: (110, 101); (110, 200); (110, 211); (110, 220); (200, 211); (211, 112); (211, 220)
-        self.star.generate(2)
-        self.dstar.generate(self.star)
-        self.assertEqual(self.dstar.Npairs, 12*11 + 6*8 + 24*7 + 12*5)
-        # for ds in self.dstar.dstars:
-        #     print self.star.pts[ds[0][0]], self.star.pts[ds[0][1]]
-        self.assertEqual(self.dstar.Ndstars, 4 + 1 + 2)
+        self.starset.generate(2)
+        self.assertEqual(self.starset.Nstars, 4)
+        jumpnetwork, jt, sp = self.starset.jumpnetwork_omega1()
+        self.assertEqual(len(jumpnetwork), 4+1+2)
+        self.assertEqual(sum(len(jlist) for jlist in jumpnetwork), 12*11 + 6*8 + 24*7 + 12*5)
+        # check that nothing changed with the larger StarSet
+        jumpnetwork2, jt, sp = self.starset.jumpnetwork_omega2()
+        self.assertEqual(len(jumpnetwork2),1)
+        self.assertEqual(len(jumpnetwork2[0]), len(self.jumpnetwork[0]))
+        self.assertEqual(jt[0], 0)
+        self.assertEqual(sp[0], (0,0))
 
-    def testPairIndices(self):
-        """Check that our pair indexing works correctly for Nshell=1..3"""
+    def testJumpNetworkindices(self):
+        """Check that our indexing works correctly for Nshell=1..3"""
         for nshells in range(1, 4):
-            self.star.generate(nshells)
-            self.dstar.generate(self.star)
-            for pair in self.dstar.pairs:
-                self.assertTrue(pair == self.dstar.pairs[self.dstar.pairindex(pair)])
+            self.starset.generate(nshells)
+            jumpnetwork, jt, sp = self.starset.jumpnetwork_omega1()
+            for jumplist, (s1,s2) in zip(jumpnetwork, sp):
+                for (i,f), dx in jumplist:
+                    si = self.starset.index[i]
+                    sf = self.starset.index[f]
+                    self.assertTrue((s1,s2) == (si,sf) or (s1,s2) == (sf,si))
 
-    def testDoubleStarindices(self):
-        """Check that our double-star indexing works correctly for Nshell=1..3"""
-        for nshells in range(1, 4):
-            self.star.generate(nshells)
-            self.dstar.generate(self.star)
-            for pair in self.dstar.pairs:
-                self.assertTrue(any(pair == p for p in self.dstar.dstars[self.dstar.dstarindex(pair)]))
 
 class VectorStarTests(unittest.TestCase):
     """Set of tests that our VectorStar class is behaving correctly"""
-    def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
-        self.vecstar = stars.VectorStarSet(self.star)
+    longMessage = False
 
-    def testVectorStarGenerate(self):
+    def setUp(self):
+        self.crys, self.jumpnetwork = setuportho()
+        self.chem = 0
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+    def TESTVectorStarGenerate(self):
         """Can we generate star-vectors that make sense?"""
         self.star.generate(1)
         self.vecstar.generate(self.star)
@@ -346,20 +358,20 @@ class VectorStarTests(unittest.TestCase):
                                                    s1[0], v1[0], s2[0], v2[0]
                                                ))
 
-    def testVectorStarConsistent(self):
+    def TESTVectorStarConsistent(self):
         """Do the star vectors obey the definition?"""
         self.VectorStarConsistent(2)
 
-    def testVectorStarOrthonormal(self):
+    def TESTVectorStarOrthonormal(self):
         self.VectorStarOrthonormal(2)
 
-    def testVectorStarCount(self):
+    def TESTVectorStarCount(self):
         """Does our star vector count make any sense?"""
         self.star.generate(1)
         self.vecstar.generate(self.star)
         self.assertEqual(self.vecstar.Nvstars, 3)
 
-    def testVectorStarOuterProduct(self):
+    def TESTVectorStarOuterProduct(self):
         """Do we generate the correct outer products for our star-vectors (symmetry checks)?"""
         self.star.generate(1)
         self.vecstar.generate(self.star)
@@ -401,18 +413,18 @@ class VectorStarFCCTests(VectorStarTests):
         self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
         self.vecstar = stars.VectorStarSet(self.star)
 
-    def testVectorStarCount(self):
+    def TESTVectorStarCount(self):
         """Does our star vector count make any sense?"""
         self.star.generate(2)
         self.vecstar.generate(self.star)
         # nn + nn = 4 stars, and that should make 5 star-vectors!
         self.assertEqual(self.vecstar.Nvstars, 5)
 
-    def testVectorStarConsistent(self):
+    def TESTVectorStarConsistent(self):
         """Do the star vectors obey the definition?"""
         self.VectorStarConsistent(2)
 
-    def testVectorStarOuterProductMore(self):
+    def TESTVectorStarOuterProductMore(self):
         """Do we generate the correct outer products for our star-vectors?"""
         self.star.generate(2)
         self.vecstar.generate(self.star)
@@ -462,7 +474,7 @@ class VectorStarGFlinearTests(unittest.TestCase):
                 self.assertAlmostEqual(g, np.dot(GFexpand[i, j, :], gexpand))
         # print(np.dot(GFexpand, gexpand))
 
-    def testConstructGF(self):
+    def TESTConstructGF(self):
         """Test the construction of the GF using double-nn shell"""
         self.ConstructGF(2)
 
@@ -475,7 +487,7 @@ class VectorStarGFFCClinearTests(VectorStarGFlinearTests):
         self.rates = FCCrates()
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
 
-    def testConstructGF(self):
+    def TESTConstructGF(self):
         """Test the construction of the GF using double-nn shell"""
         self.ConstructGF(2)
 
@@ -488,7 +500,7 @@ class VectorStarOmega0Tests(unittest.TestCase):
         self.vecstar = stars.VectorStarSet()
         self.rates = orthorates()
 
-    def testConstructOmega0(self):
+    def TESTConstructOmega0(self):
         self.star.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
         self.NNstar.generate(1) # just nearest-neighbor stars
         self.vecstar.generate(self.star)
@@ -538,7 +550,7 @@ class VectorStarOmegalinearTests(unittest.TestCase):
         self.vecstar = stars.VectorStarSet()
         self.rates = orthorates()
 
-    def testConstructOmega1(self):
+    def TESTConstructOmega1(self):
         self.star.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
         self.dstar.generate(self.star)
         self.vecstar.generate(self.star)
@@ -586,7 +598,7 @@ class VectorStarOmega2linearTests(unittest.TestCase):
         self.vecstar = stars.VectorStarSet()
         self.rates = orthorates()
 
-    def testConstructOmega2(self):
+    def TESTConstructOmega2(self):
         self.NNstar.generate(1) # we need the NN set of stars for NN jumps
         # construct the set of rates corresponding to the unique stars:
         om2expand = np.zeros(self.NNstar.Nstars)
@@ -631,7 +643,7 @@ class VectorStarBias2linearTests(unittest.TestCase):
         self.vecstar = stars.VectorStarSet()
         self.rates = orthorates()
 
-    def testConstructBias2(self):
+    def TESTConstructBias2(self):
         self.NNstar.generate(1) # we need the NN set of stars for NN jumps
         # construct the set of rates corresponding to the unique stars:
         om2expand = np.zeros(self.NNstar.Nstars)
@@ -680,7 +692,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
         self.vecstar = stars.VectorStarSet()
         self.rates = orthorates()
 
-    def testConstructBias1(self):
+    def TESTConstructBias1(self):
         self.NNstar.generate(1) # we need the NN set of stars for NN jumps
         # construct the set of rates corresponding to the unique stars:
         om0expand = np.zeros(self.NNstar.Nstars)

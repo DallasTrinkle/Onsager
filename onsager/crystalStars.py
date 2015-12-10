@@ -175,7 +175,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         return PairState(**loader.construct_mapping(node, deep=True))
 
 
-class StarSet:
+class StarSet(object):
     """
     A class to construct stars, and be able to efficiently index.
     """
@@ -223,6 +223,15 @@ class StarSet:
         self.crys = crys
         self.chem = chem
         self.Nshells = self.generate(Nshells)
+
+    def __str__(self):
+        """Human readable version"""
+        str = "Nshells: {}  Nstates: {}  Nstars: {}".format(self.Nshells, self.Nstates, self.Nstars)
+        for si in range(self.Nstars):
+            str += "Star {}".format(si)
+            for i in self.stars[si]:
+                str += "  {}: {}".format(i, self.states[i])
+        return str
 
     def generate(self, Nshells, threshold=1e-8):
         """
@@ -422,6 +431,7 @@ class StarSet:
                     except: continue
                     if PSf.iszero(): continue
                     f = self.stateindex(PSf)
+                    if f is None: continue  # outside our StarSet
                     # see if we've already generated this jump (works since all of our states are distinct)
                     if any(any( i==i0 and f==f0 for (i0,f0), dx in jlist) for jlist in jumpnetwork): continue
                     dx = PSf.dx - PSi.dx
@@ -479,224 +489,66 @@ class StarSet:
                           self.crys.g_direc(g, dx)
             if not any( gi==i0 and gf==f0 for (i0,f0), dx in symmjumplist):
                 symmjumplist.append(((gi,gf), gdx))
-                if gi != gf: symmjumplist.append((gf, gi), -gdx)
+                if gi != gf: symmjumplist.append(((gf, gi), -gdx))
         return symmjumplist
 
-
-### LEFT OFF HERE
-class DoubleStarSet:
+class VectorStarSet(object):
     """
-    A class to construct double-stars (pairs of sites,
-    where each pair is related by a single group op).
+    A class to construct vector star sets, and be able to efficiently index.
     """
-    def __init__(self, star=None):
+    def __init__(self, starset=None):
         """
-        Initiates a double-star-generator; is designed to work with a given star.
+        Initiates a vector-star generator; work with a given star.
+        :param starset: StarSet, from which we pull nearly all of the info that we need
 
-        Parameters
-        ----------
-        star : Star, optional
-            all of our input parameters will come from this, if non-empty
+        vecpos: list of "positions" (state indices) for each vector star (list of lists)
+        vecvec: list of vectors for each vector star (list of lists of vectors)
+        Nvstars: number of vector stars
         """
-        self.star = None
-        self.Ndstars = 0
-        self.Npairs = 0
-        self.Npts = 0
-        if star is not None:
-            if star.Nshells > 0:
-                self.generate(star)
-
-    def generate(self, star, threshold=1e-8):
-        """
-        Construct the actual double-stars.
-
-        Parameters
-        ----------
-        star : Star, optional
-            all of our input parameters will come from this, if non-empty
-        """
-        if star.Nshells == 0:
-            self.Npairs = 0
-            return
-        if star == self.star and star.Npts == self.Npts:
-            return
-        self.star = star
-        self.Npts = star.Npts
-        self.NNvect = star.NNvect
-        self.groupops = star.groupops
-        self.pairs = []
-        # make the pairs first
-        for i1, v1 in enumerate(self.star.pts):
-            for dv in self.NNvect:
-                v2 = v1 + dv
-                i2 = self.star.pointindex(v2)
-                # check that i2 is a valid point
-                if i2 >= 0:
-                    self.pairs.append((i1, i2))
-        # sort the pairs
-        self.pairs.sort(key=lambda x: max(np.dot(x[0], x[0]), np.dot(x[1], x[1])))
-        self.Npairs = len(self.pairs)
-        # now to make the unique sets of pairs (double-stars)
-        self.dstars = []
-        for pair in self.pairs:
-            # Q: is this a new rep. for a unique double-star?
-            match = False
-            for i, ds in enumerate(self.dstars):
-                if self.symmatch(pair, ds[0], threshold):
-                    # update star
-                    self.dstars[i].append(pair)
-                    match = True
-                    continue
-            if not match:
-                # new symmetry point!
-                self.dstars.append([pair])
-        self.Ndstars = len(self.dstars)
-        self.index = None
-
-    def generateindices(self):
-        """
-        Generates the double star indices for the set of points, if not already generated
-        """
-        if self.index is not None:
-            return
-        self.index = np.zeros(self.Npairs, dtype=int)
-        for i, p in enumerate(self.pairs):
-            for nds, ds in enumerate(self.dstars):
-                if any([p == p1 for p1 in ds]):
-                    self.index[i] = nds
-
-    def dstarindex(self, p):
-        """
-        Returns the index for the double-star to which pair p belongs.
-
-        Parameters
-        ----------
-        p : two-tuple
-            pair to find the double-star for
-
-        Returns
-        -------
-        index corresponding to double-star; -1 if not found.
-        """
-        self.generateindices()
-        for i, p1 in enumerate(self.pairs):
-            if p1 == p:
-                return self.index[i]
-        return -1
-
-    def pairindex(self, p):
-        """
-        Returns the index corresponding to the pair p.
-
-        Parameters
-        ----------
-        p : two-tuple
-            pair to index
-
-        Returns
-        -------
-        index corresponding to pair; -1 if not found.
-        """
-        for i, v in enumerate(self.pairs):
-            if v == p:
-                return i
-        return -1
-
-    def symmatch(self, x, xcomp, threshold=1e-8):
-        """
-        Tells us if x and xcomp are equivalent by a symmetry group
-
-        Parameters
-        ----------
-        x : 2-tuple
-            two indices corresponding to a pair
-        xcomp : 2-tuple
-            two indices corresponding to a pair to compare
-        threshold : double, optional
-            threshold to use for "equality"
-
-        Returns
-        -------
-        True if equivalent by a point group operation, False otherwise
-        """
-        # first, try the tuple "forward"
-        v00 = self.star.pts[x[0]]
-        v01 = self.star.pts[x[1]]
-        v10 = self.star.pts[xcomp[0]]
-        v11 = self.star.pts[xcomp[1]]
-        if any([np.all(abs(v00 - np.dot(g, v10)) < threshold) and np.all(abs(v01 - np.dot(g, v11)) < threshold)
-                for g in self.groupops]):
-            return True
-        return any([np.all(abs(v00 - np.dot(g, v11)) < threshold) and np.all(abs(v01 - np.dot(g, v10)) < threshold)
-                for g in self.groupops])
-
-class VectorStarSet:
-    """
-    A class to construct vector stars, and be able to efficiently index.
-    """
-    def __init__(self, star=None):
-        """
-        Initiates a vector-star generator; is designed to work with a given star.
-
-        Parameters
-        ----------
-        star : Star, optional
-            all of our input parameters will come from this, if non-empty
-        """
-        self.star = None
-        self.Npts = 0
+        self.starset = None
         self.Nvstars = 0
-        self.Nstars = 0
-        if star is not None:
-            self.NNvect = star.NNvect
-            self.groupops = star.groupops
-            if star.Nshells > 0:
-                self.generate(star)
+        if starset is not None:
+            self.Nstars = starset.Nstars
+            if starset.Nshells > 0:
+                self.generate(starset)
 
-    def generate(self, star, threshold=1e-8):
+    def generate(self, starset, threshold=1e-8):
         """
         Construct the actual vectors stars
-
-        Parameters
-        ----------
-        star : Star, optional
-            all of our input parameters will come from this, if non-empty
+        :param starset: StarSet, from which we pull nearly all of the info that we need
         """
-        if star.Nshells == 0:
-            return
-        if star == self.star and star.Npts == self.Npts:
-            return
-        self.star = star
-        self.Npts = star.Npts
-        self.NNvect = star.NNvect
-        self.groupops = star.groupops
+        if starset.Nshells == 0: return
+        if starset == self.starset: return
+        self.starset = starset
         self.vecpos = []
         self.vecvec = []
-        for s in self.star.stars:
+        states = starset.states
+        for s in starset.stars:
             # start by generating the parallel star-vector; always trivially present:
-            self.vecpos.append(s)
-            scale = 1./np.sqrt(len(s)*np.dot(s[0],s[0])) # normalization factor
-            self.vecvec.append([v*scale for v in s])
+            self.vecpos.append(s.copy())
+            PS0 = states[s[0]]
+            vpara = PS0.dx
+            scale = 1./np.sqrt(len(s)*np.dot(vpara, vpara)) # normalization factor
+            self.vecvec.append([states[si].dx*scale for si in s])
             # next, try to generate perpendicular star-vectors, if present:
-            v0 = np.cross(s[0], np.array([0, 0, 1.]))
+            v0 = np.cross(vpara, np.array([0, 0, 1.]))
             if np.dot(v0, v0) < threshold:
-                v0 = np.cross(s[0], np.array([1., 0, 0]))
-            v1 = np.cross(s[0], v0)
+                v0 = np.cross(vpara, np.array([1., 0, 0]))
+            v1 = np.cross(vpara, v0)
             # normalization:
             v0 /= np.sqrt(np.dot(v0, v0))
             v1 /= np.sqrt(np.dot(v1, v1))
             Nvect = 2
-            # run over the invariant group operations for vector s[0]:
-            for g in [g0 for g0 in self.groupops if all(abs(np.dot(g0, s[0]) - s[0]) < threshold)]:
-                if Nvect == 0:
-                    continue
-                gv0 = np.dot(g, v0)
+            # run over the invariant group operations for state PS0
+            for g in self.starset.crys.G:
+                if Nvect == 0: continue
+                if PS0 != PS0.g(starset.crys, starset.chem, g): continue
+                gv0 = starset.crys.g_direc(g, v0)
                 if Nvect == 1:
                     # we only need to check that we still have an invariant vector
-                    if any(abs(gv0 - v0) > threshold):
-                        Nvect = 0
+                    if any(abs(gv0 - v0) > threshold): Nvect = 0
                 if Nvect == 2:
-                    gv1 = np.dot(g, v1)
+                    gv1 = starset.crys.g_direc(g, v1)
                     g00 = np.dot(v0, gv0)
                     g11 = np.dot(v1, gv1)
                     g01 = np.dot(v0, gv1)
@@ -725,32 +577,29 @@ class VectorStarSet:
                     vlist.append(v1)
                 # add the positions
                 for v in vlist:
-                    self.vecpos.append(s)
+                    self.vecpos.append(s.copy())
                     veclist = []
-                    for R in s:
-                        for g in self.groupops:
-                            if all(abs(R - np.dot(g, s[0])) < threshold):
-                                veclist.append(np.dot(g, v))
+                    for PSi in [states[si] for si in s]:
+                        for g in starset.crys.G:
+                            if PS0.g(starset.crys, starset.chem, g) == PSi:
+                                veclist.append(starset.crys.g_direc(g, v))
                                 break
                     self.vecvec.append(veclist)
         self.Nvstars = len(self.vecpos)
-        self.generateouter()
+        self.outer = self.generateouter()
 
     def generateouter(self):
         """
         Generate our outer products for our star-vectors.
-
-        Returns
-        -------
-        outer : array [3, 3, Nvstars, Nvstars]
+        :return outer: array [3, 3, Nvstars, Nvstars]
             outer[:, :, i, j] is the 3x3 tensor outer product for two vector-stars vs[i] and vs[j]
         """
-        self.outer = np.zeros((3, 3, self.Nvstars, self.Nvstars))
+        outer = np.zeros((3, 3, self.Nvstars, self.Nvstars))
         for i, (sR0, sv0) in enumerate(zip(self.vecpos, self.vecvec)):
             for j, (sR1, sv1) in enumerate(zip(self.vecpos, self.vecvec)):
-                if (sR0[0] == sR1[0]).all():
-                    self.outer[:, :, i, j] = sum([np.outer(v0, v1) for v0, v1 in zip(sv0, sv1)])
-        #[sum([np.outer(v, v) for v in veclist]) for veclist in self.vecvec]
+                if sR0[0] == sR1[0]:
+                    outer[:, :, i, j] = sum([np.outer(v0, v1) for v0, v1 in zip(sv0, sv1)])
+        return outer
 
     def GFexpansion(self, starGF):
         """
