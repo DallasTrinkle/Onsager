@@ -46,8 +46,9 @@ def FCCrates():
 
 class PairStateTests(unittest.TestCase):
     """Tests of the PairState class"""
+    longMessage=False
+
     def setUp(self):
-        self.longMessage=False
         self.hcp = crystal.Crystal.HCP(1.0)
 
     def testZero(self):
@@ -102,7 +103,6 @@ class PairStateTests(unittest.TestCase):
                     (0,pos1a2), (1,pos2a2),
                     (0,pos1a3), (1,pos2a3)]
         zero = stars.PairState.zero()
-        zerolatt = np.zeros(3,dtype=int)
         for g in self.hcp.G:
             self.assertTrue((zero.g(self.hcp, 0, g)).iszero())
         for i,x1 in iterlist:
@@ -111,10 +111,8 @@ class PairStateTests(unittest.TestCase):
                 self.assertTrue(ps.__sane__(self.hcp, 0), msg="{} is not sane?".format(ps))
                 for g in self.hcp.G:
                     # apply directly to the vectors, and get the site index from the group op
-                    gx1 = self.hcp.g_cart(g, x1)
-                    gi = g.indexmap[0][i]
-                    gx2 = self.hcp.g_cart(g, x2)
-                    gj = g.indexmap[0][j]
+                    gi, gx1 = g.indexmap[0][i], self.hcp.g_cart(g, x1)
+                    gj, gx2 = g.indexmap[0][j], self.hcp.g_cart(g, x2)
                     gpsdirect = stars.PairState.fromcrys(self.hcp, 0, (gi,gj), gx2-gx1)
                     gps = ps.g(self.hcp, 0, g)
                     self.assertEqual(gps, gpsdirect,
@@ -123,102 +121,74 @@ class PairStateTests(unittest.TestCase):
 
 class StarTests(unittest.TestCase):
     """Set of tests that our star code is behaving correctly for a general materials"""
+    longMessage=False
 
     def setUp(self):
         self.crys, self.jumpnetwork = setuportho()
+        self.chem = 0
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
-    def isclosed(self, s, groupops, threshold=1e-8):
-        """
-        Evaluate if star s is closed against group operations.
-
-        Parameters
-        ----------
-        s : list of vectors
-            star
-
-        groupops : list (or array) of 3x3 matrices
-            all group operations
-
-        threshold : float, optional
-            threshold for equality in comparison
-
-        Returns
-        -------
-        True if every pair of vectors in star are related by a group operation;
-        False otherwise
-        """
-        for v1 in s:
-            for v2 in s:
-                if not any([all(abs(v1 - np.dot(g, v2)) < threshold) for g in groupops]):
+    def isclosed(self, starset, starindex):
+        """Evaluate if star s is closed against group operations."""
+        for i1 in starset.stars[starindex]:
+            ps1 = starset.states[i1]
+            for i2 in starset.stars[starindex]:
+                ps2 = starset.states[i2]
+                if not any( ps1 == ps2.g(self.crys, self.chem, g) for g in self.crys.G):
                     return False
         return True
-
 
     def testStarConsistent(self):
         """Check that the counts (Npts, Nstars) make sense, with Nshells = 1..4"""
         for n in range(1,5):
-            self.star.generate(n)
-            self.assertEqual(self.star.Npts, sum([len(s) for s in self.star.stars]))
-            for s in self.star.stars:
-                self.assertTrue(self.isclosed(s, self.groupops))
+            self.starset.generate(n)
+            for starindex in range(self.starset.Nstars):
+                self.assertTrue(self.isclosed(self.starset, starindex))
 
     def testStarindices(self):
         """Check that our indexing is correct."""
-        self.star.generate(4)
-        for ns, s in enumerate(self.star.stars):
-            for v in s:
-                self.assertEqual(ns, self.star.starindex(v))
-        self.assertEqual(-1, self.star.starindex(np.zeros(3)))
-        for i, v in enumerate(self.star.pts):
-            self.assertEqual(i, self.star.pointindex(v))
-        self.assertEqual(-1, self.star.pointindex(np.zeros(3)))
+        self.starset.generate(4)
+        for si, star in enumerate(self.starset.stars):
+            for i in star:
+                self.assertEqual(si, self.starset.starindex(self.starset.states[i]))
+        self.assertEqual(None, self.starset.starindex(stars.PairState.zero()))
+        self.assertEqual(None, self.starset.stateindex(stars.PairState.zero()))
 
     def assertEqualStars(self, s1, s2):
-        """Asserts that two stars are equal."""
-        self.assertEqual(s1.Npts, s2.Npts,
-                         msg='Number of points in two star sets are not equal: {} != {}'.format(
-                             s1.Npts, s2.Npts
-                         ))
+        """Asserts that two star sets are equal."""
+        self.assertEqual(s1.Nstates, s2.Nstates,
+                         msg='Number of states in two star sets are not equal: {} != {}'.format(
+                             s1.Nstates, s2.Nstates))
         self.assertEqual(s1.Nshells, s2.Nshells,
                          msg='Number of shells in two star sets are not equal: {} != {}'.format(
-                             s1.Nshells, s2.Nshells
-                         ))
+                             s1.Nshells, s2.Nshells))
         self.assertEqual(s1.Nstars, s2.Nstars,
                          msg='Number of stars in two star sets are not equal: {} != {}'.format(
-                             s1.Nstars, s2.Nstars
-                         ))
+                             s1.Nstars, s2.Nstars))
         for s in s1.stars:
-            ind = s2.starindex(s[0])
-            self.assertNotEqual(ind, -1,
-                                msg='Could not find {} from s1 in s2'.format(
-                                    s[0]
-                                ))
-            for R in s:
-                self.assertEqual(ind, s2.starindex(R),
-                                 msg='Point {} and {} from star in s1 belong to different stars in s2'.format(
-                                     s[0], R
-                                 ))
-        for s in s2.stars:
-            ind = s1.starindex(s[0])
-            self.assertNotEqual(ind, -1,
-                                msg='Could not find {} from s2 in s1'.format(
-                                    s[0]
-                                ))
-            for R in s:
-                self.assertEqual(ind, s1.starindex(R),
-                                 msg='Point {} and {} from star in s2 belong to different stars in s1'.format(
-                                     s[0], R
-                                 ))
+            # grab the first entry, and index it into a star; then check that all the others are there.
+            ps0 = s1.states[s[0]]
+            s2ind = s2.starindex(s1.states[s[0]])
+            self.assertNotEqual(s2ind, -1,
+                                msg='Could not find state {} from s1 in s2'.format(s1.states[s[0]]))
+            self.assertEqual(len(s), len(s2.stars[s2ind]),
+                             msg='Star in s1 has different length than star in s2? {} != {}'.format(
+                                     len(s), len(s2.stars[s2ind])))
+            for i1 in s:
+                ps1 = s1.states[i1]
+                self.assertEqual(s2ind, s2.starindex(ps1),
+                                 msg='States {} and {} from star in s1 belong to different stars in s2'.format(
+                                     ps0, ps1))
 
     def testStarCombine(self):
         """Check that we can combine two stars and get what we expect."""
-        s1 = stars.StarSet(self.NNvect, self.groupops)
-        s2 = stars.StarSet(self.NNvect, self.groupops)
-        s3 = stars.StarSet(self.NNvect, self.groupops)
-        s4 = stars.StarSet(self.NNvect, self.groupops)
+        s1 = self.starset.copy()
+        s2 = self.starset.copy()
+        # s3 = self.starset.copy()
+        s4 = self.starset.copy()
         s1.generate(1)
         s2.generate(1)
-        s3.combine(s1, s2)
+        s3 = s1 + s2
         s4.generate(2)
         # s3 = s1 + s2, should equal s4
         self.assertEqualStars(s1, s2)
@@ -229,29 +199,27 @@ class CubicStarTests(StarTests):
     """Set of tests that our star code is behaving correctly for cubic materials"""
 
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setupcubic()
+        self.crys, self.jumpnetwork = setupcubic()
+        self.chem = 0
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testStarConsistent(self):
         """Check that the counts (Npts, Nstars) make sense for cubic, with Nshells = 1..4"""
         for n in range(1,5):
-            self.star.generate(n)
-            self.assertEqual(self.star.Npts, sum([len(s) for s in self.star.stars]))
-            for s in self.star.stars:
-                x = s[0]
+            self.starset.generate(n)
+            for starindex in range(self.starset.Nstars):
+                self.assertTrue(self.isclosed(self.starset, starindex))
+            self.assertEqual(None, self.starset.starindex(stars.PairState.zero()))
+            self.assertEqual(None, self.starset.stateindex(stars.PairState.zero()))
+
+            for s in self.starset.stars:
+                x = self.starset.states[s[0]].R
                 num = (2 ** (3 - list(x).count(0)))
                 if x[0] != x[1] and x[1] != x[2]:
                     num *= 6
                 elif x[0] != x[1] or x[1] != x[2]:
                     num *= 3
                 self.assertEqual(num, len(s))
-                self.assertTrue(self.isclosed(s, self.groupops))
-
-    def testStarmembers(self):
-        """Are the members correct?"""
-        self.star.generate(1)
-        s = self.star.stars[0]
-        for v in self.NNvect:
-            self.assertTrue(any(all(abs(v-v1)<1e-8) for v1 in s))
 
 
 class FCCStarTests(CubicStarTests):

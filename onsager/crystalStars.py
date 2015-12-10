@@ -179,7 +179,7 @@ class StarSet:
     """
     A class to construct stars, and be able to efficiently index.
     """
-    def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False):
+    def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False, empty=False):
         """
         Initiates a star set generator for a given jumpnetwork, crystal, and specified
         chemical index.
@@ -192,6 +192,11 @@ class StarSet:
         :param Nshells: number of shells to generate
         :param lattice: which form does the jumpnetwork take?
         """
+        if empty:
+            if __debug__:
+                if any(x is not None for x in (jumpnetwork, crys, chem, Nshells)):
+                    raise TypeError('Tried to create empty StarSet with none-None parameters')
+            return
         self.jumpnetwork_index = []  # list of list of indices into...
         self.jumplist = []  # list of our jumps, as PairStates
         ind = 0
@@ -236,35 +241,37 @@ class StarSet:
             lastshell = nextshell
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
         self.states.sort(key=PairState.sortkey)
-        x2_indices = []
-        x2old = np.dot(self.states[0].dx, self.states[0].dx)
-        for i, x2 in enumerate([np.dot(st.dx, st.dx) for st in self.states]):
-            if x2 > (x2old + threshold):
-                x2_indices.append(i)
-                x2old = x2
-        x2_indices.append(len(self.states))
-        # x2_indices now contains a list of indices with the same magnitudes
-        self.stars = []
-        xmin = 0
-        for xmax in x2_indices:
-            complist_stars = [] # for finding unique stars
-            for xi in range(xmin, xmax):
-                x = self.states[xi]
-                # is this a new rep. for a unique star?
-                match = False
-                for i, s in enumerate(complist_stars):
-                    if self.symmatch(x, self.states[s[0]]):
-                        # update star
-                        complist_stars[i].append(xi)
-                        match = True
-                        continue
-                if not match:
-                    # new symmetry point!
-                    complist_stars.append([xi])
-            self.stars += complist_stars
-            xmin=xmax
-        self.Nstars = len(self.stars)
         self.Nstates = len(self.states)
+        if self.Nstates > 0:
+            x2_indices = []
+            x2old = np.dot(self.states[0].dx, self.states[0].dx)
+            for i, x2 in enumerate([np.dot(st.dx, st.dx) for st in self.states]):
+                if x2 > (x2old + threshold):
+                    x2_indices.append(i)
+                    x2old = x2
+            x2_indices.append(len(self.states))
+            # x2_indices now contains a list of indices with the same magnitudes
+            self.stars = []
+            xmin = 0
+            for xmax in x2_indices:
+                complist_stars = [] # for finding unique stars
+                for xi in range(xmin, xmax):
+                    x = self.states[xi]
+                    # is this a new rep. for a unique star?
+                    match = False
+                    for i, s in enumerate(complist_stars):
+                        if self.symmatch(x, self.states[s[0]]):
+                            # update star
+                            complist_stars[i].append(xi)
+                            match = True
+                            continue
+                    if not match:
+                        # new symmetry point!
+                        complist_stars.append([xi])
+                self.stars += complist_stars
+                xmin=xmax
+        else: self.stars = [[]]
+        self.Nstars = len(self.stars)
         # generate index: which star is each state a member of?
         self.index = np.zeros(self.Nstates, dtype=int)
         for si, star in enumerate(self.stars):
@@ -273,7 +280,7 @@ class StarSet:
 
     def copy(self):
         """Return a copy of the StarSet; done as efficiently as possible"""
-        newStarSet = self.__new__(PairState)
+        newStarSet = StarSet(None, None, None, None, empty=True)  # a little hacky... creates an empty class
         newStarSet.jumpnetwork_index = copy.deepcopy(self.jumpnetwork_index)
         newStarSet.jumplist = self.jumplist.copy()
         newStarSet.crys = self.crys
@@ -294,10 +301,10 @@ class StarSet:
         if not isinstance(other, self.__class__): return NotImplemented
         if self.Nshells >= other.Nshells:
             scopy = self.copy()
-            scopy += other
+            scopy.__radd__(other)
         else:
             scopy = other.copy()
-            scopy += self
+            scopy.__radd__(self)
         return scopy
 
     def __radd__(self, other):
@@ -363,7 +370,7 @@ class StarSet:
         except: return None
 
     def starindex(self, PS):
-        """Return the index for the star to which pair state PS belongs; Null if not found"""
+        """Return the index for the star to which pair state PS belongs; None if not found"""
         ind = self.stateindex(PS)
         if ind is None: return None
         return self.index[ind]
