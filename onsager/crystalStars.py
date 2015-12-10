@@ -56,7 +56,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         """Convert (i,j), dx into PairState"""
         return cls(i=ij[0],
                    j=ij[1],
-                   R=np.round(np.dot(crys.invlatt,dx) + crys.basis[chem][ij[1]] - crys.basis[chem][ij[0]]).astype(int),
+                   R=np.round(np.dot(crys.invlatt,dx) - crys.basis[chem][ij[1]] + crys.basis[chem][ij[0]]).astype(int),
                    dx=dx)
 
     @classmethod
@@ -73,7 +73,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
 
     def __sane__(self, crys, chem):
         """Determine if the dx value makes sense given everything else..."""
-        return np.allclose(self.dx, np.dot(crys.lattice, crys.basis[chem][self.j] + self.R - crys.basis[chem][self.i]))
+        return np.allclose(self.dx, np.dot(crys.lattice, self.R + crys.basis[chem][self.j]- crys.basis[chem][self.i]))
 
     def iszero(self):
         """Quicker than self == PairState.zero()"""
@@ -82,7 +82,8 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
     def __eq__(self, other):
         """Test for equality--we don't bother checking dx"""
         return isinstance(other, self.__class__) and \
-            self.i == other.i and self.j == other.j and np.all(self.R == other.R)
+               ((self.i == other.i and self.j == other.j and np.all(self.R == other.R)) or \
+                (self.iszero() and other.iszero()))
             #   and np.isclose(self.dx, other.dx)
 
     def __ne__(self, other):
@@ -148,6 +149,13 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         gRj, (c, gj) = crys.g_pos(g, self.R, (chem, self.j))
         gdx = crys.g_direc(g, self.dx)
         return self.__class__(i=gi, j=gj, R=gRj-gRi, dx=gdx)
+
+    def __str__(self):
+        """Human readable version"""
+        if self.iszero(): return "*.[0,0,0]:*.[0,0,0] (dx=0)"
+        return "{}.[0,0,0]:{}.[{},{},{}] (dx=[{},{},{}])".format(self.i, self.j,
+                                                                 self.R[0], self.R[1], self.R[2],
+                                                                 self.dx[0], self.dx[1], self.dx[2])
 
     @classmethod
     def sortkey(cls, entry):

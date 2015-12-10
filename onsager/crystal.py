@@ -873,6 +873,18 @@ class Crystal(object):
         incellu = incell(rotu)
         return rotlatt + (np.round(rotu - incellu)).astype(int), incellu
 
+    def g_cart(self, g, x):
+        """
+        Apply a space group operation to a (Cartesian) vector position
+        :param g: group operation (GroupOp)
+        :param x: 3-vector position in space
+        :return: 3-vector position in space (Cartesian coordinates)
+        """
+        if __debug__:
+            if type(g) is not GroupOp: raise TypeError
+            if type(x) is not np.ndarray: raise TypeError
+        return np.dot(g.cartrot, x) + np.dot(self.lattice, g.trans)
+
     def g_direc_equivalent(self, d1, d2, threshold=1e-8):
         """
         Tells us if two directions are equivalent by according to the space group

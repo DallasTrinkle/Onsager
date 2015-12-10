@@ -47,15 +47,17 @@ def FCCrates():
 class PairStateTests(unittest.TestCase):
     """Tests of the PairState class"""
     def setUp(self):
+        self.longMessage=False
         self.hcp = crystal.Crystal.HCP(1.0)
 
     def testZero(self):
         """Is zero consistent?"""
         zero = stars.PairState.zero()
         self.assertTrue(zero.iszero())
+        self.assertTrue(stars.PairState.fromcrys(self.hcp, 0, (0,0), np.zeros(3)).iszero())
 
-    def testAddition(self):
-        """Does addition work as expected?"""
+    def testArithmetic(self):
+        """Does addition,subtraction, and endpoint subtraction work as expected?"""
         pos1 = self.hcp.pos2cart(np.array([0,0,0]), (0,0))  # first site
         pos2 = self.hcp.pos2cart(np.array([0,0,0]), (0,1))  # second site
         pos1a1 = self.hcp.pos2cart(np.array([1,0,0]), (0,0))  # first + a1
@@ -70,6 +72,53 @@ class PairStateTests(unittest.TestCase):
             ps1 + ps2
         ps3 = stars.PairState.fromcrys(self.hcp, 0, (1,0), pos1a1 - pos2)
         self.assertEqual(ps2 + ps1, ps3)
+        ps4 = stars.PairState.fromcrys(self.hcp, 0, (0,1), pos2a1 - pos1)
+        self.assertEqual(ps1 - ps2, ps4)
+        for i in [ps1, ps2, ps3, ps4]:
+            self.assertTrue((i - i).iszero())
+            self.assertTrue((i ^ i).iszero())  # endpoint subtraction!
+        # endpoint subtraction: 0.(000):1.(010) ^ 0.(000):1.(000)  == 1.(000):1.(010)
+        ps1 = stars.PairState.fromcrys(self.hcp, 0, (0,1), pos2a2 - pos1)
+        ps2 = stars.PairState.fromcrys(self.hcp, 0, (0,1), pos2 - pos1)
+        ps3 = stars.PairState.fromcrys(self.hcp, 0, (1,1), pos2a2 - pos2)
+        self.assertEqual(ps1 ^ ps2, ps3)
+        with self.assertRaises(ArithmeticError):
+            ps1 ^ ps3
+        self.assertEqual(stars.PairState.fromcrys(self.hcp, 0, (1,0), pos1 - pos2),
+                         - stars.PairState.fromcrys(self.hcp, 0, (0,1), pos2 - pos1))
+
+    def testGroupOps(self):
+        """Applying group operations?"""
+        pos1 = self.hcp.pos2cart(np.array([0,0,0]), (0,0))  # first site
+        pos2 = self.hcp.pos2cart(np.array([0,0,0]), (0,1))  # second site
+        pos1a1 = self.hcp.pos2cart(np.array([1,0,0]), (0,0))  # first + a1
+        pos2a1 = self.hcp.pos2cart(np.array([1,0,0]), (0,1))  # second + a1
+        pos1a2 = self.hcp.pos2cart(np.array([0,1,0]), (0,0))  # first + a2
+        pos2a2 = self.hcp.pos2cart(np.array([0,1,0]), (0,1))  # second + a2
+        pos1a3 = self.hcp.pos2cart(np.array([0,0,1]), (0,0))  # first + a3
+        pos2a3 = self.hcp.pos2cart(np.array([0,0,1]), (0,1))  # second + a3
+        iterlist = [(0,pos1), (1,pos2),
+                    (0,pos1a1), (1,pos2a1),
+                    (0,pos1a2), (1,pos2a2),
+                    (0,pos1a3), (1,pos2a3)]
+        zero = stars.PairState.zero()
+        zerolatt = np.zeros(3,dtype=int)
+        for g in self.hcp.G:
+            self.assertTrue((zero.g(self.hcp, 0, g)).iszero())
+        for i,x1 in iterlist:
+            for j,x2 in iterlist:
+                ps = stars.PairState.fromcrys(self.hcp, 0, (i,j), x2-x1)
+                self.assertTrue(ps.__sane__(self.hcp, 0), msg="{} is not sane?".format(ps))
+                for g in self.hcp.G:
+                    # apply directly to the vectors, and get the site index from the group op
+                    gx1 = self.hcp.g_cart(g, x1)
+                    gi = g.indexmap[0][i]
+                    gx2 = self.hcp.g_cart(g, x2)
+                    gj = g.indexmap[0][j]
+                    gpsdirect = stars.PairState.fromcrys(self.hcp, 0, (gi,gj), gx2-gx1)
+                    gps = ps.g(self.hcp, 0, g)
+                    self.assertEqual(gps, gpsdirect,
+                                     msg="{}\n*{} =\n{} !=\n{}".format(g, ps, gps, gpsdirect))
 
 
 class StarTests(unittest.TestCase):
