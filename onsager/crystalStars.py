@@ -191,11 +191,23 @@ class StarSet:
         :param chem: chemical index of atom to consider jumps
         :param Nshells: number of shells to generate
         :param lattice: which form does the jumpnetwork take?
+
+        crys: crystal structure
+        chem: chemical index of atom that's jumping
+        Nshells: number of shells (addi
+        jumpnetwork_index: list of lists of indices into jumplist; matches structure of jumpnetwork
+        jumplist: list of jumps, as pair states (i=initial state, j=final state)
+        states: list of pair states, out to Nshells
+        Nstates: size of list
+        stars: list of lists of indices into states; each list are states equivalent by symmetry
+        Nstars: size of list
+        index[Nstates]: index of star that state belongs to
         """
         if empty:
+            # this is really just used by copy() to circumvent __init__
             if __debug__:
-                if any(x is not None for x in (jumpnetwork, crys, chem, Nshells)):
-                    raise TypeError('Tried to create empty StarSet with none-None parameters')
+                if any(x is not None for x in (jumpnetwork, crys, chem)):
+                    raise TypeError('Tried to create empty StarSet with non-None parameters')
             return
         self.jumpnetwork_index = []  # list of list of indices into...
         self.jumplist = []  # list of our jumps, as PairStates
@@ -231,13 +243,12 @@ class StarSet:
             for s1 in lastshell:
                 for s2 in self.jumplist:
                     # this try/except structure lets us attempt addition and kick out if not possible
-                    try:
-                        s = s1 + s2
-                        if not s.iszero():
-                            if not any(s == st for st in self.states):
-                                nextshell.append(s)
-                                self.states.append(s)
-                    except: pass
+                    try: s = s1 + s2
+                    except: continue
+                    if not s.iszero():
+                        if not any(s == st for st in self.states):
+                            nextshell.append(s)
+                            self.states.append(s)
             lastshell = nextshell
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
         self.states.sort(key=PairState.sortkey)
@@ -280,7 +291,7 @@ class StarSet:
 
     def copy(self):
         """Return a copy of the StarSet; done as efficiently as possible"""
-        newStarSet = StarSet(None, None, None, None, empty=True)  # a little hacky... creates an empty class
+        newStarSet = StarSet(None, None, None, -1, empty=True)  # a little hacky... creates an empty class
         newStarSet.jumpnetwork_index = copy.deepcopy(self.jumpnetwork_index)
         newStarSet.jumplist = self.jumplist.copy()
         newStarSet.crys = self.crys
@@ -312,16 +323,23 @@ class StarSet:
         threshold = 1e-8
         if not isinstance(other, self.__class__): return NotImplemented
         if self.chem != other.chem: return ArithmeticError('Cannot add different chemistry index')
+        if other.Nshells < 1: return self
+        if self.Nshells < 1:
+            self.Nshells = other.Nshells
+            self.stars = copy.deepcopy(other.stars)
+            self.states = other.states.copy()
+            self.Nstars = other.Nstars
+            self.Nstates = other.Nstates
+            self.index = other.index.copy()
+            return self
         self.Nshells += other.Nshells
-        newshell = []
         Nold = self.Nstates
         for s1 in self.states[:Nold]:
             for s2 in other.states:
                 # this try/except structure lets us attempt addition and kick out if not possible
-                try:
-                    s = s1 + s2
-                    if not s.iszero() and not any(s == st for st in self.states): self.states.append(s)
-                except: pass
+                try: s = s1 + s2
+                except: continue
+                if not s.iszero() and not any(s == st for st in self.states): self.states.append(s)
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
         self.states[Nold:] = sorted(self.states[Nold:], key=PairState.sortkey)
         Nnew = len(self.states)
@@ -362,6 +380,7 @@ class StarSet:
             for xi in star:
                 self.index[xi] = si
         self.Nstars = Nnew
+        return self
 
     # replaces pointindex:
     def stateindex(self, PS):
@@ -378,6 +397,91 @@ class StarSet:
     def symmatch(self, PS1, PS2):
         """True if there exists a group operation that makes PS1 == PS2."""
         return any(PS1 == PS2.g(self.crys, self.chem, g) for g in self.crys.G)
+
+    # replaces DoubleStarSet
+    def jumpnetwork_omega1(self):
+        """
+        Generate a jumpnetwork corresponding to vacancy jumping while the solute remains fixed.
+        :return jumpnetwork: list of symmetry unique jumps; list of list of tuples (i,f), dx where
+          i,f index into states for the initial and final states, and dx = displacement of vacancy
+          in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
+        :return jumptype: list of indices corresponding to the (original) jump type for each
+          symmetry unique jump; useful for constructing a LIMB approximation
+        :return starpair: list of tuples of the star indices of the i and f states for each
+          symmetry unique jump
+        """
+        if self.Nshells < 1: return []
+        jumpnetwork = []
+        jumptype = []
+        starpair = []
+        for jt, jumpindices in enumerate(self.jumpnetwork_index):
+            for jump in [ self.jumplist[j] for j in jumpindices]:
+                for i, PSi in enumerate(self.states):
+                    # attempt to add...
+                    try: PSf = PSi + jump
+                    except: continue
+                    if PSf.iszero(): continue
+                    f = self.stateindex(PSf)
+                    # see if we've already generated this jump (works since all of our states are distinct)
+                    if any(any( i==i0 and f==f0 for (i0,f0), dx in jlist) for jlist in jumpnetwork): continue
+                    dx = PSf.dx - PSi.dx
+                    jumpnetwork.append(self.symmequivjumplist(i, f, dx))
+                    jumptype.append(jt)
+                    starpair.append((self.index[i], self.index[f]))
+        return jumpnetwork, jumptype, starpair
+
+    def jumpnetwork_omega2(self):
+        """
+        Generate a jumpnetwork corresponding to vacancy exchanging with a solute.
+        :return jumpnetwork: list of symmetry unique jumps; list of list of tuples (i,f), dx where
+          i,f index into states for the initial and final states, and dx = displacement of vacancy
+          in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
+        :return jumptype: list of indices corresponding to the (original) jump type for each
+          symmetry unique jump; useful for constructing a LIMB approximation
+        :return starpair: list of tuples of the star indices of the i and f states for each
+          symmetry unique jump
+        """
+        if self.Nshells < 1: return []
+        jumpnetwork = []
+        jumptype = []
+        starpair = []
+        for jt, jumpindices in enumerate(self.jumpnetwork_index):
+            for jump in [ self.jumplist[j] for j in jumpindices]:
+                for i, PSi in enumerate(self.states):
+                    # attempt to add...
+                    try: PSf = PSi + jump
+                    except: continue
+                    if not PSf.iszero(): continue
+                    f = self.stateindex(-PSi)  # exchange
+                    # see if we've already generated this jump (works since all of our states are distinct)
+                    if any(any( i==i0 and f==f0 for (i0,f0), dx in jlist) for jlist in jumpnetwork): continue
+                    dx = -PSi.dx  # the vacancy jumps into the solute position (exchange)
+                    jumpnetwork.append(self.symmequivjumplist(i, f, dx))
+                    jumptype.append(jt)
+                    starpair.append((self.index[i], self.index[f]))
+        return jumpnetwork, jumptype, starpair
+
+    def symmequivjumplist(self, i, f, dx):
+        """
+        Returns a list of tuples of symmetry equivalent jumps
+        :param i: index of initial state
+        :param f: index of final state
+        :param dx: displacement vector
+        :return symmjumplist: list of tuples of ((gi, gf), gdx) for every group op
+        """
+        PSi = self.states[i]
+        PSf = self.states[f]
+        symmjumplist = [((i,f), dx)]
+        if i != f: symmjumplist.append(((f,i), -dx)) # i should not equal f... but in case we allow 0 as a jump
+        for g in self.crys.G:
+            gi, gf, gdx = self.stateindex(PSi.g(self.crys, self.chem, g)),\
+                          self.stateindex(PSf.g(self.crys, self.chem, g)),\
+                          self.crys.g_direc(g, dx)
+            if not any( gi==i0 and gf==f0 for (i0,f0), dx in symmjumplist):
+                symmjumplist.append(((gi,gf), gdx))
+                if gi != gf: symmjumplist.append((gf, gi), -gdx)
+        return symmjumplist
+
 
 ### LEFT OFF HERE
 class DoubleStarSet:
