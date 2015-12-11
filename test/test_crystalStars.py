@@ -566,6 +566,8 @@ class VectorStarGFHCPlinearTests(VectorStarGFlinearTests):
 
 class VectorStarOmega0Tests(unittest.TestCase):
     """Set of tests for our expansion of omega_0 in NN vectors"""
+
+    longMessage = False
     def setUp(self):
         self.crys, self.jumpnetwork = setuportho()
         self.rates = orthorates()
@@ -574,9 +576,14 @@ class VectorStarOmega0Tests(unittest.TestCase):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testConstructOmega0(self):
+        # NOTE: now we only take omega0 *here* to be those equivalent to omega1 jumps; the exchange
+        # terms are handled in omega2; the jumps outside the kinetic shell simply contributed onsite escape
+        # terms that get subtracted away, since the outer kinetic shell *has* to have zero energy
         self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        jumpnetwork_omega1, jt, sp = self.starset.jumpnetwork_omega1()
         self.vecstarset = stars.VectorStarSet(self.starset)
-        rate0expand = self.vecstarset.rate0expansion()
+        rate0expand, rate0escape, rate1expand, rate1escape = self.vecstarset.rateexpansions(jumpnetwork_omega1, jt)
+        # rate0expand = self.vecstarset.rate0expansion()
         self.assertEqual(np.shape(rate0expand),
                          (self.vecstarset.Nvstars, self.vecstarset.Nvstars, len(self.jumpnetwork)))
         om0expand = self.rates.copy()
@@ -588,9 +595,10 @@ class VectorStarOmega0Tests(unittest.TestCase):
             for rate, jumplist in zip(self.rates, self.starset.jumpnetwork_index):
                 for TS in [ self.starset.jumplist[jumpindex] for jumpindex in jumplist]:
                     if PS.j == TS.i:
-                        om0matrix[ns, ns] -= rate
                         nsend = self.starset.stateindex(PS + TS)
-                        if nsend is not None: om0matrix[ns, nsend] += rate
+                        if nsend is not None:
+                            om0matrix[ns, nsend] += rate
+                            om0matrix[ns, ns] -= rate
         # now, we need to convert that omega0 matrix into the "folded down"
         for i, (sRv0, svv0) in enumerate(zip(self.vecstarset.vecpos, self.vecstarset.vecvec)):
             for j, (sRv1, svv1) in enumerate(zip(self.vecstarset.vecpos, self.vecstarset.vecvec)):
@@ -599,6 +607,7 @@ class VectorStarOmega0Tests(unittest.TestCase):
                     for i1, v1 in zip(sRv1, svv1):
                         om0_sv += np.dot(v0, v1)*om0matrix[i0,i1]
                 om0_sv_comp = np.dot(rate0expand[i, j], om0expand)
+                if i == j: om0_sv_comp += np.dot(rate0escape[i], om0expand)
                 self.assertAlmostEqual(om0_sv, om0_sv_comp,
                                        msg='Failed to match {}, {}: {} != {}'.format(
                                            i, j, om0_sv, om0_sv_comp))
@@ -624,6 +633,8 @@ class VectorStarHPCOmega0Tests(VectorStarOmega0Tests):
 
 class VectorStarOmegalinearTests(unittest.TestCase):
     """Set of tests for our expansion of omega_1 in double-stars"""
+
+    longMessage = False
     def setUp(self):
         self.crys, self.jumpnetwork = setuportho()
         # self.rates = orthorates()
@@ -634,22 +645,29 @@ class VectorStarOmegalinearTests(unittest.TestCase):
     def testConstructOmega1(self):
         self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
-        jumpnetwork, jt, sp = self.starset.jumpnetwork_omega1()
-        rate1expand = self.vecstarset.rate1expansion(jumpnetwork)
+        jumpnetwork_omega1, jt, sp = self.starset.jumpnetwork_omega1()
+        rate0expand, rate0escape, rate1expand, rate1escape = self.vecstarset.rateexpansions(jumpnetwork_omega1, jt)
+        # rate1expand = self.vecstarset.rate1expansion(jumpnetwork)
         self.assertEqual(np.shape(rate1expand),
-                         (self.vecstarset.Nvstars, self.vecstarset.Nvstars, len(jumpnetwork)))
+                         (self.vecstarset.Nvstars, self.vecstarset.Nvstars, len(jumpnetwork_omega1)))
         # make some random rates
-        om1expand = np.random.uniform(0, 1, len(jumpnetwork))
+        om1expand = np.random.uniform(0, 1, len(jumpnetwork_omega1))
         for i in range(self.vecstarset.Nvstars):
             for j in range(self.vecstarset.Nvstars):
                 # test the construction
                 om1 = 0
                 for Ri, vi in zip(self.vecstarset.vecpos[i], self.vecstarset.vecvec[i]):
                     for Rj, vj in zip(self.vecstarset.vecpos[j], self.vecstarset.vecvec[j]):
-                        for jumplist, rate in zip(jumpnetwork, om1expand):
+                        for jumplist, rate in zip(jumpnetwork_omega1, om1expand):
                             for (IS, FS), dx in jumplist:
-                                if IS == Ri and FS == Rj: om1 += np.dot(vi, vj) * rate
-                self.assertAlmostEqual(om1, np.dot(rate1expand[i, j, :], om1expand))
+                                if IS == Ri:
+                                    if IS == Rj: om1 -= np.dot(vi, vj) * rate  # onsite terms...
+                                    if FS == Rj: om1 += np.dot(vi, vj) * rate
+                om1_sv_comp = np.dot(rate1expand[i, j], om1expand)
+                if i == j: om1_sv_comp += np.dot(rate1escape[i], om1expand)
+                self.assertAlmostEqual(om1, om1_sv_comp,
+                                       msg='Failed to match {}, {}: {} != {}'.format(
+                                               i, j, om1, om1_sv_comp))
         # print(np.dot(rateexpand, om1expand))
 
 class VectorStarFCCOmegalinearTests(VectorStarOmegalinearTests):
@@ -673,47 +691,59 @@ class VectorStarHPCOmegalinearTests(VectorStarOmegalinearTests):
 
 class VectorStarOmega2linearTests(unittest.TestCase):
     """Set of tests for our expansion of omega_2 in NN stars"""
+
+    longMessage = False
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
-        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
-        self.vecstar = stars.VectorStarSet()
+        self.crys, self.jumpnetwork = setuportho()
         self.rates = orthorates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
-    def TESTConstructOmega2(self):
-        self.NNstar.generate(1) # we need the NN set of stars for NN jumps
+    def testConstructOmega2(self):
+        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        jumpnetwork_omega2, jt, sp = self.starset.jumpnetwork_omega2()
+        rate0expand, rate0escape, rate2expand, rate2escape = self.vecstarset.rateexpansions(jumpnetwork_omega2, jt)
+
         # construct the set of rates corresponding to the unique stars:
-        om2expand = np.zeros(self.NNstar.Nstars)
-        for vec, rate in zip(self.NNvect, self.rates):
-            om2expand[self.NNstar.starindex(vec)] = rate
-        self.star.generate(2) # go ahead and make a "large" set of stars
-        self.vecstar.generate(self.star)
-        rate2expand = self.vecstar.rate2expansion(self.NNstar)
+        om2expand = self.rates.copy()
         self.assertEqual(np.shape(rate2expand),
-                         (self.vecstar.Nvstars, self.vecstar.Nvstars, self.NNstar.Nstars))
-        for i in range(self.vecstar.Nvstars):
-            # test the construction
-            om2 = 0
-            for Ri, vi in zip(self.vecstar.vecpos[i], self.vecstar.vecvec[i]):
-                for vec, rate in zip(self.NNvect, self.rates):
-                    if (vec == Ri).all():
-                        # includes the factor of 2 to account for on-site terms in matrix.
-                        om2 += -2. * np.dot(vi, vi) * rate
-                        break
-            self.assertAlmostEqual(om2, np.dot(rate2expand[i, i, :], om2expand))
-            for j in range(self.vecstar.Nvstars):
-                if j != i:
-                    for d in range(self.NNstar.Nstars):
-                        self.assertAlmostEqual(0, rate2expand[i, j, d])
-        # print(np.dot(rate2expand, om2expand))
-
+                         (self.vecstarset.Nvstars, self.vecstarset.Nvstars, len(jumpnetwork_omega2)))
+        for i in range(self.vecstarset.Nvstars):
+            for j in range(self.vecstarset.Nvstars):
+                # test the construction
+                om2 = 0
+                for Ri, vi in zip(self.vecstarset.vecpos[i], self.vecstarset.vecvec[i]):
+                    for Rj, vj in zip(self.vecstarset.vecpos[j], self.vecstarset.vecvec[j]):
+                        for jumplist, rate in zip(jumpnetwork_omega2, om2expand):
+                            for (IS, FS), dx in jumplist:
+                                if IS == Ri:
+                                    if IS == Rj: om2 -= np.dot(vi, vj) * rate  # onsite terms...
+                                    if FS == Rj: om2 += np.dot(vi, vj) * rate
+                om2_sv_comp = np.dot(rate2expand[i, j], om2expand)
+                if i == j: om2_sv_comp += np.dot(rate2escape[i], om2expand)
+                self.assertAlmostEqual(om2, om2_sv_comp,
+                                       msg='Failed to match {}, {}: {} != {}'.format(
+                                               i, j, om2, om2_sv_comp))
 
 class VectorStarFCCOmega2linearTests(VectorStarOmega2linearTests):
     """Set of tests for our expansion of omega_2 in NN stars for FCC"""
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
-        self.vecstar = stars.VectorStarSet()
+        self.crys, self.jumpnetwork = setupFCC()
         self.rates = FCCrates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+class VectorStarHCPOmega2linearTests(VectorStarOmega2linearTests):
+    """Set of tests for our expansion of omega_2 in NN stars for FCC"""
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupHCP()
+        self.rates = HCPrates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
 
 class VectorStarBias2linearTests(unittest.TestCase):

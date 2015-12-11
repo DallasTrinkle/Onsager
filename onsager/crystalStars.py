@@ -771,19 +771,24 @@ class VectorStarSet(object):
         rate1expansion = np.zeros((self.Nvstars, self.Nvstars, len(jumpnetwork_omega1)))
         rate0escape = np.zeros((self.Nvstars, len(self.starset.jumpnetwork_index)))
         rate1escape = np.zeros((self.Nvstars, len(jumpnetwork_omega1)))
-        for i in range(self.Nvstars):
-            for j in range(self.Nvstars):
-                if i <= j :
-                    for k, jumplist, jt in zip(itertools.count, jumpnetwork_omega1, jumptype):
-                        for (IS, FS), dx in jumplist:
-                            for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
+        for k, jumplist, jt in zip(itertools.count(), jumpnetwork_omega1, jumptype):
+            for (IS, FS), dx in jumplist:
+                for i in range(self.Nvstars):
+                    for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
+                        if Ri == IS:
+                            rate0escape[i, jt] -= np.dot(vi, vi)
+                            rate1escape[i, k] -= np.dot(vi, vi)
+                            for j in range(i,self.Nvstars):
                                 for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                                    if Ri == IS and Rj == FS:
+                                    if Rj == FS:
                                         rate0expansion[i, j, jt] += np.dot(vi, vj)
                                         rate1expansion[i, j, k] += np.dot(vi, vj)
-                else:
-                    rate1expansion[i, j, :] = rate1expansion[j, i, :]
-        return rate1expansion
+        # symmetrize
+        for i in range(self.Nvstars):
+            for j in range(0,i):
+                rate0expansion[i, j, :] = rate0expansion[j, i, :]
+                rate1expansion[i, j, :] = rate1expansion[j, i, :]
+        return rate0expansion, rate0escape, rate1expansion, rate1escape
 
     def rate2expansion(self, NNstar):
         """
