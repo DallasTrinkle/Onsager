@@ -82,9 +82,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
     def __eq__(self, other):
         """Test for equality--we don't bother checking dx"""
         return isinstance(other, self.__class__) and \
-               ((self.i == other.i and self.j == other.j and np.all(self.R == other.R)) or \
-                (self.iszero() and other.iszero()))
-            #   and np.isclose(self.dx, other.dx)
+               (self.i == other.i and self.j == other.j and np.all(self.R == other.R))
 
     def __ne__(self, other):
         """Inequality == not __eq__"""
@@ -103,7 +101,6 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         if other.iszero(): return self
         if self.j != other.i:
             raise ArithmeticError('Can only add matching endpoints: ({} {})+({} {}) not compatible'.format(self.i, self.j, other.i, other.j))
-        # if self.i == other.j and np.all(self.R == -other.R): return self.zero()
         return self.__class__(i=self.i, j=other.j, R=self.R+other.R, dx=self.dx+other.dx)
 
     def __neg__(self):
@@ -115,6 +112,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
 
     def __sub__(self, other):
         """Add a negative:
+        a-b points from initial of a to initial of b if same final state
         (i,j) R - (k,j) R' = (i,k) R-R'
         Note: this means that (a-b) + b = a, but b + (a-b) is an error. (b-a) + a = b
         """
@@ -122,16 +120,16 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         return self.__add__(-other)
 
     def __xor__(self, other):
-        """Subtraction on the endpoints (sort of the "opposite" of a-b)
+        """Subtraction on the endpoints (sort of the "opposite" of a-b):
+        a^b points from final of b to final of a if same initial state
         (i,j) R ^ (i,k) R' = (k,j) R-R'
-        Note: b + (a^b) = b but (a^b) + b is an error. a + (b^a) = a
+        Note: b + (a^b) = a but (a^b) + b is an error. a + (b^a) = b
         """
         if not isinstance(other, self.__class__): return NotImplemented
         if self.iszero(): raise ArithmeticError('Cannot endpoint substract from zero')
         if other.iszero(): raise ArithmeticError('Cannot endpoint subtract zero')
         if self.i != other.i:
             raise ArithmeticError('Can only endpoint subtract matching starts: ({} {})^({} {}) not compatible'.format(self.i, self.j, other.i, other.j))
-        # if self == other: return self.zero()
         return self.__class__(i=other.j, j=self.j, R=self.R-other.R, dx=self.dx - other.dx)
 
     def g(self, crys, chem, g):
@@ -143,7 +141,6 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         :param g: group operation (from crys)
         :return: PairState corresponding to group operation applied to self
         """
-        # if self.iszero(): return self.zero()
         gRi, (c, gi) = crys.g_pos(g, np.zeros(3, dtype=int), (chem, self.i))
         gRj, (c, gj) = crys.g_pos(g, self.R, (chem, self.j))
         gdx = crys.g_direc(g, self.dx)
@@ -151,7 +148,6 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
 
     def __str__(self):
         """Human readable version"""
-        # if self.iszero(): return "*.[0,0,0]:*.[0,0,0] (dx=0)"
         return "{}.[0,0,0]:{}.[{},{},{}] (dx=[{},{},{}])".format(self.i, self.j,
                                                                  self.R[0], self.R[1], self.R[2],
                                                                  self.dx[0], self.dx[1], self.dx[2])
@@ -490,6 +486,64 @@ class StarSet(object):
                 symmjumplist.append(((gi,gf), gdx))
                 if gi != gf: symmjumplist.append(((gf, gi), -gdx))
         return symmjumplist
+
+    def diffgenerate(self, S1, S2, threshold=1e-8):
+        """
+        Construct a starSet using endpoint subtraction from starset S1 to starset S2. Can (will)
+        include zero. Points from vacancy states of S1 to vacancy states of S2.
+        :param S1: starSet for start
+        :param S2: starSet for final
+        :param threshold: threshold for sorting magnitudes (can influence symmetry efficiency)
+        """
+        if S1.Nshells < 1 or S2.Nshells < 1: raise ValueError('Need to initialize stars')
+        self.Nshells = S1.Nshells + S2.Nshells  # an estimate...
+        self.states = []
+        for s1 in S1.states:
+            for s2 in S2.states:
+                # this try/except structure lets us attempt addition and kick out if not possible
+                try: s = s2 ^ s1  # points from vacancy state of s1 to vacancy state of s2
+                except: continue
+                # now we include zero.
+                if not any(s == st for st in self.states): self.states.append(s)
+        # now to sort our set of vectors (easiest by magnitude, and then reduce down:
+        self.states.sort(key=PairState.sortkey)
+        self.Nstates = len(self.states)
+        if self.Nstates > 0:
+            x2_indices = []
+            x2old = np.dot(self.states[0].dx, self.states[0].dx)
+            for i, x2 in enumerate([np.dot(st.dx, st.dx) for st in self.states]):
+                if x2 > (x2old + threshold):
+                    x2_indices.append(i)
+                    x2old = x2
+            x2_indices.append(len(self.states))
+            # x2_indices now contains a list of indices with the same magnitudes
+            self.stars = []
+            xmin = 0
+            for xmax in x2_indices:
+                complist_stars = [] # for finding unique stars
+                for xi in range(xmin, xmax):
+                    x = self.states[xi]
+                    # is this a new rep. for a unique star?
+                    match = False
+                    for i, s in enumerate(complist_stars):
+                        if self.symmatch(x, self.states[s[0]]):
+                            # update star
+                            complist_stars[i].append(xi)
+                            match = True
+                            continue
+                    if not match:
+                        # new symmetry point!
+                        complist_stars.append([xi])
+                self.stars += complist_stars
+                xmin=xmax
+        else: self.stars = [[]]
+        self.Nstars = len(self.stars)
+        # generate index: which star is each state a member of?
+        self.index = np.zeros(self.Nstates, dtype=int)
+        for si, star in enumerate(self.stars):
+            for xi in star:
+                self.index[xi] = si
+
 
 class VectorStarSet(object):
     """
