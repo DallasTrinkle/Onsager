@@ -43,6 +43,14 @@ def setupFCC():
 def FCCrates():
     return np.array([1./12.])
 
+def setupHCP():
+    lattice = crystal.Crystal.HCP(1.)
+    jumpnetwork = lattice.jumpnetwork(0, 1.01)
+    return lattice, jumpnetwork
+
+def HCPrates():
+    return np.array([1./12., 1./12.])
+
 
 class PairStateTests(unittest.TestCase):
     """Tests of the PairState class"""
@@ -223,6 +231,13 @@ class CubicStarTests(StarTests):
                                  msg='Count for {} should be {}, got {}'.format(
                                      self.starset.states[s[0]].dx, num, len(s)))
 
+class HCPStarTests(StarTests):
+    """Set of tests that our star code is behaving correctly for HCP"""
+
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupHCP()
+        self.chem = 0
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
 class FCCStarTests(CubicStarTests):
     """Set of tests that our star code is behaving correctly for FCC"""
@@ -412,32 +427,47 @@ class VectorStarFCCTests(VectorStarTests):
         self.chem = 0
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
-    def TESTVectorStarCount(self):
+    def testVectorStarCount(self):
         """Does our star vector count make any sense?"""
-        self.star.generate(2)
-        self.vecstar.generate(self.star)
+        self.starset.generate(2)
+        self.vecstarset = stars.VectorStarSet(self.starset)
         # nn + nn = 4 stars, and that should make 5 star-vectors!
-        self.assertEqual(self.vecstar.Nvstars, 5)
+        self.assertEqual(self.vecstarset.Nvstars, 5)
 
-    def TESTVectorStarConsistent(self):
+    def testVectorStarConsistent(self):
         """Do the star vectors obey the definition?"""
         self.VectorStarConsistent(2)
 
-    def TESTVectorStarOuterProductMore(self):
+    def testVectorStarOuterProductMore(self):
         """Do we generate the correct outer products for our star-vectors?"""
-        self.star.generate(2)
-        self.vecstar.generate(self.star)
+        self.starset.generate(2)
+        self.vecstarset = stars.VectorStarSet(self.starset)
         # with cubic symmetry, these all have to equal 1/3 * identity, and
         # with a diagonal matrix
         testouter = 1./3.*np.eye(3)
-        for outer in [self.vecstar.outer[:, :, i, i]
-                      for i in range(self.vecstar.Nvstars)]:
-            self.assertTrue((abs(outer - testouter) < 1e-8).all())
-        for outer in [self.vecstar.outer[:, :, i, j]
-                      for i in range(self.vecstar.Nvstars)
-                      for j in range(self.vecstar.Nvstars)
+        for outer in [self.vecstarset.outer[:, :, i, i]
+                      for i in range(self.vecstarset.Nvstars)]:
+            self.assertTrue(np.allclose(outer, testouter))
+        for outer in [self.vecstarset.outer[:, :, i, j]
+                      for i in range(self.vecstarset.Nvstars)
+                      for j in range(self.vecstarset.Nvstars)
                       if i != j]:
-            self.assertTrue((abs(outer) < 1e-8).all())
+            self.assertTrue(np.allclose(outer, 0))
+
+class VectorStarHCPTests(VectorStarTests):
+    """Set of tests that our VectorStar class is behaving correctly, for HCP"""
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupHCP()
+        self.chem = 0
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+    def testVectorStarCount(self):
+        """Does our star vector count make any sense?"""
+        self.starset.generate(1)
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        # two stars, with two vectors: one basal, one along c (more or less)
+        self.assertEqual(self.vecstarset.Nvstars, 2+2)
+
 
 import onsager.GFcalc as GFcalc
 
