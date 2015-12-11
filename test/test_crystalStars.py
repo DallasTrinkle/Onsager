@@ -475,30 +475,37 @@ import onsager.GFcalc as GFcalc
 class VectorStarGFlinearTests(unittest.TestCase):
     """Set of tests that make sure we can construct the GF matrix as a linear combination"""
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
-        self.star2 = stars.StarSet(self.NNvect, self.groupops)
-        self.vecstar = stars.VectorStarSet(self.star)
+        self.crys, self.jumpnetwork = setuportho()
         self.rates = orthorates()
-        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+        self.starset2 = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+        self.GF = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.jumpnetwork, Nmax=4)
+        self.GF.SetRates([1 for s in self.sitelist],
+                         [0 for s in self.sitelist],
+                         self.rates,
+                         [0 for j in self.rates])
 
     def ConstructGF(self, nshells):
-        self.star.generate(nshells)
-        self.star2.generate(2*nshells)
-        self.vecstar.generate(self.star)
-        GFexpand = self.vecstar.GFexpansion(self.star2)
+        self.starset.generate(nshells)
+        self.starset2.generate(2*nshells)
+        self.vecstarset.generate(self.starset)
+        GFexpand = self.vecstarset.GFexpansion(self.starset2)
         self.assertEqual(np.shape(GFexpand),
-                         (self.vecstar.Nvstars, self.vecstar.Nvstars, self.star2.Nstars + 1))
-        gexpand = np.zeros(self.star2.Nstars + 1)
+                         (self.vecstarset.Nvstars, self.vecstarset.Nvstars, self.starset2.Nstars + 1))
+        gexpand = np.zeros(self.starset2.Nstars + 1)
         gexpand[0] = self.GF.GF(np.zeros(3))
-        for i in range(self.star2.Nstars):
-            gexpand[i + 1] = self.GF.GF(self.star2.stars[i][0])
-        for i in range(self.vecstar.Nvstars):
-            for j in range(self.vecstar.Nvstars):
+        for i in range(self.starset2.Nstars):
+            gexpand[i + 1] = self.GF.GF(self.starset2.stars[i][0])
+        for i in range(self.vecstarset.Nvstars):
+            for j in range(self.vecstarset.Nvstars):
                 # test the construction
                 self.assertAlmostEqual(sum(GFexpand[i, j, :]), 0)
                 g = 0
-                for Ri, vi in zip(self.vecstar.vecpos[i], self.vecstar.vecvec[i]):
-                    for Rj, vj in zip(self.vecstar.vecpos[j], self.vecstar.vecvec[j]):
+                for Ri, vi in zip(self.vecstarset.vecpos[i], self.vecstarset.vecvec[i]):
+                    for Rj, vj in zip(self.vecstarset.vecpos[j], self.vecstarset.vecvec[j]):
                         g += np.dot(vi, vj)*self.GF.GF(Ri - Rj)
                 self.assertAlmostEqual(g, np.dot(GFexpand[i, j, :], gexpand))
         # print(np.dot(GFexpand, gexpand))

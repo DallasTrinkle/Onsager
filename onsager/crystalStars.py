@@ -47,9 +47,9 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
     """
 
     @classmethod
-    def zero(cls):
+    def zero(cls, n=-1):
         """Return the "zero" state"""
-        return cls(i=-1, j=-1, R=np.zeros(3, dtype=int), dx=np.zeros(3))
+        return cls(i=n, j=n, R=np.zeros(3, dtype=int), dx=np.zeros(3))
 
     @classmethod
     def fromcrys(cls, crys, chem, ij, dx):
@@ -103,8 +103,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         if other.iszero(): return self
         if self.j != other.i:
             raise ArithmeticError('Can only add matching endpoints: ({} {})+({} {}) not compatible'.format(self.i, self.j, other.i, other.j))
-        if self.i == other.j and np.all(self.R == -other.R):
-            return self.zero()
+        # if self.i == other.j and np.all(self.R == -other.R): return self.zero()
         return self.__class__(i=self.i, j=other.j, R=self.R+other.R, dx=self.dx+other.dx)
 
     def __neg__(self):
@@ -132,7 +131,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         if other.iszero(): raise ArithmeticError('Cannot endpoint subtract zero')
         if self.i != other.i:
             raise ArithmeticError('Can only endpoint subtract matching starts: ({} {})^({} {}) not compatible'.format(self.i, self.j, other.i, other.j))
-        if self == other: return self.zero()
+        # if self == other: return self.zero()
         return self.__class__(i=other.j, j=self.j, R=self.R-other.R, dx=self.dx - other.dx)
 
     def g(self, crys, chem, g):
@@ -144,7 +143,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         :param g: group operation (from crys)
         :return: PairState corresponding to group operation applied to self
         """
-        if self.iszero(): return self.zero()
+        # if self.iszero(): return self.zero()
         gRi, (c, gi) = crys.g_pos(g, np.zeros(3, dtype=int), (chem, self.i))
         gRj, (c, gj) = crys.g_pos(g, self.R, (chem, self.j))
         gdx = crys.g_direc(g, self.dx)
@@ -152,7 +151,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
 
     def __str__(self):
         """Human readable version"""
-        if self.iszero(): return "*.[0,0,0]:*.[0,0,0] (dx=0)"
+        # if self.iszero(): return "*.[0,0,0]:*.[0,0,0] (dx=0)"
         return "{}.[0,0,0]:{}.[{},{},{}] (dx=[{},{},{}])".format(self.i, self.j,
                                                                  self.R[0], self.R[1], self.R[2],
                                                                  self.dx[0], self.dx[1], self.dx[2])
@@ -605,6 +604,8 @@ class VectorStarSet(object):
         """
         Construct the GF matrix expansion in terms of the star vectors, and indexed
         to starGF.
+
+        :param starGF: starSet,
 
         Parameters
         ----------
