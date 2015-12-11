@@ -683,38 +683,34 @@ class VectorStarSet(object):
                     GFexpansion[i, j, :] = GFexpansion[j, i, :]
         return GFexpansion, GFstarset
 
-    def rate0expansion(self, NNstar):
+    def rate0expansion(self):
         """
-        Construct the omega0 matrix expansion in terms of the NN stars. Note: includes
-        on-site terms.
+        Construct the omega0 matrix expansion in terms of the NN stars. Note: includes on-site terms.
+        Based entirely on the jumpnetwork in self.starset
 
-        Parameters
-        ----------
-        NNstar: Star
-            nearest-neighbor stars
-
-        Returns
-        -------
-        rate0expansion: array[Nsv, Nsv, Nstars]
-            the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0(NNstar[k]))
+        :return rate0expansion: array[Nsv, Nsv, Njump]
+            the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k])
         """
-        if self.Nvstars == 0:
-            return None
-        if not isinstance(NNstar, StarSet):
-            raise TypeError('need a star')
-        rate0expansion = np.zeros((self.Nvstars, self.Nvstars, NNstar.Nstars))
+        if self.Nvstars == 0: return None
+        rate0expansion = np.zeros((self.Nvstars, self.Nvstars, len(self.starset.jumpnetwork_index)))
         for i in range(self.Nvstars):
             for j in range(self.Nvstars):
                 if i <= j :
-                    for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
-                        for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                            # which NN shell is this? k == -1 indicates a pair that does not appear
-                            k = NNstar.starindex(Ri - Rj)
-                            if k >= 0:
-                                rate0expansion[i, j, k] += np.dot(vi, vj)
+                    for si, vi in zip(self.vecpos[i], self.vecvec[i]):
+                        for sj, vj in zip(self.vecpos[j], self.vecvec[j]):
+                            try: ds = self.starset.states[sj] ^ self.starset.states[si]
+                            except: continue
+                            try: jumpindex = self.starset.jumplist.index(ds)
+                            except: continue
+                            k = None
+                            for jt, jumpindices in enumerate(self.star.jumpnetwork_index):
+                                if jumpindex in jumpindices:
+                                    k = jt
+                                    break
+                            rate0expansion[i, j, k] += np.dot(vi, vj)
                 # note: we do *addition* here because we may have on-site contributions above
                 if i == j:
-                    for k, s in enumerate(NNstar.stars):
+                    for k, s in enumerate(self.starset.jumpnetwork_index):
                         rate0expansion[i, i, k] += -len(s)
                 if i > j:
                     rate0expansion[i, j, :] = rate0expansion[j, i, :]
