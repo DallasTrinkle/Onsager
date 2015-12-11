@@ -221,11 +221,11 @@ class StarSet(object):
 
     def __str__(self):
         """Human readable version"""
-        str = "Nshells: {}  Nstates: {}  Nstars: {}".format(self.Nshells, self.Nstates, self.Nstars)
+        str = "Nshells: {}  Nstates: {}  Nstars: {}\n".format(self.Nshells, self.Nstates, self.Nstars)
         for si in range(self.Nstars):
-            str += "Star {}".format(si)
+            str += "Star {} ({})\n".format(si, len(self.stars[si]))
             for i in self.stars[si]:
-                str += "  {}: {}".format(i, self.states[i])
+                str += "  {}: {}\n".format(i, self.states[i])
         return str
 
     def generate(self, Nshells, threshold=1e-8):
@@ -293,19 +293,21 @@ class StarSet(object):
             for xi in star:
                 self.index[xi] = si
 
-    def copy(self):
-        """Return a copy of the StarSet; done as efficiently as possible"""
+    def copy(self, empty=False):
+        """Return a copy of the StarSet; done as efficiently as possible; empty means skip the shells, etc."""
         newStarSet = StarSet(None, None, None, -1, empty=True)  # a little hacky... creates an empty class
         newStarSet.jumpnetwork_index = copy.deepcopy(self.jumpnetwork_index)
         newStarSet.jumplist = self.jumplist.copy()
         newStarSet.crys = self.crys
         newStarSet.chem = self.chem
-        newStarSet.Nshells = self.Nshells
-        newStarSet.stars = copy.deepcopy(self.stars)
-        newStarSet.states = self.states.copy()
-        newStarSet.Nstars = self.Nstars
-        newStarSet.Nstates = self.Nstates
-        newStarSet.index = self.index.copy()
+        if not empty:
+            newStarSet.Nshells = self.Nshells
+            newStarSet.stars = copy.deepcopy(self.stars)
+            newStarSet.states = self.states.copy()
+            newStarSet.Nstars = self.Nstars
+            newStarSet.Nstates = self.Nstates
+            newStarSet.index = self.index.copy()
+        else: newStarSet.generate(0)
         return newStarSet
 
     # removed combine; all it does is generate(s1.Nshells + s2.Nshells) with lots of checks...
@@ -654,44 +656,32 @@ class VectorStarSet(object):
                     outer[:, :, i, j] = sum([np.outer(v0, v1) for v0, v1 in zip(sv0, sv1)])
         return outer
 
-    def GFexpansion(self, starGF):
+    def GFexpansion(self):
         """
         Construct the GF matrix expansion in terms of the star vectors, and indexed
-        to starGF.
-
-        :param starGF: starSet,
-
-        Parameters
-        ----------
-        starGF: Star
-            stars that reference the GF; should be at least twice the size of the
-            stars used to construct the star vector
-
-        Returns
-        -------
-        GFexpansion: array[Nsv, Nsv, Nstars+1]
+        to GFstarset
+        :return GFexpansion: array[Nsv, Nsv, NGFstars]
             the GF matrix[i, j] = GFexpansion[i, j, 0]*GF(0) + sum(GFexpansion[i, j, k+1] * GF(starGF[k]))
+        :return GFstarset: starSet corresponding to the GF
         """
         if self.Nvstars == 0:
             return None
-        if not isinstance(starGF, StarSet):
-            raise TypeError('need a star')
-        GFexpansion = np.zeros((self.Nvstars, self.Nvstars, starGF.Nstars+1))
+        GFstarset = self.starset.copy(empty=True)
+        GFstarset.diffgenerate(self.starset, self.starset)
+        GFexpansion = np.zeros((self.Nvstars, self.Nvstars, GFstarset.Nstars))
         for i in range(self.Nvstars):
             for j in range(self.Nvstars):
                 if i <= j :
-                    for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
-                        for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                            if (Ri == Rj).all():
-                                k = 0
-                            else:
-                                k = starGF.starindex(Ri - Rj) + 1
-                                if k == 0:
-                                    raise ArithmeticError('GF star not large enough to include {}'.format(Ri - Rj))
+                    for si, vi in zip(self.vecpos[i], self.vecvec[i]):
+                        for sj, vj in zip(self.vecpos[j], self.vecvec[j]):
+                            try: ds = self.starset.states[sj] ^ self.starset.states[si]
+                            except: continue
+                            k = GFstarset.starindex(ds)
+                            if k is None: raise ArithmeticError('GF star not large enough to include {}?'.format(ds))
                             GFexpansion[i, j, k] += np.dot(vi, vj)
                 else:
                     GFexpansion[i, j, :] = GFexpansion[j, i, :]
-        return GFexpansion
+        return GFexpansion, GFstarset
 
     def rate0expansion(self, NNstar):
         """

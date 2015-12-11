@@ -239,6 +239,16 @@ class HCPStarTests(StarTests):
         self.chem = 0
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+    def testDiffGenerate(self):
+        self.starset.generate(1)
+        dS = self.starset.copy(empty=True)
+        dS.diffgenerate(self.starset, self.starset)
+        self.assertEqual(len(dS.stars[0]), 2)
+        for si in dS.stars[0]:
+            self.assertTrue(dS.states[si].iszero())
+        # 0, a1, a1+a2, 2a1; p, p+a1, p+a1+a2, p+2a1; c, c+a1 (p=pyramidal vector)
+        self.assertEqual(dS.Nstars, 4+4+2)
+
 class FCCStarTests(CubicStarTests):
     """Set of tests that our star code is behaving correctly for FCC"""
 
@@ -480,9 +490,9 @@ class VectorStarGFlinearTests(unittest.TestCase):
         self.chem = 0
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
-        self.starset2 = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
-        self.GF = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.jumpnetwork, Nmax=4)
+        # not an accurate value for Nmax; but since we just need some values, it's fine
+        self.GF = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.jumpnetwork, Nmax=2)
         self.GF.SetRates([1 for s in self.sitelist],
                          [0 for s in self.sitelist],
                          self.rates,
@@ -490,40 +500,66 @@ class VectorStarGFlinearTests(unittest.TestCase):
 
     def ConstructGF(self, nshells):
         self.starset.generate(nshells)
-        self.starset2.generate(2*nshells)
-        self.vecstarset.generate(self.starset)
-        GFexpand = self.vecstarset.GFexpansion(self.starset2)
-        self.assertEqual(np.shape(GFexpand),
-                         (self.vecstarset.Nvstars, self.vecstarset.Nvstars, self.starset2.Nstars + 1))
-        gexpand = np.zeros(self.starset2.Nstars + 1)
-        gexpand[0] = self.GF.GF(np.zeros(3))
-        for i in range(self.starset2.Nstars):
-            gexpand[i + 1] = self.GF.GF(self.starset2.stars[i][0])
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        GFexpand, GFstarset = self.vecstarset.GFexpansion()
+        gexpand = np.zeros(GFstarset.Nstars)
+        for i, star in enumerate(GFstarset.stars):
+            st = GFstarset.states[star[0]]
+            gexpand[i] = self.GF(st.i, st.j, st.dx)
         for i in range(self.vecstarset.Nvstars):
             for j in range(self.vecstarset.Nvstars):
                 # test the construction
                 self.assertAlmostEqual(sum(GFexpand[i, j, :]), 0)
                 g = 0
-                for Ri, vi in zip(self.vecstarset.vecpos[i], self.vecstarset.vecvec[i]):
-                    for Rj, vj in zip(self.vecstarset.vecpos[j], self.vecstarset.vecvec[j]):
-                        g += np.dot(vi, vj)*self.GF.GF(Ri - Rj)
+                for si, vi in zip(self.vecstarset.vecpos[i], self.vecstarset.vecvec[i]):
+                    for sj, vj in zip(self.vecstarset.vecpos[j], self.vecstarset.vecvec[j]):
+                        try: ds = self.starset.states[sj] ^ self.starset.states[si]
+                        except: continue
+                        g += np.dot(vi, vj)*self.GF(ds.i, ds.j, ds.dx)
                 self.assertAlmostEqual(g, np.dot(GFexpand[i, j, :], gexpand))
         # print(np.dot(GFexpand, gexpand))
 
-    def TESTConstructGF(self):
+    def testConstructGF(self):
         """Test the construction of the GF using double-nn shell"""
         self.ConstructGF(2)
 
 class VectorStarGFFCClinearTests(VectorStarGFlinearTests):
     """Set of tests that make sure we can construct the GF matrix as a linear combination for FCC"""
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.star2 = stars.StarSet(self.NNvect, self.groupops)
-        self.vecstar = stars.VectorStarSet(self.star)
+        self.crys, self.jumpnetwork = setupFCC()
         self.rates = FCCrates()
-        self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
-    def TESTConstructGF(self):
+        # not an accurate value for Nmax; but since we just need some values, it's fine
+        self.GF = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.jumpnetwork, Nmax=2)
+        self.GF.SetRates([1 for s in self.sitelist],
+                         [0 for s in self.sitelist],
+                         self.rates,
+                         [0 for j in self.rates])
+
+    def testConstructGF(self):
+        """Test the construction of the GF using double-nn shell"""
+        self.ConstructGF(2)
+
+class VectorStarGFHCPlinearTests(VectorStarGFlinearTests):
+    """Set of tests that make sure we can construct the GF matrix as a linear combination for FCC"""
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupHCP()
+        self.rates = HCPrates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+        # not an accurate value for Nmax; but since we just need some values, it's fine
+        self.GF = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.jumpnetwork, Nmax=2)
+        self.GF.SetRates([1 for s in self.sitelist],
+                         [0 for s in self.sitelist],
+                         self.rates,
+                         [0 for j in self.rates])
+
+    def testConstructGF(self):
         """Test the construction of the GF using double-nn shell"""
         self.ConstructGF(2)
 
