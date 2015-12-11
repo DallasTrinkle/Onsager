@@ -27,6 +27,7 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 import collections
 import copy
+import itertools
 from . import crystal
 
 # YAML tags
@@ -661,7 +662,7 @@ class VectorStarSet(object):
         Construct the GF matrix expansion in terms of the star vectors, and indexed
         to GFstarset
         :return GFexpansion: array[Nsv, Nsv, NGFstars]
-            the GF matrix[i, j] = GFexpansion[i, j, 0]*GF(0) + sum(GFexpansion[i, j, k+1] * GF(starGF[k]))
+            the GF matrix[i, j] = sum(GFexpansion[i, j, k] * GF(starGF[k]))
         :return GFstarset: starSet corresponding to the GF
         """
         if self.Nvstars == 0:
@@ -688,7 +689,7 @@ class VectorStarSet(object):
         Construct the omega0 matrix expansion in terms of the NN stars. Note: includes on-site terms.
         Based entirely on the jumpnetwork in self.starset
 
-        :return rate0expansion: array[Nsv, Nsv, Njump]
+        :return rate0expansion: array[Nsv, Nsv, Njump_omega0]
             the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k])
         """
         if self.Nvstars == 0: return None
@@ -721,12 +722,12 @@ class VectorStarSet(object):
 
     def rate1expansion(self, jumpnetwork_omega1):
         """
-        Construct the omega1 matrix expansion in terms of the double stars.
+        Construct the omega1 matrix expansion in terms of the jumpnetwork.
 
         :param jumpnetwork_omega1: jumpnetwork of symmetry unique omega1-type jumps,
           corresponding to our starset.
-        :return rate1expansion: array[Nsv, Nsv, Ndstars]
-            the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1(k))
+        :return rate1expansion: array[Nsv, Nsv, Njumps]
+            the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])
         """
         if self.Nvstars == 0: return None
         rate1expansion = np.zeros((self.Nvstars, self.Nvstars, len(jumpnetwork_omega1)))
@@ -738,6 +739,47 @@ class VectorStarSet(object):
                             for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
                                 for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                     if Ri == IS and Rj == FS:
+                                        rate1expansion[i, j, k] += np.dot(vi, vj)
+                else:
+                    rate1expansion[i, j, :] = rate1expansion[j, i, :]
+        return rate1expansion
+
+    def rateexpansions(self, jumpnetwork_omega1, jumptype):
+        """
+        Construct the omega0 and omega1 matrix expansions in terms of the jumpnetwork;
+        includes the escape terms separately. The escape terms are tricky because they have
+        probability factors that differ from the transitions; the PS (pair stars) is useful for
+        finding this. We just call it the 'probfactor' below.
+        *Note:* this used to be separated into rate0expansion, and rate1expansion, and
+        partly in bias1expansion.
+
+        :param jumpnetwork_omega1: jumpnetwork of symmetry unique omega1-type jumps,
+          corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
+          are indices corresponding to states in our starset.
+        :param jumptype: specific omega0 jump type that the jump corresponds to
+        :return rate0expansion: array[Nsv, Nsv, Njump_omega0]
+            the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k])
+        :return rate0escape: array[Nsv, Njump_omega0]
+            the escape contributions: omega0[i,i] += sum(rate0escape[i,k]*omega0[k]*probfactor(PS[k]))
+        :return rate1expansion: array[Nsv, Nsv, Njump_omega1]
+            the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])
+        :return rate1escape: array[Nsv, Njump_omega1]
+            the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega0[k]*probfactor(PS[k]))
+        """
+        if self.Nvstars == 0: return None
+        rate0expansion = np.zeros((self.Nvstars, self.Nvstars, len(self.starset.jumpnetwork_index)))
+        rate1expansion = np.zeros((self.Nvstars, self.Nvstars, len(jumpnetwork_omega1)))
+        rate0escape = np.zeros((self.Nvstars, len(self.starset.jumpnetwork_index)))
+        rate1escape = np.zeros((self.Nvstars, len(jumpnetwork_omega1)))
+        for i in range(self.Nvstars):
+            for j in range(self.Nvstars):
+                if i <= j :
+                    for k, jumplist, jt in zip(itertools.count, jumpnetwork_omega1, jumptype):
+                        for (IS, FS), dx in jumplist:
+                            for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
+                                for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
+                                    if Ri == IS and Rj == FS:
+                                        rate0expansion[i, j, jt] += np.dot(vi, vj)
                                         rate1expansion[i, j, k] += np.dot(vi, vj)
                 else:
                     rate1expansion[i, j, :] = rate1expansion[j, i, :]

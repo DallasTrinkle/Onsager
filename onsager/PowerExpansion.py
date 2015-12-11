@@ -475,7 +475,8 @@ class Taylor3D(object):
         if fnu is not None:
             fval = [ fnu[(n,l)](umagn) if callable(fnu[(n,l)]) else fnu[(n,l)]
                      for (n, l, coeff) in self.coefflist]
-            return np.sum( fv*np.tensordot(u0[:self.powlrange[l]], coeff, axes=1) for fv, (n,l , coeff) in zip(fval, self.coefflist) )
+            return np.sum( fv*np.tensordot(u0[:self.powlrange[l]], coeff, axes=1)
+                           for fv, (n,l , coeff) in zip(fval, self.coefflist) )
         # otherwise, create a dictionary!
         return { (n,l): np.tensordot(u0[:self.powlrange[l]], coeff, axes=1) for n, l, coeff in self.coefflist}
 
