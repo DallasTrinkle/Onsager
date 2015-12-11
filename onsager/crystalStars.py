@@ -703,15 +703,18 @@ class VectorStarSet(object):
                             try: jumpindex = self.starset.jumplist.index(ds)
                             except: continue
                             k = None
-                            for jt, jumpindices in enumerate(self.star.jumpnetwork_index):
+                            for jt, jumpindices in enumerate(self.starset.jumpnetwork_index):
                                 if jumpindex in jumpindices:
                                     k = jt
                                     break
                             rate0expansion[i, j, k] += np.dot(vi, vj)
                 # note: we do *addition* here because we may have on-site contributions above
                 if i == j:
+                    state0 = self.starset.states[self.vecpos[i][0]].j  # state that vacancy leaves from
+                    # so add -1*rate for each jump that starts from that vacancy state.
                     for k, s in enumerate(self.starset.jumpnetwork_index):
-                        rate0expansion[i, i, k] += -len(s)
+                        rate0expansion[i, i, k] += sum(-1 for jumpindex in s
+                                                       if self.starset.jumplist[jumpindex].i == state0)
                 if i > j:
                     rate0expansion[i, j, :] = rate0expansion[j, i, :]
         return rate0expansion

@@ -427,7 +427,7 @@ class VectorStarTests(unittest.TestCase):
                         testouter += np.outer(v0, v1)
                 self.assertTrue(np.allclose(self.vecstarset.outer[:, :, i, j], testouter),
                                 msg='Failed for vector stars {} and {}:\n{} !=\n{}'.format(
-                                    i, j, outer, testouter))
+                                    i, j, self.vecstarset.outer[:, :, i, j], testouter))
 
 
 class VectorStarFCCTests(VectorStarTests):
@@ -567,51 +567,59 @@ class VectorStarGFHCPlinearTests(VectorStarGFlinearTests):
 class VectorStarOmega0Tests(unittest.TestCase):
     """Set of tests for our expansion of omega_0 in NN vectors"""
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
-        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
-        self.vecstar = stars.VectorStarSet()
+        self.crys, self.jumpnetwork = setuportho()
         self.rates = orthorates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
-    def TESTConstructOmega0(self):
-        self.star.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
-        self.NNstar.generate(1) # just nearest-neighbor stars
-        self.vecstar.generate(self.star)
-        rate0expand = self.vecstar.rate0expansion(self.NNstar)
+    def testConstructOmega0(self):
+        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        rate0expand = self.vecstarset.rate0expansion()
         self.assertEqual(np.shape(rate0expand),
-                         (self.vecstar.Nvstars, self.vecstar.Nvstars, self.NNstar.Nstars))
-        om0expand = np.zeros(self.NNstar.Nstars)
-        for vec, rate in zip(self.NNvect, self.rates):
-            om0expand[self.NNstar.starindex(vec)] = rate
-
-        om0matrix = -sum(self.rates)*np.eye(self.star.Npts)
-        for i, pt in enumerate(self.star.pts):
-            for vec, rate in zip(self.NNvect, self.rates):
-                j = self.star.pointindex(pt + vec)
-                if j >= 0:
-                    om0matrix[i, j] = rate
+                         (self.vecstarset.Nvstars, self.vecstarset.Nvstars, len(self.jumpnetwork)))
+        om0expand = self.rates.copy()
+        # put together the onsite and off-diagoanl terms for our matrix:
+        # go through each state, and add the escapes for the vacancy; see if vacancy (PS.j)
+        # is the initial state (i) for a transition out (i,f), dx
+        om0matrix = np.zeros((self.starset.Nstates, self.starset.Nstates))
+        for ns, PS in enumerate(self.starset.states):
+            for rate, jumplist in zip(self.rates, self.starset.jumpnetwork_index):
+                for TS in [ self.starset.jumplist[jumpindex] for jumpindex in jumplist]:
+                    if PS.j == TS.i:
+                        om0matrix[ns, ns] -= rate
+                        nsend = self.starset.stateindex(PS + TS)
+                        if nsend is not None: om0matrix[ns, nsend] += rate
         # now, we need to convert that omega0 matrix into the "folded down"
-        for i, (sRv0, svv0) in enumerate(zip(self.vecstar.vecpos, self.vecstar.vecvec)):
-            for j, (sRv1, svv1) in enumerate(zip(self.vecstar.vecpos, self.vecstar.vecvec)):
+        for i, (sRv0, svv0) in enumerate(zip(self.vecstarset.vecpos, self.vecstarset.vecvec)):
+            for j, (sRv1, svv1) in enumerate(zip(self.vecstarset.vecpos, self.vecstarset.vecvec)):
                 om0_sv = 0
-                for R0, v0 in zip(sRv0, svv0):
-                    for R1, v1 in zip(sRv1, svv1):
-                        om0_sv += np.dot(v0, v1)*\
-                                  om0matrix[self.star.pointindex(R0),
-                                            self.star.pointindex(R1)]
+                for i0, v0 in zip(sRv0, svv0):
+                    for i1, v1 in zip(sRv1, svv1):
+                        om0_sv += np.dot(v0, v1)*om0matrix[i0,i1]
                 om0_sv_comp = np.dot(rate0expand[i, j], om0expand)
                 self.assertAlmostEqual(om0_sv, om0_sv_comp,
                                        msg='Failed to match {}, {}: {} != {}'.format(
-                                           i, j, om0_sv, om0_sv_comp)
-                                       )
-
+                                           i, j, om0_sv, om0_sv_comp))
 
 class VectorStarFCCOmega0Tests(VectorStarOmega0Tests):
     """Set of tests for our expansion of omega_0 in NN vect for FCC"""
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
-        self.vecstar = stars.VectorStarSet()
+        self.crys, self.jumpnetwork = setupFCC()
         self.rates = FCCrates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+class VectorStarHPCOmega0Tests(VectorStarOmega0Tests):
+    """Set of tests for our expansion of omega_0 in NN vect for FCC"""
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupHCP()
+        self.rates = HCPrates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
 
 class VectorStarOmegalinearTests(unittest.TestCase):
