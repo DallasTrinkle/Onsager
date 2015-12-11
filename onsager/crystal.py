@@ -420,13 +420,10 @@ class Crystal(object):
         basis vectors. While it does not explicitly store the specific chemical
         elements involved, it does store that there are different elements.
 
-        Parameters
-        ----------
-        lattice : array[3,3] or list of array[3]
+        :param lattice: array[3,3] or list of array[3]
             lattice vectors; if [3,3] array, then the vectors need to be in *column* format
             so that the first lattice vector is lattice[:,0]
-
-        basis : list of array[3] or list of list of array[3]
+        :param basis : list of array[3] or list of list of array[3]
             crystalline basis vectors, in unit cell coordinates. If a list of lists, then
             there are multiple chemical elements, with each list corresponding to a unique
             element

@@ -719,38 +719,26 @@ class VectorStarSet(object):
                     rate0expansion[i, j, :] = rate0expansion[j, i, :]
         return rate0expansion
 
-    def rate1expansion(self, dstar):
+    def rate1expansion(self, jumpnetwork_omega1):
         """
         Construct the omega1 matrix expansion in terms of the double stars.
 
-        Parameters
-        ----------
-        dstar: DoubleStar
-            double-stars (i.e., pairs that are related by a symmetry operation; usually the sites
-            are connected by a NN vector to facilitate a jump; indicates unique vacancy jumps
-            around a solute)
-
-        Returns
-        -------
-        rate1expansion: array[Nsv, Nsv, Ndstars]
-            the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1(dstar[k]))
+        :param jumpnetwork_omega1: jumpnetwork of symmetry unique omega1-type jumps,
+          corresponding to our starset.
+        :return rate1expansion: array[Nsv, Nsv, Ndstars]
+            the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1(k))
         """
-        if self.Nvstars == 0:
-            return None
-        if not isinstance(dstar, DoubleStarSet):
-            raise TypeError('need a double star')
-        rate1expansion = np.zeros((self.Nvstars, self.Nvstars, dstar.Ndstars))
+        if self.Nvstars == 0: return None
+        rate1expansion = np.zeros((self.Nvstars, self.Nvstars, len(jumpnetwork_omega1)))
         for i in range(self.Nvstars):
             for j in range(self.Nvstars):
                 if i <= j :
-                    for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
-                        for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                            # note: double-stars are tuples of point indices
-                            k = dstar.dstarindex((dstar.star.pointindex(Ri),
-                                                  dstar.star.pointindex(Rj)))
-                            # note: k == -1 indicates now a pair that does not appear, not an error
-                            if k >= 0:
-                                rate1expansion[i, j, k] += np.dot(vi, vj)
+                    for k, jumplist in enumerate(jumpnetwork_omega1):
+                        for (IS, FS), dx in jumplist:
+                            for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
+                                for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
+                                    if Ri == IS and Rj == FS:
+                                        rate1expansion[i, j, k] += np.dot(vi, vj)
                 else:
                     rate1expansion[i, j, :] = rate1expansion[j, i, :]
         return rate1expansion
