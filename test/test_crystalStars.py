@@ -544,7 +544,7 @@ class VectorStarGFFCClinearTests(VectorStarGFlinearTests):
         self.ConstructGF(2)
 
 class VectorStarGFHCPlinearTests(VectorStarGFlinearTests):
-    """Set of tests that make sure we can construct the GF matrix as a linear combination for FCC"""
+    """Set of tests that make sure we can construct the GF matrix as a linear combination for HCP"""
     def setUp(self):
         self.crys, self.jumpnetwork = setupHCP()
         self.rates = HCPrates()
@@ -565,7 +565,7 @@ class VectorStarGFHCPlinearTests(VectorStarGFlinearTests):
 
 
 class VectorStarOmega0Tests(unittest.TestCase):
-    """Set of tests for our expansion of omega_0 in NN vectors"""
+    """Set of tests for our expansion of omega_0"""
 
     longMessage = False
     def setUp(self):
@@ -613,7 +613,7 @@ class VectorStarOmega0Tests(unittest.TestCase):
                                            i, j, om0_sv, om0_sv_comp))
 
 class VectorStarFCCOmega0Tests(VectorStarOmega0Tests):
-    """Set of tests for our expansion of omega_0 in NN vect for FCC"""
+    """Set of tests for our expansion of omega_0 for FCC"""
     def setUp(self):
         self.crys, self.jumpnetwork = setupFCC()
         self.rates = FCCrates()
@@ -621,8 +621,8 @@ class VectorStarFCCOmega0Tests(VectorStarOmega0Tests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
-class VectorStarHPCOmega0Tests(VectorStarOmega0Tests):
-    """Set of tests for our expansion of omega_0 in NN vect for FCC"""
+class VectorStarHCPOmega0Tests(VectorStarOmega0Tests):
+    """Set of tests for our expansion of omega_0 for HCP"""
     def setUp(self):
         self.crys, self.jumpnetwork = setupHCP()
         self.rates = HCPrates()
@@ -632,7 +632,7 @@ class VectorStarHPCOmega0Tests(VectorStarOmega0Tests):
 
 
 class VectorStarOmegalinearTests(unittest.TestCase):
-    """Set of tests for our expansion of omega_1 in double-stars"""
+    """Set of tests for our expansion of omega_1"""
 
     longMessage = False
     def setUp(self):
@@ -671,7 +671,7 @@ class VectorStarOmegalinearTests(unittest.TestCase):
         # print(np.dot(rateexpand, om1expand))
 
 class VectorStarFCCOmegalinearTests(VectorStarOmegalinearTests):
-    """Set of tests for our expansion of omega_1 in double-stars for FCC"""
+    """Set of tests for our expansion of omega_1 for FCC"""
     def setUp(self):
         self.crys, self.jumpnetwork = setupFCC()
         # self.rates = FCCrates()
@@ -679,8 +679,8 @@ class VectorStarFCCOmegalinearTests(VectorStarOmegalinearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
-class VectorStarHPCOmegalinearTests(VectorStarOmegalinearTests):
-    """Set of tests for our expansion of omega_1 in double-stars for FCC"""
+class VectorStarHCPOmegalinearTests(VectorStarOmegalinearTests):
+    """Set of tests for our expansion of omega_1 for HCP"""
     def setUp(self):
         self.crys, self.jumpnetwork = setupHCP()
         # self.rates = HCPrates()
@@ -690,7 +690,7 @@ class VectorStarHPCOmegalinearTests(VectorStarOmegalinearTests):
 
 
 class VectorStarOmega2linearTests(unittest.TestCase):
-    """Set of tests for our expansion of omega_2 in NN stars"""
+    """Set of tests for our expansion of omega_2"""
 
     longMessage = False
     def setUp(self):
@@ -728,7 +728,7 @@ class VectorStarOmega2linearTests(unittest.TestCase):
                                                i, j, om2, om2_sv_comp))
 
 class VectorStarFCCOmega2linearTests(VectorStarOmega2linearTests):
-    """Set of tests for our expansion of omega_2 in NN stars for FCC"""
+    """Set of tests for our expansion of omega_2 for FCC"""
     def setUp(self):
         self.crys, self.jumpnetwork = setupFCC()
         self.rates = FCCrates()
@@ -737,7 +737,7 @@ class VectorStarFCCOmega2linearTests(VectorStarOmega2linearTests):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
 class VectorStarHCPOmega2linearTests(VectorStarOmega2linearTests):
-    """Set of tests for our expansion of omega_2 in NN stars for FCC"""
+    """Set of tests for our expansion of omega_2 for HCP"""
     def setUp(self):
         self.crys, self.jumpnetwork = setupHCP()
         self.rates = HCPrates()
@@ -747,51 +747,64 @@ class VectorStarHCPOmega2linearTests(VectorStarOmega2linearTests):
 
 
 class VectorStarBias2linearTests(unittest.TestCase):
-    """Set of tests for our expansion of bias vector (2) in NN stars"""
-    def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
-        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
-        self.vecstar = stars.VectorStarSet()
-        self.rates = orthorates()
+    """Set of tests for our expansion of bias vector (2)"""
 
-    def TESTConstructBias2(self):
-        self.NNstar.generate(1) # we need the NN set of stars for NN jumps
-        # construct the set of rates corresponding to the unique stars:
-        om2expand = np.zeros(self.NNstar.Nstars)
-        for vec, rate in zip(self.NNvect, self.rates):
-            om2expand[self.NNstar.starindex(vec)] = rate
-        self.star.generate(2) # go ahead and make a "large" set of stars
-        self.vecstar.generate(self.star)
-        bias2expand = self.vecstar.bias2expansion(self.NNstar)
+    longMessage = False
+    def setUp(self):
+        self.crys, self.jumpnetwork = setuportho()
+        self.rates = orthorates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+    def testConstructBias2(self):
+        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        jumpnetwork_omega2, jt, sp = self.starset.jumpnetwork_omega2()
+        bias0expand, bias2expand = self.vecstarset.biasexpansions(jumpnetwork_omega2, jt)
+        # make omega2 twice omega0:
+        alpha = 2.
+        om2expand = alpha*self.rates
+        om0expand = self.rates.copy()
         self.assertEqual(np.shape(bias2expand),
-                         (self.vecstar.Nvstars, self.NNstar.Nstars))
-        biasvec = np.zeros((self.star.Npts, 3)) # bias vector: only the exchange hops
-        for i, pt in enumerate(self.star.pts):
-            for vec, rate in zip(self.NNvect, self.rates):
-                if (vec == pt).all():
-                    biasvec[i, :] += vec*rate
+                         (self.vecstarset.Nvstars, len(self.jumpnetwork)))
+        biasvec = np.zeros((self.starset.Nstates, 3)) # bias vector: only the exchange hops
+        for jumplist, rate in zip(jumpnetwork_omega2, self.rates):
+            for (IS, FS), dx in jumplist:
+                for i in range(self.starset.Nstates):
+                    if IS == i:
+                        biasvec[i, :] += dx*(alpha-1)*rate
         # construct the same bias vector using our expansion
-        biasveccomp = np.zeros((self.star.Npts, 3))
-        for om2, svpos, svvec in zip(np.dot(bias2expand, om2expand),
-                                     self.vecstar.vecpos,
-                                     self.vecstar.vecvec):
+        biasveccomp = np.zeros((self.starset.Nstates, 3))
+        for b2, b0, svpos, svvec in zip(np.dot(bias2expand, om2expand),
+                                          np.dot(bias0expand, om0expand),
+                                          self.vecstarset.vecpos,
+                                          self.vecstarset.vecvec):
             # test the construction
             for Ri, vi in zip(svpos, svvec):
-                biasveccomp[self.star.pointindex(Ri), :] = om2*vi
-        for i in range(self.star.Npts):
-            for d in range(3):
-                self.assertAlmostEqual(biasvec[i, d], biasveccomp[i, d])
-        # print(biasvec)
-        # print(np.dot(bias2expand, om2expand))
-
+                biasveccomp[Ri, :] = (b2-b0)*vi
+        for i in range(self.starset.Nstates):
+            self.assertTrue(np.allclose(biasvec[i], biasveccomp[i]),
+                            msg='Failure for state {}: {}\n{} != {}'.format(
+                                    i, self.starset.states[i], biasvec[i], biasveccomp[i]))
 
 class VectorStarFCCBias2linearTests(VectorStarBias2linearTests):
-    """Set of tests for our expansion of bias vector (2) in NN stars for FCC"""
+    """Set of tests for our expansion of bias vector (2) for FCC"""
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
-        self.vecstar = stars.VectorStarSet()
+        self.crys, self.jumpnetwork = setupFCC()
         self.rates = FCCrates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+class VectorStarHCPBias2linearTests(VectorStarBias2linearTests):
+    """Set of tests for our expansion of bias vector (2) for HCP"""
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupHCP()
+        self.rates = HCPrates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
 
 class VectorStarBias1linearTests(unittest.TestCase):
