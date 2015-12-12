@@ -808,125 +808,156 @@ class VectorStarHCPBias2linearTests(VectorStarBias2linearTests):
 
 
 class VectorStarBias1linearTests(unittest.TestCase):
-    """Set of tests for our expansion of bias vector (1) in double + NN stars"""
+    """Set of tests for our expansion of bias vector (1)"""
+
+    longMessage = False
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setuportho()
-        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
-        self.dstar = stars.DoubleStarSet()
-        self.vecstar = stars.VectorStarSet()
+        self.crys, self.jumpnetwork = setuportho()
         self.rates = orthorates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
-    def TESTConstructBias1(self):
-        self.NNstar.generate(1) # we need the NN set of stars for NN jumps
-        # construct the set of rates corresponding to the unique stars:
-        om0expand = np.zeros(self.NNstar.Nstars)
-        for vec, rate in zip(self.NNvect, self.rates):
-            om0expand[self.NNstar.starindex(vec)] = rate
-        self.star.generate(2) # go ahead and make a "large" set of stars
-        self.dstar.generate(self.star)
-        om1expand = np.zeros(self.dstar.Ndstars)
-        # in this case, we pick up omega_1 from omega_0... maybe not the most interesting case?
-        # I think we make up for the "boring" rates here by having unusual probabilities below
-        for i, ds in enumerate(self.dstar.dstars):
-            p1, p2 = ds[0]
-            dv = self.star.pts[p1] - self.star.pts[p2]
-            sind = self.NNstar.starindex(dv)
-            self.assertNotEqual(sind, -1)
-            om1expand[i] = om0expand[sind]
-        # print 'om0:', om0expand
-        # print 'om1:', om1expand
-        self.vecstar.generate(self.star)
-        bias1ds, omega1ds, gen1prob, bias1NN, omega1NN = self.vecstar.bias1expansion(self.dstar, self.NNstar)
-        self.assertEqual(np.shape(bias1ds),
-                         (self.vecstar.Nvstars, self.dstar.Ndstars))
-        self.assertEqual(np.shape(omega1ds),
-                         (self.vecstar.Nvstars, self.dstar.Ndstars))
-        self.assertEqual(np.shape(gen1prob),
-                         (self.vecstar.Nvstars, self.dstar.Ndstars))
-        self.assertEqual(np.shape(bias1NN),
-                         (self.vecstar.Nvstars, self.NNstar.Nstars))
-        self.assertEqual(np.shape(omega1NN),
-                         (self.vecstar.Nvstars, self.NNstar.Nstars))
-        self.assertTrue(np.issubdtype(gen1prob.dtype, int)) # needs to be for indexing
-        # make sure that we don't have -1 as our endpoint probability for any ds that are used.
-        for b1ds, o1ds, b1p in zip(bias1ds, omega1ds, gen1prob):
-            for bds, ods, p in zip(b1ds, o1ds, b1p):
-                if p == -1:
-                    self.assertEqual(bds, 0)
-                    self.assertEqual(ods, 0)
-
-        # construct some fake probabilities for testing, with an "extra" star, set it's probability to 1
-        # this is ONLY needed for testing purposes--the expansion should never access it.
-        # note: this probability is to be the SQRT of the true probability
-        # probsqrt = np.array([1,]*(self.star.Nstars+1)) # very little bias...
-        probsqrt = np.sqrt(np.array([1.10**(self.star.Nstars-n) for n in range(self.star.Nstars + 1)]))
-        probsqrt[-1] = 1 # this is important, as it represents our baseline "far-field"
-        biasvec = np.zeros((self.star.Npts, 3)) # bias vector: all the hops *excluding* exchange
-        omega1onsite = np.zeros(self.star.Npts) # omega1 onsite vector: all the hops *excluding* exchange
-        for i, pt in enumerate(self.star.pts):
-            for vec, rate in zip(self.NNvect, self.rates):
-                if not all(abs(pt + vec) < 1e-8):
-                    # note: starindex returns -1 if not found, which defaults to the final probability of 1.
-                    biasvec[i, :] += vec*rate*probsqrt[self.star.starindex(pt + vec)]
-                    omega1onsite[i] -=  rate*probsqrt[self.star.starindex(pt + vec)]
-            omega1onsite[i] /= probsqrt[self.star.index[i]]
+    def testConstructBias1(self):
+        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        jumpnetwork_omega1, jt, sp = self.starset.jumpnetwork_omega1()
+        bias0expand, bias1expand = self.vecstarset.biasexpansions(jumpnetwork_omega1, jt)
+        om1expand = np.random.uniform(0, 1, len(jumpnetwork_omega1))
+        om0expand = self.rates.copy()
+        self.assertEqual(np.shape(bias1expand),
+                         (self.vecstarset.Nvstars, len(jumpnetwork_omega1)))
+        biasvec = np.zeros((self.starset.Nstates, 3)) # bias vector: only the exchange hops
+        for jumplist, rate, om0type in zip(jumpnetwork_omega1, om1expand, jt):
+            om0 = om0expand[om0type]
+            for (IS, FS), dx in jumplist:
+                for i in range(self.starset.Nstates):
+                    if IS == i:
+                        biasvec[i, :] += dx*(rate - om0)
         # construct the same bias vector using our expansion
-        biasveccomp = np.zeros((self.star.Npts, 3))
-        omega1onsitecomp = np.zeros(self.star.Npts)
-        # om = om1 + om0 contributions
-        for om_b, om_on, svpos, svvec in zip(np.dot(bias1ds * probsqrt[gen1prob], om1expand) +
-                                                     np.dot(bias1NN, om0expand),
-                                             np.dot(omega1ds * probsqrt[gen1prob], om1expand) +
-                                                     np.dot(omega1NN, om0expand),
-                                             self.vecstar.vecpos,
-                                             self.vecstar.vecvec):
+        biasveccomp = np.zeros((self.starset.Nstates, 3))
+        for b1, b0, svpos, svvec in zip(np.dot(bias1expand, om1expand),
+                                          np.dot(bias0expand, om0expand),
+                                          self.vecstarset.vecpos,
+                                          self.vecstarset.vecvec):
             # test the construction
             for Ri, vi in zip(svpos, svvec):
-                biasveccomp[self.star.pointindex(Ri), :] += om_b*vi
-                omega1onsitecomp[self.star.pointindex(Ri)] += om_on # * np.dot(vi, vi)
-        for i in range(self.star.Npts):
-            omega1onsitecomp[i] /= probsqrt[self.star.index[i]]
-        # this is a little confusing, but we need to take into account the multiplicity;
-        # this has to do with how we're building out the onsite matrix, and that there
-        # can be multiple vector-stars that contain the same "base" star.
-        multiplicity = np.zeros(self.star.Npts, dtype=int)
-        for R in [Rv for svpos in self.vecstar.vecpos for Rv in svpos]:
-            multiplicity[self.star.pointindex(R)] += 1
-        omega1onsitecomp /= multiplicity
-
-        for svpos, svvec in zip(self.vecstar.vecpos, self.vecstar.vecvec):
-            for Ri, vi in zip(svpos, svvec):
-                self.assertAlmostEqual(np.dot(vi, biasvec[self.star.pointindex(Ri)]),
-                                       np.dot(vi, biasveccomp[self.star.pointindex(Ri)]),
-                                       msg='Did not match dot product for {} along {} where {} != {}'.format(
-                                           Ri, vi, biasvec[self.star.pointindex(Ri)],
-                                           biasveccomp[self.star.pointindex(Ri)]
-                                       ))
-
-        for i, pt in enumerate(self.star.pts):
-            self.assertAlmostEqual(omega1onsite[i], omega1onsitecomp[i],
-                                   msg='Did not match onsite point[{}] {} where {} != {}'.format(
-                                       i, pt, omega1onsite[i], omega1onsitecomp[i]))
-            for d in range(3):
-                self.assertAlmostEqual(biasvec[i, d], biasveccomp[i, d],
-                                       msg='Did not match point[{}] {} direction {} where {} != {}'.format(
-                                           i, pt, d, biasvec[i, d], biasveccomp[i, d]))
-
-        # print(np.dot(bias1ds * probsqrt[bias1prob], om1expand))
-        # print(np.dot(bias1NN, om0expand))
-        # print 'bias1ds', bias1ds
-        # print 'bias1prob', bias1prob
-        # print 'bias1NN', bias1NN
-        # print 'biasvec, biasveccomp:'
-        # for bv, bvc in zip(biasvec, biasveccomp):
-        #     print bv, bvc
-
+                biasveccomp[Ri, :] += (b1-b0)*vi
+        for i in range(self.starset.Nstates):
+            self.assertTrue(np.allclose(biasvec[i], biasveccomp[i]),
+                            msg='Failure for state {}: {}\n{} != {}'.format(
+                                    i, self.starset.states[i], biasvec[i], biasveccomp[i]))
 
 class VectorStarFCCBias1linearTests(VectorStarBias1linearTests):
-    """Set of tests for our expansion of bias vector (1) in double + NN stars for FCC"""
+    """Set of tests for our expansion of bias vector (1) for FCC"""
     def setUp(self):
-        self.lattice, self.NNvect, self.groupops, self.star = setupFCC()
-        self.NNstar = stars.StarSet(self.NNvect, self.groupops)
-        self.dstar = stars.DoubleStarSet()
-        self.vecstar = stars.VectorStarSet()
+        self.crys, self.jumpnetwork = setupFCC()
         self.rates = FCCrates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+class VectorStarHCPBias1linearTests(VectorStarBias1linearTests):
+    """Set of tests for our expansion of bias vector (1) for HCP"""
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupHCP()
+        self.rates = HCPrates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+## Old code from Bias1 testing:
+        # self.NNstar.generate(1) # we need the NN set of stars for NN jumps
+        # # construct the set of rates corresponding to the unique stars:
+        # om0expand = np.zeros(self.NNstar.Nstars)
+        # for vec, rate in zip(self.NNvect, self.rates):
+        #     om0expand[self.NNstar.starindex(vec)] = rate
+        # self.star.generate(2) # go ahead and make a "large" set of stars
+        # self.dstar.generate(self.star)
+        # om1expand = np.zeros(self.dstar.Ndstars)
+        # # in this case, we pick up omega_1 from omega_0... maybe not the most interesting case?
+        # # I think we make up for the "boring" rates here by having unusual probabilities below
+        # for i, ds in enumerate(self.dstar.dstars):
+        #     p1, p2 = ds[0]
+        #     dv = self.star.pts[p1] - self.star.pts[p2]
+        #     sind = self.NNstar.starindex(dv)
+        #     self.assertNotEqual(sind, -1)
+        #     om1expand[i] = om0expand[sind]
+        # # print 'om0:', om0expand
+        # # print 'om1:', om1expand
+        # self.vecstar.generate(self.star)
+        # bias1ds, omega1ds, gen1prob, bias1NN, omega1NN = self.vecstar.bias1expansion(self.dstar, self.NNstar)
+        # self.assertEqual(np.shape(bias1ds),
+        #                  (self.vecstar.Nvstars, self.dstar.Ndstars))
+        # self.assertEqual(np.shape(omega1ds),
+        #                  (self.vecstar.Nvstars, self.dstar.Ndstars))
+        # self.assertEqual(np.shape(gen1prob),
+        #                  (self.vecstar.Nvstars, self.dstar.Ndstars))
+        # self.assertEqual(np.shape(bias1NN),
+        #                  (self.vecstar.Nvstars, self.NNstar.Nstars))
+        # self.assertEqual(np.shape(omega1NN),
+        #                  (self.vecstar.Nvstars, self.NNstar.Nstars))
+        # self.assertTrue(np.issubdtype(gen1prob.dtype, int)) # needs to be for indexing
+        # # make sure that we don't have -1 as our endpoint probability for any ds that are used.
+        # for b1ds, o1ds, b1p in zip(bias1ds, omega1ds, gen1prob):
+        #     for bds, ods, p in zip(b1ds, o1ds, b1p):
+        #         if p == -1:
+        #             self.assertEqual(bds, 0)
+        #             self.assertEqual(ods, 0)
+        #
+        # # construct some fake probabilities for testing, with an "extra" star, set it's probability to 1
+        # # this is ONLY needed for testing purposes--the expansion should never access it.
+        # # note: this probability is to be the SQRT of the true probability
+        # # probsqrt = np.array([1,]*(self.star.Nstars+1)) # very little bias...
+        # probsqrt = np.sqrt(np.array([1.10**(self.star.Nstars-n) for n in range(self.star.Nstars + 1)]))
+        # probsqrt[-1] = 1 # this is important, as it represents our baseline "far-field"
+        # biasvec = np.zeros((self.star.Npts, 3)) # bias vector: all the hops *excluding* exchange
+        # omega1onsite = np.zeros(self.star.Npts) # omega1 onsite vector: all the hops *excluding* exchange
+        # for i, pt in enumerate(self.star.pts):
+        #     for vec, rate in zip(self.NNvect, self.rates):
+        #         if not all(abs(pt + vec) < 1e-8):
+        #             # note: starindex returns -1 if not found, which defaults to the final probability of 1.
+        #             biasvec[i, :] += vec*rate*probsqrt[self.star.starindex(pt + vec)]
+        #             omega1onsite[i] -=  rate*probsqrt[self.star.starindex(pt + vec)]
+        #     omega1onsite[i] /= probsqrt[self.star.index[i]]
+        # # construct the same bias vector using our expansion
+        # biasveccomp = np.zeros((self.star.Npts, 3))
+        # omega1onsitecomp = np.zeros(self.star.Npts)
+        # # om = om1 + om0 contributions
+        # for om_b, om_on, svpos, svvec in zip(np.dot(bias1ds * probsqrt[gen1prob], om1expand) +
+        #                                              np.dot(bias1NN, om0expand),
+        #                                      np.dot(omega1ds * probsqrt[gen1prob], om1expand) +
+        #                                              np.dot(omega1NN, om0expand),
+        #                                      self.vecstar.vecpos,
+        #                                      self.vecstar.vecvec):
+        #     # test the construction
+        #     for Ri, vi in zip(svpos, svvec):
+        #         biasveccomp[self.star.pointindex(Ri), :] += om_b*vi
+        #         omega1onsitecomp[self.star.pointindex(Ri)] += om_on # * np.dot(vi, vi)
+        # for i in range(self.star.Npts):
+        #     omega1onsitecomp[i] /= probsqrt[self.star.index[i]]
+        # # this is a little confusing, but we need to take into account the multiplicity;
+        # # this has to do with how we're building out the onsite matrix, and that there
+        # # can be multiple vector-stars that contain the same "base" star.
+        # multiplicity = np.zeros(self.star.Npts, dtype=int)
+        # for R in [Rv for svpos in self.vecstar.vecpos for Rv in svpos]:
+        #     multiplicity[self.star.pointindex(R)] += 1
+        # omega1onsitecomp /= multiplicity
+        #
+        # for svpos, svvec in zip(self.vecstar.vecpos, self.vecstar.vecvec):
+        #     for Ri, vi in zip(svpos, svvec):
+        #         self.assertAlmostEqual(np.dot(vi, biasvec[self.star.pointindex(Ri)]),
+        #                                np.dot(vi, biasveccomp[self.star.pointindex(Ri)]),
+        #                                msg='Did not match dot product for {} along {} where {} != {}'.format(
+        #                                    Ri, vi, biasvec[self.star.pointindex(Ri)],
+        #                                    biasveccomp[self.star.pointindex(Ri)]
+        #                                ))
+        #
+        # for i, pt in enumerate(self.star.pts):
+        #     self.assertAlmostEqual(omega1onsite[i], omega1onsitecomp[i],
+        #                            msg='Did not match onsite point[{}] {} where {} != {}'.format(
+        #                                i, pt, omega1onsite[i], omega1onsitecomp[i]))
+        #     for d in range(3):
+        #         self.assertAlmostEqual(biasvec[i, d], biasveccomp[i, d],
+        #                                msg='Did not match point[{}] {} direction {} where {} != {}'.format(
+        #                                    i, pt, d, biasvec[i, d], biasveccomp[i, d]))
