@@ -782,7 +782,7 @@ class VectorStarBias2linearTests(unittest.TestCase):
                                           self.vecstarset.vecvec):
             # test the construction
             for Ri, vi in zip(svpos, svvec):
-                biasveccomp[Ri, :] = (b2-b0)*vi
+                biasveccomp[Ri, :] += (b2-b0)*vi
         for i in range(self.starset.Nstates):
             self.assertTrue(np.allclose(biasvec[i], biasveccomp[i]),
                             msg='Failure for state {}: {}\n{} != {}'.format(
