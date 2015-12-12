@@ -671,89 +671,31 @@ class VectorStarSet(object):
         GFstarset.diffgenerate(self.starset, self.starset)
         GFexpansion = np.zeros((self.Nvstars, self.Nvstars, GFstarset.Nstars))
         for i in range(self.Nvstars):
-            for j in range(self.Nvstars):
-                if i <= j :
-                    for si, vi in zip(self.vecpos[i], self.vecvec[i]):
-                        for sj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                            try: ds = self.starset.states[sj] ^ self.starset.states[si]
-                            except: continue
-                            k = GFstarset.starindex(ds)
-                            if k is None: raise ArithmeticError('GF star not large enough to include {}?'.format(ds))
-                            GFexpansion[i, j, k] += np.dot(vi, vj)
-                else:
-                    GFexpansion[i, j, :] = GFexpansion[j, i, :]
+            for j in range(i,self.Nvstars):
+                for si, vi in zip(self.vecpos[i], self.vecvec[i]):
+                    for sj, vj in zip(self.vecpos[j], self.vecvec[j]):
+                        try: ds = self.starset.states[sj] ^ self.starset.states[si]
+                        except: continue
+                        k = GFstarset.starindex(ds)
+                        if k is None: raise ArithmeticError('GF star not large enough to include {}?'.format(ds))
+                        GFexpansion[i, j, k] += np.dot(vi, vj)
+        # symmetrize
+        for i in range(self.Nvstars):
+            for j in range(0,i):
+                GFexpansion[i, j, :] = GFexpansion[j, i, :]
         return GFexpansion, GFstarset
 
-    def rate0expansion(self):
-        """
-        Construct the omega0 matrix expansion in terms of the NN stars. Note: includes on-site terms.
-        Based entirely on the jumpnetwork in self.starset
-
-        :return rate0expansion: array[Nsv, Nsv, Njump_omega0]
-            the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k])
-        """
-        if self.Nvstars == 0: return None
-        rate0expansion = np.zeros((self.Nvstars, self.Nvstars, len(self.starset.jumpnetwork_index)))
-        for i in range(self.Nvstars):
-            for j in range(self.Nvstars):
-                if i <= j :
-                    for si, vi in zip(self.vecpos[i], self.vecvec[i]):
-                        for sj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                            try: ds = self.starset.states[sj] ^ self.starset.states[si]
-                            except: continue
-                            try: jumpindex = self.starset.jumplist.index(ds)
-                            except: continue
-                            k = None
-                            for jt, jumpindices in enumerate(self.starset.jumpnetwork_index):
-                                if jumpindex in jumpindices:
-                                    k = jt
-                                    break
-                            rate0expansion[i, j, k] += np.dot(vi, vj)
-                # note: we do *addition* here because we may have on-site contributions above
-                if i == j:
-                    state0 = self.starset.states[self.vecpos[i][0]].j  # state that vacancy leaves from
-                    # so add -1*rate for each jump that starts from that vacancy state.
-                    for k, s in enumerate(self.starset.jumpnetwork_index):
-                        rate0expansion[i, i, k] += sum(-1 for jumpindex in s
-                                                       if self.starset.jumplist[jumpindex].i == state0)
-                if i > j:
-                    rate0expansion[i, j, :] = rate0expansion[j, i, :]
-        return rate0expansion
-
-    def rate1expansion(self, jumpnetwork_omega1):
-        """
-        Construct the omega1 matrix expansion in terms of the jumpnetwork.
-
-        :param jumpnetwork_omega1: jumpnetwork of symmetry unique omega1-type jumps,
-          corresponding to our starset.
-        :return rate1expansion: array[Nsv, Nsv, Njumps]
-            the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])
-        """
-        if self.Nvstars == 0: return None
-        rate1expansion = np.zeros((self.Nvstars, self.Nvstars, len(jumpnetwork_omega1)))
-        for i in range(self.Nvstars):
-            for j in range(self.Nvstars):
-                if i <= j :
-                    for k, jumplist in enumerate(jumpnetwork_omega1):
-                        for (IS, FS), dx in jumplist:
-                            for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
-                                for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                                    if Ri == IS and Rj == FS:
-                                        rate1expansion[i, j, k] += np.dot(vi, vj)
-                else:
-                    rate1expansion[i, j, :] = rate1expansion[j, i, :]
-        return rate1expansion
-
-    def rateexpansions(self, jumpnetwork_omega1, jumptype):
+    def rateexpansions(self, jumpnetwork, jumptype):
         """
         Construct the omega0 and omega1 matrix expansions in terms of the jumpnetwork;
         includes the escape terms separately. The escape terms are tricky because they have
         probability factors that differ from the transitions; the PS (pair stars) is useful for
         finding this. We just call it the 'probfactor' below.
         *Note:* this used to be separated into rate0expansion, and rate1expansion, and
-        partly in bias1expansion.
+        partly in bias1expansion. Note also that if jumpnetwork_omega2 is passed, it also works
+        for that.
 
-        :param jumpnetwork_omega1: jumpnetwork of symmetry unique omega1-type jumps,
+        :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
           corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
           are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
@@ -768,10 +710,10 @@ class VectorStarSet(object):
         """
         if self.Nvstars == 0: return None
         rate0expansion = np.zeros((self.Nvstars, self.Nvstars, len(self.starset.jumpnetwork_index)))
-        rate1expansion = np.zeros((self.Nvstars, self.Nvstars, len(jumpnetwork_omega1)))
+        rate1expansion = np.zeros((self.Nvstars, self.Nvstars, len(jumpnetwork)))
         rate0escape = np.zeros((self.Nvstars, len(self.starset.jumpnetwork_index)))
-        rate1escape = np.zeros((self.Nvstars, len(jumpnetwork_omega1)))
-        for k, jumplist, jt in zip(itertools.count(), jumpnetwork_omega1, jumptype):
+        rate1escape = np.zeros((self.Nvstars, len(jumpnetwork)))
+        for k, jumplist, jt in zip(itertools.count(), jumpnetwork, jumptype):
             for (IS, FS), dx in jumplist:
                 for i in range(self.Nvstars):
                     for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
@@ -790,142 +732,238 @@ class VectorStarSet(object):
                 rate1expansion[i, j, :] = rate1expansion[j, i, :]
         return rate0expansion, rate0escape, rate1expansion, rate1escape
 
-    def rate2expansion(self, NNstar):
+    def biasexpansions(self, jumpnetwork, jumptype):
         """
-        Construct the omega2 matrix expansion in terms of the nearest-neighbor stars. Includes
-        the "on-site" terms as well, hence there's a factor of 2 in the output.
+        Construct the bias1 and bias0 vector expansion in terms of the jumpnetwork.
+        We return the bias0 contribution so that the db = bias1 - bias0 can be determined.
+        This saves us from having to deal with issues with our outer shell where we only
+        have a fraction of the escapes, but as long as the kinetic shell is one more than
+        the thermodynamics (so that the interaction energy is 0, hence no change in probability),
+        this will work. The PS (pair stars) is useful for including the probability factor
+        for the endpoint of the jump; we just call it the 'probfactor' below.
+        *Note:* this used to be separated into bias1expansion, and bias2expansion,and
+        had terms that are now in rateexpansions.
+        Note also that if jumpnetwork_omega2 is passed, it also works for that.
 
-        Parameters
-        ----------
-        NNstar: Star
-            stars representing the unique nearest-neighbor jumps
+        :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
+          corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
+          are indices corresponding to states in our starset.
+        :param jumptype: specific omega0 jump type that the jump corresponds to
 
-        Returns
-        -------
-        rate2expansion: array[Nsv, Nsv, NNstars]
-            the omega2 matrix[i, j] = sum(rate2expansion[i, j, k] * omega2(NNstar[k]))
+        :return bias0expansion: array[Nsv, Njump_omega0]
+            the gen0 vector[i] = sum(bias0expasion[i, k] * sqrt(probfactor0[PS[k]]) * omega0[k])
+        :return bias1expansion: array[Nsv, Njump_omega1]
+            the gen1 vector[i] = sum(bias1expansion[i, k] * sqrt(probfactor[PS[k]] * omega1[k])
         """
-        if self.Nvstars == 0:
-            return None
-        if not isinstance(NNstar, StarSet):
-            raise TypeError('need a star')
-        rate2expansion = np.zeros((self.Nvstars, self.Nvstars, NNstar.Nstars))
-        for i in range(self.Nvstars):
-            # this is a diagonal matrix, so...
-            ind = NNstar.starindex(self.vecpos[i][0])
-            if ind != -1:
-                rate2expansion[i, i, ind] = -2.*np.dot(self.vecvec[i][0], self.vecvec[i][0])*len(NNstar.stars[ind])
-        return rate2expansion
+        if self.Nvstars == 0: return None
+        bias0expansion = np.zeros((self.Nvstars, len(self.starset.jumpnetwork_index)))
+        bias1expansion = np.zeros((self.Nvstars, len(jumpnetwork)))
 
-    def bias2expansion(self, NNstar):
-        """
-        Construct the bias2 vector expansion in terms of the nearest-neighbor stars.
-
-        Parameters
-        ----------
-        NNstar: Star
-            stars representing the unique nearest-neighbor jumps
-
-        Returns
-        -------
-        bias2expansion: array[Nsv, NNstars]
-            the bias2 vector[i] = sum(bias2expansion[i, k] * omega2(NNstar[k]))
-        """
-        if self.Nvstars == 0:
-            return None
-        if not isinstance(NNstar, StarSet):
-            raise TypeError('need a star')
-        bias2expansion = np.zeros((self.Nvstars, NNstar.Nstars))
-        for i in range(self.Nvstars):
-            ind = NNstar.starindex(self.vecpos[i][0])
-            if ind != -1:
-                bias2expansion[i, ind] = np.dot(self.vecpos[i][0], self.vecvec[i][0])*len(NNstar.stars[ind])
-        return bias2expansion
-
-    def bias1expansion(self, dstar, NNstar):
-        """
-        Construct the bias1 or omega1 onsite vector expansion in terms of the
-        nearest-neighbor stars. There are three pieces to this that we need to
-        construct now, so it's more complicated. Since we use the *identical* algorithm,
-        we return both bias1ds and omega1ds, and bias1NN and omega1NN.
-
-        Parameters
-        ----------
-        dstar: DoubleStar
-            double-stars (i.e., pairs that are related by a symmetry operation; usually the sites
-            are connected by a NN vector to facilitate a jump; indicates unique vacancy jumps
-            around a solute)
-
-        NNstar: Star
-            stars representing the unique nearest-neighbor jumps
-
-        Returns
-        -------
-        bias1ds: array[Nsv, Ndstars]
-            the gen1 vector[i] = sum(gen1ds[i, k] * sqrt(prob_star[gen1prob[i, k]) * omega1[dstar[k]])
-
-        omega1ds: array[Nsv, Ndstars]
-            the omega1 onsite vector[i] = sum(omega1ds[i, k] * sqrt(prob_star[gen1prob[i, k]) * omega1[dstar[k]])
-
-        gen1prob: array[Nsv, Ndstars], dtype=int
-            index for the corresponding *star* whose probability defines the endpoint.
-
-        bias1NN: array[Nsv, NNNstars]
-            we have an additional contribution to the bias1 vector:
-            bias1 vector[i] += sum(bias1NN[i, k] * omega0[NNstar[k]])
-
-        oemga1NN: array[Nsv, NNNstars]
-            we have an additional contribution to the omega1 onsite vector:
-            omega1 onsite vector[i] += sum(omega1NN[i, k] * omega0[NNstar[k]])
-        """
-        if self.Nvstars == 0:
-            return None
-        if not isinstance(dstar, DoubleStarSet):
-            raise TypeError('need a double star')
-        if not isinstance(NNstar, StarSet):
-            raise TypeError('need a star')
-        NNstar.generateindices()
-        bias1ds = np.zeros((self.Nvstars, dstar.Ndstars))
-        omega1ds = np.zeros((self.Nvstars, dstar.Ndstars))
-        gen1bias = np.empty((self.Nvstars, dstar.Ndstars), dtype=int)
-        gen1bias[:, :] = -1
-        bias1NN = np.zeros((self.Nvstars, NNstar.Nstars))
-        omega1NN = np.zeros((self.Nvstars, NNstar.Nstars))
-
-        # run through the star-vectors
-        for i, svR, svv in zip(list(range(self.Nvstars)),
-                               self.vecpos, self.vecvec):
-            # run through the NN stars
-            p1 = dstar.star.pointindex(svR[0]) # first half of our pair
-            # nnst = star index, vec = NN jump vector
-            for nnst, vec in zip(NNstar.index, NNstar.pts):
-                endpoint = svR[0] + vec
-                # throw out the origin as an endpoint
-                if all(abs(endpoint) < 1e-8):
-                    continue
-                geom_bias = np.dot(svv[0], vec) * len(svR)
-                geom_omega1 = -1. #len(svR)
-                p2 = dstar.star.pointindex(endpoint)
-                if p2 == -1:
-                    # we landed outside our range of double-stars, so...
-                    bias1NN[i, nnst] += geom_bias
-                    omega1NN[i, nnst] += geom_omega1
-                else:
-                    ind = dstar.dstarindex((p1, p2))
-                    if ind == -1:
-                        raise ArithmeticError('Problem with DoubleStar indexing; could not find double-star for pair')
-                    bias1ds[i, ind] += geom_bias
-                    omega1ds[i, ind] += geom_omega1
-                    sind = dstar.star.index[p2]
-                    if sind == -1:
-                        raise ArithmeticError('Could not locate endpoint in a star in DoubleStar')
-                    if gen1bias[i, ind] == -1:
-                        gen1bias[i, ind] = sind
-                    else:
-                        if gen1bias[i, ind] != sind:
-                            raise ArithmeticError('Inconsistent DoubleStar endpoints found')
-        return bias1ds, omega1ds, gen1bias, bias1NN, omega1NN
+        for k, jumplist, jt in zip(itertools.count(), jumpnetwork, jumptype):
+            for (IS, FS), dx in jumplist:
+                # run through the star-vectors; just use first as representative
+                for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
+                    if IS == svR[0]:
+                        geom_bias = np.dot(svv[0], dx)*len(svR)
+                        bias0expansion[i, jt] += geom_bias
+                        bias1expansion[i, k] += geom_bias
+        return bias0expansion, bias1expansion
 
 crystal.yaml.add_representer(PairState, PairState.PairState_representer)
 crystal.yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
 
+### Old code, moved out of VectorStarSet, as (now) redundant:
+
+    # def rate0expansion(self):
+    #     """
+    #     Construct the omega0 matrix expansion in terms of the NN stars. Note: includes on-site terms.
+    #     Based entirely on the jumpnetwork in self.starset
+    #
+    #     :return rate0expansion: array[Nsv, Nsv, Njump_omega0]
+    #         the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k])
+    #     """
+    #     if self.Nvstars == 0: return None
+    #     rate0expansion = np.zeros((self.Nvstars, self.Nvstars, len(self.starset.jumpnetwork_index)))
+    #     for i in range(self.Nvstars):
+    #         for j in range(self.Nvstars):
+    #             if i <= j :
+    #                 for si, vi in zip(self.vecpos[i], self.vecvec[i]):
+    #                     for sj, vj in zip(self.vecpos[j], self.vecvec[j]):
+    #                         try: ds = self.starset.states[sj] ^ self.starset.states[si]
+    #                         except: continue
+    #                         try: jumpindex = self.starset.jumplist.index(ds)
+    #                         except: continue
+    #                         k = None
+    #                         for jt, jumpindices in enumerate(self.starset.jumpnetwork_index):
+    #                             if jumpindex in jumpindices:
+    #                                 k = jt
+    #                                 break
+    #                         rate0expansion[i, j, k] += np.dot(vi, vj)
+    #             # note: we do *addition* here because we may have on-site contributions above
+    #             if i == j:
+    #                 state0 = self.starset.states[self.vecpos[i][0]].j  # state that vacancy leaves from
+    #                 # so add -1*rate for each jump that starts from that vacancy state.
+    #                 for k, s in enumerate(self.starset.jumpnetwork_index):
+    #                     rate0expansion[i, i, k] += sum(-1 for jumpindex in s
+    #                                                    if self.starset.jumplist[jumpindex].i == state0)
+    #             if i > j:
+    #                 rate0expansion[i, j, :] = rate0expansion[j, i, :]
+    #     return rate0expansion
+    #
+    # def rate1expansion(self, jumpnetwork_omega1):
+    #     """
+    #     Construct the omega1 matrix expansion in terms of the jumpnetwork.
+    #
+    #     :param jumpnetwork_omega1: jumpnetwork of symmetry unique omega1-type jumps,
+    #       corresponding to our starset.
+    #     :return rate1expansion: array[Nsv, Nsv, Njumps]
+    #         the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])
+    #     """
+    #     if self.Nvstars == 0: return None
+    #     rate1expansion = np.zeros((self.Nvstars, self.Nvstars, len(jumpnetwork_omega1)))
+    #     for i in range(self.Nvstars):
+    #         for j in range(self.Nvstars):
+    #             if i <= j :
+    #                 for k, jumplist in enumerate(jumpnetwork_omega1):
+    #                     for (IS, FS), dx in jumplist:
+    #                         for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
+    #                             for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
+    #                                 if Ri == IS and Rj == FS:
+    #                                     rate1expansion[i, j, k] += np.dot(vi, vj)
+    #             else:
+    #                 rate1expansion[i, j, :] = rate1expansion[j, i, :]
+    #     return rate1expansion
+    #
+    # def rate2expansion(self, NNstar):
+    #     """
+    #     Construct the omega2 matrix expansion in terms of the nearest-neighbor stars. Includes
+    #     the "on-site" terms as well, hence there's a factor of 2 in the output.
+    #
+    #     Parameters
+    #     ----------
+    #     NNstar: Star
+    #         stars representing the unique nearest-neighbor jumps
+    #
+    #     Returns
+    #     -------
+    #     rate2expansion: array[Nsv, Nsv, NNstars]
+    #         the omega2 matrix[i, j] = sum(rate2expansion[i, j, k] * omega2(NNstar[k]))
+    #     """
+    #     if self.Nvstars == 0: return None
+    #     rate2expansion = np.zeros((self.Nvstars, self.Nvstars, NNstar.Nstars))
+    #     for i in range(self.Nvstars):
+    #         # this is a diagonal matrix, so...
+    #         ind = NNstar.starindex(self.vecpos[i][0])
+    #         if ind != -1:
+    #             rate2expansion[i, i, ind] = -2.*np.dot(self.vecvec[i][0], self.vecvec[i][0])*len(NNstar.stars[ind])
+    #     return rate2expansion
+    #
+    # def bias2expansion(self, NNstar):
+    #     """
+    #     Construct the bias2 vector expansion in terms of the nearest-neighbor stars.
+    #
+    #     Parameters
+    #     ----------
+    #     NNstar: Star
+    #         stars representing the unique nearest-neighbor jumps
+    #
+    #     Returns
+    #     -------
+    #     bias2expansion: array[Nsv, NNstars]
+    #         the bias2 vector[i] = sum(bias2expansion[i, k] * omega2(NNstar[k]))
+    #     """
+    #     if self.Nvstars == 0:
+    #         return None
+    #     if not isinstance(NNstar, StarSet):
+    #         raise TypeError('need a star')
+    #     bias2expansion = np.zeros((self.Nvstars, NNstar.Nstars))
+    #     for i in range(self.Nvstars):
+    #         ind = NNstar.starindex(self.vecpos[i][0])
+    #         if ind != -1:
+    #             bias2expansion[i, ind] = np.dot(self.vecpos[i][0], self.vecvec[i][0])*len(NNstar.stars[ind])
+    #     return bias2expansion
+    #
+    # def bias1expansion(self, dstar, NNstar):
+    #     """
+    #     Construct the bias1 or omega1 onsite vector expansion in terms of the
+    #     nearest-neighbor stars. There are three pieces to this that we need to
+    #     construct now, so it's more complicated. Since we use the *identical* algorithm,
+    #     we return both bias1ds and omega1ds, and bias1NN and omega1NN.
+    #
+    #     Parameters
+    #     ----------
+    #     dstar: DoubleStar
+    #         double-stars (i.e., pairs that are related by a symmetry operation; usually the sites
+    #         are connected by a NN vector to facilitate a jump; indicates unique vacancy jumps
+    #         around a solute)
+    #
+    #     NNstar: Star
+    #         stars representing the unique nearest-neighbor jumps
+    #
+    #     Returns
+    #     -------
+    #     bias1ds: array[Nsv, Ndstars]
+    #         the gen1 vector[i] = sum(gen1ds[i, k] * sqrt(prob_star[gen1prob[i, k]) * omega1[dstar[k]])
+    #
+    #     omega1ds: array[Nsv, Ndstars]
+    #         the omega1 onsite vector[i] = sum(omega1ds[i, k] * sqrt(prob_star[gen1prob[i, k]) * omega1[dstar[k]])
+    #
+    #     gen1prob: array[Nsv, Ndstars], dtype=int
+    #         index for the corresponding *star* whose probability defines the endpoint.
+    #
+    #     bias1NN: array[Nsv, NNNstars]
+    #         we have an additional contribution to the bias1 vector:
+    #         bias1 vector[i] += sum(bias1NN[i, k] * omega0[NNstar[k]])
+    #
+    #     oemga1NN: array[Nsv, NNNstars]
+    #         we have an additional contribution to the omega1 onsite vector:
+    #         omega1 onsite vector[i] += sum(omega1NN[i, k] * omega0[NNstar[k]])
+    #     """
+    #     if self.Nvstars == 0:
+    #         return None
+    #     if not isinstance(dstar, DoubleStarSet):
+    #         raise TypeError('need a double star')
+    #     if not isinstance(NNstar, StarSet):
+    #         raise TypeError('need a star')
+    #     NNstar.generateindices()
+    #     bias1ds = np.zeros((self.Nvstars, dstar.Ndstars))
+    #     omega1ds = np.zeros((self.Nvstars, dstar.Ndstars))
+    #     gen1bias = np.empty((self.Nvstars, dstar.Ndstars), dtype=int)
+    #     gen1bias[:, :] = -1
+    #     bias1NN = np.zeros((self.Nvstars, NNstar.Nstars))
+    #     omega1NN = np.zeros((self.Nvstars, NNstar.Nstars))
+    #
+    #     # run through the star-vectors
+    #     for i, svR, svv in zip(list(range(self.Nvstars)),
+    #                            self.vecpos, self.vecvec):
+    #         # run through the NN stars
+    #         p1 = dstar.star.pointindex(svR[0]) # first half of our pair
+    #         # nnst = star index, vec = NN jump vector
+    #         for nnst, vec in zip(NNstar.index, NNstar.pts):
+    #             endpoint = svR[0] + vec
+    #             # throw out the origin as an endpoint
+    #             if all(abs(endpoint) < 1e-8):
+    #                 continue
+    #             geom_bias = np.dot(svv[0], vec) * len(svR)
+    #             geom_omega1 = -1. #len(svR)
+    #             p2 = dstar.star.pointindex(endpoint)
+    #             if p2 == -1:
+    #                 # we landed outside our range of double-stars, so...
+    #                 bias1NN[i, nnst] += geom_bias
+    #                 omega1NN[i, nnst] += geom_omega1
+    #             else:
+    #                 ind = dstar.dstarindex((p1, p2))
+    #                 if ind == -1:
+    #                     raise ArithmeticError('Problem with DoubleStar indexing; could not find double-star for pair')
+    #                 bias1ds[i, ind] += geom_bias
+    #                 omega1ds[i, ind] += geom_omega1
+    #                 sind = dstar.star.index[p2]
+    #                 if sind == -1:
+    #                     raise ArithmeticError('Could not locate endpoint in a star in DoubleStar')
+    #                 if gen1bias[i, ind] == -1:
+    #                     gen1bias[i, ind] = sind
+    #                 else:
+    #                     if gen1bias[i, ind] != sind:
+    #                         raise ArithmeticError('Inconsistent DoubleStar endpoints found')
+    #     return bias1ds, omega1ds, gen1bias, bias1NN, omega1NN
+    #
