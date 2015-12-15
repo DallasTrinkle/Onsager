@@ -15,6 +15,7 @@ import collections
 import yaml ### use crystal.yaml to call--may need to change in the future
 from functools import reduce
 
+# TODO: try registering the GroupOp (and maybe others?) with YAML using a metaclass instead
 # YAML tags:
 # interfaces are either at the bottom, or staticmethods in the corresponding object
 NDARRAY_YAMLTAG = '!numpy.ndarray'
@@ -152,7 +153,8 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         ### that __eq__ uses "isclose" on our translations, and we don't have a good way to handle
         ### that in a hash function. We lose a little bit on efficiency if we construct a set that
         ### has a whole lot of translation operations, but that's not usually what we will do.
-        return int(reduce(lambda x,y: x^y, [256, 128, 64, 32, 16, 8, 4, 2, 1] * self.rot.reshape((9,))))
+        return hash(self.rot.data.tobytes())
+        # return int(reduce(lambda x,y: x^y, [256, 128, 64, 32, 16, 8, 4, 2, 1] * self.rot.reshape((9,))))
         # ^ reduce(lambda x,y: x^y, [hash(x) for x in self.trans])
 
     def __add__(self, other):
@@ -1058,7 +1060,7 @@ class Crystal(object):
                             d2 = (xRa2*dx2 - xRa_dx*xRa_dx)/dx2
                             if np.isclose(d2, mindist2) or d2 < mindist2:
                                 lis.remove(trans)
-
+        lis.sort(key=lambda entry: min( i+j + 1e-3*np.dot(dx,dx) for (i,j), dx in entry))
         return lis
 
     def jumpnetwork2lattice(self, chem, jumpnetwork):
@@ -1084,9 +1086,9 @@ class Crystal(object):
         :param chem: index corresponding to chemistry to consider
         :return: list of lists of indices that are equivalent by symmetry
         """
-        return [ sorted(i for c,i in l)  # strips out the chemistry index; sorted for readability
+        return sorted([ sorted(i for c,i in l)  # strips out the chemistry index; sorted for readability
                  for l in [list(s) for s in self.Wyckoff]  # converts to list of lists
-                 if l[0][0] == chem ]  # select only those with correct chemistry
+                 if l[0][0] == chem ])  # select only those with correct chemistry
 
     def fullkptmesh(self, Nmesh):
         """

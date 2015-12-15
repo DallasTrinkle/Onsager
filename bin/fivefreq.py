@@ -18,7 +18,7 @@ class FiveFreqFreqCalc:
         # GF calculator (using scaled rates)
         self.GF = GFcalc.GFcalc(lattice, NNvect, np.ones(len(NNvect)))
         # Onsager calculator
-        self.Lcalc = OnsagerCalc.VacancyMediated(NNvect, self.GF.groupops)
+        self.Lcalc = OnsagerCalc.VacancyMediatedBravais(NNvect, self.GF.groupops)
         self.Lcalc.generate(1) # everything we need, assuming that the thermodynamic range = 1
         # get our (scaled) Green function entries:
         self.gf = np.array([self.GF.GF(R) for R in self.Lcalc.GFlist()])

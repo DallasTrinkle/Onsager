@@ -63,7 +63,7 @@ class BaseTests(unittest.TestCase):
 
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.rates = setuportho()
-        self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
+        self.Lcalc = OnsagerCalc.VacancyMediatedBravais(self.NNvect, self.groupops)
         self.Njumps = 3
         self.Ninteract = [3, 9]
         self.Nomega1 = [9, 27]
@@ -96,7 +96,7 @@ class BaseTests(unittest.TestCase):
             self.assertEqual(len(omega1index), nom1)
             for vecpair, omindex in zip(omega1list, omega1index):
                 jump = jumplist[omindex]
-                self.assertTrue(any([all(abs(np.dot(g, jump) - (vecpair[0]-vecpair[1])) < 1e-8)
+                self.assertTrue(any([np.allclose(np.dot(g, jump),(vecpair[0]-vecpair[1]))
                                      for g in self.groupops]))
             GFlist = self.Lcalc.GFlist()
             self.assertEqual(len(GFlist), nGF)
@@ -111,7 +111,7 @@ class BaseTests(unittest.TestCase):
                         for vGF in GFlist:
                             if np.dot(vGF, vGF) != np.dot(vsum, vsum):
                                 continue
-                            if any([all(abs(vsum - np.dot(g, vGF)) < 1e-8) for g in self.groupops]):
+                            if any([np.allclose(vsum,np.dot(g, vGF)) for g in self.groupops]):
                                 match = True
                                 break
                         self.assertTrue(match)
@@ -153,7 +153,7 @@ class SCBaseTests(BaseTests):
 
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.rates = setupcubic()
-        self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
+        self.Lcalc = OnsagerCalc.VacancyMediatedBravais(self.NNvect, self.groupops)
         self.Njumps = 1
         self.Ninteract = [1, 3]
         self.Nomega1 = [2, 6]
@@ -205,7 +205,7 @@ class FCCBaseTests(SCBaseTests):
 
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.rates = setupFCC()
-        self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
+        self.Lcalc = OnsagerCalc.VacancyMediatedBravais(self.NNvect, self.groupops)
         self.Njumps = 1
         self.Ninteract = [1, 4]
         self.Nomega1 = [7, 20]
@@ -268,7 +268,7 @@ class BCCBaseTests(SCBaseTests):
 
     def setUp(self):
         self.lattice, self.NNvect, self.groupops, self.rates = setupBCC()
-        self.Lcalc = OnsagerCalc.VacancyMediated(self.NNvect, self.groupops)
+        self.Lcalc = OnsagerCalc.VacancyMediatedBravais(self.NNvect, self.groupops)
         self.Njumps = 1
         self.Ninteract = [1, 4]
         self.Nomega1 = [3, 9]

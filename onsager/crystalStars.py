@@ -218,7 +218,7 @@ class StarSet(object):
                 self.jumplist.append(PS)
         self.crys = crys
         self.chem = chem
-        self.Nshells = self.generate(Nshells)
+        self.generate(Nshells)
 
     def __str__(self):
         """Human readable version"""

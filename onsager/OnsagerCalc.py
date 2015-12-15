@@ -453,7 +453,7 @@ class Interstitial(object):
         return D0, Dp
 
 
-class VacancyMediated(object):
+class VacancyMediatedBravais(object):
     """
     A class to compute vacancy-mediated solute transport coefficients, specifically
     L_vv (vacancy diffusion), L_ss (solute), and L_sv (off-diagonal). As part of that,
@@ -688,6 +688,322 @@ class VacancyMediated(object):
             correlation for vacancy-vacancy; needs to be multiplied by cv*cs/kBT
         """
         self.generatematrices()
+
+        G0 = np.dot(self.GFexpansion, gf)
+
+        probsqrt = np.zeros(self.kinetic.Nstars)
+        probsqrt[:] = 1.
+        for p, ind in zip(prob, self.thermo2kin):
+            probsqrt[ind] = np.sqrt(p)
+
+        om1expand = np.array([r1 if r1 >= 0 else r0
+                              for r1, r0 in zip(om1, om0[self.omega1LIMB])]) # omega_1
+        om2expand = np.array([r2 if r2 >= 0 else r0
+                              for r2, r0 in zip(om2, om0)]) # omega_2
+        # onsite term: need to make sure we divide out by the starting point probability, too
+        om1onsite = (np.dot(self.omega1ds * probsqrt[self.gen1prob], om1expand) +
+                     np.dot(self.omega1NN, om0))/probsqrt[self.vstar2kin]
+        delta_om = np.dot(self.rate1expansion, om1expand) + \
+                   np.diag(om1onsite) + \
+                   np.dot(self.rate2expansion, om2expand) - \
+                   np.dot(self.rate0expansion, om0)
+
+        bias2vec = np.dot(self.bias2expansion, om2expand*np.sqrt(prob[self.NN2thermo]))
+        bias1vec = np.dot(self.bias1ds * probsqrt[self.gen1prob], om1expand) + \
+                   np.dot(self.bias1NN, om0)
+
+        # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
+        G = np.dot(np.linalg.inv(np.eye(len(bias1vec)) + np.dot(G0, delta_om)), G0)
+        outer_eta1vec = np.dot(self.biasvec.outer, np.dot(G, bias1vec))
+        outer_eta2vec = np.dot(self.biasvec.outer, np.dot(G, bias2vec))
+        L2ss = np.dot(outer_eta2vec, bias2vec)
+        L1sv = np.dot(outer_eta2vec, bias1vec)
+        L1vv = np.dot(outer_eta1vec, bias1vec)
+        # convert jump vectors to an array, and construct the rates as an array
+        L0vv = GFcalc.D2(np.array(self.jumpvect),
+                         np.array(sum([[om,]*len(Rs)
+                                       for om, Rs in zip(om0, self.NNstar.stars)], [])))
+        L0ss = GFcalc.D2(np.array(self.jumpvect),
+                         np.array(sum([[om,]*len(Rs)
+                                       for om, Rs in zip(om2expand*prob[self.NN2thermo],
+                                                         self.NNstar.stars)], [])))
+        return L0vv, L0ss, L2ss, L1sv, L1vv
+        # print 'om1:\n', np.dot(self.rate1expansion, om1expand)
+        # print 'om1_onsite:\n', np.diag(om1onsite)
+        # print 'om2:\n', np.dot(self.rate2expansion, om2expand)
+        # print 'om0:\n', np.dot(self.rate0expansion, om0)
+        # print 'delta_om:\n', delta_om
+
+    def Lij(self, gf, om0, prob, om2, om1):
+        """
+        Calculates the transport coefficients Lvv, Lss, and Lsv from the GF,
+        omega0, omega1, and omega2 rates along with site probabilities.
+
+        Parameters
+        ----------
+        gf : array[NGF_sites]
+            Green function for vacancy evaluated at sites
+        om0 : array[NNjumps]
+            rates for vacancy jumps
+        prob : array[thermosites]
+            probability of solute-vacancy complex at each sites
+        om2 : array[NNjumps]
+            rates for vacancy-solute exchange; if -1, use om0 entry
+        om1 : array[Ndstars]
+            rates for vacancy jumps around solute; if -1, use corresponding om0 entry
+
+        Returns
+        -------
+        Lvv : array[3, 3]
+            vacancy-vacancy; needs to be multiplied by cv/kBT
+        Lss : array[3, 3]
+            solute-solute; needs to be multiplied by cv*cs/kBT
+        Lsv : array[3, 3]
+            solute-vacancy; needs to be multiplied by cv*cs/kBT
+        Lvv1 : array[3, 3]
+            vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT
+        """
+        Lvv, L0ss, L2ss, L1sv, L1vv = self._lij(gf, om0, prob, om2, om1)
+        return Lvv, L0ss + L2ss, -L0ss - L2ss + L1sv, L2ss - 2*L1sv + L1vv
+
+import copy
+import collections
+import itertools
+import onsager.crystalStars as cstars
+
+class vacancyThermoKinetics(collections.namedtuple('vacancyThermoKinetics',
+                                                   'pre betaene preT betaeneT')):
+    """
+    Class to store (in a hashable manner) the thermodynamics and kinetics for the vacancy
+    :param pre: prefactors for sites
+    :param betaene: energy for sites / kBT
+    :param preT: prefactors for transition states
+    :param betaeneT: transition state energy for sites / kBT
+    """
+    def __repr__(self):
+        return "{}(pre={}, betaene={}, preT={}, betaeneT={})".format(self.__class__.__name__,
+                                                                     self.pre, self.betaene,
+                                                                     self.preT, self.betaeneT)
+
+    def _asdict(self):
+        """Return a proper dict"""
+        return {'pre': self.pre, 'betaene': self.betaene, 'preT': self.preT, 'betaeneT': self.betaeneT}
+
+    def __eq__(self, other):
+        # Note: could scale all prefactors by min(pre) and subtract all energies by min(ene)...?
+        return isinstance(other, self.__class__) and \
+               np.allclose(self.pre, other.pre) and np.allclose(self.betaene, other.betaene) and \
+               np.allclose(self.preT, other.preT) and np.allclose(self.betaeneT, other.betaeneT)
+
+    def __ne__(self, other):
+        return not __eq__(other)
+
+    def __hash__(self):
+        return hash(self.pre.data.tobytes() + self.betaene.data.tobytes() +
+                    self.preT.data.tobytes() + self.betaeneT.data.tobytes())
+
+class VacancyMediated(object):
+    """
+    A class to compute vacancy-mediated solute transport coefficients, specifically
+    L_vv (vacancy diffusion), L_ss (solute), and L_sv (off-diagonal). As part of that,
+    it determines *what* quantities are needed as inputs in order to perform this calculation.
+
+    Based on crystal class. Also now includes its own GF calculator and cacheing.
+    """
+    def __init__(self, crys, chem, sitelist, jumpnetwork, Nthermo = 0):
+        """
+        Create our diffusion calculator for a given crystal structure, chemical identity,
+        jumpnetwork (for the vacancy) and thermodynamic shell.
+
+        :param crys: Crystal object
+        :param chem: index identifying the diffusing species
+        :param sitelist: list, grouped into Wyckoff common positions, of unique sites
+        :param jumpnetwork: list of unique transitions as lists of ((i,j), dx)
+        """
+        self.crys = crys
+        self.chem = chem
+        self.sitelist = copy.deepcopy(sitelist)
+        self.jumpnetwork = copy.deepcopy(jumpnetwork)
+        self.N = sum(len(w) for w in sitelist)
+        self.invmap = [0 for i in range(self.N)]
+        for ind,w in enumerate(sitelist):
+            for i in w:
+                self.invmap[i] = ind
+        self.om0_jn= copy.deepcopy(jumpnetwork)
+        self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn) # Nmax?
+        self.GFvalues = {} # empty dictionary
+        self.Lvvvalues = {}
+        # do some initial setup:
+        self.thermo = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, self.Nthermo)
+        self.NNstar = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
+        self.kinetic = self.thermo + self.NNstar
+        self.vkinetic = cstars.VectorStarSet()
+        self.generate(Nthermo)
+
+    def generate(self, Nthermo):
+        """
+        Generate the necessary stars, vector-stars, and jump networks based on the thermodynamic range.
+        :param Nthermo : range of thermodynamic interactions, in terms of "shells",
+            which is multiple summations of jumpvect
+        """
+        if Nthermo == getattr(self, 'Nthermo', 0): return
+        self.Nthermo = Nthermo
+
+        self.thermo.generate(Nthermo)
+        self.kinetic = self.thermo + self.NNstar
+        self.vkinetic.generate(self.kinetic)
+        # some indexing helpers:
+        # thermo2kin maps star index in thermo to kinetic (should just be range(n), but we use this for safety)
+        # outerkin is the list of stars that are in kinetic, but not in thermo
+        # vstar2kin maps each vector star back to the corresponding star index
+        self.thermo2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.thermo.stars]
+        self.outerkin = [s for s in range(self.kinetic.Nstars)
+                         if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None]
+        self.vstar2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.vkinetic.vecpos]
+        # jumpnetwork, jumptype (omega0), star-pair for jump
+        self.om1_jn, self.om1_jt, self.om1_SP = self.kinetic.jumpnetwork_omega1()
+        self.om2_jn, self.om2_jt, self.om2_SP = self.kinetic.jumpnetwork_oemga2()
+        # Prune the om1 list: remove entries that have jumps between stars in outerkin:
+        # work in reverse order so that popping is safe (and most of the offending entries are at the end
+        for i, SP in zip(reversed(range(len(self.om1_SP))), reversed(self.om1_SP)):
+            if SP[0] in self.outerkin and SP[i][1] in self.outerkin:
+                self.om1_jn.pop(i), self.om1_jt.pop(i), self.om1_SP.pop(i)
+        # Vector star set, generates a LOT of our calculation:
+        self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
+        # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
+        self.om1_om0, self.om1_om0escape, self.om1expansion, self.om1escape = \
+            self.vkinetic.rateexpansions(self.om1_jn, self.om1_jt)
+        self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
+            self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
+        self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
+        self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
+
+    def interactlist(self):
+        """
+        Return a list of solute-vacancy configurations for interactions. The points correspond
+        to a vector between a solute atom and a vacancy. Defined by Stars.
+
+        :return statelist: list of PairStates for the solute-vacancy interactions
+        """
+        if 0 == getattr(self, 'Nthermo', 0): raise ValueError('Need to set thermodynamic range first')
+        return [self.thermo.states[s[0]] for s in self.thermo.stars]
+
+    def omegalist(self, fivefreqindex=1):
+        """
+        Return a list of pairs of endpoints for a vacancy jump, corresponding to omega1 or omega2
+        Solute at the origin, vacancy hopping between two sites. Defined by om1_jumpnetwork
+        :param fivefreqindex: 1 or 2, corresponding to omega1 or omega2
+
+        :return omegalist: list of tuples of PairStates
+        :return omegajumptype: index of corresponding omega0 jumptype
+        """
+        # TODO: would be useful to come up with a "minimal" set of states to use here
+        if 0 == getattr(self, 'Nthermo', 0): raise ValueError('Need to set thermodynamic range first')
+        om, jt = {1: (self.om1_jn, self.om1_jt),
+                  2: (self.om2_jn, self.om2_jt)}.get(fivefreqindex, (None,None))
+        if om is None: raise ValueError('Five frequency index should be 1 or 2')
+        return [(self.kinetic.states[jlist[0][0][0]], self.kinetic.states[jlist[0][0][1]]) for jlist in om], \
+               jt.copy()
+
+    def maketracerpreBE(self, preT0, betaeneT0):
+        """
+        Generates corresponding energies / prefactors for an isotopic tracer.
+
+        :param preT0[Nomeg0]: prefactor for vacancy jump transitions (follows jumpnetwork)
+        :param betaeneT0[Nomega0]: transition energy/kBT for vacancy jumps
+
+        :return preSV[Nthermo]: prefactor for solute-vacancy interaction
+        :return betaeneSV[Nthermo]: solute-vacancy binding energy/kBT
+        :return preT1[Nomega1]: prefactor for omega1-style transitions (follows om1_jn)
+        :return betaeneT1[Nomega1]: transition energy/kBT for omega1-style jumps
+        :return preT2[Nomega2]: prefactor for omega2-style transitions (follows om2_jn)
+        :return betaeneT2[Nomega2]: transition energy/kBT for omega2-style jumps
+        """
+        preSV = np.ones(self.thermo.Nstars)
+        betaeneSV = np.zeros(self.thermo.Nstars)
+        preT1 = np.ones(len(self.om1_jn))
+        betaeneT1 = np.zeros(len(self.om1_jn))
+        for j, jt in zip(itertools.count(), self.om1_jt):
+            preT1[j], betaeneT1[j] = preT0[jt], betaeneT0[jt]
+        preT2 = np.ones(len(self.om2_jn))
+        betaeneT2 = np.zeros(len(self.om2_jn))
+        for j, jt in zip(itertools.count(), self.om2_jt):
+            preT2[j], betaeneT2[j] = preT0[jt], betaeneT0[jt]
+        return preSV, betaeneSV, preT1, betaeneT1, preT2, betaeneT2
+
+    def makeLIMBpreBE(self, preT0, betaeneT0, preSV, betaeneSV):
+        """
+        Generates corresponding energies / prefactors for corresponding to LIMB
+        (Linearized interpolation of migration barrier approximation).
+
+        :param pre0[NWyckoff]: prefactor for vacancy
+        :param betaene0[NWyckoff]: energy/kBT for vacancy
+        :param preT0[Nomeg0]: prefactor for vacancy jump transitions (follows jumpnetwork)
+        :param betaeneT0[Nomega0]: transition energy/kBT for vacancy jumps
+        :param preSV[Nthermo]: prefactor for solute-vacancy interaction
+        :param betaeneSV[Nthermo]: solute-vacancy binding energy/kBT
+
+        :return preT1[Nomega1]: prefactor for omega1-style transitions (follows om1_jn)
+        :return betaeneT1[Nomega1]: transition energy/kBT for omega1-style jumps
+        :return preT2[Nomega2]: prefactor for omega2-style transitions (follows om2_jn)
+        :return betaeneT2[Nomega2]: transition energy/kBT for omega2-style jumps
+        """
+        preT1 = np.ones(len(self.om1_jn))
+        betaeneT1 = np.zeros(len(self.om1_jn))
+        for j, jt, SP in zip(itertools.count(), self.om1_jt, self.om1_SP):
+            preT1[j] = preT0[jt]*np.sqrt(preSV[SP[0]]*preSV[SP[1]])
+            betaeneT1[j] = betaeneT0[jt] + 0.5*(betaeneSV[SP[0]]+betaeneSV[SP[1]])
+        preT2 = np.ones(len(self.om2_jn))
+        betaeneT2 = np.zeros(len(self.om2_jn))
+        for j, jt, SP in zip(itertools.count(), self.om2_jt, self.om2_SP):
+            preT2[j] = preT0[jt]*np.sqrt(preSV[SP[0]]*preSV[SP[1]])
+            betaeneT2[j] = betaeneT0[jt] + 0.5*(betaeneSV[SP[0]]+betaeneSV[SP[1]])
+        return preT1, betaeneT1, preT2, betaeneT2
+
+    def _lij(self, pre0, betaene0, preT0, betaeneT0, preSV, betaeneSV,
+             preT1, betaeneT1, preT2, betaeneT2):
+        """
+        Calculates the pieces for the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv
+        from the omega0, omega1, and omega2 rates along with site probabilities.
+        The Green function entries are calculated from the 0. As this is the most
+        time-consuming part of the calculation, we cache these values with a dictionary
+        and hash function.
+        Used by Lij.
+
+        :param pre0[NWyckoff]: prefactor for vacancy
+        :param betaene0[NWyckoff]: energy/kBT for vacancy
+        :param preT0[Nomeg0]: prefactor for vacancy jump transitions (follows jumpnetwork)
+        :param betaeneT0[Nomega0]: transition energy/kBT for vacancy jumps
+        :param preSV[Nthermo]: prefactor for solute-vacancy interaction
+        :param betaeneSV[Nthermo]: solute-vacancy binding energy/kBT
+        :param preT1[Nomega1]: prefactor for omega1-style transitions (follows om1_jn)
+        :param betaeneT1[Nomega1]: transition energy/kBT for omega1-style jumps
+        :param preT2[Nomega2]: prefactor for omega2-style transitions (follows om2_jn)
+        :param betaeneT2[Nomega2]: transition energy/kBT for omega2-style jumps
+
+        :return Lvv[3,3]: vacancy-vacancy; needs to be multiplied by cv/kBT
+        :return L0ss[3, 3]: "bare" solute-solute; needs to be multiplied by cv*cs/kBT
+        :return L2ss[3, 3]: correlation for solute-solute; needs to be multiplied by cv*cs/kBT
+        :return L1sv[3, 3]: correlation for solute-vacancy; needs to be multiplied by cv*cs/kBT
+        :return L1vv[3, 3]: correlation for vacancy-vacancy; needs to be multiplied by cv*cs/kBT
+        """
+        # 1. bare vacancy diffusivity and Green's function
+        vTK = vacancyThermoKinetics(pre=pre0, betaene=betaene0, preT=preT0, betaeneT=betaeneT0)
+        G0 = self.GFvalues.get(vTK)
+        Lvv = self.Lvvvalues.get(vTK)
+        if G0 is None:
+            # calculate, and store in dictionary for cache:
+            self.GFcalc.SetRates(**(vTK._asdict()))
+            Lvv = self.GFcalc.Diffusivity()
+            G0 = np.array([self.GFcalc(PS.i, PS.j, PS.dx)
+                           for PS in
+                           [self.GFstarset.states[s[0]] for s in self.GFstarset.stars]])
+            self.Lvvvalues[vTK] = Lvv.copy()
+            self.GFvalues[vTK] = G0.copy()
+        # 2. set up probabilities for solute-vacancy configurations
+        # 3. set up rates: omega1, omega2
+        # 4. expand out: domega1, domega2, bias1, bias2
+        # 5. compute Onsager coefficients
 
         G0 = np.dot(self.GFexpansion, gf)
 
