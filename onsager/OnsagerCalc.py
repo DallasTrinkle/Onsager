@@ -854,9 +854,11 @@ class VacancyMediated(object):
         self.vkinetic.generate(self.kinetic)
         # some indexing helpers:
         # thermo2kin maps star index in thermo to kinetic (should just be range(n), but we use this for safety)
+        # kin2vacancy maps star index in kinetic to non-solute configuration from sitelist
         # outerkin is the list of stars that are in kinetic, but not in thermo
         # vstar2kin maps each vector star back to the corresponding star index
         self.thermo2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.thermo.stars]
+        self.kin2vacancy = [self.invmap[self.kinetic.starindex(s[0]).i] for s in self.kinetic.stars]
         self.outerkin = [s for s in range(self.kinetic.Nstars)
                          if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None]
         self.vstar2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.vkinetic.vecpos]
@@ -1001,7 +1003,14 @@ class VacancyMediated(object):
             self.Lvvvalues[vTK] = Lvv.copy()
             self.GFvalues[vTK] = G0.copy()
         # 2. set up probabilities for solute-vacancy configurations
+        minbetaene = min(betaene0)
+        prob0 = np.array([pre[wi]*np.exp(minbetaene-betaene0[wi]) for wi in self.invmap])
+        prob0 /= np.sum(prob0)  # normalize
+        prob = np.array([prob0[i] for i in self.kin2vacancy])  # bare probability
+        for tindex, kindex in enumerate(self.thermo2kin):
+            prob[kindex] *= preSV[tindex] * np.exp(-betaeneSV[tindex])
         # 3. set up rates: omega1, omega2
+        omega0 = GFcalc.SymmRates(**(vTK._asdict()))
         # 4. expand out: domega1, domega2, bias1, bias2
         # 5. compute Onsager coefficients
 
