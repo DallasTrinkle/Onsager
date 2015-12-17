@@ -907,63 +907,126 @@ class VacancyMediated(object):
         return [(self.kinetic.states[jlist[0][0][0]], self.kinetic.states[jlist[0][0][1]]) for jlist in om], \
                jt.copy()
 
-    def maketracerpreBE(self, preT0, betaeneT0):
+    def maketracerpreene(self, preT0, eneT0):
         """
         Generates corresponding energies / prefactors for an isotopic tracer.
 
         :param preT0[Nomeg0]: prefactor for vacancy jump transitions (follows jumpnetwork)
-        :param betaeneT0[Nomega0]: transition energy/kBT for vacancy jumps
+        :param eneT0[Nomega0]: transition energy state for vacancy jumps
 
+        :return preS[NWyckoff]: prefactor for solute formation
+        :return eneS[NWyckoff]: solute formation energy
         :return preSV[Nthermo]: prefactor for solute-vacancy interaction
-        :return betaeneSV[Nthermo]: solute-vacancy binding energy/kBT
+        :return eneSV[Nthermo]: solute-vacancy binding energy
         :return preT1[Nomega1]: prefactor for omega1-style transitions (follows om1_jn)
-        :return betaeneT1[Nomega1]: transition energy/kBT for omega1-style jumps
+        :return eneT1[Nomega1]: transition energy for omega1-style jumps
         :return preT2[Nomega2]: prefactor for omega2-style transitions (follows om2_jn)
-        :return betaeneT2[Nomega2]: transition energy/kBT for omega2-style jumps
+        :return eneT2[Nomega2]: transition energy for omega2-style jumps
         """
+        preS = np.ones(len(self.sitelist))
+        eneS = np.zeros(len(self.sitelist))
         preSV = np.ones(self.thermo.Nstars)
-        betaeneSV = np.zeros(self.thermo.Nstars)
+        eneSV = np.zeros(self.thermo.Nstars)
         preT1 = np.ones(len(self.om1_jn))
-        betaeneT1 = np.zeros(len(self.om1_jn))
+        eneT1 = np.zeros(len(self.om1_jn))
         for j, jt in zip(itertools.count(), self.om1_jt):
-            preT1[j], betaeneT1[j] = preT0[jt], betaeneT0[jt]
+            preT1[j], eneT1[j] = preT0[jt], eneT0[jt]
         preT2 = np.ones(len(self.om2_jn))
-        betaeneT2 = np.zeros(len(self.om2_jn))
+        eneT2 = np.zeros(len(self.om2_jn))
         for j, jt in zip(itertools.count(), self.om2_jt):
-            preT2[j], betaeneT2[j] = preT0[jt], betaeneT0[jt]
-        return preSV, betaeneSV, preT1, betaeneT1, preT2, betaeneT2
+            preT2[j], eneT2[j] = preT0[jt], eneT0[jt]
+        return preS, eneS, preSV, eneSV, preT1, eneT1, preT2, eneT2
 
-    def makeLIMBpreBE(self, preT0, betaeneT0, preSV, betaeneSV):
+    def makeLIMBpreene(self, preS, eneS, preSV, eneSV, preT0, eneT0):
         """
         Generates corresponding energies / prefactors for corresponding to LIMB
         (Linearized interpolation of migration barrier approximation).
 
-        :param pre0[NWyckoff]: prefactor for vacancy
-        :param betaene0[NWyckoff]: energy/kBT for vacancy
-        :param preT0[Nomeg0]: prefactor for vacancy jump transitions (follows jumpnetwork)
-        :param betaeneT0[Nomega0]: transition energy/kBT for vacancy jumps
+        :param preS[NWyckoff]: prefactor for solute formation
+        :param eneS[NWyckoff]: solute formation energy
         :param preSV[Nthermo]: prefactor for solute-vacancy interaction
-        :param betaeneSV[Nthermo]: solute-vacancy binding energy/kBT
+        :param eneSV[Nthermo]: solute-vacancy binding energy
+        :param preT0[Nomeg0]: prefactor for vacancy jump transitions (follows jumpnetwork)
+        :param eneT0[Nomega0]: transition energy for vacancy jumps
 
         :return preT1[Nomega1]: prefactor for omega1-style transitions (follows om1_jn)
-        :return betaeneT1[Nomega1]: transition energy/kBT for omega1-style jumps
+        :return eneT1[Nomega1]: transition energy/kBT for omega1-style jumps
         :return preT2[Nomega2]: prefactor for omega2-style transitions (follows om2_jn)
-        :return betaeneT2[Nomega2]: transition energy/kBT for omega2-style jumps
+        :return eneT2[Nomega2]: transition energy/kBT for omega2-style jumps
         """
+        preSS1 = np.zeros(len(self.om1_SP))
+        eneSS1 = np.zeros(len(self.om1_SP))
+        preSS2 = np.zeros(len(self.om2_SP))
+        eneSS2 = np.zeros(len(self.om2_SP))
+        for i, (star1, star2) in enumerate(self.om1_SP):
+            # Wyckoff position of solute in each star
+            s1 = self.invmap[self.kinetic.states[self.kinetic.stars[star1][0]].i]
+            s2 = self.invmap[self.kinetic.states[self.kinetic.stars[star2][0]].i]
+            preSS1[i], eneSS1[i] = np.sqrt(preS[s1]*preS[s2]), 0.5*(eneS[s1]+eneS[s2])
+        for i, (star1, star2) in enumerate(self.om2_SP):
+            s1 = self.invmap[self.kinetic.states[self.kinetic.stars[star1][0]].i]
+            s2 = self.invmap[self.kinetic.states[self.kinetic.stars[star2][0]].i]
+            preSS2[i], eneSS2[i] = np.sqrt(preS[s1]*preS[s2]), 0.5*(eneS[s1]+eneS[s2])
         preT1 = np.ones(len(self.om1_jn))
-        betaeneT1 = np.zeros(len(self.om1_jn))
+        eneT1 = np.zeros(len(self.om1_jn))
         for j, jt, SP in zip(itertools.count(), self.om1_jt, self.om1_SP):
-            preT1[j] = preT0[jt]*np.sqrt(preSV[SP[0]]*preSV[SP[1]])
-            betaeneT1[j] = betaeneT0[jt] + 0.5*(betaeneSV[SP[0]]+betaeneSV[SP[1]])
+            # need to include solute energy / prefactors
+            preT1[j] = preT0[jt]*np.sqrt(preSV[SP[0]]*preSV[SP[1]])*preSS1[j]
+            eneT1[j] = eneT0[jt] + 0.5*(eneSV[SP[0]]+eneSV[SP[1]]) + eneSS1[j]
         preT2 = np.ones(len(self.om2_jn))
-        betaeneT2 = np.zeros(len(self.om2_jn))
+        eneT2 = np.zeros(len(self.om2_jn))
         for j, jt, SP in zip(itertools.count(), self.om2_jt, self.om2_SP):
-            preT2[j] = preT0[jt]*np.sqrt(preSV[SP[0]]*preSV[SP[1]])
-            betaeneT2[j] = betaeneT0[jt] + 0.5*(betaeneSV[SP[0]]+betaeneSV[SP[1]])
-        return preT1, betaeneT1, preT2, betaeneT2
+            # need to include solute energy / prefactors
+            preT2[j] = preT0[jt]*np.sqrt(preSV[SP[0]]*preSV[SP[1]])*preSS2[j]
+            eneT2[j] = eneT0[jt] + 0.5*(eneSV[SP[0]]+eneSV[SP[1]]) + eneSS2[j]
+        return preT1, eneT1, preT2, eneT2
 
-    def _lij(self, pre0, betaene0, preT0, betaeneT0, preSV, betaeneSV,
-             preT1, betaeneT1, preT2, betaeneT2):
+    @staticmethod
+    def preene2betafree(preV, eneV, preS, eneS, preSV, eneSV,
+                        preT0, eneT0, preT1, eneT1, preT2, eneT2, kT):
+        """
+        Read in a series of prefactors (e^(S/kB)) and energies, and return beta*free energy for
+        energies and transition state energies.
+        :param preV: prefactor for vacancy formation (prod of inverse vibrational frequencies)
+        :param eneV: vacancy formation energy
+        :param preS: prefactor for solute formation (prod of inverse vibrational frequencies)
+        :param eneS: solute formation energy
+        :param preSV: excess prefactor for solute-vacancy binding
+        :param eneSV: solute-vacancy binding energy
+        :param preT0: prefactor for vacancy transition state
+        :param eneT0: energy for vacancy transition state (relative to eneV)
+        :param preT1: prefactor for vacancy swing transition state
+        :param eneT1: energy for vacancy swing transition state (relative to eneV + eneS + eneSV)
+        :param preT2: prefactor for vacancy exchange transition state
+        :param eneT2: energy for vacancy exchange transition state (relative to eneV + eneS + eneSV)
+        :param kT: temperature times Boltzmann's constant kB
+
+        :return bFV: beta*eneV - ln(preV) (relative to minimum value)
+        :return bFS: beta*eneS - ln(preS) (relative to minimum value)
+        :return bFSV: beta*eneSV - ln(preSV) (excess)
+        :return bFT0: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
+        :return bFT1: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
+        :return bFT2: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
+        """
+        # do anything to treat kT -> 0?
+        beta = 1/kT
+        bFV = beta*eneV - np.log(preV)
+        bFS = beta*eneS - np.log(preS)
+        bFSV = beta*eneSV - np.log(preSV)
+        bFT0 = beta*eneT0 - np.log(preT0)
+        bFT1 = beta*eneT1 - np.log(preT1)
+        bFT2 = beta*eneT2 - np.log(preT2)
+
+        bFVmin = np.min(bFV)
+        bFSmin = np.min(bFS)
+        bFV -= bFVmin
+        bFS -= bFSmin
+        bFT0 -= bFVmin
+        bFT1 -= bFVmin + bFSmin
+        bFT2 -= bFVmin + bFSmin
+        return bFV, bFS, bFSV, bFT0, bFT1, bFT2
+
+    def _lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
         """
         Calculates the pieces for the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv
         from the omega0, omega1, and omega2 rates along with site probabilities.
@@ -972,16 +1035,12 @@ class VacancyMediated(object):
         and hash function.
         Used by Lij.
 
-        :param pre0[NWyckoff]: prefactor for vacancy
-        :param betaene0[NWyckoff]: energy/kBT for vacancy
-        :param preT0[Nomeg0]: prefactor for vacancy jump transitions (follows jumpnetwork)
-        :param betaeneT0[Nomega0]: transition energy/kBT for vacancy jumps
-        :param preSV[Nthermo]: prefactor for solute-vacancy interaction
-        :param betaeneSV[Nthermo]: solute-vacancy binding energy/kBT
-        :param preT1[Nomega1]: prefactor for omega1-style transitions (follows om1_jn)
-        :param betaeneT1[Nomega1]: transition energy/kBT for omega1-style jumps
-        :param preT2[Nomega2]: prefactor for omega2-style transitions (follows om2_jn)
-        :param betaeneT2[Nomega2]: transition energy/kBT for omega2-style jumps
+        :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
+        :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
+        :param bFSV[Nthermo]: beta*eneSV - ln(preSV) (excess)
+        :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
+        :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
+        :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
 
         :return Lvv[3,3]: vacancy-vacancy; needs to be multiplied by cv/kBT
         :return L0ss[3, 3]: "bare" solute-solute; needs to be multiplied by cv*cs/kBT
@@ -990,31 +1049,35 @@ class VacancyMediated(object):
         :return L1vv[3, 3]: correlation for vacancy-vacancy; needs to be multiplied by cv*cs/kBT
         """
         # 1. bare vacancy diffusivity and Green's function
-        vTK = vacancyThermoKinetics(pre=pre0, betaene=betaene0, preT=preT0, betaeneT=betaeneT0)
-        G0 = self.GFvalues.get(vTK)
+        vTK = vacancyThermoKinetics(pre=np.ones_like(bFV), betaene=bFV,
+                                    preT=np.ones_like(bFT0), betaeneT=bFT0)
+        GF = self.GFvalues.get(vTK)
         Lvv = self.Lvvvalues.get(vTK)
-        if G0 is None:
+        if GF is None:
             # calculate, and store in dictionary for cache:
             self.GFcalc.SetRates(**(vTK._asdict()))
             Lvv = self.GFcalc.Diffusivity()
-            G0 = np.array([self.GFcalc(PS.i, PS.j, PS.dx)
+            GF = np.array([self.GFcalc(PS.i, PS.j, PS.dx)
                            for PS in
                            [self.GFstarset.states[s[0]] for s in self.GFstarset.stars]])
             self.Lvvvalues[vTK] = Lvv.copy()
-            self.GFvalues[vTK] = G0.copy()
+            self.GFvalues[vTK] = GF.copy()
         # 2. set up probabilities for solute-vacancy configurations
-        minbetaene = min(betaene0)
-        prob0 = np.array([pre[wi]*np.exp(minbetaene-betaene0[wi]) for wi in self.invmap])
-        prob0 /= np.sum(prob0)  # normalize
-        prob = np.array([prob0[i] for i in self.kin2vacancy])  # bare probability
+        probV = np.array([np.exp(min(bFV)-bFV[wi]) for wi in self.invmap])
+        probV /= np.sum(probV)  # normalize
+        probS = np.array([np.exp(min(bFS)-bFS[wi]) for wi in self.invmap])
+        probS /= np.sum(probS)  # normalize
+        kineticstatelist = [self.kinetic.states[si[0]] for si in self.kinetic.stars]
+        prob = np.array([probS[PS.i]*probV[PS.j] for PS in kineticstatelist])
         for tindex, kindex in enumerate(self.thermo2kin):
-            prob[kindex] *= preSV[tindex] * np.exp(-betaeneSV[tindex])
-        # 3. set up rates: omega1, omega2
-        omega0 = GFcalc.SymmRates(**(vTK._asdict()))
+            prob[kindex] *= np.exp(-bFSV[tindex])
+        # 3. set up symmetric and escape rates: omega0, omega1, omega2
+        omega0 = np.array([np.exp(0.5*(bFV[self.invmap[jump[0][0]]] + bFV[self.invmap[jump[0][1]]])-bF)
+                           for bF, jump in zip(bFT0, self.om0_jn)])
         # 4. expand out: domega1, domega2, bias1, bias2
         # 5. compute Onsager coefficients
 
-        G0 = np.dot(self.GFexpansion, gf)
+        G0 = np.dot(self.GFexpansion, GF)
 
         probsqrt = np.zeros(self.kinetic.Nstars)
         probsqrt[:] = 1.
