@@ -1071,9 +1071,32 @@ class VacancyMediated(object):
         prob = np.array([probS[PS.i]*probV[PS.j] for PS in kineticstatelist])
         for tindex, kindex in enumerate(self.thermo2kin):
             prob[kindex] *= np.exp(-bFSV[tindex])
-        # 3. set up symmetric and escape rates: omega0, omega1, omega2
+
+        # 3a. set up symmetric rates: omega0, omega1, omega2
         omega0 = np.array([np.exp(0.5*(bFV[self.invmap[jump[0][0]]] + bFV[self.invmap[jump[0][1]]])-bF)
                            for bF, jump in zip(bFT0, self.om0_jn)])
+        omega1 = np.zeros(len(self.om1_jn))
+        omega1_om0 = np.zeros(len(self.om1_jn))
+        for i, jumpnetwork, jumptype, bFT in zip(itertools.count(), self.om1_jn, self.om1_jt, bFT1):
+            PS1i, PS2i = jumpnetwork[0][0]  # grab the first entry in jumpnetwork, and the initial/final tuple
+            # Wyckoff position of solute and vacancy for start and finish
+            s1,v1 = self.invmap[self.kinetic.states[PS1i].i],self.invmap[self.kinetic.states[PS1i].j]
+            s2,v2 = self.invmap[self.kinetic.states[PS2i].i],self.invmap[self.kinetic.states[PS2i].j]
+            omega1[i] = np.exp(-bFT + 0.5*(bFS[s1]+bFS[s2]+bFS[v1]+bFS[v2]
+                                            +bFSV[self.kinetic.index[PS1i]]+bFSV[self.kinetic.index[PS2i]]))
+            omega1_om0[i] = omega0[jumptype]
+        omega2 = np.zeros(len(self.om2_jn))
+        omega2_om0 = np.zeros(len(self.om2_jn))
+        for i, jumpnetwork, jumptype, bFT in zip(itertools.count(), self.om2_jn, self.om2_jt, bFT2):
+            PS1i, PS2i = jumpnetwork[0][0]  # grab the first entry in jumpnetwork, and the initial/final tuple
+            # Wyckoff position of solute and vacancy for start and finish
+            s1,v1 = self.invmap[self.kinetic.states[PS1i].i],self.invmap[self.kinetic.states[PS1i].j]
+            s2,v2 = self.invmap[self.kinetic.states[PS2i].i],self.invmap[self.kinetic.states[PS2i].j]
+            omega2[i] = np.exp(-bFT + 0.5*(bFS[s1]+bFS[s2]+bFS[v1]+bFS[v2]
+                                            +bFSV[self.kinetic.index[PS1i]]+bFSV[self.kinetic.index[PS2i]]))
+            omega2_om0[i] = omega0[jumptype]
+        # 3b. set up escape rates
+
         # 4. expand out: domega1, domega2, bias1, bias2
         # 5. compute Onsager coefficients
 
