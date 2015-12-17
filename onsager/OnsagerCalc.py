@@ -1027,14 +1027,9 @@ class VacancyMediated(object):
         bFT2 -= bFVmin + bFSmin
         return bFV, bFS, bFSV, bFT0, bFT1, bFT2
 
-    def _lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
+    def symmetricandescaperates(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
         """
-        Calculates the pieces for the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv
-        from the omega0, omega1, and omega2 rates along with site probabilities.
-        The Green function entries are calculated from the 0. As this is the most
-        time-consuming part of the calculation, we cache these values with a dictionary
-        and hash function.
-        Used by Lij.
+        Compute the symmetric, symmetric reference, escape, and escape reference rates.
 
         :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
         :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
@@ -1043,39 +1038,17 @@ class VacancyMediated(object):
         :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
         :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
 
-        :return Lvv[3,3]: vacancy-vacancy; needs to be multiplied by cv/kBT
-        :return L0ss[3, 3]: "bare" solute-solute; needs to be multiplied by cv*cs/kBT
-        :return L2ss[3, 3]: correlation for solute-solute; needs to be multiplied by cv*cs/kBT
-        :return L1sv[3, 3]: correlation for solute-vacancy; needs to be multiplied by cv*cs/kBT
-        :return L1vv[3, 3]: correlation for vacancy-vacancy; needs to be multiplied by cv*cs/kBT
-        """
-        # 1. bare vacancy diffusivity and Green's function
-        vTK = vacancyThermoKinetics(pre=np.ones_like(bFV), betaene=bFV,
-                                    preT=np.ones_like(bFT0), betaeneT=bFT0)
-        GF = self.GFvalues.get(vTK)
-        Lvv = self.Lvvvalues.get(vTK)
-        if GF is None:
-            # calculate, and store in dictionary for cache:
-            self.GFcalc.SetRates(**(vTK._asdict()))
-            Lvv = self.GFcalc.Diffusivity()
-            GF = np.array([self.GFcalc(PS.i, PS.j, PS.dx)
-                           for PS in
-                           [self.GFstarset.states[s[0]] for s in self.GFstarset.stars]])
-            self.Lvvvalues[vTK] = Lvv.copy()
-            self.GFvalues[vTK] = GF.copy()
-        # 2. set up probabilities for solute-vacancy configurations
-        probV = np.array([np.exp(min(bFV)-bFV[wi]) for wi in self.invmap])
-        probV /= np.sum(probV)  # normalize
-        probS = np.array([np.exp(min(bFS)-bFS[wi]) for wi in self.invmap])
-        probS /= np.sum(probS)  # normalize
-        kineticstatelist = [self.kinetic.states[si[0]] for si in self.kinetic.stars]
-        prob = np.array([probS[PS.i]*probV[PS.j] for PS in kineticstatelist])
-        for tindex, kindex in enumerate(self.thermo2kin):
-            prob[kindex] *= np.exp(-bFSV[tindex])
+        :return omega0[Nomega0]: symmetric rate for omega0 jumps
+        :return omega1[Nomega1]: symmetric rate for omega1 jumps
+        :return omega2[Nomega2]: symmetric rate for omega2 jumps
 
-        # 3. set up symmetric rates: omega0, omega1, omega2
-        #    and reference rates: omega1_om0, omega2_om0
-        #    and escape rates omega0escape, omega1_om0escape, omega2_om0escape
+        :return omega1_om0[Nomega1]: symmetric reference rate for omega1 jumps
+        :return omega2_om0[Nomega1]: symmetric reference rate for omega2 jumps
+
+        :return omega0escape[NWyckoff, Nomega0]: escape rate elements for omega0 jumps
+        :return omega1_om0escape[NWyckoff, Nomega0]: reference escape rate elements for omega1 jumps
+        :return omega2_om0escape[NWyckoff, Nomega0]: reference escape rate elements for omega1 jumps
+        """
         # omega0 = np.array([np.exp(0.5*(bFV[self.invmap[jump[0][0][0]]] + bFV[self.invmap[jump[0][0][1]]])-bF)
         #                    for bF, jump in zip(bFT0, self.om0_jn)])
         omega0 = np.zeros(len(self.om0_jn))
@@ -1121,6 +1094,64 @@ class VacancyMediated(object):
             omega2_om0[j] = omega0[jumptype]
             omega2_om0escape[st1, j] = omega0escape[v1, jumptype]
             omega2_om0escape[st2, j] = omega0escape[v2, jumptype]
+        return omega0, omega1, omega2,
+        omega1_om0, omega2_om0,
+        omega0escape, omega1_om0escape, omega2_om0escape
+
+    def _lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
+        """
+        Calculates the pieces for the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv
+        from the omega0, omega1, and omega2 rates along with site probabilities.
+        The Green function entries are calculated from the 0. As this is the most
+        time-consuming part of the calculation, we cache these values with a dictionary
+        and hash function.
+        Used by Lij.
+
+        :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
+        :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
+        :param bFSV[Nthermo]: beta*eneSV - ln(preSV) (excess)
+        :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
+        :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
+        :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
+
+        :return Lvv[3,3]: vacancy-vacancy; needs to be multiplied by cv/kBT
+        :return L0ss[3, 3]: "bare" solute-solute; needs to be multiplied by cv*cs/kBT
+        :return L2ss[3, 3]: correlation for solute-solute; needs to be multiplied by cv*cs/kBT
+        :return L1sv[3, 3]: correlation for solute-vacancy; needs to be multiplied by cv*cs/kBT
+        :return L1vv[3, 3]: correlation for vacancy-vacancy; needs to be multiplied by cv*cs/kBT
+        """
+        # 1. bare vacancy diffusivity and Green's function
+        vTK = vacancyThermoKinetics(pre=np.ones_like(bFV), betaene=bFV,
+                                    preT=np.ones_like(bFT0), betaeneT=bFT0)
+        GF = self.GFvalues.get(vTK)
+        Lvv = self.Lvvvalues.get(vTK)
+        if GF is None:
+            # calculate, and store in dictionary for cache:
+            self.GFcalc.SetRates(**(vTK._asdict()))
+            Lvv = self.GFcalc.Diffusivity()
+            GF = np.array([self.GFcalc(PS.i, PS.j, PS.dx)
+                           for PS in
+                           [self.GFstarset.states[s[0]] for s in self.GFstarset.stars]])
+            self.Lvvvalues[vTK] = Lvv.copy()
+            self.GFvalues[vTK] = GF.copy()
+
+        # 2. set up probabilities for solute-vacancy configurations
+        probV = np.array([np.exp(min(bFV)-bFV[wi]) for wi in self.invmap])
+        probV /= np.sum(probV)  # normalize
+        probS = np.array([np.exp(min(bFS)-bFS[wi]) for wi in self.invmap])
+        probS /= np.sum(probS)  # normalize
+        prob = np.array([probS[PS.i]*probV[PS.j] for PS in
+                         [self.kinetic.states[si[0]] for si in self.kinetic.stars]])
+        for tindex, kindex in enumerate(self.thermo2kin):
+            prob[kindex] *= np.exp(-bFSV[tindex])
+
+        # 3. set up symmetric rates: omega0, omega1, omega2
+        #    and symmetric reference rates: omega1_om0, omega2_om0
+        #    and escape rates omega0escape, omega1_om0escape, omega2_om0escape
+        omega0, omega1, omega2, \
+        omega1_om0, omega2_om0, \
+        omega0escape, omega1_om0escape, omega2_om0escape = \
+            self.symmetricandescaperates(bFV, bFS, bFSV, bFT0, bFT1, bFT2)
 
         # 4. expand out: domega1, domega2, bias1, bias2
         # 5. compute Onsager coefficients
