@@ -290,12 +290,13 @@ class CrystalOnsagerTests(unittest.TestCase):
         # Make a calculator with one neighbor shell
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        Diffusivity.interactlist()
-        Diffusivity.omegalist(1)
-        Diffusivity.omegalist(2)
+        print('Interaction list:\n', Diffusivity.interactlist())
+        print('omega1 list:\n', Diffusivity.omegalist(1))
+        print('omega2 list:\n', Diffusivity.omegalist(2))
         thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
                       'preT0': np.array([1.]), 'eneT0': np.array([0.])}
         thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        print('Thermaldef:\n', thermaldef)
         L0vv = np.zeros((3,3))
         om0 = thermaldef['preT0'][0]/thermaldef['preV'][0] * \
               np.exp((thermaldef['eneV'][0]-thermaldef['eneT0'][0])/kT)
@@ -312,7 +313,9 @@ class CrystalOnsagerTests(unittest.TestCase):
         self.assertTrue(np.allclose(Lvv, L0vv))
         self.assertTrue(np.allclose(-Lsv, L0vv))
         self.assertTrue(np.allclose(L1vv, 0.))
-        self.assertTrue(np.allclose(-Lss, self.correl*Lsv, delta=1e-3))
+        self.assertTrue(np.allclose(-Lss, self.correl*Lsv, rtol=1e-3),
+                        msg='Failure to match correlation ({}), got {}'.format(
+                            self.correl, -Lss[0,0]/Lsv[0,0]))
 
 
 class InterstitialTests(unittest.TestCase):

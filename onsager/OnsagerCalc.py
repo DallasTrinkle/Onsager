@@ -1106,10 +1106,9 @@ class VacancyMediated(object):
                omega0escape, omega1escape, omega2escape, \
                omega1_om0escape, omega2_om0escape
 
-    def _lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
+    def Lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
         """
-        Calculates the pieces for the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv
-        from the scaled free energies.
+        Calculates the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv from the scaled free energies.
         The Green function entries are calculated from the omega0 info. As this is the most
         time-consuming part of the calculation, we cache these values with a dictionary
         and hash function.
@@ -1122,11 +1121,10 @@ class VacancyMediated(object):
         :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
         :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
 
-        :return Lvv[3,3]: vacancy-vacancy; needs to be multiplied by cv/kBT
-        :return L0ss[3, 3]: "bare" solute-solute; needs to be multiplied by cv*cs/kBT
-        :return L2ss[3, 3]: correlation for solute-solute; needs to be multiplied by cv*cs/kBT
-        :return L1sv[3, 3]: correlation for solute-vacancy; needs to be multiplied by cv*cs/kBT
-        :return L1vv[3, 3]: correlation for vacancy-vacancy; needs to be multiplied by cv*cs/kBT
+        :return Lvv[3, 3]: vacancy-vacancy; needs to be multiplied by cv/kBT
+        :return Lss[3, 3]: solute-solute; needs to be multiplied by cv*cs/kBT
+        :return Lsv[3, 3]: solute-vacancy; needs to be multiplied by cv*cs/kBT
+        :return Lvv1[3, 3]: vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT
         """
         # 1. bare vacancy diffusivity and Green's function
         vTK = vacancyThermoKinetics(pre=np.ones_like(bFV), betaene=bFV,
@@ -1171,52 +1169,53 @@ class VacancyMediated(object):
                                np.dot(self.om1_om0escape[sv,:], omega1_om0escape[sv,:]) + \
                                np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
                                np.dot(self.om2_om0escape[sv,:], omega2_om0escape[sv,:])
-        bias2vec = np.zeros(self.vkinetic.Nvstars)
-        bias1vec = np.zeros(self.vkinetic.Nvstars)
+        biasSvec = np.zeros(self.vkinetic.Nvstars)
+        biasVvec = np.zeros(self.vkinetic.Nvstars)
         for sv,starindex in enumerate(self.vstar2kin):
             # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
-            bias2vec[sv] = np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
-            bias1vec[sv] = np.dot(self.om1bias[sv,:], omega1escape[sv,:])*np.sqrt(prob[starindex]) - \
-                           np.dot(self.om1_b0[sv,:], omega0escape)*np.sqrt(probV[self.kin2vacancy[starindex]]) + \
-                           bias2vec[sv] - \
+            biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
+            biasVvec[sv] = np.dot(self.om1bias[sv,:], omega1escape[sv,:])*np.sqrt(prob[starindex]) - \
+                           np.dot(self.om1_b0[sv,:], omega0escape)*np.sqrt(probV[self.kin2vacancy[starindex]]) - \
+                           biasSvec[sv] - \
                            np.dot(self.om2_b0[sv,:], omega0escape)*np.sqrt(probV[self.kin2vacancy[starindex]])
 
         print('delta_om:\n', delta_om)
-        print('bias1vec:', bias1vec)
-        print('bias2vec:', bias2vec)
+        print('biasVvec:', biasVvec)
+        print('biasSvec:', biasSvec)
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
+        print('G0:\n', G0)
         # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
-        outer_eta1vec = np.dot(self.vkinetic.outer, np.dot(G, bias1vec))
-        outer_eta2vec = np.dot(self.vkinetic.outer, np.dot(G, bias2vec))
-        L2ss = np.dot(outer_eta2vec, bias2vec)
-        L1sv = np.dot(outer_eta2vec, bias1vec)
-        L1vv = np.dot(outer_eta1vec, bias1vec)
-        # convert jump vectors to an array, and construct the rates as an array
+        outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
+        outer_etaSvec = np.dot(self.vkinetic.outer, np.dot(G, biasSvec))
+        L2ss = np.dot(outer_etaSvec, biasSvec)
+        L1sv = np.dot(outer_etaSvec, biasVvec)
+        L1vv = np.dot(outer_etaVvec, biasVvec)
+        # compute our bare solute diffusivity:
         L0ss = np.zeros((3,3))
         for om2, jumplist in zip(omega2escape, self.om2_jn):
             for (i,j), dx in jumplist:
                 L0ss += 0.5*np.outer(dx,dx) * om2 * prob[self.kinetic.index[i]]
-        return L0vv, L0ss, L2ss, L1sv, L1vv
+        return L0vv, L0ss + L2ss, -L0ss + L1sv, L1vv
 
-    def Lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
-        """
-        Calculates the transport coefficients Lvv, Lss, and Lsv from the scaled free energies.
-
-        :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
-        :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
-        :param bFSV[Nthermo]: beta*eneSV - ln(preSV) (excess)
-        :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
-        :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
-        :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
-
-        :return Lvv[3, 3]: vacancy-vacancy; needs to be multiplied by cv/kBT
-        :return Lss[3, 3]: solute-solute; needs to be multiplied by cv*cs/kBT
-        :return Lsv[3, 3]: solute-vacancy; needs to be multiplied by cv*cs/kBT
-        :return Lvv1[3, 3]: vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT
-        """
-        Lvv, L0ss, L2ss, L1sv, L1vv = self._lij(bFV, bFS, bFSV, bFT0, bFT1, bFT2)
-        return Lvv, L0ss + L2ss, -L0ss - L2ss + L1sv, L2ss - 2*L1sv + L1vv
+    # def Lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
+    #     """
+    #     Calculates the transport coefficients Lvv, Lss, and Lsv from the scaled free energies.
+    #
+    #     :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
+    #     :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
+    #     :param bFSV[Nthermo]: beta*eneSV - ln(preSV) (excess)
+    #     :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
+    #     :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
+    #     :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
+    #
+    #     :return Lvv[3, 3]: vacancy-vacancy; needs to be multiplied by cv/kBT
+    #     :return Lss[3, 3]: solute-solute; needs to be multiplied by cv*cs/kBT
+    #     :return Lsv[3, 3]: solute-vacancy; needs to be multiplied by cv*cs/kBT
+    #     :return Lvv1[3, 3]: vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT
+    #     """
+    #     Lvv, L0ss, L2ss, L1sv, L1vv = self._lij(bFV, bFS, bFSV, bFT0, bFT1, bFT2)
+    #     return Lvv, L0ss + L2ss, -L0ss - L2ss + L1sv, L2ss - 2*L1sv + L1vv
