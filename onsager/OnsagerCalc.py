@@ -855,11 +855,14 @@ class VacancyMediated(object):
         # kin2vacancy maps star index in kinetic to non-solute configuration from sitelist
         # outerkin is the list of stars that are in kinetic, but not in thermo
         # vstar2kin maps each vector star back to the corresponding star index
+        # kin2vstar provides a list of vector stars indices corresponding to the same star index
         self.thermo2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.thermo.stars]
-        self.kin2vacancy = [self.invmap[self.kinetic.starindex(s[0]).i] for s in self.kinetic.stars]
+        self.kin2vacancy = [self.kinetic.states[s[0]].i for s in self.kinetic.stars]
         self.outerkin = [s for s in range(self.kinetic.Nstars)
                          if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None]
         self.vstar2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.vkinetic.vecpos]
+        self.kin2vstar = [ [j for j in range(self.vkinetic.Nvstars) if self.vstar2kin[j] == i]
+                           for i in range(self.kinetic.Nstars)]
         # jumpnetwork, jumptype (omega0), star-pair for jump
         self.om1_jn, self.om1_jt, self.om1_SP = self.kinetic.jumpnetwork_omega1()
         self.om2_jn, self.om2_jt, self.om2_SP = self.kinetic.jumpnetwork_oemga2()
@@ -1003,7 +1006,8 @@ class VacancyMediated(object):
                         preT0, eneT0, preT1, eneT1, preT2, eneT2, kT):
         """
         Read in a series of prefactors (e^(S/kB)) and energies, and return beta*free energy for
-        energies and transition state energies.
+        energies and transition state energies. Used to provide scaled values to Lij() and _lij().
+
         :param preV: prefactor for vacancy formation (prod of inverse vibrational frequencies)
         :param eneV: vacancy formation energy
         :param preS: prefactor for solute formation (prod of inverse vibrational frequencies)
@@ -1043,9 +1047,9 @@ class VacancyMediated(object):
         bFT2 -= bFVmin + bFSmin
         return bFV, bFS, bFSV, bFT0, bFT1, bFT2
 
-    def symmetricandescaperates(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
+    def _symmetricandescaperates(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
         """
-        Compute the symmetric, escape, and escape reference rates.
+        Compute the symmetric, escape, and escape reference rates. Used by _lij().
 
         :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
         :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
@@ -1058,10 +1062,10 @@ class VacancyMediated(object):
         :return omega1[Nomega1]: symmetric rate for omega1 jumps
         :return omega2[Nomega2]: symmetric rate for omega2 jumps
         :return omega0escape[NWyckoff, Nomega0]: escape rate elements for omega0 jumps
-        :return omega1escape[NWyckoff, Nomega1]: escape rate elements for omega1 jumps
-        :return omega2escape[NWyckoff, Nomega2]: escape rate elements for omega2 jumps
-        :return omega1_om0escape[NWyckoff, Nomega0]: reference escape rate elements for omega1 jumps
-        :return omega2_om0escape[NWyckoff, Nomega0]: reference escape rate elements for omega1 jumps
+        :return omega1escape[NVstars, Nomega1]: escape rate elements for omega1 jumps
+        :return omega2escape[NVstars, Nomega2]: escape rate elements for omega2 jumps
+        :return omega1_om0escape[NVstars, Nomega0]: reference escape rate elements for omega1 jumps
+        :return omega2_om0escape[NVstars, Nomega0]: reference escape rate elements for omega1 jumps
         """
         # omega0 = np.array([np.exp(0.5*(bFV[self.invmap[jump[0][0][0]]] + bFV[self.invmap[jump[0][0][1]]])-bF)
         #                    for bF, jump in zip(bFT0, self.om0_jn)])
@@ -1072,25 +1076,27 @@ class VacancyMediated(object):
             omega0escape[v2,j] = np.exp(-bF + bFV[v2])
             omega0[j] = np.sqrt(omega0escape[v1,j]*omega0escape[v2,j])
         omega1 = np.zeros(len(self.om1_jn))
-        omega1escape = np.zeros((self.kinetic.Nstars, len(self.om1_jn)))
-        omega1_om0escape = np.zeros((self.kinetic.Nstars, len(self.om0_jn)))
+        omega1escape = np.zeros((self.vkinetic.Nvstars, len(self.om1_jn)))
+        omega1_om0escape = np.zeros((self.vkinetic.Nvstars, len(self.om0_jn)))
         for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega1svsvWyckoff,
                                                                self.om1_jt, self.om1_SP, bFT1):
-            omega1escape[st1, j] = np.exp(-bFT + bFS[s1] + bFV[v1] + bFSV[st1])
-            omega1escape[st2, j] = np.exp(-bFT + bFS[s2] + bFV[v2] + bFSV[st2])
-            omega1[j] = np.sqrt(omega1escape[st1, j]*omega1escape[st2, j])
-            omega1_om0escape[st1, jumptype] = omega0escape[v1, jumptype]
-            omega1_om0escape[st2, jumptype] = omega0escape[v2, jumptype]
+            omF, omB = np.exp(-bFT+bFS[s1]+bFV[v1]+bFSV[st1]), np.exp(-bFT+bFS[s2]+bFV[v2]+bFSV[st2])
+            omega1[j] = np.sqrt(omF*omB)
+            for vst1 in self.kin2vstar[st1]:
+                omega1escape[vst1, j],omega1_om0escape[vst1, jumptype] = omF,omega0escape[v1, jumptype]
+            for vst2 in self.kin2vstar[st2]:
+                omega1escape[vst2, j],omega1_om0escape[vst2, jumptype] = omB,omega0escape[v2, jumptype]
         omega2 = np.zeros(len(self.om2_jn))
         omega2escape = np.zeros((self.kinetic.Nstars, len(self.om2_jn)))
         omega2_om0escape = np.zeros((self.kinetic.Nstars, len(self.om0_jn)))
         for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega2svsvWyckoff,
                                                                self.om2_jt, self.om2_SP, bFT2):
-            omega2escape[st1, j] = np.exp(-bFT + bFS[s1] + bFV[v1] + bFSV[st1])
-            omega2escape[st2, j] = np.exp(-bFT + bFS[s2] + bFV[v2] + bFSV[st2])
-            omega2[j] = np.sqrt(omega2escape[st1, j]*omega2escape[st2, j])
-            omega2_om0escape[st1, jumptype] = omega0escape[v1, jumptype]
-            omega2_om0escape[st2, jumptype] = omega0escape[v2, jumptype]
+            omF, omB = np.exp(-bFT+bFS[s1]+bFV[v1]+bFSV[st1]), np.exp(-bFT+bFS[s2]+bFV[v2]+bFSV[st2])
+            omega2[j] = np.sqrt(omF*omB)
+            for vst1 in self.kin2vstar[st1]:
+                omega2escape[vst1, j],omega2_om0escape[vst1, jumptype] = omF,omega0escape[v1, jumptype]
+            for vst2 in self.kin2vstar[st2]:
+                omega2escape[vst2, j],omega2_om0escape[vst2, jumptype] = omB,omega0escape[v2, jumptype]
         return omega0, omega1, omega2, \
                omega0escape, omega1escape, omega2escape, \
                omega1_om0escape, omega2_om0escape
@@ -1098,8 +1104,8 @@ class VacancyMediated(object):
     def _lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
         """
         Calculates the pieces for the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv
-        from the omega0, omega1, and omega2 rates along with site probabilities.
-        The Green function entries are calculated from the 0. As this is the most
+        from the scaled free energies.
+        The Green function entries are calculated from the omega0 info. As this is the most
         time-consuming part of the calculation, we cache these values with a dictionary
         and hash function.
         Used by Lij.
@@ -1121,15 +1127,15 @@ class VacancyMediated(object):
         vTK = vacancyThermoKinetics(pre=np.ones_like(bFV), betaene=bFV,
                                     preT=np.ones_like(bFT0), betaeneT=bFT0)
         GF = self.GFvalues.get(vTK)
-        Lvv = self.Lvvvalues.get(vTK)
+        L0vv = self.Lvvvalues.get(vTK)
         if GF is None:
             # calculate, and store in dictionary for cache:
             self.GFcalc.SetRates(**(vTK._asdict()))
-            Lvv = self.GFcalc.Diffusivity()
+            L0vv = self.GFcalc.Diffusivity()
             GF = np.array([self.GFcalc(PS.i, PS.j, PS.dx)
                            for PS in
                            [self.GFstarset.states[s[0]] for s in self.GFstarset.stars]])
-            self.Lvvvalues[vTK] = Lvv.copy()
+            self.Lvvvalues[vTK] = L0vv.copy()
             self.GFvalues[vTK] = GF.copy()
 
         # 2. set up probabilities for solute-vacancy configurations
@@ -1147,7 +1153,7 @@ class VacancyMediated(object):
         #    and reference escape rates omega1_om0escape, omega2_om0escape
         omega0, omega1, omega2, omega0escape, omega1escape, omega2escape, \
         omega1_om0escape, omega2_om0escape = \
-            self.symmetricandescaperates(bFV, bFS, bFSV, bFT0, bFT1, bFT2)
+            self._symmetricandescaperates(bFV, bFS, bFSV, bFT0, bFT1, bFT2)
 
         # 4. expand out: domega1, domega2, bias1, bias2
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
@@ -1157,82 +1163,48 @@ class VacancyMediated(object):
                                np.dot(self.om1_om0escape[sv,:], omega1_om0escape[sv,:]) + \
                                np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
                                np.dot(self.om2_om0escape[sv,:], omega2_om0escape[sv,:])
+        bias2vec = np.zeros(self.vkinetic.Nvstars)
+        bias1vec = np.zeros(self.vkinetic.Nvstars)
+        for sv,starindex in enumerate(self.vstar2kin):
+            # note: our solute bias is negative of the contribution to the vacancy, and also the
+            # reference value is 0
+            bias2vec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
+            bias1vec[sv] = np.dot(self.om1bias[sv,:], omega1escape[sv,:])*np.sqrt(prob[starindex]) - \
+                           np.dot(self.om1_b0[sv,:], omega0escape)*np.sqrt(probV[self.kin2vacancy[starindex]]) - \
+                           bias2vec[sv] - \
+                           np.dot(self.om2_b0[sv,:], omega0escape)*np.sqrt(probV[self.kin2vacancy[starindex]])
 
         # 5. compute Onsager coefficients
-
         G0 = np.dot(self.GFexpansion, GF)
-
-        probsqrt = np.zeros(self.kinetic.Nstars)
-        probsqrt[:] = 1.
-        for p, ind in zip(prob, self.thermo2kin):
-            probsqrt[ind] = np.sqrt(p)
-
-        om1expand = np.array([r1 if r1 >= 0 else r0
-                              for r1, r0 in zip(om1, om0[self.omega1LIMB])]) # omega_1
-        om2expand = np.array([r2 if r2 >= 0 else r0
-                              for r2, r0 in zip(om2, om0)]) # omega_2
-        # onsite term: need to make sure we divide out by the starting point probability, too
-        om1onsite = (np.dot(self.omega1ds * probsqrt[self.gen1prob], om1expand) +
-                     np.dot(self.omega1NN, om0))/probsqrt[self.vstar2kin]
-        delta_om = np.dot(self.rate1expansion, om1expand) + \
-                   np.diag(om1onsite) + \
-                   np.dot(self.rate2expansion, om2expand) - \
-                   np.dot(self.rate0expansion, om0)
-
-        bias2vec = np.dot(self.bias2expansion, om2expand*np.sqrt(prob[self.NN2thermo]))
-        bias1vec = np.dot(self.bias1ds * probsqrt[self.gen1prob], om1expand) + \
-                   np.dot(self.bias1NN, om0)
-
         # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
         G = np.dot(np.linalg.inv(np.eye(len(bias1vec)) + np.dot(G0, delta_om)), G0)
-        outer_eta1vec = np.dot(self.biasvec.outer, np.dot(G, bias1vec))
-        outer_eta2vec = np.dot(self.biasvec.outer, np.dot(G, bias2vec))
+        outer_eta1vec = np.dot(self.vkinetic.outer, np.dot(G, bias1vec))
+        outer_eta2vec = np.dot(self.vkinetic.outer, np.dot(G, bias2vec))
         L2ss = np.dot(outer_eta2vec, bias2vec)
         L1sv = np.dot(outer_eta2vec, bias1vec)
         L1vv = np.dot(outer_eta1vec, bias1vec)
         # convert jump vectors to an array, and construct the rates as an array
-        L0vv = GFcalc.D2(np.array(self.jumpvect),
-                         np.array(sum([[om,]*len(Rs)
-                                       for om, Rs in zip(om0, self.NNstar.stars)], [])))
-        L0ss = GFcalc.D2(np.array(self.jumpvect),
-                         np.array(sum([[om,]*len(Rs)
-                                       for om, Rs in zip(om2expand*prob[self.NN2thermo],
-                                                         self.NNstar.stars)], [])))
+        L0ss = np.zeros((3,3))
+        for om2, jumplist in zip(omega2escape, self.om2_jn):
+            for (i,j), dx in jumplist:
+                L0ss += 0.5*np.outer(dx,dx) * om2 * prob[self.kinetic.index[i]]
         return L0vv, L0ss, L2ss, L1sv, L1vv
-        # print 'om1:\n', np.dot(self.rate1expansion, om1expand)
-        # print 'om1_onsite:\n', np.diag(om1onsite)
-        # print 'om2:\n', np.dot(self.rate2expansion, om2expand)
-        # print 'om0:\n', np.dot(self.rate0expansion, om0)
-        # print 'delta_om:\n', delta_om
 
-    def Lij(self, gf, om0, prob, om2, om1):
+    def Lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
         """
-        Calculates the transport coefficients Lvv, Lss, and Lsv from the GF,
-        omega0, omega1, and omega2 rates along with site probabilities.
+        Calculates the transport coefficients Lvv, Lss, and Lsv from the scaled free energies.
 
-        Parameters
-        ----------
-        gf : array[NGF_sites]
-            Green function for vacancy evaluated at sites
-        om0 : array[NNjumps]
-            rates for vacancy jumps
-        prob : array[thermosites]
-            probability of solute-vacancy complex at each sites
-        om2 : array[NNjumps]
-            rates for vacancy-solute exchange; if -1, use om0 entry
-        om1 : array[Ndstars]
-            rates for vacancy jumps around solute; if -1, use corresponding om0 entry
+        :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
+        :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
+        :param bFSV[Nthermo]: beta*eneSV - ln(preSV) (excess)
+        :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
+        :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
+        :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
 
-        Returns
-        -------
-        Lvv : array[3, 3]
-            vacancy-vacancy; needs to be multiplied by cv/kBT
-        Lss : array[3, 3]
-            solute-solute; needs to be multiplied by cv*cs/kBT
-        Lsv : array[3, 3]
-            solute-vacancy; needs to be multiplied by cv*cs/kBT
-        Lvv1 : array[3, 3]
-            vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT
+        :return Lvv[3, 3]: vacancy-vacancy; needs to be multiplied by cv/kBT
+        :return Lss[3, 3]: solute-solute; needs to be multiplied by cv*cs/kBT
+        :return Lsv[3, 3]: solute-vacancy; needs to be multiplied by cv*cs/kBT
+        :return Lvv1[3, 3]: vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT
         """
-        Lvv, L0ss, L2ss, L1sv, L1vv = self._lij(gf, om0, prob, om2, om1)
+        Lvv, L0ss, L2ss, L1sv, L1vv = self._lij(bFV, bFS, bFSV, bFT0, bFT1, bFT2)
         return Lvv, L0ss + L2ss, -L0ss - L2ss + L1sv, L2ss - 2*L1sv + L1vv
