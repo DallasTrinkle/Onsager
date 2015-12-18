@@ -832,7 +832,7 @@ class VacancyMediated(object):
         self.om0_jn= copy.deepcopy(jumpnetwork)
         self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn) # Nmax?
         # do some initial setup:
-        self.thermo = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, self.Nthermo)
+        self.thermo = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
         self.NNstar = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
         self.kinetic = self.thermo + self.NNstar
         self.vkinetic = cstars.VectorStarSet()
@@ -860,16 +860,16 @@ class VacancyMediated(object):
         self.kin2vacancy = [self.kinetic.states[s[0]].i for s in self.kinetic.stars]
         self.outerkin = [s for s in range(self.kinetic.Nstars)
                          if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None]
-        self.vstar2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.vkinetic.vecpos]
+        self.vstar2kin = [self.kinetic.index[Rs[0]] for Rs in self.vkinetic.vecpos]
         self.kin2vstar = [ [j for j in range(self.vkinetic.Nvstars) if self.vstar2kin[j] == i]
                            for i in range(self.kinetic.Nstars)]
         # jumpnetwork, jumptype (omega0), star-pair for jump
         self.om1_jn, self.om1_jt, self.om1_SP = self.kinetic.jumpnetwork_omega1()
-        self.om2_jn, self.om2_jt, self.om2_SP = self.kinetic.jumpnetwork_oemga2()
+        self.om2_jn, self.om2_jt, self.om2_SP = self.kinetic.jumpnetwork_omega2()
         # Prune the om1 list: remove entries that have jumps between stars in outerkin:
         # work in reverse order so that popping is safe (and most of the offending entries are at the end
         for i, SP in zip(reversed(range(len(self.om1_SP))), reversed(self.om1_SP)):
-            if SP[0] in self.outerkin and SP[i][1] in self.outerkin:
+            if SP[0] in self.outerkin and SP[1] in self.outerkin:
                 self.om1_jn.pop(i), self.om1_jt.pop(i), self.om1_SP.pop(i)
         # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
         # Vector star set, generates a LOT of our calculation:
@@ -927,7 +927,7 @@ class VacancyMediated(object):
         return [(self.kinetic.states[jlist[0][0][0]], self.kinetic.states[jlist[0][0][1]]) for jlist in om], \
                jt.copy()
 
-    def maketracerpreene(self, preT0, eneT0):
+    def maketracerpreene(self, preT0, eneT0, preV=None, eneV=None):
         """
         Generates corresponding energies / prefactors for an isotopic tracer. Returns a dictionary.
 
@@ -955,10 +955,10 @@ class VacancyMediated(object):
         eneT2 = np.zeros(len(self.om2_jn))
         for j, jt in zip(itertools.count(), self.om2_jt):
             preT2[j], eneT2[j] = preT0[jt], eneT0[jt]
-        return {'pre': preS, 'eneS': eneS, 'preSV': preSV, 'eneSV': eneSV,
+        return {'preS': preS, 'eneS': eneS, 'preSV': preSV, 'eneSV': eneSV,
                 'preT1': preT1, 'eneT1': eneT1, 'preT2': preT2, 'eneT2': eneT2}
 
-    def makeLIMBpreene(self, preS, eneS, preSV, eneSV, preT0, eneT0):
+    def makeLIMBpreene(self, preS, eneS, preSV, eneSV, preT0, eneT0, preV=None, eneV=None):
         """
         Generates corresponding energies / prefactors for corresponding to LIMB
         (Linearized interpolation of migration barrier approximation). Returns a dictionary.
@@ -1083,6 +1083,8 @@ class VacancyMediated(object):
         omega1_om0escape = np.zeros((self.vkinetic.Nvstars, len(self.om0_jn)))
         for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega1svsvWyckoff,
                                                                self.om1_jt, self.om1_SP, bFT1):
+            # print(s1, v1, st1, s2, v2, st2)
+            # print(bFS[s1],bFV[v1],bFSV[st1],bFS[s2],bFV[v2],bFSV[st2])
             omF, omB = np.exp(-bFT+bFS[s1]+bFV[v1]+bFSV[st1]), np.exp(-bFT+bFS[s2]+bFV[v2]+bFSV[st2])
             omega1[j] = np.sqrt(omF*omB)
             for vst1 in self.kin2vstar[st1]:
@@ -1090,8 +1092,8 @@ class VacancyMediated(object):
             for vst2 in self.kin2vstar[st2]:
                 omega1escape[vst2, j],omega1_om0escape[vst2, jumptype] = omB,omega0escape[v2, jumptype]
         omega2 = np.zeros(len(self.om2_jn))
-        omega2escape = np.zeros((self.kinetic.Nstars, len(self.om2_jn)))
-        omega2_om0escape = np.zeros((self.kinetic.Nstars, len(self.om0_jn)))
+        omega2escape = np.zeros((self.vkinetic.Nvstars, len(self.om2_jn)))
+        omega2_om0escape = np.zeros((self.vkinetic.Nvstars, len(self.om0_jn)))
         for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega2svsvWyckoff,
                                                                self.om2_jt, self.om2_SP, bFT2):
             omF, omB = np.exp(-bFT+bFS[s1]+bFV[v1]+bFSV[st1]), np.exp(-bFT+bFS[s2]+bFV[v2]+bFSV[st2])
@@ -1146,9 +1148,12 @@ class VacancyMediated(object):
         probV /= np.sum(probV)  # normalize
         probS = np.array([np.exp(min(bFS)-bFS[wi]) for wi in self.invmap])
         probS /= np.sum(probS)  # normalize
+        bFSVkin = np.array([bFS[PS.i]+bFV[PS.j] for PS in
+                         [self.kinetic.states[si[0]] for si in self.kinetic.stars]])
         prob = np.array([probS[PS.i]*probV[PS.j] for PS in
                          [self.kinetic.states[si[0]] for si in self.kinetic.stars]])
         for tindex, kindex in enumerate(self.thermo2kin):
+            bFSVkin[kindex] += bFSV[tindex]
             prob[kindex] *= np.exp(-bFSV[tindex])
 
         # 3. set up symmetric rates: omega0, omega1, omega2
@@ -1156,7 +1161,7 @@ class VacancyMediated(object):
         #    and reference escape rates omega1_om0escape, omega2_om0escape
         omega0, omega1, omega2, omega0escape, omega1escape, omega2escape, \
         omega1_om0escape, omega2_om0escape = \
-            self._symmetricandescaperates(bFV, bFS, bFSV, bFT0, bFT1, bFT2)
+            self._symmetricandescaperates(bFV, bFS, bFSVkin, bFT0, bFT1, bFT2)
 
         # 4. expand out: domega1, domega2, bias1, bias2
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
@@ -1171,16 +1176,20 @@ class VacancyMediated(object):
         for sv,starindex in enumerate(self.vstar2kin):
             # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
-            bias2vec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
+            bias2vec[sv] = np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
             bias1vec[sv] = np.dot(self.om1bias[sv,:], omega1escape[sv,:])*np.sqrt(prob[starindex]) - \
-                           np.dot(self.om1_b0[sv,:], omega0escape)*np.sqrt(probV[self.kin2vacancy[starindex]]) - \
+                           np.dot(self.om1_b0[sv,:], omega0escape)*np.sqrt(probV[self.kin2vacancy[starindex]]) + \
                            bias2vec[sv] - \
                            np.dot(self.om2_b0[sv,:], omega0escape)*np.sqrt(probV[self.kin2vacancy[starindex]])
+
+        print('delta_om:\n', delta_om)
+        print('bias1vec:', bias1vec)
+        print('bias2vec:', bias2vec)
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
         # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
-        G = np.dot(np.linalg.inv(np.eye(len(bias1vec)) + np.dot(G0, delta_om)), G0)
+        G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         outer_eta1vec = np.dot(self.vkinetic.outer, np.dot(G, bias1vec))
         outer_eta2vec = np.dot(self.vkinetic.outer, np.dot(G, bias2vec))
         L2ss = np.dot(outer_eta2vec, bias2vec)

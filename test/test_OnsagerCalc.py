@@ -147,7 +147,6 @@ class BaseTests(unittest.TestCase):
 
 import onsager.GFcalc as GFcalc
 
-
 class SCBaseTests(BaseTests):
     """Set of tests that our Onsager calculator is well-behaved"""
 
@@ -189,7 +188,6 @@ class SCBaseTests(BaseTests):
         self.assertAlmostEqual(L1vv[0, 0], 0.)
         self.assertAlmostEqual(-Lss[0, 0]/Lsv[0, 0], self.correl, delta=1e-3)
 
-
 def fivefreq(w0, w1, w2, w3, w4):
     """The solute/solute diffusion coefficient in the 5-freq. model"""
     b = w4/w0
@@ -198,7 +196,6 @@ def fivefreq(w0, w1, w2, w3, w4):
               (435.3 + b*(596. + b*(253.3 + b*(40.1 + b*2.))))
     p = w4/w3
     return p*w2*(2.*w1 + w3*F7)/(2.*w2 + 2.*w1 + w3*F7)
-
 
 class FCCBaseTests(SCBaseTests):
     """Set of tests that our Onsager calculator is well-behaved"""
@@ -261,8 +258,6 @@ class FCCBaseTests(SCBaseTests):
         # print 'Lss:', Lss
         # print 'Lsv:', Lsv
 
-
-
 class BCCBaseTests(SCBaseTests):
     """Set of tests that our Onsager calculator is well-behaved"""
 
@@ -276,6 +271,48 @@ class BCCBaseTests(SCBaseTests):
         self.GF = GFcalc.GFcalc(self.lattice, self.NNvect, self.rates)
         self.D0 = self.GF.D2[0, 0]
         self.correl = 0.727
+
+
+class CrystalOnsagerTests(unittest.TestCase):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+    def setUp(self):
+        self.a0 = 1.
+        self.crys = crystal.Crystal.FCC(self.a0)
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.8*self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.correl = 0.78145
+
+    def testFCC(self):
+        """Test that FCC works as expected"""
+        # Make a calculator with one neighbor shell
+        kT = 1.
+        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity.interactlist()
+        Diffusivity.omegalist(1)
+        Diffusivity.omegalist(2)
+        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
+                      'preT0': np.array([1.]), 'eneT0': np.array([0.])}
+        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        L0vv = np.zeros((3,3))
+        om0 = thermaldef['preT0'][0]/thermaldef['preV'][0] * \
+              np.exp((thermaldef['eneV'][0]-thermaldef['eneT0'][0])/kT)
+        for (i,j), dx in self.jumpnetwork[0]:
+            L0vv += 0.5*np.outer(dx,dx) * om0
+        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
+        print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
+        for L in [Lvv, Lss, Lsv, L1vv]:
+            self.assertAlmostEqual(L[0, 0], L[1, 1])
+            self.assertAlmostEqual(L[1, 1], L[2, 2])
+            self.assertAlmostEqual(L[2, 2], L[0, 0])
+        # No solute drag, so Lsv = -Lvv; Lvv = normal vacancy diffusion
+        # all correlation is in that geometric prefactor of Lss.
+        self.assertTrue(np.allclose(Lvv, L0vv))
+        self.assertTrue(np.allclose(-Lsv, L0vv))
+        self.assertTrue(np.allclose(L1vv, 0.))
+        self.assertTrue(np.allclose(-Lss, self.correl*Lsv, delta=1e-3))
 
 
 class InterstitialTests(unittest.TestCase):
