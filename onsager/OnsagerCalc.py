@@ -1045,7 +1045,7 @@ class VacancyMediated(object):
 
     def symmetricandescaperates(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
         """
-        Compute the symmetric, symmetric reference, escape, and escape reference rates.
+        Compute the symmetric, escape, and escape reference rates.
 
         :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
         :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
@@ -1057,11 +1057,9 @@ class VacancyMediated(object):
         :return omega0[Nomega0]: symmetric rate for omega0 jumps
         :return omega1[Nomega1]: symmetric rate for omega1 jumps
         :return omega2[Nomega2]: symmetric rate for omega2 jumps
-
-        :return omega1_om0[Nomega1]: symmetric reference rate for omega1 jumps
-        :return omega2_om0[Nomega1]: symmetric reference rate for omega2 jumps
-
         :return omega0escape[NWyckoff, Nomega0]: escape rate elements for omega0 jumps
+        :return omega1escape[NWyckoff, Nomega1]: escape rate elements for omega1 jumps
+        :return omega2escape[NWyckoff, Nomega2]: escape rate elements for omega2 jumps
         :return omega1_om0escape[NWyckoff, Nomega0]: reference escape rate elements for omega1 jumps
         :return omega2_om0escape[NWyckoff, Nomega0]: reference escape rate elements for omega1 jumps
         """
@@ -1074,32 +1072,28 @@ class VacancyMediated(object):
             omega0escape[v2,j] = np.exp(-bF + bFV[v2])
             omega0[j] = np.sqrt(omega0escape[v1,j]*omega0escape[v2,j])
         omega1 = np.zeros(len(self.om1_jn))
-        omega1_om0 = np.zeros(len(self.om1_jn))
-        omega1escape = np.zeros((self.kinetic.Nstars, len(self.om1_jt)))
-        omega1_om0escape = np.zeros((self.kinetic.Nstars, len(self.om1_jt)))
+        omega1escape = np.zeros((self.kinetic.Nstars, len(self.om1_jn)))
+        omega1_om0escape = np.zeros((self.kinetic.Nstars, len(self.om0_jn)))
         for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega1svsvWyckoff,
                                                                self.om1_jt, self.om1_SP, bFT1):
             omega1escape[st1, j] = np.exp(-bFT + bFS[s1] + bFV[v1] + bFSV[st1])
             omega1escape[st2, j] = np.exp(-bFT + bFS[s2] + bFV[v2] + bFSV[st2])
             omega1[j] = np.sqrt(omega1escape[st1, j]*omega1escape[st2, j])
-            omega1_om0[j] = omega0[jumptype]
-            omega1_om0escape[st1, j] = omega0escape[v1, jumptype]
-            omega1_om0escape[st2, j] = omega0escape[v2, jumptype]
+            omega1_om0escape[st1, jumptype] = omega0escape[v1, jumptype]
+            omega1_om0escape[st2, jumptype] = omega0escape[v2, jumptype]
         omega2 = np.zeros(len(self.om2_jn))
-        omega2_om0 = np.zeros(len(self.om2_jn))
-        omega2escape = np.zeros((self.kinetic.Nstars, len(self.om2_jt)))
-        omega2_om0escape = np.zeros((self.kinetic.Nstars, len(self.om2_jt)))
+        omega2escape = np.zeros((self.kinetic.Nstars, len(self.om2_jn)))
+        omega2_om0escape = np.zeros((self.kinetic.Nstars, len(self.om0_jn)))
         for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega2svsvWyckoff,
                                                                self.om2_jt, self.om2_SP, bFT2):
             omega2escape[st1, j] = np.exp(-bFT + bFS[s1] + bFV[v1] + bFSV[st1])
             omega2escape[st2, j] = np.exp(-bFT + bFS[s2] + bFV[v2] + bFSV[st2])
             omega2[j] = np.sqrt(omega2escape[st1, j]*omega2escape[st2, j])
-            omega2_om0[j] = omega0[jumptype]
-            omega2_om0escape[st1, j] = omega0escape[v1, jumptype]
-            omega2_om0escape[st2, j] = omega0escape[v2, jumptype]
-        return omega0, omega1, omega2,\
-            omega1_om0, omega2_om0, \
-            omega0escape, omega1_om0escape, omega2_om0escape
+            omega2_om0escape[st1, jumptype] = omega0escape[v1, jumptype]
+            omega2_om0escape[st2, jumptype] = omega0escape[v2, jumptype]
+        return omega0, omega1, omega2, \
+               omega0escape, omega1escape, omega2escape, \
+               omega1_om0escape, omega2_om0escape
 
     def _lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
         """
@@ -1149,14 +1143,21 @@ class VacancyMediated(object):
             prob[kindex] *= np.exp(-bFSV[tindex])
 
         # 3. set up symmetric rates: omega0, omega1, omega2
-        #    and escape rates omega0escape, omega1_om0escape, omega2_om0escape
-        omega0, omega1, omega2, \
-        omega0escape, omega1_om0escape, omega2_om0escape = \
+        #    and escape rates omega0escape, omega1escape, omega2escape,
+        #    and reference escape rates omega1_om0escape, omega2_om0escape
+        omega0, omega1, omega2, omega0escape, omega1escape, omega2escape, \
+        omega1_om0escape, omega2_om0escape = \
             self.symmetricandescaperates(bFV, bFS, bFSV, bFT0, bFT1, bFT2)
 
         # 4. expand out: domega1, domega2, bias1, bias2
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
                    np.dot(self.om2expansion, omega2) - np.dot(self.om2_om0, omega0)
+        for sv in range(self.vkinetic.Nvstars):
+            delta_om[sv,sv] += np.dot(self.om1escape[sv,:],omega1escape[sv,:]) - \
+                               np.dot(self.om1_om0escape[sv,:], omega1_om0escape[sv,:]) + \
+                               np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
+                               np.dot(self.om2_om0escape[sv,:], omega2_om0escape[sv,:])
+
         # 5. compute Onsager coefficients
 
         G0 = np.dot(self.GFexpansion, GF)
