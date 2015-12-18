@@ -880,6 +880,22 @@ class VacancyMediated(object):
             self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
         self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
+        # more indexing helpers:
+        # omega0vacancyWyckoff: Wyckoff positions of initial and final position in omega0 jumps
+        # omega1svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega1
+        # omega2svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega2
+        self.omega0vacancyWyckoff = [(self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
+                                    for jumplist in self.om0_jn]
+        self.omega1svsvWyckoff = [(self.invmap[self.kinetic.states[jumplist[0][0][0]].i],
+                                   self.invmap[self.kinetic.states[jumplist[0][0][0]].j],
+                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
+                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
+                                  for jumplist in self.om1_jn]
+        self.omega2svsvWyckoff = [(self.invmap[self.kinetic.states[jumplist[0][0][0]].i],
+                                   self.invmap[self.kinetic.states[jumplist[0][0][0]].j],
+                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
+                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
+                                  for jumplist in self.om1_jn]
 
     def interactlist(self):
         """
@@ -1053,8 +1069,7 @@ class VacancyMediated(object):
         #                    for bF, jump in zip(bFT0, self.om0_jn)])
         omega0 = np.zeros(len(self.om0_jn))
         omega0escape = np.zeros((len(self.sitelist), len(self.om0_jn)))
-        for j, bF, jumplist in zip(itertools.count(), bFT0, self.om0_jn):
-            v1, v2 = self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]]  # Wyckoff pos for initial and final
+        for j, bF, (v1,v2) in zip(itertools.count(), bFT0, self.omega0vacancyWyckoff):
             omega0escape[v1,j] = np.exp(-bF + bFV[v1])
             omega0escape[v2,j] = np.exp(-bF + bFV[v2])
             omega0[j] = np.sqrt(omega0escape[v1,j]*omega0escape[v2,j])
@@ -1062,14 +1077,8 @@ class VacancyMediated(object):
         omega1_om0 = np.zeros(len(self.om1_jn))
         omega1escape = np.zeros((self.kinetic.Nstars, len(self.om1_jt)))
         omega1_om0escape = np.zeros((self.kinetic.Nstars, len(self.om1_jt)))
-        for j, jumplist, jumptype, (st1, st2), bFT in zip(itertools.count(),
-                                                          self.om1_jn, self.om1_jt, self.om1_SP, bFT1):
-            PS1i, PS2i = jumplist[0][0]  # grab the first entry in jumplist, and the initial/final tuple
-            # Wyckoff position of solute and vacancy for start and finish
-            s1,v1 = self.invmap[self.kinetic.states[PS1i].i],self.invmap[self.kinetic.states[PS1i].j]
-            s2,v2 = self.invmap[self.kinetic.states[PS2i].i],self.invmap[self.kinetic.states[PS2i].j]
-            # omega1[j] = np.exp(-bFT + 0.5*(bFS[s1]+bFS[s2]+bFV[v1]+bFV[v2]
-            #                                 +bFSV[self.kinetic.index[PS1i]]+bFSV[self.kinetic.index[PS2i]]))
+        for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega1svsvWyckoff,
+                                                               self.om1_jt, self.om1_SP, bFT1):
             omega1escape[st1, j] = np.exp(-bFT + bFS[s1] + bFV[v1] + bFSV[st1])
             omega1escape[st2, j] = np.exp(-bFT + bFS[s2] + bFV[v2] + bFSV[st2])
             omega1[j] = np.sqrt(omega1escape[st1, j]*omega1escape[st2, j])
@@ -1080,23 +1089,17 @@ class VacancyMediated(object):
         omega2_om0 = np.zeros(len(self.om2_jn))
         omega2escape = np.zeros((self.kinetic.Nstars, len(self.om2_jt)))
         omega2_om0escape = np.zeros((self.kinetic.Nstars, len(self.om2_jt)))
-        for j, jumplist, jumptype, (st1, st2), bFT in zip(itertools.count(),
-                                                          self.om2_jn, self.om2_jt, self.om2_SP, bFT2):
-            PS1i, PS2i = jumplist[0][0]  # grab the first entry in jumpnetwork, and the initial/final tuple
-            # Wyckoff position of solute and vacancy for start and finish
-            s1,v1 = self.invmap[self.kinetic.states[PS1i].i],self.invmap[self.kinetic.states[PS1i].j]
-            s2,v2 = self.invmap[self.kinetic.states[PS2i].i],self.invmap[self.kinetic.states[PS2i].j]
-            # omega2[j] = np.exp(-bFT + 0.5*(bFS[s1]+bFS[s2]+bFV[v1]+bFV[v2]
-            #                                 +bFSV[self.kinetic.index[PS1i]]+bFSV[self.kinetic.index[PS2i]]))
+        for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega2svsvWyckoff,
+                                                               self.om2_jt, self.om2_SP, bFT2):
             omega2escape[st1, j] = np.exp(-bFT + bFS[s1] + bFV[v1] + bFSV[st1])
             omega2escape[st2, j] = np.exp(-bFT + bFS[s2] + bFV[v2] + bFSV[st2])
             omega2[j] = np.sqrt(omega2escape[st1, j]*omega2escape[st2, j])
             omega2_om0[j] = omega0[jumptype]
             omega2_om0escape[st1, j] = omega0escape[v1, jumptype]
             omega2_om0escape[st2, j] = omega0escape[v2, jumptype]
-        return omega0, omega1, omega2,
-        omega1_om0, omega2_om0,
-        omega0escape, omega1_om0escape, omega2_om0escape
+        return omega0, omega1, omega2,\
+            omega1_om0, omega2_om0, \
+            omega0escape, omega1_om0escape, omega2_om0escape
 
     def _lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
         """
@@ -1146,14 +1149,14 @@ class VacancyMediated(object):
             prob[kindex] *= np.exp(-bFSV[tindex])
 
         # 3. set up symmetric rates: omega0, omega1, omega2
-        #    and symmetric reference rates: omega1_om0, omega2_om0
         #    and escape rates omega0escape, omega1_om0escape, omega2_om0escape
         omega0, omega1, omega2, \
-        omega1_om0, omega2_om0, \
         omega0escape, omega1_om0escape, omega2_om0escape = \
             self.symmetricandescaperates(bFV, bFS, bFSV, bFT0, bFT1, bFT2)
 
         # 4. expand out: domega1, domega2, bias1, bias2
+        delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
+                   np.dot(self.om2expansion, omega2) - np.dot(self.om2_om0, omega0)
         # 5. compute Onsager coefficients
 
         G0 = np.dot(self.GFexpansion, GF)
