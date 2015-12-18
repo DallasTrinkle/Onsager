@@ -929,7 +929,7 @@ class VacancyMediated(object):
 
     def maketracerpreene(self, preT0, eneT0):
         """
-        Generates corresponding energies / prefactors for an isotopic tracer.
+        Generates corresponding energies / prefactors for an isotopic tracer. Returns a dictionary.
 
         :param preT0[Nomeg0]: prefactor for vacancy jump transitions (follows jumpnetwork)
         :param eneT0[Nomega0]: transition energy state for vacancy jumps
@@ -955,12 +955,13 @@ class VacancyMediated(object):
         eneT2 = np.zeros(len(self.om2_jn))
         for j, jt in zip(itertools.count(), self.om2_jt):
             preT2[j], eneT2[j] = preT0[jt], eneT0[jt]
-        return preS, eneS, preSV, eneSV, preT1, eneT1, preT2, eneT2
+        return {'pre': preS, 'eneS': eneS, 'preSV': preSV, 'eneSV': eneSV,
+                'preT1': preT1, 'eneT1': eneT1, 'preT2': preT2, 'eneT2': eneT2}
 
     def makeLIMBpreene(self, preS, eneS, preSV, eneSV, preT0, eneT0):
         """
         Generates corresponding energies / prefactors for corresponding to LIMB
-        (Linearized interpolation of migration barrier approximation).
+        (Linearized interpolation of migration barrier approximation). Returns a dictionary.
 
         :param preS[NWyckoff]: prefactor for solute formation
         :param eneS[NWyckoff]: solute formation energy
@@ -999,15 +1000,18 @@ class VacancyMediated(object):
             # need to include solute energy / prefactors
             preT2[j] = preT0[jt]*np.sqrt(preSV[SP[0]]*preSV[SP[1]])*preSS2[j]
             eneT2[j] = eneT0[jt] + 0.5*(eneSV[SP[0]]+eneSV[SP[1]]) + eneSS2[j]
-        return preT1, eneT1, preT2, eneT2
+        return {'preT1': preT1, 'eneT1': eneT1, 'preT2': preT2, 'eneT2': eneT2}
 
     @staticmethod
-    def preene2betafree(preV, eneV, preS, eneS, preSV, eneSV,
-                        preT0, eneT0, preT1, eneT1, preT2, eneT2, kT):
+    def preene2betafree(kT, preV, eneV, preS, eneS, preSV, eneSV,
+                        preT0, eneT0, preT1, eneT1, preT2, eneT2):
         """
         Read in a series of prefactors (e^(S/kB)) and energies, and return beta*free energy for
         energies and transition state energies. Used to provide scaled values to Lij() and _lij().
+        Can specify all of the entries using a dictionary; e.g., preene2betafree(kT, **data_dict)
+        and then send that output as input to Lij: Lij(*preene2betafree(kT, **data_dict))
 
+        :param kT: temperature times Boltzmann's constant kB
         :param preV: prefactor for vacancy formation (prod of inverse vibrational frequencies)
         :param eneV: vacancy formation energy
         :param preS: prefactor for solute formation (prod of inverse vibrational frequencies)
@@ -1020,7 +1024,6 @@ class VacancyMediated(object):
         :param eneT1: energy for vacancy swing transition state (relative to eneV + eneS + eneSV)
         :param preT2: prefactor for vacancy exchange transition state
         :param eneT2: energy for vacancy exchange transition state (relative to eneV + eneS + eneSV)
-        :param kT: temperature times Boltzmann's constant kB
 
         :return bFV: beta*eneV - ln(preV) (relative to minimum value)
         :return bFS: beta*eneS - ln(preS) (relative to minimum value)
