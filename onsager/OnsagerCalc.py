@@ -1135,7 +1135,7 @@ class VacancyMediated(object):
         if GF is None:
             # calculate, and store in dictionary for cache:
             self.GFcalc.SetRates(**(vTK._asdict()))
-            L0vv = self.N*self.GFcalc.Diffusivity()
+            L0vv = self.GFcalc.Diffusivity()
             GF = np.array([self.GFcalc(PS.i, PS.j, PS.dx)
                            for PS in
                            [self.GFstarset.states[s[0]] for s in self.GFstarset.stars]])
@@ -1195,14 +1195,15 @@ class VacancyMediated(object):
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
         outer_etaSvec = np.dot(self.vkinetic.outer, np.dot(G, biasSvec))
-        L2ss = np.dot(outer_etaSvec, biasSvec) # /self.N
-        L1sv = np.dot(outer_etaSvec, biasVvec) # /self.N
-        L1vv = np.dot(outer_etaVvec, biasVvec) # /self.N
+        L2ss = np.dot(outer_etaSvec, biasSvec) /self.N
+        L1sv = np.dot(outer_etaSvec, biasVvec) /self.N
+        L1vv = np.dot(outer_etaVvec, biasVvec) /self.N
         # compute our bare solute diffusivity:
         L0ss = np.zeros((3,3))
         for om2, jumplist in zip(omega2escape, self.om2_jn):
             for (i,j), dx in jumplist:
                 L0ss += 0.5*np.outer(dx,dx) * om2 * prob[self.kinetic.index[i]]
+        L0ss /= self.N
         return L0vv, L0ss + L2ss, -L0ss + L1sv, L1vv
 
     # def Lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):

@@ -307,6 +307,7 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
               np.exp((thermaldef['eneV'][0]-thermaldef['eneT0'][0])/kT)
         for (i,j), dx in self.jumpnetwork[0]:
             L0vv += 0.5*np.outer(dx,dx) * om0
+        L0vv /= self.crys.N
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
         print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
         for L in [Lvv, Lss, Lsv, L1vv]:
