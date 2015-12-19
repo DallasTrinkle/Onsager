@@ -273,21 +273,23 @@ class BCCBaseTests(SCBaseTests):
         self.correl = 0.727
 
 
-class CrystalOnsagerTests(unittest.TestCase):
+class CrystalOnsagerTestsSC(unittest.TestCase):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
 
     longMessage = False
     def setUp(self):
         self.a0 = 1.
-        self.crys = crystal.Crystal.FCC(self.a0)
+        self.crys = crystal.Crystal(self.a0*np.eye(3), [np.zeros(3)])
         self.chem = 0
-        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.8*self.a0)
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 1.01*self.a0)
         self.sitelist = self.crys.sitelist(self.chem)
-        self.correl = 0.78145
+        self.crystalname = 'Simple Cubic a0={}'.format(self.a0)
+        self.correl = 0.653
 
-    def testFCC(self):
-        """Test that FCC works as expected"""
+    def testtracer(self):
+        """Test that FCC tracer works as expected"""
         # Make a calculator with one neighbor shell
+        print('Crystal: ' + self.crystalname)
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         print('Interaction list:')
@@ -319,6 +321,48 @@ class CrystalOnsagerTests(unittest.TestCase):
         self.assertTrue(np.allclose(-Lss, self.correl*Lsv, rtol=1e-3),
                         msg='Failure to match correlation ({}), got {}'.format(
                             self.correl, -Lss[0,0]/Lsv[0,0]))
+
+class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+    def setUp(self):
+        self.a0 = 1.
+        self.crys = crystal.Crystal.FCC(self.a0)
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.8*self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Face-Centered Cubic a0={}'.format(self.a0)
+        self.correl = 0.78145
+
+class CrystalOnsagerTestsBCC(CrystalOnsagerTestsSC):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+    def setUp(self):
+        self.a0 = 1.
+        self.crys = crystal.Crystal.BCC(self.a0)
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.87*self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Body-Centered Cubic a0={}'.format(self.a0)
+        self.correl = 0.727
+
+class CrystalOnsagerTestsDiamond(CrystalOnsagerTestsSC):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+    def setUp(self):
+        self.a0 = 1.
+        self.crys = crystal.Crystal(self.a0*np.array([[0,0.5,0.5],[0.5,0,0.5],[0.5,0.5,0]]),
+                                    [np.array([-0.125,-0.125,-0.125]),
+                                     np.array([0.125,0.125,0.125])])
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.45*self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Diamond Cubic a0={}'.format(self.a0)
+        self.correl = 0.5
+
 
 
 class InterstitialTests(unittest.TestCase):
