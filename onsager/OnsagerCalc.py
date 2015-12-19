@@ -884,9 +884,12 @@ class VacancyMediated(object):
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
         self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
         # more indexing helpers:
+        # kineticsvWyckoff: Wyckoff position of solute and vacancy for kinetic stars
         # omega0vacancyWyckoff: Wyckoff positions of initial and final position in omega0 jumps
         # omega1svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega1
         # omega2svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega2
+        self.kineticsvWyckoff = [(self.invmap[PS.i], self.invmap[PS.j]) for PS in
+                         [self.kinetic.states[si[0]] for si in self.kinetic.stars]]
         self.omega0vacancyWyckoff = [(self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
                                     for jumplist in self.om0_jn]
         self.omega1svsvWyckoff = [(self.invmap[self.kinetic.states[jumplist[0][0][0]].i],
@@ -1132,22 +1135,20 @@ class VacancyMediated(object):
         if GF is None:
             # calculate, and store in dictionary for cache:
             self.GFcalc.SetRates(**(vTK._asdict()))
-            L0vv = self.GFcalc.Diffusivity()
+            L0vv = self.N*self.GFcalc.Diffusivity()
             GF = np.array([self.GFcalc(PS.i, PS.j, PS.dx)
                            for PS in
                            [self.GFstarset.states[s[0]] for s in self.GFstarset.stars]])
-            self.Lvvvalues[vTK] = L0vv.copy()
+            self.Lvvvalues[vTK] = L0vv
             self.GFvalues[vTK] = GF.copy()
 
         # 2. set up probabilities for solute-vacancy configurations
         probV = np.array([np.exp(min(bFV)-bFV[wi]) for wi in self.invmap])
-        probV /= np.sum(probV)  # normalize
+        probV *= self.N/np.sum(probV)  # normalize
         probS = np.array([np.exp(min(bFS)-bFS[wi]) for wi in self.invmap])
-        probS /= np.sum(probS)  # normalize
-        bFSVkin = np.array([bFS[PS.i]+bFV[PS.j] for PS in
-                         [self.kinetic.states[si[0]] for si in self.kinetic.stars]])
-        prob = np.array([probS[PS.i]*probV[PS.j] for PS in
-                         [self.kinetic.states[si[0]] for si in self.kinetic.stars]])
+        probS *= self.N/np.sum(probS)  # normalize
+        bFSVkin = np.array([bFS[s]+bFV[v] for (s,v) in self.kineticsvWyckoff])
+        prob = np.array([probS[s]*probV[v] for (s,v) in self.kineticsvWyckoff])
         for tindex, kindex in enumerate(self.thermo2kin):
             bFSVkin[kindex] += bFSV[tindex]
             prob[kindex] *= np.exp(-bFSV[tindex])
@@ -1194,9 +1195,9 @@ class VacancyMediated(object):
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
         outer_etaSvec = np.dot(self.vkinetic.outer, np.dot(G, biasSvec))
-        L2ss = np.dot(outer_etaSvec, biasSvec)
-        L1sv = np.dot(outer_etaSvec, biasVvec)
-        L1vv = np.dot(outer_etaVvec, biasVvec)
+        L2ss = np.dot(outer_etaSvec, biasSvec) # /self.N
+        L1sv = np.dot(outer_etaSvec, biasVvec) # /self.N
+        L1vv = np.dot(outer_etaVvec, biasVvec) # /self.N
         # compute our bare solute diffusivity:
         L0ss = np.zeros((3,3))
         for om2, jumplist in zip(omega2escape, self.om2_jn):
