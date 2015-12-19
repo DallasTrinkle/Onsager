@@ -761,7 +761,7 @@ class GreenFuncCrystalTests(unittest.TestCase):
         rates = np.array([1 for jump in NNvect])
         old_FCC_GF = GFcalc.GFcalc(self.FCC.lattice, NNvect, rates)
         for R in [np.array([0.,0.,0.]), np.array([0.5, 0.5, 0.]), np.array([0.5, 0., 0.5]), \
-                 np.array([1.,0.,0.]), np.array([1.,0.5,0.5])]:
+                 np.array([1.,0.,0.]), np.array([1.,0.5,0.5]), np.array([1.,1.,0.])]:
             GF_orig = old_FCC_GF.GF(R)
             GF_new = FCC_GF(0,0,R)
             # print("R={}: dG= {}  G_orig= {}  G_new= {}".format(R, GF_new-GF_orig, GF_orig, GF_new))

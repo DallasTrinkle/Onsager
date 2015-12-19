@@ -290,9 +290,12 @@ class CrystalOnsagerTests(unittest.TestCase):
         # Make a calculator with one neighbor shell
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        print('Interaction list:\n', Diffusivity.interactlist())
-        print('omega1 list:\n', Diffusivity.omegalist(1))
-        print('omega2 list:\n', Diffusivity.omegalist(2))
+        print('Interaction list:')
+        for PS in Diffusivity.interactlist(): print(PS)
+        print('omega1 list:')
+        for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "->", PS2)
+        print('omega2 list:')
+        for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "->", PS2)
         thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
                       'preT0': np.array([1.]), 'eneT0': np.array([0.])}
         thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))

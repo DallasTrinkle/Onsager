@@ -949,12 +949,10 @@ class VacancyMediated(object):
         eneSV = np.zeros(self.thermo.Nstars)
         preT1 = np.ones(len(self.om1_jn))
         eneT1 = np.zeros(len(self.om1_jn))
-        for j, jt in zip(itertools.count(), self.om1_jt):
-            preT1[j], eneT1[j] = preT0[jt], eneT0[jt]
+        for j, jt in zip(itertools.count(), self.om1_jt): preT1[j], eneT1[j] = preT0[jt], eneT0[jt]
         preT2 = np.ones(len(self.om2_jn))
         eneT2 = np.zeros(len(self.om2_jn))
-        for j, jt in zip(itertools.count(), self.om2_jt):
-            preT2[j], eneT2[j] = preT0[jt], eneT0[jt]
+        for j, jt in zip(itertools.count(), self.om2_jt): preT2[j], eneT2[j] = preT0[jt], eneT0[jt]
         return {'preS': preS, 'eneS': eneS, 'preSV': preSV, 'eneSV': eneSV,
                 'preT1': preT1, 'eneT1': eneT1, 'preT2': preT2, 'eneT2': eneT2}
 
@@ -1162,8 +1160,9 @@ class VacancyMediated(object):
             self._symmetricandescaperates(bFV, bFS, bFSVkin, bFT0, bFT1, bFT2)
 
         # 4. expand out: domega1, domega2, bias1, bias2
+        # TODO: MAKE SURE THAT YOU'RE DOING THIS CORRECTLY: (has to do with exchange being different)
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
-                   np.dot(self.om2expansion, omega2) - np.dot(self.om2_om0, omega0)
+                   np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
         for sv in range(self.vkinetic.Nvstars):
             delta_om[sv,sv] += np.dot(self.om1escape[sv,:],omega1escape[sv,:]) - \
                                np.dot(self.om1_om0escape[sv,:], omega1_om0escape[sv,:]) + \
@@ -1180,14 +1179,18 @@ class VacancyMediated(object):
                            biasSvec[sv] - \
                            np.dot(self.om2_b0[sv,:], omega0escape)*np.sqrt(probV[self.kin2vacancy[starindex]])
 
-        print('delta_om:\n', delta_om)
-        print('biasVvec:', biasVvec)
-        print('biasSvec:', biasSvec)
+        # print('delta_om:\n', delta_om)
+        # print('biasVvec:', biasVvec)
+        # print('biasSvec:', biasSvec)
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
-        print('G0:\n', G0)
-        # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
+        # for gindex, GFexp, PS in zip(itertools.count(), self.GFexpansion[0,0,:],
+        #                              [self.GFstarset.states[s[0]] for s in self.GFstarset.stars]):
+        #     if GFexp != 0.: print(gindex, GFexp, "*", PS)
+        # print('GF: ', GF)
+        # print('G0:\n', G0)
+        # # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
         outer_etaSvec = np.dot(self.vkinetic.outer, np.dot(G, biasSvec))

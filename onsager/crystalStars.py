@@ -602,7 +602,7 @@ class VectorStarSet(object):
                 gv0 = starset.crys.g_direc(g, v0)
                 if Nvect == 1:
                     # we only need to check that we still have an invariant vector
-                    if any(abs(gv0 - v0) > threshold): Nvect = 0
+                    if not np.allclose(gv0, v0): Nvect = 0
                 if Nvect == 2:
                     gv1 = starset.crys.g_direc(g, v1)
                     g00 = np.dot(v0, gv0)
