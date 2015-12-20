@@ -856,7 +856,7 @@ class VacancyMediated(object):
         # outerkin is the list of stars that are in kinetic, but not in thermo
         # vstar2kin maps each vector star back to the corresponding star index
         # kin2vstar provides a list of vector stars indices corresponding to the same star index
-        self.thermo2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.thermo.stars]
+        self.thermo2kin = [self.kinetic.starindex(self.thermo.states[s[0]]) for s in self.thermo.stars]
         self.kin2vacancy = [self.kinetic.states[s[0]].i for s in self.kinetic.stars]
         self.outerkin = [s for s in range(self.kinetic.Nstars)
                          if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None]
@@ -976,31 +976,26 @@ class VacancyMediated(object):
         :return preT2[Nomega2]: prefactor for omega2-style transitions (follows om2_jn)
         :return eneT2[Nomega2]: transition energy/kBT for omega2-style jumps
         """
-        preSS1 = np.zeros(len(self.om1_SP))
-        eneSS1 = np.zeros(len(self.om1_SP))
-        preSS2 = np.zeros(len(self.om2_SP))
-        eneSS2 = np.zeros(len(self.om2_SP))
-        for i, (star1, star2) in enumerate(self.om1_SP):
-            # Wyckoff position of solute in each star
-            s1 = self.invmap[self.kinetic.states[self.kinetic.stars[star1][0]].i]
-            s2 = self.invmap[self.kinetic.states[self.kinetic.stars[star2][0]].i]
-            preSS1[i], eneSS1[i] = np.sqrt(preS[s1]*preS[s2]), 0.5*(eneS[s1]+eneS[s2])
-        for i, (star1, star2) in enumerate(self.om2_SP):
-            s1 = self.invmap[self.kinetic.states[self.kinetic.stars[star1][0]].i]
-            s2 = self.invmap[self.kinetic.states[self.kinetic.stars[star2][0]].i]
-            preSS2[i], eneSS2[i] = np.sqrt(preS[s1]*preS[s2]), 0.5*(eneS[s1]+eneS[s2])
+        # we need the prefactors and energies for all of our kinetic stars... without the
+        # vacancy part (since that reference is already in preT0 and eneT0); we're going
+        # to add these to preT0 and eneT0 to get the TS prefactor/energy for w1 and w2 jumps
+        eneSVkin = np.array([eneS[s] for (s,v) in self.kineticsvWyckoff])
+        preSVkin = np.array([preS[s] for (s,v) in self.kineticsvWyckoff])
+        for tindex, kindex in enumerate(self.thermo2kin):
+            eneSVkin[kindex] += eneSV[tindex]
+            preSVkin[kindex] *= preSV[tindex]
         preT1 = np.ones(len(self.om1_jn))
         eneT1 = np.zeros(len(self.om1_jn))
         for j, jt, SP in zip(itertools.count(), self.om1_jt, self.om1_SP):
             # need to include solute energy / prefactors
-            preT1[j] = preT0[jt]*np.sqrt(preSV[SP[0]]*preSV[SP[1]])*preSS1[j]
-            eneT1[j] = eneT0[jt] + 0.5*(eneSV[SP[0]]+eneSV[SP[1]]) + eneSS1[j]
+            preT1[j] = preT0[jt]*np.sqrt(preSVkin[SP[0]]*preSVkin[SP[1]])
+            eneT1[j] = eneT0[jt] + 0.5*(eneSVkin[SP[0]]+eneSVkin[SP[1]])
         preT2 = np.ones(len(self.om2_jn))
         eneT2 = np.zeros(len(self.om2_jn))
         for j, jt, SP in zip(itertools.count(), self.om2_jt, self.om2_SP):
             # need to include solute energy / prefactors
-            preT2[j] = preT0[jt]*np.sqrt(preSV[SP[0]]*preSV[SP[1]])*preSS2[j]
-            eneT2[j] = eneT0[jt] + 0.5*(eneSV[SP[0]]+eneSV[SP[1]]) + eneSS2[j]
+            preT2[j] = preT0[jt]*np.sqrt(preSVkin[SP[0]]*preSVkin[SP[1]])
+            eneT2[j] = eneT0[jt] + 0.5*(eneSVkin[SP[0]]+eneSVkin[SP[1]])
         return {'preT1': preT1, 'eneT1': eneT1, 'preT2': preT2, 'eneT2': eneT2}
 
     @staticmethod

@@ -8,6 +8,7 @@ __author__ = 'Dallas R. Trinkle'
 # TODO: additional tests using the 14 frequency model for FCC?
 
 import unittest
+import textwrap
 import onsager.FCClatt as FCClatt
 import onsager.KPTmesh as KPTmesh
 import numpy as np
@@ -311,9 +312,7 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
         print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
         for L in [Lvv, Lss, Lsv, L1vv]:
-            self.assertAlmostEqual(L[0, 0], L[1, 1])
-            self.assertAlmostEqual(L[1, 1], L[2, 2])
-            self.assertAlmostEqual(L[2, 2], L[0, 0])
+            self.assertTrue(np.allclose(L, L[0,0]*np.eye(3)), msg='Diffusivity not isotropic?')
         # No solute drag, so Lsv = -Lvv; Lvv = normal vacancy diffusion
         # all correlation is in that geometric prefactor of Lss.
         self.assertTrue(np.allclose(Lvv, L0vv))
@@ -336,6 +335,74 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         self.crystalname = 'Face-Centered Cubic a0={}'.format(self.a0)
         self.correl = 0.78145
 
+    def testFiveFreq(self):
+        """Test whether we can reproduce the five frequency model"""
+        print('Five-frequency model, Crystal: ' + self.crystalname)
+        kT = 1.
+        w0 = 1.0  # bare rate
+        w1 = 0.8 * w0  # "swing" rate (vacancy jump around solute)
+        w2 = 1.25 * w0  # "exchange" rate (vacancy-solute exchange)
+        w3 = 0.5 * w0  # dissociation jump (vacancy away from solute)
+        w4 = 1.5 * w0  # association jump (vacancy jump into solute)
+        SVprob = w4/w3  # enhanced probability of solute-vacancy complex
+        print(textwrap.dedent("""
+                               w0={}
+                               w1={}
+                               w2={}
+                               w3={}
+                               w4={}
+                               prob={}""".format(w0,w1,w2,w3,w4,SVprob)))
+        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        print('Interaction list:')
+        for PS in Diffusivity.interactlist(): print(PS)
+        print('omega1 list:')
+        for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "->", PS2)
+        print('omega2 list:')
+        for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "->", PS2)
+        # input the solute/vacancy binding (w4/w3), and use LIMB to take a first stab at the rates
+        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
+                      'preS': np.array([1.]), 'eneS': np.array([0.]),
+                      'preT0': np.array([w0]), 'eneT0': np.array([0.]),
+                      'preSV': np.array([SVprob]), 'eneSV': np.array([0.])}
+        thermaldef.update(Diffusivity.makeLIMBpreene(**thermaldef))
+        print('Thermaldef (LIMB):\n', thermaldef)
+        # now, we need to get w1, w3, and w4 in there. w3 = dissociation, w4 = association, so:
+        # the transition state for the association/dissociation jump is w4 as the outer prob = 1,
+        # and the bound probability = w4/w3. The transition state for the "swing" jumps is
+        # w1*(w4/w3), where the w4/w3 takes care of the probability factor. Finally, the
+        # exchange jump is also w2*(w4/w3).
+        thermaldef['preT2'][0] = w2*SVprob
+        for j, (PS1, PS2) in enumerate(Diffusivity.omegalist(1)[0]):
+            # check to see if the two endpoints of the transition have the solute-vacancy at same distance:
+            if np.isclose(np.dot(PS1.dx, PS1.dx), np.dot(PS2.dx, PS2.dx)):
+                thermaldef['preT1'][j] = w1*SVprob
+            else:
+                thermaldef['preT1'][j] = w4
+        print('Thermaldef (5-frequency):\n', thermaldef)
+        L0vv = np.zeros((3,3))
+        om0 = thermaldef['preT0'][0]/thermaldef['preV'][0] * \
+              np.exp((thermaldef['eneV'][0]-thermaldef['eneT0'][0])/kT)
+        for (i,j), dx in self.jumpnetwork[0]:
+            L0vv += 0.5*np.outer(dx,dx) * om0
+        L0vv /= self.crys.N
+        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
+        print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
+        for L in [Lvv, Lss, Lsv, L1vv]:
+            self.assertTrue(np.allclose(L, L[0,0]*np.eye(3)), msg='Diffusivity not isotropic?')
+        self.assertTrue(np.allclose(Lvv, L0vv))
+        Ds5freq = fivefreq(w0, w1, w2, w3, w4)
+        self.assertAlmostEqual(Lss[0, 0], Ds5freq, delta=1e-3,
+                               msg=textwrap.dedent("""
+                               Did not match the 5-freq. model for
+                               w0={}
+                               w1={}
+                               w2={}
+                               w3={}
+                               w4={}
+                               Lss={}
+                               Ds5={}""".format(w0,w1,w2,w3,w4,Lss[0,0],Ds5freq)))
+
+
 class CrystalOnsagerTestsBCC(CrystalOnsagerTestsSC):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
 
@@ -354,7 +421,7 @@ class CrystalOnsagerTestsDiamond(CrystalOnsagerTestsSC):
 
     longMessage = False
     def setUp(self):
-        self.a0 = 1.
+        self.a0 = 2.
         self.crys = crystal.Crystal(self.a0*np.array([[0,0.5,0.5],[0.5,0,0.5],[0.5,0.5,0]]),
                                     [np.array([-0.125,-0.125,-0.125]),
                                      np.array([0.125,0.125,0.125])])
