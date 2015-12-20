@@ -857,7 +857,7 @@ class VacancyMediated(object):
         # vstar2kin maps each vector star back to the corresponding star index
         # kin2vstar provides a list of vector stars indices corresponding to the same star index
         self.thermo2kin = [self.kinetic.starindex(self.thermo.states[s[0]]) for s in self.thermo.stars]
-        self.kin2vacancy = [self.kinetic.states[s[0]].i for s in self.kinetic.stars]
+        self.kin2vacancy = [self.invmap[self.kinetic.states[s[0]].j] for s in self.kinetic.stars]
         self.outerkin = [s for s in range(self.kinetic.Nstars)
                          if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None]
         self.vstar2kin = [self.kinetic.index[Rs[0]] for Rs in self.vkinetic.vecpos]
@@ -879,6 +879,7 @@ class VacancyMediated(object):
         self.Lvvvalues = {}
         self.om1_om0, self.om1_om0escape, self.om1expansion, self.om1escape = \
             self.vkinetic.rateexpansions(self.om1_jn, self.om1_jt)
+        # technically, we don't need om2_om0 for anything
         self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
             self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
@@ -1156,7 +1157,9 @@ class VacancyMediated(object):
             self._symmetricandescaperates(bFV, bFS, bFSVkin, bFT0, bFT1, bFT2)
 
         # 4. expand out: domega1, domega2, bias1, bias2
-        # TODO: MAKE SURE THAT YOU'RE DOING THIS CORRECTLY: (has to do with exchange being different)
+        # Note: we don't subtract off the equivalent of om1_om0 for omega2, because those
+        # jumps correspond to the vacancy *landing* on the solute site, and those states are not included
+        # however, the *escape* part must be referenced.
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
                    np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
         for sv in range(self.vkinetic.Nvstars):
@@ -1169,11 +1172,12 @@ class VacancyMediated(object):
         for sv,starindex in enumerate(self.vstar2kin):
             # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
+            svvacindex = self.kin2vacancy[starindex]  # vacancy
             biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
             biasVvec[sv] = np.dot(self.om1bias[sv,:], omega1escape[sv,:])*np.sqrt(prob[starindex]) - \
-                           np.dot(self.om1_b0[sv,:], omega0escape)*np.sqrt(probV[self.kin2vacancy[starindex]]) - \
+                           np.dot(self.om1_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex]) - \
                            biasSvec[sv] - \
-                           np.dot(self.om2_b0[sv,:], omega0escape)*np.sqrt(probV[self.kin2vacancy[starindex]])
+                           np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
 
         # print('delta_om:\n', delta_om)
         # print('biasVvec:', biasVvec)
@@ -1195,9 +1199,14 @@ class VacancyMediated(object):
         L1vv = np.dot(outer_etaVvec, biasVvec) /self.N
         # compute our bare solute diffusivity:
         L0ss = np.zeros((3,3))
-        for om2, jumplist in zip(omega2escape, self.om2_jn):
+        # Need to transpose omega2escape so that we're working with each escape, and then it
+        # is indexed by which vector star it corresponds to.
+        for om2, jumplist in zip(omega2escape.T, self.om2_jn):
             for (i,j), dx in jumplist:
-                L0ss += 0.5*np.outer(dx,dx) * om2 * prob[self.kinetic.index[i]]
+                # index into kinetic stars to get the probability; to get the escape rate, have to index
+                # back to the vector star (take the first entry since kin2vstar returns a list).
+                L0ss += 0.5*np.outer(dx,dx) * om2[self.kin2vstar[self.kinetic.index[i]][0]] * \
+                        prob[self.kinetic.index[i]]
         L0ss /= self.N
         return L0vv, L0ss + L2ss, -L0ss + L1sv, L1vv
 

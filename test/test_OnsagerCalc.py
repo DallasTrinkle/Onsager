@@ -356,9 +356,9 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         print('Interaction list:')
         for PS in Diffusivity.interactlist(): print(PS)
         print('omega1 list:')
-        for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "->", PS2)
+        for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "-", PS2)
         print('omega2 list:')
-        for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "->", PS2)
+        for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "-", PS2)
         # input the solute/vacancy binding (w4/w3), and use LIMB to take a first stab at the rates
         thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
                       'preS': np.array([1.]), 'eneS': np.array([0.]),
@@ -431,6 +431,55 @@ class CrystalOnsagerTestsDiamond(CrystalOnsagerTestsSC):
         self.crystalname = 'Diamond Cubic a0={}'.format(self.a0)
         self.correl = 0.5
 
+class CrystalOnsagerTestsHCP(unittest.TestCase):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+    def setUp(self):
+        self.a0 = 1.
+        self.crys = crystal.Crystal.HCP(1.)
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 1.01*self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Hexagonal Closed-Packed a0={} c0=sqrt(8/3)'.format(self.a0)
+        self.correl = 0.78145
+
+    def testtracer(self):
+        """Test that HCP tracer works as expected"""
+        # Make a calculator with one neighbor shell
+        print('Crystal: ' + self.crystalname)
+        kT = 1.
+        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        print('Interaction list:')
+        for PS in Diffusivity.interactlist(): print(PS)
+        print('omega1 list:')
+        for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "-", PS2)
+        print('omega2 list:')
+        for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "-", PS2)
+        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
+                      'preT0': np.array([1.,1.]), 'eneT0': np.array([0.,0.])}
+        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        print('Thermaldef:\n', thermaldef)
+        L0vv = np.zeros((3,3))
+        om0 = thermaldef['preT0'][0]/thermaldef['preV'][0] * \
+              np.exp((thermaldef['eneV'][0]-thermaldef['eneT0'][0])/kT)
+        for jumplist in self.jumpnetwork:
+            for (i,j), dx in jumplist:
+                L0vv += 0.5*np.outer(dx,dx) * om0
+        L0vv /= self.crys.N
+        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
+        print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
+        for L in [Lvv, Lss, Lsv, L1vv]:
+            self.assertTrue(np.allclose(L, L[0,0]*np.eye(3), atol=1e-3),
+                            msg='Diffusivity not isotropic?')
+        # No solute drag, so Lsv = -Lvv; Lvv = normal vacancy diffusion
+        # all correlation is in that geometric prefactor of Lss.
+        self.assertTrue(np.allclose(Lvv, L0vv))
+        self.assertTrue(np.allclose(-Lsv, L0vv))
+        self.assertTrue(np.allclose(L1vv, 0.))
+        self.assertTrue(np.allclose(-Lss, self.correl*Lsv, rtol=1e-3),
+                        msg='Failure to match correlation ({}), got {}'.format(
+                            self.correl, -Lss[0,0]/Lsv[0,0]))
 
 
 class InterstitialTests(unittest.TestCase):
