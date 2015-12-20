@@ -390,7 +390,7 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0,0]*np.eye(3)), msg='Diffusivity not isotropic?')
         self.assertTrue(np.allclose(Lvv, L0vv))
-        Ds5freq = fivefreq(w0, w1, w2, w3, w4)
+        Ds5freq = self.a0**2 * fivefreq(w0, w1, w2, w3, w4)
         self.assertAlmostEqual(Lss[0, 0], Ds5freq, delta=1e-3,
                                msg=textwrap.dedent("""
                                Did not match the 5-freq. model for

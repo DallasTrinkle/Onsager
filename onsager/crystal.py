@@ -416,7 +416,7 @@ class Crystal(object):
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.
     """
 
-    def __init__(self, lattice, basis):
+    def __init__(self, lattice, basis, chemistry=None):
         """
         Initialization; starts off with the lattice vector definition and the
         basis vectors. While it does not explicitly store the specific chemical
@@ -429,6 +429,7 @@ class Crystal(object):
             crystalline basis vectors, in unit cell coordinates. If a list of lists, then
             there are multiple chemical elements, with each list corresponding to a unique
             element
+        :param chemistry: (optional) list of names of chemical elements
         """
         # Do some basic type checking and "formatting"
         self.lattice = None
@@ -459,6 +460,8 @@ class Crystal(object):
                             for atomindex in range(len(atomlist))]
         self.N = len(self.atomindices)
         self.Nchem = len(self.basis)
+        if chemistry is None: self.chemistry = [i for i in range(self.Nchem)]
+        else: self.chemistry = chemistry.copy()
         self.volume, self.metric = self.calcmetric()
         self.reciplatt = 2.*np.pi*self.invlatt.T
         self.BZvol = abs(float(np.linalg.det(self.reciplatt)))
@@ -470,7 +473,8 @@ class Crystal(object):
 
     def __repr__(self):
         """String representation of crystal (lattice + basis)"""
-        return 'Crystal(' + repr(self.lattice).replace('\n','').replace('\t','') + ',' + repr(self.basis) + ')'
+        return 'Crystal(' + repr(self.lattice).replace('\n','').replace('\t','') + ',' + \
+               repr(self.basis) + ', chemistry=' + repr(self.chemistry) + ')'
 
     def __str__(self):
         """Human-readable version of crystal (lattice + basis)"""
@@ -478,7 +482,8 @@ class Crystal(object):
             self.lattice.T[0], self.lattice.T[1], self.lattice.T[2])
         for chemind, atoms in enumerate(self.basis):
             for atomind, pos in enumerate(atoms):
-                str_rep = str_rep + "\n  {}.{} = {}".format(chemind, atomind, pos)
+                str_rep = str_rep + "\n  ({}) {}.{} = {}".format(self.chemistry[chemind],
+                                                               chemind, atomind, pos)
         return str_rep
 
     @classmethod
@@ -493,7 +498,9 @@ class Crystal(object):
         if 'basis' not in yamldict: raise IndexError('{} does not contain "basis"'.format(yamldict))
         lattice_constant = 1.
         if 'lattice_constant' in yamldict: lattice_constant = yamldict['lattice_constant']
-        return cls((lattice_constant*yamldict['lattice']).T, yamldict['basis'])
+        chem = None
+        if 'chemistry' in yamldict: chem = yamldict['chemistry']
+        return cls((lattice_constant*yamldict['lattice']).T, yamldict['basis'], chem)
 
     def simpleYAML(self, a0=1.0):
         """
@@ -503,40 +510,55 @@ class Crystal(object):
         return yaml.dump({'lattice_constant': a0,
                           'lattice': self.lattice.T/a0,
                           'basis': self.basis,
-                          'chemistry': [ len(chem) for chem in self.basis ]})
+                          'chemistry': self.chemistry})
+
+    def chemindex(self, chemistry):
+        """
+        Return index corresponding to chemistry; None if not present.
+        :param chemistry: value to check
+        :return: index corresponding to chemistry
+        """
+        try: return self.chemistry.index(chemistry)
+        except: return None
 
     # a few "convenient" lattices
     @classmethod
-    def FCC(cls, a0):
+    def FCC(cls, a0, chemistry=None):
         """
         Create a face-centered cubic crystal with lattice constant a0
         :param a0: lattice constant
         :return: FCC crystal
         """
-        return cls(np.array([[0.,0.5,0.5],[0.5,0.,0.5],[0.5,0.5,0.]])*a0, [np.zeros(3)])
+        if chemistry is None or isinstance(chemistry, (list,tuple)): chem = chemistry
+        else: chem = [chemistry]
+        return cls(np.array([[0.,0.5,0.5],[0.5,0.,0.5],[0.5,0.5,0.]])*a0, [np.zeros(3)], chem)
 
     @classmethod
-    def BCC(cls, a0):
+    def BCC(cls, a0, chemistry=None):
         """
         Create a body-centered cubic crystal with lattice constant a0
         :param a0: lattice constant
         :return: BCC crystal
         """
-        return cls(np.array([[-0.5,0.5,0.5],[0.5,-0.5,0.5],[0.5,0.5,-0.5]])*a0, [np.zeros(3)])
+        if chemistry is None or isinstance(chemistry, (list,tuple)): chem = chemistry
+        else: chem = [chemistry]
+        return cls(np.array([[-0.5,0.5,0.5],[0.5,-0.5,0.5],[0.5,0.5,-0.5]])*a0, [np.zeros(3)], chem)
 
     @classmethod
-    def HCP(cls, a0, c_a=np.sqrt(8./3.)):
+    def HCP(cls, a0, c_a=np.sqrt(8./3.), chemistry=None):
         """
         Create a hexagonal closed packed crystal with lattice constant a0, c/a ratio c_a
         :param a0: lattice constant
         :param c_a: c/a ratio
         :return: HCP crystal
         """
+        if chemistry is None or isinstance(chemistry, (list,tuple)): chem = chemistry
+        else: chem = [chemistry]
         return cls(np.array([[0.5,0.5,0.],
                                  [-np.sqrt(0.75),np.sqrt(0.75),0.],
                                  [0.,0.,c_a]])*a0,
                                  [np.array([1./3.,2./3.,1./4.]),
-                                  np.array([2./3.,1./3.,3./4])])
+                                  np.array([2./3.,1./3.,3./4])], chem)
 
     def center(self):
         """
@@ -740,12 +762,13 @@ class Crystal(object):
                 raise TypeError('strain is not a 3x3 tensor')
         return Crystal(np.dot(np.eye(3) + eps, self.lattice), self.basis)
 
-    def addbasis(self, basis):
+    def addbasis(self, basis, chemistry=None):
         """
         Returns a new Crystal object that contains additional sites (assumed to be new chemistry).
         This is intended to "add in" interstitial sites. Note: if the symmetry is to be
         maintained, should be the output from Wyckoffpos().
         :param basis: list (or list of lists) of new sites
+        :paran chemistry: (optional) list of chemistry names
         :return: new Crystal object, with additional sites
         """
         if type(basis) is not list: raise TypeError('basis needs to be a list or list of lists')
@@ -759,7 +782,9 @@ class Crystal(object):
                 for u in elem:
                     if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, elem))
             newbasis = [[incell(u) for u in atombasis] for atombasis in basis]
-        return Crystal(self.lattice, self.basis + newbasis)
+        if chemistry is None: newchemistry = self.chemistry + [i + self.Nchem for i in range(len(basis))]
+        else: newchemistry = self.chemistry + chemistry
+        return Crystal(self.lattice, self.basis + newbasis, newchemistry)
 
     def pos2cart(self, lattvec, ind):
         """
