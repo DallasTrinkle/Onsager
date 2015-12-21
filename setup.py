@@ -10,5 +10,5 @@ setup(
     url = 'https://github.com/DallasTrinkle/onsager', # use the URL to the github repo
     download_url = 'https://github.com/DallasTrinkle/onsager/tarball/0.3', # for when we upload
     keywords = ['diffusion', 'elastodiffusion', 'Onsager', 'mass transport'],
-    classifiers = [], requires=['numpy', 'scipy']
+    classifiers = [], requires=['numpy', 'scipy', 'yaml']
 )
