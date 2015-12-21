@@ -771,6 +771,9 @@ import collections
 import itertools
 import onsager.crystalStars as cstars
 
+# YAML tags
+VACANCYTHERMOKINETICS_YAMLTAG = '!VacancyThermoKinetics'
+
 class vacancyThermoKinetics(collections.namedtuple('vacancyThermoKinetics',
                                                    'pre betaene preT betaeneT')):
     """
@@ -801,6 +804,20 @@ class vacancyThermoKinetics(collections.namedtuple('vacancyThermoKinetics',
     def __hash__(self):
         return hash(self.pre.data.tobytes() + self.betaene.data.tobytes() +
                     self.preT.data.tobytes() + self.betaeneT.data.tobytes())
+
+    @staticmethod
+    def vacancyThermoKinetics_representer(dumper, data):
+        """Output a PairState"""
+        # asdict() returns an OrderedDictionary, so pass through dict()
+        # had to rewrite _asdict() for some reason...?
+        return dumper.represent_mapping(VACANCYTHERMOKINETICS_YAMLTAG, data._asdict())
+
+    @staticmethod
+    def vacancyThermoKinetics_constructor(loader, node):
+        """Construct a GroupOp from YAML"""
+        # ** turns the dictionary into parameters for GroupOp constructor
+        return vacancyThermoKinetics(**loader.construct_mapping(node, deep=True))
+
 
 class VacancyMediated(object):
     """
@@ -1210,21 +1227,5 @@ class VacancyMediated(object):
         L0ss /= self.N
         return L0vv, L0ss + L2ss, -L0ss + L1sv, L1vv
 
-    # def Lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
-    #     """
-    #     Calculates the transport coefficients Lvv, Lss, and Lsv from the scaled free energies.
-    #
-    #     :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
-    #     :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
-    #     :param bFSV[Nthermo]: beta*eneSV - ln(preSV) (excess)
-    #     :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
-    #     :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
-    #     :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
-    #
-    #     :return Lvv[3, 3]: vacancy-vacancy; needs to be multiplied by cv/kBT
-    #     :return Lss[3, 3]: solute-solute; needs to be multiplied by cv*cs/kBT
-    #     :return Lsv[3, 3]: solute-vacancy; needs to be multiplied by cv*cs/kBT
-    #     :return Lvv1[3, 3]: vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT
-    #     """
-    #     Lvv, L0ss, L2ss, L1sv, L1vv = self._lij(bFV, bFS, bFSV, bFT0, bFT1, bFT2)
-    #     return Lvv, L0ss + L2ss, -L0ss - L2ss + L1sv, L2ss - 2*L1sv + L1vv
+crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
+crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)

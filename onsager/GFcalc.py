@@ -733,6 +733,65 @@ from scipy.special import hyp1f1, gamma
 T3D = PE.Taylor3D
 factorial = PE.factorial
 
+# Some "helper objects"; mostly collected here so that YAML has full access to them
+
+class Fnl_p(object):
+    def __init__(self, n, pm):
+        """
+        Exponential cutoff function in Fourier space (p)
+        :param n: power
+        :param pm: pmax value
+        """
+        self.n = n
+        self.inv_pmax = 1/pm
+
+    def __call__(self, p):
+        return (p**self.n)*np.exp(-(p*self.inv_pmax)**2)
+
+class Fnl_u(object):
+    def __init__(self, n, l, pm, prefactor):
+        """
+        Inverse Fourier transform of exponential cutoff function into real space (u)
+        :param n: power
+        :param l: angular momentum
+        :param pm: pmax value
+        :param prefactor: V/sqrt(d1 d2 d3)
+        """
+        self.a = (3+l+n)/2
+        self.b = 3/2 + l
+        self.l = l
+        self.half_pm = 0.5*pm
+        self.pre = (-1j)**l *prefactor*(pm**(3+n+l))*gamma(self.a)/\
+                   ((np.pi**1.5)*(2**(3+l))*gamma(self.b))
+
+    def __call__(self, u):
+        return self.pre* u**self.l * hyp1f1(self.a,self.b, -(u*self.half_pm)**2)
+
+# YAML tags
+GROUPLIST_YAMLTAG = '!PairState'
+
+class grouplist(collections.namedtuple('grouplist', 'indexpair groupops')):
+    def _asdict(self):
+        """Return a proper dict"""
+        return {'indexpair': self.indexpair, 'groupops': self.groupops}
+
+    @staticmethod
+    def grouplist_representer(dumper, data):
+        """Output a grouplist"""
+        # asdict() returns an OrderedDictionary, so pass through dict()
+        # had to rewrite _asdict() for some reason...?
+        return dumper.represent_mapping(GROUPLIST_YAMLTAG, data._asdict())
+
+    @staticmethod
+    def grouplist_constructor(loader, node):
+        """Construct a GroupOp from YAML"""
+        # ** turns the dictionary into parameters for GroupOp constructor
+        return grouplist(**loader.construct_mapping(node, deep=True))
+
+crystal.yaml.add_representer(grouplist, grouplist.grouplist_representer)
+crystal.yaml.add_constructor(GROUPLIST_YAMLTAG, grouplist.grouplist_constructor)
+
+
 class GFCrystalcalc(object):
     """
     Class calculator for the Green function, designed to work with the Crystal class.
@@ -825,7 +884,7 @@ class GFCrystalcalc(object):
           indexpair = (g(i), g(j)) tuple of mapped indices, and groupops = set of group ops
         """
         # start with a bunch of empty lists
-        grouplist = collections.namedtuple('grouplist', 'indexpair groupops')
+        # grouplist = collections.namedtuple('grouplist', 'indexpair groupops')
         groups_ij = [ [[] for j in range(self.N)] for i in range(self.N)]
         for g in self.crys.G:
             indexmap = g.indexmap[self.chem]
@@ -913,9 +972,9 @@ class GFCrystalcalc(object):
         gT_rotate = self.BlockInvertOmegaTaylor(oT_dd, oT_dr, oT_rd, oT_rr, oT_D)
         self.g_Taylor = (gT_rotate.ldot(self.vr)).rdot(self.vr.T)
         self.g_Taylor.separate()
-        g_Taylor_fnlp = {(n,l): create_fnlp(n, l, self.pmax) for (n,l) in self.g_Taylor.nl()}
+        g_Taylor_fnlp = {(n,l): Fnl_p(n, self.pmax) for (n,l) in self.g_Taylor.nl()}
         prefactor = self.crys.volume/np.sqrt(np.product(self.d))
-        self.g_Taylor_fnlu = {(n,l): create_fnlu(n, l, self.pmax, prefactor) for (n,l) in self.g_Taylor.nl()}
+        self.g_Taylor_fnlu = {(n,l): Fnl_u(n, l, self.pmax, prefactor) for (n,l) in self.g_Taylor.nl()}
         # 5. Invert Fourier expansion
         gsc_qij = np.zeros_like(self.omega_qij)
         for qind, q in enumerate(self.kpts):

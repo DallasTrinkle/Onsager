@@ -170,6 +170,9 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         # ** turns the dictionary into parameters for GroupOp constructor
         return PairState(**loader.construct_mapping(node, deep=True))
 
+crystal.yaml.add_representer(PairState, PairState.PairState_representer)
+crystal.yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
+
 
 class StarSet(object):
     """
@@ -768,9 +771,6 @@ class VectorStarSet(object):
                         bias0expansion[i, jt] += geom_bias
                         bias1expansion[i, k] += geom_bias
         return bias0expansion, bias1expansion
-
-crystal.yaml.add_representer(PairState, PairState.PairState_representer)
-crystal.yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
 
 ### Old code, moved out of VectorStarSet, as (now) redundant:
 

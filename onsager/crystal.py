@@ -1204,3 +1204,22 @@ yaml.add_constructor(NDARRAY_YAMLTAG, ndarray_constructor)
 yaml.add_representer(GroupOp, GroupOp.GroupOp_representer)
 yaml.add_constructor(GROUPOP_YAMLTAG, GroupOp.GroupOp_constructor)
 
+# representers for numpy types that trip up YAML
+# (from https://github.com/leifdenby/pycfd/blob/master/yaml_serialize.py)
+def bool_representer(dumper, data):
+    return dumper.represent_bool(data)
+yaml.add_representer(np.bool_, bool_representer)
+
+def int_representer(dumper, data):
+    return dumper.represent_int(data)
+yaml.add_representer(np.int32, int_representer)
+yaml.add_representer(np.dtype(np.int32), int_representer)
+
+def long_representer(dumper, data):
+    return dumper.represent_long(data)
+yaml.add_representer(np.int64, int_representer)
+
+def float_representer(dumper, data):
+    return dumper.represent_float(data)
+yaml.add_representer(np.float32, float_representer)
+yaml.add_representer(np.float64, float_representer)

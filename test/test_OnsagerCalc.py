@@ -115,7 +115,8 @@ class BaseTests(unittest.TestCase):
                             if any([np.allclose(vsum,np.dot(g, vGF)) for g in self.groupops]):
                                 match = True
                                 break
-                        self.assertTrue(match)
+                        self.assertTrue(match, msg='Unable to find {} + {} = {} in GFlist'.format(
+                            gv, v2, vsum))
 
     def testTracerIndexing(self):
         """Test out the generation of the tracer example indexing."""
