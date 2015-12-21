@@ -110,8 +110,7 @@ class BaseTests(unittest.TestCase):
                         vsum = gv + v2
                         match = False
                         for vGF in GFlist:
-                            if np.dot(vGF, vGF) != np.dot(vsum, vsum):
-                                continue
+                            if not np.isclose(np.dot(vGF, vGF), np.dot(vsum, vsum)): continue
                             if any([np.allclose(vsum,np.dot(g, vGF), atol=1e-8) for g in self.groupops]):
                                 match = True
                                 break
