@@ -112,7 +112,7 @@ class BaseTests(unittest.TestCase):
                         for vGF in GFlist:
                             if np.dot(vGF, vGF) != np.dot(vsum, vsum):
                                 continue
-                            if any([np.allclose(vsum,np.dot(g, vGF)) for g in self.groupops]):
+                            if any([np.allclose(vsum,np.dot(g, vGF), atol=1e-8) for g in self.groupops]):
                                 match = True
                                 break
                         self.assertTrue(match, msg='Unable to find {} + {} = {} in GFlist'.format(
