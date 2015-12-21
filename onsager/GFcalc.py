@@ -768,7 +768,7 @@ class Fnl_u(object):
         return self.pre* u**self.l * hyp1f1(self.a,self.b, -(u*self.half_pm)**2)
 
 # YAML tags
-GROUPLIST_YAMLTAG = '!PairState'
+GROUPLIST_YAMLTAG = '!grouplist'
 
 class grouplist(collections.namedtuple('grouplist', 'indexpair groupops')):
     def _asdict(self):
@@ -785,7 +785,7 @@ class grouplist(collections.namedtuple('grouplist', 'indexpair groupops')):
     @staticmethod
     def grouplist_constructor(loader, node):
         """Construct a GroupOp from YAML"""
-        # ** turns the dictionary into parameters for GroupOp constructor
+        # ** turns the dictionary into parameters for grouplist constructor
         return grouplist(**loader.construct_mapping(node, deep=True))
 
 crystal.yaml.add_representer(grouplist, grouplist.grouplist_representer)

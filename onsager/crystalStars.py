@@ -167,7 +167,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
     @staticmethod
     def PairState_constructor(loader, node):
         """Construct a GroupOp from YAML"""
-        # ** turns the dictionary into parameters for GroupOp constructor
+        # ** turns the dictionary into parameters for PairState constructor
         return PairState(**loader.construct_mapping(node, deep=True))
 
 crystal.yaml.add_representer(PairState, PairState.PairState_representer)
