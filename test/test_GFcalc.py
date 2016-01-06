@@ -791,7 +791,7 @@ class GreenFuncCrystalTests(unittest.TestCase):
         HCP_GF.SetRates([1],[0],[1,3],[0,0])  # one unique site, two types of jumps
         g0 = HCP_GF(0,0,hcp_zero)
         gw = 0
-        for jumplist, omega in zip(self.HCP_jumpnetwork, HCP_GF.symmrate):
+        for jumplist, omega in zip(self.HCP_jumpnetwork, HCP_GF.symmrate*HCP_GF.maxrate):
             for (i,j), dx in jumplist:
                 if (i==0):
                     gw += omega*(HCP_GF(i,j,dx) - g0)

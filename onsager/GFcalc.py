@@ -937,9 +937,11 @@ class GFCrystalcalc(object):
             return lambda u: pre* u**l * hyp1f1(a,b, -(u*half_pm)**2)
 
         self.symmrate = self.SymmRates(pre, betaene, preT, betaeneT)
+        self.maxrate = self.symmrate.max()
+        self.symmrate /= self.maxrate
         self.escape = -np.diag([sum(self.SEjumps[i,J]*pretrans/pre[wi]*np.exp(betaene[wi]-BET)
                            for J,pretrans,BET in zip(itertools.count(), preT, betaeneT))
-                       for i,wi in enumerate(self.invmap)])
+                       for i,wi in enumerate(self.invmap)]) / self.maxrate
         self.omega_qij = np.tensordot(self.symmrate, self.FTjumps, axes=(0,0))
         self.omega_qij[:] += self.escape # adds it to every point
         self.omega_Taylor = sum(symmrate*expansion
@@ -954,9 +956,9 @@ class GFCrystalcalc(object):
         # 2. Calculate D
         self.D = self.Diffusivity(oT_D)
         # 3. Spatially rotate the Taylor expansion
-        self.d, self.e = LA.eigh(self.D)
+        self.d, self.e = LA.eigh(self.D/self.maxrate)
         # had been 1e-11; changed to 1e-7 to reflect likely integration accuracy of k-point grids
-        self.pmax = np.sqrt(min([np.dot(G,np.dot(G,self.D)) for G in self.crys.BZG])/-np.log(1e-7))
+        self.pmax = np.sqrt(min([np.dot(G,np.dot(G,self.D/self.maxrate)) for G in self.crys.BZG])/-np.log(1e-7))
         self.qptrans = self.e.copy()
         self.pqtrans = self.e.T.copy()
         self.uxtrans = self.e.T.copy()
@@ -1026,7 +1028,7 @@ class GFCrystalcalc(object):
         gTaylor = self.gT_ij[i][j](np.dot(self.uxtrans, dx), self.g_Taylor_fnlu)
         if not np.isclose(gTaylor.imag, 0): raise ArithmeticError("Got complex IFT from Taylor? {}".format(gTaylor))
         # combine:
-        return (gIFT+gTaylor).real
+        return (gIFT+gTaylor).real / self.maxrate
 
     def DiagGamma(self, omega = None):
         """
@@ -1074,7 +1076,7 @@ class GFCrystalcalc(object):
                         D[t] += 0.5*c[ind, 0, 0].real
                         D[t[1], t[0]] += 0.5*c[ind, 0, 0].real
         # note: the "D" constructed this way will be negative! (as it is -q.D.q)
-        return -D
+        return -D*self.maxrate
 
     def BlockRotateOmegaTaylor(self, omega_Taylor_rotate):
         """
