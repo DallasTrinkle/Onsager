@@ -270,8 +270,9 @@ class Taylor3D(object):
         the old.
         NOTE: This is more complex than one might first realize. If we only work with cases
         where all of the entries for a given power n have those same n (that is, not reduced),
-        then this works. However, we run into problems with *reductions*: e.g., for n=2, the
-        power x^0 y^0 z^0 is, in reality, x^2+y^2+z^2, and hence *it must be transformed*.
+        then this is straightforward. However, we run into problems with *reductions*: e.g.,
+        for n=2, the power x^0 y^0 z^0 is, in reality, x^2+y^2+z^2, and hence *it must be
+        transformed* because we allow non-orthogonal transformation matrices.
         :param qptrans: 3x3 matrix
         :return: Lmax +1 x Npow x Npow transformation matrix [n][original pow][new pow] for
         each n from 0 up to Lmax

@@ -955,7 +955,8 @@ class GFCrystalcalc(object):
         self.D = self.Diffusivity(oT_D)
         # 3. Spatially rotate the Taylor expansion
         self.d, self.e = LA.eigh(self.D)
-        self.pmax = np.sqrt(min([np.dot(G,np.dot(G,self.D)) for G in self.crys.BZG])/-np.log(1e-11))
+        # had been 1e-11; changed to 1e-7 to reflect likely integration accuracy of k-point grids
+        self.pmax = np.sqrt(min([np.dot(G,np.dot(G,self.D)) for G in self.crys.BZG])/-np.log(1e-7))
         self.qptrans = self.e.copy()
         self.pqtrans = self.e.T.copy()
         self.uxtrans = self.e.T.copy()

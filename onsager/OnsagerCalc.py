@@ -847,7 +847,7 @@ class VacancyMediated(object):
             for i in w:
                 self.invmap[i] = ind
         self.om0_jn= copy.deepcopy(jumpnetwork)
-        self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn) # Nmax?
+        self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4) # Nmax?
         # do some initial setup:
         self.thermo = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
         self.NNstar = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
@@ -948,9 +948,10 @@ class VacancyMediated(object):
         return [(self.kinetic.states[jlist[0][0][0]], self.kinetic.states[jlist[0][0][1]]) for jlist in om], \
                jt.copy()
 
-    def maketracerpreene(self, preT0, eneT0, preV=None, eneV=None):
+    def maketracerpreene(self, preT0, eneT0, **ignoredextraarguments):
         """
         Generates corresponding energies / prefactors for an isotopic tracer. Returns a dictionary.
+        (we ignore extra arguments so that a dictionary including additional entries can be passed)
 
         :param preT0[Nomeg0]: prefactor for vacancy jump transitions (follows jumpnetwork)
         :param eneT0[Nomega0]: transition energy state for vacancy jumps
@@ -977,10 +978,11 @@ class VacancyMediated(object):
         return {'preS': preS, 'eneS': eneS, 'preSV': preSV, 'eneSV': eneSV,
                 'preT1': preT1, 'eneT1': eneT1, 'preT2': preT2, 'eneT2': eneT2}
 
-    def makeLIMBpreene(self, preS, eneS, preSV, eneSV, preT0, eneT0, preV=None, eneV=None):
+    def makeLIMBpreene(self, preS, eneS, preSV, eneSV, preT0, eneT0, **ignoredextraarguments):
         """
         Generates corresponding energies / prefactors for corresponding to LIMB
         (Linearized interpolation of migration barrier approximation). Returns a dictionary.
+        (we ignore extra arguments so that a dictionary including additional entries can be passed)
 
         :param preS[NWyckoff]: prefactor for solute formation
         :param eneS[NWyckoff]: solute formation energy
@@ -1018,12 +1020,13 @@ class VacancyMediated(object):
 
     @staticmethod
     def preene2betafree(kT, preV, eneV, preS, eneS, preSV, eneSV,
-                        preT0, eneT0, preT1, eneT1, preT2, eneT2):
+                        preT0, eneT0, preT1, eneT1, preT2, eneT2, **ignoredextraarguments):
         """
         Read in a series of prefactors (e^(S/kB)) and energies, and return beta*free energy for
         energies and transition state energies. Used to provide scaled values to Lij() and _lij().
         Can specify all of the entries using a dictionary; e.g., preene2betafree(kT, **data_dict)
         and then send that output as input to Lij: Lij(*preene2betafree(kT, **data_dict))
+        (we ignore extra arguments so that a dictionary including additional entries can be passed)
 
         :param kT: temperature times Boltzmann's constant kB
         :param preV: prefactor for vacancy formation (prod of inverse vibrational frequencies)
