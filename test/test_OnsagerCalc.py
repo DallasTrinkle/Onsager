@@ -288,7 +288,7 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
         self.correl = 0.653109 # 0.653
 
     def testtracer(self):
-        """Test that FCC tracer works as expected"""
+        """Test that arbitrary tracer works as expected"""
         # Make a calculator with one neighbor shell
         print('Crystal: ' + self.crystalname)
         kT = 1.
@@ -308,7 +308,7 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
               np.exp((thermaldef['eneV'][0]-thermaldef['eneT0'][0])/kT)
         for (i,j), dx in self.jumpnetwork[0]:
             L0vv += 0.5*np.outer(dx,dx) * om0
-        L0vv /= self.crys.N
+        L0vv /= len(self.crys.basis[self.chem])
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
         print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
         for L in [Lvv, Lss, Lsv, L1vv]:
@@ -430,6 +430,22 @@ class CrystalOnsagerTestsDiamond(CrystalOnsagerTestsSC):
         self.sitelist = self.crys.sitelist(self.chem)
         self.crystalname = 'Diamond Cubic a0={}'.format(self.a0)
         self.correl = 0.5
+
+class CrystalOnsagerTestsNbO(CrystalOnsagerTestsSC):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+    def setUp(self):
+        self.a0 = 1.
+        self.crys = crystal.Crystal(self.a0*np.eye(3),
+                                    [[np.array([0,0.5,0.5]),np.array([0.5,0,0.5]),np.array([0.5,0.5,0])],
+                                     [np.array([0.5,0,0]), np.array([0,0.5,0]), np.array([0,0,0.5])]],
+                                    ['Nb', 'O'])
+        self.chem = 1 # do on the oxygen sublattice, though it works on Nb too
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.80*self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'NbO (oxygen sublattice) a0={}'.format(self.a0)
+        self.correl = 0.688916  # doi://10.1080/01418618308234882  (Koiwa & Ishioka paper)
 
 class CrystalOnsagerTestsHCP(unittest.TestCase):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
