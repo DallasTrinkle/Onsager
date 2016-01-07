@@ -822,8 +822,10 @@ class GFCrystalcalc(object):
         # to allow a new kpoint mesh to be generated "on the fly", we'd need to store
         # a copy for regeneration
         # self.jumpnetwork = jumpnetwork
-        # generate a kptmesh
-        self.kptgrid = (4*Nmax, 4*Nmax, 4*Nmax)
+        # generate a kptmesh: now we try to make the mesh more "uniform" ??
+        bmagn = np.array([ np.sqrt(np.dot(crys.reciplatt[:,i], crys.reciplatt[:,i])) for i in range(3) ])
+        bmagn /= np.power(np.product(bmagn), 1/3)
+        self.kptgrid = tuple(2*np.int(np.ceil(2*Nmax*b)) for b in bmagn) # makes sure we have even meshes
         self.kpts, self.wts = crys.reducekptmesh(crys.fullkptmesh(self.kptgrid))
         self.Nkpt = self.kpts.shape[0]
         # generate the Fourier transformation for each jump

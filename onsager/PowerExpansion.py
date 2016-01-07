@@ -888,7 +888,7 @@ class Taylor3D(object):
         return Taylor3D(self.inversecoeff(self, Nmax))
 
     @classmethod
-    def reducecoeff(cls, a, inplace=False):
+    def reducecoeff(cls, a, inplace=False, atol=1e-10):
         """
         Projects coefficients through Ylm space, then eliminates any zero contributions
         (including possible reduction in l values, too).
@@ -908,14 +908,14 @@ class Taylor3D(object):
             c = np.tensordot(projector[:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
             # print(c)
             # now, systematically attempt to reduce the l value
-            if np.allclose(c, 0):
+            if np.allclose(c, 0, atol=atol):
                 # occasionally, it gets reduced to zero:
                 dellist.append(coeffindex)
             else:
                 # then we have something to look at... systematically attempt to drop l:
                 # check in blocks
                 for lmin in range(l, -1, -1):
-                    if not np.allclose(c[cls.powlrange[lmin-1]:cls.powlrange[lmin]],0):
+                    if not np.allclose(c[cls.powlrange[lmin-1]:cls.powlrange[lmin]],0, atol=atol):
                         break
                 # reduce! Note: we do this *every time* because c is the projected version of our coeff.
                 ra[coeffindex] = (n, lmin, c[:cls.powlrange[lmin]].copy())
@@ -926,7 +926,7 @@ class Taylor3D(object):
         return ra
 
     @classmethod
-    def collectcoeff(cls, a, inplace=False):
+    def collectcoeff(cls, a, inplace=False, atol=1e-10):
         """
         Collects coefficients: sums up all the common n values. Best to be done *after*
         reduce is called.
@@ -947,7 +947,7 @@ class Taylor3D(object):
         for coeffindex,(n, l, c) in enumerate(ca):
             # first, project
             c = np.tensordot(projector[:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
-            if np.allclose(c, 0):
+            if np.allclose(c, 0, atol=atol):
                 # if we have zero coefficients, remove from the list
                 dellist.append(coeffindex)
             else:
@@ -974,7 +974,7 @@ class Taylor3D(object):
         return self
 
     @classmethod
-    def separatecoeff(cls, a, inplace=False):
+    def separatecoeff(cls, a, inplace=False, atol=1e-10):
         """
         Projects coefficients through Ylm space, one by one. Assumes they've already been
         reduced and collected first; if not, could lead to duplicated (n,l) entries in list, which
@@ -996,10 +996,10 @@ class Taylor3D(object):
             for l0 in range(l):
                 cl0 = np.tensordot(cls.Lproj[l0][:cls.powlrange[l],:cls.powlrange[l]],
                                    c, axes=1)[:cls.powlrange[l0]]
-                if not np.allclose(cl0, 0):
+                if not np.allclose(cl0, 0, atol=atol):
                     sa.append((n, l0, cl0))
             c = np.tensordot(cls.Lproj[l][:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
-            if not np.allclose(c, 0):
+            if not np.allclose(c, 0, atol=atol):
                 sa[coeffindex] = (n, l, c) # this *should not be zero* but just in case...
             else:
                 dellist.append(coeffindex)

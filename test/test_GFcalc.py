@@ -770,7 +770,7 @@ class GreenFuncCrystalTests(unittest.TestCase):
 
     def testHCP(self):
         """Test on HCP"""
-        HCP_GF = GFcalc.GFCrystalcalc(self.HCP, 0, self.HCP_sitelist, self.HCP_jumpnetwork, Nmax=6)
+        HCP_GF = GFcalc.GFCrystalcalc(self.HCP, 0, self.HCP_sitelist, self.HCP_jumpnetwork, Nmax=4)
         HCP_GF.SetRates([1],[0],[1,1],[0,0])  # one unique site, two types of jumps
         # print(HCP_GF.Diffusivity())
         # make some basic vectors:
@@ -786,7 +786,7 @@ class GreenFuncCrystalTests(unittest.TestCase):
         g0 = HCP_GF(0,0,hcp_zero)
         gbasal = HCP_GF(0,0,hcp_basal)
         gpyram = HCP_GF(0,1,hcp_pyram)
-        self.assertAlmostEqual(-12*g0 + 6*gbasal + 6*gpyram, 1, places=4)
+        self.assertAlmostEqual(-12*g0 + 6*gbasal + 6*gpyram, 1, places=6)
         # Try again, but with different rates:
         HCP_GF.SetRates([1],[0],[1,3],[0,0])  # one unique site, two types of jumps
         g0 = HCP_GF(0,0,hcp_zero)
@@ -795,7 +795,7 @@ class GreenFuncCrystalTests(unittest.TestCase):
             for (i,j), dx in jumplist:
                 if (i==0):
                     gw += omega*(HCP_GF(i,j,dx) - g0)
-        self.assertAlmostEqual(gw, 1, places=4)
+        self.assertAlmostEqual(gw, 1, places=6)
 
         # for jumplist in self.HCP_jumpnetwork:
         #     for (i,j), dx in jumplist:
