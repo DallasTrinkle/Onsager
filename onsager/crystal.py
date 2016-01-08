@@ -700,7 +700,7 @@ class Crystal(object):
         """
         if BZG is None: BZG = self.BZG
         # checks that vec.G < G^2 for all G (and throws out the option that vec == G, in case threshold == 0)
-        return all([np.dot(vec, G) < (np.dot(G, G) + threshold) for G in BZG if not np.all(vec == G)])
+        return all(np.dot(vec, G) < (np.dot(G, G) + threshold) for G in BZG if not np.all(vec == G))
 
     def genBZG(self):
         """
@@ -1168,11 +1168,12 @@ class Crystal(object):
         basewt = 1 / Nkpt
         for kmax in k2_indices:
             complist = []
+            symmcomplist = []
             wtlist = []
             for k in kptlist[kmin:kmax]:
                 match = False
-                for i, kcomp in enumerate(complist):
-                    if self.g_direc_equivalent(k, kcomp, threshold):
+                for i, symmcomp in enumerate(symmcomplist):
+                    if any(np.allclose(k, gk, rtol=0, atol=threshold) for gk in symmcomp):
                         # update weight, kick out
                         wtlist[i] += basewt
                         match = True
@@ -1180,6 +1181,7 @@ class Crystal(object):
                 if not match:
                     # new symmetry point!
                     complist.append(k)
+                    symmcomplist.append([self.g_direc(g, k) for g in self.G])
                     wtlist.append(basewt)
             kptsym += complist
             wsym += wtlist
