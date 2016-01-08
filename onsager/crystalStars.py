@@ -91,7 +91,8 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
 
     def __hash__(self):
         """Hash, so that we can make sets of states"""
-        return self.i ^ (self.j << 1) ^ (self.R[0] << 2) ^ (self.R[1] << 3) ^ (self.R[2] << 4)
+        # return self.i ^ (self.j << 1) ^ (self.R[0] << 2) ^ (self.R[1] << 3) ^ (self.R[2] << 4)
+        return hash((self.i, self.j, self.R[0], self.R[1], self.R[2]))
 
     def __add__(self, other):
         """Add two states: works if and only if self.j == other.i
@@ -293,9 +294,11 @@ class StarSet(object):
         self.Nstars = len(self.stars)
         # generate index: which star is each state a member of?
         self.index = np.zeros(self.Nstates, dtype=int)
+        self.indexdict = {}
         for si, star in enumerate(self.stars):
             for xi in star:
                 self.index[xi] = si
+                self.indexdict[self.states[xi]] = (xi, si)
 
     def copy(self, empty=False):
         """Return a copy of the StarSet; done as efficiently as possible; empty means skip the shells, etc."""
@@ -311,6 +314,7 @@ class StarSet(object):
             newStarSet.Nstars = self.Nstars
             newStarSet.Nstates = self.Nstates
             newStarSet.index = self.index.copy()
+            newStarSet.indexdict = self.indexdict.copy()
         else: newStarSet.generate(0)
         return newStarSet
 
@@ -341,6 +345,7 @@ class StarSet(object):
             self.Nstars = other.Nstars
             self.Nstates = other.Nstates
             self.index = other.index.copy()
+            self.indexdict = other.indexdict.copy()
             return self
         self.Nshells += other.Nshells
         Nold = self.Nstates
@@ -389,20 +394,24 @@ class StarSet(object):
             star = self.stars[si]
             for xi in star:
                 self.index[xi] = si
+                self.indexdict[self.states[xi]] = (xi, si)
         self.Nstars = Nnew
         return self
 
     # replaces pointindex:
     def stateindex(self, PS):
         """Return the index of pair state PS; None if not found"""
-        try: return self.states.index(PS)
+        # try: return self.states.index(PS)
+        try: return self.indexdict[PS][0]
         except: return None
 
     def starindex(self, PS):
         """Return the index for the star to which pair state PS belongs; None if not found"""
-        ind = self.stateindex(PS)
-        if ind is None: return None
-        return self.index[ind]
+        # ind = self.stateindex(PS)
+        # if ind is None: return None
+        # return self.index[ind]
+        try: return self.indexdict[PS][1]
+        except: return None
 
     def symmatch(self, PS1, PS2):
         """True if there exists a group operation that makes PS1 == PS2."""
@@ -503,16 +512,16 @@ class StarSet(object):
         """
         if S1.Nshells < 1 or S2.Nshells < 1: raise ValueError('Need to initialize stars')
         self.Nshells = S1.Nshells + S2.Nshells  # an estimate...
-        self.states = []
+        stateset = set([])
+        # self.states = []
         for s1 in S1.states:
             for s2 in S2.states:
                 # this try/except structure lets us attempt addition and kick out if not possible
                 try: s = s2 ^ s1  # points from vacancy state of s1 to vacancy state of s2
                 except: continue
-                # now we include zero.
-                if not any(s == st for st in self.states): self.states.append(s)
+                stateset.add(s)
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
-        self.states.sort(key=PairState.sortkey)
+        self.states = sorted([s for s in stateset], key=PairState.sortkey)
         self.Nstates = len(self.states)
         if self.Nstates > 0:
             x2_indices = []
@@ -546,9 +555,11 @@ class StarSet(object):
         self.Nstars = len(self.stars)
         # generate index: which star is each state a member of?
         self.index = np.zeros(self.Nstates, dtype=int)
+        self.indexdict = {}
         for si, star in enumerate(self.stars):
             for xi in star:
                 self.index[xi] = si
+                self.indexdict[self.states[xi]] = (xi, si)
 
 
 class VectorStarSet(object):
