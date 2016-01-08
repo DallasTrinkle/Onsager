@@ -8,10 +8,6 @@ analytically calculated IFT for the Green function.
 Really designed to get used by other code.
 """
 
-# TODO: reduction of expansion (consolidate n terms, reduce l if possible after projection)
-# TODO: projection expansion (strict (n,l) pairs)
-# TODO: test both, and test inversion expansion series
-
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np

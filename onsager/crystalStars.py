@@ -20,7 +20,7 @@ The big changes are:
   is because the "points" now have a more complex representation (see above).
 """
 
-# TODO: need to make sure we can read / write stars for optimal functionality (YAML?)
+# TODO: need to make sure we can read / write stars for optimal functionality (HDF5?)
 
 __author__ = 'Dallas R. Trinkle'
 

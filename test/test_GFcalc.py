@@ -8,7 +8,28 @@ import unittest
 import numpy as np
 from scipy import special
 import onsager.GFcalc as GFcalc
-import collections
+
+def poleFT(di, u, pm, erfupm=-1):
+    """
+    Calculates the pole FT (excluding the volume prefactor) given the `di` eigenvalues,
+    the value of u magnitude (available from unorm), and the pmax scaling factor.
+
+    :param di : array [:]  eigenvalues of `D2`
+    :param u : double  magnitude of u, from unorm() = x.D^-1.x
+    :param pm : double  scaling factor pmax for exponential cutoff function
+    :param erfupm : double, optional  value of erf(0.5*u*pm) (negative = not set, then its calculated)
+    :return poleFT : double
+        integral of Gaussian cutoff function corresponding to a l=0 pole;
+        erf(0.5*u*pm)/(4*pi*u*sqrt(d1*d2*d3)) if u>0
+        pm/(4*pi^3/2 * sqrt(d1*d2*d3)) if u==0
+    """
+
+    if (u == 0):
+        return 0.25 * pm / np.sqrt(np.product(di * np.pi))
+    if (erfupm < 0):
+        erfupm = special.erf(0.5 * u * pm)
+    return erfupm * 0.25 / (np.pi * u * np.sqrt(np.product(di)))
+
 
 class GreenFuncCrystalTests(unittest.TestCase):
     """Test new implementation of GF calculator, based on Crystal class"""
@@ -26,7 +47,7 @@ class GreenFuncCrystalTests(unittest.TestCase):
         FCC_GF.SetRates([1],[0],[1],[0])
         # test the pole function:
         for u in np.linspace(0,5,21):
-            pole_orig = FCC_GF.crys.volume*GFcalc.poleFT(FCC_GF.d, u, FCC_GF.pmax)
+            pole_orig = FCC_GF.crys.volume*poleFT(FCC_GF.d, u, FCC_GF.pmax)
             pole_new = FCC_GF.g_Taylor_fnlu[(-2,0)](u).real
             self.assertAlmostEqual(pole_orig, pole_new, places=15, msg="Pole (-2,0) failed for u={}".format(u))
         # test the discontinuity function:
