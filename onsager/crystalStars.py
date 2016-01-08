@@ -373,12 +373,13 @@ class StarSet(object):
         xmin = Nold
         for xmax in x2_indices:
             complist_stars = [] # for finding unique stars
+            symmstate_list = [] # list of sets corresponding to those stars...
             for xi in range(xmin, xmax):
                 x = self.states[xi]
                 # is this a new rep. for a unique star?
                 match = False
-                for i, s in enumerate(complist_stars):
-                    if self.symmatch(x, self.states[s[0]]):
+                for i, gs in enumerate(symmstate_list):
+                    if x in gs:
                         # update star
                         complist_stars[i].append(xi)
                         match = True
@@ -386,6 +387,7 @@ class StarSet(object):
                 if not match:
                     # new symmetry point!
                     complist_stars.append([xi])
+                    symmstate_list.append(set([x.g(self.crys, self.chem, g) for g in self.crys.G]))
             self.stars += complist_stars
             xmin=xmax
         self.Nstates = Nnew
@@ -418,8 +420,8 @@ class StarSet(object):
 
     def symmatch(self, PS1, PS2):
         """True if there exists a group operation that makes PS1 == PS2."""
-        # return any(PS1 == PS2.g(self.crys, self.chem, g) for g in self.crys.G)
-        return PS1 in set([PS2.g(self.crys, self.chem, g) for g in self.crys.G])
+        return any(PS1 == PS2.g(self.crys, self.chem, g) for g in self.crys.G)
+        # return PS1 in set([PS2.g(self.crys, self.chem, g) for g in self.crys.G])
 
     # replaces DoubleStarSet
     def jumpnetwork_omega1(self):
@@ -540,12 +542,13 @@ class StarSet(object):
             xmin = 0
             for xmax in x2_indices:
                 complist_stars = [] # for finding unique stars
+                symmstate_list = [] # list of sets corresponding to those stars...
                 for xi in range(xmin, xmax):
                     x = self.states[xi]
                     # is this a new rep. for a unique star?
                     match = False
-                    for i, s in enumerate(complist_stars):
-                        if self.symmatch(x, self.states[s[0]]):
+                    for i, gs in enumerate(symmstate_list):
+                        if x in gs:
                             # update star
                             complist_stars[i].append(xi)
                             match = True
@@ -553,6 +556,7 @@ class StarSet(object):
                     if not match:
                         # new symmetry point!
                         complist_stars.append([xi])
+                        symmstate_list.append(set([x.g(self.crys, self.chem, g) for g in self.crys.G]))
                 self.stars += complist_stars
                 xmin=xmax
         else: self.stars = [[]]
