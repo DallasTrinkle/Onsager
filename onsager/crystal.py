@@ -37,7 +37,7 @@ def inhalf(vec):
     return vec - np.floor(vec + 0.5)
 
 
-def maptranslation(oldpos, newpos):
+def maptranslation(oldpos, newpos, threshold=1e-8):
     """
     Given a list of transformed positions, identify if there's a translation vector
     that maps from the current positions to the new position.
@@ -78,7 +78,7 @@ def maptranslation(oldpos, newpos):
             maplist = []
             for rua in atomlist1:
                 for j, uj in enumerate(atomlist0):
-                    if np.allclose(inhalf(uj - rua - trans), 0):
+                    if np.all(abs(inhalf(uj - rua - trans))<threshold):
                         maplist.append(j)
                         break
             if len(maplist) != len(atomlist0):
@@ -585,7 +585,7 @@ class Crystal(object):
                 shift[d] = 0.5
         self.basis = [[incell(atom + shift) for atom in atomlist] for atomlist in self.basis]
 
-    def reduce(self):
+    def reduce(self, threshold=1e-8):
         """
         Reduces the lattice and basis, if needed. Works (tail) recursively.
         """
@@ -606,7 +606,7 @@ class Crystal(object):
             trans = True
             for atomlist in self.basis:
                 for u in atomlist:
-                    if np.all([not np.allclose(inhalf(u + t - v), 0) for v in atomlist]):
+                    if np.all([not np.all(abs(inhalf(u + t - v))<threshold) for v in atomlist]):
                         trans = False
                         break
             if trans:
@@ -918,7 +918,7 @@ class Crystal(object):
 
         :return: True if equivalent by a point group operation
         """
-        return any(np.allclose(d1, self.g_direc(g, d2), rtol=0, atol=threshold) for g in self.G)
+        return any(np.all(abs(d1 - self.g_direc(g, d2)) < threshold) for g in self.G)
 
     def genpoint(self):
         """
@@ -1173,7 +1173,8 @@ class Crystal(object):
             for k in kptlist[kmin:kmax]:
                 match = False
                 for i, symmcomp in enumerate(symmcomplist):
-                    if any(np.allclose(k, gk, rtol=0, atol=threshold) for gk in symmcomp):
+                    # if any(np.allclose(k, gk, rtol=0, atol=threshold) for gk in symmcomp):
+                    if any(np.all(abs(k-gk)<threshold) for gk in symmcomp):
                         # update weight, kick out
                         wtlist[i] += basewt
                         match = True
