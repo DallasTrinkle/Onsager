@@ -20,7 +20,6 @@ from functools import reduce
 # interfaces are either at the bottom, or staticmethods in the corresponding object
 NDARRAY_YAMLTAG = '!numpy.ndarray'
 GROUPOP_YAMLTAG = '!GroupOp'
-#FROZENSET_YAMLTAG = u'!set'
 
 
 def incell(vec):
@@ -135,7 +134,6 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
 
     def __eq__(self, other):
         """Test for equality--we use numpy.isclose for comparison, since that's what we usually care about"""
-        # if not type(other) is not GroupOp: return False
         return isinstance(other, self.__class__) and \
                np.all(self.rot == other.rot) and \
                np.allclose(self.trans, other.trans) and \
@@ -154,8 +152,6 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         ### that in a hash function. We lose a little bit on efficiency if we construct a set that
         ### has a whole lot of translation operations, but that's not usually what we will do.
         return hash(self.rot.data.tobytes())
-        # return int(reduce(lambda x,y: x^y, [256, 128, 64, 32, 16, 8, 4, 2, 1] * self.rot.reshape((9,))))
-        # ^ reduce(lambda x,y: x^y, [hash(x) for x in self.trans])
 
     def __add__(self, other):
         """Add a translation to our group operation"""
