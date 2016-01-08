@@ -58,7 +58,7 @@ class FiveFreqFreqCalc:
                 thermaldef['preT1'][j] = w1*SVprob
             else:
                 thermaldef['preT1'][j] = w4
-        return self.diffuser.Lij(*self.diffuser..preene2betafree(1., **thermaldef))
+        return self.diffuser.Lij(*self.diffuser.preene2betafree(1., **thermaldef))
 
 if __name__ == '__main__':
     import argparse

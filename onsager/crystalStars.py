@@ -242,25 +242,24 @@ class StarSet(object):
         """
         if Nshells == getattr(self, 'Nshells', -1): return
         self.Nshells = Nshells
-        if Nshells > 0: self.states = self.jumplist.copy()
-        else: self.states = []
-        lastshell = list(self.states)
+        if Nshells > 0: stateset = set(self.jumplist)
+        else: stateset = set([])
+        lastshell = stateset.copy()
         for i in range(Nshells-1):
             # add all NNvect to last shell produced, always excluding 0
             # lastshell = [v1+v2 for v1 in lastshell for v2 in self.NNvect if not all(abs(v1 + v2) < threshold)]
-            nextshell = []
+            nextshell = set([])
             for s1 in lastshell:
                 for s2 in self.jumplist:
                     # this try/except structure lets us attempt addition and kick out if not possible
                     try: s = s1 + s2
                     except: continue
                     if not s.iszero():
-                        if not any(s == st for st in self.states):
-                            nextshell.append(s)
-                            self.states.append(s)
+                        nextshell.add(s)
+                        stateset.add(s)
             lastshell = nextshell
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
-        self.states.sort(key=PairState.sortkey)
+        self.states = sorted([s for s in stateset], key=PairState.sortkey)
         self.Nstates = len(self.states)
         if self.Nstates > 0:
             x2_indices = []
@@ -275,12 +274,13 @@ class StarSet(object):
             xmin = 0
             for xmax in x2_indices:
                 complist_stars = [] # for finding unique stars
+                symmstate_list = [] # list of sets corresponding to those stars...
                 for xi in range(xmin, xmax):
                     x = self.states[xi]
                     # is this a new rep. for a unique star?
                     match = False
-                    for i, s in enumerate(complist_stars):
-                        if self.symmatch(x, self.states[s[0]]):
+                    for i, gs in enumerate(symmstate_list):
+                        if x in gs:
                             # update star
                             complist_stars[i].append(xi)
                             match = True
@@ -288,6 +288,7 @@ class StarSet(object):
                     if not match:
                         # new symmetry point!
                         complist_stars.append([xi])
+                        symmstate_list.append(set([x.g(self.crys, self.chem, g) for g in self.crys.G]))
                 self.stars += complist_stars
                 xmin=xmax
         else: self.stars = [[]]
@@ -349,14 +350,16 @@ class StarSet(object):
             return self
         self.Nshells += other.Nshells
         Nold = self.Nstates
+        oldstateset = set(self.states)
+        newstateset = set([])
         for s1 in self.states[:Nold]:
             for s2 in other.states:
                 # this try/except structure lets us attempt addition and kick out if not possible
                 try: s = s1 + s2
                 except: continue
-                if not s.iszero() and not any(s == st for st in self.states): self.states.append(s)
+                if not s.iszero() and not s in oldstateset: newstateset.add(s)
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
-        self.states[Nold:] = sorted(self.states[Nold:], key=PairState.sortkey)
+        self.states += sorted([s for s in newstateset], key=PairState.sortkey)
         Nnew = len(self.states)
         x2_indices = []
         x2old = np.dot(self.states[Nold].dx, self.states[Nold].dx)
@@ -415,7 +418,8 @@ class StarSet(object):
 
     def symmatch(self, PS1, PS2):
         """True if there exists a group operation that makes PS1 == PS2."""
-        return any(PS1 == PS2.g(self.crys, self.chem, g) for g in self.crys.G)
+        # return any(PS1 == PS2.g(self.crys, self.chem, g) for g in self.crys.G)
+        return PS1 in set([PS2.g(self.crys, self.chem, g) for g in self.crys.G])
 
     # replaces DoubleStarSet
     def jumpnetwork_omega1(self):
