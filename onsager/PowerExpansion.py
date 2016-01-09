@@ -13,6 +13,7 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 from numbers import Number
 from scipy.special import factorial
+import h5py
 
 class Taylor3D(object):
     """
@@ -349,6 +350,7 @@ class Taylor3D(object):
         cls.Lproj = cls.makeLprojections()
         cls.directmult = cls.makedirectmult()
         cls.powercoeff = cls.makepowercoeff()
+        cls.HDF5str = 'coeff.{}.{}'  # needed for addhdf5()
         cls.__INITIALIZED__ = True
 
     def __init__(self, coefflist = [], Lmax = 4, nodeepcopy=False):
@@ -375,6 +377,36 @@ class Taylor3D(object):
         Returns a copy of the current expansion
         """
         return Taylor3D(self.coefflist)
+
+    def addhdf5(self, HDF5group):
+        """
+        Adds an HDF5 representation of object into an HDF5group (needs to already exist).
+
+        Example: if f is an open HDF5, then T3D.addhdf5(f.create_group('T3D')) will
+          (1) create the group named 'T3D', and then (2) put the T3D representation in that group.
+        :param HDF5group: HDF5 group
+        """
+        for (n, l, c) in self.coefflist:
+            coeffstr = self.HDF5str.format(n, l)
+            HDF5group[coeffstr] = c
+            HDF5group[coeffstr].attrs['n'] = n
+            HDF5group[coeffstr].attrs['l'] = l
+
+    @classmethod
+    def loadhdf5(cls, HDF5group):
+        """
+        Creates a new T3D from an HDF5 group.
+        :param HDFgroup: HDF5 group
+        :return: new T3D object
+        """
+        t3d = cls()  # initialize
+        for k, c in HDF5group.items():
+            n = HDF5group[k].attrs['n']
+            l = HDF5group[k].attrs['l']
+            if l > t3d.Lmax or l < 0:
+                raise ValueError('HDF5 group data contains illegal l = {} for {}'.format(l, k))
+            t3d.coefflist.append((n, l, c[:]))
+        return t3d
 
     @classmethod
     def zeros(cls, nmin, nmax, shape, dtype=complex):
@@ -456,7 +488,6 @@ class Taylor3D(object):
                 self.coefflist.append((coeff[0], coeff[1], coeff[2].copy()))
         self.coefflist.sort(key=self.__sortkey)
 
-    # def __call__(self, *args, **kwargs):
     def __call__(self, u, fnu=None):
         """
         Method for evaluating our 3D Taylor expansion. We have two approaches: if we are
