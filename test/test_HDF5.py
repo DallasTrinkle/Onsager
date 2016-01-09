@@ -38,3 +38,5 @@ class HDF5ParsingTests(unittest.TestCase):
                 self.assertEqual(n0, n1)
                 self.assertEqual(l0, l1)
                 self.assertTrue(np.all(coeff0 == coeff1))
+        c1.dumpinternalsHDF5(self.f.create_group('Taylor3Dinternals'))
+        self.assertTrue(T3D.checkinternalsHDF5(self.f['Taylor3Dinternals']))

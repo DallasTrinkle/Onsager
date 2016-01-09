@@ -351,6 +351,9 @@ class Taylor3D(object):
         cls.directmult = cls.makedirectmult()
         cls.powercoeff = cls.makepowercoeff()
         cls.HDF5str = 'coeff.{}.{}'  # needed for addhdf5()
+        cls.__internallist__ = ('pow2ind', 'ind2pow', 'Ylm2ind', 'ind2Ylm',
+                                'powlrange', 'Ylmpow', 'powYlm',
+                                'Lproj', 'directmult', 'powercoeff')
         cls.__INITIALIZED__ = True
 
     def __init__(self, coefflist = [], Lmax = 4, nodeepcopy=False):
@@ -386,6 +389,7 @@ class Taylor3D(object):
           (1) create the group named 'T3D', and then (2) put the T3D representation in that group.
         :param HDF5group: HDF5 group
         """
+        HDF5group.attrs['Lmax'] = self.Lmax
         for (n, l, c) in self.coefflist:
             coeffstr = self.HDF5str.format(n, l)
             HDF5group[coeffstr] = c
@@ -407,6 +411,35 @@ class Taylor3D(object):
                 raise ValueError('HDF5 group data contains illegal l = {} for {}'.format(l, k))
             t3d.coefflist.append((n, l, c[:]))
         return t3d
+
+    def dumpinternalsHDF5(self, HDF5group):
+        """
+        Adds the initialized power expansion internals into an HDF5group--should be stored for a
+        sanity check
+        :param HDF5group:
+        """
+        HDF5group.attrs['description'] = u'Internals of PowerExpansion class'
+        HDF5group.attrs['Lmax'] = self.Lmax
+        HDF5group.attrs['NYlm'] = self.NYlm
+        HDF5group.attrs['Npower'] = self.Npower
+        for internal in self.__internallist__:
+            HDF5group[internal] = getattr(self, internal)
+
+    @classmethod
+    def checkinternalsHDF5(cls, HDF5group):
+        """
+        Reads the power expansion internals into an HDF5group, and performs sanity check
+        :param HDF5group:
+        """
+        if not cls.__INITIALIZED__: raise ValueError('Must initialize first to perform sanity check')
+        if HDF5group.attrs['description'] != u'Internals of PowerExpansion class':
+            raise ValueError('HDF5 group lacks the attribute "description" which matches "Internals of PowerExpansion class"')
+        if HDF5group.attrs['Lmax'] != cls.Lmax: return False
+        if HDF5group.attrs['NYlm'] != cls.NYlm: return False
+        if HDF5group.attrs['Npower'] != cls.Npower: return False
+        for internal in cls.__internallist__:
+            if not np.all(HDF5group[internal][:] == getattr(cls, internal)): return False
+        return True
 
     @classmethod
     def zeros(cls, nmin, nmax, shape, dtype=complex):
