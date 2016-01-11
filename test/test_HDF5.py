@@ -53,7 +53,7 @@ class HDF5ParsingTests(unittest.TestCase):
         HCP_jumpnetwork = HCP.jumpnetwork(0, 1.01)
         HCP_GF = GFcalc.GFCrystalcalc(HCP, 0, HCP_sitelist, HCP_jumpnetwork, Nmax=4)
         HCP_GF.addhdf5(self.f.create_group('GFcalc'))
-        GFcopy = GFcalc.GFCrystalcalc.loadhdf5(self.f['GFcalc'])
-        HCP_GF.SetRates([2.],[0],[1.5,-1.0],[0.5,1.])  # one unique site, two types of jumps
-        GFcopy.SetRates([2.],[0],[1.5,-1.0],[0.5,1.])  # one unique site, two types of jumps
+        GFcopy = GFcalc.GFCrystalcalc.loadhdf5(HCP, self.f['GFcalc'])  # note: we need to pass crystal!
+        HCP_GF.SetRates([2.],[0],[1.5,0.5],[0.5,1.])  # one unique site, two types of jumps
+        GFcopy.SetRates([2.],[0],[1.5,0.5],[0.5,1.])  # one unique site, two types of jumps
         self.assertEqual(HCP_GF(0,0,np.zeros(3)), GFcopy(0,0,np.zeros(3)))

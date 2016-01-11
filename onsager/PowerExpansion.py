@@ -388,6 +388,7 @@ class Taylor3D(object):
           (1) create the group named 'T3D', and then (2) put the T3D representation in that group.
         :param HDF5group: HDF5 group
         """
+        HDF5group.attrs['type'] = self.__class__.__name__
         HDF5group.attrs['Lmax'] = self.Lmax
         for (n, l, c) in self.coefflist:
             coeffstr = self.HDF5str.format(n, l)
@@ -408,7 +409,7 @@ class Taylor3D(object):
             l = HDF5group[k].attrs['l']
             if l > t3d.Lmax or l < 0:
                 raise ValueError('HDF5 group data contains illegal l = {} for {}'.format(l, k))
-            t3d.coefflist.append((n, l, c[:]))
+            t3d.coefflist.append((n, l, c.value))
         return t3d
 
     def dumpinternalsHDF5(self, HDF5group):

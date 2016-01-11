@@ -61,7 +61,7 @@ class GFCrystalcalc(object):
     """
     Class calculator for the Green function, designed to work with the Crystal class.
     """
-    def __init__(self, crys, chem, sitelist, jumpnetwork, Nmax=4):
+    def __init__(self, crys, chem, sitelist, jumpnetwork, Nmax=4, empty=False):
         """
         Initializes our calculator with the appropriate topology / connectivity. Doesn't
         require, at this point, the site probabilities or transition rates to be known.
@@ -71,13 +71,19 @@ class GFCrystalcalc(object):
         :param jumpnetwork: list of unique transitions as lists of ((i,j), dx)
         :param Nmax: maximum range as estimator for kpt mesh generation
         """
+        if empty:
+            # this is really just used by copy() to circumvent __init__
+            if __debug__:
+                if any(x is not None for x in (crys, chem, sitelist, jumpnetwork)):
+                    raise TypeError('Tried to create empty GFcalc with non-None parameters')
+            return
         self.crys = crys
         self.chem = chem
         self.sitelist = sitelist.copy()
         # self.N = sum(1 for w in sitelist for i in w)
         # self.invmap = [0 for w in sitelist for i in w]
         self.N = sum(len(w) for w in sitelist)
-        self.invmap = [0 for i in range(self.N)]
+        self.invmap = np.zeros(self.N, dtype=int)
         for ind,w in enumerate(sitelist):
             for i in w:
                 self.invmap[i] = ind
@@ -104,35 +110,56 @@ class GFCrystalcalc(object):
             for jumplist in jumpnetwork)
         self.D = 0  # we don't yet know the diffusivity
 
+    # this is part of our *class* definition:
+    __HDF5list__ = ('N', 'invmap', 'NG', 'grouparray', 'indexpair', 'kptgrid',
+                    'kpts', 'wts', 'Nkpt', 'FTjumps', 'SEjumps')
+
     def addhdf5(self, HDF5group):
         """
         Adds an HDF5 representation of object into an HDF5group (needs to already exist).
 
-        Example: if f is an open HDF5, then T3D.addhdf5(f.create_group('T3D')) will
-          (1) create the group named 'T3D', and then (2) put the T3D representation in that group.
+        Example: if f is an open HDF5, then GFcalc.addhdf5(f.create_group('GFcalc')) will
+          (1) create the group named 'GFcalc', and then (2) put the GFcalc representation in that group.
         :param HDF5group: HDF5 group
         """
-        HDF5group.attrs['Lmax'] = self.Lmax
-        for (n, l, c) in self.coefflist:
-            coeffstr = self.HDF5str.format(n, l)
-            HDF5group[coeffstr] = c
-            HDF5group[coeffstr].attrs['n'] = n
-            HDF5group[coeffstr].attrs['l'] = l
+        HDF5group.attrs['type'] = self.__class__.__name__
+        HDF5group.attrs['crystal'] = self.crys.__repr__()
+        HDF5group.attrs['chem'] = self.chem
+        # arrays that we can deal with:
+        for internal in self.__HDF5list__:
+            HDF5group[internal] = getattr(self, internal)
+        # note: we don't store sitelist; we reconstruct it from invmap
+        # we need to deal with T3Djumps and jumppairs separately
+        NT3Djumps = len(self.T3Djumps)
+        HDF5group['NT3Djumps'] = NT3Djumps
+        for i, t3d in enumerate(self.T3Djumps):
+            coeffstr = 'T3Djump-{}'.format(i)
+            t3d.addhdf5(HDF5group.create_group(coeffstr))
+        HDF5group['jumppairs'] = np.array(self.jumppairs)
 
     @classmethod
-    def loadhdf5(cls, HDF5group):
+    def loadhdf5(cls, crys, HDF5group):
         """
-        Creates a new T3D from an HDF5 group.
+        Creates a new GFcalc from an HDF5 group.
+        :param crys: crystal object--MUST BE PASSED IN as it is not stored with the GFcalc
         :param HDFgroup: HDF5 group
-        :return: new T3D object
+        :return: new GFcalc object
         """
-        GFcalc = cls()  # initialize
-        for k, c in HDF5group.items():
-            n = HDF5group[k].attrs['n']
-            l = HDF5group[k].attrs['l']
-            if l > t3d.Lmax or l < 0:
-                raise ValueError('HDF5 group data contains illegal l = {} for {}'.format(l, k))
-            t3d.coefflist.append((n, l, c[:]))
+        GFcalc = cls(None, None, None, None, empty=True)  # initialize
+        GFcalc.crys = crys
+        GFcalc.chem = HDF5group.attrs['chem']
+        for internal in cls.__HDF5list__:
+            setattr(GFcalc, internal, HDF5group[internal].value)
+        GFcalc.T3Djumps = []
+        for i in range(HDF5group['NT3Djumps'].value):
+            coeffstr = 'T3Djump-{}'.format(i)
+            GFcalc.T3Djumps.append(T3D.loadhdf5(HDF5group[coeffstr]))
+        # construct sitelist and jumppairs
+        GFcalc.sitelist = [[] for i in range(max(GFcalc.invmap)+1)]
+        for i, site in enumerate(GFcalc.invmap):
+            GFcalc.sitelist[site].append(i)
+        GFcalc.jumppairs = tuple((pair[0], pair[1]) for pair in HDF5group['jumppairs'])
+        GFcalc.D = 0  # we don't yet know the diffusivity
         return GFcalc
 
     def FourierTransformJumps(self, jumpnetwork, N, kpts):
