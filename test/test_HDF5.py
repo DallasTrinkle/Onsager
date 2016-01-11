@@ -7,12 +7,17 @@ __author__ = 'Dallas R. Trinkle'
 import unittest
 import numpy as np
 import h5py
+import onsager.crystal as crystal
 import onsager.PowerExpansion as PE
+import onsager.GFcalc as GFcalc
 T3D = PE.Taylor3D
 
 class HDF5ParsingTests(unittest.TestCase):
     def setUp(self):
         self.f = h5py.File('/dev/null', 'w', driver='core', backing_store=False)
+
+    def tearDown(self):
+        self.f.close()
 
     def testPowerExpansion(self):
         """Test whether we can write and read an HDF5 group containing a PowerExpansion"""
@@ -40,3 +45,15 @@ class HDF5ParsingTests(unittest.TestCase):
                 self.assertTrue(np.all(coeff0 == coeff1))
         c1.dumpinternalsHDF5(self.f.create_group('Taylor3Dinternals'))
         self.assertTrue(T3D.checkinternalsHDF5(self.f['Taylor3Dinternals']))
+
+    def testGreenFunction(self):
+        """Test whether we can write and read an HDF5 group containing a GFcalc"""
+        HCP = crystal.Crystal.HCP(1., np.sqrt(8/3))
+        HCP_sitelist = HCP.sitelist(0)
+        HCP_jumpnetwork = HCP.jumpnetwork(0, 1.01)
+        HCP_GF = GFcalc.GFCrystalcalc(HCP, 0, HCP_sitelist, HCP_jumpnetwork, Nmax=4)
+        HCP_GF.addhdf5(self.f.create_group('GFcalc'))
+        GFcopy = GFcalc.GFCrystalcalc.loadhdf5(self.f['GFcalc'])
+        HCP_GF.SetRates([2.],[0],[1.5,-1.0],[0.5,1.])  # one unique site, two types of jumps
+        GFcopy.SetRates([2.],[0],[1.5,-1.0],[0.5,1.])  # one unique site, two types of jumps
+        self.assertEqual(HCP_GF(0,0,np.zeros(3)), GFcopy(0,0,np.zeros(3)))

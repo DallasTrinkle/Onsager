@@ -14,10 +14,8 @@ remaining function can be numerically inverse fourier transformed.
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-from . import crystal
 from . import PowerExpansion as PE
 import itertools
-import collections
 from numpy import linalg as LA
 from scipy.special import hyp1f1, gamma
 # two quick shortcuts
@@ -57,30 +55,6 @@ class Fnl_u(object):
 
     def __call__(self, u):
         return self.pre* u**self.l * hyp1f1(self.a,self.b, -(u*self.half_pm)**2)
-
-# YAML tags
-GROUPLIST_YAMLTAG = '!grouplist'
-
-class grouplist(collections.namedtuple('grouplist', 'indexpair groupops')):
-    def _asdict(self):
-        """Return a proper dict"""
-        return {'indexpair': self.indexpair, 'groupops': self.groupops}
-
-    @staticmethod
-    def grouplist_representer(dumper, data):
-        """Output a grouplist"""
-        # asdict() returns an OrderedDictionary, so pass through dict()
-        # had to rewrite _asdict() for some reason...?
-        return dumper.represent_mapping(GROUPLIST_YAMLTAG, data._asdict())
-
-    @staticmethod
-    def grouplist_constructor(loader, node):
-        """Construct a GroupOp from YAML"""
-        # ** turns the dictionary into parameters for grouplist constructor
-        return grouplist(**loader.construct_mapping(node, deep=True))
-
-crystal.yaml.add_representer(grouplist, grouplist.grouplist_representer)
-crystal.yaml.add_constructor(GROUPLIST_YAMLTAG, grouplist.grouplist_constructor)
 
 
 class GFCrystalcalc(object):
@@ -130,6 +104,37 @@ class GFCrystalcalc(object):
             for jumplist in jumpnetwork)
         self.D = 0  # we don't yet know the diffusivity
 
+    def addhdf5(self, HDF5group):
+        """
+        Adds an HDF5 representation of object into an HDF5group (needs to already exist).
+
+        Example: if f is an open HDF5, then T3D.addhdf5(f.create_group('T3D')) will
+          (1) create the group named 'T3D', and then (2) put the T3D representation in that group.
+        :param HDF5group: HDF5 group
+        """
+        HDF5group.attrs['Lmax'] = self.Lmax
+        for (n, l, c) in self.coefflist:
+            coeffstr = self.HDF5str.format(n, l)
+            HDF5group[coeffstr] = c
+            HDF5group[coeffstr].attrs['n'] = n
+            HDF5group[coeffstr].attrs['l'] = l
+
+    @classmethod
+    def loadhdf5(cls, HDF5group):
+        """
+        Creates a new T3D from an HDF5 group.
+        :param HDFgroup: HDF5 group
+        :return: new T3D object
+        """
+        GFcalc = cls()  # initialize
+        for k, c in HDF5group.items():
+            n = HDF5group[k].attrs['n']
+            l = HDF5group[k].attrs['l']
+            if l > t3d.Lmax or l < 0:
+                raise ValueError('HDF5 group data contains illegal l = {} for {}'.format(l, k))
+            t3d.coefflist.append((n, l, c[:]))
+        return GFcalc
+
     def FourierTransformJumps(self, jumpnetwork, N, kpts):
         """
         Generate the Fourier transform coefficients for each jump
@@ -177,8 +182,6 @@ class GFCrystalcalc(object):
         :return grouparray: array[NG][3][3] of the NG group operations
         :return indexpair: array[N][N][NG][2] of the index pair for each group operation
         """
-        # start with a bunch of empty lists
-        # grouplist = collections.namedtuple('grouplist', 'indexpair groupops')
         grouparray = np.zeros((self.NG, 3, 3))
         indexpair = np.zeros((self.N, self.N, self.NG, 2), dtype=int)
         for ng, g in enumerate(self.crys.G):

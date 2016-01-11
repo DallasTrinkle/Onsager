@@ -13,7 +13,6 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 from numbers import Number
 from scipy.special import factorial
-import h5py
 
 class Taylor3D(object):
     """

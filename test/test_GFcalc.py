@@ -8,6 +8,7 @@ import unittest
 import numpy as np
 from scipy import special
 import onsager.GFcalc as GFcalc
+import onsager.crystal as crystal
 
 def poleFT(di, u, pm, erfupm=-1):
     """
@@ -34,8 +35,8 @@ def poleFT(di, u, pm, erfupm=-1):
 class GreenFuncCrystalTests(unittest.TestCase):
     """Test new implementation of GF calculator, based on Crystal class"""
     def setUp(self):
-        self.FCC = GFcalc.crystal.Crystal.FCC(1.)
-        self.HCP = GFcalc.crystal.Crystal.HCP(1., np.sqrt(8/3))
+        self.FCC = crystal.Crystal.FCC(1.)
+        self.HCP = crystal.Crystal.HCP(1., np.sqrt(8/3))
         self.FCC_sitelist = self.FCC.sitelist(0)
         self.FCC_jumpnetwork = self.FCC.jumpnetwork(0, 0.75)
         self.HCP_sitelist = self.HCP.sitelist(0)
