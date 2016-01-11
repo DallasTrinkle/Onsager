@@ -72,7 +72,7 @@ class GFCrystalcalc(object):
         :param Nmax: maximum range as estimator for kpt mesh generation
         """
         if empty:
-            # this is really just used by copy() to circumvent __init__
+            # this is really just used by loadHDF5() to circumvent __init__
             if __debug__:
                 if any(x is not None for x in (crys, chem, sitelist, jumpnetwork)):
                     raise TypeError('Tried to create empty GFcalc with non-None parameters')

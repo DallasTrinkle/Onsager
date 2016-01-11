@@ -418,7 +418,7 @@ class Taylor3D(object):
         sanity check
         :param HDF5group:
         """
-        HDF5group.attrs['description'] = u'Internals of PowerExpansion class'
+        HDF5group.attrs['description'] = 'Internals of PowerExpansion class'
         HDF5group.attrs['Lmax'] = self.Lmax
         HDF5group.attrs['NYlm'] = self.NYlm
         HDF5group.attrs['Npower'] = self.Npower
