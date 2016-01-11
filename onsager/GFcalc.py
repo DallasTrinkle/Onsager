@@ -107,8 +107,8 @@ class GFCrystalcalc(object):
         for ind,w in enumerate(sitelist):
             for i in w:
                 self.invmap[i] = ind
-        self.groups_ij = self.BreakdownGroups()
         self.NG = len(self.crys.G)  # number of group operations
+        self.grouparray, self.indexpair = self.BreakdownGroups()
         # note: currently, we don't store jumpnetwork. If we want to rewrite the class
         # to allow a new kpoint mesh to be generated "on the fly", we'd need to store
         # a copy for regeneration
@@ -116,7 +116,8 @@ class GFCrystalcalc(object):
         # generate a kptmesh: now we try to make the mesh more "uniform" ??
         bmagn = np.array([ np.sqrt(np.dot(crys.reciplatt[:,i], crys.reciplatt[:,i])) for i in range(3) ])
         bmagn /= np.power(np.product(bmagn), 1/3)
-        self.kptgrid = tuple(2*np.int(np.ceil(2*Nmax*b)) for b in bmagn) # makes sure we have even meshes
+         # make sure we have even meshes
+        self.kptgrid = np.array([2*np.int(np.ceil(2*Nmax*b)) for b in bmagn], dtype=int)
         self.kpts, self.wts = crys.reducekptmesh(crys.fullkptmesh(self.kptgrid))
         self.Nkpt = self.kpts.shape[0]
         # generate the Fourier transformation for each jump
@@ -173,33 +174,20 @@ class GFCrystalcalc(object):
         """
         Takes in a crystal, and a chemistry, and constructs the indexing breakdown for each
         (i,j) pair.
-        :return: tuples within tuples: each [i][j] = tuple of named tuples, with
-          indexpair = (g(i), g(j)) tuple of mapped indices, and groupops = set of group ops
+        :return grouparray: array[NG][3][3] of the NG group operations
+        :return indexpair: array[N][N][NG][2] of the index pair for each group operation
         """
         # start with a bunch of empty lists
         # grouplist = collections.namedtuple('grouplist', 'indexpair groupops')
-        groups_ij = [ [[] for j in range(self.N)] for i in range(self.N)]
-        for g in self.crys.G:
+        grouparray = np.zeros((self.NG, 3, 3))
+        indexpair = np.zeros((self.N, self.N, self.NG, 2), dtype=int)
+        for ng, g in enumerate(self.crys.G):
+            grouparray[ng,:,:] = g.cartrot[:,:]
             indexmap = g.indexmap[self.chem]
             for i in range(self.N):
-                gi = indexmap[i]
                 for j in range(self.N):
-                    gj = indexmap[j]
-                    match = False
-                    indexpair = (gi, gj)
-                    for gl in groups_ij[i][j]:
-                        if gl.indexpair == indexpair:
-                            gl.groupops.append(g)
-                            match = True
-                    if not match:
-                        groups_ij[i][j].append(grouplist(indexpair = indexpair, groupops = [g]))
-        # convert into tuples:
-        return tuple(
-            tuple(
-                tuple(grouplist(indexpair=gl.indexpair, groupops=frozenset(gl.groupops))
-                      for gl in groups_ij[i][j])
-                for j in range(self.N))
-            for i in range(self.N))
+                    indexpair[i,j,ng,0], indexpair[i,j,ng,1] = indexmap[i], indexmap[j]
+        return grouparray, indexpair
 
     def SymmRates(self, pre, betaene, preT, betaeneT):
         """Returns a list of lists of symmetrized rates, matched to jumpnetwork"""
@@ -291,16 +279,14 @@ class GFCrystalcalc(object):
                                  for j in range(self.N))
                            for i in range(self.N))
 
-    def exp_dxq(self, dx, groupset):
+    def exp_dxq(self, dx):
         """
         Return the array of exp(-i q.dx) evaluated over the q-points, and accounting for symmetry
         :param dx: vector
-        :param groupset: set of group operations
-        :return: array of exp(-i q.dx) evaluated symmetrically
+        :return: array of exp(-i q.dx)
         """
         # kpts[k,3] .. g_dx_array[NR, 3]
-        g_dx_array = np.array([self.crys.g_direc(g, dx) for g in groupset])
-        return np.sum(np.exp(-1j*np.tensordot(self.kpts, g_dx_array, axes=(1,1))), axis=1)
+        return np.exp(-1j*np.tensordot(self.kpts, dx, axes=(1,0)))
 
     def __call__(self, i, j, dx):
         """
@@ -313,8 +299,8 @@ class GFCrystalcalc(object):
         if self.D is 0: raise ValueError("Need to SetRates first")
         # evaluate Fourier transform component (now with better space group treatment!)
         gIFT = 0
-        for gl in self.groups_ij[i][j]:
-            gIFT += np.dot(self.wts, self.gsc_ijq[gl.indexpair]*self.exp_dxq(dx, gl.groupops))
+        for gop, pair in zip(self.grouparray, self.indexpair[i][j]):
+            gIFT += np.dot(self.wts, self.gsc_ijq[pair[0],pair[1]]*self.exp_dxq(np.dot(gop, dx)))
         gIFT /= self.NG
         if not np.isclose(gIFT.imag, 0): raise ArithmeticError("Got complex IFT? {}".format(gIFT))
         # evaluate Taylor expansion component:
