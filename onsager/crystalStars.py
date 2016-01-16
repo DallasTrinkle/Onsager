@@ -174,7 +174,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
 crystal.yaml.add_representer(PairState, PairState.PairState_representer)
 crystal.yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
 
-# HDF5 conversion routines
+# HDF5 conversion routines: PairState, and list-of-list structures
 def PSlist2array(PSlist):
     """
     Take in a list of pair states; return arrays that can be stored in HDF5 format
@@ -201,6 +201,33 @@ def array2PSlist(ij, R, dx):
     """
     return [ PairState(i=ij0[0], j=ij0[1], R=R0, dx=dx0) for ij0, R0, dx0 in zip(ij, R, dx)]
 
+def doublelist2flatlistindex(listlist):
+    """
+    Takes a list of lists, returns a flattened list and an index array
+    :param listlist: list of lists of objects
+    :return flatlist: flat list of objects (preserving order)
+    :return indexarray: array indexing which original list it came from
+    """
+    flatlist = []
+    indexlist = []
+    for ind, entries in enumerate(listlist):
+        flatlist += entries
+        indexlist += [ind for j in entries]
+    return flatlist, np.array(indexlist)
+
+def flatlistindex2doublelist(flatlist, indexarray):
+    """
+    Takes a flattened list and an index array, returns a list of lists
+    :param flatlist: flat list of objects (preserving order)
+    :param indexarray: array indexing which original list it came from
+    :return listlist: list of lists of objects
+    """
+    Nlist = max(indexarray) + 1
+    listlist = [ [] for n in range(Nlist)]
+    for entry, ind in zip(flatlist, indexarray):
+        listlist[ind].append(entry)
+    return listlist
+
 # database tags
 SOLUTE_TAG = 's'
 VACANCY_TAG = 'v'
@@ -215,7 +242,7 @@ class StarSet(object):
     """
     A class to construct stars, and be able to efficiently index.
     """
-    def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False, empty=False):
+    def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False):
         """
         Initiates a star set generator for a given jumpnetwork, crystal, and specified
         chemical index.
@@ -239,12 +266,8 @@ class StarSet(object):
         Nstars: size of list
         index[Nstates]: index of star that state belongs to
         """
-        if empty:
-            # this is really just used by copy() to circumvent __init__
-            if __debug__:
-                if any(x is not None for x in (jumpnetwork, crys, chem)):
-                    raise TypeError('Tried to create empty StarSet with non-None parameters')
-            return
+        # empty StarSet
+        if all(x is None for x in (jumpnetwork, crys, chem)): return
         self.jumpnetwork_index = []  # list of list of indices into...
         self.jumplist = []  # list of our jumps, as PairStates
         ind = 0
@@ -370,7 +393,7 @@ class StarSet(object):
         :param HDFgroup: HDF5 group
         :return: new StarSet object
         """
-        SSet = cls(None, None, None, empty=True)  # initialize
+        SSet = cls(None, None, None)  # initialize
         SSet.crys = crys
         SSet.chem = HDF5group.attrs['chem']
         SSet.Nshells = HDF5group['Nshells'].value
@@ -396,7 +419,7 @@ class StarSet(object):
 
     def copy(self, empty=False):
         """Return a copy of the StarSet; done as efficiently as possible; empty means skip the shells, etc."""
-        newStarSet = StarSet(None, None, None, -1, empty=True)  # a little hacky... creates an empty class
+        newStarSet = StarSet(None, None, None)  # a little hacky... creates an empty class
         newStarSet.jumpnetwork_index = copy.deepcopy(self.jumpnetwork_index)
         newStarSet.jumplist = self.jumplist.copy()
         newStarSet.crys = self.crys
@@ -766,6 +789,45 @@ class VectorStarSet(object):
                 if sR0[0] == sR1[0]:
                     outer[:, :, i, j] = sum([np.outer(v0, v1) for v0, v1 in zip(sv0, sv1)])
         return outer
+
+    def addhdf5(self, HDF5group):
+        """
+        Adds an HDF5 representation of object into an HDF5group (needs to already exist).
+
+        Example: if f is an open HDF5, then StarSet.addhdf5(f.create_group('VectorStarSet')) will
+          (1) create the group named 'VectorStarSet', and then (2) put the VectorStarSet
+          representation in that group.
+        :param HDF5group: HDF5 group
+        """
+        HDF5group.attrs['type'] = self.__class__.__name__
+        HDF5group['Nstars'] = self.Nstars
+        HDF5group['Nvstars'] = self.Nvstars
+        poslist, posindex = doublelist2flatlistindex(self.vecpos)
+        veclist, vecindex = doublelist2flatlistindex(self.vecvec)
+        HDF5group['vecposlist'] = np.array(poslist)
+        HDF5group['vecposindex'] = posindex
+        HDF5group['vecveclist'] = np.array(veclist)
+        HDF5group['vecvecindex'] = vecindex
+        HDF5group['outer'] = self.outer
+
+    @classmethod
+    def loadhdf5(cls, SSet, HDF5group):
+        """
+        Creates a new StarSet from an HDF5 group.
+        :param SSet: StarSet--MUST BE PASSED IN as it is not stored with the VectorStarSet
+        :param HDFgroup: HDF5 group
+        :return: new StarSet object
+        """
+        VSSet = cls(None)  # initialize
+        VSSet.starset = SSet
+        VSSet.Nstars = HDF5group['Nstars'].value
+        VSSet.Nvstars = HDF5group['Nvstars'].value
+        VSSet.vecpos = flatlistindex2doublelist(HDF5group['vecposlist'].value,
+                                                HDF5group['vecposindex'].value)
+        VSSet.vecvec = flatlistindex2doublelist(HDF5group['vecveclist'].value,
+                                                HDF5group['vecvecindex'].value)
+        VSSet.outer = HDF5group['outer'].value
+        return VSSet
 
     def GFexpansion(self):
         """
