@@ -174,6 +174,33 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
 crystal.yaml.add_representer(PairState, PairState.PairState_representer)
 crystal.yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
 
+# HDF5 conversion routines
+def PSlist2array(PSlist):
+    """
+    Take in a list of pair states; return arrays that can be stored in HDF5 format
+    :param PSlist: list of pair states
+    :return ij: int_array[N][2] = (i,j)
+    :return R: int[N][3]
+    :return dx: float[N][3]
+    """
+    N = len(PSlist)
+    ij = np.zeros((N,2), dtype=int)
+    R = np.zeros((N,3), dtype=int)
+    dx = np.zeros((N,3))
+    for n, PS in enumerate(PSlist):
+        ij[n,0], ij[n,1], R[n,:], dx[n,:] = PS.i, PS.j, PS.R, PS.dx
+    return ij, R, dx
+
+def array2PSlist(ij, R, dx):
+    """
+    Take in arrays of ij, R, dx (from HDF5), return a list of PairStates
+    :param ij: int_array[N][2] = (i,j)
+    :param R: int[N][3]
+    :param dx: float[N][3]
+    :return PSlist: list of pair states
+    """
+    return [ PairState(i=ij0[0], j=ij0[1], R=R0, dx=dx0) for ij0, R0, dx0 in zip(ij, R, dx)]
+
 # database tags
 SOLUTE_TAG = 's'
 VACANCY_TAG = 'v'

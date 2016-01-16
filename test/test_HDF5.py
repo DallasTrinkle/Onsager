@@ -10,6 +10,7 @@ import h5py
 import onsager.crystal as crystal
 import onsager.PowerExpansion as PE
 import onsager.GFcalc as GFcalc
+import onsager.crystalStars as stars
 T3D = PE.Taylor3D
 
 class HDF5ParsingTests(unittest.TestCase):
@@ -57,3 +58,16 @@ class HDF5ParsingTests(unittest.TestCase):
         HCP_GF.SetRates([2.],[0],[1.5,0.5],[0.5,1.])  # one unique site, two types of jumps
         GFcopy.SetRates([2.],[0],[1.5,0.5],[0.5,1.])  # one unique site, two types of jumps
         self.assertEqual(HCP_GF(0,0,np.zeros(3)), GFcopy(0,0,np.zeros(3)))
+
+    def testPairState(self):
+        """Test whether conversion of different PairState groups back and forth to arrays works"""
+        PSlist = [ stars.PairState(i=0, j=1, R=np.array([1,0,-1]), dx=np.array([1.,0.,-1.])),
+                   stars.PairState(i=1, j=0, R=np.array([-1,0,1]), dx=np.array([-1.,0.,1.]))]
+        ij, R, dx = stars.PSlist2array(PSlist)
+        self.assertEqual(ij.shape, (2,2))
+        self.assertEqual(R.shape, (2,3))
+        self.assertEqual(dx.shape, (2,3))
+        PSlistcopy = stars.array2PSlist(ij, R, dx)
+        for PS0, PS1 in zip(PSlist, PSlistcopy):
+            self.assertEqual(PS0, PS1)
+
