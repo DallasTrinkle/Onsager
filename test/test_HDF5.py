@@ -71,3 +71,18 @@ class HDF5ParsingTests(unittest.TestCase):
         for PS0, PS1 in zip(PSlist, PSlistcopy):
             self.assertEqual(PS0, PS1)
 
+    def testStarSet(self):
+        """Test whether we can write and read an HDF5 group containing a StarSet"""
+        HCP = crystal.Crystal.HCP(1., np.sqrt(8/3))
+        HCP_jumpnetwork = HCP.jumpnetwork(0, 1.01)
+        HCP_StarSet = stars.StarSet(HCP_jumpnetwork, HCP, 0, Nshells=2)
+        HCP_StarSet.addhdf5(self.f.create_group('thermo'))
+        HCP_StarSetcopy = stars.StarSet.loadhdf5(HCP, self.f['thermo'])  # note: we need to pass crystal!
+        self.assertEqual(HCP_StarSet.Nstates, HCP_StarSetcopy.Nstates)
+        self.assertEqual(HCP_StarSet.Nshells, HCP_StarSetcopy.Nshells)
+        for s1, s2 in zip(HCP_StarSet.states, HCP_StarSetcopy.states):
+            self.assertEqual(s1, s2)
+            self.assertEqual(HCP_StarSet.stateindex(s1), HCP_StarSet.stateindex(s2))
+            self.assertEqual(HCP_StarSet.starindex(s1), HCP_StarSet.starindex(s2))
+
+

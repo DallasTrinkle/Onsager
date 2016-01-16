@@ -337,6 +337,63 @@ class StarSet(object):
                 self.index[xi] = si
                 self.indexdict[self.states[xi]] = (xi, si)
 
+    def addhdf5(self, HDF5group):
+        """
+        Adds an HDF5 representation of object into an HDF5group (needs to already exist).
+
+        Example: if f is an open HDF5, then StarSet.addhdf5(f.create_group('StarSet')) will
+          (1) create the group named 'StarSet', and then (2) put the StarSet representation in that group.
+        :param HDF5group: HDF5 group
+        """
+        HDF5group.attrs['type'] = self.__class__.__name__
+        HDF5group.attrs['crystal'] = self.crys.__repr__()
+        HDF5group.attrs['chem'] = self.chem
+        HDF5group['Nshells'] = self.Nshells
+        # convert jumplist (list of PS) into arrays to store:
+        HDF5group['jumplist_ij'], HDF5group['jumplist_R'], HDF5group['jumplist_dx'] = \
+            PSlist2array(self.jumplist)
+        HDF5group['jumplist_Nunique'] = len(self.jumpnetwork_index)
+        jumplistinvmap = np.zeros(len(self.jumplist), dtype=int)
+        for j, jlist in enumerate(self.jumpnetwork_index):
+            for i in jlist: jumplistinvmap[i] = j
+        HDF5group['jumplist_invmap'] = jumplistinvmap
+        # convert states into arrays to store:
+        HDF5group['states_ij'], HDF5group['states_R'], HDF5group['states_dx'] = \
+            PSlist2array(self.states)
+        HDF5group['states_index'] = self.index
+
+    @classmethod
+    def loadhdf5(cls, crys, HDF5group):
+        """
+        Creates a new StarSet from an HDF5 group.
+        :param crys: crystal object--MUST BE PASSED IN as it is not stored with the StarSet
+        :param HDFgroup: HDF5 group
+        :return: new StarSet object
+        """
+        SSet = cls(None, None, None, empty=True)  # initialize
+        SSet.crys = crys
+        SSet.chem = HDF5group.attrs['chem']
+        SSet.Nshells = HDF5group['Nshells'].value
+        SSet.jumplist = array2PSlist(HDF5group['jumplist_ij'].value,
+                                     HDF5group['jumplist_R'].value,
+                                     HDF5group['jumplist_dx'].value)
+        SSet.jumpnetwork_index = [[] for n in range(HDF5group['jumplist_Nunique'].value)]
+        for i, jump in enumerate(HDF5group['jumplist_invmap'].value):
+            SSet.jumpnetwork_index[jump].append(i)
+        SSet.states = array2PSlist(HDF5group['states_ij'].value,
+                                   HDF5group['states_R'].value,
+                                   HDF5group['states_dx'].value)
+        SSet.Nstates = len(SSet.states)
+        SSet.index = HDF5group['states_index'].value
+        # construct the states, and the index dictionary:
+        SSet.Nstars = max(SSet.index) + 1
+        SSet.stars = [[] for n in range(SSet.Nstars)]
+        SSet.indexdict = {}
+        for xi, si in enumerate(SSet.index):
+            SSet.stars[si].append(xi)
+            SSet.indexdict[SSet.states[xi]] = (xi, si)
+        return SSet
+
     def copy(self, empty=False):
         """Return a copy of the StarSet; done as efficiently as possible; empty means skip the shells, etc."""
         newStarSet = StarSet(None, None, None, -1, empty=True)  # a little hacky... creates an empty class
