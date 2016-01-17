@@ -495,6 +495,41 @@ class vacancyThermoKinetics(collections.namedtuple('vacancyThermoKinetics',
         # ** turns the dictionary into parameters for GroupOp constructor
         return vacancyThermoKinetics(**loader.construct_mapping(node, deep=True))
 
+# HDF5 conversion routines: vTK indexed dictionaries
+def vTKdict2arrays(vTKdict):
+    """
+    Takes a dictionary indexed by vTK objects, returns two arrays of vTK keys and values,
+    and the splits to separate vTKarray back into vTK
+    :param vTKdict: dictionary, indexed by vTK objects, whose entries are arrays
+    :return vTKarray: array of vTK entries
+    :return valarray: array of values
+    :return vTKsplits: split placement for vTK entries
+    """
+    if len(vTKdict.keys()) == 0: return None, None, None
+    vTKexample = [k for k in vTKdict.keys()][0]
+    vTKsplits = np.cumsum(np.array([ len(v) for v in vTKexample ]))[:-1]
+    vTKlist = []
+    vallist = []
+    for k, v in zip(vTKdict.keys(), vTKdict.values()):
+        vTKlist.append(np.hstack(k)) # k.pre, k.betaene, k.preT, k.betaeneT
+        vallist.append(v)
+    return np.array(vTKlist), np.array(vallist), vTKsplits
+
+def arrays2vTKdict(vTKarray, valarray, vTKsplits):
+    """
+    Takes two arrays of vTK keys and values, and the splits to separate vTKarray back into vTK
+    and returns a dictionary indexed by the vTK.
+    :param vTKarray: array of vTK entries
+    :param valarray: array of values
+    :param vTKsplits: split placement for vTK entries
+    :return vTKdict: dictionary, indexed by vTK objects, whose entries are arrays
+    """
+    if all( x is None for x in (vTKarray, valarray, vTKsplits)): return {}
+    vTKdict = {}
+    for vTKa, val in zip(vTKarray, valarray):
+        vTKdict[vacancyThermoKinetics(*np.hsplit(vTKa, vTKsplits))] = val
+    return vTKdict
+
 
 class VacancyMediated(object):
     """

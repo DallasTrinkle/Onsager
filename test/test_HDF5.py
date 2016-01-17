@@ -11,6 +11,7 @@ import onsager.crystal as crystal
 import onsager.PowerExpansion as PE
 import onsager.GFcalc as GFcalc
 import onsager.crystalStars as stars
+import onsager.OnsagerCalc as OnsagerCalc
 T3D = PE.Taylor3D
 
 class HDF5ParsingTests(unittest.TestCase):
@@ -103,6 +104,39 @@ class HDF5ParsingTests(unittest.TestCase):
 
     def testVectorStarSet(self):
         """Test whether we can write and read an HDF5 group containing a VectorStarSet"""
+        HCP = crystal.Crystal.HCP(1., np.sqrt(8/3))
+        HCP_jumpnetwork = HCP.jumpnetwork(0, 1.01)
+        HCP_StarSet = stars.StarSet(HCP_jumpnetwork, HCP, 0, Nshells=2)
+        HCP_VectorStarSet = stars.VectorStarSet(HCP_StarSet)
+        HCP_VectorStarSet.addhdf5(self.f.create_group('vkinetic'))
+        HCP_VectorStarSetcopy = stars.VectorStarSet.loadhdf5(HCP_StarSet,
+                                                             self.f['vkinetic'])  # note: we need to pass StarSet!
+        self.assertEqual(HCP_VectorStarSet.Nstars, HCP_VectorStarSetcopy.Nstars)
+        self.assertEqual(HCP_VectorStarSet.Nvstars, HCP_VectorStarSetcopy.Nvstars)
+        self.assertTrue(np.all(HCP_VectorStarSet.outer == HCP_VectorStarSetcopy.outer))
+        for p1list, v1list, p2list, v2list in zip(HCP_VectorStarSet.vecpos, HCP_VectorStarSet.vecvec,
+                                                  HCP_VectorStarSetcopy.vecpos, HCP_VectorStarSetcopy.vecvec):
+            self.assertEqual(p1list, p2list)
+            self.assertTrue(all(np.all(v1 == v2) for v1, v2 in zip(v1list, v2list)))
+
+    def testvTKdict(self):
+        """Test whether we can write and read an HDF5 group containing a dictionary indexed by vTK"""
+        self.assertEqual(OnsagerCalc.arrays2vTKdict(*OnsagerCalc.vTKdict2arrays({})), {})
+        dict1 = {}
+        vTK = OnsagerCalc.vacancyThermoKinetics(pre=np.ones(2), betaene=np.zeros(2),
+                                                preT=np.ones(4), betaeneT=np.zeros(4))
+        dict1[vTK] = np.eye(3)
+        vTK = OnsagerCalc.vacancyThermoKinetics(pre=2.*np.ones(2), betaene=np.zeros(2),
+                                                preT=np.ones(4), betaeneT=np.ones(4))
+        dict1[vTK] = 2.*np.eye(3)
+        dict1copy = OnsagerCalc.arrays2vTKdict(*OnsagerCalc.vTKdict2arrays(dict1))
+        for k,v in zip(dict1.keys(), dict1.values()):
+            self.assertTrue(np.all(dict1copy[k] == v))
+        for k,v in zip(dict1copy.keys(), dict1copy.values()):
+            self.assertTrue(np.all(dict1[k] == v))
+
+    def testOnsagerVacancyMediated(self):
+        """Test whether we can write and read an HDF5 group containing a VacancyMediated Onsager Calculator"""
         HCP = crystal.Crystal.HCP(1., np.sqrt(8/3))
         HCP_jumpnetwork = HCP.jumpnetwork(0, 1.01)
         HCP_StarSet = stars.StarSet(HCP_jumpnetwork, HCP, 0, Nshells=2)
