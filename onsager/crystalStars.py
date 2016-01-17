@@ -228,15 +228,6 @@ def flatlistindex2doublelist(flatlist, indexarray):
         listlist[ind].append(entry)
     return listlist
 
-# database tags
-SOLUTE_TAG = 's'
-VACANCY_TAG = 'v'
-SINGLE_DEFECT_TAG = '{type}:{u1:+06.3f},{u2:+06.3f},{u3:+06.3f}'
-DOUBLE_DEFECT_TAG = '{state1}-{state2}'
-OM0_TAG = 'omega0:{vac1}^{vac2}'
-OM1_TAG = 'omega1:{solute}-{vac1}^{vac2}'
-OM2_TAG = 'omega2:{complex1}^{complex2}'
-
 
 class StarSet(object):
     """
