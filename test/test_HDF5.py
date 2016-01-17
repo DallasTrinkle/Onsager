@@ -142,4 +142,10 @@ class HDF5ParsingTests(unittest.TestCase):
         HCP_diffuser = OnsagerCalc.VacancyMediated(HCP, 0, HCP_sitelist, HCP_jumpnetwork, 1)
         HCP_diffuser.addhdf5(self.f)  # we'll usually dump it in main
         HCP_diffuser_copy = OnsagerCalc.VacancyMediated.loadhdf5(self.f)  # should be fully self-contained
+        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
+                      'preT0': np.array([1.,1.5]), 'eneT0': np.array([0.25,0.35])}
+        thermaldef.update(HCP_diffuser.maketracerpreene(**thermaldef))
+        for L0, Lcopy in zip(HCP_diffuser.Lij(*HCP_diffuser.preene2betafree(1.0, **thermaldef)),
+                             HCP_diffuser_copy.Lij(*HCP_diffuser_copy.preene2betafree(1.0, **thermaldef))):
+            self.assertTrue(np.all(L0 == Lcopy))
 
