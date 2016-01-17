@@ -574,7 +574,7 @@ class VacancyMediated(object):
         # self.kinetic = self.thermo + self.NNstar
         self.vkinetic = stars.VectorStarSet()
         self.generate(Nthermo)
-        # self.generatetags()  # vacancy, solute, solute-vacancy; omega0, omega1, omega2
+        self.tags = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
 
     def generate(self, Nthermo):
         """
@@ -642,6 +642,43 @@ class VacancyMediated(object):
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
                                   for jumplist in self.om1_jn]
 
+    def generatetags(self):
+        """
+        Create tags for vacancy states, solute states, solute-vacancy complexes;
+        omega0, omega1, and omega2 transition states.
+        :return tags: dictionary of tags; each is a list-of-lists
+        """
+        tags = {}
+        basis = self.crys.basis[self.chem]  # shortcut
+        def single_defect(DEFECT_TAG, u):
+            return SINGLE_DEFECT_TAG.format(type=DEFECT_TAG, u1=u[0], u2=u[1], u3=u[2])
+        def double_defect(PS):
+            return DOUBLE_DEFECT_TAG.format( \
+                    state1=single_defect(SOLUTE_TAG, basis[PS.i]), \
+                    state2=single_defect(VACANCY_TAG, basis[PS.j] + PS.R))
+        def omega1(PS1, PS2):
+            return OM1_TAG.format( \
+                    solute=single_defect(SOLUTE_TAG, basis[PS1.i]),
+                    vac1=single_defect(VACANCY_TAG, basis[PS2.j] + PS2.R), \
+                    vac2=single_defect(VACANCY_TAG, basis[PS2.j] + PS2.R))
+
+        tags['vacancy'] = [ [ single_defect(VACANCY_TAG, basis[s]) for s in sites]
+                            for sites in self.sitelist]
+        tags['solute'] = [ [ single_defect(SOLUTE_TAG, basis[s]) for s in sites]
+                           for sites in self.sitelist]
+        tags['solute-vacancy'] = [ [ double_defect(self.thermo.states[s]) for s in starlist]
+                                   for starlist in self.thermo.stars]
+        tags['omega0'] = [[OM0_TAG.format(vac1=single_defect(VACANCY_TAG, basis[i]),
+                                          vac2=single_defect(VACANCY_TAG, basis[j]+dx))
+                           for ((i,j), dx) in jumplist]
+                          for jumplist in self.crys.jumpnetwork2lattice(self.chem, self.om0_jn)]
+        tags['omega1'] = [[omega1(self.kinetic.states[i], self.kinetic.states[j])
+                           for ((i,j), dx) in jumplist] for jumplist in self.om1_jn]
+        tags['omega2'] = [[OM2_TAG.format(complex1=double_defect(self.kinetic.states[i]),
+                                          complex2=double_defect(self.kinetic.states[j]))
+                           for ((i,j), dx) in jumplist] for jumplist in self.om2_jn]
+        return tags
+
     # this is part of our *class* definition: list of data that can be directly assigned / read
     __HDF5list__ = ('chem', 'N', 'invmap', 'thermo2kin', 'kin2vacancy', 'outerkin', 'vstar2kin',
                     'om1_jt', 'om1_SP', 'om2_jt', 'om2_SP',
@@ -651,6 +688,7 @@ class VacancyMediated(object):
                     'om1_b0', 'om1bias', 'om2_b0', 'om2bias',
                     'kineticsvWyckoff', 'omega0vacancyWyckoff', 'omega1svsvWyckoff',
                     'omega2svsvWyckoff')
+    __taglist__ = ('vacancy', 'solute', 'solute-vacancy', 'omega0', 'omega1', 'omega2')
 
     def addhdf5(self, HDF5group):
         """
@@ -711,6 +749,11 @@ class VacancyMediated(object):
             HDF5group['Lvvvalues_vTK'], HDF5group['Lvvvalues_values'], HDF5group['Lvvvalues_splits'] = \
                 vTKdict2arrays(self.Lvvvalues)
 
+        # tags
+        for tag in self.__taglist__:
+            taglist, tagindex = stars.doublelist2flatlistindex(self.tags[tag])
+            HDF5group[tag + '_taglist'], HDF5group[tag + '_tagindex'] = np.array(taglist, dtype='S'), tagindex
+
     @classmethod
     def loadhdf5(cls, HDF5group):
         """
@@ -757,6 +800,12 @@ class VacancyMediated(object):
         else:
             diffuser.GFvalues, diffuser.Lvvvalues = {}, {}
 
+        # tags
+        diffuser.tags = {}
+        for tag in cls.__taglist__:
+            # needed because of how HDF5 stores strings...
+            utf8list = [ str(data, encoding='utf-8') for data in HDF5group[tag + '_taglist'].value ]
+            diffuser.tags[tag] = stars.flatlistindex2doublelist(utf8list, HDF5group[tag + '_tagindex'])
         return diffuser
 
     def interactlist(self):
