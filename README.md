@@ -23,6 +23,8 @@ Update 0.2.1: corrected a sign error in the definition of elastic dipole.
 
 Update 0.3: an entirely new implementation of the Onsager calculation is now included. This is based on the crystal class; two examples are shown in the examples directory as iPython notebooks. This allows for the use of crystals that are not simple Bravais lattices for vacancy-mediated diffusion. YAML support is also included to output a diffuser (and read back in).
 
+Update 0.4: cleanup of code, removing old implementations and tests; updated for speed, and inclusion of HDF5 format for reading and writing of VacancyMediated objects.
+
 Contributors
 ============
 Dallas R. Trinkle, initial design and implementation.
