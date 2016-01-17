@@ -800,12 +800,8 @@ class VectorStarSet(object):
         """
         HDF5group.attrs['type'] = self.__class__.__name__
         HDF5group['Nvstars'] = self.Nvstars
-        poslist, posindex = doublelist2flatlistindex(self.vecpos)
-        veclist, vecindex = doublelist2flatlistindex(self.vecvec)
-        HDF5group['vecposlist'] = np.array(poslist)
-        HDF5group['vecposindex'] = posindex
-        HDF5group['vecveclist'] = np.array(veclist)
-        HDF5group['vecvecindex'] = vecindex
+        HDF5group['vecposlist'], HDF5group['vecposindex'] = doublelist2flatlistindex(self.vecpos)
+        HDF5group['vecveclist'], HDF5group['vecvecindex'] = doublelist2flatlistindex(self.vecvec)
         HDF5group['outer'] = self.outer
 
     @classmethod

@@ -589,8 +589,8 @@ class VacancyMediated(object):
         # kin2vstar provides a list of vector stars indices corresponding to the same star index
         self.thermo2kin = [self.kinetic.starindex(self.thermo.states[s[0]]) for s in self.thermo.stars]
         self.kin2vacancy = [self.invmap[self.kinetic.states[s[0]].j] for s in self.kinetic.stars]
-        self.outerkin = [s for s in range(self.kinetic.Nstars
-                         if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None])
+        self.outerkin = [s for s in range(self.kinetic.Nstars)
+                         if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None]
         self.vstar2kin = [self.kinetic.index[Rs[0]] for Rs in self.vkinetic.vecpos]
         self.kin2vstar = [ [j for j in range(self.vkinetic.Nvstars) if self.vstar2kin[j] == i]
                            for i in range(self.kinetic.Nstars)]
