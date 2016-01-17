@@ -589,8 +589,8 @@ class VacancyMediated(object):
         # kin2vstar provides a list of vector stars indices corresponding to the same star index
         self.thermo2kin = [self.kinetic.starindex(self.thermo.states[s[0]]) for s in self.thermo.stars]
         self.kin2vacancy = [self.invmap[self.kinetic.states[s[0]].j] for s in self.kinetic.stars]
-        self.outerkin = [s for s in range(self.kinetic.Nstars)
-                         if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None]
+        self.outerkin = [s for s in range(self.kinetic.Nstars
+                         if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None])
         self.vstar2kin = [self.kinetic.index[Rs[0]] for Rs in self.vkinetic.vecpos]
         self.kin2vstar = [ [j for j in range(self.vkinetic.Nvstars) if self.vstar2kin[j] == i]
                            for i in range(self.kinetic.Nstars)]
@@ -636,7 +636,14 @@ class VacancyMediated(object):
                                   for jumplist in self.om1_jn]
 
     # this is part of our *class* definition: list of data that can be directly assigned / read
-    __HDF5list__ = ('chem', 'N', 'invmap')
+    __HDF5list__ = ('chem', 'N', 'invmap', 'thermo2kin', 'kin2vacancy', 'outerkin', 'vstar2kin',
+                    'om1_jt', 'om1_SP', 'om2_jt', 'om2_SP',
+                    'GFexpansion',
+                    'om1_om0', 'om1_om0escape', 'om1expansion', 'om1escape',
+                    'om2_om0', 'om2_om0escape', 'om2expansion', 'om2escape',
+                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias',
+                    'kineticsvWyckoff', 'omega0vacancyWyckoff', 'omega1svsvWyckoff',
+                    'omega2svsvWyckoff')
 
     def addhdf5(self, HDF5group):
         """
@@ -671,6 +678,26 @@ class VacancyMediated(object):
         self.NNstar.addhdf5(HDF5group.create_group('NNstar'))
         self.kinetic.addhdf5(HDF5group.create_group('kinetic'))
         self.vkinetic.addhdf5(HDF5group.create_group('vkinetic'))
+        self.GFstarset.addhdf5(HDF5group.create_group('GFstarset'))
+
+        # jump networks:
+        om1jumplist, om1jumpindex = cstars.doublelist2flatlistindex(self.om1_jn)
+        HDF5group['omega1_ij'], HDF5group['omega1_R'], \
+        HDF5group['omega1_dx'] = cstars.PSlist2array(om1jumplist)
+        HDF5group['omega1_index'] = om1jumpindex
+
+        om2jumplist, om2jumpindex = cstars.doublelist2flatlistindex(self.om2_jn)
+        HDF5group['omega2_ij'], HDF5group['omega2_R'], \
+        HDF5group['omega2_dx'] = cstars.PSlist2array(om2jumplist)
+        HDF5group['omega2_index'] = om2jumpindex
+
+        self.kin2vstar = [ [j for j in range(self.vkinetic.Nvstars) if self.vstar2kin[j] == i]
+                           for i in range(self.kinetic.Nstars)]
+        # empty dictionaries to store GF values
+        self.GFvalues = {}
+        self.Lvvvalues = {}
+
+
 
     @classmethod
     def loadhdf5(cls, HDF5group):
