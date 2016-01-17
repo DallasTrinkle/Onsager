@@ -61,7 +61,7 @@ class GFCrystalcalc(object):
     """
     Class calculator for the Green function, designed to work with the Crystal class.
     """
-    def __init__(self, crys, chem, sitelist, jumpnetwork, Nmax=4, empty=False):
+    def __init__(self, crys, chem, sitelist, jumpnetwork, Nmax=4):
         """
         Initializes our calculator with the appropriate topology / connectivity. Doesn't
         require, at this point, the site probabilities or transition rates to be known.
@@ -71,12 +71,8 @@ class GFCrystalcalc(object):
         :param jumpnetwork: list of unique transitions as lists of ((i,j), dx)
         :param Nmax: maximum range as estimator for kpt mesh generation
         """
-        if empty:
-            # this is really just used by loadHDF5() to circumvent __init__
-            if __debug__:
-                if any(x is not None for x in (crys, chem, sitelist, jumpnetwork)):
-                    raise TypeError('Tried to create empty GFcalc with non-None parameters')
-            return
+        # this is really just used by loadHDF5() to circumvent __init__
+        if all(x is None for x in (crys, chem, sitelist, jumpnetwork)): return
         self.crys = crys
         self.chem = chem
         self.sitelist = sitelist.copy()
@@ -145,7 +141,7 @@ class GFCrystalcalc(object):
         :param HDFgroup: HDF5 group
         :return: new GFcalc object
         """
-        GFcalc = cls(None, None, None, None, empty=True)  # initialize
+        GFcalc = cls(None, None, None, None)  # initialize
         GFcalc.crys = crys
         GFcalc.chem = HDF5group.attrs['chem']
         for internal in cls.__HDF5list__:

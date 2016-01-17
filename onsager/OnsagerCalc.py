@@ -31,6 +31,7 @@ from functools import reduce
 import copy
 import collections
 import itertools
+import h5py
 
 
 class Interstitial(object):
@@ -549,12 +550,13 @@ class VacancyMediated(object):
         :param sitelist: list, grouped into Wyckoff common positions, of unique sites
         :param jumpnetwork: list of unique transitions as lists of ((i,j), dx)
         """
+        if all(x is None for x in (crys, chem, sitelist, jumpnetwork)): return  # blank object
         self.crys = crys
         self.chem = chem
         self.sitelist = copy.deepcopy(sitelist)
         self.jumpnetwork = copy.deepcopy(jumpnetwork)
         self.N = sum(len(w) for w in sitelist)
-        self.invmap = [0 for i in range(self.N)]
+        self.invmap = np.zeros(self.N, dtype=int)
         for ind,w in enumerate(sitelist):
             for i in w:
                 self.invmap[i] = ind
@@ -563,7 +565,7 @@ class VacancyMediated(object):
         # do some initial setup:
         self.thermo = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
         self.NNstar = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
-        self.kinetic = self.thermo + self.NNstar
+        # self.kinetic = self.thermo + self.NNstar
         self.vkinetic = cstars.VectorStarSet()
         self.generate(Nthermo)
 
@@ -632,6 +634,93 @@ class VacancyMediated(object):
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
                                   for jumplist in self.om1_jn]
+
+    # this is part of our *class* definition: list of data that can be directly assigned / read
+    __HDF5list__ = ('chem', 'N', 'invmap')
+
+    def addhdf5(self, HDF5group):
+        """
+        Adds an HDF5 representation of object into an HDF5group (needs to already exist).
+
+        Example: if f is an open HDF5, then StarSet.addhdf5(f.create_group('StarSet')) will
+          (1) create the group named 'StarSet', and then (2) put the StarSet representation in that group.
+        :param HDF5group: HDF5 group
+        """
+        HDF5group.attrs['type'] = self.__class__.__name__
+        HDF5group['crystal_yaml'] = crystal.yaml.dump(self.crys)
+        HDF5group['crystal_yaml'].attrs['pythonrep'] = self.crys.__repr__()
+        HDF5group['crystal_lattice'] = self.crys.lattice.T
+        basislist, basisindex = cstars.doublelist2flatlistindex(self.crys.basis)
+        HDF5group['crystal_basisarray'], HDF5group['crystal_basisindex'] = \
+            np.array(basislist), basisindex
+        # a long way around, but if you want to store an array of strings... this is how to do it:
+        HDF5group.create_dataset('crystal_chemistry', data=np.array(self.crys.chemistry, dtype=object),
+                                 dtype=h5py.special_dtype(vlen=str))
+        # arrays that we can deal with:
+        for internal in self.__HDF5list__:
+            HDF5group[internal] = getattr(self, internal)
+        # convert jumplist:
+        jumplist, jumpindex = cstars.doublelist2flatlistindex(self.jumpnetwork)
+        HDF5group['jump_ij'], HDF5group['jump_dx'], HDF5group['jump_index'] = \
+            np.array([np.array((i,j)) for ((i,j), dx) in jumplist]), \
+            np.array([dx for ((i,j), dx) in jumplist]), \
+            jumpindex
+        # objects with their own addhdf5 functionality:
+        self.GFcalc.addhdf5(HDF5group.create_group('GFcalc'))
+        self.thermo.addhdf5(HDF5group.create_group('thermo'))
+        self.NNstar.addhdf5(HDF5group.create_group('NNstar'))
+        self.kinetic.addhdf5(HDF5group.create_group('kinetic'))
+        self.vkinetic.addhdf5(HDF5group.create_group('vkinetic'))
+
+    @classmethod
+    def loadhdf5(cls, HDF5group):
+        """
+        Creates a new VacancyMediated diffuser from an HDF5 group.
+        :param HDFgroup: HDF5 group
+        :return: new StarSet object
+        """
+        diffuser = cls(None, None, None, None)  # initialize
+        diffuser.crys = crys
+        diffuser.chem = HDF5group.attrs['chem']
+        diffuser.Nshells = HDF5group['Nshells'].value
+        diffuser.jumplist = array2PSlist(HDF5group['jumplist_ij'].value,
+                                     HDF5group['jumplist_R'].value,
+                                     HDF5group['jumplist_dx'].value)
+        diffuser.jumpnetwork_index = [[] for n in range(HDF5group['jumplist_Nunique'].value)]
+        for i, jump in enumerate(HDF5group['jumplist_invmap'].value):
+            diffuser.jumpnetwork_index[jump].append(i)
+        diffuser.states = array2PSlist(HDF5group['states_ij'].value,
+                                   HDF5group['states_R'].value,
+                                   HDF5group['states_dx'].value)
+        diffuser.Nstates = len(diffuser.states)
+        diffuser.index = HDF5group['states_index'].value
+        # construct the states, and the index dictionary:
+        diffuser.Nstars = max(diffuser.index) + 1
+        diffuser.stars = [[] for n in range(diffuser.Nstars)]
+        diffuser.indexdict = {}
+        for xi, si in enumerate(diffuser.index):
+            diffuser.stars[si].append(xi)
+            diffuser.indexdict[diffuser.states[xi]] = (xi, si)
+        self.crys = crys
+        self.chem = chem
+        self.sitelist = copy.deepcopy(sitelist)
+        self.jumpnetwork = copy.deepcopy(jumpnetwork)
+        self.N = sum(len(w) for w in sitelist)
+        self.invmap = np.zeros(self.N, dtype=int)
+        for ind,w in enumerate(sitelist):
+            for i in w:
+                self.invmap[i] = ind
+        self.om0_jn= copy.deepcopy(jumpnetwork)
+        self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4) # Nmax?
+        # do some initial setup:
+        self.thermo = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
+        self.NNstar = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
+        self.kinetic = self.thermo + self.NNstar
+        self.vkinetic = cstars.VectorStarSet()
+
+
+
+        return diffuser
 
     def interactlist(self):
         """

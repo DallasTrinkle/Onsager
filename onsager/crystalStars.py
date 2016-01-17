@@ -697,7 +697,6 @@ class VectorStarSet(object):
         self.starset = None
         self.Nvstars = 0
         if starset is not None:
-            self.Nstars = starset.Nstars
             if starset.Nshells > 0:
                 self.generate(starset)
 
@@ -800,7 +799,6 @@ class VectorStarSet(object):
         :param HDF5group: HDF5 group
         """
         HDF5group.attrs['type'] = self.__class__.__name__
-        HDF5group['Nstars'] = self.Nstars
         HDF5group['Nvstars'] = self.Nvstars
         poslist, posindex = doublelist2flatlistindex(self.vecpos)
         veclist, vecindex = doublelist2flatlistindex(self.vecvec)
@@ -820,7 +818,6 @@ class VectorStarSet(object):
         """
         VSSet = cls(None)  # initialize
         VSSet.starset = SSet
-        VSSet.Nstars = HDF5group['Nstars'].value
         VSSet.Nvstars = HDF5group['Nvstars'].value
         VSSet.vecpos = flatlistindex2doublelist(HDF5group['vecposlist'].value,
                                                 HDF5group['vecposindex'].value)
