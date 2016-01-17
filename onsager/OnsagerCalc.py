@@ -681,23 +681,26 @@ class VacancyMediated(object):
         self.GFstarset.addhdf5(HDF5group.create_group('GFstarset'))
 
         # jump networks:
-        om1jumplist, om1jumpindex = cstars.doublelist2flatlistindex(self.om1_jn)
-        HDF5group['omega1_ij'], HDF5group['omega1_R'], \
-        HDF5group['omega1_dx'] = cstars.PSlist2array(om1jumplist)
-        HDF5group['omega1_index'] = om1jumpindex
+        jumplist, jumpindex = cstars.doublelist2flatlistindex(self.om1_jn)
+        HDF5group['omega1_ij'], HDF5group['omega1_dx'], HDF5group['omega1_index'] = \
+            np.array([np.array((i,j)) for ((i,j), dx) in jumplist]), \
+            np.array([dx for ((i,j), dx) in jumplist]), \
+            jumpindex
 
-        om2jumplist, om2jumpindex = cstars.doublelist2flatlistindex(self.om2_jn)
-        HDF5group['omega2_ij'], HDF5group['omega2_R'], \
-        HDF5group['omega2_dx'] = cstars.PSlist2array(om2jumplist)
-        HDF5group['omega2_index'] = om2jumpindex
+        jumplist, jumpindex = cstars.doublelist2flatlistindex(self.om2_jn)
+        HDF5group['omega2_ij'], HDF5group['omega2_dx'], HDF5group['omega2_index'] = \
+            np.array([np.array((i,j)) for ((i,j), dx) in jumplist]), \
+            np.array([dx for ((i,j), dx) in jumplist]), \
+            jumpindex
 
-        self.kin2vstar = [ [j for j in range(self.vkinetic.Nvstars) if self.vstar2kin[j] == i]
-                           for i in range(self.kinetic.Nstars)]
-        # empty dictionaries to store GF values
-        self.GFvalues = {}
-        self.Lvvvalues = {}
+        HDF5group['kin2vstar_array'], HDF5group['kin2vstar_index'] = \
+            cstars.doublelist2flatlistindex(self.kin2vstar)
 
-
+        if self.GFvalues != {}:
+            HDF5group['GFvalues_vTK'], HDF5group['GFvalues_values'], HDF5group['GFvalues_splits'] = \
+                vTKdict2arrays(self.GFvalues)
+            HDF5group['Lvvvalues_vTK'], HDF5group['Lvvvalues_values'], HDF5group['Lvvvalues_splits'] = \
+                vTKdict2arrays(self.Lvvvalues)
 
     @classmethod
     def loadhdf5(cls, HDF5group):
@@ -707,45 +710,43 @@ class VacancyMediated(object):
         :return: new StarSet object
         """
         diffuser = cls(None, None, None, None)  # initialize
-        diffuser.crys = crys
-        diffuser.chem = HDF5group.attrs['chem']
-        diffuser.Nshells = HDF5group['Nshells'].value
-        diffuser.jumplist = array2PSlist(HDF5group['jumplist_ij'].value,
-                                     HDF5group['jumplist_R'].value,
-                                     HDF5group['jumplist_dx'].value)
-        diffuser.jumpnetwork_index = [[] for n in range(HDF5group['jumplist_Nunique'].value)]
-        for i, jump in enumerate(HDF5group['jumplist_invmap'].value):
-            diffuser.jumpnetwork_index[jump].append(i)
-        diffuser.states = array2PSlist(HDF5group['states_ij'].value,
-                                   HDF5group['states_R'].value,
-                                   HDF5group['states_dx'].value)
-        diffuser.Nstates = len(diffuser.states)
-        diffuser.index = HDF5group['states_index'].value
-        # construct the states, and the index dictionary:
-        diffuser.Nstars = max(diffuser.index) + 1
-        diffuser.stars = [[] for n in range(diffuser.Nstars)]
-        diffuser.indexdict = {}
-        for xi, si in enumerate(diffuser.index):
-            diffuser.stars[si].append(xi)
-            diffuser.indexdict[diffuser.states[xi]] = (xi, si)
-        self.crys = crys
-        self.chem = chem
-        self.sitelist = copy.deepcopy(sitelist)
-        self.jumpnetwork = copy.deepcopy(jumpnetwork)
-        self.N = sum(len(w) for w in sitelist)
-        self.invmap = np.zeros(self.N, dtype=int)
-        for ind,w in enumerate(sitelist):
-            for i in w:
-                self.invmap[i] = ind
-        self.om0_jn= copy.deepcopy(jumpnetwork)
-        self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4) # Nmax?
-        # do some initial setup:
-        self.thermo = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
-        self.NNstar = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
-        self.kinetic = self.thermo + self.NNstar
-        self.vkinetic = cstars.VectorStarSet()
+        diffuser.crys = crystal.yaml.load(HDF5group['crystal_yaml'].value)
+        for internal in cls.__HDF5list__:
+            setattr(diffuser, internal, HDF5group[internal].value)
+        diffuser.sitelist = [[] for i in range(max(diffuser.invmap)+1)]
+        for i, site in enumerate(diffuser.invmap):
+            diffuser.sitelist[site].append(i)
 
+        # convert jumplist:
+        diffuser.jumpnetwork = cstars.flatlistindex2doublelist([((ij[0],ij[1]), dx) for ij, dx in \
+            zip(HDF5group['jump_ij'].value, HDF5group['jump_dx'].value)], HDF5group['jump_index'])
+        diffuser.om0_jn= copy.deepcopy(diffuser.jumpnetwork)
 
+        # objects with their own addhdf5 functionality:
+        diffuser.GFcalc = GFcalc.GFCrystalcalc.loadhdf5(diffuser.crys, HDF5group['GFcalc'])
+        diffuser.thermo = cstars.StarSet.loadhdf5(diffuser.crys, HDF5group['thermo'])
+        diffuser.NNstar = cstars.StarSet.loadhdf5(diffuser.crys, HDF5group['NNstar'])
+        diffuser.kinetic = cstars.StarSet.loadhdf5(diffuser.crys, HDF5group['kinetic'])
+        diffuser.vkinetic = cstars.VectorStarSet.loadhdf5(diffuser.kinetic, HDF5group['vkinetic'])
+        diffuser.GFstarset = cstars.StarSet.loadhdf5(diffuser.crys, HDF5group['GFstarset'])
+
+        # jump networks:
+        diffuser.om1_jn = cstars.flatlistindex2doublelist([((ij[0],ij[1]), dx) for ij, dx in \
+            zip(HDF5group['omega1_ij'].value, HDF5group['omega1_dx'].value)], HDF5group['omega1_index'])
+        diffuser.om2_jn = cstars.flatlistindex2doublelist([((ij[0],ij[1]), dx) for ij, dx in \
+            zip(HDF5group['omega2_ij'].value, HDF5group['omega2_dx'].value)], HDF5group['omega2_index'])
+
+        diffuser.kin2vstar = cstars.flatlistindex2doublelist(HDF5group['kin2vstar_array'],
+                                                             HDF5group['kin2vstar_index'])
+        if 'GFvalues_vTK' in HDF5group:
+            diffuser.GFvalues = arrays2vTKdict(HDF5group['GFvalues_vTK'],
+                                               HDF5group['GFvalues_values'],
+                                               HDF5group['GFvalues_splits'])
+            diffuser.Lvvvalues = arrays2vTKdict(HDF5group['Lvvvalues_vTK'],
+                                                HDF5group['Lvvvalues_values'],
+                                                HDF5group['Lvvvalues_splits'])
+        else:
+            diffuser.GFvalues, diffuser.Lvvvalues = {}, {}
 
         return diffuser
 
