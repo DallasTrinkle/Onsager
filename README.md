@@ -33,4 +33,9 @@ Thanks to discussions with Maylise Nastar (CEA, Saclay), Thomas Garnier (CEA, Sa
 
 Support
 =======
-This work has been supported in part by DOE/BES program XYZ and NSF/CDSE program XYZ.
+This work has been supported in part by
+
+* DOE/BES Computation Materials and Chemical Sciences Network on "Computational Microstructure Science,"
+* DOE/BES grant DE-FG02-05ER46217,
+* ONR grant N000141210752,
+* NSF/CDSE grant 1411106.

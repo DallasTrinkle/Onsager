@@ -20,8 +20,6 @@ The big changes are:
   is because the "points" now have a more complex representation (see above).
 """
 
-# TODO: need to make sure we can read / write stars for optimal functionality (HDF5?)
-
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
@@ -924,3 +922,20 @@ class VectorStarSet(object):
                         bias0expansion[i, jt] += geom_bias
                         bias1expansion[i, k] += geom_bias
         return bias0expansion, bias1expansion
+
+    def periodicvectorexpansion(self):
+        """
+        Construct the expansion from vectors on sites in the cell that are periodic to
+        our vectorstar basis. This is used to map from the rate-bias correction vectors into
+        the vectorstar basis, to correct for situations where the vacancy jumps themselves
+        have bias.
+
+        :return periodicexpansion:
+        """
+        if self.Nvstars == 0: return None
+        periodicexpansion = np.zeros((self.Nvstars,
+                                      len(self.starset.crys.basis[self.starset.chem]), 3))
+        for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
+            for s, v in zip(svR, svv):
+                periodicexpansion[i, self.starset.states[s].j, :] += v
+        return periodicexpansion

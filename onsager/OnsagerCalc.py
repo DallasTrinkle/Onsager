@@ -827,7 +827,6 @@ class VacancyMediated(object):
         :return omegalist: list of tuples of PairStates
         :return omegajumptype: index of corresponding omega0 jumptype
         """
-        # TODO: would be useful to come up with a "minimal" set of states to use here
         if 0 == getattr(self, 'Nthermo', 0): raise ValueError('Need to set thermodynamic range first')
         om, jt = {1: (self.om1_jn, self.om1_jt),
                   2: (self.om2_jn, self.om2_jt)}.get(fivefreqindex, (None,None))

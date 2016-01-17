@@ -15,7 +15,6 @@ import collections
 import yaml ### use crystal.yaml to call--may need to change in the future
 from functools import reduce
 
-# TODO: try registering the GroupOp (and maybe others?) with YAML using a metaclass instead
 # YAML tags:
 # interfaces are either at the bottom, or staticmethods in the corresponding object
 NDARRAY_YAMLTAG = '!numpy.ndarray'

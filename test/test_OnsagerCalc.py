@@ -4,7 +4,6 @@ Unit tests for Onsager calculator for vacancy-mediated diffusion.
 
 __author__ = 'Dallas R. Trinkle'
 
-# TODO: add the five-frequency model as a test for FCC; add in BCC
 # TODO: additional tests using the 14 frequency model for FCC?
 
 import unittest
