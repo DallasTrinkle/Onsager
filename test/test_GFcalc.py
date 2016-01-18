@@ -35,16 +35,14 @@ def poleFT(di, u, pm, erfupm=-1):
 class GreenFuncCrystalTests(unittest.TestCase):
     """Test new implementation of GF calculator, based on Crystal class"""
     def setUp(self):
-        self.FCC = crystal.Crystal.FCC(1.)
-        self.HCP = crystal.Crystal.HCP(1., np.sqrt(8/3))
-        self.FCC_sitelist = self.FCC.sitelist(0)
-        self.FCC_jumpnetwork = self.FCC.jumpnetwork(0, 0.75)
-        self.HCP_sitelist = self.HCP.sitelist(0)
-        self.HCP_jumpnetwork = self.HCP.jumpnetwork(0, 1.01)
+        pass
 
     def testFCC(self):
         """Test on FCC"""
-        FCC_GF = GFcalc.GFCrystalcalc(self.FCC, 0, self.FCC_sitelist, self.FCC_jumpnetwork, Nmax=4)
+        FCC = crystal.Crystal.FCC(1.)
+        FCC_sitelist = FCC.sitelist(0)
+        FCC_jumpnetwork = FCC.jumpnetwork(0, 0.75)
+        FCC_GF = GFcalc.GFCrystalcalc(FCC, 0, FCC_sitelist, FCC_jumpnetwork, Nmax=4)
         FCC_GF.SetRates([1],[0],[1],[0])
         # test the pole function:
         for u in np.linspace(0,5,21):
@@ -58,8 +56,8 @@ class GreenFuncCrystalTests(unittest.TestCase):
             disc_new = FCC_GF.g_Taylor_fnlu[(0,0)](u).real
             self.assertAlmostEqual(disc_orig, disc_new, places=15, msg="Disc (0,0) failed for u={}".format(u))
         # test the GF evaluation against the original
-        NNvect = np.array([dx for (i,j), dx in self.FCC_jumpnetwork[0]])
-        rates = np.array([1 for jump in NNvect])
+        # NNvect = np.array([dx for (i,j), dx in FCC_jumpnetwork[0]])
+        # rates = np.array([1 for jump in NNvect])
         # old_FCC_GF = GFcalc.GFcalc(self.FCC.lattice, NNvect, rates)
         # for R in [np.array([0.,0.,0.]), np.array([0.5, 0.5, 0.]), np.array([0.5, 0., 0.5]), \
         #          np.array([1.,0.,0.]), np.array([1.,0.5,0.5]), np.array([1.,1.,0.])]:
@@ -71,14 +69,17 @@ class GreenFuncCrystalTests(unittest.TestCase):
 
     def testHCP(self):
         """Test on HCP"""
-        HCP_GF = GFcalc.GFCrystalcalc(self.HCP, 0, self.HCP_sitelist, self.HCP_jumpnetwork, Nmax=4)
+        HCP = crystal.Crystal.HCP(1., np.sqrt(8/3))
+        HCP_sitelist = HCP.sitelist(0)
+        HCP_jumpnetwork = HCP.jumpnetwork(0, 1.01)
+        HCP_GF = GFcalc.GFCrystalcalc(HCP, 0, HCP_sitelist, HCP_jumpnetwork, Nmax=4)
         HCP_GF.SetRates([1],[0],[1,1],[0,0])  # one unique site, two types of jumps
         # print(HCP_GF.Diffusivity())
         # make some basic vectors:
-        hcp_basal = self.HCP.pos2cart(np.array([1.,0.,0.]), (0,0)) - \
-                    self.HCP.pos2cart(np.array([0.,0.,0.]), (0,0))
-        hcp_pyram = self.HCP.pos2cart(np.array([0.,0.,0.]), (0,1)) - \
-                    self.HCP.pos2cart(np.array([0.,0.,0.]), (0,0))
+        hcp_basal = HCP.pos2cart(np.array([1.,0.,0.]), (0,0)) - \
+                    HCP.pos2cart(np.array([0.,0.,0.]), (0,0))
+        hcp_pyram = HCP.pos2cart(np.array([0.,0.,0.]), (0,1)) - \
+                    HCP.pos2cart(np.array([0.,0.,0.]), (0,0))
         hcp_zero = np.zeros(3)
         for R in [hcp_zero, hcp_basal, hcp_pyram]:
             self.assertAlmostEqual(HCP_GF(0,0,R), HCP_GF(1,1,R), places=15)
@@ -92,9 +93,31 @@ class GreenFuncCrystalTests(unittest.TestCase):
         HCP_GF.SetRates([1],[0],[1,3],[0,0])  # one unique site, two types of jumps
         g0 = HCP_GF(0,0,hcp_zero)
         gw = 0
-        for jumplist, omega in zip(self.HCP_jumpnetwork, HCP_GF.symmrate*HCP_GF.maxrate):
+        for jumplist, omega in zip(HCP_jumpnetwork, HCP_GF.symmrate*HCP_GF.maxrate):
             for (i,j), dx in jumplist:
                 if (i==0):
                     gw += omega*(HCP_GF(i,j,dx) - g0)
         self.assertAlmostEqual(gw, 1, places=6)
 
+    def testBCC_B2(self):
+        """Test that BCC and B2 produce the same GF"""
+        a0 = 1.
+        chem = 0
+        BCC = crystal.Crystal.BCC(a0)
+        BCC_sitelist = BCC.sitelist(chem)
+        BCC_jumpnetwork = BCC.jumpnetwork(chem, 0.87*a0)
+        BCC_GF = GFcalc.GFCrystalcalc(BCC, chem, BCC_sitelist, BCC_jumpnetwork, Nmax=6)
+        BCC_GF.SetRates(np.ones(len(BCC_sitelist)),np.zeros(len(BCC_sitelist)),
+                        2.*np.ones(len(BCC_jumpnetwork)), np.zeros(len(BCC_jumpnetwork)))
+
+        B2 = crystal.Crystal(a0*np.eye(3), [np.zeros(3), np.array([0.45, 0.45, 0.45])])
+        B2_sitelist = B2.sitelist(chem)
+        B2_jumpnetwork = B2.jumpnetwork(chem, 0.99*a0)
+        B2_GF = GFcalc.GFCrystalcalc(B2, chem, B2_sitelist, B2_jumpnetwork, Nmax=6)
+        B2_GF.SetRates(np.ones(len(B2_sitelist)),np.zeros(len(B2_sitelist)),
+                        2.*np.ones(len(B2_jumpnetwork)), np.zeros(len(B2_jumpnetwork)))
+        veclist = [np.array([a0, 0, 0]), np.array([0, a0, 0]), np.array([0, 0, a0]),
+                   np.array([-a0, 0, 0]), np.array([0, -a0, 0]), np.array([0, 0, -a0])]
+        for v1 in veclist:
+            for v2 in veclist:
+                self.assertAlmostEqual(BCC_GF(0,0,v1+v2), B2_GF(0,0,v1+v2), places=5)
