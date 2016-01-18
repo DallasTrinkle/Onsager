@@ -622,6 +622,7 @@ class VacancyMediated(object):
             self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
         self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
+        self.etaperiodic = self.vkinetic.periodicvectorexpansion()
         # more indexing helpers:
         # kineticsvWyckoff: Wyckoff position of solute and vacancy for kinetic stars
         # omega0vacancyWyckoff: Wyckoff positions of initial and final position in omega0 jumps
@@ -685,7 +686,7 @@ class VacancyMediated(object):
                     'GFexpansion',
                     'om1_om0', 'om1_om0escape', 'om1expansion', 'om1escape',
                     'om2_om0', 'om2_om0escape', 'om2expansion', 'om2escape',
-                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias',
+                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias', 'etaperiodic',
                     'kineticsvWyckoff', 'omega0vacancyWyckoff', 'omega1svsvWyckoff',
                     'omega2svsvWyckoff')
     __taglist__ = ('vacancy', 'solute', 'solute-vacancy', 'omega0', 'omega1', 'omega2')
