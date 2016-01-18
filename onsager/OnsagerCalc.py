@@ -976,7 +976,7 @@ class VacancyMediated(object):
         :return omega1escape[NVstars, Nomega1]: escape rate elements for omega1 jumps
         :return omega2escape[NVstars, Nomega2]: escape rate elements for omega2 jumps
         :return omega1_om0escape[NVstars, Nomega0]: reference escape rate elements for omega1 jumps
-        :return omega2_om0escape[NVstars, Nomega0]: reference escape rate elements for omega1 jumps
+        :return omega2_om0escape[NVstars, Nomega0]: reference escape rate elements for omega2 jumps
         """
         # omega0 = np.array([np.exp(0.5*(bFV[self.invmap[jump[0][0][0]]] + bFV[self.invmap[jump[0][0][1]]])-bF)
         #                    for bF, jump in zip(bFT0, self.om0_jn)])
