@@ -613,8 +613,7 @@ class VacancyMediated(object):
         # Vector star set, generates a LOT of our calculation:
         self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
         # empty dictionaries to store GF values
-        self.GFvalues = {}
-        self.Lvvvalues = {}
+        self.GFvalues, self.Lvvvalues, self.etavvalues = {}, {}, {}
         self.om1_om0, self.om1_om0escape, self.om1expansion, self.om1escape = \
             self.vkinetic.rateexpansions(self.om1_jn, self.om1_jt)
         # technically, we don't need om2_om0 for anything
@@ -749,6 +748,8 @@ class VacancyMediated(object):
                 vTKdict2arrays(self.GFvalues)
             HDF5group['Lvvvalues_vTK'], HDF5group['Lvvvalues_values'], HDF5group['Lvvvalues_splits'] = \
                 vTKdict2arrays(self.Lvvvalues)
+            HDF5group['etavvalues_vTK'], HDF5group['etavvalues_values'], HDF5group['etavvalues_splits'] = \
+                vTKdict2arrays(self.etavvalues)
 
         # tags
         for tag in self.__taglist__:
@@ -798,8 +799,11 @@ class VacancyMediated(object):
             diffuser.Lvvvalues = arrays2vTKdict(HDF5group['Lvvvalues_vTK'],
                                                 HDF5group['Lvvvalues_values'],
                                                 HDF5group['Lvvvalues_splits'])
+            diffuser.etavvalues = arrays2vTKdict(HDF5group['etavvalues_vTK'],
+                                                HDF5group['etavvalues_values'],
+                                                HDF5group['etavvalues_splits'])
         else:
-            diffuser.GFvalues, diffuser.Lvvvalues = {}, {}
+            diffuser.GFvalues, diffuser.Lvvvalues, diffuser.etavvalues = {}, {}, {}
 
         # tags
         diffuser.tags = {}
@@ -1035,15 +1039,18 @@ class VacancyMediated(object):
                                     preT=np.ones_like(bFT0), betaeneT=bFT0)
         GF = self.GFvalues.get(vTK)
         L0vv = self.Lvvvalues.get(vTK)
+        etav = self.etavvalues.get(vTK)
         if GF is None:
             # calculate, and store in dictionary for cache:
             self.GFcalc.SetRates(**(vTK._asdict()))
             L0vv = self.GFcalc.Diffusivity()
+            etav = self.GFcalc.biascorrection()
             GF = np.array([self.GFcalc(PS.i, PS.j, PS.dx)
                            for PS in
                            [self.GFstarset.states[s[0]] for s in self.GFstarset.stars]])
-            self.Lvvvalues[vTK] = L0vv
             self.GFvalues[vTK] = GF.copy()
+            self.Lvvvalues[vTK] = L0vv
+            self.etavvalues[vTK] = etav
 
         # 2. set up probabilities for solute-vacancy configurations
         probV = np.array([np.exp(min(bFV)-bFV[wi]) for wi in self.invmap])

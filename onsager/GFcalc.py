@@ -392,6 +392,7 @@ class GFCrystalcalc(object):
         """
         if etav is None: return self.eta
         eta = np.zeros((self.N,3))
+        if etav == 0: return eta
         for (n,l,c) in etav.coefflist:
             if n < 1: raise ValueError("Reduced Taylor expansion for etav doesn't begin with n==1")
             if n == 1:
@@ -419,7 +420,7 @@ class GFCrystalcalc(object):
             etav.truncate(1, inplace=True)
         else:
             D = dd.copy()
-            etav = None
+            etav = 0
         D.truncate(T3D.Lmax, inplace=True)
         D.reduce()
         return dd, dr, rd, rr, D, etav
