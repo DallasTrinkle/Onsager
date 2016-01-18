@@ -400,7 +400,7 @@ class GFCrystalcalc(object):
                     for d, ind in ((0, T3D.pow2ind[1,0,0]),
                                    (1, T3D.pow2ind[0,1,0]),
                                    (2, T3D.pow2ind[0,0,1])):
-                        eta[:,d] += np.dot(self.vr[:,1:], c[ind, :].imag)
+                        eta[:,d] += np.dot(self.vr[:,1:], c[ind, :])[:,0].imag
         return eta
 
     def BlockRotateOmegaTaylor(self, omega_Taylor_rotate):

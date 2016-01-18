@@ -254,6 +254,54 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                         msg='Failure to match correlation ({}, {}), got {}, {}'.format(
                             self.correlx, self.correlz, -Lss[0,0]/Lsv[0,0], -Lss[2,2]/Lsv[2,2]))
 
+class CrystalOnsagerTestsB2(unittest.TestCase):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+    def setUp(self):
+        self.a0 = 1.
+        self.crys = crystal.Crystal.BCC(self.a0)
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.87*self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Body-Centered Cubic a0={}'.format(self.a0)
+
+        self.crys2 = crystal.Crystal(self.a0*np.eye(3), [np.zeros(3), np.array([0.45, 0.45, 0.45])])
+        self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.99*self.a0)
+        self.sitelist2 = self.crys2.sitelist(self.chem)
+        self.crystalname2 = 'B2 a0={}'.format(self.a0)
+
+    def testtracer(self):
+        """Test that BCC mapped onto B2 match exactly"""
+        # Make a calculator with one neighbor shell
+        print('Crystal: ' + self.crystalname)
+        print('Crystal2: ' + self.crystalname2)
+        kT = 1.
+        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
+        for tag in ('solute-vacancy', 'omega0', 'omega1', 'omega2'):
+            print(tag + ' list:')
+            for str, mult in ((taglist[0], len(taglist)) for taglist in Diffusivity.tags[tag]):
+                print(str, 'x', mult)
+            print(tag + ' list2:')
+            for str, mult in ((taglist[0], len(taglist)) for taglist in Diffusivity2.tags[tag]):
+                print(str, 'x', mult)
+        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
+                      'preT0': np.array([1.]), 'eneT0': np.array([0.])}
+        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        print('Thermaldef:\n', thermaldef)
+        thermaldef2 = {'preV': np.ones(len(self.sitelist2)), 'eneV': np.zeros(len(self.sitelist2)),
+                      'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
+        thermaldef2.update(Diffusivity2.maketracerpreene(**thermaldef2))
+        print('Thermaldef2:\n', thermaldef2)
+
+        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
+        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
+        print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
+        print('Lvv2:\n', Lvv2), print('Lss2:\n', Lss2), print('Lsv2:\n', Lsv2), print('L1vv2:\n', L1vv2)
+        for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
+            self.assertTrue(np.allclose(L, Lp), msg="Diffusivity doesn't match?")
+
 
 class InterstitialTests(unittest.TestCase):
     """Tests for our interstitial diffusion calculator"""

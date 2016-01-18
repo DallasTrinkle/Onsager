@@ -1096,14 +1096,14 @@ class VacancyMediated(object):
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
-        etaV0 = np.tensordot(self.etaperiodic, etav, axes=((1,2), (0,1)))
+        etaV0 = np.tensordot(self.etaperiodic, etav*np.sqrt(self.N), axes=((1,2), (0,1)))
         outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
         outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
         outer_etaSvec = np.dot(self.vkinetic.outer, np.dot(G, biasSvec))
         L2ss = np.dot(outer_etaSvec, biasSvec) /self.N
-        L1sv = (np.dot(outer_etaSvec, biasVvec) + 2.*np.dot(outer_etaV0, biasSvec)) /self.N
-        L1vv = (np.dot(outer_etaVvec, biasVvec) + 2.*np.dot(outer_etaV0, biasVvec) -
-                np.dot(outer_etaV0, np.dot(delta_om, etaV0))) /self.N
+        L1sv = (np.dot(outer_etaSvec, biasVvec) - np.dot(outer_etaV0, biasSvec))/self.N
+        L1vv = (np.dot(outer_etaVvec, biasVvec) - np.dot(outer_etaV0, biasVvec))/self.N # - \
+                # np.dot(outer_etaV0, np.dot(delta_om, etaV0))
         # compute our bare solute diffusivity:
         L0ss = np.zeros((3,3))
         # Need to transpose omega2escape so that we're working with each escape, and then it
