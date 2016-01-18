@@ -876,18 +876,27 @@ class VectorStarHCPBias1linearTests(VectorStarBias1linearTests):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
 
-    # def testPeriodicBias(self):
-    #     self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
-    #     self.vecstarset = stars.VectorStarSet(self.starset)
-    #     periodicexpansion = self.vecstarset.periodicvectorexpansion()
-    #     vectorbasislist = OnsagerCalc.Interstitial(self.crys, self.chem, self.sitelist, self.jumpnetwork).VectorBasis
-    #     vb = sum( (2.*u-1)*vect for u,vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist) )
-    #     print(vectorbasislist)
-    #     print(vb.shape)
-    #     print(vb)
-    #     svexp = np.dot(vb, periodicexpansion)
-    #     vbexp = np.zeros_like(vb)
-    #     for i, svR, svv in zip(stars.itertools.count(), self.vecstarset.vecpos, self.vecstarset.vecvec):
-    #         for s, v in zip(svR, svv):
-    #             vbexp[self.starset.states[s].j, :] += v*svexp[i]
-    #     self.assertTrue(np.allclose(vb, vbexp))
+class VectorStarPeriodicBias(unittest.TestCase):
+    """Set of tests for our expansion of periodic bias vector (1)"""
+
+    longMessage = False
+    def setUp(self):
+        self.crys = crystal.Crystal(np.eye(3), [np.array([0.,0.,0.]), np.array([0.25, 0.25, 0.25])])
+        self.jumpnetwork = self.crys.jumpnetwork(0, 0.9)
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+    def testPeriodicBias(self):
+        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        periodicexpansion = self.vecstarset.periodicvectorexpansion()
+        vectorbasislist = OnsagerCalc.Interstitial(self.crys, self.chem, self.sitelist, self.jumpnetwork).VectorBasis
+        vb = sum( (2.*u-1)*vect for u,vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist) )
+        svexp = np.tensordot(periodicexpansion, vb, axes=((1,2), (0,1)))
+        vbdirect = np.array([vb[PS.j] for PS in self.starset.states])
+        vbexp = np.zeros((self.starset.Nstates, 3))
+        for i, svR, svv in zip(stars.itertools.count(), self.vecstarset.vecpos, self.vecstarset.vecvec):
+            for s, v in zip(svR, svv):
+                vbexp[s, :] += v*svexp[i]
+        self.assertTrue(np.allclose(vbdirect, vbexp))
