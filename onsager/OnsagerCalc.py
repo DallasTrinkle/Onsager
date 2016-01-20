@@ -575,6 +575,10 @@ class VacancyMediated(object):
         self.vkinetic = stars.VectorStarSet()
         self.generate(Nthermo)
         self.tags = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
+        self.tagdict = {}
+        for taglist in self.tags.values():
+            for i, tags in enumerate(taglist):
+                for tag in tags: self.tagdict[tag] = i
 
     def generate(self, Nthermo):
         """
@@ -811,6 +815,10 @@ class VacancyMediated(object):
             # needed because of how HDF5 stores strings...
             utf8list = [ str(data, encoding='utf-8') for data in HDF5group[tag + '_taglist'].value ]
             diffuser.tags[tag] = stars.flatlistindex2doublelist(utf8list, HDF5group[tag + '_tagindex'])
+        diffuser.tagdict = {}
+        for taglist in diffuser.tags.values():
+            for i, tags in enumerate(taglist):
+                for tag in tags: diffuser.tagdict[tag] = i
         return diffuser
 
     def interactlist(self):
