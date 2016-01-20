@@ -1101,10 +1101,13 @@ class VacancyMediated(object):
         outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
         outer_etaSvec = np.dot(self.vkinetic.outer, np.dot(G, biasSvec))
         L2ss = np.dot(outer_etaSvec, biasSvec) /self.N
-        L1sv = (np.dot(outer_etaSvec, biasVvec) - np.dot(outer_etaV0, biasSvec))/self.N
-        L1vv = (np.dot(outer_etaVvec, biasVvec) - np.dot(outer_etaV0, biasVvec))/self.N # - \
-                # np.dot(outer_etaV0, np.dot(delta_om, etaV0))
+        L1sv = (np.dot(outer_etaSvec, biasVvec) - 2*np.dot(outer_etaV0, biasSvec))/self.N
+        L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
+                np.dot(outer_etaV0, np.dot(delta_om, etaV0))
         # compute our bare solute diffusivity:
+        # TODO: need to compute the GF correction for the solute diffusivity. Involves essentially
+        # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
+        # from *both* L1sv and L1vv. Then that will fix our other problems.
         L0ss = np.zeros((3,3))
         # Need to transpose omega2escape so that we're working with each escape, and then it
         # is indexed by which vector star it corresponds to.
