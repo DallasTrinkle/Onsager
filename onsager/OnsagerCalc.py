@@ -659,7 +659,7 @@ class VacancyMediated(object):
         def omega1(PS1, PS2):
             return OM1_TAG.format( \
                     solute=single_defect(SOLUTE_TAG, basis[PS1.i]),
-                    vac1=single_defect(VACANCY_TAG, basis[PS2.j] + PS2.R), \
+                    vac1=single_defect(VACANCY_TAG, basis[PS1.j] + PS1.R), \
                     vac2=single_defect(VACANCY_TAG, basis[PS2.j] + PS2.R))
 
         tags['vacancy'] = [ [ single_defect(VACANCY_TAG, basis[s]) for s in sites]
