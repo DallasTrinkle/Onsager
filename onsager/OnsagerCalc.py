@@ -629,8 +629,8 @@ class VacancyMediated(object):
             self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
         self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
-        self.biasperiodic = self.vkinetic.periodicvectorexpansion('solute')
-        self.etaperiodic = self.vkinetic.periodicvectorexpansion('vacancy')
+        self.etaSperiodic = self.vkinetic.periodicvectorexpansion('solute')
+        self.etaVperiodic = self.vkinetic.periodicvectorexpansion('vacancy')
         # more indexing helpers:
         # kineticsvWyckoff: Wyckoff position of solute and vacancy for kinetic stars
         # omega0vacancyWyckoff: Wyckoff positions of initial and final position in omega0 jumps
@@ -705,7 +705,7 @@ class VacancyMediated(object):
                     'GFexpansion',
                     'om1_om0', 'om1_om0escape', 'om1expansion', 'om1escape',
                     'om2_om0', 'om2_om0escape', 'om2expansion', 'om2escape',
-                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias', 'biasperidioc', 'etaperiodic',
+                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias', 'etaSperiodic', 'etaVperiodic',
                     'kineticsvWyckoff', 'omega0vacancyWyckoff', 'omega1svsvWyckoff',
                     'omega2svsvWyckoff')
     __taglist__ = ('vacancy', 'solute', 'solute-vacancy', 'omega0', 'omega1', 'omega2')
@@ -1062,7 +1062,7 @@ class VacancyMediated(object):
         :return Lsv[3, 3]: solute-vacancy; needs to be multiplied by cv*cs/kBT
         :return Lvv1[3, 3]: vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT
         """
-        # 1. bare vacancy diffusivity and Green's function
+        # 1. bare vacancy and solute diffusivity and Green's function
         vTK = vacancyThermoKinetics(pre=np.ones_like(bFV), betaene=bFV,
                                     preT=np.ones_like(bFT0), betaeneT=bFT0)
         GF = self.GFvalues.get(vTK)
@@ -1079,8 +1079,7 @@ class VacancyMediated(object):
             self.GFvalues[vTK] = GF.copy()
             self.Lvvvalues[vTK] = L0vv
             self.etavvalues[vTK] = etav
-
-        # 1'. bare solute diffusivity
+        # solute:
         bFVmin = min(bFV)
         lnZV = -bFVmin + np.log(np.exp(bFVmin - bFV).mean())
         L0ss, etas, D0ss = self.L0sscalc.diffusivity(pre=np.ones_like(bFS), betaene=bFS,
@@ -1131,14 +1130,19 @@ class VacancyMediated(object):
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
-        etaS0 = np.tensordot(self.biasperiodic, etas*np.sqrt(self.N), axes=((1,2), (0,1)))
-        etaV0 = np.tensordot(self.etaperiodic, etav*np.sqrt(self.N), axes=((1,2), (0,1)))
+        etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
+        etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
+        outer_biasS = np.dot(self.vkinetic.outer, biasSvec)
         outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
         outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
         outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
         outer_etaSvec = np.dot(self.vkinetic.outer, np.dot(G, biasSvec))
-        L1ss = np.dot(outer_etaSvec, biasSvec) /self.N + np.dot(outer_etaS0, biasSvec)/self.N
-        L1sv = (np.dot(outer_etaSvec, biasVvec) - 2*np.dot(outer_etaV0, biasSvec))/self.N
+        etaSfolddown = np.tensordot(np.dot(G, biasSvec), self.etaSperiodic, axes=(0,0))
+        L1ss = (np.dot(outer_etaSvec, biasSvec) - 0.*np.dot(outer_etaS0, biasSvec))/self.N - \
+               0.*np.dot(outer_etaS0, np.dot(delta_om, etaS0))/self.N
+        L1sv = (np.dot(outer_etaSvec, biasVvec)
+                - np.dot(outer_etaV0, biasSvec)
+                - np.dot(outer_etaS0, biasVvec))/self.N
         L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
                np.dot(outer_etaV0, np.dot(delta_om, etaV0))
         # compute our bare solute diffusivity:

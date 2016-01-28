@@ -931,7 +931,7 @@ class VectorStarSet(object):
         have bias.
 
         :param type: 'solute' or 'vacancy', depending on which site we need to check.
-        :return periodicexpansion:
+        :return periodicexpansion: [Nvstars, Nsites, 3], to map Nsites,3 into Nvstars
         """
         if self.Nvstars == 0: return None
         attr = {'solute': 'i', 'vacancy': 'j'}.get(type)
@@ -942,3 +942,19 @@ class VectorStarSet(object):
             for s, v in zip(svR, svv):
                 periodicexpansion[i, getattr(self.starset.states[s], attr), :] += v
         return periodicexpansion
+
+    def unitcellfolddown(self, type):
+        """
+        Construct the expansion to "fold down" from starvector back into the unit cell.
+
+        :param type: 'solute' or 'vacancy', depending on which site we need to check.
+        :return folddown: [Nsites, 3, Nvstars], to map vstars back into Nsites, 3
+        """
+        if self.Nvstars == 0: return None
+        attr = {'solute': 'i', 'vacancy': 'j'}.get(type)
+        if attr is None: raise ValueError('type needs to be "solute" or "vacancy"')
+        folddown = np.zeros((len(self.starset.crys.basis[self.starset.chem]), 3, self.Nvstars))
+        for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
+            for s, v in zip(svR, svv):
+                folddown[getattr(self.starset.states[s], attr), :, i] += v
+        return folddown
