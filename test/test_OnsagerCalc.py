@@ -297,8 +297,8 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
 
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
         Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
-        print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
-        print('Lvv2:\n', Lvv2), print('Lss2:\n', Lss2), print('Lsv2:\n', Lsv2), print('L1vv2:\n', L1vv2)
+        print('Lvv-bcc:\n', Lvv), print('Lss-bcc:\n', Lss), print('Lsv-bcc:\n', Lsv), print('L1vv-bcc:\n', L1vv)
+        print('Lvv-B2:\n', Lvv2), print('Lss-B2:\n', Lss2), print('Lsv-B2:\n', Lsv2), print('L1vv-B2:\n', L1vv2)
         for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
             self.assertTrue(np.allclose(L, Lp), msg="Diffusivity doesn't match?")
 
