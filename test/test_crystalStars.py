@@ -853,8 +853,8 @@ class VectorStarBias1linearTests(unittest.TestCase):
     def testPeriodicBias(self):
         self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
-        periodicexpansion = self.vecstarset.periodicvectorexpansion()
-        self.assertTrue(np.allclose(periodicexpansion, 0))
+        for type in ('solute', 'vacancy'):
+            self.assertTrue(np.allclose(self.vecstarset.periodicvectorexpansion(type), 0))
 
 
 class VectorStarFCCBias1linearTests(VectorStarBias1linearTests):
@@ -890,7 +890,8 @@ class VectorStarPeriodicBias(unittest.TestCase):
     def testPeriodicBias(self):
         self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
-        periodicexpansion = self.vecstarset.periodicvectorexpansion()
+        # vacancy first:
+        periodicexpansion = self.vecstarset.periodicvectorexpansion('vacancy')
         vectorbasislist = OnsagerCalc.Interstitial(self.crys, self.chem, self.sitelist, self.jumpnetwork).VectorBasis
         vb = sum( (2.*u-1)*vect for u,vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist) )
         svexp = np.tensordot(periodicexpansion, vb, axes=((1,2), (0,1)))
@@ -900,3 +901,15 @@ class VectorStarPeriodicBias(unittest.TestCase):
             for s, v in zip(svR, svv):
                 vbexp[s, :] += v*svexp[i]
         self.assertTrue(np.allclose(vbdirect, vbexp))
+
+        # solute second:
+        periodicexpansion = self.vecstarset.periodicvectorexpansion('solute')
+        vectorbasislist = OnsagerCalc.Interstitial(self.crys, self.chem, self.sitelist, self.jumpnetwork).VectorBasis
+        vb = sum( (2.*u-1)*vect for u,vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist) )
+        svexp = np.tensordot(periodicexpansion, vb, axes=((1,2), (0,1)))
+        sbdirect = np.array([vb[PS.i] for PS in self.starset.states])
+        sbexp = np.zeros((self.starset.Nstates, 3))
+        for i, svR, svv in zip(stars.itertools.count(), self.vecstarset.vecpos, self.vecstarset.vecvec):
+            for s, v in zip(svR, svv):
+                sbexp[s, :] += v*svexp[i]
+        self.assertTrue(np.allclose(sbdirect, sbexp))

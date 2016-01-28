@@ -923,19 +923,22 @@ class VectorStarSet(object):
                         bias1expansion[i, k] += geom_bias
         return bias0expansion, bias1expansion
 
-    def periodicvectorexpansion(self):
+    def periodicvectorexpansion(self, type):
         """
         Construct the expansion from vectors on sites in the cell that are periodic to
         our vectorstar basis. This is used to map from the rate-bias correction vectors into
         the vectorstar basis, to correct for situations where the vacancy jumps themselves
         have bias.
 
+        :param type: 'solute' or 'vacancy', depending on which site we need to check.
         :return periodicexpansion:
         """
         if self.Nvstars == 0: return None
+        attr = {'solute': 'i', 'vacancy': 'j'}.get(type)
+        if attr is None: raise ValueError('type needs to be "solute" or "vacancy"')
         periodicexpansion = np.zeros((self.Nvstars,
                                       len(self.starset.crys.basis[self.starset.chem]), 3))
         for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
             for s, v in zip(svR, svv):
-                periodicexpansion[i, self.starset.states[s].j, :] += v
+                periodicexpansion[i, getattr(self.starset.states[s], attr), :] += v
         return periodicexpansion

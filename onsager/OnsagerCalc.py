@@ -272,26 +272,21 @@ class Interstitial(object):
         return [ [ self.crys.g_tensor(g, dipole) for g in groupops ]
                  for groupops, dipole in zip(self.jumpgroupops, symmdipoles) ]
 
-    def diffusivity(self, pre, betaene, preT, betaeneT, CalcDeriv = False):
+    def diffusivity(self, pre, betaene, preT, betaeneT, CalcDeriv = False, returnBias = False):
         """
         Computes the diffusivity for our element given prefactors and energies/kB T.
         Also returns the negative derivative of diffusivity with respect to beta (used to compute
         the activation barrier tensor) if CalcDeriv = True
         The input list order corresponds to the sitelist and jumpnetwork
 
-        Parameters
-        ----------
-        pre : list of prefactors for unique sites
-        betaene : list of site energies divided by kB T
-        preT : list of prefactors for transition states
-        betaeneT: list of transition state energies divided by kB T
+        :param pre : list of prefactors for unique sites
+        :param betaene : list of site energies divided by kB T
+        :param preT : list of prefactors for transition states
+        :param betaeneT: list of transition state energies divided by kB T
 
-        Returns
-        -------
-        if CalcDeriv:
-          D[3,3], DE[3,3] : diffusivity as 3x3 tensor, diffusivity times activation barrier
-        else:
-          D[3,3] : diffusivity as 3x3 tensor
+        :return D[3,3]: diffusivity as a 3x3 tensor
+        :return DE[3,3]: diffusivity times activation barrier (if CalcDeriv == True)
+        :return bias[N,3]: bias vector (if returnBias == True)
         """
         if __debug__:
             if len(pre) != len(self.sitelist): raise IndexError("length of prefactor {} doesn't match sitelist".format(pre))
@@ -343,10 +338,13 @@ class Interstitial(object):
                   + np.dot(np.dot(self.VV, gamma_v), dbias_v) \
                   - np.dot(np.dot(self.VV, gamma_v), dgamma_v)
 
-        if CalcDeriv:
-            return D0, Db
-        else:
+        if not (CalcDeriv or returnBias):
             return D0
+        else:
+            ret = (D0,)
+            if CalcDeriv: ret += (Db,)
+            if returnBias: ret += (bias_i,)
+            return ret
 
     def elastodiffusion(self, pre, betaene, dipole, preT, betaeneT, dipoleT):
         """
@@ -626,7 +624,8 @@ class VacancyMediated(object):
             self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
         self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
-        self.etaperiodic = self.vkinetic.periodicvectorexpansion()
+        self.biasperiodic = self.vkinetic.periodicvectorexpansion('solute')
+        self.etaperiodic = self.vkinetic.periodicvectorexpansion('vacancy')
         # more indexing helpers:
         # kineticsvWyckoff: Wyckoff position of solute and vacancy for kinetic stars
         # omega0vacancyWyckoff: Wyckoff positions of initial and final position in omega0 jumps
@@ -701,7 +700,7 @@ class VacancyMediated(object):
                     'GFexpansion',
                     'om1_om0', 'om1_om0escape', 'om1expansion', 'om1escape',
                     'om2_om0', 'om2_om0escape', 'om2expansion', 'om2escape',
-                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias', 'etaperiodic',
+                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias', 'biasperidioc', 'etaperiodic',
                     'kineticsvWyckoff', 'omega0vacancyWyckoff', 'omega1svsvWyckoff',
                     'omega2svsvWyckoff')
     __taglist__ = ('vacancy', 'solute', 'solute-vacancy', 'omega0', 'omega1', 'omega2')
@@ -1078,9 +1077,11 @@ class VacancyMediated(object):
 
         # 1'. bare solute diffusivity
         bFVmin = min(bFV)
-        lnZv = -bFVmin + np.log(np.exp(bFVmin - bFV).mean())
-        L0ss = self.L0sscalc.diffusivity(pre=np.ones_like(bFS), betaene=bFS,
-                                         preT=np.ones_like(bFT2), betaeneT=bFT2+lnZv)
+        lnZV = -bFVmin + np.log(np.exp(bFVmin - bFV).mean())
+        L0ss, biass = self.L0sscalc.diffusivity(pre=np.ones_like(bFS), betaene=bFS,
+                                                preT=np.ones_like(bFT2), betaeneT=bFT2+lnZV,
+                                                returnBias=True)
+        biasS0 = np.tensordot(self.biasperiodic, biass*np.sqrt(self.N), axes=((1,2), (0,1)))
 
         # 2. set up probabilities for solute-vacancy configurations
         probV = np.array([np.exp(min(bFV)-bFV[wi]) for wi in self.invmap])
@@ -1117,7 +1118,8 @@ class VacancyMediated(object):
             # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
             svvacindex = self.kin2vacancy[starindex]  # vacancy
-            biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
+            biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex]) - \
+                biasS0[sv]
             biasVvec[sv] = np.dot(self.om1bias[sv,:], omega1escape[sv,:])*np.sqrt(prob[starindex]) - \
                            np.dot(self.om1_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex]) - \
                            biasSvec[sv] - \
