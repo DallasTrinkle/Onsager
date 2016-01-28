@@ -574,6 +574,7 @@ class VacancyMediated(object):
         # self.kinetic = self.thermo + self.NNstar
         self.vkinetic = stars.VectorStarSet()
         self.generate(Nthermo)
+        self.L0sscalc = self.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
         self.tags = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
         self.tagdict = {}
         for taglist in self.tags.values():
@@ -644,7 +645,18 @@ class VacancyMediated(object):
                                    self.invmap[self.kinetic.states[jumplist[0][0][0]].j],
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
-                                  for jumplist in self.om1_jn]
+                                  for jumplist in self.om2_jn]
+
+    def solutecalculator(self):
+        """
+        Generate a bare solute diffusivity calculator; use Interstitial to do the heavy lifting
+        :return Interstitial: Interstitial calculator
+        """
+        # we need to convert our omega2 PairState jumpnetwork into an "interstitial" jump network
+        solutejumpnetwork = [ [((self.kinetic.states[PSi].i, self.kinetic.states[PSj].i), dx)
+                               for (PSi, PSj), dx in jumplist]
+                              for jumplist in self.om2_jn ]
+        return Interstitial(self.crys, self.chem, self.sitelist, solutejumpnetwork)
 
     def generatetags(self):
         """
@@ -808,6 +820,10 @@ class VacancyMediated(object):
                                                 HDF5group['etavvalues_splits'])
         else:
             diffuser.GFvalues, diffuser.Lvvvalues, diffuser.etavvalues = {}, {}, {}
+
+        # for now, we will just recreate this from scratch each time.
+        # TODO: create addhdf5() / loadhdf5() capabilities for Interstitial diffuser...
+        diffuser.L0sscalc = diffuser.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
 
         # tags
         diffuser.tags = {}
@@ -1060,6 +1076,12 @@ class VacancyMediated(object):
             self.Lvvvalues[vTK] = L0vv
             self.etavvalues[vTK] = etav
 
+        # 1'. bare solute diffusivity
+        bFVmin = min(bFV)
+        lnZv = -bFVmin + np.log(np.exp(bFVmin - bFV).mean())
+        L0ss = self.L0sscalc.diffusivity(pre=np.ones_like(bFS), betaene=bFS,
+                                         preT=np.ones_like(bFT2), betaeneT=bFT2+lnZv)
+
         # 2. set up probabilities for solute-vacancy configurations
         probV = np.array([np.exp(min(bFV)-bFV[wi]) for wi in self.invmap])
         probV *= self.N/np.sum(probV)  # normalize
@@ -1116,16 +1138,6 @@ class VacancyMediated(object):
         # TODO: need to compute the GF correction for the solute diffusivity. Involves essentially
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
         # from *both* L1sv and L1vv. Then that will fix our other problems.
-        L0ss = np.zeros((3,3))
-        # Need to transpose omega2escape so that we're working with each escape, and then it
-        # is indexed by which vector star it corresponds to.
-        for om2, jumplist in zip(omega2escape.T, self.om2_jn):
-            for (i,j), dx in jumplist:
-                # index into kinetic stars to get the probability; to get the escape rate, have to index
-                # back to the vector star (take the first entry since kin2vstar returns a list).
-                L0ss += 0.5*np.outer(dx,dx) * om2[self.kin2vstar[self.kinetic.index[i]][0]] * \
-                        prob[self.kinetic.index[i]]
-        L0ss /= self.N
         return L0vv, L0ss + L2ss, -L0ss + L1sv, L1vv
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
