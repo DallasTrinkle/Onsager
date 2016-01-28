@@ -344,7 +344,11 @@ class Interstitial(object):
         else:
             ret = (D0 + Dcorrection,)
             if CalcDeriv: ret += (Db,)
-            if returnBias: ret += (bias_i, D0)
+            if returnBias:
+                # looks a little funny, but if self.VectorBasis is empty, we never access gamma_v anyway
+                gamma_i = sum([gamma_v[a]*va for a, va in enumerate(self.VectorBasis)],
+                              np.zeros_like(bias_i))
+                ret += (gamma_i, D0)
             return ret
 
     def elastodiffusion(self, pre, betaene, dipole, preT, betaeneT, dipoleT):
@@ -1079,10 +1083,9 @@ class VacancyMediated(object):
         # 1'. bare solute diffusivity
         bFVmin = min(bFV)
         lnZV = -bFVmin + np.log(np.exp(bFVmin - bFV).mean())
-        L0ss, biass, D0ss = self.L0sscalc.diffusivity(pre=np.ones_like(bFS), betaene=bFS,
-                                                      preT=np.ones_like(bFT2), betaeneT=bFT2+lnZV,
-                                                      returnBias=True)
-        biasS0 = np.tensordot(self.biasperiodic, biass*np.sqrt(self.N), axes=((1,2), (0,1)))
+        L0ss, etas, D0ss = self.L0sscalc.diffusivity(pre=np.ones_like(bFS), betaene=bFS,
+                                                     preT=np.ones_like(bFT2), betaeneT=bFT2+lnZV,
+                                                     returnBias=True)
 
         # 2. set up probabilities for solute-vacancy configurations
         probV = np.array([np.exp(min(bFV)-bFV[wi]) for wi in self.invmap])
@@ -1124,28 +1127,26 @@ class VacancyMediated(object):
                            np.dot(self.om1_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex]) - \
                            biasSvec[sv] - \
                            np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
-            # if not np.isclose(biasSvec[sv], 0): biasSvec[sv] -= 0.1*biasS0[sv]*np.sqrt(prob[starindex])
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
+        etaS0 = np.tensordot(self.biasperiodic, etas*np.sqrt(self.N), axes=((1,2), (0,1)))
         etaV0 = np.tensordot(self.etaperiodic, etav*np.sqrt(self.N), axes=((1,2), (0,1)))
+        outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
         outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
         outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
         outer_etaSvec = np.dot(self.vkinetic.outer, np.dot(G, biasSvec))
-        L1ss = np.dot(outer_etaSvec, biasSvec) /self.N
+        L1ss = np.dot(outer_etaSvec, biasSvec) /self.N + np.dot(outer_etaS0, biasSvec)/self.N
         L1sv = (np.dot(outer_etaSvec, biasVvec) - 2*np.dot(outer_etaV0, biasSvec))/self.N
         L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
                np.dot(outer_etaV0, np.dot(delta_om, etaV0))
-        for i, bSv in enumerate(biasSvec):
-            print("bias:", i, bSv)
-            print(-2*outer_etaV0[:,:,i]/self.N)
         # compute our bare solute diffusivity:
         # TODO: need to compute the GF correction for the solute diffusivity. Involves essentially
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
         # from *both* L1sv and L1vv. Then that will fix our other problems.
         print(L0ss, D0ss)
-        print(biass)
+        print(etas)
         return L0vv, L0ss + L1ss, -D0ss + L1sv, L0ss - D0ss + L1vv
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
