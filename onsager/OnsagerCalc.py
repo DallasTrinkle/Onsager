@@ -606,7 +606,7 @@ class VacancyMediated(object):
             self.vkinetic.rateexpansions(self.om1_jn, self.om1_jt)
         # technically, we don't need om2_om0 for anything
         self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
-            self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
+            self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt, omega2=True)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
         self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
         self.etaSperiodic = self.vkinetic.periodicvectorexpansion('solute')
@@ -999,8 +999,6 @@ class VacancyMediated(object):
         omega1_om0escape = np.zeros((self.vkinetic.Nvstars, len(self.om0_jn)))
         for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega1svsvWyckoff,
                                                                self.om1_jt, self.om1_SP, bFT1):
-            # print(s1, v1, st1, s2, v2, st2)
-            # print(bFS[s1],bFV[v1],bFSV[st1],bFS[s2],bFV[v2],bFSV[st2])
             omF, omB = np.exp(-bFT+bFS[s1]+bFV[v1]+bFSV[st1]), np.exp(-bFT+bFS[s2]+bFV[v2]+bFSV[st2])
             omega1[j] = np.sqrt(omF*omB)
             for vst1 in self.kin2vstar[st1]:
@@ -1065,7 +1063,6 @@ class VacancyMediated(object):
         L0ss, etas, D0ss = self.L0sscalc.diffusivity(pre=np.ones_like(bFS), betaene=bFS,
                                                      preT=np.ones_like(bFT2), betaeneT=bFT2+lnZV,
                                                      returnBias=True)
-        # biass = etas  # just for naming...
 
         # 2. set up probabilities for solute-vacancy configurations
         probV = np.array([np.exp(min(bFV)-bFV[wi]) for wi in self.invmap])
@@ -1090,7 +1087,7 @@ class VacancyMediated(object):
         # jumps correspond to the vacancy *landing* on the solute site, and those states are not included
         # however, the *escape* part must be referenced.
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
-                   np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
+                   np.dot(self.om2expansion, omega2) - np.dot(self.om2_om0, omega0)
         for sv in range(self.vkinetic.Nvstars):
             delta_om[sv,sv] += np.dot(self.om1escape[sv,:],omega1escape[sv,:]) - \
                                np.dot(self.om1_om0escape[sv,:], omega1_om0escape[sv,:]) + \
@@ -1141,7 +1138,7 @@ class VacancyMediated(object):
         # from *both* L1sv and L1vv. Then that will fix our other problems.
         print(L0ss, D0ss)
         print(etas)
-        return L0vv, L0ss + L1ss, -D0ss + L1sv, L0ss - D0ss + L1vv
+        return L0vv, L0ss + L1ss, -D0ss + L1sv, -L0ss + D0ss + L1vv
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
 crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)

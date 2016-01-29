@@ -299,7 +299,7 @@ class StarSet(object):
             # we do this *even if Nshells == 0*
             for i in range(len(self.crys.basis[self.chem])):
                 if self.crys.VectorBasis((self.chem, i))[0] > 0:
-                    stateset.add(PairState(i=i, j=i, R=np.zeros(3, dtype=int), dx=np.zeros(3)))
+                    stateset.add(PairState.zero(i))
         lastshell = stateset.copy()
         for i in range(Nshells-1):
             # add all NNvect to last shell produced, always excluding 0
@@ -550,6 +550,7 @@ class StarSet(object):
         for jt, jumpindices in enumerate(self.jumpnetwork_index):
             for jump in [ self.jumplist[j] for j in jumpindices]:
                 for i, PSi in enumerate(self.states):
+                    if PSi.iszero(): continue
                     # attempt to add...
                     try: PSf = PSi + jump
                     except: continue
@@ -582,6 +583,7 @@ class StarSet(object):
         for jt, jumpindices in enumerate(self.jumpnetwork_index):
             for jump in [ self.jumplist[j] for j in jumpindices]:
                 for i, PSi in enumerate(self.states):
+                    if PSi.iszero(): continue
                     # attempt to add...
                     try: PSf = PSi + jump
                     except: continue
@@ -864,7 +866,7 @@ class VectorStarSet(object):
                 GFexpansion[i, j, :] = GFexpansion[j, i, :]
         return GFexpansion, GFstarset
 
-    def rateexpansions(self, jumpnetwork, jumptype):
+    def rateexpansions(self, jumpnetwork, jumptype, omega2=False):
         """
         Construct the omega0 and omega1 matrix expansions in terms of the jumpnetwork;
         includes the escape terms separately. The escape terms are tricky because they have
@@ -872,12 +874,14 @@ class VectorStarSet(object):
         finding this. We just call it the 'probfactor' below.
         *Note:* this used to be separated into rate0expansion, and rate1expansion, and
         partly in bias1expansion. Note also that if jumpnetwork_omega2 is passed, it also works
-        for that.
+        for that. However, in that case we have a different approach for the calculation of
+        rate0expansion: if there are origin states, then we need to "jump" to those.
 
         :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
           corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
           are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
+        :param omega2: do we need to check for origin states?
         :return rate0expansion: array[Nsv, Nsv, Njump_omega0]
             the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k])
         :return rate0escape: array[Nsv, Njump_omega0]
@@ -899,14 +903,22 @@ class VectorStarSet(object):
                         if Ri == IS:
                             rate0escape[i, jt] -= np.dot(vi, vi)
                             rate1escape[i, k] -= np.dot(vi, vi)
-                            for j in range(i,self.Nvstars):
+                            for j in range(self.Nvstars):
                                 for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                     if Rj == FS:
-                                        rate0expansion[i, j, jt] += np.dot(vi, vj)
                                         rate1expansion[i, j, k] += np.dot(vi, vj)
+                                        if not omega2: rate0expansion[i, j, jt] += np.dot(vi, vj)
+                            if omega2:
+                                OS = self.starset.stateindex(PairState.zero(self.starset.states[Ri].i))
+                                for j in range(self.Nvstars):
+                                    for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
+                                        if Rj == OS:
+                                            rate0expansion[i, j, jt] += np.dot(vi, vj)
+                                            rate0escape[j, jt] -= np.dot(vi, vi)
+
         # symmetrize
         for i in range(self.Nvstars):
-            for j in range(0,i):
+            for j in range(i+1, self.Nvstars):
                 rate0expansion[i, j, :] = rate0expansion[j, i, :]
                 rate1expansion[i, j, :] = rate1expansion[j, i, :]
         return rate0expansion, rate0escape, rate1expansion, rate1escape
