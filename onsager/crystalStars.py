@@ -281,17 +281,25 @@ class StarSet(object):
                 str += "  {}: {}\n".format(i, self.states[i])
         return str
 
-    def generate(self, Nshells, threshold=1e-8):
+    def generate(self, Nshells, threshold=1e-8, originstates=True):
         """
-        Construct the points and the stars in the set.
+        Construct the points and the stars in the set. Now includes "origin states" by default; these
+        are PairStates that iszero() is True; they are only included if they have a nonzero VectorBasis.
+
         :param Nshells: number of shells to generate; this is interpreted as subsequent
           "sums" of jumplist (as we need the solute to be connected to the vacancy by at least one jump)
         :param threshold: threshold for determining equality with symmetry
+        :param originstates: include origin states in generate?
         """
         if Nshells == getattr(self, 'Nshells', -1): return
         self.Nshells = Nshells
         if Nshells > 0: stateset = set(self.jumplist)
         else: stateset = set([])
+        if originstates:
+            # we do this *even if Nshells == 0*
+            for i in range(len(self.crys.basis[self.chem])):
+                if self.crys.VectorBasis((self.chem, i))[0] > 0:
+                    stateset.add(PairState(i=i, j=i, R=np.zeros(3, dtype=int), dx=np.zeros(3)))
         lastshell = stateset.copy()
         for i in range(Nshells-1):
             # add all NNvect to last shell produced, always excluding 0
