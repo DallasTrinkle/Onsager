@@ -349,6 +349,7 @@ class Interstitial(object):
                 gamma_i = sum([gamma_v[a]*va for a, va in enumerate(self.VectorBasis)],
                               np.zeros_like(bias_i))
                 ret += (gamma_i, D0)
+                # ret += (bias_i, D0)
             return ret
 
     def elastodiffusion(self, pre, betaene, dipole, preT, betaeneT, dipoleT):
@@ -1085,6 +1086,7 @@ class VacancyMediated(object):
         L0ss, etas, D0ss = self.L0sscalc.diffusivity(pre=np.ones_like(bFS), betaene=bFS,
                                                      preT=np.ones_like(bFT2), betaeneT=bFT2+lnZV,
                                                      returnBias=True)
+        # biass = etas  # just for naming...
 
         # 2. set up probabilities for solute-vacancy configurations
         probV = np.array([np.exp(min(bFV)-bFV[wi]) for wi in self.invmap])
@@ -1138,8 +1140,17 @@ class VacancyMediated(object):
         outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
         outer_etaSvec = np.dot(self.vkinetic.outer, np.dot(G, biasSvec))
         etaSfolddown = np.tensordot(np.dot(G, biasSvec), self.etaSperiodic, axes=(0,0))
+        print('etaSfolddown: ')
+        print(etaSfolddown)
+        print('biasSfolddown:')
+        print(np.tensordot(biasSvec, self.etaSperiodic, axes=(0,0)))
+        print('etaSvec*biasSvec:')
+        print(np.dot(outer_etaSvec, biasSvec)/self.N)
+        print('etaSfolddown*biass(0):')
+        print(np.dot(outer_etaS0, biasSvec)/self.N)
         L1ss = (np.dot(outer_etaSvec, biasSvec) - 0.*np.dot(outer_etaS0, biasSvec))/self.N - \
-               0.*np.dot(outer_etaS0, np.dot(delta_om, etaS0))/self.N
+               0.*np.dot(outer_etaS0, np.dot(delta_om, etaS0))/self.N \
+               # 2.*np.dot(etaSfolddown.T, biass)/self.N
         L1sv = (np.dot(outer_etaSvec, biasVvec)
                 - np.dot(outer_etaV0, biasSvec)
                 - np.dot(outer_etaS0, biasVvec))/self.N
