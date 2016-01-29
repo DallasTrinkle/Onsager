@@ -710,56 +710,12 @@ class VectorStarSet(object):
         states = starset.states
         for s in starset.stars:
             # start by generating the parallel star-vector; always trivially present:
-            self.vecpos.append(s.copy())
             PS0 = states[s[0]]
-            vpara = PS0.dx
-            scale = 1./np.sqrt(len(s)*np.dot(vpara, vpara)) # normalization factor
-            self.vecvec.append([states[si].dx*scale for si in s])
-            # next, try to generate perpendicular star-vectors, if present:
-            v0 = np.cross(vpara, np.array([0, 0, 1.]))
-            if np.dot(v0, v0) < threshold:
-                v0 = np.cross(vpara, np.array([1., 0, 0]))
-            v1 = np.cross(vpara, v0)
-            # normalization:
-            v0 /= np.sqrt(np.dot(v0, v0))
-            v1 /= np.sqrt(np.dot(v1, v1))
-            Nvect = 2
-            # run over the invariant group operations for state PS0
-            for g in self.starset.crys.G:
-                if Nvect == 0: continue
-                if PS0 != PS0.g(starset.crys, starset.chem, g): continue
-                gv0 = starset.crys.g_direc(g, v0)
-                if Nvect == 1:
-                    # we only need to check that we still have an invariant vector
-                    if not np.allclose(gv0, v0): Nvect = 0
-                if Nvect == 2:
-                    gv1 = starset.crys.g_direc(g, v1)
-                    g00 = np.dot(v0, gv0)
-                    g11 = np.dot(v1, gv1)
-                    g01 = np.dot(v0, gv1)
-                    g10 = np.dot(v1, gv0)
-                    if abs((abs(g00*g11 - g01*g10) - 1)) > threshold or abs(g01-g10) > threshold:
-                        # we don't have an orthogonal matrix, or we have a rotation, so kick out
-                        Nvect = 0
-                        continue
-                    if (abs(g00 - 1) > threshold) or (abs(g11 - 1) > threshold):
-                        # if we don't have the identify matrix, then we have to find the one vector that survives
-                        if abs(g00 - 1) < threshold:
-                            Nvect = 1
-                            continue
-                        if abs(g11 - 1) < threshold:
-                            v0 = v1
-                            Nvect = 1
-                            continue
-                        v0 = (g01*v0 + (1 - g00)*v1)/np.sqrt(g01*g10 + (1 - g00)**2)
-                        Nvect = 1
-            # so... do we have any vectors to add?
-            if Nvect > 0:
-                v0 /= np.sqrt(len(s)*np.dot(v0, v0))
-                v1 /= np.sqrt(len(s)*np.dot(v1, v1))
-                vlist = [v0]
-                if Nvect > 1:
-                    vlist.append(v1)
+            if PS0.iszero():
+                # origin state; we can easily generate our vlist
+                vlist = starset.crys.vectlist(starset.crys.VectorBasis((self.starset.chem, PS0.i)))
+                scale = 1./np.sqrt(len(s)) # normalization factor; vectors are already normalized
+                vlist = [v*scale for v in vlist]
                 # add the positions
                 for v in vlist:
                     self.vecpos.append(s.copy())
@@ -770,6 +726,67 @@ class VectorStarSet(object):
                                 veclist.append(starset.crys.g_direc(g, v))
                                 break
                     self.vecvec.append(veclist)
+            else:
+                # not an origin state
+                vpara = PS0.dx
+                scale = 1./np.sqrt(len(s)*np.dot(vpara, vpara)) # normalization factor
+                self.vecpos.append(s.copy())
+                self.vecvec.append([states[si].dx*scale for si in s])
+                # next, try to generate perpendicular star-vectors, if present:
+                v0 = np.cross(vpara, np.array([0, 0, 1.]))
+                if np.dot(v0, v0) < threshold:
+                    v0 = np.cross(vpara, np.array([1., 0, 0]))
+                v1 = np.cross(vpara, v0)
+                # normalization:
+                v0 /= np.sqrt(np.dot(v0, v0))
+                v1 /= np.sqrt(np.dot(v1, v1))
+                Nvect = 2
+                # run over the invariant group operations for state PS0
+                for g in self.starset.crys.G:
+                    if Nvect == 0: continue
+                    if PS0 != PS0.g(starset.crys, starset.chem, g): continue
+                    gv0 = starset.crys.g_direc(g, v0)
+                    if Nvect == 1:
+                        # we only need to check that we still have an invariant vector
+                        if not np.allclose(gv0, v0): Nvect = 0
+                    if Nvect == 2:
+                        gv1 = starset.crys.g_direc(g, v1)
+                        g00 = np.dot(v0, gv0)
+                        g11 = np.dot(v1, gv1)
+                        g01 = np.dot(v0, gv1)
+                        g10 = np.dot(v1, gv0)
+                        if abs((abs(g00*g11 - g01*g10) - 1)) > threshold or abs(g01-g10) > threshold:
+                            # we don't have an orthogonal matrix, or we have a rotation, so kick out
+                            Nvect = 0
+                            continue
+                        if (abs(g00 - 1) > threshold) or (abs(g11 - 1) > threshold):
+                            # if we don't have the identify matrix, then we have to find the one vector that survives
+                            if abs(g00 - 1) < threshold:
+                                Nvect = 1
+                                continue
+                            if abs(g11 - 1) < threshold:
+                                v0 = v1
+                                Nvect = 1
+                                continue
+                            v0 = (g01*v0 + (1 - g00)*v1)/np.sqrt(g01*g10 + (1 - g00)**2)
+                            Nvect = 1
+                # so... do we have any vectors to add?
+                if Nvect > 0:
+                    v0 /= np.sqrt(len(s)*np.dot(v0, v0))
+                    v1 /= np.sqrt(len(s)*np.dot(v1, v1))
+                    vlist = [v0]
+                    if Nvect > 1:
+                        vlist.append(v1)
+                    # add the positions
+                    for v in vlist:
+                        self.vecpos.append(s.copy())
+                        veclist = []
+                        for PSi in [states[si] for si in s]:
+                            for g in starset.crys.G:
+                                if PS0.g(starset.crys, starset.chem, g) == PSi:
+                                    veclist.append(starset.crys.g_direc(g, v))
+                                    break
+                        self.vecvec.append(veclist)
         self.Nvstars = len(self.vecpos)
         self.outer = self.generateouter()
 

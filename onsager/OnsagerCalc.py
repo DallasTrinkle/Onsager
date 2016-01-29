@@ -99,26 +99,9 @@ class Interstitial(object):
         Generate our full vector basis, using the information from our crystal
         :return: list of our unique vector basis lattice functions, normalized
         """
-        def vectlist(vb):
-            """Returns a list of orthonormal vectors corresponding to our vector basis
-            :param vb: (dim, v)
-            :return: list of vectors
-            """
-            if vb[0] == 0: return []
-            if vb[0] == 1: return [vb[1]]
-            if vb[0] == 2:
-                # now, construct the other two directions:
-                norm = vb[1]
-                if abs(norm[2]) < 0.75: v1 = np.array([norm[1], -norm[0], 0])
-                else: v1 = np.array([-norm[2], 0, norm[0]])
-                v1 /= np.sqrt(np.dot(v1, v1))
-                v2 = np.cross(norm, v1)
-                return [v1, v2]
-            if vb[0] == 3: return [ v for v in np.eye(3) ]
-
         lis = []
         for s in self.sitelist:
-            for v in vectlist(self.crys.VectorBasis((self.chem, s[0]))):
+            for v in self.crys.vectlist(self.crys.VectorBasis((self.chem, s[0]))):
                 v /= np.sqrt(len(s)) # additional normalization
                 # we have some constructing to do... first, make the vector we want to use
                 vb = np.zeros((self.N, 3))

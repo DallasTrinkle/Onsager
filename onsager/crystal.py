@@ -967,6 +967,25 @@ class Crystal(object):
                       [ VectorBasis(*g.eigen()) for g in self.pointG[ind[0]][ind[1]] ] )
         # , (3, np.zeros(3)) -- don't need initial value; if there's only one group op, it's identity
 
+    # implemented as a static method as its a utility function
+    @staticmethod
+    def vectlist(vb):
+        """Returns a list of orthonormal vectors corresponding to our vector basis.
+        :param vb: (dim, v)
+        :return: list of vectors
+        """
+        if vb[0] == 0: return []
+        if vb[0] == 1: return [vb[1]]
+        if vb[0] == 2:
+            # now, construct the other two directions:
+            norm = vb[1]
+            if abs(norm[2]) < 0.75: v1 = np.array([norm[1], -norm[0], 0])
+            else: v1 = np.array([-norm[2], 0, norm[0]])
+            v1 /= np.sqrt(np.dot(v1, v1))
+            v2 = np.cross(norm, v1)
+            return [v1, v2]
+        if vb[0] == 3: return [ v for v in np.eye(3) ]
+
     def SymmTensorBasis(self, ind):
         """
         Generates the symmetric tensor basis corresponding to an atomic site
