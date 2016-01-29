@@ -1104,8 +1104,8 @@ class VacancyMediated(object):
 #                           np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
             biasVvec[sv] = np.dot(self.om1bias[sv,:], omega1escape[sv,:])*np.sqrt(prob[starindex]) - \
                            np.dot(self.om1_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex]) - \
-                           biasSvec[sv]
-#                           - np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
+                           biasSvec[sv] - \
+                           np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
