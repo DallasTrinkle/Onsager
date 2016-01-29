@@ -608,7 +608,7 @@ class VacancyMediated(object):
         self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
             self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt, omega2=True)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
-        self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
+        self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt, omega2=True)
         self.etaSperiodic = self.vkinetic.periodicvectorexpansion('solute')
         self.etaVperiodic = self.vkinetic.periodicvectorexpansion('vacancy')
         # more indexing helpers:
@@ -1099,11 +1099,13 @@ class VacancyMediated(object):
             # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
             svvacindex = self.kin2vacancy[starindex]  # vacancy
-            biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
+#            biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
+            biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex]) + \
+                           np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
             biasVvec[sv] = np.dot(self.om1bias[sv,:], omega1escape[sv,:])*np.sqrt(prob[starindex]) - \
                            np.dot(self.om1_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex]) - \
-                           biasSvec[sv] - \
-                           np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
+                           biasSvec[sv]
+#                           - np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
@@ -1124,21 +1126,19 @@ class VacancyMediated(object):
         print(np.dot(outer_etaSvec, biasSvec)/self.N)
         print('etaSfolddown*biass(0):')
         print(np.dot(outer_etaS0, biasSvec)/self.N)
-        L1ss = (np.dot(outer_etaSvec, biasSvec) - 0.*np.dot(outer_etaS0, biasSvec))/self.N - \
-               0.*np.dot(outer_etaS0, np.dot(delta_om, etaS0))/self.N \
-               # 2.*np.dot(etaSfolddown.T, biass)/self.N
+        L1ss = np.dot(outer_etaSvec, biasSvec)/self.N
         L1sv = (np.dot(outer_etaSvec, biasVvec)
                 - np.dot(outer_etaV0, biasSvec)
                 - np.dot(outer_etaS0, biasVvec))/self.N
-        L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
-               np.dot(outer_etaV0, np.dot(delta_om, etaV0))
+        L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N + \
+               np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
         # compute our bare solute diffusivity:
         # TODO: need to compute the GF correction for the solute diffusivity. Involves essentially
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
         # from *both* L1sv and L1vv. Then that will fix our other problems.
         print(L0ss, D0ss)
         print(etas)
-        return L0vv, L0ss + L1ss, -D0ss + L1sv, -L0ss + D0ss + L1vv
+        return L0vv, L0ss + L1ss, -L0ss + L1sv, D0ss - L0ss + L1vv
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
 crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)

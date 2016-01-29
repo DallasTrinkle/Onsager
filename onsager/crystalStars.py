@@ -903,14 +903,15 @@ class VectorStarSet(object):
                         if Ri == IS:
                             rate0escape[i, jt] -= np.dot(vi, vi)
                             rate1escape[i, k] -= np.dot(vi, vi)
-                            for j in range(self.Nvstars):
+                            for j in range(i+1):
                                 for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                     if Rj == FS:
                                         rate1expansion[i, j, k] += np.dot(vi, vj)
                                         if not omega2: rate0expansion[i, j, jt] += np.dot(vi, vj)
                             if omega2:
+                                # note: origin states should come first anyway, so this *should* be safe:
                                 OS = self.starset.stateindex(PairState.zero(self.starset.states[Ri].i))
-                                for j in range(self.Nvstars):
+                                for j in range(i+1):
                                     for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                         if Rj == OS:
                                             rate0expansion[i, j, jt] += np.dot(vi, vj)
@@ -923,7 +924,7 @@ class VectorStarSet(object):
                 rate1expansion[i, j, :] = rate1expansion[j, i, :]
         return rate0expansion, rate0escape, rate1expansion, rate1escape
 
-    def biasexpansions(self, jumpnetwork, jumptype):
+    def biasexpansions(self, jumpnetwork, jumptype, omega2=False):
         """
         Construct the bias1 and bias0 vector expansion in terms of the jumpnetwork.
         We return the bias0 contribution so that the db = bias1 - bias0 can be determined.
@@ -934,12 +935,15 @@ class VectorStarSet(object):
         for the endpoint of the jump; we just call it the 'probfactor' below.
         *Note:* this used to be separated into bias1expansion, and bias2expansion,and
         had terms that are now in rateexpansions.
-        Note also that if jumpnetwork_omega2 is passed, it also works for that.
+        Note also that if jumpnetwork_omega2 is passed, it also works for that. However,
+        in that case we have a different approach for the calculation of bias1expansion:
+        if there are origin states, they get the negative summed bias of the others.
 
         :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
           corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
           are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
+        :param omega2: do we need to check for origin states?
 
         :return bias0expansion: array[Nsv, Njump_omega0]
             the gen0 vector[i] = sum(bias0expasion[i, k] * sqrt(probfactor0[PS[k]]) * omega0[k])
@@ -958,6 +962,18 @@ class VectorStarSet(object):
                         geom_bias = np.dot(svv[0], dx)*len(svR)
                         bias0expansion[i, jt] += geom_bias
                         bias1expansion[i, k] += geom_bias
+                        if omega2:
+                            # note: origin states should come first anyway, so this *should* be safe:
+                            for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
+                                if Ri == IS:
+                                    OS = self.starset.stateindex(PairState.zero(self.starset.states[IS].i))
+                                    if OS is not None:
+                                        for j in range(i+1):
+                                            for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
+                                                if Rj == OS:
+                                                    bias0expansion[j, jt] -= np.dot(vi, vi)
+                                                    bias1expansion[j, k] -= np.dot(vi, vj)
+
         return bias0expansion, bias1expansion
 
     def periodicvectorexpansion(self, type):
