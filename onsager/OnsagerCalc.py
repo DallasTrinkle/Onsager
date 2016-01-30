@@ -1073,7 +1073,8 @@ class VacancyMediated(object):
         prob = np.array([probS[s]*probV[v] for (s,v) in self.kineticsvWyckoff])
         for tindex, kindex in enumerate(self.thermo2kin):
             bFSVkin[kindex] += bFSV[tindex]
-            prob[kindex] *= np.exp(-bFSV[tindex])
+            if self.kinetic.states[self.kinetic.stars[kindex][0]].iszero(): prob[kindex] = 0
+            else: prob[kindex] *= np.exp(-bFSV[tindex])
 
         # 3. set up symmetric rates: omega0, omega1, omega2
         #    and escape rates omega0escape, omega1escape, omega2escape,
@@ -1083,9 +1084,9 @@ class VacancyMediated(object):
             self._symmetricandescaperates(bFV, bFS, bFSVkin, bFT0, bFT1, bFT2)
 
         # 4. expand out: domega1, domega2, bias1, bias2
-        # Note: we don't subtract off the equivalent of om1_om0 for omega2, because those
-        # jumps correspond to the vacancy *landing* on the solute site, and those states are not included
-        # however, the *escape* part must be referenced.
+        # Note: we now  subtract off the equivalent of om1_om0 for omega2, which is those
+        # jumps correspond to the vacancy *landing* on the solute site; these "origin states"
+        # are now explicitly dealt with here, when present.
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
                    np.dot(self.om2expansion, omega2) - np.dot(self.om2_om0, omega0)
         for sv in range(self.vkinetic.Nvstars):
@@ -1106,6 +1107,12 @@ class VacancyMediated(object):
                            np.dot(self.om1_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex]) - \
                            biasSvec[sv] - \
                            np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
+        # deal with the origin states for solute...
+        biasSfolddown = np.tensordot(biasSvec, self.etaSperiodic, axes=(0,0))
+        for i, svR, svv in zip(itertools.count(), self.vkinetic.vecpos, self.vkinetic.vecvec):
+            if self.kinetic.states[svR[0]].iszero():
+                for Ri, v in zip(svR, svv):
+                    biasSvec[i] -= np.dot(v, biasSfolddown[self.kinetic.states[Ri].i,:])
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
@@ -1128,9 +1135,9 @@ class VacancyMediated(object):
         print(np.dot(outer_etaS0, biasSvec)/self.N)
         L1ss = np.dot(outer_etaSvec, biasSvec)/self.N
         L1sv = (np.dot(outer_etaSvec, biasVvec)
-                - np.dot(outer_etaV0, biasSvec)
-                - np.dot(outer_etaS0, biasVvec))/self.N
-        L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N + \
+                - 1.*np.dot(outer_etaV0, biasSvec)
+                - 1.*np.dot(outer_etaS0, biasVvec))/self.N
+        L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
                np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
         # compute our bare solute diffusivity:
         # TODO: need to compute the GF correction for the solute diffusivity. Involves essentially
@@ -1138,7 +1145,7 @@ class VacancyMediated(object):
         # from *both* L1sv and L1vv. Then that will fix our other problems.
         print(L0ss, D0ss)
         print(etas)
-        return L0vv, L0ss + L1ss, -L0ss + L1sv, D0ss - L0ss + L1vv
+        return L0vv, L0ss + L1ss, -D0ss + L1sv, D0ss - L0ss + L1vv
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
 crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)

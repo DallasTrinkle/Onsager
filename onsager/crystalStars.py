@@ -46,8 +46,8 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
     """
 
     @classmethod
-    def zero(cls, n=-1):
-        """Return the "zero" state"""
+    def zero(cls, n=0):
+        """Return a "zero" state"""
         return cls(i=n, j=n, R=np.zeros(3, dtype=int), dx=np.zeros(3))
 
     @classmethod
@@ -126,8 +126,8 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         Note: b + (a^b) = a but (a^b) + b is an error. a + (b^a) = b
         """
         if not isinstance(other, self.__class__): return NotImplemented
-        if self.iszero(): raise ArithmeticError('Cannot endpoint substract from zero')
-        if other.iszero(): raise ArithmeticError('Cannot endpoint subtract zero')
+        # if self.iszero(): raise ArithmeticError('Cannot endpoint substract from zero')
+        # if other.iszero(): raise ArithmeticError('Cannot endpoint subtract zero')
         if self.i != other.i:
             raise ArithmeticError('Can only endpoint subtract matching starts: ({} {})^({} {}) not compatible'.format(self.i, self.j, other.i, other.j))
         return self.__class__(i=other.j, j=self.j, R=self.R-other.R, dx=self.dx - other.dx)
@@ -915,7 +915,7 @@ class VectorStarSet(object):
                                     for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                         if Rj == OS:
                                             rate0expansion[i, j, jt] += np.dot(vi, vj)
-                                            rate0escape[j, jt] -= np.dot(vi, vi)
+                                            rate0escape[j, jt] -= np.dot(vj, vj)
 
         # symmetrize
         for i in range(self.Nvstars):
@@ -964,16 +964,14 @@ class VectorStarSet(object):
                         bias1expansion[i, k] += geom_bias
                         if omega2:
                             # note: origin states should come first anyway, so this *should* be safe:
-                            for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
+                            for Ri, vi in zip(svR, svv):
                                 if Ri == IS:
                                     OS = self.starset.stateindex(PairState.zero(self.starset.states[IS].i))
                                     if OS is not None:
                                         for j in range(i+1):
                                             for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                                 if Rj == OS:
-                                                    bias0expansion[j, jt] -= np.dot(vi, vi)
-                                                    bias1expansion[j, k] -= np.dot(vi, vj)
-
+                                                    bias0expansion[j, jt] += np.dot(vj, -dx)
         return bias0expansion, bias1expansion
 
     def periodicvectorexpansion(self, type):
