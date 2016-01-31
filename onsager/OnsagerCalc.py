@@ -982,8 +982,8 @@ class VacancyMediated(object):
         :return omega0escape[NWyckoff, Nomega0]: escape rate elements for omega0 jumps
         :return omega1escape[NVstars, Nomega1]: escape rate elements for omega1 jumps
         :return omega2escape[NVstars, Nomega2]: escape rate elements for omega2 jumps
-        :return omega1_om0escape[NVstars, Nomega0]: reference escape rate elements for omega1 jumps
-        :return omega2_om0escape[NVstars, Nomega0]: reference escape rate elements for omega2 jumps
+        # :return omega1_om0escape[NVstars, Nomega0]: reference escape rate elements for omega1 jumps
+        # :return omega2_om0escape[NVstars, Nomega0]: reference escape rate elements for omega2 jumps
         """
         # omega0 = np.array([np.exp(0.5*(bFV[self.invmap[jump[0][0][0]]] + bFV[self.invmap[jump[0][0][1]]])-bF)
         #                    for bF, jump in zip(bFT0, self.om0_jn)])
@@ -995,29 +995,29 @@ class VacancyMediated(object):
             omega0[j] = np.sqrt(omega0escape[v1,j]*omega0escape[v2,j])
         omega1 = np.zeros(len(self.om1_jn))
         omega1escape = np.zeros((self.vkinetic.Nvstars, len(self.om1_jn)))
-        omega1_om0escape = np.zeros((self.vkinetic.Nvstars, len(self.om0_jn)))
+        # omega1_om0escape = np.zeros((self.vkinetic.Nvstars, len(self.om0_jn)))
         for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega1svsvWyckoff,
                                                                self.om1_jt, self.om1_SP, bFT1):
             omF, omB = np.exp(-bFT+bFS[s1]+bFV[v1]+bFSV[st1]), np.exp(-bFT+bFS[s2]+bFV[v2]+bFSV[st2])
             omega1[j] = np.sqrt(omF*omB)
-            for vst1 in self.kin2vstar[st1]:
-                omega1escape[vst1, j],omega1_om0escape[vst1, jumptype] = omF,omega0escape[v1, jumptype]
-            for vst2 in self.kin2vstar[st2]:
-                omega1escape[vst2, j],omega1_om0escape[vst2, jumptype] = omB,omega0escape[v2, jumptype]
+            for vst1 in self.kin2vstar[st1]: omega1escape[vst1, j] = omF
+            for vst2 in self.kin2vstar[st2]: omega1escape[vst2, j] = omB
+                # omega1escape[vst1, j],omega1_om0escape[vst1, jumptype] = omF,omega0escape[v1, jumptype]
+                # omega1escape[vst2, j],omega1_om0escape[vst2, jumptype] = omB,omega0escape[v2, jumptype]
         omega2 = np.zeros(len(self.om2_jn))
         omega2escape = np.zeros((self.vkinetic.Nvstars, len(self.om2_jn)))
-        omega2_om0escape = np.zeros((self.vkinetic.Nvstars, len(self.om0_jn)))
+        # omega2_om0escape = np.zeros((self.vkinetic.Nvstars, len(self.om0_jn)))
         for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega2svsvWyckoff,
                                                                self.om2_jt, self.om2_SP, bFT2):
             omF, omB = np.exp(-bFT+bFS[s1]+bFV[v1]+bFSV[st1]), np.exp(-bFT+bFS[s2]+bFV[v2]+bFSV[st2])
             omega2[j] = np.sqrt(omF*omB)
-            for vst1 in self.kin2vstar[st1]:
-                omega2escape[vst1, j],omega2_om0escape[vst1, jumptype] = omF,omega0escape[v1, jumptype]
-            for vst2 in self.kin2vstar[st2]:
-                omega2escape[vst2, j],omega2_om0escape[vst2, jumptype] = omB,omega0escape[v2, jumptype]
+            for vst1 in self.kin2vstar[st1]: omega2escape[vst1, j] = omF
+            for vst2 in self.kin2vstar[st2]: omega2escape[vst2, j] = omB
+                # omega2escape[vst1, j],omega2_om0escape[vst1, jumptype] = omF,omega0escape[v1, jumptype]
+                # omega2escape[vst2, j],omega2_om0escape[vst2, jumptype] = omB,omega0escape[v2, jumptype]
         return omega0, omega1, omega2, \
-               omega0escape, omega1escape, omega2escape, \
-               omega1_om0escape, omega2_om0escape
+               omega0escape, omega1escape, omega2escape
+               # omega1_om0escape, omega2_om0escape
 
     def Lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
         """
@@ -1078,9 +1078,9 @@ class VacancyMediated(object):
         # 3. set up symmetric rates: omega0, omega1, omega2
         #    and escape rates omega0escape, omega1escape, omega2escape,
         #    and reference escape rates omega1_om0escape, omega2_om0escape
-        omega0, omega1, omega2, omega0escape, omega1escape, omega2escape, \
-        omega1_om0escape, omega2_om0escape = \
+        omega0, omega1, omega2, omega0escape, omega1escape, omega2escape = \
             self._symmetricandescaperates(bFV, bFS, bFSVkin, bFT0, bFT1, bFT2)
+        # omega1_om0escape, omega2_om0escape = \
 
         # 4. expand out: domega1, domega2, bias1, bias2
         # Note: we now  subtract off the equivalent of om1_om0 for omega2, which is those
@@ -1098,7 +1098,6 @@ class VacancyMediated(object):
                                np.dot(self.om2_om0escape[sv,:], omega0escape[svvacindex,:])
             # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
-#            biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
             biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
 #                           np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
             biasVvec[sv] = np.dot(self.om1bias[sv,:], omega1escape[sv,:])*np.sqrt(prob[starindex]) - \
@@ -1114,7 +1113,9 @@ class VacancyMediated(object):
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
-        G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
+        print('det: ', np.linalg.det(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)))
+        # G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
+        G = np.dot(pinv2(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         outer_biasS = np.dot(self.vkinetic.outer, biasSvec)

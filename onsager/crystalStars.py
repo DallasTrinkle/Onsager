@@ -898,12 +898,17 @@ class VectorStarSet(object):
         rate1escape = np.zeros((self.Nvstars, len(jumpnetwork)))
         for k, jumplist, jt in zip(itertools.count(), jumpnetwork, jumptype):
             for (IS, FS), dx in jumplist:
+                if omega2:
+                    OS = self.starset.stateindex(PairState.zero(self.starset.states[IS].i))
+                    for j in range(self.Nvstars):
+                        for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
+                            if Rj == OS:
+                                rate0escape[j, jt] -= np.dot(vj, vj)
                 for i in range(self.Nvstars):
                     for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
                         if Ri == IS:
                             rate0escape[i, jt] -= np.dot(vi, vi)
                             rate1escape[i, k] -= np.dot(vi, vi)
-                            if omega2: OS = self.starset.stateindex(PairState.zero(self.starset.states[Ri].i))
                             # for j in range(i+1):
                             for j in range(self.Nvstars):
                                 for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
@@ -913,7 +918,6 @@ class VectorStarSet(object):
                                     if omega2 and Rj == OS:
                                         rate0expansion[j, i, jt] += np.dot(vj, vi)
                                         rate0expansion[i, j, jt] += np.dot(vj, vi)
-                                        rate0escape[j, jt] -= np.dot(vj, vj)
 
         # symmetrize
         for i in range(self.Nvstars):
