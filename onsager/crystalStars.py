@@ -903,19 +903,17 @@ class VectorStarSet(object):
                         if Ri == IS:
                             rate0escape[i, jt] -= np.dot(vi, vi)
                             rate1escape[i, k] -= np.dot(vi, vi)
-                            for j in range(i+1):
+                            if omega2: OS = self.starset.stateindex(PairState.zero(self.starset.states[Ri].i))
+                            # for j in range(i+1):
+                            for j in range(self.Nvstars):
                                 for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                     if Rj == FS:
                                         rate1expansion[i, j, k] += np.dot(vi, vj)
                                         if not omega2: rate0expansion[i, j, jt] += np.dot(vi, vj)
-                            if omega2:
-                                # note: origin states should come first anyway, so this *should* be safe:
-                                OS = self.starset.stateindex(PairState.zero(self.starset.states[Ri].i))
-                                for j in range(i+1):
-                                    for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                                        if Rj == OS:
-                                            rate0expansion[i, j, jt] += np.dot(vi, vj)
-                                            rate0escape[j, jt] -= np.dot(vj, vj)
+                                    if omega2 and Rj == OS:
+                                        rate0expansion[j, i, jt] += np.dot(vj, vi)
+                                        rate0expansion[i, j, jt] += np.dot(vj, vi)
+                                        rate0escape[j, jt] -= np.dot(vj, vj)
 
         # symmetrize
         for i in range(self.Nvstars):
@@ -958,20 +956,17 @@ class VectorStarSet(object):
             for (IS, FS), dx in jumplist:
                 # run through the star-vectors; just use first as representative
                 for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
-                    if IS == svR[0]:
+                    if svR[0] == IS:
                         geom_bias = np.dot(svv[0], dx)*len(svR)
                         bias0expansion[i, jt] += geom_bias
                         bias1expansion[i, k] += geom_bias
-                        if omega2:
-                            # note: origin states should come first anyway, so this *should* be safe:
-                            for Ri, vi in zip(svR, svv):
-                                if Ri == IS:
-                                    OS = self.starset.stateindex(PairState.zero(self.starset.states[IS].i))
-                                    if OS is not None:
-                                        for j in range(i+1):
-                                            for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                                                if Rj == OS:
-                                                    bias0expansion[j, jt] += np.dot(vj, -dx)
+                if omega2:
+                    OS = self.starset.stateindex(PairState.zero(self.starset.states[IS].i))
+                    if OS is not None:
+                        for j in range(self.Nvstars):
+                            for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
+                                if Rj == OS:
+                                    bias0expansion[j, jt] += np.dot(vj, -dx) #*nIS
         return bias0expansion, bias1expansion
 
     def periodicvectorexpansion(self, type):

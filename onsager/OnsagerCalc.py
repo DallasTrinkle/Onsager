@@ -604,7 +604,6 @@ class VacancyMediated(object):
         self.GFvalues, self.Lvvvalues, self.etavvalues = {}, {}, {}
         self.om1_om0, self.om1_om0escape, self.om1expansion, self.om1escape = \
             self.vkinetic.rateexpansions(self.om1_jn, self.om1_jt)
-        # technically, we don't need om2_om0 for anything
         self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
             self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt, omega2=True)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
@@ -1087,19 +1086,18 @@ class VacancyMediated(object):
         # Note: we now  subtract off the equivalent of om1_om0 for omega2, which is those
         # jumps correspond to the vacancy *landing* on the solute site; these "origin states"
         # are now explicitly dealt with here, when present.
-        delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
-                   np.dot(self.om2expansion, omega2) - np.dot(self.om2_om0, omega0)
-        for sv in range(self.vkinetic.Nvstars):
-            delta_om[sv,sv] += np.dot(self.om1escape[sv,:],omega1escape[sv,:]) - \
-                               np.dot(self.om1_om0escape[sv,:], omega1_om0escape[sv,:]) + \
-                               np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
-                               np.dot(self.om2_om0escape[sv,:], omega2_om0escape[sv,:])
         biasSvec = np.zeros(self.vkinetic.Nvstars)
         biasVvec = np.zeros(self.vkinetic.Nvstars)
+        delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
+                   np.dot(self.om2expansion, omega2) - np.dot(self.om2_om0, omega0)
         for sv,starindex in enumerate(self.vstar2kin):
+            svvacindex = self.kin2vacancy[starindex]  # vacancy
+            delta_om[sv,sv] += np.dot(self.om1escape[sv,:],omega1escape[sv,:]) - \
+                               np.dot(self.om1_om0escape[sv,:], omega0escape[svvacindex,:]) + \
+                               np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
+                               np.dot(self.om2_om0escape[sv,:], omega0escape[svvacindex,:])
             # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
-            svvacindex = self.kin2vacancy[starindex]  # vacancy
 #            biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
             biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
 #                           np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
@@ -1109,10 +1107,10 @@ class VacancyMediated(object):
                            np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
         # deal with the origin states for solute...
         biasSfolddown = np.tensordot(biasSvec, self.etaSperiodic, axes=(0,0))
-        for i, svR, svv in zip(itertools.count(), self.vkinetic.vecpos, self.vkinetic.vecvec):
-            if self.kinetic.states[svR[0]].iszero():
-                for Ri, v in zip(svR, svv):
-                    biasSvec[i] -= np.dot(v, biasSfolddown[self.kinetic.states[Ri].i,:])
+        # for i, svR, svv in zip(itertools.count(), self.vkinetic.vecpos, self.vkinetic.vecvec):
+        #     if self.kinetic.states[svR[0]].iszero():
+        #         for Ri, v in zip(svR, svv):
+        #             biasSvec[i] -= np.dot(v, biasSfolddown[self.kinetic.states[Ri].i,:])
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
@@ -1125,10 +1123,14 @@ class VacancyMediated(object):
         outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
         outer_etaSvec = np.dot(self.vkinetic.outer, np.dot(G, biasSvec))
         etaSfolddown = np.tensordot(np.dot(G, biasSvec), self.etaSperiodic, axes=(0,0))
+        print('domega:')
+        print(delta_om)
         print('etaSfolddown: ')
         print(etaSfolddown)
         print('biasSfolddown:')
         print(np.tensordot(biasSvec, self.etaSperiodic, axes=(0,0)))
+        print('biasVfolddown:')
+        print(np.tensordot(biasVvec, self.etaVperiodic, axes=(0,0)))
         print('etaSvec*biasSvec:')
         print(np.dot(outer_etaSvec, biasSvec)/self.N)
         print('etaSfolddown*biass(0):')
