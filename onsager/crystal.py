@@ -20,7 +20,6 @@ from functools import reduce
 # interfaces are either at the bottom, or staticmethods in the corresponding object
 NDARRAY_YAMLTAG = '!numpy.ndarray'
 GROUPOP_YAMLTAG = '!GroupOp'
-#FROZENSET_YAMLTAG = u'!set'
 
 
 def incell(vec):
@@ -37,7 +36,7 @@ def inhalf(vec):
     return vec - np.floor(vec + 0.5)
 
 
-def maptranslation(oldpos, newpos):
+def maptranslation(oldpos, newpos, threshold=1e-8):
     """
     Given a list of transformed positions, identify if there's a translation vector
     that maps from the current positions to the new position.
@@ -78,7 +77,7 @@ def maptranslation(oldpos, newpos):
             maplist = []
             for rua in atomlist1:
                 for j, uj in enumerate(atomlist0):
-                    if np.allclose(inhalf(uj - rua - trans), 0):
+                    if np.all(abs(inhalf(uj - rua - trans))<threshold):
                         maplist.append(j)
                         break
             if len(maplist) != len(atomlist0):
@@ -135,7 +134,6 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
 
     def __eq__(self, other):
         """Test for equality--we use numpy.isclose for comparison, since that's what we usually care about"""
-        # if not type(other) is not GroupOp: return False
         return isinstance(other, self.__class__) and \
                np.all(self.rot == other.rot) and \
                np.allclose(self.trans, other.trans) and \
@@ -154,8 +152,6 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         ### that in a hash function. We lose a little bit on efficiency if we construct a set that
         ### has a whole lot of translation operations, but that's not usually what we will do.
         return hash(self.rot.data.tobytes())
-        # return int(reduce(lambda x,y: x^y, [256, 128, 64, 32, 16, 8, 4, 2, 1] * self.rot.reshape((9,))))
-        # ^ reduce(lambda x,y: x^y, [hash(x) for x in self.trans])
 
     def __add__(self, other):
         """Add a translation to our group operation"""
@@ -585,7 +581,7 @@ class Crystal(object):
                 shift[d] = 0.5
         self.basis = [[incell(atom + shift) for atom in atomlist] for atomlist in self.basis]
 
-    def reduce(self):
+    def reduce(self, threshold=1e-8):
         """
         Reduces the lattice and basis, if needed. Works (tail) recursively.
         """
@@ -606,7 +602,7 @@ class Crystal(object):
             trans = True
             for atomlist in self.basis:
                 for u in atomlist:
-                    if np.all([not np.allclose(inhalf(u + t - v), 0) for v in atomlist]):
+                    if np.all([not np.all(abs(inhalf(u + t - v))<threshold) for v in atomlist]):
                         trans = False
                         break
             if trans:
@@ -700,7 +696,7 @@ class Crystal(object):
         """
         if BZG is None: BZG = self.BZG
         # checks that vec.G < G^2 for all G (and throws out the option that vec == G, in case threshold == 0)
-        return all([np.dot(vec, G) < (np.dot(G, G) + threshold) for G in BZG if not np.all(vec == G)])
+        return all(np.dot(vec, G) < (np.dot(G, G) + threshold) for G in BZG if not np.all(vec == G))
 
     def genBZG(self):
         """
@@ -918,7 +914,7 @@ class Crystal(object):
 
         :return: True if equivalent by a point group operation
         """
-        return any(np.allclose(d1, self.g_direc(g, d2), rtol=0, atol=threshold) for g in self.G)
+        return any(np.all(abs(d1 - self.g_direc(g, d2)) < threshold) for g in self.G)
 
     def genpoint(self):
         """
@@ -1168,11 +1164,13 @@ class Crystal(object):
         basewt = 1 / Nkpt
         for kmax in k2_indices:
             complist = []
+            symmcomplist = []
             wtlist = []
             for k in kptlist[kmin:kmax]:
                 match = False
-                for i, kcomp in enumerate(complist):
-                    if self.g_direc_equivalent(k, kcomp, threshold):
+                for i, symmcomp in enumerate(symmcomplist):
+                    # if any(np.allclose(k, gk, rtol=0, atol=threshold) for gk in symmcomp):
+                    if any(np.all(abs(k-gk)<threshold) for gk in symmcomp):
                         # update weight, kick out
                         wtlist[i] += basewt
                         match = True
@@ -1180,6 +1178,7 @@ class Crystal(object):
                 if not match:
                     # new symmetry point!
                     complist.append(k)
+                    symmcomplist.append([self.g_direc(g, k) for g in self.G])
                     wtlist.append(basewt)
             kptsym += complist
             wsym += wtlist

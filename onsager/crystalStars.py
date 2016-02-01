@@ -20,7 +20,7 @@ The big changes are:
   is because the "points" now have a more complex representation (see above).
 """
 
-# TODO: need to make sure we can read / write stars for optimal functionality (YAML?)
+# TODO: need to make sure we can read / write stars for optimal functionality (HDF5?)
 
 __author__ = 'Dallas R. Trinkle'
 
@@ -91,7 +91,8 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
 
     def __hash__(self):
         """Hash, so that we can make sets of states"""
-        return self.i ^ (self.j << 1) ^ (self.R[0] << 2) ^ (self.R[1] << 3) ^ (self.R[2] << 4)
+        # return self.i ^ (self.j << 1) ^ (self.R[0] << 2) ^ (self.R[1] << 3) ^ (self.R[2] << 4)
+        return hash((self.i, self.j, self.R[0], self.R[1], self.R[2]))
 
     def __add__(self, other):
         """Add two states: works if and only if self.j == other.i
@@ -173,12 +174,66 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
 crystal.yaml.add_representer(PairState, PairState.PairState_representer)
 crystal.yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
 
+# HDF5 conversion routines: PairState, and list-of-list structures
+def PSlist2array(PSlist):
+    """
+    Take in a list of pair states; return arrays that can be stored in HDF5 format
+    :param PSlist: list of pair states
+    :return ij: int_array[N][2] = (i,j)
+    :return R: int[N][3]
+    :return dx: float[N][3]
+    """
+    N = len(PSlist)
+    ij = np.zeros((N,2), dtype=int)
+    R = np.zeros((N,3), dtype=int)
+    dx = np.zeros((N,3))
+    for n, PS in enumerate(PSlist):
+        ij[n,0], ij[n,1], R[n,:], dx[n,:] = PS.i, PS.j, PS.R, PS.dx
+    return ij, R, dx
+
+def array2PSlist(ij, R, dx):
+    """
+    Take in arrays of ij, R, dx (from HDF5), return a list of PairStates
+    :param ij: int_array[N][2] = (i,j)
+    :param R: int[N][3]
+    :param dx: float[N][3]
+    :return PSlist: list of pair states
+    """
+    return [ PairState(i=ij0[0], j=ij0[1], R=R0, dx=dx0) for ij0, R0, dx0 in zip(ij, R, dx)]
+
+def doublelist2flatlistindex(listlist):
+    """
+    Takes a list of lists, returns a flattened list and an index array
+    :param listlist: list of lists of objects
+    :return flatlist: flat list of objects (preserving order)
+    :return indexarray: array indexing which original list it came from
+    """
+    flatlist = []
+    indexlist = []
+    for ind, entries in enumerate(listlist):
+        flatlist += entries
+        indexlist += [ind for j in entries]
+    return flatlist, np.array(indexlist)
+
+def flatlistindex2doublelist(flatlist, indexarray):
+    """
+    Takes a flattened list and an index array, returns a list of lists
+    :param flatlist: flat list of objects (preserving order)
+    :param indexarray: array indexing which original list it came from
+    :return listlist: list of lists of objects
+    """
+    Nlist = max(indexarray) + 1
+    listlist = [ [] for n in range(Nlist)]
+    for entry, ind in zip(flatlist, indexarray):
+        listlist[ind].append(entry)
+    return listlist
+
 
 class StarSet(object):
     """
     A class to construct stars, and be able to efficiently index.
     """
-    def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False, empty=False):
+    def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False):
         """
         Initiates a star set generator for a given jumpnetwork, crystal, and specified
         chemical index.
@@ -202,12 +257,8 @@ class StarSet(object):
         Nstars: size of list
         index[Nstates]: index of star that state belongs to
         """
-        if empty:
-            # this is really just used by copy() to circumvent __init__
-            if __debug__:
-                if any(x is not None for x in (jumpnetwork, crys, chem)):
-                    raise TypeError('Tried to create empty StarSet with non-None parameters')
-            return
+        # empty StarSet
+        if all(x is None for x in (jumpnetwork, crys, chem)): return
         self.jumpnetwork_index = []  # list of list of indices into...
         self.jumplist = []  # list of our jumps, as PairStates
         ind = 0
@@ -241,25 +292,24 @@ class StarSet(object):
         """
         if Nshells == getattr(self, 'Nshells', -1): return
         self.Nshells = Nshells
-        if Nshells > 0: self.states = self.jumplist.copy()
-        else: self.states = []
-        lastshell = list(self.states)
+        if Nshells > 0: stateset = set(self.jumplist)
+        else: stateset = set([])
+        lastshell = stateset.copy()
         for i in range(Nshells-1):
             # add all NNvect to last shell produced, always excluding 0
             # lastshell = [v1+v2 for v1 in lastshell for v2 in self.NNvect if not all(abs(v1 + v2) < threshold)]
-            nextshell = []
+            nextshell = set([])
             for s1 in lastshell:
                 for s2 in self.jumplist:
                     # this try/except structure lets us attempt addition and kick out if not possible
                     try: s = s1 + s2
                     except: continue
                     if not s.iszero():
-                        if not any(s == st for st in self.states):
-                            nextshell.append(s)
-                            self.states.append(s)
+                        nextshell.add(s)
+                        stateset.add(s)
             lastshell = nextshell
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
-        self.states.sort(key=PairState.sortkey)
+        self.states = sorted([s for s in stateset], key=PairState.sortkey)
         self.Nstates = len(self.states)
         if self.Nstates > 0:
             x2_indices = []
@@ -274,12 +324,13 @@ class StarSet(object):
             xmin = 0
             for xmax in x2_indices:
                 complist_stars = [] # for finding unique stars
+                symmstate_list = [] # list of sets corresponding to those stars...
                 for xi in range(xmin, xmax):
                     x = self.states[xi]
                     # is this a new rep. for a unique star?
                     match = False
-                    for i, s in enumerate(complist_stars):
-                        if self.symmatch(x, self.states[s[0]]):
+                    for i, gs in enumerate(symmstate_list):
+                        if x in gs:
                             # update star
                             complist_stars[i].append(xi)
                             match = True
@@ -287,19 +338,79 @@ class StarSet(object):
                     if not match:
                         # new symmetry point!
                         complist_stars.append([xi])
+                        symmstate_list.append(set([x.g(self.crys, self.chem, g) for g in self.crys.G]))
                 self.stars += complist_stars
                 xmin=xmax
         else: self.stars = [[]]
         self.Nstars = len(self.stars)
         # generate index: which star is each state a member of?
         self.index = np.zeros(self.Nstates, dtype=int)
+        self.indexdict = {}
         for si, star in enumerate(self.stars):
             for xi in star:
                 self.index[xi] = si
+                self.indexdict[self.states[xi]] = (xi, si)
+
+    def addhdf5(self, HDF5group):
+        """
+        Adds an HDF5 representation of object into an HDF5group (needs to already exist).
+
+        Example: if f is an open HDF5, then StarSet.addhdf5(f.create_group('StarSet')) will
+          (1) create the group named 'StarSet', and then (2) put the StarSet representation in that group.
+        :param HDF5group: HDF5 group
+        """
+        HDF5group.attrs['type'] = self.__class__.__name__
+        HDF5group.attrs['crystal'] = self.crys.__repr__()
+        HDF5group.attrs['chem'] = self.chem
+        HDF5group['Nshells'] = self.Nshells
+        # convert jumplist (list of PS) into arrays to store:
+        HDF5group['jumplist_ij'], HDF5group['jumplist_R'], HDF5group['jumplist_dx'] = \
+            PSlist2array(self.jumplist)
+        HDF5group['jumplist_Nunique'] = len(self.jumpnetwork_index)
+        jumplistinvmap = np.zeros(len(self.jumplist), dtype=int)
+        for j, jlist in enumerate(self.jumpnetwork_index):
+            for i in jlist: jumplistinvmap[i] = j
+        HDF5group['jumplist_invmap'] = jumplistinvmap
+        # convert states into arrays to store:
+        HDF5group['states_ij'], HDF5group['states_R'], HDF5group['states_dx'] = \
+            PSlist2array(self.states)
+        HDF5group['states_index'] = self.index
+
+    @classmethod
+    def loadhdf5(cls, crys, HDF5group):
+        """
+        Creates a new StarSet from an HDF5 group.
+        :param crys: crystal object--MUST BE PASSED IN as it is not stored with the StarSet
+        :param HDFgroup: HDF5 group
+        :return: new StarSet object
+        """
+        SSet = cls(None, None, None)  # initialize
+        SSet.crys = crys
+        SSet.chem = HDF5group.attrs['chem']
+        SSet.Nshells = HDF5group['Nshells'].value
+        SSet.jumplist = array2PSlist(HDF5group['jumplist_ij'].value,
+                                     HDF5group['jumplist_R'].value,
+                                     HDF5group['jumplist_dx'].value)
+        SSet.jumpnetwork_index = [[] for n in range(HDF5group['jumplist_Nunique'].value)]
+        for i, jump in enumerate(HDF5group['jumplist_invmap'].value):
+            SSet.jumpnetwork_index[jump].append(i)
+        SSet.states = array2PSlist(HDF5group['states_ij'].value,
+                                   HDF5group['states_R'].value,
+                                   HDF5group['states_dx'].value)
+        SSet.Nstates = len(SSet.states)
+        SSet.index = HDF5group['states_index'].value
+        # construct the states, and the index dictionary:
+        SSet.Nstars = max(SSet.index) + 1
+        SSet.stars = [[] for n in range(SSet.Nstars)]
+        SSet.indexdict = {}
+        for xi, si in enumerate(SSet.index):
+            SSet.stars[si].append(xi)
+            SSet.indexdict[SSet.states[xi]] = (xi, si)
+        return SSet
 
     def copy(self, empty=False):
         """Return a copy of the StarSet; done as efficiently as possible; empty means skip the shells, etc."""
-        newStarSet = StarSet(None, None, None, -1, empty=True)  # a little hacky... creates an empty class
+        newStarSet = StarSet(None, None, None)  # a little hacky... creates an empty class
         newStarSet.jumpnetwork_index = copy.deepcopy(self.jumpnetwork_index)
         newStarSet.jumplist = self.jumplist.copy()
         newStarSet.crys = self.crys
@@ -311,6 +422,7 @@ class StarSet(object):
             newStarSet.Nstars = self.Nstars
             newStarSet.Nstates = self.Nstates
             newStarSet.index = self.index.copy()
+            newStarSet.indexdict = self.indexdict.copy()
         else: newStarSet.generate(0)
         return newStarSet
 
@@ -341,17 +453,20 @@ class StarSet(object):
             self.Nstars = other.Nstars
             self.Nstates = other.Nstates
             self.index = other.index.copy()
+            self.indexdict = other.indexdict.copy()
             return self
         self.Nshells += other.Nshells
         Nold = self.Nstates
+        oldstateset = set(self.states)
+        newstateset = set([])
         for s1 in self.states[:Nold]:
             for s2 in other.states:
                 # this try/except structure lets us attempt addition and kick out if not possible
                 try: s = s1 + s2
                 except: continue
-                if not s.iszero() and not any(s == st for st in self.states): self.states.append(s)
+                if not s.iszero() and not s in oldstateset: newstateset.add(s)
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
-        self.states[Nold:] = sorted(self.states[Nold:], key=PairState.sortkey)
+        self.states += sorted([s for s in newstateset], key=PairState.sortkey)
         Nnew = len(self.states)
         x2_indices = []
         x2old = np.dot(self.states[Nold].dx, self.states[Nold].dx)
@@ -365,12 +480,13 @@ class StarSet(object):
         xmin = Nold
         for xmax in x2_indices:
             complist_stars = [] # for finding unique stars
+            symmstate_list = [] # list of sets corresponding to those stars...
             for xi in range(xmin, xmax):
                 x = self.states[xi]
                 # is this a new rep. for a unique star?
                 match = False
-                for i, s in enumerate(complist_stars):
-                    if self.symmatch(x, self.states[s[0]]):
+                for i, gs in enumerate(symmstate_list):
+                    if x in gs:
                         # update star
                         complist_stars[i].append(xi)
                         match = True
@@ -378,6 +494,7 @@ class StarSet(object):
                 if not match:
                     # new symmetry point!
                     complist_stars.append([xi])
+                    symmstate_list.append(set([x.g(self.crys, self.chem, g) for g in self.crys.G]))
             self.stars += complist_stars
             xmin=xmax
         self.Nstates = Nnew
@@ -389,20 +506,20 @@ class StarSet(object):
             star = self.stars[si]
             for xi in star:
                 self.index[xi] = si
+                self.indexdict[self.states[xi]] = (xi, si)
         self.Nstars = Nnew
         return self
 
     # replaces pointindex:
     def stateindex(self, PS):
         """Return the index of pair state PS; None if not found"""
-        try: return self.states.index(PS)
+        try: return self.indexdict[PS][0]
         except: return None
 
     def starindex(self, PS):
         """Return the index for the star to which pair state PS belongs; None if not found"""
-        ind = self.stateindex(PS)
-        if ind is None: return None
-        return self.index[ind]
+        try: return self.indexdict[PS][1]
+        except: return None
 
     def symmatch(self, PS1, PS2):
         """True if there exists a group operation that makes PS1 == PS2."""
@@ -503,16 +620,16 @@ class StarSet(object):
         """
         if S1.Nshells < 1 or S2.Nshells < 1: raise ValueError('Need to initialize stars')
         self.Nshells = S1.Nshells + S2.Nshells  # an estimate...
-        self.states = []
+        stateset = set([])
+        # self.states = []
         for s1 in S1.states:
             for s2 in S2.states:
                 # this try/except structure lets us attempt addition and kick out if not possible
                 try: s = s2 ^ s1  # points from vacancy state of s1 to vacancy state of s2
                 except: continue
-                # now we include zero.
-                if not any(s == st for st in self.states): self.states.append(s)
+                stateset.add(s)
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
-        self.states.sort(key=PairState.sortkey)
+        self.states = sorted([s for s in stateset], key=PairState.sortkey)
         self.Nstates = len(self.states)
         if self.Nstates > 0:
             x2_indices = []
@@ -527,12 +644,13 @@ class StarSet(object):
             xmin = 0
             for xmax in x2_indices:
                 complist_stars = [] # for finding unique stars
+                symmstate_list = [] # list of sets corresponding to those stars...
                 for xi in range(xmin, xmax):
                     x = self.states[xi]
                     # is this a new rep. for a unique star?
                     match = False
-                    for i, s in enumerate(complist_stars):
-                        if self.symmatch(x, self.states[s[0]]):
+                    for i, gs in enumerate(symmstate_list):
+                        if x in gs:
                             # update star
                             complist_stars[i].append(xi)
                             match = True
@@ -540,15 +658,18 @@ class StarSet(object):
                     if not match:
                         # new symmetry point!
                         complist_stars.append([xi])
+                        symmstate_list.append(set([x.g(self.crys, self.chem, g) for g in self.crys.G]))
                 self.stars += complist_stars
                 xmin=xmax
         else: self.stars = [[]]
         self.Nstars = len(self.stars)
         # generate index: which star is each state a member of?
         self.index = np.zeros(self.Nstates, dtype=int)
+        self.indexdict = {}
         for si, star in enumerate(self.stars):
             for xi in star:
                 self.index[xi] = si
+                self.indexdict[self.states[xi]] = (xi, si)
 
 
 class VectorStarSet(object):
@@ -567,7 +688,6 @@ class VectorStarSet(object):
         self.starset = None
         self.Nvstars = 0
         if starset is not None:
-            self.Nstars = starset.Nstars
             if starset.Nshells > 0:
                 self.generate(starset)
 
@@ -659,6 +779,39 @@ class VectorStarSet(object):
                 if sR0[0] == sR1[0]:
                     outer[:, :, i, j] = sum([np.outer(v0, v1) for v0, v1 in zip(sv0, sv1)])
         return outer
+
+    def addhdf5(self, HDF5group):
+        """
+        Adds an HDF5 representation of object into an HDF5group (needs to already exist).
+
+        Example: if f is an open HDF5, then StarSet.addhdf5(f.create_group('VectorStarSet')) will
+          (1) create the group named 'VectorStarSet', and then (2) put the VectorStarSet
+          representation in that group.
+        :param HDF5group: HDF5 group
+        """
+        HDF5group.attrs['type'] = self.__class__.__name__
+        HDF5group['Nvstars'] = self.Nvstars
+        HDF5group['vecposlist'], HDF5group['vecposindex'] = doublelist2flatlistindex(self.vecpos)
+        HDF5group['vecveclist'], HDF5group['vecvecindex'] = doublelist2flatlistindex(self.vecvec)
+        HDF5group['outer'] = self.outer
+
+    @classmethod
+    def loadhdf5(cls, SSet, HDF5group):
+        """
+        Creates a new StarSet from an HDF5 group.
+        :param SSet: StarSet--MUST BE PASSED IN as it is not stored with the VectorStarSet
+        :param HDFgroup: HDF5 group
+        :return: new StarSet object
+        """
+        VSSet = cls(None)  # initialize
+        VSSet.starset = SSet
+        VSSet.Nvstars = HDF5group['Nvstars'].value
+        VSSet.vecpos = flatlistindex2doublelist(HDF5group['vecposlist'].value,
+                                                HDF5group['vecposindex'].value)
+        VSSet.vecvec = flatlistindex2doublelist(HDF5group['vecveclist'].value,
+                                                HDF5group['vecvecindex'].value)
+        VSSet.outer = HDF5group['outer'].value
+        return VSSet
 
     def GFexpansion(self):
         """
@@ -771,199 +924,3 @@ class VectorStarSet(object):
                         bias0expansion[i, jt] += geom_bias
                         bias1expansion[i, k] += geom_bias
         return bias0expansion, bias1expansion
-
-### Old code, moved out of VectorStarSet, as (now) redundant:
-
-    # def rate0expansion(self):
-    #     """
-    #     Construct the omega0 matrix expansion in terms of the NN stars. Note: includes on-site terms.
-    #     Based entirely on the jumpnetwork in self.starset
-    #
-    #     :return rate0expansion: array[Nsv, Nsv, Njump_omega0]
-    #         the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k])
-    #     """
-    #     if self.Nvstars == 0: return None
-    #     rate0expansion = np.zeros((self.Nvstars, self.Nvstars, len(self.starset.jumpnetwork_index)))
-    #     for i in range(self.Nvstars):
-    #         for j in range(self.Nvstars):
-    #             if i <= j :
-    #                 for si, vi in zip(self.vecpos[i], self.vecvec[i]):
-    #                     for sj, vj in zip(self.vecpos[j], self.vecvec[j]):
-    #                         try: ds = self.starset.states[sj] ^ self.starset.states[si]
-    #                         except: continue
-    #                         try: jumpindex = self.starset.jumplist.index(ds)
-    #                         except: continue
-    #                         k = None
-    #                         for jt, jumpindices in enumerate(self.starset.jumpnetwork_index):
-    #                             if jumpindex in jumpindices:
-    #                                 k = jt
-    #                                 break
-    #                         rate0expansion[i, j, k] += np.dot(vi, vj)
-    #             # note: we do *addition* here because we may have on-site contributions above
-    #             if i == j:
-    #                 state0 = self.starset.states[self.vecpos[i][0]].j  # state that vacancy leaves from
-    #                 # so add -1*rate for each jump that starts from that vacancy state.
-    #                 for k, s in enumerate(self.starset.jumpnetwork_index):
-    #                     rate0expansion[i, i, k] += sum(-1 for jumpindex in s
-    #                                                    if self.starset.jumplist[jumpindex].i == state0)
-    #             if i > j:
-    #                 rate0expansion[i, j, :] = rate0expansion[j, i, :]
-    #     return rate0expansion
-    #
-    # def rate1expansion(self, jumpnetwork_omega1):
-    #     """
-    #     Construct the omega1 matrix expansion in terms of the jumpnetwork.
-    #
-    #     :param jumpnetwork_omega1: jumpnetwork of symmetry unique omega1-type jumps,
-    #       corresponding to our starset.
-    #     :return rate1expansion: array[Nsv, Nsv, Njumps]
-    #         the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])
-    #     """
-    #     if self.Nvstars == 0: return None
-    #     rate1expansion = np.zeros((self.Nvstars, self.Nvstars, len(jumpnetwork_omega1)))
-    #     for i in range(self.Nvstars):
-    #         for j in range(self.Nvstars):
-    #             if i <= j :
-    #                 for k, jumplist in enumerate(jumpnetwork_omega1):
-    #                     for (IS, FS), dx in jumplist:
-    #                         for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
-    #                             for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
-    #                                 if Ri == IS and Rj == FS:
-    #                                     rate1expansion[i, j, k] += np.dot(vi, vj)
-    #             else:
-    #                 rate1expansion[i, j, :] = rate1expansion[j, i, :]
-    #     return rate1expansion
-    #
-    # def rate2expansion(self, NNstar):
-    #     """
-    #     Construct the omega2 matrix expansion in terms of the nearest-neighbor stars. Includes
-    #     the "on-site" terms as well, hence there's a factor of 2 in the output.
-    #
-    #     Parameters
-    #     ----------
-    #     NNstar: Star
-    #         stars representing the unique nearest-neighbor jumps
-    #
-    #     Returns
-    #     -------
-    #     rate2expansion: array[Nsv, Nsv, NNstars]
-    #         the omega2 matrix[i, j] = sum(rate2expansion[i, j, k] * omega2(NNstar[k]))
-    #     """
-    #     if self.Nvstars == 0: return None
-    #     rate2expansion = np.zeros((self.Nvstars, self.Nvstars, NNstar.Nstars))
-    #     for i in range(self.Nvstars):
-    #         # this is a diagonal matrix, so...
-    #         ind = NNstar.starindex(self.vecpos[i][0])
-    #         if ind != -1:
-    #             rate2expansion[i, i, ind] = -2.*np.dot(self.vecvec[i][0], self.vecvec[i][0])*len(NNstar.stars[ind])
-    #     return rate2expansion
-    #
-    # def bias2expansion(self, NNstar):
-    #     """
-    #     Construct the bias2 vector expansion in terms of the nearest-neighbor stars.
-    #
-    #     Parameters
-    #     ----------
-    #     NNstar: Star
-    #         stars representing the unique nearest-neighbor jumps
-    #
-    #     Returns
-    #     -------
-    #     bias2expansion: array[Nsv, NNstars]
-    #         the bias2 vector[i] = sum(bias2expansion[i, k] * omega2(NNstar[k]))
-    #     """
-    #     if self.Nvstars == 0:
-    #         return None
-    #     if not isinstance(NNstar, StarSet):
-    #         raise TypeError('need a star')
-    #     bias2expansion = np.zeros((self.Nvstars, NNstar.Nstars))
-    #     for i in range(self.Nvstars):
-    #         ind = NNstar.starindex(self.vecpos[i][0])
-    #         if ind != -1:
-    #             bias2expansion[i, ind] = np.dot(self.vecpos[i][0], self.vecvec[i][0])*len(NNstar.stars[ind])
-    #     return bias2expansion
-    #
-    # def bias1expansion(self, dstar, NNstar):
-    #     """
-    #     Construct the bias1 or omega1 onsite vector expansion in terms of the
-    #     nearest-neighbor stars. There are three pieces to this that we need to
-    #     construct now, so it's more complicated. Since we use the *identical* algorithm,
-    #     we return both bias1ds and omega1ds, and bias1NN and omega1NN.
-    #
-    #     Parameters
-    #     ----------
-    #     dstar: DoubleStar
-    #         double-stars (i.e., pairs that are related by a symmetry operation; usually the sites
-    #         are connected by a NN vector to facilitate a jump; indicates unique vacancy jumps
-    #         around a solute)
-    #
-    #     NNstar: Star
-    #         stars representing the unique nearest-neighbor jumps
-    #
-    #     Returns
-    #     -------
-    #     bias1ds: array[Nsv, Ndstars]
-    #         the gen1 vector[i] = sum(gen1ds[i, k] * sqrt(prob_star[gen1prob[i, k]) * omega1[dstar[k]])
-    #
-    #     omega1ds: array[Nsv, Ndstars]
-    #         the omega1 onsite vector[i] = sum(omega1ds[i, k] * sqrt(prob_star[gen1prob[i, k]) * omega1[dstar[k]])
-    #
-    #     gen1prob: array[Nsv, Ndstars], dtype=int
-    #         index for the corresponding *star* whose probability defines the endpoint.
-    #
-    #     bias1NN: array[Nsv, NNNstars]
-    #         we have an additional contribution to the bias1 vector:
-    #         bias1 vector[i] += sum(bias1NN[i, k] * omega0[NNstar[k]])
-    #
-    #     oemga1NN: array[Nsv, NNNstars]
-    #         we have an additional contribution to the omega1 onsite vector:
-    #         omega1 onsite vector[i] += sum(omega1NN[i, k] * omega0[NNstar[k]])
-    #     """
-    #     if self.Nvstars == 0:
-    #         return None
-    #     if not isinstance(dstar, DoubleStarSet):
-    #         raise TypeError('need a double star')
-    #     if not isinstance(NNstar, StarSet):
-    #         raise TypeError('need a star')
-    #     NNstar.generateindices()
-    #     bias1ds = np.zeros((self.Nvstars, dstar.Ndstars))
-    #     omega1ds = np.zeros((self.Nvstars, dstar.Ndstars))
-    #     gen1bias = np.empty((self.Nvstars, dstar.Ndstars), dtype=int)
-    #     gen1bias[:, :] = -1
-    #     bias1NN = np.zeros((self.Nvstars, NNstar.Nstars))
-    #     omega1NN = np.zeros((self.Nvstars, NNstar.Nstars))
-    #
-    #     # run through the star-vectors
-    #     for i, svR, svv in zip(list(range(self.Nvstars)),
-    #                            self.vecpos, self.vecvec):
-    #         # run through the NN stars
-    #         p1 = dstar.star.pointindex(svR[0]) # first half of our pair
-    #         # nnst = star index, vec = NN jump vector
-    #         for nnst, vec in zip(NNstar.index, NNstar.pts):
-    #             endpoint = svR[0] + vec
-    #             # throw out the origin as an endpoint
-    #             if all(abs(endpoint) < 1e-8):
-    #                 continue
-    #             geom_bias = np.dot(svv[0], vec) * len(svR)
-    #             geom_omega1 = -1. #len(svR)
-    #             p2 = dstar.star.pointindex(endpoint)
-    #             if p2 == -1:
-    #                 # we landed outside our range of double-stars, so...
-    #                 bias1NN[i, nnst] += geom_bias
-    #                 omega1NN[i, nnst] += geom_omega1
-    #             else:
-    #                 ind = dstar.dstarindex((p1, p2))
-    #                 if ind == -1:
-    #                     raise ArithmeticError('Problem with DoubleStar indexing; could not find double-star for pair')
-    #                 bias1ds[i, ind] += geom_bias
-    #                 omega1ds[i, ind] += geom_omega1
-    #                 sind = dstar.star.index[p2]
-    #                 if sind == -1:
-    #                     raise ArithmeticError('Could not locate endpoint in a star in DoubleStar')
-    #                 if gen1bias[i, ind] == -1:
-    #                     gen1bias[i, ind] = sind
-    #                 else:
-    #                     if gen1bias[i, ind] != sind:
-    #                         raise ArithmeticError('Inconsistent DoubleStar endpoints found')
-    #     return bias1ds, omega1ds, gen1bias, bias1NN, omega1NN
-    #

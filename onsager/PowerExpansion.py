@@ -8,10 +8,6 @@ analytically calculated IFT for the Green function.
 Really designed to get used by other code.
 """
 
-# TODO: reduction of expansion (consolidate n terms, reduce l if possible after projection)
-# TODO: projection expansion (strict (n,l) pairs)
-# TODO: test both, and test inversion expansion series
-
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
@@ -270,8 +266,9 @@ class Taylor3D(object):
         the old.
         NOTE: This is more complex than one might first realize. If we only work with cases
         where all of the entries for a given power n have those same n (that is, not reduced),
-        then this works. However, we run into problems with *reductions*: e.g., for n=2, the
-        power x^0 y^0 z^0 is, in reality, x^2+y^2+z^2, and hence *it must be transformed*.
+        then this is straightforward. However, we run into problems with *reductions*: e.g.,
+        for n=2, the power x^0 y^0 z^0 is, in reality, x^2+y^2+z^2, and hence *it must be
+        transformed* because we allow non-orthogonal transformation matrices.
         :param qptrans: 3x3 matrix
         :return: Lmax +1 x Npow x Npow transformation matrix [n][original pow][new pow] for
         each n from 0 up to Lmax
@@ -352,6 +349,10 @@ class Taylor3D(object):
         cls.Lproj = cls.makeLprojections()
         cls.directmult = cls.makedirectmult()
         cls.powercoeff = cls.makepowercoeff()
+        cls.HDF5str = 'coeff.{}.{}'  # needed for addhdf5()
+        cls.__internallist__ = ('pow2ind', 'ind2pow', 'Ylm2ind', 'ind2Ylm',
+                                'powlrange', 'Ylmpow', 'powYlm',
+                                'Lproj', 'directmult', 'powercoeff')
         cls.__INITIALIZED__ = True
 
     def __init__(self, coefflist = [], Lmax = 4, nodeepcopy=False):
@@ -378,6 +379,67 @@ class Taylor3D(object):
         Returns a copy of the current expansion
         """
         return Taylor3D(self.coefflist)
+
+    def addhdf5(self, HDF5group):
+        """
+        Adds an HDF5 representation of object into an HDF5group (needs to already exist).
+
+        Example: if f is an open HDF5, then T3D.addhdf5(f.create_group('T3D')) will
+          (1) create the group named 'T3D', and then (2) put the T3D representation in that group.
+        :param HDF5group: HDF5 group
+        """
+        HDF5group.attrs['type'] = self.__class__.__name__
+        HDF5group.attrs['Lmax'] = self.Lmax
+        for (n, l, c) in self.coefflist:
+            coeffstr = self.HDF5str.format(n, l)
+            HDF5group[coeffstr] = c
+            HDF5group[coeffstr].attrs['n'] = n
+            HDF5group[coeffstr].attrs['l'] = l
+
+    @classmethod
+    def loadhdf5(cls, HDF5group):
+        """
+        Creates a new T3D from an HDF5 group.
+        :param HDFgroup: HDF5 group
+        :return: new T3D object
+        """
+        t3d = cls()  # initialize
+        for k, c in HDF5group.items():
+            n = HDF5group[k].attrs['n']
+            l = HDF5group[k].attrs['l']
+            if l > t3d.Lmax or l < 0:
+                raise ValueError('HDF5 group data contains illegal l = {} for {}'.format(l, k))
+            t3d.coefflist.append((n, l, c.value))
+        return t3d
+
+    def dumpinternalsHDF5(self, HDF5group):
+        """
+        Adds the initialized power expansion internals into an HDF5group--should be stored for a
+        sanity check
+        :param HDF5group:
+        """
+        HDF5group.attrs['description'] = 'Internals of PowerExpansion class'
+        HDF5group.attrs['Lmax'] = self.Lmax
+        HDF5group.attrs['NYlm'] = self.NYlm
+        HDF5group.attrs['Npower'] = self.Npower
+        for internal in self.__internallist__:
+            HDF5group[internal] = getattr(self, internal)
+
+    @classmethod
+    def checkinternalsHDF5(cls, HDF5group):
+        """
+        Reads the power expansion internals into an HDF5group, and performs sanity check
+        :param HDF5group:
+        """
+        if not cls.__INITIALIZED__: raise ValueError('Must initialize first to perform sanity check')
+        if HDF5group.attrs['description'] != u'Internals of PowerExpansion class':
+            raise ValueError('HDF5 group lacks the attribute "description" which matches "Internals of PowerExpansion class"')
+        if HDF5group.attrs['Lmax'] != cls.Lmax: return False
+        if HDF5group.attrs['NYlm'] != cls.NYlm: return False
+        if HDF5group.attrs['Npower'] != cls.Npower: return False
+        for internal in cls.__internallist__:
+            if not np.all(HDF5group[internal][:] == getattr(cls, internal)): return False
+        return True
 
     @classmethod
     def zeros(cls, nmin, nmax, shape, dtype=complex):
@@ -459,7 +521,6 @@ class Taylor3D(object):
                 self.coefflist.append((coeff[0], coeff[1], coeff[2].copy()))
         self.coefflist.sort(key=self.__sortkey)
 
-    # def __call__(self, *args, **kwargs):
     def __call__(self, u, fnu=None):
         """
         Method for evaluating our 3D Taylor expansion. We have two approaches: if we are
@@ -887,7 +948,7 @@ class Taylor3D(object):
         return Taylor3D(self.inversecoeff(self, Nmax))
 
     @classmethod
-    def reducecoeff(cls, a, inplace=False):
+    def reducecoeff(cls, a, inplace=False, atol=1e-10):
         """
         Projects coefficients through Ylm space, then eliminates any zero contributions
         (including possible reduction in l values, too).
@@ -907,14 +968,14 @@ class Taylor3D(object):
             c = np.tensordot(projector[:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
             # print(c)
             # now, systematically attempt to reduce the l value
-            if np.allclose(c, 0):
+            if np.allclose(c, 0, atol=atol):
                 # occasionally, it gets reduced to zero:
                 dellist.append(coeffindex)
             else:
                 # then we have something to look at... systematically attempt to drop l:
                 # check in blocks
                 for lmin in range(l, -1, -1):
-                    if not np.allclose(c[cls.powlrange[lmin-1]:cls.powlrange[lmin]],0):
+                    if not np.allclose(c[cls.powlrange[lmin-1]:cls.powlrange[lmin]],0, atol=atol):
                         break
                 # reduce! Note: we do this *every time* because c is the projected version of our coeff.
                 ra[coeffindex] = (n, lmin, c[:cls.powlrange[lmin]].copy())
@@ -925,7 +986,7 @@ class Taylor3D(object):
         return ra
 
     @classmethod
-    def collectcoeff(cls, a, inplace=False):
+    def collectcoeff(cls, a, inplace=False, atol=1e-10):
         """
         Collects coefficients: sums up all the common n values. Best to be done *after*
         reduce is called.
@@ -946,7 +1007,7 @@ class Taylor3D(object):
         for coeffindex,(n, l, c) in enumerate(ca):
             # first, project
             c = np.tensordot(projector[:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
-            if np.allclose(c, 0):
+            if np.allclose(c, 0, atol=atol):
                 # if we have zero coefficients, remove from the list
                 dellist.append(coeffindex)
             else:
@@ -973,7 +1034,7 @@ class Taylor3D(object):
         return self
 
     @classmethod
-    def separatecoeff(cls, a, inplace=False):
+    def separatecoeff(cls, a, inplace=False, atol=1e-10):
         """
         Projects coefficients through Ylm space, one by one. Assumes they've already been
         reduced and collected first; if not, could lead to duplicated (n,l) entries in list, which
@@ -995,10 +1056,10 @@ class Taylor3D(object):
             for l0 in range(l):
                 cl0 = np.tensordot(cls.Lproj[l0][:cls.powlrange[l],:cls.powlrange[l]],
                                    c, axes=1)[:cls.powlrange[l0]]
-                if not np.allclose(cl0, 0):
+                if not np.allclose(cl0, 0, atol=atol):
                     sa.append((n, l0, cl0))
             c = np.tensordot(cls.Lproj[l][:cls.powlrange[l],:cls.powlrange[l]], c, axes=1)
-            if not np.allclose(c, 0):
+            if not np.allclose(c, 0, atol=atol):
                 sa[coeffindex] = (n, l, c) # this *should not be zero* but just in case...
             else:
                 dellist.append(coeffindex)

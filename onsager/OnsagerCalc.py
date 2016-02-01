@@ -1,5 +1,5 @@
 """
-Onsager calculator module
+Onsager calculator module: Interstitialcy mechanism and Vacancy-mediated mechanism
 
 Class to create an Onsager "calculator", which brings two functionalities:
 1. determines *what* input is needed to compute the Onsager (mobility, or L) tensors
@@ -11,23 +11,24 @@ energies, and energy barriers, and then in concert with scripts to convert such 
 into rates and probabilities, this will allow for efficient evaluation of transport
 coefficients.
 
-This implementation will be for vacancy-mediated solute diffusion on a Bravais lattice,
-and assumes the dilute limit. The mathematics is based on a Green function solution
-for the vacancy diffusion. The computation of the GF is outside the scope of this
-particular module; however, clever uses of the GFcalc module can be attached to this
-quite easily.
-"""
+This implementation will be for vacancy-mediated solute diffusion assumes the dilute limit.
+The mathematics is based on a Green function solution for the vacancy diffusion. The
+computation of the GF is included in the GFcalc module.
 
-# TODO: need to make sure we can read / write Onsager comp. information for optimal functionality (JSON?)
+Now with HDF5 write / read capability for VacancyMediated module
+"""
 
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 from scipy.linalg import pinv2, solve
-from . import stars
 from . import GFcalc
 from . import crystal
+from . import crystalStars as stars
 from functools import reduce
+import copy
+import collections
+import itertools
 
 
 class Interstitial(object):
@@ -40,17 +41,11 @@ class Interstitial(object):
         Initialization; takes an underlying crystal, a choice of atomic chemistry,
         a corresponding Wyckoff site list and jump network.
 
-        Parameters
-        ----------
-        crys : Crystal object
-
-        chem : integer
-            index into the basis of crys, corresponding to the chemical element that hops
-
-        sitelist : list of lists of indices
-            site indices where the atom may hop; grouped by symmetry equivalency
-
-        jumpnetwork : list of lists of tuples: ( (i, j), dx )
+        :param crys : Crystal object
+        :param chem : integer, index into the basis of crys, corresponding to the chemical element that hops
+        :param sitelist : list of lists of indices, site indices where the atom may hop;
+          grouped by symmetry equivalency
+        :param jumpnetwork : list of lists of tuples: ( (i, j), dx )
             symmetry unique transitions; each list is all of the possible transitions
             from site i to site j with jump vector dx; includes i->j and j->i
         """
@@ -71,8 +66,6 @@ class Interstitial(object):
         if self.NV > 0:
             # invertible if inversion is present
             self.omega_invertible = any( np.allclose(g.cartrot, -np.eye(3)) for g in crys.G )
-            # self.omega_invertible = all( np.all(np.isclose(np.sum(v, axis=0), np.zeros(3)))
-            #                              for v in self.VectorBasis)
         if self.omega_invertible:
             # invertible, so just use solve for speed (omega is technically *negative* definite)
             self.bias_solver = lambda omega,b: -solve(-omega, b, sym_pos=True)
@@ -453,324 +446,6 @@ class Interstitial(object):
         return D0, Dp
 
 
-class VacancyMediatedBravais(object):
-    """
-    A class to compute vacancy-mediated solute transport coefficients, specifically
-    L_vv (vacancy diffusion), L_ss (solute), and L_sv (off-diagonal). As part of that,
-    it determines *what* quantities are needed as inputs in order to perform this calculation.
-
-    Currently for Bravais lattice only.
-    """
-    def __init__(self, jumpvect, groupops, Nthermo = 0):
-        """
-        Initialization; starts off with a set of jump vectors, group operations, and an optional
-        range for thermodynamic interactions.
-
-        Parameters
-        ----------
-        jumpvect : either list of array[3] or array[:, 3]
-            list of jump vectors that are possible
-
-        groupops : list of array[3, 3]
-            point group operations
-
-        Nthermo : integer, optional
-            range of thermodynamic interactions, in terms of "shells", which is multiple
-            summations of jumpvect
-        """
-        # make copies, as lists (there is likely a more efficient way to do this
-        self.jumpvect = [v for v in jumpvect]
-        self.groupops = [g for g in groupops]
-        self.NNstar = stars.StarSet(self.jumpvect, self.groupops, 1)
-        self.thermo = stars.StarSet(self.jumpvect, self.groupops)
-        self.kinetic = stars.StarSet(self.jumpvect, self.groupops)
-        self.GF = stars.StarSet(self.jumpvect, self.groupops)
-        self.omega1 = stars.DoubleStarSet(self.kinetic)
-        self.biasvec = stars.VectorStarSet(self.GF)
-        self.Nthermo = 0
-        self.generate(Nthermo)
-
-    def generate(self, Nthermo, genmatrices=False):
-        """
-        Generate the necessary stars, double-stars, vector-stars, etc. based on the
-        thermodynamic range.
-
-        Parameters
-        ----------
-        Nthermo : integer
-            range of thermodynamic interactions, in terms of "shells", which is multiple
-            summations of jumpvect
-
-        genmatrices : logical, optional
-            if set, call generate matrices (default is to wait until needed)
-        """
-        if Nthermo == 0:
-            self.Nthermo = 0
-        if Nthermo == self.Nthermo:
-            return
-        self.thermo.generate(Nthermo)
-        self.kinetic.combine(self.thermo, self.NNstar)
-        self.omega1.generate(self.kinetic)
-        # the following is a list of indices corresponding to the jump-type; so that if one
-        # chooses *not* to calculate omega1, the corresponding omega0 value can be substituted
-        # This is returned both for reference, and used for internal consumption
-        self.omega1LIMB = [self.NNstar.starindex(self.kinetic.pts[p[0][0]] - self.kinetic.pts[p[0][1]])
-                           for p in self.omega1.dstars]
-        self.GF.combine(self.kinetic, self.kinetic)
-        self.biasvec.generate(self.kinetic)
-        # this is the list of points for the GF calculation; we need to add in the origin now:
-        self.GFR = [np.zeros(3)] + [sR[0] for sR in self.GF.stars]
-        self.matricesgenerated = False
-        if genmatrices:
-            self.generatematrices()
-
-    def generatematrices(self, Nthermo=None):
-        """
-        Makes all of the pieces we need to calculate the diffusion. Called by Lij, but we store
-        "cached" versions for efficiency.
-
-        Parameters
-        ----------
-        Nthermo : integer, optional
-            range of thermodynamic interactions, in terms of "shells", which is multiple
-            summations of jumpvect; if set, call generate() first.
-        """
-        if Nthermo is not None:
-            self.generate(Nthermo)
-        if not self.matricesgenerated:
-            self.matricesgenerated = True
-            self.thermo2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.thermo.stars]
-            self.NN2thermo = [self.thermo.starindex(Rs[0]) for Rs in self.NNstar.stars]
-            self.vstar2kin = [self.kinetic.starindex(Rs[0]) for Rs in self.biasvec.vecpos]
-            self.GFexpansion = self.biasvec.GFexpansion(self.GF)
-            self.rate0expansion = self.biasvec.rate0expansion(self.NNstar)
-            self.rate1expansion = self.biasvec.rate1expansion(self.omega1)
-            self.rate2expansion = self.biasvec.rate2expansion(self.NNstar)
-            self.bias2expansion = self.biasvec.bias2expansion(self.NNstar)
-            self.bias1ds, self.omega1ds, self.gen1prob, self.bias1NN, self.omega1NN = \
-                self.biasvec.bias1expansion(self.omega1, self.NNstar)
-
-    def omega0list(self, Nthermo = None):
-        """
-        Return a list of endpoints for a vacancy jump, corresponding to omega0: no solute.
-        Note: omega0list and omega2list are, by definition, the same. Defined by Stars.
-
-        Parameters
-        ----------
-        Nthermo : integer, optional
-            if set to some value, then we call generate(Nthermo) first.
-
-        Returns
-        -------
-        omega0list : list of array[3]
-            list of endpoints for a vacancy jump: we will expect rates for jumps from
-            the origin to each of these endpoints as inputs for our calculation
-        """
-        if Nthermo is not None:
-            self.generate(Nthermo)
-        return [s[0] for s in self.NNstar.stars]
-
-    def interactlist(self, Nthermo = None):
-        """
-        Return a list of solute-vacancy configurations for interactions. The points correspond
-        to a vector between a solute atom and a vacancy. Defined by Stars.
-
-        Parameters
-        ----------
-        Nthermo : integer, optional
-            if set to some value, then we call generate(Nthermo) first.
-
-        Returns
-        -------
-        interactlist : list of array[3]
-            list of vectors to connect a solute and a vacancy jump.
-        """
-        if Nthermo is not None:
-            self.generate(Nthermo)
-        return [s[0] for s in self.thermo.stars]
-
-    def GFlist(self, Nthermo = None):
-        """
-        Return a list of points for the vacancy GF calculation, corresponding to omega0: no solute.
-        Defined by Stars.
-
-        Parameters
-        ----------
-        Nthermo : integer, optional
-            if set to some value, then we call generate(Nthermo) first.
-
-        Returns
-        -------
-        GFlist : list of array[3]
-            list of points to calculate the vacancy diffusion GF; this is based ultimately on omega0,
-            and is the (pseudo)inverse of the vacancy hop rate matrix.
-        """
-        if Nthermo is not None:
-            self.generate(Nthermo)
-        return self.GFR
-
-    def omega1list(self, Nthermo = None):
-        """
-        Return a list of pairs of endpoints for a vacancy jump, corresponding to omega1:
-        Solute at the origin, vacancy hopping between two sites. Defined by Double Stars.
-
-        Parameters
-        ----------
-        Nthermo : integer, optional
-            if set to some value, then we call generate(Nthermo) first.
-
-        Returns
-        -------
-        omega1list : list of tuples of array[3]
-            list of paired endpoints for a vacancy jump: the solute is at the origin,
-            and these define start- and end-points for the vacancy jump.
-        omega1LIMB : int array [Ndstar]
-            index specifying which type of jump in omega0 would correspond to the LIMB
-            approximation
-        """
-        if Nthermo is not None:
-            self.generate(Nthermo)
-        return [(self.kinetic.pts[p[0][0]], self.kinetic.pts[p[0][1]]) for p in self.omega1.dstars], \
-               self.omega1LIMB
-
-    def maketracer(self):
-        """
-        Generates input to Lij that corresponds to a tracer atom; useful for building
-        input to Lij()
-
-        Returns
-        -------
-        prob : array[thermo.Nstars]
-            probability for each site in thermodynamic interaction range
-        om2 : array[NNstar.Nstars]
-            rates for exchange
-        om1 : array[omega1.Ndstars]
-            rates for vacancy motion around a solute
-        """
-        prob = np.zeros(self.thermo.Nstars, dtype=float)
-        prob[:] = 1.
-        om2 = np.zeros(self.NNstar.Nstars, dtype=float)
-        om2[:] = -1.
-        om1 = np.zeros(self.omega1.Ndstars, dtype=float)
-        om1[:] = -1.
-        return prob, om2, om1
-
-    def _lij(self, gf, om0, prob, om2, om1):
-        """
-        Calculates the pieces for the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv
-        from the GF, omega0, omega1, and omega2 rates along with site probabilities.
-        Used by Lij.
-
-        Parameters
-        ----------
-        gf : array[NGF_sites]
-            Green function for vacancy evaluated at sites
-        om0 : array[NNjumps]
-            rates for vacancy jumps
-        prob : array[thermosites]
-            probability of solute-vacancy complex at each sites
-        om2 : array[NNjumps]
-            rates for vacancy-solute exchange; if -1, use om0 entry
-        om1 : array[Ndstars]
-            rates for vacancy jumps around solute; if -1, use corresponding om0 entry
-
-        Returns
-        -------
-        Lvv : array[3, 3]
-            vacancy-vacancy; needs to be multiplied by cv/kBT
-        L0ss : array[3, 3]
-            "bare" solute-solute; needs to be multiplied by cv*cs/kBT
-        L2ss : array[3, 3]
-            correlation for solute-solute; needs to be multiplied by cv*cs/kBT
-        L1sv : array[3, 3]
-            correlation for solute-vacancy; needs to be multiplied by cv*cs/kBT
-        L1vv : array[3, 3]
-            correlation for vacancy-vacancy; needs to be multiplied by cv*cs/kBT
-        """
-        self.generatematrices()
-
-        G0 = np.dot(self.GFexpansion, gf)
-
-        probsqrt = np.zeros(self.kinetic.Nstars)
-        probsqrt[:] = 1.
-        for p, ind in zip(prob, self.thermo2kin):
-            probsqrt[ind] = np.sqrt(p)
-
-        om1expand = np.array([r1 if r1 >= 0 else r0
-                              for r1, r0 in zip(om1, om0[self.omega1LIMB])]) # omega_1
-        om2expand = np.array([r2 if r2 >= 0 else r0
-                              for r2, r0 in zip(om2, om0)]) # omega_2
-        # onsite term: need to make sure we divide out by the starting point probability, too
-        om1onsite = (np.dot(self.omega1ds * probsqrt[self.gen1prob], om1expand) +
-                     np.dot(self.omega1NN, om0))/probsqrt[self.vstar2kin]
-        delta_om = np.dot(self.rate1expansion, om1expand) + \
-                   np.diag(om1onsite) + \
-                   np.dot(self.rate2expansion, om2expand) - \
-                   np.dot(self.rate0expansion, om0)
-
-        bias2vec = np.dot(self.bias2expansion, om2expand*np.sqrt(prob[self.NN2thermo]))
-        bias1vec = np.dot(self.bias1ds * probsqrt[self.gen1prob], om1expand) + \
-                   np.dot(self.bias1NN, om0)
-
-        # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
-        G = np.dot(np.linalg.inv(np.eye(len(bias1vec)) + np.dot(G0, delta_om)), G0)
-        outer_eta1vec = np.dot(self.biasvec.outer, np.dot(G, bias1vec))
-        outer_eta2vec = np.dot(self.biasvec.outer, np.dot(G, bias2vec))
-        L2ss = np.dot(outer_eta2vec, bias2vec)
-        L1sv = np.dot(outer_eta2vec, bias1vec)
-        L1vv = np.dot(outer_eta1vec, bias1vec)
-        # convert jump vectors to an array, and construct the rates as an array
-        L0vv = GFcalc.D2(np.array(self.jumpvect),
-                         np.array(sum([[om,]*len(Rs)
-                                       for om, Rs in zip(om0, self.NNstar.stars)], [])))
-        L0ss = GFcalc.D2(np.array(self.jumpvect),
-                         np.array(sum([[om,]*len(Rs)
-                                       for om, Rs in zip(om2expand*prob[self.NN2thermo],
-                                                         self.NNstar.stars)], [])))
-        return L0vv, L0ss, L2ss, L1sv, L1vv
-        # print 'om1:\n', np.dot(self.rate1expansion, om1expand)
-        # print 'om1_onsite:\n', np.diag(om1onsite)
-        # print 'om2:\n', np.dot(self.rate2expansion, om2expand)
-        # print 'om0:\n', np.dot(self.rate0expansion, om0)
-        # print 'delta_om:\n', delta_om
-
-    def Lij(self, gf, om0, prob, om2, om1):
-        """
-        Calculates the transport coefficients Lvv, Lss, and Lsv from the GF,
-        omega0, omega1, and omega2 rates along with site probabilities.
-
-        Parameters
-        ----------
-        gf : array[NGF_sites]
-            Green function for vacancy evaluated at sites
-        om0 : array[NNjumps]
-            rates for vacancy jumps
-        prob : array[thermosites]
-            probability of solute-vacancy complex at each sites
-        om2 : array[NNjumps]
-            rates for vacancy-solute exchange; if -1, use om0 entry
-        om1 : array[Ndstars]
-            rates for vacancy jumps around solute; if -1, use corresponding om0 entry
-
-        Returns
-        -------
-        Lvv : array[3, 3]
-            vacancy-vacancy; needs to be multiplied by cv/kBT
-        Lss : array[3, 3]
-            solute-solute; needs to be multiplied by cv*cs/kBT
-        Lsv : array[3, 3]
-            solute-vacancy; needs to be multiplied by cv*cs/kBT
-        Lvv1 : array[3, 3]
-            vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT
-        """
-        Lvv, L0ss, L2ss, L1sv, L1vv = self._lij(gf, om0, prob, om2, om1)
-        return Lvv, L0ss + L2ss, -L0ss - L2ss + L1sv, L2ss - 2*L1sv + L1vv
-
-import copy
-import collections
-import itertools
-import onsager.crystalStars as cstars
-
 # YAML tags
 VACANCYTHERMOKINETICS_YAMLTAG = '!VacancyThermoKinetics'
 
@@ -818,6 +493,50 @@ class vacancyThermoKinetics(collections.namedtuple('vacancyThermoKinetics',
         # ** turns the dictionary into parameters for GroupOp constructor
         return vacancyThermoKinetics(**loader.construct_mapping(node, deep=True))
 
+# HDF5 conversion routines: vTK indexed dictionaries
+def vTKdict2arrays(vTKdict):
+    """
+    Takes a dictionary indexed by vTK objects, returns two arrays of vTK keys and values,
+    and the splits to separate vTKarray back into vTK
+    :param vTKdict: dictionary, indexed by vTK objects, whose entries are arrays
+    :return vTKarray: array of vTK entries
+    :return valarray: array of values
+    :return vTKsplits: split placement for vTK entries
+    """
+    if len(vTKdict.keys()) == 0: return None, None, None
+    vTKexample = [k for k in vTKdict.keys()][0]
+    vTKsplits = np.cumsum(np.array([ len(v) for v in vTKexample ]))[:-1]
+    vTKlist = []
+    vallist = []
+    for k, v in zip(vTKdict.keys(), vTKdict.values()):
+        vTKlist.append(np.hstack(k)) # k.pre, k.betaene, k.preT, k.betaeneT
+        vallist.append(v)
+    return np.array(vTKlist), np.array(vallist), vTKsplits
+
+def arrays2vTKdict(vTKarray, valarray, vTKsplits):
+    """
+    Takes two arrays of vTK keys and values, and the splits to separate vTKarray back into vTK
+    and returns a dictionary indexed by the vTK.
+    :param vTKarray: array of vTK entries
+    :param valarray: array of values
+    :param vTKsplits: split placement for vTK entries
+    :return vTKdict: dictionary, indexed by vTK objects, whose entries are arrays
+    """
+    if all( x is None for x in (vTKarray, valarray, vTKsplits)): return {}
+    vTKdict = {}
+    for vTKa, val in zip(vTKarray, valarray):
+        vTKdict[vacancyThermoKinetics(*np.hsplit(vTKa, vTKsplits))] = val
+    return vTKdict
+
+# database tags
+SOLUTE_TAG = 's'
+VACANCY_TAG = 'v'
+SINGLE_DEFECT_TAG = '{type}:{u1:+06.3f},{u2:+06.3f},{u3:+06.3f}'
+DOUBLE_DEFECT_TAG = '{state1}-{state2}'
+OM0_TAG = 'omega0:{vac1}^{vac2}'
+OM1_TAG = 'omega1:{solute}-{vac1}^{vac2}'
+OM2_TAG = 'omega2:{complex1}^{complex2}'
+
 
 class VacancyMediated(object):
     """
@@ -837,23 +556,25 @@ class VacancyMediated(object):
         :param sitelist: list, grouped into Wyckoff common positions, of unique sites
         :param jumpnetwork: list of unique transitions as lists of ((i,j), dx)
         """
+        if all(x is None for x in (crys, chem, sitelist, jumpnetwork)): return  # blank object
         self.crys = crys
         self.chem = chem
         self.sitelist = copy.deepcopy(sitelist)
         self.jumpnetwork = copy.deepcopy(jumpnetwork)
         self.N = sum(len(w) for w in sitelist)
-        self.invmap = [0 for i in range(self.N)]
+        self.invmap = np.zeros(self.N, dtype=int)
         for ind,w in enumerate(sitelist):
             for i in w:
                 self.invmap[i] = ind
         self.om0_jn= copy.deepcopy(jumpnetwork)
-        self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn) # Nmax?
+        self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4) # Nmax?
         # do some initial setup:
-        self.thermo = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
-        self.NNstar = cstars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
-        self.kinetic = self.thermo + self.NNstar
-        self.vkinetic = cstars.VectorStarSet()
+        self.thermo = stars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
+        self.NNstar = stars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
+        # self.kinetic = self.thermo + self.NNstar
+        self.vkinetic = stars.VectorStarSet()
         self.generate(Nthermo)
+        self.tags = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
 
     def generate(self, Nthermo):
         """
@@ -921,6 +642,172 @@ class VacancyMediated(object):
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
                                   for jumplist in self.om1_jn]
 
+    def generatetags(self):
+        """
+        Create tags for vacancy states, solute states, solute-vacancy complexes;
+        omega0, omega1, and omega2 transition states.
+        :return tags: dictionary of tags; each is a list-of-lists
+        """
+        tags = {}
+        basis = self.crys.basis[self.chem]  # shortcut
+        def single_defect(DEFECT_TAG, u):
+            return SINGLE_DEFECT_TAG.format(type=DEFECT_TAG, u1=u[0], u2=u[1], u3=u[2])
+        def double_defect(PS):
+            return DOUBLE_DEFECT_TAG.format( \
+                    state1=single_defect(SOLUTE_TAG, basis[PS.i]), \
+                    state2=single_defect(VACANCY_TAG, basis[PS.j] + PS.R))
+        def omega1(PS1, PS2):
+            return OM1_TAG.format( \
+                    solute=single_defect(SOLUTE_TAG, basis[PS1.i]),
+                    vac1=single_defect(VACANCY_TAG, basis[PS2.j] + PS2.R), \
+                    vac2=single_defect(VACANCY_TAG, basis[PS2.j] + PS2.R))
+
+        tags['vacancy'] = [ [ single_defect(VACANCY_TAG, basis[s]) for s in sites]
+                            for sites in self.sitelist]
+        tags['solute'] = [ [ single_defect(SOLUTE_TAG, basis[s]) for s in sites]
+                           for sites in self.sitelist]
+        tags['solute-vacancy'] = [ [ double_defect(self.thermo.states[s]) for s in starlist]
+                                   for starlist in self.thermo.stars]
+        tags['omega0'] = [[OM0_TAG.format(vac1=single_defect(VACANCY_TAG, basis[i]),
+                                          vac2=single_defect(VACANCY_TAG, basis[j]+dx))
+                           for ((i,j), dx) in jumplist]
+                          for jumplist in self.crys.jumpnetwork2lattice(self.chem, self.om0_jn)]
+        tags['omega1'] = [[omega1(self.kinetic.states[i], self.kinetic.states[j])
+                           for ((i,j), dx) in jumplist] for jumplist in self.om1_jn]
+        tags['omega2'] = [[OM2_TAG.format(complex1=double_defect(self.kinetic.states[i]),
+                                          complex2=double_defect(self.kinetic.states[j]))
+                           for ((i,j), dx) in jumplist] for jumplist in self.om2_jn]
+        return tags
+
+    # this is part of our *class* definition: list of data that can be directly assigned / read
+    __HDF5list__ = ('chem', 'N', 'invmap', 'thermo2kin', 'kin2vacancy', 'outerkin', 'vstar2kin',
+                    'om1_jt', 'om1_SP', 'om2_jt', 'om2_SP',
+                    'GFexpansion',
+                    'om1_om0', 'om1_om0escape', 'om1expansion', 'om1escape',
+                    'om2_om0', 'om2_om0escape', 'om2expansion', 'om2escape',
+                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias',
+                    'kineticsvWyckoff', 'omega0vacancyWyckoff', 'omega1svsvWyckoff',
+                    'omega2svsvWyckoff')
+    __taglist__ = ('vacancy', 'solute', 'solute-vacancy', 'omega0', 'omega1', 'omega2')
+
+    def addhdf5(self, HDF5group):
+        """
+        Adds an HDF5 representation of object into an HDF5group (needs to already exist).
+
+        Example: if f is an open HDF5, then StarSet.addhdf5(f.create_group('StarSet')) will
+          (1) create the group named 'StarSet', and then (2) put the StarSet representation in that group.
+        :param HDF5group: HDF5 group
+        """
+        HDF5group.attrs['type'] = self.__class__.__name__
+        HDF5group['crystal_yaml'] = crystal.yaml.dump(self.crys)
+        HDF5group['crystal_yaml'].attrs['pythonrep'] = self.crys.__repr__()
+        HDF5group['crystal_lattice'] = self.crys.lattice.T
+        basislist, basisindex = stars.doublelist2flatlistindex(self.crys.basis)
+        HDF5group['crystal_basisarray'], HDF5group['crystal_basisindex'] = \
+            np.array(basislist), basisindex
+        # a long way around, but if you want to store an array of variable length strings, this is how to do it:
+        # import h5py
+        # HDF5group.create_dataset('crystal_chemistry', data=np.array(self.crys.chemistry, dtype=object),
+        #                          dtype=h5py.special_dtype(vlen=str))
+        HDF5group['crystal_chemistry'] = np.array(self.crys.chemistry, dtype='S')
+        # arrays that we can deal with:
+        for internal in self.__HDF5list__:
+            HDF5group[internal] = getattr(self, internal)
+        # convert jumplist:
+        jumplist, jumpindex = stars.doublelist2flatlistindex(self.jumpnetwork)
+        HDF5group['jump_ij'], HDF5group['jump_dx'], HDF5group['jump_index'] = \
+            np.array([np.array((i,j)) for ((i,j), dx) in jumplist]), \
+            np.array([dx for ((i,j), dx) in jumplist]), \
+            jumpindex
+        # objects with their own addhdf5 functionality:
+        self.GFcalc.addhdf5(HDF5group.create_group('GFcalc'))
+        self.thermo.addhdf5(HDF5group.create_group('thermo'))
+        self.NNstar.addhdf5(HDF5group.create_group('NNstar'))
+        self.kinetic.addhdf5(HDF5group.create_group('kinetic'))
+        self.vkinetic.addhdf5(HDF5group.create_group('vkinetic'))
+        self.GFstarset.addhdf5(HDF5group.create_group('GFstarset'))
+
+        # jump networks:
+        jumplist, jumpindex = stars.doublelist2flatlistindex(self.om1_jn)
+        HDF5group['omega1_ij'], HDF5group['omega1_dx'], HDF5group['omega1_index'] = \
+            np.array([np.array((i,j)) for ((i,j), dx) in jumplist]), \
+            np.array([dx for ((i,j), dx) in jumplist]), \
+            jumpindex
+
+        jumplist, jumpindex = stars.doublelist2flatlistindex(self.om2_jn)
+        HDF5group['omega2_ij'], HDF5group['omega2_dx'], HDF5group['omega2_index'] = \
+            np.array([np.array((i,j)) for ((i,j), dx) in jumplist]), \
+            np.array([dx for ((i,j), dx) in jumplist]), \
+            jumpindex
+
+        HDF5group['kin2vstar_array'], HDF5group['kin2vstar_index'] = \
+            stars.doublelist2flatlistindex(self.kin2vstar)
+
+        if self.GFvalues != {}:
+            HDF5group['GFvalues_vTK'], HDF5group['GFvalues_values'], HDF5group['GFvalues_splits'] = \
+                vTKdict2arrays(self.GFvalues)
+            HDF5group['Lvvvalues_vTK'], HDF5group['Lvvvalues_values'], HDF5group['Lvvvalues_splits'] = \
+                vTKdict2arrays(self.Lvvvalues)
+
+        # tags
+        for tag in self.__taglist__:
+            taglist, tagindex = stars.doublelist2flatlistindex(self.tags[tag])
+            HDF5group[tag + '_taglist'], HDF5group[tag + '_tagindex'] = np.array(taglist, dtype='S'), tagindex
+
+    @classmethod
+    def loadhdf5(cls, HDF5group):
+        """
+        Creates a new VacancyMediated diffuser from an HDF5 group.
+        :param HDFgroup: HDF5 group
+        :return: new StarSet object
+        """
+        diffuser = cls(None, None, None, None)  # initialize
+        diffuser.crys = crystal.yaml.load(HDF5group['crystal_yaml'].value)
+        for internal in cls.__HDF5list__:
+            setattr(diffuser, internal, HDF5group[internal].value)
+        diffuser.sitelist = [[] for i in range(max(diffuser.invmap)+1)]
+        for i, site in enumerate(diffuser.invmap):
+            diffuser.sitelist[site].append(i)
+
+        # convert jumplist:
+        diffuser.jumpnetwork = stars.flatlistindex2doublelist([((ij[0], ij[1]), dx) for ij, dx in \
+                                                               zip(HDF5group['jump_ij'].value, HDF5group['jump_dx'].value)], HDF5group['jump_index'])
+        diffuser.om0_jn= copy.deepcopy(diffuser.jumpnetwork)
+
+        # objects with their own addhdf5 functionality:
+        diffuser.GFcalc = GFcalc.GFCrystalcalc.loadhdf5(diffuser.crys, HDF5group['GFcalc'])
+        diffuser.thermo = stars.StarSet.loadhdf5(diffuser.crys, HDF5group['thermo'])
+        diffuser.NNstar = stars.StarSet.loadhdf5(diffuser.crys, HDF5group['NNstar'])
+        diffuser.kinetic = stars.StarSet.loadhdf5(diffuser.crys, HDF5group['kinetic'])
+        diffuser.vkinetic = stars.VectorStarSet.loadhdf5(diffuser.kinetic, HDF5group['vkinetic'])
+        diffuser.GFstarset = stars.StarSet.loadhdf5(diffuser.crys, HDF5group['GFstarset'])
+
+        # jump networks:
+        diffuser.om1_jn = stars.flatlistindex2doublelist([((ij[0], ij[1]), dx) for ij, dx in \
+                                                          zip(HDF5group['omega1_ij'].value, HDF5group['omega1_dx'].value)], HDF5group['omega1_index'])
+        diffuser.om2_jn = stars.flatlistindex2doublelist([((ij[0], ij[1]), dx) for ij, dx in \
+                                                          zip(HDF5group['omega2_ij'].value, HDF5group['omega2_dx'].value)], HDF5group['omega2_index'])
+
+        diffuser.kin2vstar = stars.flatlistindex2doublelist(HDF5group['kin2vstar_array'],
+                                                            HDF5group['kin2vstar_index'])
+        if 'GFvalues_vTK' in HDF5group:
+            diffuser.GFvalues = arrays2vTKdict(HDF5group['GFvalues_vTK'],
+                                               HDF5group['GFvalues_values'],
+                                               HDF5group['GFvalues_splits'])
+            diffuser.Lvvvalues = arrays2vTKdict(HDF5group['Lvvvalues_vTK'],
+                                                HDF5group['Lvvvalues_values'],
+                                                HDF5group['Lvvvalues_splits'])
+        else:
+            diffuser.GFvalues, diffuser.Lvvvalues = {}, {}
+
+        # tags
+        diffuser.tags = {}
+        for tag in cls.__taglist__:
+            # needed because of how HDF5 stores strings...
+            utf8list = [ str(data, encoding='utf-8') for data in HDF5group[tag + '_taglist'].value ]
+            diffuser.tags[tag] = stars.flatlistindex2doublelist(utf8list, HDF5group[tag + '_tagindex'])
+        return diffuser
+
     def interactlist(self):
         """
         Return a list of solute-vacancy configurations for interactions. The points correspond
@@ -948,9 +835,10 @@ class VacancyMediated(object):
         return [(self.kinetic.states[jlist[0][0][0]], self.kinetic.states[jlist[0][0][1]]) for jlist in om], \
                jt.copy()
 
-    def maketracerpreene(self, preT0, eneT0, preV=None, eneV=None):
+    def maketracerpreene(self, preT0, eneT0, **ignoredextraarguments):
         """
         Generates corresponding energies / prefactors for an isotopic tracer. Returns a dictionary.
+        (we ignore extra arguments so that a dictionary including additional entries can be passed)
 
         :param preT0[Nomeg0]: prefactor for vacancy jump transitions (follows jumpnetwork)
         :param eneT0[Nomega0]: transition energy state for vacancy jumps
@@ -977,10 +865,11 @@ class VacancyMediated(object):
         return {'preS': preS, 'eneS': eneS, 'preSV': preSV, 'eneSV': eneSV,
                 'preT1': preT1, 'eneT1': eneT1, 'preT2': preT2, 'eneT2': eneT2}
 
-    def makeLIMBpreene(self, preS, eneS, preSV, eneSV, preT0, eneT0, preV=None, eneV=None):
+    def makeLIMBpreene(self, preS, eneS, preSV, eneSV, preT0, eneT0, **ignoredextraarguments):
         """
         Generates corresponding energies / prefactors for corresponding to LIMB
         (Linearized interpolation of migration barrier approximation). Returns a dictionary.
+        (we ignore extra arguments so that a dictionary including additional entries can be passed)
 
         :param preS[NWyckoff]: prefactor for solute formation
         :param eneS[NWyckoff]: solute formation energy
@@ -1018,12 +907,13 @@ class VacancyMediated(object):
 
     @staticmethod
     def preene2betafree(kT, preV, eneV, preS, eneS, preSV, eneSV,
-                        preT0, eneT0, preT1, eneT1, preT2, eneT2):
+                        preT0, eneT0, preT1, eneT1, preT2, eneT2, **ignoredextraarguments):
         """
         Read in a series of prefactors (e^(S/kB)) and energies, and return beta*free energy for
         energies and transition state energies. Used to provide scaled values to Lij() and _lij().
         Can specify all of the entries using a dictionary; e.g., preene2betafree(kT, **data_dict)
         and then send that output as input to Lij: Lij(*preene2betafree(kT, **data_dict))
+        (we ignore extra arguments so that a dictionary including additional entries can be passed)
 
         :param kT: temperature times Boltzmann's constant kB
         :param preV: prefactor for vacancy formation (prod of inverse vibrational frequencies)
@@ -1196,18 +1086,8 @@ class VacancyMediated(object):
                            biasSvec[sv] - \
                            np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
 
-        # print('delta_om:\n', delta_om)
-        # print('biasVvec:', biasVvec)
-        # print('biasSvec:', biasSvec)
-
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
-        # for gindex, GFexp, PS in zip(itertools.count(), self.GFexpansion[0,0,:],
-        #                              [self.GFstarset.states[s[0]] for s in self.GFstarset.stars]):
-        #     if GFexp != 0.: print(gindex, GFexp, "*", PS)
-        # print('GF: ', GF)
-        # print('G0:\n', G0)
-        # # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
         outer_etaSvec = np.dot(self.vkinetic.outer, np.dot(G, biasSvec))
