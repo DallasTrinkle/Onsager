@@ -1114,8 +1114,9 @@ class VacancyMediated(object):
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
         print('det: ', np.linalg.det(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)))
+        # Hmm... now that we're "disconnecting" the origin states, we end up with a singular matrix.
         # G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
-        G = np.dot(pinv2(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
+        G = np.dot(pinv2(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om), rcond=1e-6), G0)
         etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         outer_biasS = np.dot(self.vkinetic.outer, biasSvec)
