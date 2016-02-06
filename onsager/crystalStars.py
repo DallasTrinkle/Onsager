@@ -231,7 +231,7 @@ class StarSet(object):
     """
     A class to construct stars, and be able to efficiently index.
     """
-    def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False):
+    def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False, originstates=True):
         """
         Initiates a star set generator for a given jumpnetwork, crystal, and specified
         chemical index.
@@ -270,7 +270,7 @@ class StarSet(object):
                 self.jumplist.append(PS)
         self.crys = crys
         self.chem = chem
-        self.generate(Nshells)
+        self.generate(Nshells, originstates)
 
     def __str__(self):
         """Human readable version"""

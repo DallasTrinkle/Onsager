@@ -553,7 +553,7 @@ class VacancyMediated(object):
         self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4) # Nmax?
         # do some initial setup:
         self.thermo = stars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
-        self.NNstar = stars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
+        self.NNstar = stars.StarSet(self.jumpnetwork, self.crys, self.chem, 1, originstates=False)
         # self.kinetic = self.thermo + self.NNstar
         self.vkinetic = stars.VectorStarSet()
         self.generate(Nthermo)
@@ -570,10 +570,11 @@ class VacancyMediated(object):
         :param Nthermo : range of thermodynamic interactions, in terms of "shells",
             which is multiple summations of jumpvect
         """
+        originstates = False
         if Nthermo == getattr(self, 'Nthermo', 0): return
         self.Nthermo = Nthermo
 
-        self.thermo.generate(Nthermo)
+        self.thermo.generate(Nthermo, originstates=originstates)
         self.kinetic = self.thermo + self.NNstar
         self.vkinetic.generate(self.kinetic)
         # some indexing helpers:
@@ -897,8 +898,8 @@ class VacancyMediated(object):
         # we need the prefactors and energies for all of our kinetic stars... without the
         # vacancy part (since that reference is already in preT0 and eneT0); we're going
         # to add these to preT0 and eneT0 to get the TS prefactor/energy for w1 and w2 jumps
-        eneSVkin = np.array([eneS[s] for (s,v) in self.kineticsvWyckoff])
-        preSVkin = np.array([preS[s] for (s,v) in self.kineticsvWyckoff])
+        eneSVkin = np.array([eneS[s] for (s,v) in self.kineticsvWyckoff], dtype=float)  # avoid ints
+        preSVkin = np.array([preS[s] for (s,v) in self.kineticsvWyckoff], dtype=float)  # avoid ints
         for tindex, kindex in enumerate(self.thermo2kin):
             eneSVkin[kindex] += eneSV[tindex]
             preSVkin[kindex] *= preSV[tindex]
