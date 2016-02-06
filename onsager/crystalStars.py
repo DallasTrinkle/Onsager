@@ -231,7 +231,7 @@ class StarSet(object):
     """
     A class to construct stars, and be able to efficiently index.
     """
-    def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False, originstates=True):
+    def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False):
         """
         Initiates a star set generator for a given jumpnetwork, crystal, and specified
         chemical index.
@@ -270,7 +270,7 @@ class StarSet(object):
                 self.jumplist.append(PS)
         self.crys = crys
         self.chem = chem
-        self.generate(Nshells, originstates)
+        self.generate(Nshells)
 
     def __str__(self):
         """Human readable version"""
@@ -281,7 +281,7 @@ class StarSet(object):
                 str += "  {}: {}\n".format(i, self.states[i])
         return str
 
-    def generate(self, Nshells, threshold=1e-8, originstates=True):
+    def generate(self, Nshells, threshold=1e-8):
         """
         Construct the points and the stars in the set. Now includes "origin states" by default; these
         are PairStates that iszero() is True; they are only included if they have a nonzero VectorBasis.
@@ -295,11 +295,6 @@ class StarSet(object):
         self.Nshells = Nshells
         if Nshells > 0: stateset = set(self.jumplist)
         else: stateset = set([])
-        if originstates:
-            # we do this *even if Nshells == 0*
-            for i in range(len(self.crys.basis[self.chem])):
-                if self.crys.VectorBasis((self.chem, i))[0] > 0:
-                    stateset.add(PairState.zero(i))
         lastshell = stateset.copy()
         for i in range(Nshells-1):
             # add all NNvect to last shell produced, always excluding 0
@@ -866,7 +861,7 @@ class VectorStarSet(object):
                 GFexpansion[i, j, :] = GFexpansion[j, i, :]
         return GFexpansion, GFstarset
 
-    def rateexpansions(self, jumpnetwork, jumptype, omega2=False):
+    def rateexpansions(self, jumpnetwork, jumptype):
         """
         Construct the omega0 and omega1 matrix expansions in terms of the jumpnetwork;
         includes the escape terms separately. The escape terms are tricky because they have
@@ -881,7 +876,6 @@ class VectorStarSet(object):
           corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
           are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
-        :param omega2: do we need to check for origin states?
         :return rate0expansion: array[Nsv, Nsv, Njump_omega0]
             the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k])
         :return rate0escape: array[Nsv, Njump_omega0]
@@ -898,12 +892,6 @@ class VectorStarSet(object):
         rate1escape = np.zeros((self.Nvstars, len(jumpnetwork)))
         for k, jumplist, jt in zip(itertools.count(), jumpnetwork, jumptype):
             for (IS, FS), dx in jumplist:
-                if omega2:
-                    OS = self.starset.stateindex(PairState.zero(self.starset.states[IS].i))
-                    for j in range(self.Nvstars):
-                        for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                            if Rj == OS:
-                                rate0escape[j, jt] -= np.dot(vj, vj)
                 for i in range(self.Nvstars):
                     for Ri, vi in zip(self.vecpos[i], self.vecvec[i]):
                         if Ri == IS:
@@ -914,10 +902,7 @@ class VectorStarSet(object):
                                 for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                     if Rj == FS:
                                         rate1expansion[i, j, k] += np.dot(vi, vj)
-                                        if not omega2: rate0expansion[i, j, jt] += np.dot(vi, vj)
-                                    if omega2 and Rj == OS:
-                                        rate0expansion[j, i, jt] += np.dot(vj, vi)
-                                        rate0expansion[i, j, jt] += np.dot(vj, vi)
+                                        rate0expansion[i, j, jt] += np.dot(vi, vj)
 
         # symmetrize
         for i in range(self.Nvstars):
@@ -926,7 +911,7 @@ class VectorStarSet(object):
                 rate1expansion[i, j, :] = rate1expansion[j, i, :]
         return rate0expansion, rate0escape, rate1expansion, rate1escape
 
-    def biasexpansions(self, jumpnetwork, jumptype, omega2=False):
+    def biasexpansions(self, jumpnetwork, jumptype):
         """
         Construct the bias1 and bias0 vector expansion in terms of the jumpnetwork.
         We return the bias0 contribution so that the db = bias1 - bias0 can be determined.
@@ -945,7 +930,6 @@ class VectorStarSet(object):
           corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
           are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
-        :param omega2: do we need to check for origin states?
 
         :return bias0expansion: array[Nsv, Njump_omega0]
             the gen0 vector[i] = sum(bias0expasion[i, k] * sqrt(probfactor0[PS[k]]) * omega0[k])
@@ -964,13 +948,6 @@ class VectorStarSet(object):
                         geom_bias = np.dot(svv[0], dx)*len(svR)
                         bias0expansion[i, jt] += geom_bias
                         bias1expansion[i, k] += geom_bias
-                if omega2:
-                    OS = self.starset.stateindex(PairState.zero(self.starset.states[IS].i))
-                    if OS is not None:
-                        for j in range(self.Nvstars):
-                            for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                                if Rj == OS:
-                                    bias0expansion[j, jt] += np.dot(vj, -dx) #*nIS
         return bias0expansion, bias1expansion
 
     def periodicvectorexpansion(self, type):

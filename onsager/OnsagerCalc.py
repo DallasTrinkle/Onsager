@@ -553,7 +553,7 @@ class VacancyMediated(object):
         self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4) # Nmax?
         # do some initial setup:
         self.thermo = stars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
-        self.NNstar = stars.StarSet(self.jumpnetwork, self.crys, self.chem, 1, originstates=False)
+        self.NNstar = stars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
         # self.kinetic = self.thermo + self.NNstar
         self.vkinetic = stars.VectorStarSet()
         self.generate(Nthermo)
@@ -570,11 +570,10 @@ class VacancyMediated(object):
         :param Nthermo : range of thermodynamic interactions, in terms of "shells",
             which is multiple summations of jumpvect
         """
-        originstates = False
         if Nthermo == getattr(self, 'Nthermo', 0): return
         self.Nthermo = Nthermo
 
-        self.thermo.generate(Nthermo, originstates=originstates)
+        self.thermo.generate(Nthermo)
         self.kinetic = self.thermo + self.NNstar
         self.vkinetic.generate(self.kinetic)
         # some indexing helpers:
@@ -606,9 +605,9 @@ class VacancyMediated(object):
         self.om1_om0, self.om1_om0escape, self.om1expansion, self.om1escape = \
             self.vkinetic.rateexpansions(self.om1_jn, self.om1_jt)
         self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
-            self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt, omega2=True)
+            self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
-        self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt, omega2=True)
+        self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
         self.etaSperiodic = self.vkinetic.periodicvectorexpansion('solute')
         self.etaVperiodic = self.vkinetic.periodicvectorexpansion('vacancy')
         # more indexing helpers:
@@ -1090,7 +1089,7 @@ class VacancyMediated(object):
         biasSvec = np.zeros(self.vkinetic.Nvstars)
         biasVvec = np.zeros(self.vkinetic.Nvstars)
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
-                   np.dot(self.om2expansion, omega2) - np.dot(self.om2_om0, omega0)
+                   np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
         for sv,starindex in enumerate(self.vstar2kin):
             svvacindex = self.kin2vacancy[starindex]  # vacancy
             delta_om[sv,sv] += np.dot(self.om1escape[sv,:],omega1escape[sv,:]) - \
