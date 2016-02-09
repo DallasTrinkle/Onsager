@@ -111,6 +111,12 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         """Return a version of groupop where the translation is in the centered unit cell"""
         return GroupOp(self.rot, inhalf(self.trans), self.cartrot, self.indexmap)
 
+    @classmethod
+    def ident(cls, basis):
+        """Return a group operation corresponding to identity for a given basis"""
+        return cls(rot=np.eye(3, dtype=int), trans=np.zeros(3), cartrot=np.eye(3),
+                       indexmap=[[i for i in range(len(atomlist))] for atomlist in basis])
+
     def __str__(self):
         """Human-readable version of groupop"""
         str_rep = "#Rotation (lattice, cartesian):\n {}\t{}\n {}\t{}\n {}\t{}\n#Translation: {}\n#Indexmap:".format(
@@ -411,7 +417,7 @@ class Crystal(object):
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.
     """
 
-    def __init__(self, lattice, basis, chemistry=None):
+    def __init__(self, lattice, basis, chemistry=None, NOSYM=False):
         """
         Initialization; starts off with the lattice vector definition and the
         basis vectors. While it does not explicitly store the specific chemical
@@ -462,7 +468,8 @@ class Crystal(object):
         self.BZvol = abs(float(np.linalg.det(self.reciplatt)))
         self.BZG = self.genBZG()
         self.center()  # should do before gengroup so that inversion is centered at origin
-        self.G = self.gengroup()  # do before genpoint
+        if NOSYM: self.G = frozenset([GroupOp.ident(self.basis)])
+        else: self.G = self.gengroup()  # do before genpoint
         self.pointG = self.genpoint()
         self.Wyckoff = self.genWyckoffsets()
 

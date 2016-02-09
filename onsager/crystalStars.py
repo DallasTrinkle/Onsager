@@ -95,10 +95,11 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
     def __add__(self, other):
         """Add two states: works if and only if self.j == other.i
         (i,j) R + (j,k) R' = (i,k) R+R'  : works for thinking about transitions...
+        Note: a + b != b + a, and may be that only one of those is even defined
         """
         if not isinstance(other, self.__class__): return NotImplemented
-        if self.iszero(): return other
-        if other.iszero(): return self
+        if self.iszero() and self.j == -1: return other
+        if other.iszero() and other.i == -1: return self
         if self.j != other.i:
             raise ArithmeticError('Can only add matching endpoints: ({} {})+({} {}) not compatible'.format(self.i, self.j, other.i, other.j))
         return self.__class__(i=self.i, j=other.j, R=self.R+other.R, dx=self.dx+other.dx)

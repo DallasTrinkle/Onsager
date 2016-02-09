@@ -266,10 +266,15 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         self.sitelist = self.crys.sitelist(self.chem)
         self.crystalname = 'Body-Centered Cubic a0={}'.format(self.a0)
 
-        self.crys2 = crystal.Crystal(self.a0*np.eye(3), [np.zeros(3), np.array([0.45, 0.45, 0.45])])
+        self.crys2 = crystal.Crystal(self.a0*np.eye(3), [np.zeros(3), np.array([0.45, 0.45, 0.45])], NOSYM=True)
         self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.99*self.a0)
         self.sitelist2 = self.crys2.sitelist(self.chem)
         self.crystalname2 = 'B2 a0={}'.format(self.a0)
+
+        # self.crys2 = crystal.Crystal(self.crys.lattice, self.crys.basis, NOSYM=True)
+        # self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.87*self.a0)
+        # self.sitelist2 = self.crys2.sitelist(self.chem)
+        # self.crystalname2 = 'BCC (unsymmetric) a0={}'.format(self.a0)
 
     def testtracer(self):
         """Test that BCC mapped onto B2 match exactly"""
@@ -297,8 +302,9 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
 
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
         Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
-        print('Lvv-bcc:\n', Lvv), print('Lss-bcc:\n', Lss), print('Lsv-bcc:\n', Lsv), print('L1vv-bcc:\n', L1vv)
-        print('Lvv-B2:\n', Lvv2), print('Lss-B2:\n', Lss2), print('Lsv-B2:\n', Lsv2), print('L1vv-B2:\n', L1vv2)
+        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
+            print(Lname)
+            print(locals()[Lname])
         for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
             self.assertTrue(np.allclose(L, Lp), msg="Diffusivity doesn't match?")
 
