@@ -1104,7 +1104,7 @@ class VacancyMediated(object):
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF + 0.0*np.ones_like(GF))
-        print('det: ', np.linalg.det(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)))
+        # print('det: ', np.linalg.det(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)))
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         # If we "disconnect" the origin states, we would end up with a singular matrix.
         # G = np.dot(pinv2(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om), rcond=1e-6), G0)
@@ -1138,11 +1138,11 @@ class VacancyMediated(object):
         L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
                np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
         # compute our bare solute diffusivity:
-        # TODO: need to compute the GF correction for the solute diffusivity. Involves essentially
+        # TODO: vacancy-vacancy bare term, maybe more? Involves essentially
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
         # from *both* L1sv and L1vv. Then that will fix our other problems.
-        print(L0ss, D0ss)
-        print(etas)
+        # print(L0ss, D0ss)
+        # print(etas)
         return L0vv, L0ss + L1ss, -D0ss + L1sv, D0ss - L0ss + L1vv
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
