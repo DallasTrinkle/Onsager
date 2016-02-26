@@ -1131,8 +1131,10 @@ class VacancyMediated(object):
         # print(np.dot(outer_etaSvec, biasSvec)/self.N)
         # print('etaS0vec*biasSvec:')
         # print(np.dot(outer_etaS0vec, biasSvec)/self.N)
-        L1ss = np.dot(outer_etaSvec, biasSvec)/self.N + 2*np.dot(outer_etaS0, delta_om_etaS)/self.N
-        L1sv = (np.dot(outer_etaSvec, biasVvec)
+        ### in our test, 13.626 gives the right answer for the LIMB test with preSV = 3?
+        L1ss = (np.dot(outer_etaSvec, biasSvec) + 2*np.dot(outer_etaS0, delta_om_etaS))/self.N
+        L1sv = (np.dot(outer_etaSvec, biasVvec) +
+                2*np.dot(outer_etaS0, delta_om_etaV)
                 - 1.*np.dot(outer_etaV0, biasSvec)
                 - 1.*np.dot(outer_etaS0, biasVvec))/self.N
         L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \

@@ -328,13 +328,13 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
                       'preS': np.ones(len(self.sitelist)), 'eneS': np.zeros(len(self.sitelist)),
                       'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
         # now to add in some random solute-vacancy energies.
-        thermaldef['preSV'] = 3.*np.ones(len(Diffusivity.interactlist()))
+        thermaldef['preSV'] = 2.*np.ones(len(Diffusivity.interactlist()))
         thermaldef['eneSV'] = np.zeros(len(Diffusivity.interactlist()))
         thermaldef.update(Diffusivity.makeLIMBpreene(**thermaldef))
         thermaldef2 = {'preV': np.ones(len(self.sitelist2)), 'eneV': np.zeros(len(self.sitelist2)),
                        'preS': np.ones(len(self.sitelist2)), 'eneS': np.zeros(len(self.sitelist2)),
                        'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
-        thermaldef2['preSV'] = 3.*np.ones(len(Diffusivity2.interactlist()))
+        thermaldef2['preSV'] = 2.*np.ones(len(Diffusivity2.interactlist()))
         thermaldef2['eneSV'] = np.zeros(len(Diffusivity2.interactlist()))
         thermaldef2.update(Diffusivity2.makeLIMBpreene(**thermaldef2))
 
