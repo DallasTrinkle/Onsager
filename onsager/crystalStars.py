@@ -986,3 +986,23 @@ class VectorStarSet(object):
             for s, v in zip(svR, svv):
                 folddown[getattr(self.starset.states[s], attr), :, i] += v
         return folddown
+
+    def unitcellVectorBasisfolddown(self, VectorBasis, type='solute'):
+        """
+        Construct the expansion to "fold down" from starvector to a VectorBasis in the
+        unit cell
+        :param VectorBasis: list of (N,3) matrices, corresponding to (normalized) vectors
+        :param type: 'solute' of 'vacancy', depending on which site we need to reduce
+        :return: folddown: [NV, Nvstars] to map vstars to VectorBasis
+        """
+        if self.Nvstars == 0: return None
+        attr = {'solute': 'i', 'vacancy': 'j'}.get(type)
+        if attr is None: raise ValueError('type needs to be "solute" or "vacancy"')
+        folddown = np.zeros((len(VectorBasis), self.Nvstars))
+        if len(VectorBasis) == 0: return folddown
+        for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
+            for s, v in zip(svR, svv):
+                ind = getattr(self.starset.states[s], attr)
+                for j, vb in enumerate(VectorBasis):
+                    folddown[j, i] += np.dot(vb[ind,:],v)
+        return folddown
