@@ -1145,15 +1145,22 @@ class VacancyMediated(object):
         # from *both* L1sv and L1vv. Then that will fix our other problems.
 
         if comp_vs2solute_vs.shape[0] > 0:
-            delta_om_bar = np.dot(np.dot(comp_vs2solute_vs, delta_om), comp_vs2solute_vs.T)
-            biasSbar = np.dot(comp_vs2solute_vs, biasSvec)/self.N
-            G_bar = np.linalg.inv(delta_om_bar)
+            B = np.dot(comp_vs2solute_vs, delta_om)
+            C = np.dot(delta_om, comp_vs2solute_vs.T)  # = B.T
+            A = np.dot(np.dot(comp_vs2solute_vs, delta_om), comp_vs2solute_vs.T)
+            biasSbar = np.dot(comp_vs2solute_vs, biasSvec) /self.N
+            SD = A - np.dot(np.dot(B, G), C)
+            G_bar = np.linalg.inv(SD)
             etaSbar = np.dot(G_bar, biasSbar)
             outer_etaSbar = np.dot(self.L0sscalc.VV, etaSbar)
             # outer_etaSbar = np.dot(self.vkinetic.outer, np.dot(comp_vs2solute_vs.T, etaSbar))
             # L1ss += np.dot(np.dot(self.L0sscalc.VV, biasSbar), etaSbar) - \
             #          2*np.dot(outer_etaSbar, delta_om_etaS)/self.N
-            L1ss += np.dot(outer_etaSbar, biasSbar) - \
+            print('D0ss: ', D0ss[0,1])
+            print('etaSbar*biasSbar: ', (np.dot(outer_etaSbar, biasSbar))[0,1])
+            print('etaSbar*domega*etaS: ', (np.dot(outer_etaSbar, np.dot(comp_vs2solute_vs, delta_om_etaS)))[0,1])
+            print('D0ss: ', D0ss[0,1])
+            L1ss += np.dot(outer_etaSbar, biasSbar) + \
                      2*np.dot(outer_etaSbar, np.dot(comp_vs2solute_vs, delta_om_etaS))/self.N
 
         return L0vv, D0ss + L1ss, -D0ss + L1sv, D0ss - L0ss + L1vv
