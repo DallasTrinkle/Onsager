@@ -1083,7 +1083,7 @@ class VacancyMediated(object):
         if comp_vs2solute_vs.shape[0] > 0:
             for sv,starindex in enumerate(self.vstar2kin):
                 svvacindex = self.kin2vacancy[starindex]  # vacancy
-                comp_vs2solute_vs[:, sv] *= np.sqrt(probV[svvacindex]/self.N) # / sqrt(self.N) ??
+                comp_vs2solute_vs[:, sv] *= np.sqrt(probV[svvacindex]) # / sqrt(self.N) ??
 
         # 3. set up symmetric rates: omega0, omega1, omega2
         #    and escape rates omega0escape, omega1escape, omega2escape
@@ -1113,7 +1113,7 @@ class VacancyMediated(object):
                            np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
 
         # 5. compute Onsager coefficients
-        G0 = np.dot(self.GFexpansion, GF + 0.0*np.ones_like(GF))
+        G0 = np.dot(self.GFexpansion, GF)
         # print('det: ', np.linalg.det(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)))
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         # If we "disconnect" the origin states, we would end up with a singular matrix.
@@ -1145,29 +1145,33 @@ class VacancyMediated(object):
         # from *both* L1sv and L1vv. Then that will fix our other problems.
 
         if comp_vs2solute_vs.shape[0] > 0:
-            B = np.dot(comp_vs2solute_vs, delta_om)
-            C = np.dot(delta_om, comp_vs2solute_vs.T)  # = B.T
-            A = np.dot(np.dot(comp_vs2solute_vs, delta_om), comp_vs2solute_vs.T)
-            biasSbar = np.dot(comp_vs2solute_vs, biasSvec) /self.N
-            SD = A - np.dot(np.dot(B, G), C)
-            G_bar = np.linalg.inv(SD)
-            G_bar_expand = np.dot(comp_vs2solute_vs.T, np.dot(G_bar, comp_vs2solute_vs))
-            etaSbar = np.dot(G_bar, biasSbar)
-            outer_etaSbar = np.dot(self.L0sscalc.VV, etaSbar)
+            biasSbar = np.dot(comp_vs2solute_vs, biasSvec)  # [solute SV index]
+            B = np.dot(comp_vs2solute_vs, delta_om)  # [solute SV index, complex SV index]
+            C = B.T  # [complex SV index, solute SV index]
+            A = np.dot(B, comp_vs2solute_vs.T)  # [solute SV index, solute SV index]
+            # C = np.dot(delta_om, comp_vs2solute_vs.T)  # = B.T
+            # A = np.dot(np.dot(comp_vs2solute_vs, delta_om), comp_vs2solute_vs.T)
+            # SD = A - np.dot(np.dot(B, G), C)
+            G_bar = np.linalg.inv(A - np.dot(np.dot(B, G), C))  # [solute SV index, solute SV index]
+            # G_bar_expand = np.dot(comp_vs2solute_vs.T, np.dot(G_bar, comp_vs2solute_vs))
+            bar_delta_om_etaS = np.dot(comp_vs2solute_vs, delta_om_etaS)  # [solute SV index]
+            etaSbar = np.dot(G_bar, biasSbar)  # [solute SV index]
+            outer_etaSbar = np.dot(self.L0sscalc.VV, etaSbar)  # [3,3, solute SV index]
             # outer_etaSbar = np.dot(self.vkinetic.outer, np.dot(comp_vs2solute_vs.T, etaSbar))
             # L1ss += np.dot(np.dot(self.L0sscalc.VV, biasSbar), etaSbar) - \
             #          2*np.dot(outer_etaSbar, delta_om_etaS)/self.N
             print('D0ss: ', D0ss[0,1])
             print('L1ss: ', L1ss[0,1])
             print('etaSbar*biasSbar: ', (np.dot(outer_etaSbar, biasSbar))[0,1])
-            print('etaSbar*domega*etaS: ', (np.dot(outer_etaSbar, np.dot(comp_vs2solute_vs, delta_om_etaS)))[0,1])
+            print('-2*etaSbar*domega*etaS: ', (-2*np.dot(outer_etaSbar, bar_delta_om_etaS))[0,1])
             print('etaS*domega*G_bar*domega*etaS: ',
-                  np.dot(np.dot(self.vkinetic.outer, delta_om_etaS), np.dot(G_bar_expand, delta_om_etaS))[0,1])
+                  np.dot(np.dot(self.L0sscalc.VV, bar_delta_om_etaS), np.dot(G_bar, bar_delta_om_etaS))[0,1])
+                  # np.dot(np.dot(self.vkinetic.outer, delta_om_etaS), np.dot(G_bar_expand, delta_om_etaS))[0,1])
             # seems (?!?!) like it should be first term - second term/2 (not sure where the self.N goes)
             # BUT THEN also a probV term is showing up... for some reason?
-            L1ss += np.dot(outer_etaSbar, biasSbar) - \
-                     2*np.dot(outer_etaSbar, np.dot(comp_vs2solute_vs, delta_om_etaS)) + \
-                     np.dot(np.dot(self.vkinetic.outer, delta_om_etaS), np.dot(G_bar_expand, delta_om_etaS))/self.N
+            L1ss += (np.dot(outer_etaSbar, biasSbar) - \
+                     2*np.dot(outer_etaSbar, bar_delta_om_etaS) + \
+                     np.dot(np.dot(self.L0sscalc.VV, bar_delta_om_etaS), np.dot(G_bar, bar_delta_om_etaS)))/self.N
 
         return L0vv, D0ss + L1ss, -D0ss + L1sv, D0ss - L0ss + L1vv
 
