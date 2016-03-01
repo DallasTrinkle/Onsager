@@ -1151,17 +1151,23 @@ class VacancyMediated(object):
             biasSbar = np.dot(comp_vs2solute_vs, biasSvec) /self.N
             SD = A - np.dot(np.dot(B, G), C)
             G_bar = np.linalg.inv(SD)
+            G_bar_expand = np.dot(comp_vs2solute_vs.T, np.dot(G_bar, comp_vs2solute_vs))
             etaSbar = np.dot(G_bar, biasSbar)
             outer_etaSbar = np.dot(self.L0sscalc.VV, etaSbar)
             # outer_etaSbar = np.dot(self.vkinetic.outer, np.dot(comp_vs2solute_vs.T, etaSbar))
             # L1ss += np.dot(np.dot(self.L0sscalc.VV, biasSbar), etaSbar) - \
             #          2*np.dot(outer_etaSbar, delta_om_etaS)/self.N
             print('D0ss: ', D0ss[0,1])
+            print('L1ss: ', L1ss[0,1])
             print('etaSbar*biasSbar: ', (np.dot(outer_etaSbar, biasSbar))[0,1])
             print('etaSbar*domega*etaS: ', (np.dot(outer_etaSbar, np.dot(comp_vs2solute_vs, delta_om_etaS)))[0,1])
-            print('D0ss: ', D0ss[0,1])
-            L1ss += np.dot(outer_etaSbar, biasSbar) + \
-                     2*np.dot(outer_etaSbar, np.dot(comp_vs2solute_vs, delta_om_etaS))/self.N
+            print('etaS*domega*G_bar*domega*etaS: ',
+                  np.dot(np.dot(self.vkinetic.outer, delta_om_etaS), np.dot(G_bar_expand, delta_om_etaS))[0,1])
+            # seems (?!?!) like it should be first term - second term/2 (not sure where the self.N goes)
+            # BUT THEN also a probV term is showing up... for some reason?
+            L1ss += np.dot(outer_etaSbar, biasSbar) - \
+                     2*np.dot(outer_etaSbar, np.dot(comp_vs2solute_vs, delta_om_etaS)) + \
+                     np.dot(np.dot(self.vkinetic.outer, delta_om_etaS), np.dot(G_bar_expand, delta_om_etaS))/self.N
 
         return L0vv, D0ss + L1ss, -D0ss + L1sv, D0ss - L0ss + L1vv
 

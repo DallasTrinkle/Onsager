@@ -270,10 +270,12 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         self.sitelist = self.crys.sitelist(self.chem)
         self.crystalname = 'Body-Centered Cubic a0={}'.format(self.a0)
 
-        self.crys2 = crystal.Crystal(self.a0*np.eye(3), [np.zeros(3), np.array([0.45, 0.45, 0.45])], NOSYM=True)
+        self.crys2 = crystal.Crystal(self.a0*np.eye(3), [np.zeros(3), np.array([0.45, 0.45, 0.45])])
         self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.99*self.a0)
         self.sitelist2 = self.crys2.sitelist(self.chem)
         self.crystalname2 = 'B2 a0={}'.format(self.a0)
+
+        self.solutebinding = 3.
 
         # self.crys2 = crystal.Crystal(self.crys.lattice, self.crys.basis, NOSYM=True)
         # self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.87*self.a0)
@@ -288,8 +290,8 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
-        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
-                      'preT0': np.array([1.]), 'eneT0': np.array([0.])}
+        thermaldef = {'preV': np.ones(len(self.sitelist)), 'eneV': np.zeros(len(self.sitelist)),
+                      'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
         thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
         thermaldef2 = {'preV': np.ones(len(self.sitelist2)), 'eneV': np.zeros(len(self.sitelist2)),
                       'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
@@ -319,7 +321,7 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         # Make a calculator with one neighbor shell
         print('Crystal: ' + self.crystalname)
         print('Crystal2: ' + self.crystalname2)
-        print('  Solute test')
+        print('  Solute test: SV binding = ', self.solutebinding)
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
@@ -328,13 +330,13 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
                       'preS': np.ones(len(self.sitelist)), 'eneS': np.zeros(len(self.sitelist)),
                       'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
         # now to add in some random solute-vacancy energies.
-        thermaldef['preSV'] = 3.*np.ones(len(Diffusivity.interactlist()))
+        thermaldef['preSV'] = self.solutebinding*np.ones(len(Diffusivity.interactlist()))
         thermaldef['eneSV'] = np.zeros(len(Diffusivity.interactlist()))
         thermaldef.update(Diffusivity.makeLIMBpreene(**thermaldef))
         thermaldef2 = {'preV': np.ones(len(self.sitelist2)), 'eneV': np.zeros(len(self.sitelist2)),
                        'preS': np.ones(len(self.sitelist2)), 'eneS': np.zeros(len(self.sitelist2)),
                        'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
-        thermaldef2['preSV'] = 3.*np.ones(len(Diffusivity2.interactlist()))
+        thermaldef2['preSV'] = self.solutebinding*np.ones(len(Diffusivity2.interactlist()))
         thermaldef2['eneSV'] = np.zeros(len(Diffusivity2.interactlist()))
         thermaldef2.update(Diffusivity2.makeLIMBpreene(**thermaldef2))
 
@@ -356,6 +358,32 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         # for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
         for L, Lp in zip([Lvv, Lss, Lsv], [Lvv2, Lss2, Lsv2]):
             self.assertTrue(np.allclose(L, Lp), msg="Diffusivity doesn't match?")
+
+
+class CrystalOnsagerTestsL12(CrystalOnsagerTestsB2):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+    def setUp(self):
+        self.a0 = 1.
+        self.crys = crystal.Crystal.FCC(self.a0)
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.71*self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Face-Centered Cubic a0={}'.format(self.a0)
+
+        self.crys2 = crystal.Crystal(self.a0*np.eye(3), [np.zeros(3), np.array([0.05, 0.5, 0.5]),
+                                                         np.array([0.5, 0.05, 0.5]), np.array([0.5, 0.5, 0.05])])
+        self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.99*self.a0)
+        self.sitelist2 = self.crys2.sitelist(self.chem)
+        self.crystalname2 = 'L1_2 a0={}'.format(self.a0)
+
+        self.solutebinding = 3.
+
+        # self.crys2 = crystal.Crystal(self.crys.lattice, self.crys.basis, NOSYM=True)
+        # self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.87*self.a0)
+        # self.sitelist2 = self.crys2.sitelist(self.chem)
+        # self.crystalname2 = 'BCC (unsymmetric) a0={}'.format(self.a0)
 
 
 class InterstitialTests(unittest.TestCase):
