@@ -1145,6 +1145,11 @@ class VacancyMediated(object):
         # from *both* L1sv and L1vv. Then that will fix our other problems.
 
         if comp_vs2solute_vs.shape[0] > 0:
+            proj = np.eye(self.vkinetic.Nvstars) - np.dot(comp_vs2solute_vs.T, comp_vs2solute_vs)*0 #/self.vkinetic.Nvstars
+            Gproj = np.dot(proj, np.dot(G, proj))
+            # biasSproj = np.dot(proj, biasSvec)
+            # etaSproj = np.dot(Gproj, biasSproj)
+
             biasSbar = np.dot(comp_vs2solute_vs, biasSvec)  # [solute SV index]
             B = np.dot(comp_vs2solute_vs, delta_om)  # [solute SV index, complex SV index]
             C = B.T  # [complex SV index, solute SV index]
@@ -1154,9 +1159,11 @@ class VacancyMediated(object):
             # SD = A - np.dot(np.dot(B, G), C)
             G_bar = np.linalg.inv(A - np.dot(np.dot(B, G), C))  # [solute SV index, solute SV index]
             # G_bar_expand = np.dot(comp_vs2solute_vs.T, np.dot(G_bar, comp_vs2solute_vs))
-            bar_delta_om_etaS = np.dot(comp_vs2solute_vs, delta_om_etaS)  # [solute SV index]
             etaSbar = np.dot(G_bar, biasSbar)  # [solute SV index]
             outer_etaSbar = np.dot(self.L0sscalc.VV, etaSbar)  # [3,3, solute SV index]
+            # bar_delta_om_etaSproj = np.dot(comp_vs2solute_vs, np.dot(delta_om, etaSproj))  # [solute SV index]
+            bar_delta_om_etaS = np.dot(comp_vs2solute_vs, delta_om_etaS)  # [solute SV index]
+
             # outer_etaSbar = np.dot(self.vkinetic.outer, np.dot(comp_vs2solute_vs.T, etaSbar))
             # L1ss += np.dot(np.dot(self.L0sscalc.VV, biasSbar), etaSbar) - \
             #          2*np.dot(outer_etaSbar, delta_om_etaS)/self.N
@@ -1166,12 +1173,14 @@ class VacancyMediated(object):
             print('-2*etaSbar*domega*etaS: ', (-2*np.dot(outer_etaSbar, bar_delta_om_etaS))[0,1])
             print('etaS*domega*G_bar*domega*etaS: ',
                   np.dot(np.dot(self.L0sscalc.VV, bar_delta_om_etaS), np.dot(G_bar, bar_delta_om_etaS))[0,1])
+            # print('etaSproj*biasSproj: ', np.dot(np.dot(self.vkinetic.outer, biasSproj), etaSproj)[0,1])
                   # np.dot(np.dot(self.vkinetic.outer, delta_om_etaS), np.dot(G_bar_expand, delta_om_etaS))[0,1])
             # seems (?!?!) like it should be first term - second term/2 (not sure where the self.N goes)
             # BUT THEN also a probV term is showing up... for some reason?
             L1ss += (np.dot(outer_etaSbar, biasSbar) - \
                      2*np.dot(outer_etaSbar, bar_delta_om_etaS) + \
                      np.dot(np.dot(self.L0sscalc.VV, bar_delta_om_etaS), np.dot(G_bar, bar_delta_om_etaS)))/self.N
+            #  + np.dot(np.dot(self.vkinetic.outer, biasSproj), etaSproj))
 
         return L0vv, D0ss + L1ss, -D0ss + L1sv, D0ss - L0ss + L1vv
 
