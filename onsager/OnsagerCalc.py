@@ -1122,9 +1122,10 @@ class VacancyMediated(object):
         etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
         outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
+        etaSvec = np.dot(G,biasSvec)
         outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
-        outer_etaSvec = np.dot(self.vkinetic.outer, np.dot(G, biasSvec))
-        delta_om_etaS = np.dot(delta_om, np.dot(G, biasSvec))
+        outer_etaSvec = np.dot(self.vkinetic.outer, etaSvec)
+        delta_om_etaS = np.dot(delta_om, etaSvec)
         # delta_om_etaV = np.dot(delta_om, np.dot(G, biasVvec))
 
         # L1ss = (np.dot(outer_etaSvec, biasSvec) + 2*np.dot(outer_etaS0, delta_om_etaS))/self.N
@@ -1153,7 +1154,8 @@ class VacancyMediated(object):
             biasSbar = np.dot(comp_vs2solute_vs, biasSvec)  # [solute SV index]
             B = np.dot(comp_vs2solute_vs, delta_om)  # [solute SV index, complex SV index]
             C = B.T  # [complex SV index, solute SV index]
-            A = np.dot(B, comp_vs2solute_vs.T)  # [solute SV index, solute SV index]
+            # print('VectorBasis: ', len(self.L0sscalc.VectorBasis))
+            A = np.dot(B, comp_vs2solute_vs.T) + 1.*np.eye(len(self.L0sscalc.VectorBasis)) # [solute SV index, solute SV index]
             # C = np.dot(delta_om, comp_vs2solute_vs.T)  # = B.T
             # A = np.dot(np.dot(comp_vs2solute_vs, delta_om), comp_vs2solute_vs.T)
             # SD = A - np.dot(np.dot(B, G), C)
@@ -1161,8 +1163,10 @@ class VacancyMediated(object):
             # G_bar_expand = np.dot(comp_vs2solute_vs.T, np.dot(G_bar, comp_vs2solute_vs))
             etaSbar = np.dot(G_bar, biasSbar)  # [solute SV index]
             outer_etaSbar = np.dot(self.L0sscalc.VV, etaSbar)  # [3,3, solute SV index]
+            outer_etaSbar_vk = np.dot(self.vkinetic.outer, np.dot(comp_vs2solute_vs.T, etaSbar))
             # bar_delta_om_etaSproj = np.dot(comp_vs2solute_vs, np.dot(delta_om, etaSproj))  # [solute SV index]
             bar_delta_om_etaS = np.dot(comp_vs2solute_vs, delta_om_etaS)  # [solute SV index]
+            CGB = np.dot(C, np.dot(G_bar, B))
 
             # outer_etaSbar = np.dot(self.vkinetic.outer, np.dot(comp_vs2solute_vs.T, etaSbar))
             # L1ss += np.dot(np.dot(self.L0sscalc.VV, biasSbar), etaSbar) - \
@@ -1170,9 +1174,12 @@ class VacancyMediated(object):
             print('D0ss: ', D0ss[0,1])
             print('L1ss: ', L1ss[0,1])
             print('etaSbar*biasSbar: ', (np.dot(outer_etaSbar, biasSbar))[0,1])
-            print('-2*etaSbar*domega*etaS: ', (-2*np.dot(outer_etaSbar, bar_delta_om_etaS))[0,1])
+            # print('-2*etaSbar*domega*etaS: ', (-2*np.dot(outer_etaSbar, bar_delta_om_etaS))[0,1])
+            print('-2*etaSbar*domega*etaS: ', (-2*np.dot(outer_etaSbar_vk, delta_om_etaS))[0,1])
+            # print('etaS*domega*G_bar*domega*etaS: ',
+            #       np.dot(np.dot(self.L0sscalc.VV, bar_delta_om_etaS), np.dot(G_bar, bar_delta_om_etaS))[0,1])
             print('etaS*domega*G_bar*domega*etaS: ',
-                  np.dot(np.dot(self.L0sscalc.VV, bar_delta_om_etaS), np.dot(G_bar, bar_delta_om_etaS))[0,1])
+                  np.dot(outer_etaSvec, np.dot(CGB, etaSvec))[0,1])
             # print('etaSproj*biasSproj: ', np.dot(np.dot(self.vkinetic.outer, biasSproj), etaSproj)[0,1])
                   # np.dot(np.dot(self.vkinetic.outer, delta_om_etaS), np.dot(G_bar_expand, delta_om_etaS))[0,1])
             # seems (?!?!) like it should be first term - second term/2 (not sure where the self.N goes)

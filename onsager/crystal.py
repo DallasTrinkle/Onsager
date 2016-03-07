@@ -417,7 +417,7 @@ class Crystal(object):
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.
     """
 
-    def __init__(self, lattice, basis, chemistry=None, NOSYM=False):
+    def __init__(self, lattice, basis, chemistry=None, NOSYM=False, noreduce=False):
         """
         Initialization; starts off with the lattice vector definition and the
         basis vectors. While it does not explicitly store the specific chemical
@@ -431,6 +431,8 @@ class Crystal(object):
             there are multiple chemical elements, with each list corresponding to a unique
             element
         :param chemistry: (optional) list of names of chemical elements
+        :param NOSYM: turn off all symmetry finding (except identity)
+        :param noreduce: do not attempt to reduce the atomic basis
         """
         # Do some basic type checking and "formatting"
         self.lattice = None
@@ -452,7 +454,7 @@ class Crystal(object):
                 for u in elem:
                     if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, elem))
             self.basis = [[incell(u) for u in atombasis] for atombasis in basis]
-        self.reduce()  # clean up basis as needed
+        if not noreduce: self.reduce()  # clean up basis as needed
         self.minlattice()  # clean up lattice vectors as needed
         self.invlatt = np.linalg.inv(self.lattice)
         # this lets us, in a flat list, enumerate over indices of atoms as needed
@@ -620,7 +622,7 @@ class Crystal(object):
         for d in range(3):
             supercell = np.eye(3)
             supercell[:, d] = t[:]
-            if np.linalg.det(supercell) != 0:
+            if not np.isclose(np.linalg.det(supercell), 0):
                 break
         invsuper = np.linalg.inv(supercell)
         self.lattice = np.dot(self.lattice, supercell)
