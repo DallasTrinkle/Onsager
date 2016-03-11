@@ -1191,5 +1191,146 @@ class VacancyMediated(object):
 
         return L0vv, D0ss + L1ss, -D0ss + L1sv, D0ss - L0ss + L1vv
 
+class VacancyMediatedMeta(VacancyMediated):
+    """Trying out metastable preening"""
+
+    def __init__(self, crys, chem, sitelist, jumpnetwork, Nthermo = 0, meta_tags = []):
+        """
+        will fill it later
+        """
+        if not meta_tags:
+            VacancyMediated.__init__(self,crys, chem, sitelist, jumpnetwork, Nthermo)
+        else:
+            if all(x is None for x in (crys, chem, sitelist, jumpnetwork)): return  # blank object
+            self.crys = crys
+            self.chem = chem
+            self.sitelist = copy.deepcopy(sitelist)
+            self.jumpnetwork = copy.deepcopy(jumpnetwork)
+            self.N = sum(len(w) for w in sitelist)
+            self.invmap = np.zeros(self.N, dtype=int)
+            for ind,w in enumerate(sitelist):
+                for i in w:
+                    self.invmap[i] = ind
+            self.om0_jn= copy.deepcopy(jumpnetwork)
+            self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4) # Nmax?
+            # do some initial setup:
+            self.thermo = stars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
+            self.NNstar = stars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
+
+            # separating out the thermo and kinetic part from here on
+            # generate and preen thermo data
+            self.generatethermometa(Nthermo, meta_tags)
+
+            # generate and preen kinetic data
+            #self.vkinetic = stars.VectorStarSet()
+            #self.generatekineticmeta(Nthermo)
+            #self.gfconstruct(Nthermo)
+            #self.tags = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
+
+    def generatethermometa(self, Nthermo, meta_tags):
+        """
+        will fill it later
+        """
+        if Nthermo == getattr(self, 'Nthermo', 0): return
+        self.Nthermo = Nthermo
+        self.thermo.generate(Nthermo)
+        state_delete_list = []
+        for state_indx, state in enumerate(self.thermo.states):
+            for site_index, sites in enumerate(self.sitelist):
+               if state.i in sites and meta_tags[site_index]:
+                    if state.i is not state.j:
+                        state_delete_list.append(state_indx)
+                        break
+        stars_delete_list = []
+        for index in state_delete_list:
+            for star_indx, star_list in enumerate(self.thermo.stars):
+                if index in star_list and star_indx not in stars_delete_list:
+                    stars_delete_list.append(star_indx)
+
+        stars_delete_list.sort(reverse=True)
+        for i in stars_delete_list:
+            self.thermo.stars.pop(i)
+        new_thermo_states = []
+        new_stars = []
+        new_state_index = 0
+        new_star_index = 0
+        for star in self.thermo.stars:
+            new_stars.append([])
+            for i in star:
+                new_thermo_states.append(self.thermo.states[i])
+                new_stars[new_star_index].append(new_state_index)
+                new_state_index += 1
+            new_star_index += 1
+        self.thermo.states = copy.deepcopy(new_thermo_states)
+        self.thermo.stars = copy.deepcopy(new_stars)
+
+    def generatekineticmeta(self, Nthermo):
+        """
+        no idea. will fill it later
+        """
+        if Nthermo == getattr(self, 'Nthermo', 0): return
+        self.kinetic = self.thermo + self.NNstar
+        self.vkinetic.generate(self.kinetic)
+        # some indexing helpers:
+        # thermo2kin maps star index in thermo to kinetic (should just be range(n), but we use this for safety)
+        # kin2vacancy maps star index in kinetic to non-solute configuration from sitelist
+        # outerkin is the list of stars that are in kinetic, but not in thermo
+        # vstar2kin maps each vector star back to the corresponding star index
+        # kin2vstar provides a list of vector stars indices corresponding to the same star index
+        self.thermo2kin = [self.kinetic.starindex(self.thermo.states[s[0]]) for s in self.thermo.stars]
+        self.kin2vacancy = [self.invmap[self.kinetic.states[s[0]].j] for s in self.kinetic.stars]
+        self.outerkin = [s for s in range(self.kinetic.Nstars)
+                         if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None]
+        self.vstar2kin = [self.kinetic.index[Rs[0]] for Rs in self.vkinetic.vecpos]
+        self.kin2vstar = [ [j for j in range(self.vkinetic.Nvstars) if self.vstar2kin[j] == i]
+                           for i in range(self.kinetic.Nstars)]
+        # jumpnetwork, jumptype (omega0), star-pair for jump
+        self.om1_jn, self.om1_jt, self.om1_SP = self.kinetic.jumpnetwork_omega1()
+        self.om2_jn, self.om2_jt, self.om2_SP = self.kinetic.jumpnetwork_omega2()
+        # Prune the om1 list: remove entries that have jumps between stars in outerkin:
+        # work in reverse order so that popping is safe (and most of the offending entries are at the end
+        for i, SP in zip(reversed(range(len(self.om1_SP))), reversed(self.om1_SP)):
+            if SP[0] in self.outerkin and SP[1] in self.outerkin:
+                self.om1_jn.pop(i), self.om1_jt.pop(i), self.om1_SP.pop(i)
+
+    def gfconstruct(self, Nthermo):
+        """
+        no idea. will fill it later
+        """
+        if Nthermo == getattr(self, 'Nthermo', 0): return
+
+        # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
+        # Vector star set, generates a LOT of our calculation:
+        self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
+        # empty dictionaries to store GF values
+        self.GFvalues, self.Lvvvalues, self.etavvalues = {}, {}, {}
+        self.om1_om0, self.om1_om0escape, self.om1expansion, self.om1escape = \
+            self.vkinetic.rateexpansions(self.om1_jn, self.om1_jt)
+        self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
+            self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
+        self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
+        self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
+        self.etaSperiodic = self.vkinetic.periodicvectorexpansion('solute')
+        self.etaVperiodic = self.vkinetic.periodicvectorexpansion('vacancy')
+        # more indexing helpers:
+        # kineticsvWyckoff: Wyckoff position of solute and vacancy for kinetic stars
+        # omega0vacancyWyckoff: Wyckoff positions of initial and final position in omega0 jumps
+        # omega1svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega1
+        # omega2svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega2
+        self.kineticsvWyckoff = [(self.invmap[PS.i], self.invmap[PS.j]) for PS in
+                         [self.kinetic.states[si[0]] for si in self.kinetic.stars]]
+        self.omega0vacancyWyckoff = [(self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
+                                    for jumplist in self.om0_jn]
+        self.omega1svsvWyckoff = [(self.invmap[self.kinetic.states[jumplist[0][0][0]].i],
+                                   self.invmap[self.kinetic.states[jumplist[0][0][0]].j],
+                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
+                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
+                                  for jumplist in self.om1_jn]
+        self.omega2svsvWyckoff = [(self.invmap[self.kinetic.states[jumplist[0][0][0]].i],
+                                   self.invmap[self.kinetic.states[jumplist[0][0][0]].j],
+                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
+                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
+                                  for jumplist in self.om2_jn]
+
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
 crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)
