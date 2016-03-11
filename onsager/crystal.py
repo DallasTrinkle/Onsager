@@ -412,6 +412,8 @@ def Voigtstrain(e1, e2, e3, e4, e5, e6):
     return np.array([[e1,0.5*e6,0.5*e5],[0.5*e6,e2,0.5*e4],[0.5*e5,0.5*e4,e3]])
 
 
+# TODO: Add the ability to explicitly specify "metastable" states that should be considered the same chemistry, but not subject to reduction
+# TODO: Symmetry analysis that includes magnetic ordering (e.g., ferro- and anti-ferromagnetic ordering)
 class Crystal(object):
     """
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.
@@ -604,25 +606,25 @@ class Crystal(object):
             return
         # We need to first check against reducibility of atomic positions: try out non-trivial displacements
         initpos = self.basis[atomindex][0]
+        trans = False
         for newpos in self.basis[atomindex]:
             t = newpos - initpos
-            if np.all(t == 0): continue
+            if np.allclose(t, 0): continue
             trans = True
             for atomlist in self.basis:
                 for u in atomlist:
                     if np.all([not np.all(abs(inhalf(u + t - v))<threshold) for v in atomlist]):
                         trans = False
                         break
-            if trans:
-                break
-        if not trans:
-            return
+            if trans: break
+        # end the recursion here:
+        if not trans: return
         # reduce that lattice and basis
         # 1. determine what the new lattice needs to look like.
         for d in range(3):
             supercell = np.eye(3)
             supercell[:, d] = t[:]
-            if not np.isclose(np.linalg.det(supercell), 0):
+            if not np.allclose(np.linalg.det(supercell), 0):
                 break
         invsuper = np.linalg.inv(supercell)
         self.lattice = np.dot(self.lattice, supercell)
@@ -636,6 +638,7 @@ class Crystal(object):
                     newatomlist.append(v)
             newbasis.append(newatomlist)
         self.basis = newbasis
+        # 3. tail recursion:
         self.reduce()
 
     def remapbasis(self, supercell):

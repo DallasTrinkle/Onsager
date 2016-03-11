@@ -1150,12 +1150,20 @@ class VacancyMediated(object):
             Gproj = np.dot(proj, np.dot(G, proj))
             # biasSproj = np.dot(proj, biasSvec)
             # etaSproj = np.dot(Gproj, biasSproj)
+            ## total bias projected into the null space: is it zero?
+            biasStotal = np.zeros(3)
+            etaStotal = np.zeros(3)
+            for bs, es, veclist, starindex in zip(biasSvec, etaSvec, self.vkinetic.vecvec, self.vstar2kin):
+                biasStotal += bs*np.sqrt(prob[starindex])*sum(veclist)
+                etaStotal += es*np.sqrt(prob[starindex])*sum(veclist)
+            print('Total biasS: ', biasStotal)
+            print('Total etaS: ', etaStotal)
 
             biasSbar = np.dot(comp_vs2solute_vs, biasSvec)  # [solute SV index]
             B = np.dot(comp_vs2solute_vs, delta_om)  # [solute SV index, complex SV index]
             C = B.T  # [complex SV index, solute SV index]
             # print('VectorBasis: ', len(self.L0sscalc.VectorBasis))
-            A = np.dot(B, comp_vs2solute_vs.T) + 1.*np.eye(len(self.L0sscalc.VectorBasis)) # [solute SV index, solute SV index]
+            A = np.dot(B, comp_vs2solute_vs.T) + 0.*np.eye(len(self.L0sscalc.VectorBasis)) # [solute SV index, solute SV index]
             # C = np.dot(delta_om, comp_vs2solute_vs.T)  # = B.T
             # A = np.dot(np.dot(comp_vs2solute_vs, delta_om), comp_vs2solute_vs.T)
             # SD = A - np.dot(np.dot(B, G), C)
