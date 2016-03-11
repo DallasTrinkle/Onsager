@@ -20,8 +20,6 @@ The big changes are:
   is because the "points" now have a more complex representation (see above).
 """
 
-# TODO: need to make sure we can read / write stars for optimal functionality (HDF5?)
-
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
@@ -48,8 +46,8 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
     """
 
     @classmethod
-    def zero(cls, n=-1):
-        """Return the "zero" state"""
+    def zero(cls, n=0):
+        """Return a "zero" state"""
         return cls(i=n, j=n, R=np.zeros(3, dtype=int), dx=np.zeros(3))
 
     @classmethod
@@ -97,10 +95,11 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
     def __add__(self, other):
         """Add two states: works if and only if self.j == other.i
         (i,j) R + (j,k) R' = (i,k) R+R'  : works for thinking about transitions...
+        Note: a + b != b + a, and may be that only one of those is even defined
         """
         if not isinstance(other, self.__class__): return NotImplemented
-        if self.iszero(): return other
-        if other.iszero(): return self
+        if self.iszero() and self.j == -1: return other
+        if other.iszero() and other.i == -1: return self
         if self.j != other.i:
             raise ArithmeticError('Can only add matching endpoints: ({} {})+({} {}) not compatible'.format(self.i, self.j, other.i, other.j))
         return self.__class__(i=self.i, j=other.j, R=self.R+other.R, dx=self.dx+other.dx)
@@ -128,8 +127,8 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         Note: b + (a^b) = a but (a^b) + b is an error. a + (b^a) = b
         """
         if not isinstance(other, self.__class__): return NotImplemented
-        if self.iszero(): raise ArithmeticError('Cannot endpoint substract from zero')
-        if other.iszero(): raise ArithmeticError('Cannot endpoint subtract zero')
+        # if self.iszero(): raise ArithmeticError('Cannot endpoint substract from zero')
+        # if other.iszero(): raise ArithmeticError('Cannot endpoint subtract zero')
         if self.i != other.i:
             raise ArithmeticError('Can only endpoint subtract matching starts: ({} {})^({} {}) not compatible'.format(self.i, self.j, other.i, other.j))
         return self.__class__(i=other.j, j=self.j, R=self.R-other.R, dx=self.dx - other.dx)
@@ -285,10 +284,13 @@ class StarSet(object):
 
     def generate(self, Nshells, threshold=1e-8):
         """
-        Construct the points and the stars in the set.
+        Construct the points and the stars in the set. Now includes "origin states" by default; these
+        are PairStates that iszero() is True; they are only included if they have a nonzero VectorBasis.
+
         :param Nshells: number of shells to generate; this is interpreted as subsequent
           "sums" of jumplist (as we need the solute to be connected to the vacancy by at least one jump)
         :param threshold: threshold for determining equality with symmetry
+        :param originstates: include origin states in generate?
         """
         if Nshells == getattr(self, 'Nshells', -1): return
         self.Nshells = Nshells
@@ -544,6 +546,7 @@ class StarSet(object):
         for jt, jumpindices in enumerate(self.jumpnetwork_index):
             for jump in [ self.jumplist[j] for j in jumpindices]:
                 for i, PSi in enumerate(self.states):
+                    if PSi.iszero(): continue
                     # attempt to add...
                     try: PSf = PSi + jump
                     except: continue
@@ -576,6 +579,7 @@ class StarSet(object):
         for jt, jumpindices in enumerate(self.jumpnetwork_index):
             for jump in [ self.jumplist[j] for j in jumpindices]:
                 for i, PSi in enumerate(self.states):
+                    if PSi.iszero(): continue
                     # attempt to add...
                     try: PSf = PSi + jump
                     except: continue
@@ -704,56 +708,12 @@ class VectorStarSet(object):
         states = starset.states
         for s in starset.stars:
             # start by generating the parallel star-vector; always trivially present:
-            self.vecpos.append(s.copy())
             PS0 = states[s[0]]
-            vpara = PS0.dx
-            scale = 1./np.sqrt(len(s)*np.dot(vpara, vpara)) # normalization factor
-            self.vecvec.append([states[si].dx*scale for si in s])
-            # next, try to generate perpendicular star-vectors, if present:
-            v0 = np.cross(vpara, np.array([0, 0, 1.]))
-            if np.dot(v0, v0) < threshold:
-                v0 = np.cross(vpara, np.array([1., 0, 0]))
-            v1 = np.cross(vpara, v0)
-            # normalization:
-            v0 /= np.sqrt(np.dot(v0, v0))
-            v1 /= np.sqrt(np.dot(v1, v1))
-            Nvect = 2
-            # run over the invariant group operations for state PS0
-            for g in self.starset.crys.G:
-                if Nvect == 0: continue
-                if PS0 != PS0.g(starset.crys, starset.chem, g): continue
-                gv0 = starset.crys.g_direc(g, v0)
-                if Nvect == 1:
-                    # we only need to check that we still have an invariant vector
-                    if not np.allclose(gv0, v0): Nvect = 0
-                if Nvect == 2:
-                    gv1 = starset.crys.g_direc(g, v1)
-                    g00 = np.dot(v0, gv0)
-                    g11 = np.dot(v1, gv1)
-                    g01 = np.dot(v0, gv1)
-                    g10 = np.dot(v1, gv0)
-                    if abs((abs(g00*g11 - g01*g10) - 1)) > threshold or abs(g01-g10) > threshold:
-                        # we don't have an orthogonal matrix, or we have a rotation, so kick out
-                        Nvect = 0
-                        continue
-                    if (abs(g00 - 1) > threshold) or (abs(g11 - 1) > threshold):
-                        # if we don't have the identify matrix, then we have to find the one vector that survives
-                        if abs(g00 - 1) < threshold:
-                            Nvect = 1
-                            continue
-                        if abs(g11 - 1) < threshold:
-                            v0 = v1
-                            Nvect = 1
-                            continue
-                        v0 = (g01*v0 + (1 - g00)*v1)/np.sqrt(g01*g10 + (1 - g00)**2)
-                        Nvect = 1
-            # so... do we have any vectors to add?
-            if Nvect > 0:
-                v0 /= np.sqrt(len(s)*np.dot(v0, v0))
-                v1 /= np.sqrt(len(s)*np.dot(v1, v1))
-                vlist = [v0]
-                if Nvect > 1:
-                    vlist.append(v1)
+            if PS0.iszero():
+                # origin state; we can easily generate our vlist
+                vlist = starset.crys.vectlist(starset.crys.VectorBasis((self.starset.chem, PS0.i)))
+                scale = 1./np.sqrt(len(s)) # normalization factor; vectors are already normalized
+                vlist = [v*scale for v in vlist]
                 # add the positions
                 for v in vlist:
                     self.vecpos.append(s.copy())
@@ -764,6 +724,67 @@ class VectorStarSet(object):
                                 veclist.append(starset.crys.g_direc(g, v))
                                 break
                     self.vecvec.append(veclist)
+            else:
+                # not an origin state
+                vpara = PS0.dx
+                scale = 1./np.sqrt(len(s)*np.dot(vpara, vpara)) # normalization factor
+                self.vecpos.append(s.copy())
+                self.vecvec.append([states[si].dx*scale for si in s])
+                # next, try to generate perpendicular star-vectors, if present:
+                v0 = np.cross(vpara, np.array([0, 0, 1.]))
+                if np.dot(v0, v0) < threshold:
+                    v0 = np.cross(vpara, np.array([1., 0, 0]))
+                v1 = np.cross(vpara, v0)
+                # normalization:
+                v0 /= np.sqrt(np.dot(v0, v0))
+                v1 /= np.sqrt(np.dot(v1, v1))
+                Nvect = 2
+                # run over the invariant group operations for state PS0
+                for g in self.starset.crys.G:
+                    if Nvect == 0: continue
+                    if PS0 != PS0.g(starset.crys, starset.chem, g): continue
+                    gv0 = starset.crys.g_direc(g, v0)
+                    if Nvect == 1:
+                        # we only need to check that we still have an invariant vector
+                        if not np.allclose(gv0, v0): Nvect = 0
+                    if Nvect == 2:
+                        gv1 = starset.crys.g_direc(g, v1)
+                        g00 = np.dot(v0, gv0)
+                        g11 = np.dot(v1, gv1)
+                        g01 = np.dot(v0, gv1)
+                        g10 = np.dot(v1, gv0)
+                        if abs((abs(g00*g11 - g01*g10) - 1)) > threshold or abs(g01-g10) > threshold:
+                            # we don't have an orthogonal matrix, or we have a rotation, so kick out
+                            Nvect = 0
+                            continue
+                        if (abs(g00 - 1) > threshold) or (abs(g11 - 1) > threshold):
+                            # if we don't have the identify matrix, then we have to find the one vector that survives
+                            if abs(g00 - 1) < threshold:
+                                Nvect = 1
+                                continue
+                            if abs(g11 - 1) < threshold:
+                                v0 = v1
+                                Nvect = 1
+                                continue
+                            v0 = (g01*v0 + (1 - g00)*v1)/np.sqrt(g01*g10 + (1 - g00)**2)
+                            Nvect = 1
+                # so... do we have any vectors to add?
+                if Nvect > 0:
+                    v0 /= np.sqrt(len(s)*np.dot(v0, v0))
+                    v1 /= np.sqrt(len(s)*np.dot(v1, v1))
+                    vlist = [v0]
+                    if Nvect > 1:
+                        vlist.append(v1)
+                    # add the positions
+                    for v in vlist:
+                        self.vecpos.append(s.copy())
+                        veclist = []
+                        for PSi in [states[si] for si in s]:
+                            for g in starset.crys.G:
+                                if PS0.g(starset.crys, starset.chem, g) == PSi:
+                                    veclist.append(starset.crys.g_direc(g, v))
+                                    break
+                        self.vecvec.append(veclist)
         self.Nvstars = len(self.vecpos)
         self.outer = self.generateouter()
 
@@ -849,7 +870,8 @@ class VectorStarSet(object):
         finding this. We just call it the 'probfactor' below.
         *Note:* this used to be separated into rate0expansion, and rate1expansion, and
         partly in bias1expansion. Note also that if jumpnetwork_omega2 is passed, it also works
-        for that.
+        for that. However, in that case we have a different approach for the calculation of
+        rate0expansion: if there are origin states, then we need to "jump" to those.
 
         :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
           corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
@@ -876,14 +898,16 @@ class VectorStarSet(object):
                         if Ri == IS:
                             rate0escape[i, jt] -= np.dot(vi, vi)
                             rate1escape[i, k] -= np.dot(vi, vi)
-                            for j in range(i,self.Nvstars):
+                            # for j in range(i+1):
+                            for j in range(self.Nvstars):
                                 for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                     if Rj == FS:
-                                        rate0expansion[i, j, jt] += np.dot(vi, vj)
                                         rate1expansion[i, j, k] += np.dot(vi, vj)
+                                        rate0expansion[i, j, jt] += np.dot(vi, vj)
+
         # symmetrize
         for i in range(self.Nvstars):
-            for j in range(0,i):
+            for j in range(i+1, self.Nvstars):
                 rate0expansion[i, j, :] = rate0expansion[j, i, :]
                 rate1expansion[i, j, :] = rate1expansion[j, i, :]
         return rate0expansion, rate0escape, rate1expansion, rate1escape
@@ -899,7 +923,9 @@ class VectorStarSet(object):
         for the endpoint of the jump; we just call it the 'probfactor' below.
         *Note:* this used to be separated into bias1expansion, and bias2expansion,and
         had terms that are now in rateexpansions.
-        Note also that if jumpnetwork_omega2 is passed, it also works for that.
+        Note also that if jumpnetwork_omega2 is passed, it also works for that. However,
+        in that case we have a different approach for the calculation of bias1expansion:
+        if there are origin states, they get the negative summed bias of the others.
 
         :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
           corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
@@ -919,8 +945,64 @@ class VectorStarSet(object):
             for (IS, FS), dx in jumplist:
                 # run through the star-vectors; just use first as representative
                 for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
-                    if IS == svR[0]:
+                    if svR[0] == IS:
                         geom_bias = np.dot(svv[0], dx)*len(svR)
                         bias0expansion[i, jt] += geom_bias
                         bias1expansion[i, k] += geom_bias
         return bias0expansion, bias1expansion
+
+    def periodicvectorexpansion(self, type):
+        """
+        Construct the expansion from vectors on sites in the cell that are periodic to
+        our vectorstar basis. This is used to map from the rate-bias correction vectors into
+        the vectorstar basis, to correct for situations where the vacancy jumps themselves
+        have bias.
+
+        :param type: 'solute' or 'vacancy', depending on which site we need to check.
+        :return periodicexpansion: [Nvstars, Nsites, 3], to map Nsites,3 into Nvstars
+        """
+        if self.Nvstars == 0: return None
+        attr = {'solute': 'i', 'vacancy': 'j'}.get(type)
+        if attr is None: raise ValueError('type needs to be "solute" or "vacancy"')
+        periodicexpansion = np.zeros((self.Nvstars,
+                                      len(self.starset.crys.basis[self.starset.chem]), 3))
+        for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
+            for s, v in zip(svR, svv):
+                periodicexpansion[i, getattr(self.starset.states[s], attr), :] += v
+        return periodicexpansion
+
+    def unitcellfolddown(self, type):
+        """
+        Construct the expansion to "fold down" from starvector back into the unit cell.
+
+        :param type: 'solute' or 'vacancy', depending on which site we need to check.
+        :return folddown: [Nsites, 3, Nvstars], to map vstars back into Nsites, 3
+        """
+        if self.Nvstars == 0: return None
+        attr = {'solute': 'i', 'vacancy': 'j'}.get(type)
+        if attr is None: raise ValueError('type needs to be "solute" or "vacancy"')
+        folddown = np.zeros((len(self.starset.crys.basis[self.starset.chem]), 3, self.Nvstars))
+        for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
+            for s, v in zip(svR, svv):
+                folddown[getattr(self.starset.states[s], attr), :, i] += v
+        return folddown
+
+    def unitcellVectorBasisfolddown(self, VectorBasis, type='solute'):
+        """
+        Construct the expansion to "fold down" from starvector to a VectorBasis in the
+        unit cell
+        :param VectorBasis: list of (N,3) matrices, corresponding to (normalized) vectors
+        :param type: 'solute' of 'vacancy', depending on which site we need to reduce
+        :return: folddown: [NV, Nvstars] to map vstars to VectorBasis
+        """
+        if self.Nvstars == 0: return None
+        attr = {'solute': 'i', 'vacancy': 'j'}.get(type)
+        if attr is None: raise ValueError('type needs to be "solute" or "vacancy"')
+        folddown = np.zeros((len(VectorBasis), self.Nvstars))
+        if len(VectorBasis) == 0: return folddown
+        for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
+            for s, v in zip(svR, svv):
+                ind = getattr(self.starset.states[s], attr)
+                for j, vb in enumerate(VectorBasis):
+                    folddown[j, i] += np.dot(vb[ind,:],v)
+        return folddown

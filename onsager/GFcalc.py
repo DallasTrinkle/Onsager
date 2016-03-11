@@ -104,7 +104,7 @@ class GFCrystalcalc(object):
         # tuple of the Wyckoff site indices for each jump (needed to make symmrate)
         self.jumppairs = tuple((self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
             for jumplist in jumpnetwork)
-        self.D = 0  # we don't yet know the diffusivity
+        self.D, self.eta = 0, 0  # we don't yet know the diffusivity
 
     # this is part of our *class* definition:
     __HDF5list__ = ('N', 'invmap', 'NG', 'grouparray', 'indexpair', 'kptgrid',
@@ -155,7 +155,7 @@ class GFCrystalcalc(object):
         for i, site in enumerate(GFcalc.invmap):
             GFcalc.sitelist[site].append(i)
         GFcalc.jumppairs = tuple((pair[0], pair[1]) for pair in HDF5group['jumppairs'])
-        GFcalc.D = 0  # we don't yet know the diffusivity
+        GFcalc.D, GFcalc.eta = 0, 0  # we don't yet know the diffusivity
         return GFcalc
 
     def FourierTransformJumps(self, jumpnetwork, N, kpts):
@@ -259,9 +259,10 @@ class GFCrystalcalc(object):
         self.r, self.vr = self.DiagGamma()
         if not np.isclose(self.r[0],0): raise ArithmeticError("No equilibrium solution to rates?")
         self.omega_Taylor_rotate = (self.omega_Taylor.ldot(self.vr.T)).rdot(self.vr)
-        oT_dd, oT_dr, oT_rd, oT_rr, oT_D = self.BlockRotateOmegaTaylor(self.omega_Taylor_rotate)
-        # 2. Calculate D
+        oT_dd, oT_dr, oT_rd, oT_rr, oT_D, etav = self.BlockRotateOmegaTaylor(self.omega_Taylor_rotate)
+        # 2. Calculate D and eta
         self.D = self.Diffusivity(oT_D)
+        self.eta = self.biascorrection(etav)
         # 3. Spatially rotate the Taylor expansion
         self.d, self.e = LA.eigh(self.D/self.maxrate)
         # had been 1e-11; changed to 1e-7 to reflect likely integration accuracy of k-point grids
@@ -383,6 +384,25 @@ class GFCrystalcalc(object):
         # note: the "D" constructed this way will be negative! (as it is -q.D.q)
         return -D*self.maxrate
 
+    def biascorrection(self, etav = None):
+        """
+        Return the bias correction, or compute it if it's not already known. Uses etav to compute.
+        :param etav: Taylor expansion of the bias correction
+        :return eta: [N,3] array
+        """
+        if etav is None: return self.eta
+        eta = np.zeros((self.N,3))
+        if etav == 0: return eta
+        for (n,l,c) in etav.coefflist:
+            if n < 1: raise ValueError("Reduced Taylor expansion for etav doesn't begin with n==1")
+            if n == 1:
+                if l >= 1:
+                    for d, ind in ((0, T3D.pow2ind[1,0,0]),
+                                   (1, T3D.pow2ind[0,1,0]),
+                                   (2, T3D.pow2ind[0,0,1])):
+                        eta[:,d] += np.dot(self.vr[:,1:], c[ind, :])[:,0].imag
+        return eta
+
     def BlockRotateOmegaTaylor(self, omega_Taylor_rotate):
         """
         Returns block partitioned Taylor expansion of a rotated omega Taylor expansion.
@@ -396,11 +416,14 @@ class GFCrystalcalc(object):
         for t in [dd, dr, rd, rr]: t.reduce()
         if self.N > 1:
             D = dd - dr*rr.inv()*rd
+            etav = rr.inv()*rd
+            etav.truncate(1, inplace=True)
         else:
             D = dd.copy()
+            etav = 0
         D.truncate(T3D.Lmax, inplace=True)
         D.reduce()
-        return dd, dr, rd, rr, D
+        return dd, dr, rd, rr, D, etav
 
     def BlockInvertOmegaTaylor(self, dd, dr, rd, rr, D):
         """

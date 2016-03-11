@@ -15,7 +15,6 @@ import collections
 import yaml ### use crystal.yaml to call--may need to change in the future
 from functools import reduce
 
-# TODO: try registering the GroupOp (and maybe others?) with YAML using a metaclass instead
 # YAML tags:
 # interfaces are either at the bottom, or staticmethods in the corresponding object
 NDARRAY_YAMLTAG = '!numpy.ndarray'
@@ -111,6 +110,12 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     def inhalf(self):
         """Return a version of groupop where the translation is in the centered unit cell"""
         return GroupOp(self.rot, inhalf(self.trans), self.cartrot, self.indexmap)
+
+    @classmethod
+    def ident(cls, basis):
+        """Return a group operation corresponding to identity for a given basis"""
+        return cls(rot=np.eye(3, dtype=int), trans=np.zeros(3), cartrot=np.eye(3),
+                       indexmap=[[i for i in range(len(atomlist))] for atomlist in basis])
 
     def __str__(self):
         """Human-readable version of groupop"""
@@ -412,7 +417,7 @@ class Crystal(object):
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.
     """
 
-    def __init__(self, lattice, basis, chemistry=None):
+    def __init__(self, lattice, basis, chemistry=None, NOSYM=False, noreduce=False):
         """
         Initialization; starts off with the lattice vector definition and the
         basis vectors. While it does not explicitly store the specific chemical
@@ -426,6 +431,8 @@ class Crystal(object):
             there are multiple chemical elements, with each list corresponding to a unique
             element
         :param chemistry: (optional) list of names of chemical elements
+        :param NOSYM: turn off all symmetry finding (except identity)
+        :param noreduce: do not attempt to reduce the atomic basis
         """
         # Do some basic type checking and "formatting"
         self.lattice = None
@@ -447,7 +454,7 @@ class Crystal(object):
                 for u in elem:
                     if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, elem))
             self.basis = [[incell(u) for u in atombasis] for atombasis in basis]
-        self.reduce()  # clean up basis as needed
+        if not noreduce: self.reduce()  # clean up basis as needed
         self.minlattice()  # clean up lattice vectors as needed
         self.invlatt = np.linalg.inv(self.lattice)
         # this lets us, in a flat list, enumerate over indices of atoms as needed
@@ -463,7 +470,8 @@ class Crystal(object):
         self.BZvol = abs(float(np.linalg.det(self.reciplatt)))
         self.BZG = self.genBZG()
         self.center()  # should do before gengroup so that inversion is centered at origin
-        self.G = self.gengroup()  # do before genpoint
+        if NOSYM: self.G = frozenset([GroupOp.ident(self.basis)])
+        else: self.G = self.gengroup()  # do before genpoint
         self.pointG = self.genpoint()
         self.Wyckoff = self.genWyckoffsets()
 
@@ -614,7 +622,7 @@ class Crystal(object):
         for d in range(3):
             supercell = np.eye(3)
             supercell[:, d] = t[:]
-            if np.linalg.det(supercell) != 0:
+            if not np.isclose(np.linalg.det(supercell), 0):
                 break
         invsuper = np.linalg.inv(supercell)
         self.lattice = np.dot(self.lattice, supercell)
@@ -967,6 +975,25 @@ class Crystal(object):
         return reduce(CombineVectorBasis,
                       [ VectorBasis(*g.eigen()) for g in self.pointG[ind[0]][ind[1]] ] )
         # , (3, np.zeros(3)) -- don't need initial value; if there's only one group op, it's identity
+
+    # implemented as a static method as its a utility function
+    @staticmethod
+    def vectlist(vb):
+        """Returns a list of orthonormal vectors corresponding to our vector basis.
+        :param vb: (dim, v)
+        :return: list of vectors
+        """
+        if vb[0] == 0: return []
+        if vb[0] == 1: return [vb[1]]
+        if vb[0] == 2:
+            # now, construct the other two directions:
+            norm = vb[1]
+            if abs(norm[2]) < 0.75: v1 = np.array([norm[1], -norm[0], 0])
+            else: v1 = np.array([-norm[2], 0, norm[0]])
+            v1 /= np.sqrt(np.dot(v1, v1))
+            v2 = np.cross(norm, v1)
+            return [v1, v2]
+        if vb[0] == 3: return [ v for v in np.eye(3) ]
 
     def SymmTensorBasis(self, ind):
         """

@@ -4,7 +4,6 @@ Unit tests for Onsager calculator for vacancy-mediated diffusion.
 
 __author__ = 'Dallas R. Trinkle'
 
-# TODO: add the five-frequency model as a test for FCC; add in BCC
 # TODO: additional tests using the 14 frequency model for FCC?
 
 import unittest
@@ -43,16 +42,10 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
         print('Crystal: ' + self.crystalname)
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        print('Interaction list:')
-        for PS in Diffusivity.interactlist(): print(PS)
-        print('omega1 list:')
-        for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "->", PS2)
-        print('omega2 list:')
-        for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "->", PS2)
         thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
                       'preT0': np.array([1.]), 'eneT0': np.array([0.])}
         thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
-        print('Thermaldef:\n', thermaldef)
+
         L0vv = np.zeros((3,3))
         om0 = thermaldef['preT0'][0]/thermaldef['preV'][0] * \
               np.exp((thermaldef['eneV'][0]-thermaldef['eneT0'][0])/kT)
@@ -60,6 +53,14 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
             L0vv += 0.5*np.outer(dx,dx) * om0
         L0vv /= len(self.crys.basis[self.chem])
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
+
+        # print('Interaction list:')
+        # for PS in Diffusivity.interactlist(): print(PS)
+        # print('omega1 list:')
+        # for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "->", PS2)
+        # print('omega2 list:')
+        # for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "->", PS2)
+        # print('Thermaldef:\n', thermaldef)
         print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
         for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0,0]*np.eye(3)), msg='Diffusivity not isotropic?')
@@ -103,19 +104,12 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
                                w4={}
                                prob={}""".format(w0,w1,w2,w3,w4,SVprob)))
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        print('Interaction list:')
-        for PS in Diffusivity.interactlist(): print(PS)
-        print('omega1 list:')
-        for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "-", PS2)
-        print('omega2 list:')
-        for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "-", PS2)
         # input the solute/vacancy binding (w4/w3), and use LIMB to take a first stab at the rates
         thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
                       'preS': np.array([1.]), 'eneS': np.array([0.]),
                       'preT0': np.array([w0]), 'eneT0': np.array([0.]),
                       'preSV': np.array([SVprob]), 'eneSV': np.array([0.])}
         thermaldef.update(Diffusivity.makeLIMBpreene(**thermaldef))
-        print('Thermaldef (LIMB):\n', thermaldef)
         # now, we need to get w1, w3, and w4 in there. w3 = dissociation, w4 = association, so:
         # the transition state for the association/dissociation jump is w4 as the outer prob = 1,
         # and the bound probability = w4/w3. The transition state for the "swing" jumps is
@@ -128,7 +122,6 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
                 thermaldef['preT1'][j] = w1*SVprob
             else:
                 thermaldef['preT1'][j] = w4
-        print('Thermaldef (5-frequency):\n', thermaldef)
         L0vv = np.zeros((3,3))
         om0 = thermaldef['preT0'][0]/thermaldef['preV'][0] * \
               np.exp((thermaldef['eneV'][0]-thermaldef['eneT0'][0])/kT)
@@ -136,6 +129,15 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
             L0vv += 0.5*np.outer(dx,dx) * om0
         L0vv /= self.crys.N
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
+
+        # print('Interaction list:')
+        # for PS in Diffusivity.interactlist(): print(PS)
+        # print('omega1 list:')
+        # for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "-", PS2)
+        # print('omega2 list:')
+        # for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "-", PS2)
+        # print('Thermaldef (LIMB):\n', thermaldef)
+        # print('Thermaldef (5-frequency):\n', thermaldef)
         print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
         for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0,0]*np.eye(3)), msg='Diffusivity not isotropic?')
@@ -221,17 +223,9 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         print('Crystal: ' + self.crystalname)
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        print('kpt mesh: ', Diffusivity.GFcalc.kptgrid)
-        print('Interaction list:')
-        for PS in Diffusivity.interactlist(): print(PS)
-        print('omega1 list:')
-        for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "-", PS2)
-        print('omega2 list:')
-        for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "-", PS2)
         thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
                       'preT0': np.array([1.,1.]), 'eneT0': np.array([0.,0.])}
         thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
-        print('Thermaldef:\n', thermaldef)
         L0vv = np.zeros((3,3))
         om0 = thermaldef['preT0'][0]/thermaldef['preV'][0] * \
               np.exp((thermaldef['eneV'][0]-thermaldef['eneT0'][0])/kT)
@@ -240,6 +234,15 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                 L0vv += 0.5*np.outer(dx,dx) * om0
         L0vv /= self.crys.N
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
+
+        # print('kpt mesh: ', Diffusivity.GFcalc.kptgrid)
+        # print('Interaction list:')
+        # for PS in Diffusivity.interactlist(): print(PS)
+        # print('omega1 list:')
+        # for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "-", PS2)
+        # print('omega2 list:')
+        # for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "-", PS2)
+        # print('Thermaldef:\n', thermaldef)
         print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
         # we leave out Lss since it is not, in fact, isotropic!
         for L in [Lvv, Lsv, L1vv]:
@@ -254,6 +257,133 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         self.assertTrue(np.allclose(-Lss, np.dot(correlmat, Lsv), rtol=1e-7),
                         msg='Failure to match correlation ({}, {}), got {}, {}'.format(
                             self.correlx, self.correlz, -Lss[0,0]/Lsv[0,0], -Lss[2,2]/Lsv[2,2]))
+
+class CrystalOnsagerTestsB2(unittest.TestCase):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+    def setUp(self):
+        self.a0 = 1.
+        self.crys = crystal.Crystal.BCC(self.a0)
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.87*self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Body-Centered Cubic a0={}'.format(self.a0)
+
+        self.crys2 = crystal.Crystal(self.a0*np.eye(3), [np.zeros(3), np.array([0.45, 0.45, 0.45])])
+        self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.99*self.a0)
+        self.sitelist2 = self.crys2.sitelist(self.chem)
+        self.crystalname2 = 'B2 a0={}'.format(self.a0)
+
+        self.solutebinding = 3.
+
+        # self.crys2 = crystal.Crystal(self.crys.lattice, self.crys.basis, NOSYM=True)
+        # self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.87*self.a0)
+        # self.sitelist2 = self.crys2.sitelist(self.chem)
+        # self.crystalname2 = 'BCC (unsymmetric) a0={}'.format(self.a0)
+
+    def testtracer(self):
+        """Test that BCC mapped onto B2 match exactly"""
+        # Make a calculator with one neighbor shell
+        print('Crystal: ' + self.crystalname)
+        print('Crystal2: ' + self.crystalname2)
+        kT = 1.
+        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
+        thermaldef = {'preV': np.ones(len(self.sitelist)), 'eneV': np.zeros(len(self.sitelist)),
+                      'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
+        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        thermaldef2 = {'preV': np.ones(len(self.sitelist2)), 'eneV': np.zeros(len(self.sitelist2)),
+                      'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
+        thermaldef2.update(Diffusivity2.maketracerpreene(**thermaldef2))
+
+        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
+        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
+        # for tag in ('solute-vacancy', 'omega0', 'omega1', 'omega2'):
+        #     print(tag + ' list:')
+        #     for str, mult in ((taglist[0], len(taglist)) for taglist in Diffusivity.tags[tag]):
+        #         print(str, 'x', mult)
+        #     print(tag + ' list2:')
+        #     for str, mult in ((taglist[0], len(taglist)) for taglist in Diffusivity2.tags[tag]):
+        #         print(str, 'x', mult)
+        # print('Thermaldef:\n', thermaldef)
+        # print('Thermaldef2:\n', thermaldef2)
+        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
+            print(Lname)
+            print(locals()[Lname])
+        # For now, remove the test on the v-v correction, since that term is NOT CORRECT:
+        # for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
+        for L, Lp in zip([Lvv, Lss, Lsv], [Lvv2, Lss2, Lsv2]):
+            self.assertTrue(np.allclose(L, Lp), msg="Diffusivity doesn't match?")
+
+    def testsolute(self):
+        """Test that BCC mapped onto B2 match exactly"""
+        # Make a calculator with one neighbor shell
+        print('Crystal: ' + self.crystalname)
+        print('Crystal2: ' + self.crystalname2)
+        print('  Solute test: SV binding = ', self.solutebinding)
+        kT = 1.
+        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
+        # we will make this test using LIMB
+        thermaldef = {'preV': np.ones(len(self.sitelist)), 'eneV': np.zeros(len(self.sitelist)),
+                      'preS': np.ones(len(self.sitelist)), 'eneS': np.zeros(len(self.sitelist)),
+                      'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
+        # now to add in some random solute-vacancy energies.
+        thermaldef['preSV'] = self.solutebinding*np.ones(len(Diffusivity.interactlist()))
+        thermaldef['eneSV'] = np.zeros(len(Diffusivity.interactlist()))
+        thermaldef.update(Diffusivity.makeLIMBpreene(**thermaldef))
+        thermaldef2 = {'preV': np.ones(len(self.sitelist2)), 'eneV': np.zeros(len(self.sitelist2)),
+                       'preS': np.ones(len(self.sitelist2)), 'eneS': np.zeros(len(self.sitelist2)),
+                       'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
+        thermaldef2['preSV'] = self.solutebinding*np.ones(len(Diffusivity2.interactlist()))
+        thermaldef2['eneSV'] = np.zeros(len(Diffusivity2.interactlist()))
+        thermaldef2.update(Diffusivity2.makeLIMBpreene(**thermaldef2))
+
+        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
+        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
+        # for tag in ('solute-vacancy', 'omega0', 'omega1', 'omega2'):
+        #     print(tag + ' list:')
+        #     for str, mult in ((taglist[0], len(taglist)) for taglist in Diffusivity.tags[tag]):
+        #         print(str, 'x', mult)
+        #     print(tag + ' list2:')
+        #     for str, mult in ((taglist[0], len(taglist)) for taglist in Diffusivity2.tags[tag]):
+        #         print(str, 'x', mult)
+        # print('Thermaldef:\n', thermaldef)
+        # print('Thermaldef2:\n', thermaldef2)
+        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
+            print(Lname)
+            print(locals()[Lname])
+        # For now, remove the test on the v-v correction, since that term is NOT CORRECT:
+        # for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
+        for L, Lp in zip([Lvv, Lss, Lsv], [Lvv2, Lss2, Lsv2]):
+            self.assertTrue(np.allclose(L, Lp), msg="Diffusivity doesn't match?")
+
+
+class CrystalOnsagerTestsL12(CrystalOnsagerTestsB2):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+    def setUp(self):
+        self.a0 = 1.
+        self.crys = crystal.Crystal.FCC(self.a0)
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.71*self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Face-Centered Cubic a0={}'.format(self.a0)
+
+        self.crys2 = crystal.Crystal(self.a0*np.eye(3), [np.zeros(3), np.array([0.05, 0.5, 0.5]),
+                                                         np.array([0.5, 0.05, 0.5]), np.array([0.5, 0.5, 0.05])])
+        self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.99*self.a0)
+        self.sitelist2 = self.crys2.sitelist(self.chem)
+        self.crystalname2 = 'L1_2 a0={}'.format(self.a0)
+
+        self.solutebinding = 3.
+
+        # self.crys2 = crystal.Crystal(self.crys.lattice, self.crys.basis, NOSYM=True)
+        # self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.87*self.a0)
+        # self.sitelist2 = self.crys2.sitelist(self.chem)
+        # self.crystalname2 = 'BCC (unsymmetric) a0={}'.format(self.a0)
 
 
 class InterstitialTests(unittest.TestCase):

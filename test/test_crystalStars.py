@@ -807,6 +807,8 @@ class VectorStarHCPBias2linearTests(VectorStarBias2linearTests):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
 
+import onsager.OnsagerCalc as OnsagerCalc  # we use this for the Interstitial Calculator
+
 class VectorStarBias1linearTests(unittest.TestCase):
     """Set of tests for our expansion of bias vector (1)"""
 
@@ -848,6 +850,13 @@ class VectorStarBias1linearTests(unittest.TestCase):
                             msg='Failure for state {}: {}\n{} != {}'.format(
                                     i, self.starset.states[i], biasvec[i], biasveccomp[i]))
 
+    def testPeriodicBias(self):
+        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        for type in ('solute', 'vacancy'):
+            self.assertTrue(np.allclose(self.vecstarset.periodicvectorexpansion(type), 0))
+
+
 class VectorStarFCCBias1linearTests(VectorStarBias1linearTests):
     """Set of tests for our expansion of bias vector (1) for FCC"""
     def setUp(self):
@@ -865,3 +874,42 @@ class VectorStarHCPBias1linearTests(VectorStarBias1linearTests):
         self.chem = 0
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+
+class VectorStarPeriodicBias(unittest.TestCase):
+    """Set of tests for our expansion of periodic bias vector (1)"""
+
+    longMessage = False
+    def setUp(self):
+        self.crys = crystal.Crystal(np.eye(3), [np.array([0.,0.,0.]), np.array([0.25, 0.25, 0.25])])
+        self.jumpnetwork = self.crys.jumpnetwork(0, 0.9)
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+    def testPeriodicBias(self):
+        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        # vacancy first:
+        periodicexpansion = self.vecstarset.periodicvectorexpansion('vacancy')
+        vectorbasislist = OnsagerCalc.Interstitial(self.crys, self.chem, self.sitelist, self.jumpnetwork).VectorBasis
+        vb = sum( (2.*u-1)*vect for u,vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist) )
+        svexp = np.tensordot(periodicexpansion, vb, axes=((1,2), (0,1)))
+        vbdirect = np.array([vb[PS.j] for PS in self.starset.states])
+        vbexp = np.zeros((self.starset.Nstates, 3))
+        for i, svR, svv in zip(stars.itertools.count(), self.vecstarset.vecpos, self.vecstarset.vecvec):
+            for s, v in zip(svR, svv):
+                vbexp[s, :] += v*svexp[i]
+        self.assertTrue(np.allclose(vbdirect, vbexp))
+
+        # solute second:
+        periodicexpansion = self.vecstarset.periodicvectorexpansion('solute')
+        vectorbasislist = OnsagerCalc.Interstitial(self.crys, self.chem, self.sitelist, self.jumpnetwork).VectorBasis
+        vb = sum( (2.*u-1)*vect for u,vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist) )
+        svexp = np.tensordot(periodicexpansion, vb, axes=((1,2), (0,1)))
+        sbdirect = np.array([vb[PS.i] for PS in self.starset.states])
+        sbexp = np.zeros((self.starset.Nstates, 3))
+        for i, svR, svv in zip(stars.itertools.count(), self.vecstarset.vecpos, self.vecstarset.vecvec):
+            for s, v in zip(svR, svv):
+                sbexp[s, :] += v*svexp[i]
+        self.assertTrue(np.allclose(sbdirect, sbexp))

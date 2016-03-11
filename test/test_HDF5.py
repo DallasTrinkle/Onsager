@@ -151,5 +151,11 @@ class HDF5ParsingTests(unittest.TestCase):
         # compare tags
         for k in HCP_diffuser.tags.keys():
             self.assertEqual(HCP_diffuser.tags[k], HCP_diffuser_copy.tags[k])
+        # do a dictionary check (dictionaries are only added *after* a minimum of one call
+        HCP_diffuser.addhdf5(self.f.create_group('new'))
+        HCP_diffuser_copy = OnsagerCalc.VacancyMediated.loadhdf5(self.f['new'])  # should be fully self-contained
+        for L0, Lcopy in zip(HCP_diffuser.Lij(*HCP_diffuser.preene2betafree(1.0, **thermaldef)),
+                             HCP_diffuser_copy.Lij(*HCP_diffuser_copy.preene2betafree(1.0, **thermaldef))):
+            self.assertTrue(np.all(L0 == Lcopy))
 
 
