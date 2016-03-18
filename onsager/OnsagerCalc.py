@@ -1211,21 +1211,23 @@ class VacancyMediatedMeta(VacancyMediated):
             for ind,w in enumerate(sitelist):
                 for i in w:
                     self.invmap[i] = ind
-            self.om0_jn= copy.deepcopy(jumpnetwork)
+            self.om0_jn = copy.deepcopy(jumpnetwork)
             self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4) # Nmax?
             # do some initial setup:
-            self.thermo = stars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
-            self.NNstar = stars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
+            self.thermo = stars.StarSetMeta(self.jumpnetwork, self.crys, self.chem, Nthermo, meta_tags=meta_tags)
+            self.NNstar = stars.StarSetMeta(self.jumpnetwork, self.crys, self.chem, 1, meta_tags=meta_tags)
 
             # separating out the thermo and kinetic part from here on
-            # generate and preen thermo data
+            # generate and prune thermo data
             self.generatethermometa(Nthermo, meta_tags)
 
-            # generate and preen kinetic data
-            #self.vkinetic = stars.VectorStarSet()
-            #self.generatekineticmeta(Nthermo)
-            #self.gfconstruct(Nthermo)
-            #self.tags = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
+            # self.gfconstruct(Nthermo)
+            # self.L0sscalc = self.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
+            # self.tags = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
+            # self.tagdict = {}
+            # for taglist in self.tags.values():
+            #    for i, tags in enumerate(taglist):
+            #       for tag in tags: self.tagdict[tag] = i
 
     def generatethermometa(self, Nthermo, meta_tags):
         """
@@ -1233,42 +1235,45 @@ class VacancyMediatedMeta(VacancyMediated):
         """
         if Nthermo == getattr(self, 'Nthermo', 0): return
         self.Nthermo = Nthermo
-        self.thermo.generate(Nthermo)
-        state_delete_list = []
-        for state_indx, state in enumerate(self.thermo.states):
-            for site_index, sites in enumerate(self.sitelist):
-               if state.i in sites and meta_tags[site_index]:
-                    if state.i is not state.j:
-                        state_delete_list.append(state_indx)
-                        break
-        stars_delete_list = []
-        for index in state_delete_list:
-            for star_indx, star_list in enumerate(self.thermo.stars):
-                if index in star_list and star_indx not in stars_delete_list:
-                    stars_delete_list.append(star_indx)
+        # generate and prune kinetic data
+        self.vkinetic = stars.VectorStarSet()
+        self.generatekineticmeta(Nthermo)
 
-        stars_delete_list.sort(reverse=True)
-        for i in stars_delete_list:
-            self.thermo.stars.pop(i)
-        new_thermo_states = []
-        new_stars = []
-        new_state_index = 0
-        new_star_index = 0
-        for star in self.thermo.stars:
-            new_stars.append([])
-            for i in star:
-                new_thermo_states.append(self.thermo.states[i])
-                new_stars[new_star_index].append(new_state_index)
-                new_state_index += 1
-            new_star_index += 1
-        self.thermo.states = copy.deepcopy(new_thermo_states)
-        self.thermo.stars = copy.deepcopy(new_stars)
+        # self.thermo.generate(Nthermo, meta_tags)
+        # state_delete_list = []
+        # for state_indx, state in enumerate(self.thermo.states):
+        #     for site_index, sites in enumerate(self.sitelist):
+        #        if state.i in sites and meta_tags[site_index]:
+        #             if state.i is not state.j:
+        #                 state_delete_list.append(state_indx)
+        #                 break
+        # stars_delete_list = []
+        # for index in state_delete_list:
+        #     for star_indx, star_list in enumerate(self.thermo.stars):
+        #         if index in star_list and star_indx not in stars_delete_list:
+        #             stars_delete_list.append(star_indx)
+        #
+        # stars_delete_list.sort(reverse=True)
+        # for i in stars_delete_list:
+        #     self.thermo.stars.pop(i)
+        # new_thermo_states = []
+        # new_stars = []
+        # new_state_index = 0
+        # new_star_index = 0
+        # for star in self.thermo.stars:
+        #     new_stars.append([])
+        #     for i in star:
+        #         new_thermo_states.append(self.thermo.states[i])
+        #         new_stars[new_star_index].append(new_state_index)
+        #         new_state_index += 1
+        #     new_star_index += 1
+        # self.thermo.states = copy.deepcopy(new_thermo_states)
+        # self.thermo.stars = copy.deepcopy(new_stars)
 
     def generatekineticmeta(self, Nthermo):
         """
         no idea. will fill it later
         """
-        if Nthermo == getattr(self, 'Nthermo', 0): return
         self.kinetic = self.thermo + self.NNstar
         self.vkinetic.generate(self.kinetic)
         # some indexing helpers:
@@ -1297,8 +1302,6 @@ class VacancyMediatedMeta(VacancyMediated):
         """
         no idea. will fill it later
         """
-        if Nthermo == getattr(self, 'Nthermo', 0): return
-
         # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
         # Vector star set, generates a LOT of our calculation:
         self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
