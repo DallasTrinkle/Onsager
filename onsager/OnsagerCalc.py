@@ -1158,17 +1158,21 @@ class VacancyMediated(object):
                 etaStotal += es*np.sqrt(prob[starindex])*sum(veclist)
             print('Total biasS: ', biasStotal)
             print('Total etaS: ', etaStotal)
+            etaSbar = np.dot(comp_vs2solute_vs, etaSvec)
+            print('etaS projection: ', etaSbar)
 
             biasSbar = np.dot(comp_vs2solute_vs, biasSvec)  # [solute SV index]
             B = np.dot(comp_vs2solute_vs, delta_om)  # [solute SV index, complex SV index]
             C = B.T  # [complex SV index, solute SV index]
             # print('VectorBasis: ', len(self.L0sscalc.VectorBasis))
             A = np.dot(B, comp_vs2solute_vs.T) + 0.*np.eye(len(self.L0sscalc.VectorBasis)) # [solute SV index, solute SV index]
+            # A = np.zeros(len(self.L0sscalc.VectorBasis))
             # C = np.dot(delta_om, comp_vs2solute_vs.T)  # = B.T
             # A = np.dot(np.dot(comp_vs2solute_vs, delta_om), comp_vs2solute_vs.T)
             # SD = A - np.dot(np.dot(B, G), C)
             G_bar = np.linalg.inv(A - np.dot(np.dot(B, G), C))  # [solute SV index, solute SV index]
             # G_bar_expand = np.dot(comp_vs2solute_vs.T, np.dot(G_bar, comp_vs2solute_vs))
+            # alpha = np.array([np.tensordot(etas, VB) for VB in self.L0sscalc.VectorBasis ])
             etaSbar = np.dot(G_bar, biasSbar)  # [solute SV index]
             outer_etaSbar = np.dot(self.L0sscalc.VV, etaSbar)  # [3,3, solute SV index]
             outer_etaSbar_vk = np.dot(self.vkinetic.outer, np.dot(comp_vs2solute_vs.T, etaSbar))
@@ -1188,6 +1192,13 @@ class VacancyMediated(object):
             #       np.dot(np.dot(self.L0sscalc.VV, bar_delta_om_etaS), np.dot(G_bar, bar_delta_om_etaS))[0,1])
             print('etaS*domega*G_bar*domega*etaS: ',
                   np.dot(outer_etaSvec, np.dot(CGB, etaSvec))[0,1])
+
+            # crazy, but...
+            print('a,b,c,c0 = ', (np.dot(outer_etaSbar, biasSbar))[0,1]/self.N, ',',
+                  (-2*np.dot(outer_etaSbar_vk, delta_om_etaS))[0,1]/self.N, ',',
+                  np.dot(outer_etaSvec, np.dot(CGB, etaSvec))[0,1]/self.N, ',',
+                  L1ss[0,1]+D0ss[0,1])
+            print('G_bar,A = ', G_bar,A)
             # print('etaSproj*biasSproj: ', np.dot(np.dot(self.vkinetic.outer, biasSproj), etaSproj)[0,1])
                   # np.dot(np.dot(self.vkinetic.outer, delta_om_etaS), np.dot(G_bar_expand, delta_om_etaS))[0,1])
             # seems (?!?!) like it should be first term - second term/2 (not sure where the self.N goes)

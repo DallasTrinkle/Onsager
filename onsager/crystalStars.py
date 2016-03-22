@@ -282,7 +282,7 @@ class StarSet(object):
                 str += "  {}: {}\n".format(i, self.states[i])
         return str
 
-    def generate(self, Nshells, threshold=1e-8):
+    def generate(self, Nshells, threshold=1e-8, originstates=False):
         """
         Construct the points and the stars in the set. Now includes "origin states" by default; these
         are PairStates that iszero() is True; they are only included if they have a nonzero VectorBasis.
@@ -297,6 +297,9 @@ class StarSet(object):
         if Nshells > 0: stateset = set(self.jumplist)
         else: stateset = set([])
         lastshell = stateset.copy()
+        if originstates:
+            for i in range(len(self.crys.basis[self.chem])):
+                stateset.add(PairState.zero(i))
         for i in range(Nshells-1):
             # add all NNvect to last shell produced, always excluding 0
             # lastshell = [v1+v2 for v1 in lastshell for v2 in self.NNvect if not all(abs(v1 + v2) < threshold)]
