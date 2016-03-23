@@ -749,8 +749,11 @@ class VectorStarSet(object):
                     gv0 = starset.crys.g_direc(g, v0)
                     if Nvect == 1:
                         # we only need to check that we still have an invariant vector
+                        if not np.isclose(np.dot(v0, v0), 1): raise ArithmeticError('Somehow got unnormalized vector?')
                         if not np.allclose(gv0, v0): Nvect = 0
                     if Nvect == 2:
+                        if not np.isclose(np.dot(v0, v0), 1): raise ArithmeticError('Somehow got unnormalized vector?')
+                        if not np.isclose(np.dot(v1, v1), 1): raise ArithmeticError('Somehow got unnormalized vector?')
                         gv1 = starset.crys.g_direc(g, v1)
                         g00 = np.dot(v0, gv0)
                         g11 = np.dot(v1, gv1)
