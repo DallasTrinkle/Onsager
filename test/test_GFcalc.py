@@ -120,4 +120,13 @@ class GreenFuncCrystalTests(unittest.TestCase):
                    np.array([-a0, 0, 0]), np.array([0, -a0, 0]), np.array([0, 0, -a0])]
         for v1 in veclist:
             for v2 in veclist:
+                # print('{}: '.format(v1+v2) + '{} vs {} vs {}'.format(B2_GF(0,0,v1+v2),B2_GF(1,1,v1+v2),BCC_GF(0,0,v1+v2)))
                 self.assertAlmostEqual(BCC_GF(0,0,v1+v2), B2_GF(0,0,v1+v2), places=5)
+                self.assertAlmostEqual(BCC_GF(0, 0, v1 + v2), B2_GF(1, 1, v1 + v2), places=5)
+        for jlist in B2_jumpnetwork:
+            for (i,j), dx in jlist:
+                # convert our B2 dx into a corresponding BCC dx:
+                BCCdx = (0.5*a0)*np.round(dx/(0.5*a0))
+                # print('({},{}), {} / {}: '.format(i,j,dx,BCCdx) + '{} vs {}'.format(B2_GF(i,j,dx), BCC_GF(0,0,BCCdx)))
+                self.assertAlmostEqual(BCC_GF(0, 0, BCCdx), B2_GF(i, j, dx), places=5)
+
