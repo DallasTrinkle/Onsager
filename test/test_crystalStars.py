@@ -65,7 +65,7 @@ def setupB2():
     return lattice, jumpnetwork
 
 def B2rates():
-    return np.array([1./8., 1./8.])
+    return np.array([1./12., 1./8.])
 
 
 class PairStateTests(unittest.TestCase):
