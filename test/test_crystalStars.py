@@ -412,7 +412,7 @@ class VectorStarTests(unittest.TestCase):
 
     def testVectorStarOuterProduct(self):
         """Do we generate the correct outer products for our star-vectors (symmetry checks)?"""
-        self.starset.generate(1)
+        self.starset.generate(2)
         self.vecstarset = stars.VectorStarSet(self.starset)
         self.assertEqual(np.shape(self.vecstarset.outer),
                          (3, 3, self.vecstarset.Nvstars, self.vecstarset.Nvstars))
@@ -458,6 +458,7 @@ class VectorStarFCCTests(VectorStarTests):
         self.starset.generate(2)
         self.vecstarset = stars.VectorStarSet(self.starset)
         # nn + nn = 4 stars, and that should make 5 star-vectors!
+        self.assertEqual(self.starset.Nstars, 4)
         self.assertEqual(self.vecstarset.Nvstars, 5)
 
     def testVectorStarConsistent(self):
@@ -492,6 +493,7 @@ class VectorStarHCPTests(VectorStarTests):
         self.starset.generate(1)
         self.vecstarset = stars.VectorStarSet(self.starset)
         # two stars, with two vectors: one basal, one along c (more or less)
+        self.assertEqual(self.starset.Nstars, 2)
         self.assertEqual(self.vecstarset.Nvstars, 2+2)
 
 class VectorStarBCCTests(VectorStarTests):
@@ -501,12 +503,28 @@ class VectorStarBCCTests(VectorStarTests):
         self.chem = 0
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+    def testVectorStarCount(self):
+        """Does our star vector count make any sense?"""
+        self.starset.generate(2)
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        # nn + nn = 4 stars, and that should make 4 star-vectors!
+        self.assertEqual(self.starset.Nstars, 4)
+        self.assertEqual(self.vecstarset.Nvstars, 4)
+
 class VectorStarB2Tests(VectorStarTests):
     """Set of tests that our VectorStar class is behaving correctly, for B2"""
     def setUp(self):
         self.crys, self.jumpnetwork = setupB2()
         self.chem = 0
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+    def testVectorStarCount(self):
+        """Does our star vector count make any sense?"""
+        self.starset.generate(2)
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        # nn + nn = 6 stars, and that should make 10 star-vectors!
+        self.assertEqual(self.starset.Nstars, 5)
+        self.assertEqual(self.vecstarset.Nvstars, 10)
 
 
 import onsager.GFcalc as GFcalc
@@ -539,7 +557,8 @@ class VectorStarGFlinearTests(unittest.TestCase):
         for i in range(self.vecstarset.Nvstars):
             for j in range(self.vecstarset.Nvstars):
                 # test the construction
-                self.assertAlmostEqual(sum(GFexpand[i, j, :]), 0)
+                GFsum = np.sum(GFexpand[i,j,:])
+                self.assertAlmostEqual(GFsum, 0, msg='Failure for {},{}: GF= {}'.format(i,j,GFsum))
                 g = 0
                 for si, vi in zip(self.vecstarset.vecpos[i], self.vecstarset.vecvec[i]):
                     for sj, vj in zip(self.vecstarset.vecpos[j], self.vecstarset.vecvec[j]):
