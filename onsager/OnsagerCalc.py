@@ -1125,6 +1125,7 @@ class VacancyMediated(object):
         # G = np.dot(pinv2(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om), rcond=1e-6), G0)
         etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
+        biasSvec -= np.dot(delta_om, etaS0)
         outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
         outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
         etaSvec = np.dot(G,biasSvec)
@@ -1224,7 +1225,7 @@ class VacancyMediated(object):
             #          np.dot(np.dot(self.L0sscalc.VV, bar_delta_om_etaS), np.dot(G_bar, bar_delta_om_etaS)))/self.N
             #  + np.dot(np.dot(self.vkinetic.outer, biasSproj), etaSproj))
 
-        return L0vv, D0ss + L1ss, -D0ss + L1sv, D0ss - L0ss + L1vv
+        return L0vv, L0ss + L1ss, -L0ss + L1sv, D0ss - L0ss + L1vv
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
 crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)
