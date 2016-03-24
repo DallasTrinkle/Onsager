@@ -1098,13 +1098,17 @@ class VacancyMediated(object):
         biasVvec = np.zeros(self.vkinetic.Nvstars)
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
                    np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
+        # new idea: construct actual omega (not domega)... so this is omega0 + domega:
+        om = np.dot(self.om1expansion, omega1) + np.dot(self.om2expansion, omega2)
         for sv,starindex in enumerate(self.vstar2kin):
             svvacindex = self.kin2vacancy[starindex]  # vacancy
             delta_om[sv,sv] += np.dot(self.om1escape[sv,:],omega1escape[sv,:]) - \
                                np.dot(self.om1_om0escape[sv,:], omega0escape[svvacindex,:]) + \
                                np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
                                np.dot(self.om2_om0escape[sv,:], omega0escape[svvacindex,:])
-            # note: our solute bias is negative of the contribution to the vacancy, and also the
+            om[sv,sv] += np.dot(self.om1escape[sv, :], omega1escape[sv, :]) + \
+                         np.dot(self.om2escape[sv, :], omega2escape[sv, :])
+                 # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
             biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
             biasVvec[sv] = np.dot(self.om1bias[sv,:], omega1escape[sv,:])*np.sqrt(prob[starindex]) - \
@@ -1116,6 +1120,7 @@ class VacancyMediated(object):
         G0 = np.dot(self.GFexpansion, GF)
         # print('det: ', np.linalg.det(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)))
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
+        # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
         # If we "disconnect" the origin states, we would end up with a singular matrix.
         # G = np.dot(pinv2(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om), rcond=1e-6), G0)
         etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
@@ -1144,6 +1149,10 @@ class VacancyMediated(object):
         # TODO: vacancy-vacancy bare term, maybe more? Involves essentially
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
         # from *both* L1sv and L1vv. Then that will fix our other problems.
+
+        print('biasSvec: ', biasSvec)
+        print('biasStry: ', np.dot(om, etaSvec))
+        print('diff: ', (biasSvec - np.dot(om, etaSvec))[:8])
 
         if comp_vs2solute_vs.shape[0] > 0:
             # proj = np.eye(self.vkinetic.Nvstars) - np.dot(comp_vs2solute_vs.T, comp_vs2solute_vs)*0 #/self.vkinetic.Nvstars
@@ -1174,7 +1183,12 @@ class VacancyMediated(object):
             G_bar = np.linalg.inv(A)  # [solute SV index, solute SV index]
             # G_bar_expand = np.dot(comp_vs2solute_vs.T, np.dot(G_bar, comp_vs2solute_vs))
             # alpha = np.array([np.tensordot(etas, VB) for VB in self.L0sscalc.VectorBasis ])
-            biasStry = np.dot(B, etaSvec) + np.dot(comp_vs2solute_vs, np.dot(np.linalg.inv(G0), etaSvec))
+            # biasStry = np.dot(B, etaSvec) + np.dot(comp_vs2solute_vs, np.dot(np.linalg.inv(G0), etaSvec))
+            ometaSvec = np.dot(om, etaSvec)
+            ometaSvec[8:] = 0.
+            etaScorrec = -np.dot(np.linalg.inv(om), ometaSvec)
+            print('correction: ', np.dot(np.dot(self.vkinetic.outer, etaScorrec), biasSvec)[0,1]/self.N)
+            biasStry = np.dot(comp_vs2solute_vs, ometaSvec)
             etaSbar = np.dot(G_bar, biasSbar) - np.dot(G_bar, biasStry)  # [solute SV index]
             outer_etaSbar = np.dot(self.L0sscalc.VV, etaSbar)  # [3,3, solute SV index]
             # outer_etaSbar_vk = np.dot(self.vkinetic.outer, np.dot(comp_vs2solute_vs.T, etaSbar))
@@ -1187,10 +1201,11 @@ class VacancyMediated(object):
             #          2*np.dot(outer_etaSbar, delta_om_etaS)/self.N
             print('D0ss: ', D0ss[0,1])
             print('L1ss: ', L1ss[0,1])
-            print('etaSbar*biasSbar: ', (np.dot(outer_etaSbar, biasSbar))[0,1])
+            print('etaSbar*biasSbar: ', (np.dot(outer_etaSbar, biasSbar))[0,1]/self.N)
             print('biasSvec: ', biasSvec)
             print('domega*etaSvec: ', np.dot(delta_om, etaSvec))
             print('biasStry: ', np.dot(delta_om, etaSvec) + np.dot(np.linalg.inv(G0), etaSvec))
+            print('biasStry2: ', np.dot(om, etaSvec))
 
             # print('-2*etaSbar*domega*etaS: ', (-2*np.dot(outer_etaSbar, bar_delta_om_etaS))[0,1])
             # print('-2*etaSbar*domega*etaS: ', (-2*np.dot(outer_etaSbar_vk, delta_om_etaS))[0,1])

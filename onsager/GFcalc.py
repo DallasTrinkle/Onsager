@@ -110,6 +110,12 @@ class GFCrystalcalc(object):
     __HDF5list__ = ('N', 'invmap', 'NG', 'grouparray', 'indexpair', 'kptgrid',
                     'kpts', 'wts', 'Nkpt', 'FTjumps', 'SEjumps')
 
+    def __str__(self):
+        return 'GFcalc for crystal (chemistry={}):\n{}\nkpt grid: {} ({})'.format(self.chem,
+                                                                                  self.crys,
+                                                                                  self.kptgrid,
+                                                                                  self.Nkpt)
+
     def addhdf5(self, HDF5group):
         """
         Adds an HDF5 representation of object into an HDF5group (needs to already exist).

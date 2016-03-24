@@ -908,9 +908,8 @@ class VectorStarSet(object):
                             for j in range(self.Nvstars):
                                 for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                     if Rj == FS:
-                                        rate1expansion[i, j, k] += np.dot(vi, vj)
                                         rate0expansion[i, j, jt] += np.dot(vi, vj)
-
+                                        rate1expansion[i, j, k] += np.dot(vi, vj)
         # symmetrize
         for i in range(self.Nvstars):
             for j in range(i+1, self.Nvstars):

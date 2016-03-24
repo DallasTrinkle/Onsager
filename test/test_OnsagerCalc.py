@@ -289,7 +289,7 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         print('Crystal2: ' + self.crystalname2)
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
+        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 3)
         thermaldef = {'preV': np.ones(len(self.sitelist)), 'eneV': np.zeros(len(self.sitelist)),
                       'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
         thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
@@ -323,21 +323,20 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         print('Crystal2: ' + self.crystalname2)
         print('  Solute test: SV binding = ', self.solutebinding)
         kT = 1.
-        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
-        # we will make this test using LIMB
+        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 3)
+        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 3)
+        # we will make this test using LIMB; add in the solute-vacancy interaction
         thermaldef = {'preV': np.ones(len(self.sitelist)), 'eneV': np.zeros(len(self.sitelist)),
                       'preS': np.ones(len(self.sitelist)), 'eneS': np.zeros(len(self.sitelist)),
-                      'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
-        # now to add in some random solute-vacancy energies.
-        thermaldef['preSV'] = self.solutebinding*np.ones(len(Diffusivity.interactlist()))
-        thermaldef['eneSV'] = np.zeros(len(Diffusivity.interactlist()))
+                      'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork)),
+                      'preSV': self.solutebinding*np.ones(len(Diffusivity.interactlist())),
+                      'eneSV': np.zeros(len(Diffusivity.interactlist()))}
         thermaldef.update(Diffusivity.makeLIMBpreene(**thermaldef))
         thermaldef2 = {'preV': np.ones(len(self.sitelist2)), 'eneV': np.zeros(len(self.sitelist2)),
                        'preS': np.ones(len(self.sitelist2)), 'eneS': np.zeros(len(self.sitelist2)),
-                       'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
-        thermaldef2['preSV'] = self.solutebinding*np.ones(len(Diffusivity2.interactlist()))
-        thermaldef2['eneSV'] = np.zeros(len(Diffusivity2.interactlist()))
+                       'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2)),
+                       'preSV': self.solutebinding * np.ones(len(Diffusivity2.interactlist())),
+                       'eneSV': np.zeros(len(Diffusivity2.interactlist()))}
         thermaldef2.update(Diffusivity2.makeLIMBpreene(**thermaldef2))
 
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
