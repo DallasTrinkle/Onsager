@@ -60,12 +60,12 @@ def BCCrates():
     return np.array([1./8.])
 
 def setupB2():
-    lattice = crystal.Crystal(np.eye(3), [np.array([0., 0., 0.]), np.array([0.25, 0.25, 0.25])])
+    lattice = crystal.Crystal(np.eye(3), [np.array([0., 0., 0.]), np.array([0.45, 0.45, 0.45])])
     jumpnetwork = lattice.jumpnetwork(0, 0.9)
     return lattice, jumpnetwork
 
 def B2rates():
-    return np.array([1./12., 1./8.])
+    return np.array([1./8., 1./8., 1./8.])
 
 
 class PairStateTests(unittest.TestCase):
@@ -522,9 +522,9 @@ class VectorStarB2Tests(VectorStarTests):
         """Does our star vector count make any sense?"""
         self.starset.generate(2)
         self.vecstarset = stars.VectorStarSet(self.starset)
-        # nn + nn = 6 stars, and that should make 10 star-vectors!
-        self.assertEqual(self.starset.Nstars, 5)
-        self.assertEqual(self.vecstarset.Nvstars, 10)
+        # nn + nn = 10 stars, and that should make 20 star-vectors!
+        self.assertEqual(self.starset.Nstars, 10)
+        self.assertEqual(self.vecstarset.Nvstars, 20)
 
 
 import onsager.GFcalc as GFcalc
@@ -577,7 +577,8 @@ class VectorStarGFlinearTests(unittest.TestCase):
                         except: continue
                         g += np.dot(vi, vj)*self.GF(ds.i, ds.j, ds.dx)
                 self.assertAlmostEqual(g, np.dot(GFexpand[i, j, :], gexpand))
-        self.assertAlmostEqual(np.sum(GFexpand), 0)
+        # Removed this test. It's not generally true.
+        # self.assertAlmostEqual(np.sum(GFexpand), 0)
         # print(np.dot(GFexpand, gexpand))
 
     def testConstructGF(self):
