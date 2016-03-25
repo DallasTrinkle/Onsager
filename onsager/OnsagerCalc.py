@@ -557,7 +557,8 @@ class VacancyMediated(object):
         # self.kinetic = self.thermo + self.NNstar
         self.vkinetic = stars.VectorStarSet()
         self.generate(Nthermo)
-        self.L0sscalc = self.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
+        # moved this into generate:
+        # self.L0sscalc = self.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
         self.tags = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
         self.tagdict = {}
         for taglist in self.tags.values():
@@ -597,9 +598,6 @@ class VacancyMediated(object):
         for i, SP in zip(reversed(range(len(self.om1_SP))), reversed(self.om1_SP)):
             if SP[0] in self.outerkin and SP[1] in self.outerkin:
                 self.om1_jn.pop(i), self.om1_jt.pop(i), self.om1_SP.pop(i)
-        # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
-        # Vector star set, generates a LOT of our calculation:
-        self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
         # empty dictionaries to store GF values
         self.GFvalues, self.Lvvvalues, self.etavvalues = {}, {}, {}
         self.om1_om0, self.om1_om0escape, self.om1expansion, self.om1escape = \
@@ -629,6 +627,14 @@ class VacancyMediated(object):
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
                                   for jumplist in self.om2_jn]
+        self.L0sscalc = self.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
+        # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
+        # Vector star set, generates a LOT of our calculation:
+        self.VectorBasis = self.L0sscalc.VectorBasis.copy()
+        if len(self.VectorBasis) > 0:
+            self.GFexpansion, self.GFstarset, self.GFOSexpansion = self.vkinetic.GFexpansion(self.VectorBasis)
+        else:
+            self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
 
     def solutecalculator(self):
         """
@@ -1077,14 +1083,6 @@ class VacancyMediated(object):
             if self.kinetic.states[self.kinetic.stars[kindex][0]].iszero(): prob[kindex] = 0
             else: prob[kindex] *= np.exp(-bFSV[tindex])
 
-        # if we have bias to deal with, so let's deal with it.
-        # note: *technically* we can return a matrix of shape (0,N); might take advantage of that?
-        comp_vs2solute_vs = self.vkinetic.unitcellVectorBasisfolddown(self.L0sscalc.VectorBasis)
-        if comp_vs2solute_vs.shape[0] > 0:
-            for sv,starindex in enumerate(self.vstar2kin):
-                svvacindex = self.kin2vacancy[starindex]  # vacancy
-                comp_vs2solute_vs[:, sv] *= np.sqrt(probV[svvacindex]) # / sqrt(self.N) ??
-
         # 3. set up symmetric rates: omega0, omega1, omega2
         #    and escape rates omega0escape, omega1escape, omega2escape
         omega0, omega1, omega2, omega0escape, omega1escape, omega2escape = \
@@ -1096,21 +1094,15 @@ class VacancyMediated(object):
         # are removed from the state space.
         biasSvec = np.zeros(self.vkinetic.Nvstars)
         biasVvec = np.zeros(self.vkinetic.Nvstars)
-        om2 = np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
-        delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + om2
-                   # np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
-        # new idea: construct actual omega (not domega)... so this is omega0 + domega:
-        om = np.dot(self.om1expansion, omega1) + np.dot(self.om2expansion, omega2)
+        delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
+                   np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
+        delta_omOS = -np.dot(self.om2_om0, omega0)
         for sv,starindex in enumerate(self.vstar2kin):
             svvacindex = self.kin2vacancy[starindex]  # vacancy
-            om2[sv,sv] += np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
-                          np.dot(self.om2_om0escape[sv,:], omega0escape[svvacindex,:])
             delta_om[sv,sv] += np.dot(self.om1escape[sv,:],omega1escape[sv,:]) - \
                                np.dot(self.om1_om0escape[sv,:], omega0escape[svvacindex,:]) + \
                                np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
                                np.dot(self.om2_om0escape[sv,:], omega0escape[svvacindex,:])
-            om[sv,sv] += np.dot(self.om1escape[sv, :], omega1escape[sv, :]) + \
-                         np.dot(self.om2escape[sv, :], omega2escape[sv, :])
                  # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
             biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
@@ -1121,20 +1113,16 @@ class VacancyMediated(object):
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
+        G0OS = np.dot(self.GFOSexpansion, GF)
         # print('det: ', np.linalg.det(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)))
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
         # If we "disconnect" the origin states, we would end up with a singular matrix.
         # G = np.dot(pinv2(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om), rcond=1e-6), G0)
-        etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
-        etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
-        biasSvec -= np.dot(om2, etaS0)
-        outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
-        outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
+        ### NEED TO PUT etaV0, etaV0outer back here!!
         etaSvec = np.dot(G,biasSvec)
         outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
         outer_etaSvec = np.dot(self.vkinetic.outer, etaSvec)
-        delta_om_etaS = np.dot(delta_om, etaSvec)
         # delta_om_etaV = np.dot(delta_om, np.dot(G, biasVvec))
 
         # L1ss = (np.dot(outer_etaSvec, biasSvec) + 2*np.dot(outer_etaS0, delta_om_etaS))/self.N
@@ -1154,82 +1142,6 @@ class VacancyMediated(object):
         # TODO: vacancy-vacancy bare term, maybe more? Involves essentially
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
         # from *both* L1sv and L1vv. Then that will fix our other problems.
-
-        # print('biasSvec: ', biasSvec)
-        # print('biasStry: ', np.dot(om, etaSvec))
-        # print('diff: ', (biasSvec - np.dot(om, etaSvec))[:8])
-
-        if comp_vs2solute_vs.shape[0] > 0:
-            # proj = np.eye(self.vkinetic.Nvstars) - np.dot(comp_vs2solute_vs.T, comp_vs2solute_vs)*0 #/self.vkinetic.Nvstars
-            # Gproj = np.dot(proj, np.dot(G, proj))
-            # biasSproj = np.dot(proj, biasSvec)
-            # etaSproj = np.dot(Gproj, biasSproj)
-            ## total bias projected into the null space: is it zero?
-            # biasStotal = np.zeros(3)
-            # etaStotal = np.zeros(3)
-            # for bs, es, veclist, starindex in zip(biasSvec, etaSvec, self.vkinetic.vecvec, self.vstar2kin):
-            #     biasStotal += bs*np.sqrt(prob[starindex])*sum(veclist)
-            #     etaStotal += es*np.sqrt(prob[starindex])*sum(veclist)
-            # print('Total biasS: ', biasStotal)
-            # print('Total etaS: ', etaStotal)
-            etaSbar = np.dot(comp_vs2solute_vs, etaSvec)
-            print('etaS projection: ', etaSbar)
-            print('etaS0: ', etas*np.sqrt(self.N))
-
-            biasSbar = np.dot(comp_vs2solute_vs, biasSvec)  # [solute SV index]
-            B = np.dot(comp_vs2solute_vs, delta_om)  # [solute SV index, complex SV index]
-            # C = B.T  # [complex SV index, solute SV index]
-            # print('VectorBasis: ', len(self.L0sscalc.VectorBasis))
-            A = np.dot(B, comp_vs2solute_vs.T) + 0.*np.eye(len(self.L0sscalc.VectorBasis)) # [solute SV index, solute SV index]
-            # A = np.zeros(len(self.L0sscalc.VectorBasis))
-            # C = np.dot(delta_om, comp_vs2solute_vs.T)  # = B.T
-            # A = np.dot(np.dot(comp_vs2solute_vs, delta_om), comp_vs2solute_vs.T)
-            # SD = A - np.dot(np.dot(B, G), C)
-            # G_bar = np.linalg.inv(A - np.dot(np.dot(B, G), C))  # [solute SV index, solute SV index]
-            G_bar = np.linalg.inv(A)  # [solute SV index, solute SV index]
-            # G_bar_expand = np.dot(comp_vs2solute_vs.T, np.dot(G_bar, comp_vs2solute_vs))
-            # alpha = np.array([np.tensordot(etas, VB) for VB in self.L0sscalc.VectorBasis ])
-            # biasStry = np.dot(B, etaSvec) + np.dot(comp_vs2solute_vs, np.dot(np.linalg.inv(G0), etaSvec))
-            ometaSvec = np.dot(om, etaSvec)
-            ometaSvec[8:] = 0.
-            etaScorrec = -np.dot(np.linalg.inv(om), ometaSvec)
-            print('correction: ', np.dot(np.dot(self.vkinetic.outer, etaScorrec), biasSvec)[0,1]/self.N)
-            biasStry = np.dot(comp_vs2solute_vs, ometaSvec)
-            etaSbar = np.dot(G_bar, biasSbar) - np.dot(G_bar, biasStry)  # [solute SV index]
-            outer_etaSbar = np.dot(self.L0sscalc.VV, etaSbar)  # [3,3, solute SV index]
-            # outer_etaSbar_vk = np.dot(self.vkinetic.outer, np.dot(comp_vs2solute_vs.T, etaSbar))
-            # bar_delta_om_etaSproj = np.dot(comp_vs2solute_vs, np.dot(delta_om, etaSproj))  # [solute SV index]
-            # bar_delta_om_etaS = np.dot(comp_vs2solute_vs, delta_om_etaS)  # [solute SV index]
-            # CGB = np.dot(C, np.dot(G_bar, B))
-
-            # outer_etaSbar = np.dot(self.vkinetic.outer, np.dot(comp_vs2solute_vs.T, etaSbar))
-            # L1ss += np.dot(np.dot(self.L0sscalc.VV, biasSbar), etaSbar) - \
-            #          2*np.dot(outer_etaSbar, delta_om_etaS)/self.N
-            print('D0ss: ', D0ss[0,1])
-            print('L1ss: ', L1ss[0,1])
-            print('etaSbar*biasSbar: ', (np.dot(outer_etaSbar, biasSbar))[0,1]/self.N)
-            print('biasSvec: ', biasSvec)
-            print('domega*etaSvec: ', np.dot(delta_om, etaSvec))
-            print('biasStry: ', np.dot(delta_om, etaSvec) + np.dot(np.linalg.inv(G0), etaSvec))
-            print('biasStry2: ', np.dot(om, etaSvec))
-            print('diff: ', (biasSvec - np.dot(om, etaSvec))[:8])
-
-            # print('-2*etaSbar*domega*etaS: ', (-2*np.dot(outer_etaSbar, bar_delta_om_etaS))[0,1])
-            # print('-2*etaSbar*domega*etaS: ', (-2*np.dot(outer_etaSbar_vk, delta_om_etaS))[0,1])
-            # print('etaS*domega*G_bar*domega*etaS: ',
-            #       np.dot(np.dot(self.L0sscalc.VV, bar_delta_om_etaS), np.dot(G_bar, bar_delta_om_etaS))[0,1])
-            # print('etaS*domega*G_bar*domega*etaS: ',
-            #       np.dot(outer_etaSvec, np.dot(CGB, etaSvec))[0,1])
-
-            # print('etaSproj*biasSproj: ', np.dot(np.dot(self.vkinetic.outer, biasSproj), etaSproj)[0,1])
-                  # np.dot(np.dot(self.vkinetic.outer, delta_om_etaS), np.dot(G_bar_expand, delta_om_etaS))[0,1])
-            # seems (?!?!) like it should be first term - second term/2 (not sure where the self.N goes)
-            # BUT THEN also a probV term is showing up... for some reason?
-            # L1ss += np.dot(outer_etaSbar, biasSbar)/self.N
-            # L1ss += (np.dot(outer_etaSbar, biasSbar) - \
-            #          2*np.dot(outer_etaSbar, bar_delta_om_etaS) + \
-            #          np.dot(np.dot(self.L0sscalc.VV, bar_delta_om_etaS), np.dot(G_bar, bar_delta_om_etaS)))/self.N
-            #  + np.dot(np.dot(self.vkinetic.outer, biasSproj), etaSproj))
 
         return L0vv, L0ss + L1ss, -L0ss + L1sv, D0ss - L0ss + L1vv
 
