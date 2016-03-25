@@ -1194,7 +1194,7 @@ class VacancyMediated(object):
 class VacancyMediatedMeta(VacancyMediated):
     """Trying out metastable preening"""
 
-    def __init__(self, crys, chem, sitelist, jumpnetwork, Nthermo = 0, meta_tags = []):
+    def __init__(self, crys, chem, sitelist, jumpnetwork, Nthermo=0, meta_tags=[], jumpnetwork2=[]):
         """
         will fill it later
         """
@@ -1214,9 +1214,11 @@ class VacancyMediatedMeta(VacancyMediated):
             self.om0_jn = copy.deepcopy(jumpnetwork)
             self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4) # Nmax?
             # do some initial setup:
-            self.thermo = stars.StarSetMeta(self.jumpnetwork, self.crys, self.chem, Nthermo, meta_tags=meta_tags)
-            self.NNstar = stars.StarSetMeta(self.jumpnetwork, self.crys, self.chem, 1, meta_tags=meta_tags)
-
+            self.thermo = stars.StarSetMeta(self.jumpnetwork, self.crys, self.chem, Nthermo, meta_tags=meta_tags,
+                                            jumpnetwork2=jumpnetwork2)
+            self.NNstar = stars.StarSetMeta(self.jumpnetwork, self.crys, self.chem, 1, meta_tags=meta_tags,
+                                            jumpnetwork2=jumpnetwork2)
+            self.vkinetic = stars.VectorStarSet()
             # separating out the thermo and kinetic part from here on
             # generate and prune thermo data
             self.generatethermometa(Nthermo, meta_tags)
@@ -1235,46 +1237,19 @@ class VacancyMediatedMeta(VacancyMediated):
         """
         if Nthermo == getattr(self, 'Nthermo', 0): return
         self.Nthermo = Nthermo
-        # generate and prune kinetic data
-        self.vkinetic = stars.VectorStarSet()
-        self.generatekineticmeta(Nthermo)
+        self.thermo.generate(Nthermo, meta_tags)
 
-        # self.thermo.generate(Nthermo, meta_tags)
-        # state_delete_list = []
-        # for state_indx, state in enumerate(self.thermo.states):
-        #     for site_index, sites in enumerate(self.sitelist):
-        #        if state.i in sites and meta_tags[site_index]:
-        #             if state.i is not state.j:
-        #                 state_delete_list.append(state_indx)
-        #                 break
-        # stars_delete_list = []
-        # for index in state_delete_list:
-        #     for star_indx, star_list in enumerate(self.thermo.stars):
-        #         if index in star_list and star_indx not in stars_delete_list:
-        #             stars_delete_list.append(star_indx)
-        #
-        # stars_delete_list.sort(reverse=True)
-        # for i in stars_delete_list:
-        #     self.thermo.stars.pop(i)
-        # new_thermo_states = []
-        # new_stars = []
-        # new_state_index = 0
-        # new_star_index = 0
-        # for star in self.thermo.stars:
-        #     new_stars.append([])
-        #     for i in star:
-        #         new_thermo_states.append(self.thermo.states[i])
-        #         new_stars[new_star_index].append(new_state_index)
-        #         new_state_index += 1
-        #     new_star_index += 1
-        # self.thermo.states = copy.deepcopy(new_thermo_states)
-        # self.thermo.stars = copy.deepcopy(new_stars)
+
+        # generate and prune kinetic data
+        self.generatekineticmeta(Nthermo)
 
     def generatekineticmeta(self, Nthermo):
         """
         no idea. will fill it later
         """
         self.kinetic = self.thermo + self.NNstar
+        # print(type(self.kinetic))
+        # print(self.kinetic.jumplist2)
         self.vkinetic.generate(self.kinetic)
         # some indexing helpers:
         # thermo2kin maps star index in thermo to kinetic (should just be range(n), but we use this for safety)
@@ -1294,9 +1269,9 @@ class VacancyMediatedMeta(VacancyMediated):
         self.om2_jn, self.om2_jt, self.om2_SP = self.kinetic.jumpnetwork_omega2()
         # Prune the om1 list: remove entries that have jumps between stars in outerkin:
         # work in reverse order so that popping is safe (and most of the offending entries are at the end
-        for i, SP in zip(reversed(range(len(self.om1_SP))), reversed(self.om1_SP)):
-            if SP[0] in self.outerkin and SP[1] in self.outerkin:
-                self.om1_jn.pop(i), self.om1_jt.pop(i), self.om1_SP.pop(i)
+        # for i, SP in zip(reversed(range(len(self.om1_SP))), reversed(self.om1_SP)):
+        #     if SP[0] in self.outerkin and SP[1] in self.outerkin:
+        #         self.om1_jn.pop(i), self.om1_jt.pop(i), self.om1_SP.pop(i)
 
     def gfconstruct(self, Nthermo):
         """
