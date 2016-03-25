@@ -415,7 +415,7 @@ class StarSet(object):
 
     def copy(self, empty=False):
         """Return a copy of the StarSet; done as efficiently as possible; empty means skip the shells, etc."""
-        newStarSet = StarSet(None, None, None)  # a little hacky... creates an empty class
+        newStarSet = self.__class__(None, None, None)  # a little hacky... creates an empty class
         newStarSet.jumpnetwork_index = copy.deepcopy(self.jumpnetwork_index)
         newStarSet.jumplist = self.jumplist.copy()
         newStarSet.crys = self.crys
@@ -432,20 +432,20 @@ class StarSet(object):
         return newStarSet
 
     # removed combine; all it does is generate(s1.Nshells + s2.Nshells) with lots of checks...
-    # replaced with (more efficient?) __add__ and __radd__.
+    # replaced with (more efficient?) __add__ and __iadd__.
 
     def __add__(self, other):
-        """Add two StarSets together; done by making a copy of one, and radding"""
+        """Add two StarSets together; done by making a copy of one, and iadding"""
         if not isinstance(other, self.__class__): return NotImplemented
         if self.Nshells >= other.Nshells:
             scopy = self.copy()
-            scopy.__radd__(other)
+            scopy.__iadd__(other)
         else:
             scopy = other.copy()
-            scopy.__radd__(self)
+            scopy.__iadd__(self)
         return scopy
 
-    def __radd__(self, other):
+    def __iadd__(self, other):
         """Add another StarSet to this one; very similar to generate()"""
         threshold = 1e-8
         if not isinstance(other, self.__class__): return NotImplemented

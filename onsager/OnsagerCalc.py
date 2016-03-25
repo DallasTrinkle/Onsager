@@ -1096,12 +1096,15 @@ class VacancyMediated(object):
         # are removed from the state space.
         biasSvec = np.zeros(self.vkinetic.Nvstars)
         biasVvec = np.zeros(self.vkinetic.Nvstars)
-        delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
-                   np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
+        om2 = np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
+        delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + om2
+                   # np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
         # new idea: construct actual omega (not domega)... so this is omega0 + domega:
         om = np.dot(self.om1expansion, omega1) + np.dot(self.om2expansion, omega2)
         for sv,starindex in enumerate(self.vstar2kin):
             svvacindex = self.kin2vacancy[starindex]  # vacancy
+            om2[sv,sv] += np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
+                          np.dot(self.om2_om0escape[sv,:], omega0escape[svvacindex,:])
             delta_om[sv,sv] += np.dot(self.om1escape[sv,:],omega1escape[sv,:]) - \
                                np.dot(self.om1_om0escape[sv,:], omega0escape[svvacindex,:]) + \
                                np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
@@ -1125,7 +1128,7 @@ class VacancyMediated(object):
         # G = np.dot(pinv2(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om), rcond=1e-6), G0)
         etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
-        biasSvec -= np.dot(delta_om, etaS0)
+        biasSvec -= np.dot(om2, etaS0)
         outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
         outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
         etaSvec = np.dot(G,biasSvec)
@@ -1142,7 +1145,8 @@ class VacancyMediated(object):
         # L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
         #        np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
 
-        L1ss = np.dot(outer_etaSvec, biasSvec)/self.N
+        # L1ss = np.dot(outer_etaSvec, biasSvec)/self.N
+        L1ss = (np.dot(outer_etaSvec, biasSvec) + np.dot(outer_etaS0, biasSvec))/self.N
         L1sv = np.dot(outer_etaSvec, biasVvec)/self.N
         L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
                np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
@@ -1151,9 +1155,9 @@ class VacancyMediated(object):
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
         # from *both* L1sv and L1vv. Then that will fix our other problems.
 
-        print('biasSvec: ', biasSvec)
-        print('biasStry: ', np.dot(om, etaSvec))
-        print('diff: ', (biasSvec - np.dot(om, etaSvec))[:8])
+        # print('biasSvec: ', biasSvec)
+        # print('biasStry: ', np.dot(om, etaSvec))
+        # print('diff: ', (biasSvec - np.dot(om, etaSvec))[:8])
 
         if comp_vs2solute_vs.shape[0] > 0:
             # proj = np.eye(self.vkinetic.Nvstars) - np.dot(comp_vs2solute_vs.T, comp_vs2solute_vs)*0 #/self.vkinetic.Nvstars
@@ -1170,6 +1174,7 @@ class VacancyMediated(object):
             # print('Total etaS: ', etaStotal)
             etaSbar = np.dot(comp_vs2solute_vs, etaSvec)
             print('etaS projection: ', etaSbar)
+            print('etaS0: ', etas*np.sqrt(self.N))
 
             biasSbar = np.dot(comp_vs2solute_vs, biasSvec)  # [solute SV index]
             B = np.dot(comp_vs2solute_vs, delta_om)  # [solute SV index, complex SV index]
@@ -1207,6 +1212,7 @@ class VacancyMediated(object):
             print('domega*etaSvec: ', np.dot(delta_om, etaSvec))
             print('biasStry: ', np.dot(delta_om, etaSvec) + np.dot(np.linalg.inv(G0), etaSvec))
             print('biasStry2: ', np.dot(om, etaSvec))
+            print('diff: ', (biasSvec - np.dot(om, etaSvec))[:8])
 
             # print('-2*etaSbar*domega*etaS: ', (-2*np.dot(outer_etaSbar, bar_delta_om_etaS))[0,1])
             # print('-2*etaSbar*domega*etaS: ', (-2*np.dot(outer_etaSbar_vk, delta_om_etaS))[0,1])
@@ -1219,7 +1225,7 @@ class VacancyMediated(object):
                   # np.dot(np.dot(self.vkinetic.outer, delta_om_etaS), np.dot(G_bar_expand, delta_om_etaS))[0,1])
             # seems (?!?!) like it should be first term - second term/2 (not sure where the self.N goes)
             # BUT THEN also a probV term is showing up... for some reason?
-            L1ss += np.dot(outer_etaSbar, biasSbar)/self.N
+            # L1ss += np.dot(outer_etaSbar, biasSbar)/self.N
             # L1ss += (np.dot(outer_etaSbar, biasSbar) - \
             #          2*np.dot(outer_etaSbar, bar_delta_om_etaS) + \
             #          np.dot(np.dot(self.L0sscalc.VV, bar_delta_om_etaS), np.dot(G_bar, bar_delta_om_etaS)))/self.N
