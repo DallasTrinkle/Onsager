@@ -1097,6 +1097,7 @@ class VacancyMediated(object):
         # are removed from the state space.
         biasSvec = np.zeros(self.vkinetic.Nvstars)
         biasVvec = np.zeros(self.vkinetic.Nvstars)
+        om = np.dot(self.om1expansion, omega1) + np.dot(self.om2expansion, omega2)
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
                    np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
         for sv,starindex in enumerate(self.vstar2kin):
@@ -1105,7 +1106,9 @@ class VacancyMediated(object):
                                np.dot(self.om1_om0escape[sv,:], omega0escape[svvacindex,:]) + \
                                np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
                                np.dot(self.om2_om0escape[sv,:], omega0escape[svvacindex,:])
-                 # note: our solute bias is negative of the contribution to the vacancy, and also the
+            om[sv, sv] += np.dot(self.om1escape[sv, :], omega1escape[sv, :]) + \
+                          np.dot(self.om2escape[sv, :], omega2escape[sv, :])
+            # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
             biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
             biasVvec[sv] = np.dot(self.om1bias[sv,:], omega1escape[sv,:])*np.sqrt(prob[starindex]) - \
@@ -1144,6 +1147,14 @@ class VacancyMediated(object):
             print('  C: ', C.shape)
             print('  Dinv: ', Dinv.shape)
 
+            G0inv = np.linalg.inv(G0)
+            SGinv = np.linalg.inv(G0OSOS - np.dot(G0OS, np.dot(G0inv, G0OS.T)))
+            omtry = G0inv + \
+                    np.dot(G0inv, np.dot(G0OS.T, np.dot(SGinv, np.dot(G0OS, G0inv)))) + \
+                    delta_om
+            print('om-omtry:')
+            print(om[:8,:8] - omtry[:8,:8])
+
         # etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         # outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
@@ -1151,6 +1162,10 @@ class VacancyMediated(object):
         etaVvec, etaSvec = np.dot(G,biasVvec), np.dot(G,biasSvec)
         outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer, etaSvec)
         # delta_om_etaV = np.dot(delta_om, np.dot(G, biasVvec))
+        biasStry = np.dot(om, etaSvec)
+        print('biasSvec: ', biasSvec)
+        print('biasStry: ', biasStry)
+        print('diff: ', biasSvec - biasStry)
 
         # L1ss = (np.dot(outer_etaSvec, biasSvec) + 2*np.dot(outer_etaS0, delta_om_etaS))/self.N
         # L1sv = (np.dot(outer_etaSvec, biasVvec) +
