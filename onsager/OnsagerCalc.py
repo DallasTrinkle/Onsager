@@ -1098,6 +1098,7 @@ class VacancyMediated(object):
         biasSvec = np.zeros(self.vkinetic.Nvstars)
         biasVvec = np.zeros(self.vkinetic.Nvstars)
         om = np.dot(self.om1expansion, omega1) + np.dot(self.om2expansion, omega2)
+        om2 = np.dot(self.om2expansion, omega2)
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
                    np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
         for sv,starindex in enumerate(self.vstar2kin):
@@ -1108,6 +1109,7 @@ class VacancyMediated(object):
                                np.dot(self.om2_om0escape[sv,:], omega0escape[svvacindex,:])
             om[sv, sv] += np.dot(self.om1escape[sv, :], omega1escape[sv, :]) + \
                           np.dot(self.om2escape[sv, :], omega2escape[sv, :])
+            om2[sv, sv] += np.dot(self.om2escape[sv, :], omega2escape[sv, :])
             # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
             biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
@@ -1162,7 +1164,8 @@ class VacancyMediated(object):
 
         etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
-        # outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
+        biasSvec -= np.dot(om2, etaS0)
+        outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
         outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
         etaVvec, etaSvec = np.dot(G,biasVvec), np.dot(G,biasSvec)
         outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer, etaSvec)
@@ -1181,7 +1184,7 @@ class VacancyMediated(object):
         #        np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
 
         # L1ss = np.dot(outer_etaSvec, biasSvec)/self.N
-        L1ss = np.dot(outer_etaSvec, biasSvec)/self.N
+        L1ss = (np.dot(outer_etaSvec, biasSvec) + 2.*np.dot(outer_etaS0, biasSvec))/self.N
         L1sv = np.dot(outer_etaSvec, biasVvec)/self.N
         L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
                np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
@@ -1190,7 +1193,7 @@ class VacancyMediated(object):
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
         # from *both* L1sv and L1vv. Then that will fix our other problems.
 
-        return L0vv, D0ss + L1ss, -L0ss + L1sv, D0ss - L0ss + L1vv
+        return L0vv, L0ss + L1ss, -L0ss + L1sv, D0ss - L0ss + L1vv
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
 crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)
