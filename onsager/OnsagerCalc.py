@@ -1154,8 +1154,13 @@ class VacancyMediated(object):
                     delta_om
             print('om-omtry:')
             print(om[:8,:8] - omtry[:8,:8])
+            Goffdiag = np.dot(SDinv, G0OS) - np.dot(SDinv, np.dot(B, np.dot(Dinv, G0)))
+            print('Goffdiag.shape:', Goffdiag.shape)
+            print(Goffdiag[:,:8])
+            GOSOS = np.dot(SDinv, G0OSOS) - np.dot(SDinv, np.dot(B, np.dot(Dinv, G0OS.T)))
+            print('GOSOS: ', GOSOS)
 
-        # etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
+        etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         # outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
         outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
