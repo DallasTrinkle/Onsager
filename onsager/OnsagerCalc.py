@@ -632,7 +632,10 @@ class VacancyMediated(object):
         # Vector star set, generates a LOT of our calculation:
         self.VectorBasis = self.L0sscalc.VectorBasis.copy()
         if len(self.VectorBasis) > 0:
-            self.GFexpansion, self.GFstarset, self.GFOSexpansion = self.vkinetic.GFexpansion(self.VectorBasis)
+            self.GFexpansion, self.GFstarset, self.GFOSexpansion, self.GFOSOSexpansion = \
+                self.vkinetic.GFexpansion(self.VectorBasis)
+            self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
+                self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt, self.VectorBasis)
         else:
             self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
 
@@ -1096,7 +1099,6 @@ class VacancyMediated(object):
         biasVvec = np.zeros(self.vkinetic.Nvstars)
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
                    np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
-        delta_omOS = -np.dot(self.om2_om0, omega0)
         for sv,starindex in enumerate(self.vstar2kin):
             svvacindex = self.kin2vacancy[starindex]  # vacancy
             delta_om[sv,sv] += np.dot(self.om1escape[sv,:],omega1escape[sv,:]) - \
@@ -1113,16 +1115,41 @@ class VacancyMediated(object):
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
-        G0OS = np.dot(self.GFOSexpansion, GF)
         # print('det: ', np.linalg.det(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)))
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         # G = np.linalg.inv(np.linalg.inv(G0) + delta_om)
         # If we "disconnect" the origin states, we would end up with a singular matrix.
         # G = np.dot(pinv2(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om), rcond=1e-6), G0)
-        ### NEED TO PUT etaV0, etaV0outer back here!!
-        etaSvec = np.dot(G,biasSvec)
-        outer_etaVvec = np.dot(self.vkinetic.outer, np.dot(G, biasVvec))
-        outer_etaSvec = np.dot(self.vkinetic.outer, etaSvec)
+        if len(self.VectorBasis)>0:
+            NVB = len(self.VectorBasis)
+            delta_omOS = -np.dot(self.om2_om0, omega0)
+            G0OS = np.dot(self.GFOSexpansion, GF)
+            G0OSOS = np.dot(self.GFOSOSexpansion, GF)
+            Dinv = np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om) +
+                                 np.dot(G0OS.T, delta_omOS))
+            A = np.eye(NVB) + np.dot(G0OS, delta_omOS.T)
+            B = np.dot(G0OS, delta_om) + np.dot(G0OSOS, delta_omOS)
+            C = np.dot(G0, delta_omOS.T)
+            SDinv = np.linalg.inv(A - np.dot(B, np.dot(Dinv, C)))
+            # G = np.dot(Dinv, G0 + np.dot(C, np.dot(SDinv, np.dot(B, np.dot(Dinv, G0)) - G0OS)))
+            G = np.dot(Dinv, G0) + \
+                np.dot(Dinv, np.dot(C, np.dot(SDinv, np.dot(B, np.dot(Dinv, G0))))) - \
+                np.dot(Dinv, np.dot(C, np.dot(SDinv,  G0OS)))
+            print('Shapes:')
+            print('  delta_omOS: ', delta_omOS.shape)
+            print('  G0OS: ', G0OS.shape)
+            print('  G0OSOS: ', G0OSOS.shape)
+            print('  A: ', A.shape)
+            print('  B: ', B.shape)
+            print('  C: ', C.shape)
+            print('  Dinv: ', Dinv.shape)
+
+        # etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
+        etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
+        # outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
+        outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
+        etaVvec, etaSvec = np.dot(G,biasVvec), np.dot(G,biasSvec)
+        outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer, etaSvec)
         # delta_om_etaV = np.dot(delta_om, np.dot(G, biasVvec))
 
         # L1ss = (np.dot(outer_etaSvec, biasSvec) + 2*np.dot(outer_etaS0, delta_om_etaS))/self.N
@@ -1134,7 +1161,7 @@ class VacancyMediated(object):
         #        np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
 
         # L1ss = np.dot(outer_etaSvec, biasSvec)/self.N
-        L1ss = (np.dot(outer_etaSvec, biasSvec) + np.dot(outer_etaS0, biasSvec))/self.N
+        L1ss = np.dot(outer_etaSvec, biasSvec)/self.N
         L1sv = np.dot(outer_etaSvec, biasVvec)/self.N
         L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
                np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
@@ -1143,7 +1170,7 @@ class VacancyMediated(object):
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
         # from *both* L1sv and L1vv. Then that will fix our other problems.
 
-        return L0vv, L0ss + L1ss, -L0ss + L1sv, D0ss - L0ss + L1vv
+        return L0vv, D0ss + L1ss, -L0ss + L1sv, D0ss - L0ss + L1vv
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
 crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)

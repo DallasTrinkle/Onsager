@@ -840,7 +840,7 @@ class VectorStarSet(object):
         VSSet.outer = HDF5group['outer'].value
         return VSSet
 
-    def GFexpansion(self, VectorBasis=[]):
+    def GFexpansion(self, VectorBasis=()):
         """
         Construct the GF matrix expansion in terms of the star vectors, and indexed
         to GFstarset. Now takes in a VectorBasis; if not an empty set, returns the
@@ -861,6 +861,7 @@ class VectorStarSet(object):
         NVB = len(VectorBasis)
         if NVB > 0:
             GFOSexpansion = np.zeros((NVB, self.Nvstars, GFstarset.Nstars))
+            GFOSOSexpansion = np.zeros((NVB, NVB, GFstarset.Nstars))
             zeroPS = [PairState.zero(n) for n in range(VectorBasis[0].shape[0])] # number of sites
         for i in range(self.Nvstars):
             for si, vi in zip(self.vecpos[i], self.vecvec[i]):
@@ -879,16 +880,23 @@ class VectorStarSet(object):
                             k = GFstarset.starindex(ds)
                             if k is None: raise ArithmeticError('GF star not large enough to include {}?'.format(ds))
                             GFOSexpansion[j, i, k] += np.dot(VB[n,:], vi)
+        if NVB > 0:
+            OSindex = [GFstarset.starindex(zPS) for zPS in zeroPS]
+            for j, VB in enumerate(VectorBasis):
+                for n, k in enumerate(OSindex):
+                    v2 = np.dot(VB[n,:], VB[n,:])
+                    GFOSOSexpansion[j,j,k] += v2
+
         # symmetrize
         for i in range(self.Nvstars):
             for j in range(0,i):
                 GFexpansion[i, j, :] = GFexpansion[j, i, :]
         if NVB>0:
-            return GFexpansion, GFstarset, GFOSexpansion
+            return GFexpansion, GFstarset, GFOSexpansion, GFOSOSexpansion
         else:
             return GFexpansion, GFstarset
 
-    def rateexpansions(self, jumpnetwork, jumptype, VectorBasis=[]):
+    def rateexpansions(self, jumpnetwork, jumptype, VectorBasis=()):
         """
         Construct the omega0 and omega1 matrix expansions in terms of the jumpnetwork;
         includes the escape terms separately. The escape terms are tricky because they have
@@ -940,8 +948,9 @@ class VectorStarSet(object):
                                         rate1expansion[i, j, k] += np.dot(vi, vj)
                             if NVB>0:
                                 # work through the VB, and dot into the "origin state" given by the solute
+                                wi = self.starset.states[IS].i
                                 for j, VB in enumerate(VectorBasis):
-                                    rate0expansion[j, i, jt] += np.dot(VB[IS.i,:], vi)
+                                    rate0expansion[j, i, jt] += np.dot(VB[wi,:], vi)
 
         # symmetrize
         # for i in range(self.Nvstars):
