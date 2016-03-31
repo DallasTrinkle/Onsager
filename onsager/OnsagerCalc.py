@@ -1179,12 +1179,13 @@ class VacancyMediated(object):
 
         etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
-        dbiasS = -np.dot(om2, etaS0)
+        dbiasS = np.dot(om2, etaS0)
         print('etaS0: ', etaS0)
         print('om2: ')
         print(om2[:8,:8])
         print('biasSvec sum: ', np.tensordot(self.etaSperiodic, biasSvec, axes=(0,0)))
         print('biasS0vec sum: ', np.tensordot(self.etaSperiodic, dbiasS, axes=(0,0)))
+        biasSvec += dbiasS
         # biasSvec -= np.dot(om2, etaS0)
         # outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
         outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
@@ -1215,7 +1216,7 @@ class VacancyMediated(object):
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
         # from *both* L1sv and L1vv. Then that will fix our other problems.
 
-        return L0vv, D0ss + L1ss, -L0ss + L1sv, D0ss - L0ss + L1vv
+        return L0vv, L0ss + L1ss, -L0ss + L1sv, D0ss - L0ss + L1vv
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
 crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)
