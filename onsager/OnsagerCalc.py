@@ -694,8 +694,8 @@ class VacancyMediated(object):
                            for ((i,j), dx) in jumplist] for jumplist in self.om2_jn]
         # make the "tagdict" for quick indexing!
         for taglist in tags.values():
-            for i, tags in enumerate(taglist):
-                for tag in tags:
+            for i, tagset in enumerate(taglist):
+                for tag in tagset:
                     if tag in tagdict:
                         raise ValueError('Generated repeated tags? {} found twice.'.format(tag))
                     else:
