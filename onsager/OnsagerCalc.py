@@ -556,14 +556,9 @@ class VacancyMediated(object):
         self.NNstar = stars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
         # self.kinetic = self.thermo + self.NNstar
         self.vkinetic = stars.VectorStarSet()
-        self.generate(Nthermo)
-        # moved this into generate:
-        # self.L0sscalc = self.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
-        self.tags = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
-        self.tagdict = {}
-        for taglist in self.tags.values():
-            for i, tags in enumerate(taglist):
-                for tag in tags: self.tagdict[tag] = i
+        self.generate(Nthermo) # includes generation of L0ss calculator
+        self.generatematrices()
+        self.tags, self.tagdict = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
 
     def generate(self, Nthermo):
         """
@@ -598,12 +593,33 @@ class VacancyMediated(object):
         for i, SP in zip(reversed(range(len(self.om1_SP))), reversed(self.om1_SP)):
             if SP[0] in self.outerkin and SP[1] in self.outerkin:
                 self.om1_jn.pop(i), self.om1_jt.pop(i), self.om1_SP.pop(i)
+        self.L0sscalc = self.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
+        # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
+        # Vector star set, generates a LOT of our calculation:
+        self.VectorBasis = self.L0sscalc.VectorBasis.copy()
+        if len(self.VectorBasis) > 0:
+            self.GFexpansion, self.GFstarset, self.GFOSexpansion, self.GFOSOSexpansion = \
+                self.vkinetic.GFexpansion(self.VectorBasis)
+        else:
+            self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
         # empty dictionaries to store GF values
         self.GFvalues, self.Lvvvalues, self.etavvalues = {}, {}, {}
+
+    def generatematrices(self):
+        """
+        Generates all the matrices and "helper" pieces, based on our jump networks.
+        This has been separated out in case the user wants to, e.g., prune / modify the networks
+        after they've been created with generate(), then generatematrices() can be rerun.
+        """
+
         self.om1_om0, self.om1_om0escape, self.om1expansion, self.om1escape = \
             self.vkinetic.rateexpansions(self.om1_jn, self.om1_jt)
-        self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
-            self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
+        if len(self.VectorBasis) > 0:
+            self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
+                self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt, self.VectorBasis)
+        else:
+            self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
+                self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
         self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
         self.etaSperiodic = self.vkinetic.periodicvectorexpansion('solute')
@@ -627,17 +643,6 @@ class VacancyMediated(object):
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
                                   for jumplist in self.om2_jn]
-        self.L0sscalc = self.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
-        # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
-        # Vector star set, generates a LOT of our calculation:
-        self.VectorBasis = self.L0sscalc.VectorBasis.copy()
-        if len(self.VectorBasis) > 0:
-            self.GFexpansion, self.GFstarset, self.GFOSexpansion, self.GFOSOSexpansion = \
-                self.vkinetic.GFexpansion(self.VectorBasis)
-            self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
-                self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt, self.VectorBasis)
-        else:
-            self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
 
     def solutecalculator(self):
         """
@@ -655,8 +660,10 @@ class VacancyMediated(object):
         Create tags for vacancy states, solute states, solute-vacancy complexes;
         omega0, omega1, and omega2 transition states.
         :return tags: dictionary of tags; each is a list-of-lists
+        :return tagdict: dictionary that maps tag into the index of the corresponding list.
         """
         tags = {}
+        tagdict = {}
         basis = self.crys.basis[self.chem]  # shortcut
         def single_defect(DEFECT_TAG, u):
             return SINGLE_DEFECT_TAG.format(type=DEFECT_TAG, u1=u[0], u2=u[1], u3=u[2])
@@ -685,7 +692,15 @@ class VacancyMediated(object):
         tags['omega2'] = [[OM2_TAG.format(complex1=double_defect(self.kinetic.states[i]),
                                           complex2=double_defect(self.kinetic.states[j]))
                            for ((i,j), dx) in jumplist] for jumplist in self.om2_jn]
-        return tags
+        # make the "tagdict" for quick indexing!
+        for taglist in tags.values():
+            for i, tags in enumerate(taglist):
+                for tag in tags:
+                    if tag in tagdict:
+                        raise ValueError('Generated repeated tags? {} found twice.'.format(tag))
+                    else:
+                        tagdict[tag] = i
+        return tags, tagdict
 
     # this is part of our *class* definition: list of data that can be directly assigned / read
     __HDF5list__ = ('chem', 'N', 'invmap', 'thermo2kin', 'kin2vacancy', 'outerkin', 'vstar2kin',
@@ -1164,14 +1179,21 @@ class VacancyMediated(object):
 
         etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N), axes=((1, 2), (0, 1)))
-        biasSvec -= np.dot(om2, etaS0)
-        outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
+        dbiasS = -np.dot(om2, etaS0)
+        print('etaS0: ', etaS0)
+        print('om2: ')
+        print(om2[:8,:8])
+        print('biasSvec sum: ', np.tensordot(self.etaSperiodic, biasSvec, axes=(0,0)))
+        print('biasS0vec sum: ', np.tensordot(self.etaSperiodic, dbiasS, axes=(0,0)))
+        # biasSvec -= np.dot(om2, etaS0)
+        # outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
         outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
         etaVvec, etaSvec = np.dot(G,biasVvec), np.dot(G,biasSvec)
         outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer, etaSvec)
         # delta_om_etaV = np.dot(delta_om, np.dot(G, biasVvec))
         biasStry = np.dot(om, etaSvec)
         print('biasSvec: ', biasSvec)
+        print('dbiasS: ', dbiasS)
         print('biasStry: ', biasStry)
         print('diff: ', biasSvec - biasStry)
 
@@ -1184,7 +1206,7 @@ class VacancyMediated(object):
         #        np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
 
         # L1ss = np.dot(outer_etaSvec, biasSvec)/self.N
-        L1ss = (np.dot(outer_etaSvec, biasSvec) + 2.*np.dot(outer_etaS0, biasSvec))/self.N
+        L1ss = np.dot(outer_etaSvec, biasSvec)/self.N
         L1sv = np.dot(outer_etaSvec, biasVvec)/self.N
         L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
                np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
@@ -1193,7 +1215,7 @@ class VacancyMediated(object):
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
         # from *both* L1sv and L1vv. Then that will fix our other problems.
 
-        return L0vv, L0ss + L1ss, -L0ss + L1sv, D0ss - L0ss + L1vv
+        return L0vv, D0ss + L1ss, -L0ss + L1sv, D0ss - L0ss + L1vv
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
 crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)
