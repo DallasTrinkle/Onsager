@@ -288,8 +288,8 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         print('Crystal: ' + self.crystalname)
         print('Crystal2: ' + self.crystalname2)
         kT = 1.
-        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 3)
-        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 3)
+        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
         thermaldef = {'preV': np.ones(len(self.sitelist)), 'eneV': np.zeros(len(self.sitelist)),
                       'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
         thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
@@ -323,8 +323,8 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         print('Crystal2: ' + self.crystalname2)
         print('  Solute test: SV binding = ', self.solutebinding)
         kT = 1.
-        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 3)
-        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 3)
+        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
         # we will make this test using LIMB; add in the solute-vacancy interaction
         thermaldef = {'preV': np.ones(len(self.sitelist)), 'eneV': np.zeros(len(self.sitelist)),
                       'preS': np.ones(len(self.sitelist)), 'eneS': np.zeros(len(self.sitelist)),

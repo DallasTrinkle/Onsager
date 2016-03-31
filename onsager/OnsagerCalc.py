@@ -1181,7 +1181,7 @@ class VacancyMediated(object):
             om2bar = np.dot(folddown, np.dot(om2, folddown.T))  # VB x VB
             etaSbar = np.dot(pinv2(om2bar), biasSbar)  # VB only...
             dbiasS = np.dot(np.dot(om2, folddown.T), etaSbar)  # expand back out to sites
-            D0ss += np.dot(np.dot(self.L0sscalc.VV, etaSbar), biasSbar)
+            D0ss += np.dot(np.dot(self.L0sscalc.VV, etaSbar), biasSbar)/self.N
 
         etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N),
@@ -1192,7 +1192,7 @@ class VacancyMediated(object):
         print(om2[:8,:8])
         print('biasSvec sum: ', np.tensordot(self.etaSperiodic, biasSvec, axes=(0,0)))
         print('biasS0vec sum: ', np.tensordot(self.etaSperiodic, dbiasS, axes=(0,0)))
-        biasSvec += dbiasS
+        biasSvec -= dbiasS
         # biasSvec -= np.dot(om2, etaS0)
         # outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
         outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
