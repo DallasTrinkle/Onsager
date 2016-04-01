@@ -612,6 +612,8 @@ class VacancyMediated(object):
         after they've been created with generate(), then generatematrices() can be rerun.
         """
 
+        self.Dom1_om0, self.Dom1 = self.vkinetic.bareexpansions(self.om1_jn, self.om1_jt)
+        self.Dom2_om0, self.Dom2 = self.vkinetic.bareexpansions(self.om2_jn, self.om2_jt)
         self.om1_om0, self.om1_om0escape, self.om1expansion, self.om1escape = \
             self.vkinetic.rateexpansions(self.om1_jn, self.om1_jt)
         if len(self.VectorBasis) > 0:
@@ -622,8 +624,10 @@ class VacancyMediated(object):
                 self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
         self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
-        self.etaSperiodic = self.vkinetic.periodicvectorexpansion('solute')
+        # self.etaSperiodic = self.vkinetic.periodicvectorexpansion('solute')
         self.etaVperiodic = self.vkinetic.periodicvectorexpansion('vacancy')
+        self.etaS2VB= self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'solute')
+
         # more indexing helpers:
         # kineticsvWyckoff: Wyckoff position of solute and vacancy for kinetic stars
         # omega0vacancyWyckoff: Wyckoff positions of initial and final position in omega0 jumps
@@ -706,9 +710,10 @@ class VacancyMediated(object):
     __HDF5list__ = ('chem', 'N', 'invmap', 'thermo2kin', 'kin2vacancy', 'outerkin', 'vstar2kin',
                     'om1_jt', 'om1_SP', 'om2_jt', 'om2_SP',
                     'GFexpansion',
+                    'Dom1_om0', 'Dom1', 'Dom2_om0', 'Dom2',
                     'om1_om0', 'om1_om0escape', 'om1expansion', 'om1escape',
                     'om2_om0', 'om2_om0escape', 'om2expansion', 'om2escape',
-                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias', 'etaSperiodic', 'etaVperiodic',
+                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias', 'etaVperiodic', 'etaSVB',
                     'kineticsvWyckoff', 'omega0vacancyWyckoff', 'omega1svsvWyckoff',
                     'omega2svsvWyckoff')
     __taglist__ = ('vacancy', 'solute', 'solute-vacancy', 'omega0', 'omega1', 'omega2')
@@ -1081,12 +1086,12 @@ class VacancyMediated(object):
             self.Lvvvalues[vTK] = L0vv
             self.etavvalues[vTK] = etav
         # solute:
-        bFVmin = min(bFV)
-        lnZV = -bFVmin + np.log(np.exp(bFVmin - bFV).mean())
-        L0ss, etas, D0ss = self.L0sscalc.diffusivity(pre=np.ones_like(bFS), betaene=bFS,
-                                                     preT=np.ones_like(bFT2), betaeneT=bFT2+lnZV,
-                                                     returnBias=True)
-        D0sv = D0ss.copy()
+        # bFVmin = min(bFV)
+        # lnZV = -bFVmin + np.log(np.exp(bFVmin - bFV).mean())
+        # L0ss, etas, D0ss = self.L0sscalc.diffusivity(pre=np.ones_like(bFS), betaene=bFS,
+        #                                              preT=np.ones_like(bFT2), betaeneT=bFT2+lnZV,
+        #                                              returnBias=True)
+        # D0sv = D0ss.copy()
         # what's above will probably (?) need to get modified--I suspect we can cut the returnBias
         # see comp_vs2solute_vs for how we now treat these terms...
 
@@ -1107,11 +1112,29 @@ class VacancyMediated(object):
         omega0, omega1, omega2, omega0escape, omega1escape, omega2escape = \
             self._symmetricandescaperates(bFV, bFS, bFSVkin, bFT0, bFT1, bFT2)
 
-        # 4. expand out: domega1, domega2, bias1, bias2
+        # 4. expand out: D0ss, D0vv, domega1, domega2, bias1, bias2
         # Note: we handle the equivalent of om1_om0 for omega2 (om2_om0) differently. Those
         # jumps correspond to the vacancy *landing* on the solute site; the "origin states"
         # are treated below--they only need to be considered *if* there is broken symmetry, such
         # that we have a non-empty VectorBasis in our *unit cell*.
+        # 4a. Bare diffusivities
+        D0ss, D0vv = np.zeros((3,3)), np.zeros((3,3))
+        symmprobV0 = np.array([np.sqrt(probV[sp[0]]*probV[sp[1]]) for sp in self.omega0vacancyWyckoff])
+        symmprobSV1 = np.array([np.sqrt(prob[sp[0]]*prob[sp[1]]) for sp in self.om1_SP])
+        symmprobSV2 = np.array([np.sqrt(prob[sp[0]]*prob[sp[1]]) for sp in self.om2_SP])
+        D0ss = np.dot(self.Dom2, omega2*symmprobSV2)/self.N
+        D0vv = D0ss + (np.dot(self.Dom1, omega1*symmprobSV1) -
+                       np.dot(self.Dom1_om0 + self.Dom2_om0, omega0*symmprobV0))/self.N
+        print('Dom2:')
+        for d in [self.Dom2[:,:,i] for i in range(self.Dom2.shape[-1])]: print(d)
+        print('Dom1:')
+        for d in [self.Dom1[:,:,i] for i in range(self.Dom1.shape[-1])]: print(d)
+        print('Dom2_om0:')
+        for d in [self.Dom2_om0[:,:,i] for i in range(self.Dom2_om0.shape[-1])]: print(d)
+        print('Dom1_om0:')
+        for d in [self.Dom1_om0[:,:,i] for i in range(self.Dom1_om0.shape[-1])]: print(d)
+
+        # 4b. Bias vectors (before correction) and rate matrices
         biasSvec = np.zeros(self.vkinetic.Nvstars)
         biasVvec = np.zeros(self.vkinetic.Nvstars)
         om = np.dot(self.om1expansion, omega1) + np.dot(self.om2expansion, omega2)
@@ -1177,15 +1200,13 @@ class VacancyMediated(object):
             GOSOS = np.dot(SDinv, G0OSOS) - np.dot(SDinv, np.dot(B, np.dot(Dinv, G0OS.T)))
             print('GOSOS: ', GOSOS)
 
-            folddown = self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'solute')
             # biasSbar = np.tensordot(self.etaSperiodic, biasSvec, axes=(0, 0))
-            biasSbar = np.dot(folddown, biasSvec)  # folddown to VB
-            om2bar = np.dot(folddown, np.dot(om2, folddown.T))  # VB x VB
+            biasSbar = np.dot(self.etaS2VB, biasSvec)  # folddown to VB
+            om2bar = np.dot(self.etaS2VB, np.dot(om2, self.etaS2VB.T))  # VB x VB
             etaSbar = np.dot(pinv2(om2bar), biasSbar)  # VB only...
-            etaS0 = np.dot(folddown.T, etaSbar)
-            dbiasS = np.dot(np.dot(om2, folddown.T), etaSbar)  # expand back out to sites
+            etaS0 = np.dot(self.etaS2VB.T, etaSbar)
+            dbiasS = np.dot(np.dot(om2, self.etaS2VB.T), etaSbar)  # expand back out to sites
             D0ss += np.dot(np.dot(self.L0sscalc.VV, etaSbar), biasSbar)/self.N
-            D0sv = D0ss.copy()
             # etaVbar = np.array([np.tensordot(VB, etav*np.sqrt(self.N)) for VB in self.VectorBasis])
             # D0sv -= np.dot(np.dot(self.L0sscalc.VV, etaVbar), biasSbar)/self.N
 
@@ -1196,8 +1217,8 @@ class VacancyMediated(object):
         print('etaS0: ', etaS0)
         print('om2: ')
         print(om2[:8,:8])
-        print('biasSvec sum: ', np.tensordot(self.etaSperiodic, biasSvec, axes=(0,0)))
-        print('biasS0vec sum: ', np.tensordot(self.etaSperiodic, dbiasS, axes=(0,0)))
+        # print('biasSvec sum: ', np.tensordot(self.etaSperiodic, biasSvec, axes=(0,0)))
+        # print('biasS0vec sum: ', np.tensordot(self.etaSperiodic, dbiasS, axes=(0,0)))
         biasSvec -= dbiasS
         # biasSvec -= np.dot(om2, etaS0)
         outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
@@ -1231,7 +1252,7 @@ class VacancyMediated(object):
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
         # from *both* L1sv and L1vv. Then that will fix our other problems.
 
-        return L0vv, D0ss + L1ss, -D0sv + L1sv, D0ss - L0ss + L1vv
+        return L0vv, D0ss + L1ss, -D0ss + L1sv, D0vv + L1vv
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
 crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)

@@ -998,6 +998,42 @@ class VectorStarSet(object):
                         bias1expansion[i, k] += geom_bias
         return bias0expansion, bias1expansion
 
+    # this is *almost* a static method--it only need to know how many omega0 type jumps there are
+    # in the starset. We *could* make it static and use max(jumptype), but that may not be strictly safe
+    def bareexpansions(self, jumpnetwork, jumptype):
+        """
+        Construct the bare diffusivity expansion in terms of the jumpnetwork.
+        We return the reference (0) contribution so that the change can be determined; this
+        is useful for the vacancy contributions.
+        This saves us from having to deal with issues with our outer shell where we only
+        have a fraction of the escapes, but as long as the kinetic shell is one more than
+        the thermodynamics (so that the interaction energy is 0, hence no change in probability),
+        this will work. The PS (pair stars) is useful for including the probability factor
+        for the endpoint of the jump; we just call it the 'probfactor' below.
+
+        Note also: this *currently assumes* that the displacement vector *does not change* between
+        omega0 and omega(1/2).
+
+        :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
+          corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
+          are indices corresponding to states in our starset.
+        :param jumptype: specific omega0 jump type that the jump corresponds to
+
+        :return D0expansion: array[3,3, Njump_omega0]
+            the D0[a,b,jt] = sum(D0expansion[a,b, jt] * sqrt(probfactor0[PS[jt][0]]*probfactor0[PS[jt][1]) * omega0[jt])
+        :return D1expansion: array[3,3, Njump_omega1]
+            the D1[a,b,k] = sum(D1expansion[a,b, k] * sqrt(probfactor[PS[k][0]]*probfactor[PS[k][1]) * omega[k])
+        """
+        if self.Nvstars == 0: return None
+        D0expansion = np.zeros((3,3, len(self.starset.jumpnetwork_index)))
+        D1expansion = np.zeros((3,3, len(jumpnetwork)))
+        for k, jumplist, jt in zip(itertools.count(), jumpnetwork, jumptype):
+            for (IS, FS), dx in jumplist:
+                d0 = 0.5*np.outer(dx, dx)
+                D0expansion[:,:,jt] += d0
+                D1expansion[:,:,k] += d0
+        return D0expansion, D1expansion
+
     def periodicvectorexpansion(self, type):
         """
         Construct the expansion from vectors on sites in the cell that are periodic to
