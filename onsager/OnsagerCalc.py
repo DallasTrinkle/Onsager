@@ -1185,8 +1185,9 @@ class VacancyMediated(object):
             etaS0 = np.dot(folddown.T, etaSbar)
             dbiasS = np.dot(np.dot(om2, folddown.T), etaSbar)  # expand back out to sites
             D0ss += np.dot(np.dot(self.L0sscalc.VV, etaSbar), biasSbar)/self.N
-            etaVbar = np.array([np.tensordot(VB, etav*np.sqrt(self.N)) for VB in self.VectorBasis])
-            D0sv -= np.dot(np.dot(self.L0sscalc.VV, etaVbar), biasSbar)/self.N
+            D0sv = D0ss.copy()
+            # etaVbar = np.array([np.tensordot(VB, etav*np.sqrt(self.N)) for VB in self.VectorBasis])
+            # D0sv -= np.dot(np.dot(self.L0sscalc.VV, etaVbar), biasSbar)/self.N
 
         # etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
         etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N),
