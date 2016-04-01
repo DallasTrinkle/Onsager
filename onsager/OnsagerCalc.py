@@ -1223,6 +1223,7 @@ class VacancyMediated(object):
         # biasSvec -= np.dot(om2, etaS0)
         outer_etaS0 = np.dot(self.vkinetic.outer, etaS0)
         outer_etaV0 = np.dot(self.vkinetic.outer, etaV0)
+        outer_G0biasV = np.dot(self.vkinetic.outer, np.dot(G0, biasVvec))
         etaVvec, etaSvec = np.dot(G,biasVvec), np.dot(G,biasSvec)
         outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer, etaSvec)
         # delta_om_etaV = np.dot(delta_om, np.dot(G, biasVvec))
@@ -1245,8 +1246,8 @@ class VacancyMediated(object):
         # L1sv = (np.dot(outer_etaSvec, biasVvec) -
         #         2.*np.dot(outer_etaS0, biasVvec) - np.dot(outer_etaS0, np.dot(delta_om, etaV0)) -
         #         2.*np.dot(outer_etaV0, biasSvec) - np.dot(outer_etaV0, np.dot(delta_om, etaS0)))/self.N
-        L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
-               np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
+        L1vv = (np.dot(outer_etaVvec + 2*outer_etaV0, biasVvec) -
+                np.dot(outer_etaV0+2.*outer_G0biasV, np.dot(delta_om, etaV0)))/self.N
         # compute our bare solute diffusivity:
         # TODO: vacancy-vacancy bare term, maybe more? Involves essentially
         # the same calculation as diffusivity for the vacancy. Note also: that correction gets subtracted
