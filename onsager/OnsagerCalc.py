@@ -58,7 +58,7 @@ class Interstitial(object):
             for i in w:
                 self.invmap[i] = ind
         self.jumpnetwork = jumpnetwork
-        self.VectorBasis, self.VV = self.generateVectorBasis()
+        self.VectorBasis, self.VV = self.crys.FullVectorBasis(self.chem)
         self.NV = len(self.VectorBasis)
         # quick check to see if our projected omega matrix will be invertible
         # only really needed if we have a non-empty vector basis
@@ -93,28 +93,6 @@ class Interstitial(object):
                                   'EnergyT': [0 for t in jumpnetwork],
                                   'PrefactorT': [1 for t in jumpnetwork],
                                   'jumpnetwork': jumpnetwork})
-
-    def generateVectorBasis(self):
-        """
-        Generate our full vector basis, using the information from our crystal
-        :return: list of our unique vector basis lattice functions, normalized
-        """
-        lis = []
-        for s in self.sitelist:
-            for v in self.crys.vectlist(self.crys.VectorBasis((self.chem, s[0]))):
-                v /= np.sqrt(len(s)) # additional normalization
-                # we have some constructing to do... first, make the vector we want to use
-                vb = np.zeros((self.N, 3))
-                for g in self.crys.G:
-                    # what site do we land on, and what's the vector? (this is slight overkill)
-                    vb[g.indexmap[self.chem][s[0]]] = self.crys.g_direc(g, v)
-                lis.append(vb)
-        # need the *full matrix of this tensor*
-        VV = np.zeros((3,3,len(lis),len(lis)))
-        for i,vb_i in enumerate(lis):
-            for j,vb_j in enumerate(lis):
-                VV[:,:,i,j] = np.dot(vb_i.T, vb_j)
-        return lis, VV
 
     def generateSiteGroupOps(self):
         """
@@ -572,6 +550,16 @@ class VacancyMediated(object):
         self.thermo.generate(Nthermo)
         self.kinetic = self.thermo + self.NNstar
         self.vkinetic.generate(self.kinetic)
+        # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
+        # Vector star set, generates a LOT of our calculation:
+        self.VectorBasis, self.VV = self.crys.FullVectorBasis(self.chem)
+        self.NVB = len(self.VectorBasis)
+        if self.NVB > 0:
+            self.GFexpansion, self.GFstarset, self.GFOSexpansion, self.GFOSOSexpansion = \
+                self.vkinetic.GFexpansion(self.VectorBasis)
+        else:
+            self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
+            self.GFOSexpansion, self.GFOSOSexpansion = np.array([]), np.array([])
         # some indexing helpers:
         # thermo2kin maps star index in thermo to kinetic (should just be range(n), but we use this for safety)
         # kin2vacancy maps star index in kinetic to non-solute configuration from sitelist
@@ -593,15 +581,6 @@ class VacancyMediated(object):
         for i, SP in zip(reversed(range(len(self.om1_SP))), reversed(self.om1_SP)):
             if SP[0] in self.outerkin and SP[1] in self.outerkin:
                 self.om1_jn.pop(i), self.om1_jt.pop(i), self.om1_SP.pop(i)
-        self.L0sscalc = self.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
-        # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
-        # Vector star set, generates a LOT of our calculation:
-        self.VectorBasis = self.L0sscalc.VectorBasis.copy()
-        if len(self.VectorBasis) > 0:
-            self.GFexpansion, self.GFstarset, self.GFOSexpansion, self.GFOSOSexpansion = \
-                self.vkinetic.GFexpansion(self.VectorBasis)
-        else:
-            self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
         # empty dictionaries to store GF values
         self.GFvalues, self.Lvvvalues, self.etavvalues = {}, {}, {}
 
@@ -616,7 +595,7 @@ class VacancyMediated(object):
         self.Dom2_om0, self.Dom2 = self.vkinetic.bareexpansions(self.om2_jn, self.om2_jt)
         self.om1_om0, self.om1_om0escape, self.om1expansion, self.om1escape = \
             self.vkinetic.rateexpansions(self.om1_jn, self.om1_jt)
-        if len(self.VectorBasis) > 0:
+        if self.NVB > 0:
             self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
                 self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt, self.VectorBasis)
         else:
@@ -648,16 +627,16 @@ class VacancyMediated(object):
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
                                   for jumplist in self.om2_jn]
 
-    def solutecalculator(self):
-        """
-        Generate a bare solute diffusivity calculator; use Interstitial to do the heavy lifting
-        :return Interstitial: Interstitial calculator
-        """
-        # we need to convert our omega2 PairState jumpnetwork into an "interstitial" jump network
-        solutejumpnetwork = [ [((self.kinetic.states[PSi].i, self.kinetic.states[PSj].i), dx)
-                               for (PSi, PSj), dx in jumplist]
-                              for jumplist in self.om2_jn ]
-        return Interstitial(self.crys, self.chem, self.sitelist, solutejumpnetwork)
+    # def solutecalculator(self):
+    #     """
+    #     Generate a bare solute diffusivity calculator; use Interstitial to do the heavy lifting
+    #     :return Interstitial: Interstitial calculator
+    #     """
+    #     # we need to convert our omega2 PairState jumpnetwork into an "interstitial" jump network
+    #     solutejumpnetwork = [ [((self.kinetic.states[PSi].i, self.kinetic.states[PSj].i), dx)
+    #                            for (PSi, PSj), dx in jumplist]
+    #                           for jumplist in self.om2_jn ]
+    #     return Interstitial(self.crys, self.chem, self.sitelist, solutejumpnetwork)
 
     def generatetags(self):
         """
@@ -707,13 +686,14 @@ class VacancyMediated(object):
         return tags, tagdict
 
     # this is part of our *class* definition: list of data that can be directly assigned / read
-    __HDF5list__ = ('chem', 'N', 'invmap', 'thermo2kin', 'kin2vacancy', 'outerkin', 'vstar2kin',
+    __HDF5list__ = ('chem', 'N', 'invmap', 'VectorBasis', 'VV', 'NVB',
+                    'thermo2kin', 'kin2vacancy', 'outerkin', 'vstar2kin',
                     'om1_jt', 'om1_SP', 'om2_jt', 'om2_SP',
-                    'GFexpansion',
+                    'GFexpansion', 'GFOSexpansion', 'GFOSOSexpansion',
                     'Dom1_om0', 'Dom1', 'Dom2_om0', 'Dom2',
                     'om1_om0', 'om1_om0escape', 'om1expansion', 'om1escape',
                     'om2_om0', 'om2_om0escape', 'om2expansion', 'om2escape',
-                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias', 'etaVperiodic', 'etaSVB',
+                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias', 'etaVperiodic', 'etaS2VB',
                     'kineticsvWyckoff', 'omega0vacancyWyckoff', 'omega1svsvWyckoff',
                     'omega2svsvWyckoff')
     __taglist__ = ('vacancy', 'solute', 'solute-vacancy', 'omega0', 'omega1', 'omega2')
@@ -834,8 +814,8 @@ class VacancyMediated(object):
             diffuser.GFvalues, diffuser.Lvvvalues, diffuser.etavvalues = {}, {}, {}
 
         # for now, we will just recreate this from scratch each time.
-        # TODO: create addhdf5() / loadhdf5() capabilities for Interstitial diffuser...
-        diffuser.L0sscalc = diffuser.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
+        # ? create addhdf5() / loadhdf5() capabilities for Interstitial diffuser...
+        # diffuser.L0sscalc = diffuser.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
 
         # tags
         diffuser.tags = {}
@@ -1118,7 +1098,6 @@ class VacancyMediated(object):
         # are treated below--they only need to be considered *if* there is broken symmetry, such
         # that we have a non-empty VectorBasis in our *unit cell*.
         # 4a. Bare diffusivities
-        D0ss, D0vv = np.zeros((3,3)), np.zeros((3,3))
         symmprobV0 = np.array([np.sqrt(probV[sp[0]]*probV[sp[1]]) for sp in self.omega0vacancyWyckoff])
         symmprobSV1 = np.array([np.sqrt(prob[sp[0]]*prob[sp[1]]) for sp in self.om1_SP])
         symmprobSV2 = np.array([np.sqrt(prob[sp[0]]*prob[sp[1]]) for sp in self.om2_SP])
@@ -1160,7 +1139,7 @@ class VacancyMediated(object):
 
         # 5. compute Onsager coefficients
         G0 = np.dot(self.GFexpansion, GF)
-        if len(self.VectorBasis)==0:
+        if self.NVB==0:
             G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
             dbiasS = np.zeros_like(biasSvec)
             etaS0 = np.zeros_like(biasSvec)
@@ -1206,7 +1185,7 @@ class VacancyMediated(object):
             etaSbar = np.dot(pinv2(om2bar), biasSbar)  # VB only...
             etaS0 = np.dot(self.etaS2VB.T, etaSbar)
             dbiasS = np.dot(np.dot(om2, self.etaS2VB.T), etaSbar)  # expand back out to sites
-            D0ss += np.dot(np.dot(self.L0sscalc.VV, etaSbar), biasSbar)/self.N
+            D0ss += np.dot(np.dot(self.VV, etaSbar), biasSbar)/self.N
             # etaVbar = np.array([np.tensordot(VB, etav*np.sqrt(self.N)) for VB in self.VectorBasis])
             # D0sv -= np.dot(np.dot(self.L0sscalc.VV, etaVbar), biasSbar)/self.N
 

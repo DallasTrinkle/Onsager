@@ -998,6 +998,39 @@ class Crystal(object):
             return [v1, v2]
         if vb[0] == 3: return [ v for v in np.eye(3) ]
 
+    def FullVectorBasis(self, chem=None):
+        """
+        Generate our full vector basis, using the information from our crystal
+        :param chem: (optional) chemical index to consider; otherwise return a list of such
+        :return: (list) of our unique vector basis lattice functions, normalized; each is an array
+        """
+        if chem is None: chemlist = [c for c in range(len(self.basis))]
+        else: chemlist = [chem]
+        VBlist = []
+        VVlist = []
+        for c in chemlist:
+            lis = []
+            for s in self.sitelist(c):
+                N = len(self.basis[c])
+                for v in self.vectlist(self.VectorBasis((c, s[0]))):
+                    v /= np.sqrt(len(s))  # additional normalization
+                    # we have some constructing to do... first, make the vector we want to use
+                    vb = np.zeros((N, 3))
+                    for g in self.G:
+                        # what site do we land on, and what's the vector? (this is slight overkill)
+                        vb[g.indexmap[c][s[0]]] = self.g_direc(g, v)
+                    lis.append(vb)
+            # need the *full matrix of this tensor*; could probably be done using tensordot?
+            VV = np.zeros((3, 3, len(lis), len(lis)))
+            for i, vb_i in enumerate(lis):
+                for j, vb_j in enumerate(lis):
+                    VV[:, :, i, j] = np.dot(vb_i.T, vb_j)
+            VBlist.append(np.array(lis))
+            VVlist.append(VV)
+        # if we didn't specify which chemical element, return the lists; else, just the individual arrays
+        if chem is None: return VBlist, VVlist
+        else: return VBlist[0], VVlist[0]
+
     def SymmTensorBasis(self, ind):
         """
         Generates the symmetric tensor basis corresponding to an atomic site
