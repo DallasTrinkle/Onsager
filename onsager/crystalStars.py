@@ -1027,11 +1027,10 @@ class VectorStarSet(object):
         if self.Nvstars == 0: return None
         D0expansion = np.zeros((3,3, len(self.starset.jumpnetwork_index)))
         D1expansion = np.zeros((3,3, len(jumpnetwork)))
-        for k, jumplist, jt in zip(itertools.count(), jumpnetwork, jumptype):
-            for (IS, FS), dx in jumplist:
-                d0 = 0.5*np.outer(dx, dx)
-                D0expansion[:,:,jt] += d0
-                D1expansion[:,:,k] += d0
+        for k, jt, jumplist in zip(itertools.count(), jumptype, jumpnetwork):
+            d0 = np.sum(0.5*np.outer(dx,dx) for ISFS, dx in jumplist)  # we don't need initial/final state
+            D0expansion[:,:,jt] += d0
+            D1expansion[:,:,k] += d0
         return D0expansion, D1expansion
 
     def periodicvectorexpansion(self, type):
