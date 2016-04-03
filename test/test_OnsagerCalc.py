@@ -54,13 +54,6 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
         L0vv /= len(self.crys.basis[self.chem])
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
 
-        # print('Interaction list:')
-        # for PS in Diffusivity.interactlist(): print(PS)
-        # print('omega1 list:')
-        # for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "->", PS2)
-        # print('omega2 list:')
-        # for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "->", PS2)
-        # print('Thermaldef:\n', thermaldef)
         print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
         for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0,0]*np.eye(3)), msg='Diffusivity not isotropic?')
@@ -130,14 +123,6 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         L0vv /= self.crys.N
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
 
-        # print('Interaction list:')
-        # for PS in Diffusivity.interactlist(): print(PS)
-        # print('omega1 list:')
-        # for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "-", PS2)
-        # print('omega2 list:')
-        # for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "-", PS2)
-        # print('Thermaldef (LIMB):\n', thermaldef)
-        # print('Thermaldef (5-frequency):\n', thermaldef)
         print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
         for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0,0]*np.eye(3)), msg='Diffusivity not isotropic?')
@@ -235,14 +220,6 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         L0vv /= self.crys.N
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
 
-        # print('kpt mesh: ', Diffusivity.GFcalc.kptgrid)
-        # print('Interaction list:')
-        # for PS in Diffusivity.interactlist(): print(PS)
-        # print('omega1 list:')
-        # for (PS1, PS2) in Diffusivity.omegalist(1)[0]: print(PS1, "-", PS2)
-        # print('omega2 list:')
-        # for (PS1, PS2) in Diffusivity.omegalist(2)[0]: print(PS1, "-", PS2)
-        # print('Thermaldef:\n', thermaldef)
         print('Lvv:\n', Lvv), print('Lss:\n', Lss), print('Lsv:\n', Lsv), print('L1vv:\n', L1vv)
         # we leave out Lss since it is not, in fact, isotropic!
         for L in [Lvv, Lsv, L1vv]:
@@ -277,10 +254,6 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
 
         self.solutebinding = 3.
 
-        # self.crys2 = crystal.Crystal(self.crys.lattice, self.crys.basis, NOSYM=True)
-        # self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.87*self.a0)
-        # self.sitelist2 = self.crys2.sitelist(self.chem)
-        # self.crystalname2 = 'BCC (unsymmetric) a0={}'.format(self.a0)
 
     def testtracer(self):
         """Test that BCC mapped onto B2 match exactly"""
@@ -299,22 +272,12 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
 
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
         Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
-        # for tag in ('solute-vacancy', 'omega0', 'omega1', 'omega2'):
-        #     print(tag + ' list:')
-        #     for str, mult in ((taglist[0], len(taglist)) for taglist in Diffusivity.tags[tag]):
-        #         print(str, 'x', mult)
-        #     print(tag + ' list2:')
-        #     for str, mult in ((taglist[0], len(taglist)) for taglist in Diffusivity2.tags[tag]):
-        #         print(str, 'x', mult)
-        # print('Thermaldef:\n', thermaldef)
-        # print('Thermaldef2:\n', thermaldef2)
         for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
             print(Lname)
             print(locals()[Lname])
-        # For now, remove the test on the v-v correction, since that term is NOT CORRECT:
-        # for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
-        for L, Lp in zip([Lvv, Lss, Lsv], [Lvv2, Lss2, Lsv2]):
-            self.assertTrue(np.allclose(L, Lp), msg="Diffusivity doesn't match?")
+        for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
+            self.assertTrue(np.allclose(L, Lp, atol=1e-7),
+                            msg="Diffusivity doesn't match?\n{} !=\n{}".format(L, Lp))
 
     def testsolute(self):
         """Test that BCC mapped onto B2 match exactly"""
@@ -341,22 +304,14 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
 
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
         Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
-        # for tag in ('solute-vacancy', 'omega0', 'omega1', 'omega2'):
-        #     print(tag + ' list:')
-        #     for str, mult in ((taglist[0], len(taglist)) for taglist in Diffusivity.tags[tag]):
-        #         print(str, 'x', mult)
-        #     print(tag + ' list2:')
-        #     for str, mult in ((taglist[0], len(taglist)) for taglist in Diffusivity2.tags[tag]):
-        #         print(str, 'x', mult)
-        # print('Thermaldef:\n', thermaldef)
-        # print('Thermaldef2:\n', thermaldef2)
         for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
             print(Lname)
             print(locals()[Lname])
         # For now, remove the test on the v-v correction, since that term is NOT CORRECT:
-        # for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
-        for L, Lp in zip([Lvv, Lss, Lsv], [Lvv2, Lss2, Lsv2]):
-            self.assertTrue(np.allclose(L, Lp), msg="Diffusivity doesn't match?")
+        for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
+        # for L, Lp in zip([Lvv, Lss, Lsv], [Lvv2, Lss2, Lsv2]):
+            self.assertTrue(np.allclose(L, Lp, atol=1e-7),
+                            msg="Diffusivity doesn't match?\n{} !=\n{}".format(L, Lp))
 
 
 class CrystalOnsagerTestsL12(CrystalOnsagerTestsB2):
@@ -378,11 +333,6 @@ class CrystalOnsagerTestsL12(CrystalOnsagerTestsB2):
         self.crystalname2 = 'L1_2 a0={}'.format(self.a0)
 
         self.solutebinding = 3.
-
-        # self.crys2 = crystal.Crystal(self.crys.lattice, self.crys.basis, NOSYM=True)
-        # self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.87*self.a0)
-        # self.sitelist2 = self.crys2.sitelist(self.chem)
-        # self.crystalname2 = 'BCC (unsymmetric) a0={}'.format(self.a0)
 
 
 class InterstitialTests(unittest.TestCase):
