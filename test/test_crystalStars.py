@@ -1084,26 +1084,21 @@ class VectorStarPeriodicBias(unittest.TestCase):
     def testPeriodicBias(self):
         self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
-        # vacancy first:
-        periodicexpansion = self.vecstarset.periodicvectorexpansion('vacancy')
-        vectorbasislist = OnsagerCalc.Interstitial(self.crys, self.chem, self.sitelist, self.jumpnetwork).VectorBasis
-        vb = sum( (2.*u-1)*vect for u,vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist) )
-        svexp = np.tensordot(periodicexpansion, vb, axes=((1,2), (0,1)))
-        vbdirect = np.array([vb[PS.j] for PS in self.starset.states])
-        vbexp = np.zeros((self.starset.Nstates, 3))
-        for i, svR, svv in zip(stars.itertools.count(), self.vecstarset.vecpos, self.vecstarset.vecvec):
-            for s, v in zip(svR, svv):
-                vbexp[s, :] += v*svexp[i]
-        self.assertTrue(np.allclose(vbdirect, vbexp))
-
-        # solute second:
-        periodicexpansion = self.vecstarset.periodicvectorexpansion('solute')
-        vectorbasislist = OnsagerCalc.Interstitial(self.crys, self.chem, self.sitelist, self.jumpnetwork).VectorBasis
-        vb = sum( (2.*u-1)*vect for u,vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist) )
-        svexp = np.tensordot(periodicexpansion, vb, axes=((1,2), (0,1)))
-        sbdirect = np.array([vb[PS.i] for PS in self.starset.states])
-        sbexp = np.zeros((self.starset.Nstates, 3))
-        for i, svR, svv in zip(stars.itertools.count(), self.vecstarset.vecpos, self.vecstarset.vecvec):
-            for s, v in zip(svR, svv):
-                sbexp[s, :] += v*svexp[i]
-        self.assertTrue(np.allclose(sbdirect, sbexp))
+        vectorbasislist = self.crys.FullVectorBasis(self.chem)[0]
+        NVB = len(vectorbasislist)
+        for elemtype, attr in zip(['vacancy', 'solute'], ['j', 'i']):
+            periodicexpansion = self.vecstarset.periodicvectorexpansion(elemtype)
+            VBexpansion = self.vecstarset.unitcellVectorBasisfolddown(vectorbasislist,elemtype)
+            for n in range(self.vecstarset.Nvstars):
+                for i in range(NVB):
+                    self.assertTrue(np.allclose(np.tensordot(vectorbasislist[i,:,:],
+                                                             periodicexpansion[n,:,:],
+                                                             axes=((0,1),(0,1))), VBexpansion[i,n]))
+            vb = sum( (2.*u-1)*vect for u,vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist) )
+            svexp = np.tensordot(periodicexpansion, vb, axes=((1,2), (0,1)))
+            vbdirect = np.array([vb[getattr(PS, attr)] for PS in self.starset.states])
+            vbexp = np.zeros((self.starset.Nstates, 3))
+            for i, svR, svv in zip(stars.itertools.count(), self.vecstarset.vecpos, self.vecstarset.vecvec):
+                for s, v in zip(svR, svv):
+                    vbexp[s, :] += v*svexp[i]
+            self.assertTrue(np.allclose(vbdirect, vbexp))

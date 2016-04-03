@@ -229,7 +229,7 @@ class Interstitial(object):
         return [ [ self.crys.g_tensor(g, dipole) for g in groupops ]
                  for groupops, dipole in zip(self.jumpgroupops, symmdipoles) ]
 
-    def diffusivity(self, pre, betaene, preT, betaeneT, CalcDeriv = False, returnBias = False):
+    def diffusivity(self, pre, betaene, preT, betaeneT, CalcDeriv = False):
         """
         Computes the diffusivity for our element given prefactors and energies/kB T.
         Also returns the negative derivative of diffusivity with respect to beta (used to compute
@@ -243,7 +243,6 @@ class Interstitial(object):
 
         :return D[3,3]: diffusivity as a 3x3 tensor
         :return DE[3,3]: diffusivity times activation barrier (if CalcDeriv == True)
-        :return bias[N,3], D0[3,3]: bias vector and "bare" diffusivity (if returnBias == True)
         """
         if __debug__:
             if len(pre) != len(self.sitelist): raise IndexError("length of prefactor {} doesn't match sitelist".format(pre))
@@ -296,18 +295,10 @@ class Interstitial(object):
                   + np.dot(np.dot(self.VV, gamma_v), dbias_v) \
                   - np.dot(np.dot(self.VV, gamma_v), dgamma_v)
 
-        if not (CalcDeriv or returnBias):
+        if not CalcDeriv:
             return D0 + Dcorrection
         else:
-            ret = (D0 + Dcorrection,)
-            if CalcDeriv: ret += (Db,)
-            if returnBias:
-                # looks a little funny, but if self.VectorBasis is empty, we never access gamma_v anyway
-                gamma_i = sum([gamma_v[a]*va for a, va in enumerate(self.VectorBasis)],
-                              np.zeros_like(bias_i))
-                ret += (gamma_i, D0)
-                # ret += (bias_i, D0)
-            return ret
+            return D0 + Dcorrection, Db
 
     def elastodiffusion(self, pre, betaene, dipole, preT, betaeneT, dipoleT):
         """
@@ -534,7 +525,7 @@ class VacancyMediated(object):
         self.NNstar = stars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
         # self.kinetic = self.thermo + self.NNstar
         self.vkinetic = stars.VectorStarSet()
-        self.generate(Nthermo) # includes generation of L0ss calculator
+        self.generate(Nthermo)
         self.generatematrices()
         self.tags, self.tagdict = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
 
@@ -629,17 +620,6 @@ class VacancyMediated(object):
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
                                   for jumplist in self.om2_jn]
-
-    # def solutecalculator(self):
-    #     """
-    #     Generate a bare solute diffusivity calculator; use Interstitial to do the heavy lifting
-    #     :return Interstitial: Interstitial calculator
-    #     """
-    #     # we need to convert our omega2 PairState jumpnetwork into an "interstitial" jump network
-    #     solutejumpnetwork = [ [((self.kinetic.states[PSi].i, self.kinetic.states[PSj].i), dx)
-    #                            for (PSi, PSj), dx in jumplist]
-    #                           for jumplist in self.om2_jn ]
-    #     return Interstitial(self.crys, self.chem, self.sitelist, solutejumpnetwork)
 
     def generatetags(self):
         """
@@ -815,11 +795,6 @@ class VacancyMediated(object):
                                                 HDF5group['etavvalues_splits'])
         else:
             diffuser.GFvalues, diffuser.Lvvvalues, diffuser.etavvalues = {}, {}, {}
-
-        # for now, we will just recreate this from scratch each time.
-        # ? create addhdf5() / loadhdf5() capabilities for Interstitial diffuser...
-        # diffuser.L0sscalc = diffuser.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
-
         # tags
         diffuser.tags = {}
         for tag in cls.__taglist__:
@@ -994,11 +969,7 @@ class VacancyMediated(object):
         :return omega0escape[NWyckoff, Nomega0]: escape rate elements for omega0 jumps
         :return omega1escape[NVstars, Nomega1]: escape rate elements for omega1 jumps
         :return omega2escape[NVstars, Nomega2]: escape rate elements for omega2 jumps
-        # :return omega1_om0escape[NVstars, Nomega0]: reference escape rate elements for omega1 jumps
-        # :return omega2_om0escape[NVstars, Nomega0]: reference escape rate elements for omega2 jumps
         """
-        # omega0 = np.array([np.exp(0.5*(bFV[self.invmap[jump[0][0][0]]] + bFV[self.invmap[jump[0][0][1]]])-bF)
-        #                    for bF, jump in zip(bFT0, self.om0_jn)])
         omega0 = np.zeros(len(self.om0_jn))
         omega0escape = np.zeros((len(self.sitelist), len(self.om0_jn)))
         for j, bF, (v1,v2) in zip(itertools.count(), bFT0, self.omega0vacancyWyckoff):
@@ -1007,29 +978,22 @@ class VacancyMediated(object):
             omega0[j] = np.sqrt(omega0escape[v1,j]*omega0escape[v2,j])
         omega1 = np.zeros(len(self.om1_jn))
         omega1escape = np.zeros((self.vkinetic.Nvstars, len(self.om1_jn)))
-        # omega1_om0escape = np.zeros((self.vkinetic.Nvstars, len(self.om0_jn)))
         for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega1svsvWyckoff,
                                                                self.om1_jt, self.om1_SP, bFT1):
             omF, omB = np.exp(-bFT+bFS[s1]+bFV[v1]+bFSV[st1]), np.exp(-bFT+bFS[s2]+bFV[v2]+bFSV[st2])
             omega1[j] = np.sqrt(omF*omB)
             for vst1 in self.kin2vstar[st1]: omega1escape[vst1, j] = omF
             for vst2 in self.kin2vstar[st2]: omega1escape[vst2, j] = omB
-                # omega1escape[vst1, j],omega1_om0escape[vst1, jumptype] = omF,omega0escape[v1, jumptype]
-                # omega1escape[vst2, j],omega1_om0escape[vst2, jumptype] = omB,omega0escape[v2, jumptype]
         omega2 = np.zeros(len(self.om2_jn))
         omega2escape = np.zeros((self.vkinetic.Nvstars, len(self.om2_jn)))
-        # omega2_om0escape = np.zeros((self.vkinetic.Nvstars, len(self.om0_jn)))
         for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega2svsvWyckoff,
                                                                self.om2_jt, self.om2_SP, bFT2):
             omF, omB = np.exp(-bFT+bFS[s1]+bFV[v1]+bFSV[st1]), np.exp(-bFT+bFS[s2]+bFV[v2]+bFSV[st2])
             omega2[j] = np.sqrt(omF*omB)
             for vst1 in self.kin2vstar[st1]: omega2escape[vst1, j] = omF
             for vst2 in self.kin2vstar[st2]: omega2escape[vst2, j] = omB
-                # omega2escape[vst1, j],omega2_om0escape[vst1, jumptype] = omF,omega0escape[v1, jumptype]
-                # omega2escape[vst2, j],omega2_om0escape[vst2, jumptype] = omB,omega0escape[v2, jumptype]
         return omega0, omega1, omega2, \
                omega0escape, omega1escape, omega2escape
-               # omega1_om0escape, omega2_om0escape
 
     def Lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
         """
@@ -1051,7 +1015,7 @@ class VacancyMediated(object):
         :return Lsv[3, 3]: solute-vacancy; needs to be multiplied by cv*cs/kBT
         :return Lvv1[3, 3]: vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT
         """
-        # 1. bare vacancy and solute diffusivity and Green's function
+        # 1. bare vacancy diffusivity and Green's function
         vTK = vacancyThermoKinetics(pre=np.ones_like(bFV), betaene=bFV,
                                     preT=np.ones_like(bFT0), betaeneT=bFT0)
         GF = self.GFvalues.get(vTK)
@@ -1090,7 +1054,7 @@ class VacancyMediated(object):
         # Note: we handle the equivalent of om1_om0 for omega2 (om2_om0) differently. Those
         # jumps correspond to the vacancy *landing* on the solute site; the "origin states"
         # are treated below--they only need to be considered *if* there is broken symmetry, such
-        # that we have a non-empty VectorBasis in our *unit cell*.
+        # that we have a non-empty VectorBasis in our *unit cell* (NVB > 0)
         # 4a. Bare diffusivities
         symmprobV0 = np.array([np.sqrt(probV[sp[0]]*probV[sp[1]]) for sp in self.omega0vacancyWyckoff])
         symmprobSV1 = np.array([np.sqrt(prob[sp[0]]*prob[sp[1]]) for sp in self.om1_SP])
@@ -1098,19 +1062,10 @@ class VacancyMediated(object):
         D0ss = np.dot(self.Dom2, omega2*symmprobSV2)/self.N
         D0vv = D0ss + (np.dot(self.Dom1, omega1*symmprobSV1) -
                        np.dot(self.Dom1_om0 + self.Dom2_om0, omega0*symmprobV0))/self.N
-        # print('Dom2:')
-        # for d in [self.Dom2[:,:,i] for i in range(self.Dom2.shape[-1])]: print(d)
-        # print('Dom1:')
-        # for d in [self.Dom1[:,:,i] for i in range(self.Dom1.shape[-1])]: print(d)
-        # print('Dom2_om0:')
-        # for d in [self.Dom2_om0[:,:,i] for i in range(self.Dom2_om0.shape[-1])]: print(d)
-        # print('Dom1_om0:')
-        # for d in [self.Dom1_om0[:,:,i] for i in range(self.Dom1_om0.shape[-1])]: print(d)
 
         # 4b. Bias vectors (before correction) and rate matrices
         biasSvec = np.zeros(self.vkinetic.Nvstars)
         biasVvec = np.zeros(self.vkinetic.Nvstars)
-        # om = np.dot(self.om1expansion, omega1) + np.dot(self.om2expansion, omega2)
         om2 = np.dot(self.om2expansion, omega2)
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
                    np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
@@ -1121,8 +1076,6 @@ class VacancyMediated(object):
                                np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
                                np.dot(self.om2_om0escape[sv,:], omega0escape[svvacindex,:])
             om2[sv, sv] += np.dot(self.om2escape[sv, :], omega2escape[sv, :])
-            # om[sv, sv] += np.dot(self.om1escape[sv, :], omega1escape[sv, :]) + \
-            #               np.dot(self.om2escape[sv, :], omega2escape[sv, :])
             # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
             biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
@@ -1135,8 +1088,6 @@ class VacancyMediated(object):
         G0 = np.dot(self.GFexpansion, GF)
         if self.NVB==0:
             G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
-            # dbiasS = np.zeros_like(biasSvec)
-            # etaS0 = np.zeros_like(biasSvec)
         else:
             delta_omOS = -np.dot(self.om2_om0, omega0)
             G0OS = np.dot(self.GFOSexpansion, GF)
@@ -1148,82 +1099,28 @@ class VacancyMediated(object):
             C = np.dot(G0, delta_omOS.T)
             SDinv = np.linalg.inv(A - np.dot(B, np.dot(Dinv, C)))
             G = np.dot(Dinv, G0 + np.dot(C, np.dot(SDinv, np.dot(B, np.dot(Dinv, G0)) - G0OS)))
-            # G = np.dot(Dinv, G0) + \
-            #     np.dot(Dinv, np.dot(C, np.dot(SDinv, np.dot(B, np.dot(Dinv, G0))))) - \
-            #     np.dot(Dinv, np.dot(C, np.dot(SDinv,  G0OS)))
-            # print('Shapes:')
-            # print('  delta_omOS: ', delta_omOS.shape)
-            # print('  G0OS: ', G0OS.shape)
-            # print('  G0OSOS: ', G0OSOS.shape)
-            # print('  A: ', A.shape)
-            # print('  B: ', B.shape)
-            # print('  C: ', C.shape)
-            # print('  Dinv: ', Dinv.shape)
 
-            # G0inv = np.linalg.inv(G0)
-            # SGinv = np.linalg.inv(G0OSOS - np.dot(G0OS, np.dot(G0inv, G0OS.T)))
-            # omtry = G0inv + \
-            #         np.dot(G0inv, np.dot(G0OS.T, np.dot(SGinv, np.dot(G0OS, G0inv)))) + \
-            #         delta_om
-            # print('om-omtry:')
-            # print(om[:8,:8] - omtry[:8,:8])
-            # Goffdiag = np.dot(SDinv, G0OS) - np.dot(SDinv, np.dot(B, np.dot(Dinv, G0)))
-            # print('Goffdiag.shape:', Goffdiag.shape)
-            # print(Goffdiag[:,:8])
-            # GOSOS = np.dot(SDinv, G0OSOS) - np.dot(SDinv, np.dot(B, np.dot(Dinv, G0OS.T)))
-            # print('GOSOS: ', GOSOS)
-
-            # biasSbar = np.tensordot(self.etaSperiodic, biasSvec, axes=(0, 0))
             biasSbar = np.dot(self.etaS2VB, biasSvec)  # folddown to VB
             om2bar = np.dot(self.etaS2VB, np.dot(om2, self.etaS2VB.T))  # VB x VB
             etaSbar = np.dot(pinv2(om2bar), biasSbar)  # VB only...
             D0ss += np.dot(np.dot(self.VV, etaSbar), biasSbar)/self.N
-            # etaS0 = np.dot(self.etaS2VB.T, etaSbar)
+
             dbiasS = np.dot(np.dot(om2, self.etaS2VB.T), etaSbar)  # expand back out to sites
             biasSvec -= dbiasS
+
             # terms for vv:
             delta_om_bar = np.dot(self.etaV2VB, delta_omOS.T + np.dot(delta_om, self.etaV2VB.T))  # [NVB, NVB]
             # delta_om_bar = np.dot(self.etaV2VB, np.dot(delta_om, self.etaV2VB.T))  # [NVB, NVB]
             delta_om_G0 = np.dot(delta_omOS, G0) + \
                           np.dot(self.etaV2VB, np.dot(delta_omOS.T, G0OS) + np.dot(delta_om, G0))  # [NVB, NVS]
             # delta_om_G0 = np.dot(self.etaV2VB, np.dot(delta_om, G0))  # [NVB, NVS]
-            # etaVbar = np.array([np.tensordot(VB, etav*np.sqrt(self.N)) for VB in self.VectorBasis])
-            # D0sv -= np.dot(np.dot(self.L0sscalc.VV, etaVbar), biasSbar)/self.N
 
         # 6. Compute bias contributions to Onsager coefficients
-        # etaS0 = np.tensordot(self.etaSperiodic, etas * np.sqrt(self.N), axes=((1, 2), (0, 1)))
-        # etaV0 = np.tensordot(self.etaVperiodic, etav * np.sqrt(self.N),
-        #              axes=((1, 2), (0, 1)))
-
-        # print('etaS0: ', etaS0)
-        # print('om2: ')
-        # print(om2[:8,:8])
-        # print('biasSvec sum: ', np.tensordot(self.etaSperiodic, biasSvec, axes=(0,0)))
-        # print('biasS0vec sum: ', np.tensordot(self.etaSperiodic, dbiasS, axes=(0,0)))
-        # biasSvec -= np.dot(om2, etaS0)
-        # outer_G0biasV = np.dot(self.vkinetic.outer, np.dot(G0, biasVvec))
         etaVvec, etaSvec = np.dot(G,biasVvec), np.dot(G,biasSvec)
         outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer, etaSvec)
-        # delta_om_etaV = np.dot(delta_om, np.dot(G, biasVvec))
-        # biasStry = np.dot(om, etaSvec)
-        # print('biasSvec: ', biasSvec)
-        # print('dbiasS: ', dbiasS)
-        # print('biasStry: ', biasStry)
-        # print('diff: ', biasSvec - biasStry)
-
-        # L1ss = (np.dot(outer_etaSvec, biasSvec) + 2*np.dot(outer_etaS0, delta_om_etaS))/self.N
-        # L1sv = (np.dot(outer_etaSvec, biasVvec) +
-        #         2*np.dot(outer_etaS0, delta_om_etaV)
-        #         - 1.*np.dot(outer_etaV0, biasSvec)
-        #         - 1.*np.dot(outer_etaS0, biasVvec))/self.N
-        # L1vv = (np.dot(outer_etaVvec, biasVvec) - 2*np.dot(outer_etaV0, biasVvec))/self.N - \
-        #        np.dot(outer_etaV0, np.dot(delta_om, etaV0))/self.N
 
         L1ss = np.dot(outer_etaSvec, biasSvec)/self.N
         L1sv = np.dot(outer_etaSvec, biasVvec)/self.N
-        # L1sv = (np.dot(outer_etaSvec, biasVvec) -
-        #         2.*np.dot(outer_etaS0, biasVvec) - np.dot(outer_etaS0, np.dot(delta_om, etaV0)) -
-        #         2.*np.dot(outer_etaV0, biasSvec) - np.dot(outer_etaV0, np.dot(delta_om, etaS0)))/self.N
         L1vv = np.dot(outer_etaVvec, biasVvec)/self.N
         if self.NVB>0:
             etaV0 = np.tensordot(self.VectorBasis, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)

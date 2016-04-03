@@ -1003,6 +1003,7 @@ class Crystal(object):
         Generate our full vector basis, using the information from our crystal
         :param chem: (optional) chemical index to consider; otherwise return a list of such
         :return: (list) of our unique vector basis lattice functions, normalized; each is an array
+        :return: (list) of ouf VV "outer" expansion
         """
         if chem is None: chemlist = [c for c in range(len(self.basis))]
         else: chemlist = [chem]
