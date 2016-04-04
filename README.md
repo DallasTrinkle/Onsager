@@ -25,9 +25,13 @@ Update 0.3: an entirely new implementation of the Onsager calculation is now inc
 
 Update 0.4: cleanup of code, removing old implementations and tests; updated for speed, and inclusion of HDF5 format for reading and writing of VacancyMediated objects.
 
+Update 0.5: fix of an error in the calculation of the Green function for a solute for cases with reduced symmetry (lattice has a non-null vector basis), that required the inclusion of "origin states." Also added tags to VacancyMediated calculator to make the identification of structures to compute corresponding to states (metastable and transition) easier.
+
 Contributors
 ============
-Dallas R. Trinkle, initial design and implementation.
+* Dallas R. Trinkle, initial design, derivation, and implementation.
+* Ravi Agarwal, testing of HCP interstitial calculations; testing of HCP vacancy-mediated diffusion calculations
+* Abhinav Jain, testing of HCP vacancy-mediated diffusion calculations.
 
 Thanks to discussions with Maylise Nastar (CEA, Saclay), Thomas Garnier (CEA, Saclay and UIUC), Thomas Schuler (CEA, Saclay), and Pascal Bellon (UIUC).
 
