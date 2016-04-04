@@ -173,9 +173,7 @@ class GFCrystalcalc(object):
         :return: array[Njump][Nkpt][Nsite][Nsite] of FT of the jump network
         :return: array[Nsite][Njump] multiplicity of jump on each site
         """
-        if type(kpts) is np.ndarray: Nkpt = kpts.shape[0]
-        else: Nkpt = len(kpts)
-        FTjumps = np.zeros((len(jumpnetwork),Nkpt,N,N), dtype=complex)
+        FTjumps = np.zeros((len(jumpnetwork),self.Nkpt,N,N), dtype=complex)
         SEjumps = np.zeros((N, len(jumpnetwork)), dtype=int)
         for J,jumplist in enumerate(jumpnetwork):
             for (i,j), dx in jumplist:
@@ -237,18 +235,6 @@ class GFCrystalcalc(object):
         :param betaeneT: list of beta*ET (energy/kB T) for each transition state
         :return:
         """
-        def create_fnlp(n, l, pm):
-            inv_pmax = 1/pm
-            return lambda p: (p**n)*np.exp(-(p*inv_pmax)**2)
-        def create_fnlu(n, l, pm, prefactor):
-            # prefactor = V/sqrt(d1 d2 d3)
-            a = (3+l+n)/2
-            b = 3/2 + l
-            half_pm = 0.5*pm
-            pre = (-1j)**l *prefactor*(pm**(3+n+l))*gamma(a)/\
-                  ((np.pi**1.5)*(2**(3+l))*gamma(b))
-            return lambda u: pre* u**l * hyp1f1(a,b, -(u*half_pm)**2)
-
         self.symmrate = self.SymmRates(pre, betaene, preT, betaeneT)
         self.maxrate = self.symmrate.max()
         self.symmrate /= self.maxrate
