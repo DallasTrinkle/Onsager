@@ -1221,23 +1221,23 @@ class VacancyMediatedMeta(VacancyMediated):
             self.vkinetic = stars.VectorStarSet()
             # separating out the thermo and kinetic part from here on
             # generate and prune thermo data
-            self.generatethermometa(Nthermo, meta_tags)
+            self.generatethermometa(Nthermo)
 
-            # self.gfconstruct(Nthermo)
-            # self.L0sscalc = self.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
-            # self.tags = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
-            # self.tagdict = {}
-            # for taglist in self.tags.values():
-            #    for i, tags in enumerate(taglist):
-            #       for tag in tags: self.tagdict[tag] = i
+            self.gfconstruct(Nthermo)
+            self.L0sscalc = self.solutecalculator()  # this creates the solute diffusivity calculator, based on omega2
+            self.tags = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
+            self.tagdict = {}
+            for taglist in self.tags.values():
+               for i, tags in enumerate(taglist):
+                  for tag in tags: self.tagdict[tag] = i
 
-    def generatethermometa(self, Nthermo, meta_tags):
+    def generatethermometa(self, Nthermo):
         """
         will fill it later
         """
         if Nthermo == getattr(self, 'Nthermo', 0): return
         self.Nthermo = Nthermo
-        self.thermo.generate(Nthermo, meta_tags)
+        self.thermo.generate(Nthermo)
 
 
         # generate and prune kinetic data
@@ -1269,9 +1269,9 @@ class VacancyMediatedMeta(VacancyMediated):
         self.om2_jn, self.om2_jt, self.om2_SP = self.kinetic.jumpnetwork_omega2()
         # Prune the om1 list: remove entries that have jumps between stars in outerkin:
         # work in reverse order so that popping is safe (and most of the offending entries are at the end
-        # for i, SP in zip(reversed(range(len(self.om1_SP))), reversed(self.om1_SP)):
-        #     if SP[0] in self.outerkin and SP[1] in self.outerkin:
-        #         self.om1_jn.pop(i), self.om1_jt.pop(i), self.om1_SP.pop(i)
+        for i, SP in zip(reversed(range(len(self.om1_SP))), reversed(self.om1_SP)):
+            if SP[0] in self.outerkin and SP[1] in self.outerkin:
+                self.om1_jn.pop(i), self.om1_jt.pop(i), self.om1_SP.pop(i)
 
     def gfconstruct(self, Nthermo):
         """

@@ -412,7 +412,7 @@ class StarSet(object):
 
     def copy(self, empty=False):
         """Return a copy of the StarSet; done as efficiently as possible; empty means skip the shells, etc."""
-        newStarSet = StarSet(None, None, None)  # a little hacky... creates an empty class
+        newStarSet = self.__class__(None, None, None)  # a little hacky... creates an empty class
         newStarSet.jumpnetwork_index = copy.deepcopy(self.jumpnetwork_index)
         newStarSet.jumplist = self.jumplist.copy()
         newStarSet.crys = self.crys
@@ -710,7 +710,12 @@ class StarSetMeta(StarSet):
         self.jumpnetwork_index2 = []  # list of list of indices into...
         self.jumplist = []  # list of our jumps, as PairStates
         self.jumplist2 = []  # list of our w2 jumps, as PairStates
-        self.meta_tags = meta_tags.copy()
+        if not meta_tags:
+            self.meta_tags = []
+            for x in crys.basis:
+                self.meta_tags.append(False)
+        else:
+            self.meta_tags = meta_tags.copy()
         ind = 0
         # ind_2 = 0
         for jlist in jumpnetwork:
@@ -747,97 +752,31 @@ class StarSetMeta(StarSet):
 
         self.crys = crys
         self.chem = chem
-        self.generate(Nshells, meta_tags)
+        self.generate(Nshells)
 
-    def __radd__(self, other):
-        """Add another StarSet to this one; very similar to generate()"""
-
-        threshold = 1e-8
-        if not isinstance(other, self.__class__): return NotImplemented
-        if self.chem != other.chem: return ArithmeticError('Cannot add different chemistry index')
-        if other.Nshells < 1: return self
-        if self.Nshells < 1:
-            self.Nshells = other.Nshells
-            self.stars = copy.deepcopy(other.stars)
-            self.states = other.states.copy()
-            self.Nstars = other.Nstars
-            self.Nstates = other.Nstates
-            self.index = other.index.copy()
-            self.indexdict = other.indexdict.copy()
-            return self
-        self.Nshells += other.Nshells
-        Nold = self.Nstates
-        oldstateset = set(self.states)
-        newstateset = set([])
-        for s1 in self.states[:Nold]:
-            for s2 in other.states:
-                # this try/except structure lets us attempt addition and kick out if not possible
-                try: s = s1 + s2
-                except: continue
-                if not s.iszero() and not s in oldstateset: newstateset.add(s)
-        # now to sort our set of vectors (easiest by magnitude, and then reduce down:
-        self.states += sorted([s for s in newstateset], key=PairState.sortkey)
-        Nnew = len(self.states)
-        x2_indices = []
-        x2old = np.dot(self.states[Nold].dx, self.states[Nold].dx)
-        for i in range(Nold, Nnew):
-            x2 = np.dot(self.states[i].dx, self.states[i].dx)
-            if x2 > (x2old + threshold):
-                x2_indices.append(i)
-                x2old = x2
-        x2_indices.append(Nnew)
-        # x2_indices now contains a list of indices with the same magnitudes
-        xmin = Nold
-        for xmax in x2_indices:
-            complist_stars = [] # for finding unique stars
-            symmstate_list = [] # list of sets corresponding to those stars...
-            for xi in range(xmin, xmax):
-                x = self.states[xi]
-                # is this a new rep. for a unique star?
-                match = False
-                for i, gs in enumerate(symmstate_list):
-                    if x in gs:
-                        # update star
-                        complist_stars[i].append(xi)
-                        match = True
-                        continue
-                if not match:
-                    # new symmetry point!
-                    complist_stars.append([xi])
-                    symmstate_list.append(set([x.g(self.crys, self.chem, g) for g in self.crys.G]))
-            self.stars += complist_stars
-            xmin=xmax
-        self.Nstates = Nnew
-        # generate new index entries: which star is each state a member of?
-        self.index = np.pad(self.index, (0, Nnew-Nold), mode='constant')
-        Nold = self.Nstars
-        Nnew = len(self.stars)
-        for si in range(Nold, Nnew):
-            star = self.stars[si]
-            for xi in star:
-                self.index[xi] = si
-                self.indexdict[self.states[xi]] = (xi, si)
-        self.Nstars = Nnew
-
-        #super().__radd__(other)
-        return self
-
-    def __add__(self, other):
-        """Add two StarSets together; done by making a copy of one, and radding"""
-        if not isinstance(other, self.__class__): return NotImplemented
-        if self.Nshells >= other.Nshells:
-            return self.__radd__(other)
-            #scopy = self.copy()
-            #return scopy.__radd__(other)
-        else:
-            #scopy = other.copy()
-            #return scopy.__radd__(self)
-            return other.__radd__(self)
-        #super().__add__(other)
-        #return scopy
+    def copy(self, empty=False):
+        """Return a copy of the StarSet; done as efficiently as possible; empty means skip the shells, etc."""
+        newStarSet = self.__class__(None, None, None)  # a little hacky... creates an empty class
+        newStarSet.jumpnetwork_index = copy.deepcopy(self.jumpnetwork_index)
+        newStarSet.jumplist = self.jumplist.copy()
+        newStarSet.crys = self.crys
+        newStarSet.chem = self.chem
+        if not empty:
+            newStarSet.Nshells = self.Nshells
+            newStarSet.stars = copy.deepcopy(self.stars)
+            newStarSet.states = self.states.copy()
+            newStarSet.Nstars = self.Nstars
+            newStarSet.Nstates = self.Nstates
+            newStarSet.index = self.index.copy()
+            newStarSet.indexdict = self.indexdict.copy()
+            newStarSet.meta_tags = self.meta_tags.copy()
+            newStarSet.jumplist2 = self.jumplist2.copy()
+            newStarSet.jumpnetwork_index2 =copy.deepcopy(self.jumpnetwork_index2)
+        else: newStarSet.generate(0)
+        return newStarSet
 
 
-    def generate(self, Nshells, meta_tags, threshold=1e-8):
+    def generate(self, Nshells, threshold=1e-8):
         """
         Construct the points and the stars in the set. Now includes "origin states" by default; these
         are PairStates that iszero() is True; they are only included if they have a nonzero VectorBasis.
@@ -859,13 +798,13 @@ class StarSetMeta(StarSet):
                         i_indx = site_index
                     if state.j in sites:
                         j_indx = site_index
-                if meta_tags[i_indx]:
+                if self.meta_tags[i_indx]:
                         #if state.i is not state.j:
                         state_delete_list.append(state_indx)
                         continue
-                #elif meta_tags[j_indx]:
-                #        state_delete_list.append(state_indx)
-                #        continue
+                elif self.meta_tags[j_indx]:
+                        state_delete_list.append(state_indx)
+                        continue
 
                 # for site_index, sites in enumerate(self.crys.sitelist(0)):
                 #    if state.i in sites and meta_tags[site_index]:
@@ -902,7 +841,7 @@ class StarSetMeta(StarSet):
                                 i_indx = site_index
                             if s.j in sites:
                                 j_indx = site_index
-                        if meta_tags[i_indx]:
+                        if self.meta_tags[i_indx]:
                             to_add = False
                         # elif meta_tags[j_indx]:
                         #     for s3 in self.jumplist:
@@ -986,7 +925,7 @@ class StarSetMeta(StarSet):
         jumptype = []
         starpair = []
         for jt, jumpindices in enumerate(self.jumpnetwork_index2):
-            for jump in [ self.jumplist2[j] for j in jumpindices]:
+            for jump in [self.jumplist2[j] for j in jumpindices]:
                 for i, PSi in enumerate(self.states):
 
                     i_i_indx = 0
