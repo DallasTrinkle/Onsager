@@ -13,6 +13,16 @@ Contents:
 
    includeme
 
+.. automodule:: crystal
+   :members:
+.. automodule:: crystalStars
+   :members:
+.. automodule:: PowerExpansion
+   :members:
+.. automodule:: GFcalc
+   :members:
+.. automodule:: OnsagerCalc
+   :members:
 
 Indices and tables
 ==================
