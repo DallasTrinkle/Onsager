@@ -13,14 +13,28 @@ Contents:
 
    includeme
 
+Crystal:
+
 .. automodule:: crystal
    :members:
+
+CrystalStars:
+
 .. automodule:: crystalStars
    :members:
+
+PowerExpansion:
+
 .. automodule:: PowerExpansion
    :members:
+
+GFcalc:
+
 .. automodule:: GFcalc
    :members:
+
+OnsagerCalc:
+
 .. automodule:: OnsagerCalc
    :members:
 
