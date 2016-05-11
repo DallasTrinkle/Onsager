@@ -41,4 +41,4 @@ This work has been supported in part by
 * DOE/BES grant DE-FG02-05ER46217,
 * ONR grant N000141210752,
 * NSF/CDSE grant 1411106.
-* D. R. Trinkle began the theoretical work for this code during the long program on Material Defects at the [Institute for Pure and Applied Mathematics](https://www.ipam.ucla.edu/) at UCLA, Fall 2012.
+* D. R. Trinkle began the theoretical work for this code during the long program on Material Defects at the [Institute for Pure and Applied Mathematics](https://www.ipam.ucla.edu/) at UCLA, Fall 2012, which is supported by the National Science Foundation.
