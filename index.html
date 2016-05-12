@@ -150,19 +150,43 @@
 <dl class="function">
 <dt id="crystal.CombineTensorBasis">
 <code class="descclassname">crystal.</code><code class="descname">CombineTensorBasis</code><span class="sig-paren">(</span><em>b1</em>, <em>b2</em>, <em>symmetric=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#CombineTensorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.CombineTensorBasis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Combines (intersects) two tensor spaces into one; uses SVD to compute null space.
-:param b1: list of tensors
-:param b2: list of tensors
-:return: list of tensors</p>
+<dd><p>Combines (intersects) two tensor spaces into one; uses SVD to compute null space.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>b1</strong> &#8211; list of tensors</li>
+<li><strong>b2</strong> &#8211; list of tensors</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of tensors</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="crystal.CombineVectorBasis">
 <code class="descclassname">crystal.</code><code class="descname">CombineVectorBasis</code><span class="sig-paren">(</span><em>b1</em>, <em>b2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#CombineVectorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.CombineVectorBasis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Combines (intersects) two vector spaces into one.
-:param b1: (dim, vect) &#8211; dimensionality (0..3), vector defining line direction (1) or plane normal (2)
-:param b2: (dim, vect)
-:return: (dim, vect)</p>
+<dd><p>Combines (intersects) two vector spaces into one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>b1</strong> &#8211; (dim, vect) &#8211; dimensionality (0..3), vector defining line direction (1) or plane normal (2)</li>
+<li><strong>b2</strong> &#8211; (dim, vect)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(dim, vect)</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="class">
@@ -172,59 +196,120 @@
 <dl class="classmethod">
 <dt id="crystal.Crystal.BCC">
 <em class="property">classmethod </em><code class="descname">BCC</code><span class="sig-paren">(</span><em>a0</em>, <em>chemistry=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.BCC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.BCC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a body-centered cubic crystal with lattice constant a0
-:param a0: lattice constant
-:return: BCC crystal</p>
+<dd><p>Create a body-centered cubic crystal with lattice constant a0</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>a0</strong> &#8211; lattice constant</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">BCC crystal</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="classmethod">
 <dt id="crystal.Crystal.FCC">
 <em class="property">classmethod </em><code class="descname">FCC</code><span class="sig-paren">(</span><em>a0</em>, <em>chemistry=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.FCC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.FCC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a face-centered cubic crystal with lattice constant a0
-:param a0: lattice constant
-:return: FCC crystal</p>
+<dd><p>Create a face-centered cubic crystal with lattice constant a0</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>a0</strong> &#8211; lattice constant</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">FCC crystal</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.FullVectorBasis">
 <code class="descname">FullVectorBasis</code><span class="sig-paren">(</span><em>chem=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.FullVectorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.FullVectorBasis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate our full vector basis, using the information from our crystal
-:param chem: (optional) chemical index to consider; otherwise return a list of such
-:return: (list) of our unique vector basis lattice functions, normalized; each is an array
-:return: (list) of ouf VV &#8220;outer&#8221; expansion</p>
+<dd><p>Generate our full vector basis, using the information from our crystal</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>chem</strong> &#8211; (optional) chemical index to consider; otherwise return a list of such</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(list) of our unique vector basis lattice functions, normalized; each is an array</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(list) of ouf VV &#8220;outer&#8221; expansion</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="classmethod">
 <dt id="crystal.Crystal.HCP">
 <em class="property">classmethod </em><code class="descname">HCP</code><span class="sig-paren">(</span><em>a0</em>, <em>c_a=1.6329931618554521</em>, <em>chemistry=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.HCP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.HCP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a hexagonal closed packed crystal with lattice constant a0, c/a ratio c_a
-:param a0: lattice constant
-:param c_a: c/a ratio
-:return: HCP crystal</p>
+<dd><p>Create a hexagonal closed packed crystal with lattice constant a0, c/a ratio c_a</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a0</strong> &#8211; lattice constant</li>
+<li><strong>c_a</strong> &#8211; c/a ratio</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">HCP crystal</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.SymmTensorBasis">
 <code class="descname">SymmTensorBasis</code><span class="sig-paren">(</span><em>ind</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.SymmTensorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.SymmTensorBasis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates the symmetric tensor basis corresponding to an atomic site
-:param ind: tuple index for atom
-:return: (dim, vect) &#8211; dimension of basis, vector = normal for plane, direction for line</p>
+<dd><p>Generates the symmetric tensor basis corresponding to an atomic site</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ind</strong> &#8211; tuple index for atom</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(dim, vect) &#8211; dimension of basis, vector = normal for plane, direction for line</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.VectorBasis">
 <code class="descname">VectorBasis</code><span class="sig-paren">(</span><em>ind</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.VectorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.VectorBasis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates the vector basis corresponding to an atomic site
-:param ind: tuple index for atom
-:return: (dim, vect) &#8211; dimension of basis, vector = normal for plane, direction for line</p>
+<dd><p>Generates the vector basis corresponding to an atomic site</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ind</strong> &#8211; tuple index for atom</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(dim, vect) &#8211; dimension of basis, vector = normal for plane, direction for line</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.Wyckoffpos">
 <code class="descname">Wyckoffpos</code><span class="sig-paren">(</span><em>uvec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.Wyckoffpos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.Wyckoffpos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates all the equivalent Wyckoff positions for a unit cell vector.
-:param uvec: 3-vector (float) vector in direct coordinates
-:return: list of equivalent Wyckoff positions</p>
+<dd><p>Generates all the equivalent Wyckoff positions for a unit cell vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uvec</strong> &#8211; 3-vector (float) vector in direct coordinates</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of equivalent Wyckoff positions</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -232,39 +317,70 @@
 <code class="descname">addbasis</code><span class="sig-paren">(</span><em>basis</em>, <em>chemistry=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.addbasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.addbasis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a new Crystal object that contains additional sites (assumed to be new chemistry).
 This is intended to &#8220;add in&#8221; interstitial sites. Note: if the symmetry is to be
-maintained, should be the output from Wyckoffpos().
-:param basis: list (or list of lists) of new sites
-:paran chemistry: (optional) list of chemistry names
-:return: new Crystal object, with additional sites</p>
+maintained, should be the output from Wyckoffpos().</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>basis</strong> &#8211; list (or list of lists) of new sites</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Paran chemistry:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">(optional) list of chemistry names</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">new Crystal object, with additional sites</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.calcmetric">
 <code class="descname">calcmetric</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.calcmetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.calcmetric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the volume of the cell and the metric tensor
-:return: volume, metric tensor</p>
+<dd><p>Computes the volume of the cell and the metric tensor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">volume, metric tensor</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.cart2pos">
 <code class="descname">cart2pos</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.cart2pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.cart2pos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the lattvec and index corresponding to an atomic position in cartesian coord.
-:param v: 3-vector (float) position in Cartesian coordinates
-:return: 3-vector (integer) lattice vector in direct coordinates, index tuple</p>
-<blockquote>
-<div>of corresponding atom.
-Returns None on tuple if no match</div></blockquote>
+<dd><p>Return the lattvec and index corresponding to an atomic position in cartesian coord.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>v</strong> &#8211; 3-vector (float) position in Cartesian coordinates</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">3-vector (integer) lattice vector in direct coordinates, index tuple
+of corresponding atom.
+Returns None on tuple if no match</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.cart2unit">
 <code class="descname">cart2unit</code><span class="sig-paren">(</span><em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.cart2unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.cart2unit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the lattvec and unit cell coord. corresponding to a position
-in cartesian coord.
-:param v: 3-vector (float) position in Cartesian coordinates
-:return: 3-vector (integer) lattice vector in direct coordinates,</p>
-<blockquote>
-<div>3-vector (float) inside unit cell</div></blockquote>
+in cartesian coord.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>v</strong> &#8211; 3-vector (float) position in Cartesian coordinates</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">3-vector (integer) lattice vector in direct coordinates,
+3-vector (float) inside unit cell</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -276,17 +392,32 @@ in cartesian coord.
 <dl class="method">
 <dt id="crystal.Crystal.chemindex">
 <code class="descname">chemindex</code><span class="sig-paren">(</span><em>chemistry</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.chemindex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.chemindex" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return index corresponding to chemistry; None if not present.
-:param chemistry: value to check
-:return: index corresponding to chemistry</p>
+<dd><p>Return index corresponding to chemistry; None if not present.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>chemistry</strong> &#8211; value to check</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">index corresponding to chemistry</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="classmethod">
 <dt id="crystal.Crystal.fromdict">
 <em class="property">classmethod </em><code class="descname">fromdict</code><span class="sig-paren">(</span><em>yamldict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.fromdict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.fromdict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a Crystal object from a YAML-created dictionary
-:param yamldict: dictionary; must contain &#8216;lattice&#8217; (using <em>row</em> vectors!) and &#8216;basis&#8217;;
-can contain optional &#8216;lattice_constant&#8217;
+<dd><p>Creates a Crystal object from a YAML-created dictionary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>yamldict</strong> &#8211; dictionary; must contain &#8216;lattice&#8217; (using <em>row</em> vectors!) and &#8216;basis&#8217;;</td>
+</tr>
+</tbody>
+</table>
+<p>can contain optional &#8216;lattice_constant&#8217;
 :return: Crystal(lattice.T, basis)</p>
 </dd></dl>
 
@@ -310,33 +441,62 @@ k-points inside the BZ. Does not return any <em>weights</em> as every point is e
 <dl class="method">
 <dt id="crystal.Crystal.g_cart">
 <code class="descname">g_cart</code><span class="sig-paren">(</span><em>g</em>, <em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_cart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.g_cart" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply a space group operation to a (Cartesian) vector position
-:param g: group operation (GroupOp)
-:param x: 3-vector position in space
-:return: 3-vector position in space (Cartesian coordinates)</p>
+<dd><p>Apply a space group operation to a (Cartesian) vector position</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>g</strong> &#8211; group operation (GroupOp)</li>
+<li><strong>x</strong> &#8211; 3-vector position in space</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">3-vector position in space (Cartesian coordinates)</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="crystal.Crystal.g_direc">
 <em class="property">static </em><code class="descname">g_direc</code><span class="sig-paren">(</span><em>g</em>, <em>direc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_direc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.g_direc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply a space group operation to a direction
-:param g: group operation (GroupOp)
-:param direc: 3-vector direction
-:return: 3-vector direction</p>
+<dd><p>Apply a space group operation to a direction</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>g</strong> &#8211; group operation (GroupOp)</li>
+<li><strong>direc</strong> &#8211; 3-vector direction</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">3-vector direction</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.g_direc_equivalent">
 <code class="descname">g_direc_equivalent</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_direc_equivalent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.g_direc_equivalent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tells us if two directions are equivalent by according to the space group
-:param d1: direction one (array[3])
-:param d2: direction two (array[3])
-:param threshold: threshold for equality</p>
+<dd><p>Tells us if two directions are equivalent by according to the space group</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if equivalent by a point group operation</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>d1</strong> &#8211; direction one (array[3])</li>
+<li><strong>d2</strong> &#8211; direction two (array[3])</li>
+<li><strong>threshold</strong> &#8211; threshold for equality</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if equivalent by a point group operation</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -345,72 +505,147 @@ k-points inside the BZ. Does not return any <em>weights</em> as every point is e
 <dl class="method">
 <dt id="crystal.Crystal.g_pos">
 <code class="descname">g_pos</code><span class="sig-paren">(</span><em>g</em>, <em>lattvec</em>, <em>ind</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.g_pos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply a space group operation to an atom position specified by its lattice and index
-:param g: group operation (GroupOp)
-:param lattvec: 3-vector (integer) lattice vector in direct coordinates
-:param ind: two-tuple index specifying the atom: (atomtype, atomindex)
-:return: 3-vector (integer) lattice vector in direct coordinates, index</p>
+<dd><p>Apply a space group operation to an atom position specified by its lattice and index</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>g</strong> &#8211; group operation (GroupOp)</li>
+<li><strong>lattvec</strong> &#8211; 3-vector (integer) lattice vector in direct coordinates</li>
+<li><strong>ind</strong> &#8211; two-tuple index specifying the atom: (atomtype, atomindex)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">3-vector (integer) lattice vector in direct coordinates, index</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="crystal.Crystal.g_tensor">
 <em class="property">static </em><code class="descname">g_tensor</code><span class="sig-paren">(</span><em>g</em>, <em>tensor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.g_tensor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply a space group operation to a 2nd-rank tensor
-:param g: group operation (GroupOp)
-:param tensor: 2nd-rank tensor
-:return: 2nd-rank tensor</p>
+<dd><p>Apply a space group operation to a 2nd-rank tensor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>g</strong> &#8211; group operation (GroupOp)</li>
+<li><strong>tensor</strong> &#8211; 2nd-rank tensor</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">2nd-rank tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="crystal.Crystal.g_vect">
 <em class="property">static </em><code class="descname">g_vect</code><span class="sig-paren">(</span><em>g</em>, <em>lattvec</em>, <em>uvec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_vect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.g_vect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply a space group operation to a vector position specified by its lattice and a location
-in the unit cell in direct coordinates
-:param g:  group operation (GroupOp)
-:param lattvec: 3-vector (integer) lattice vector in direct coordinates
-:param uvec: 3-vector (float) vector in direct coordinates
-:return: 3-vector (integer) lattice vector in direct coordinates, location in unit cell in</p>
-<blockquote>
-<div>direct coordinates</div></blockquote>
+in the unit cell in direct coordinates</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>g</strong> &#8211; group operation (GroupOp)</li>
+<li><strong>lattvec</strong> &#8211; 3-vector (integer) lattice vector in direct coordinates</li>
+<li><strong>uvec</strong> &#8211; 3-vector (float) vector in direct coordinates</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">3-vector (integer) lattice vector in direct coordinates, location in unit cell in
+direct coordinates</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.genBZG">
 <code class="descname">genBZG</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.genBZG"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.genBZG" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates the reciprocal lattice G points that define the Brillouin zone.
-:return: array of G vectors that define the BZ, in Cartesian coordinates</p>
+<dd><p>Generates the reciprocal lattice G points that define the Brillouin zone.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">array of G vectors that define the BZ, in Cartesian coordinates</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.genWyckoffsets">
 <code class="descname">genWyckoffsets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.genWyckoffsets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.genWyckoffsets" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate our Wykcoff sets.
-:return: set of sets of tuples of positions that correspond to identical Wyckoff positions</p>
+<dd><p>Generate our Wykcoff sets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">set of sets of tuples of positions that correspond to identical Wyckoff positions</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.gengroup">
 <code class="descname">gengroup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.gengroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.gengroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate all of the space group operations.
-:return: list of group operations</p>
+<dd><p>Generate all of the space group operations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of group operations</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.genpoint">
 <code class="descname">genpoint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.genpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.genpoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate our point group indices. Done with crazy list comprehension due to the
-structure of our basis.
-:return: list of sets of point group operations that leave a site unchanged</p>
+structure of our basis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of sets of point group operations that leave a site unchanged</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.inBZ">
 <code class="descname">inBZ</code><span class="sig-paren">(</span><em>vec</em>, <em>BZG=None</em>, <em>threshold=1e-05</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.inBZ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.inBZ" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tells us if vec is inside our set of defining points.
-:param vec: array [3], vector to be tested
-:param BGZ: array [:,3], optional (default = self.BZG), array of vectors that define the BZ
-:param threshold: double, optional, threshold to use for &#8220;equality&#8221;
-:return: False if outside the BZ, True otherwise</p>
+<dd><p>Tells us if vec is inside our set of defining points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vec</strong> &#8211; array [3], vector to be tested</li>
+<li><strong>BGZ</strong> &#8211; array [:,3], optional (default = self.BZG), array of vectors that define the BZ</li>
+<li><strong>threshold</strong> &#8211; double, optional, threshold to use for &#8220;equality&#8221;</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">False if outside the BZ, True otherwise</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -477,19 +712,43 @@ shortest to longest; (c) the vectors have minimal dot product; (d) the basis is 
 <code class="descname">nnlist</code><span class="sig-paren">(</span><em>ind</em>, <em>cutoff</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.nnlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.nnlist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate the nearest neighbor list for a given cutoff. Only consider
 neighbor vectors for atoms of the same type. Returns a list of
-cartesian vectors.
-:param ind: tuple index for atom
-:param cutoff:  distance cutoff
-:return: list of nearest neighbor vectors</p>
+cartesian vectors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ind</strong> &#8211; tuple index for atom</li>
+<li><strong>cutoff</strong> &#8211; distance cutoff</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of nearest neighbor vectors</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.pos2cart">
 <code class="descname">pos2cart</code><span class="sig-paren">(</span><em>lattvec</em>, <em>ind</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.pos2cart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.pos2cart" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the cartesian coordinates of an atom specified by its lattice and index
-:param lattvec: 3-vector (integer) lattice vector in direct coordinates
-:param ind: two-tuple index specifying the atom: (atomtype, atomindex)
-:return: 3-vector (float) in Cartesian coordinates</p>
+<dd><p>Return the cartesian coordinates of an atom specified by its lattice and index</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lattvec</strong> &#8211; 3-vector (integer) lattice vector in direct coordinates</li>
+<li><strong>ind</strong> &#8211; two-tuple index specifying the atom: (atomtype, atomindex)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">3-vector (float) in Cartesian coordinates</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -502,16 +761,22 @@ cartesian vectors.
 <dt id="crystal.Crystal.reducekptmesh">
 <code class="descname">reducekptmesh</code><span class="sig-paren">(</span><em>kptfull</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.reducekptmesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.reducekptmesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a fully expanded mesh, and reduces it by symmetry. Assumes every point is
-equally weighted. We would need a different (more complicated) algorithm if not true...
-:param kptfull: array[Nkpt][3] of kpoints
-:param threshold: threshold for symmetry equality</p>
+equally weighted. We would need a different (more complicated) algorithm if not true...</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return kptsymm:</th><td class="field-body">array[Nsymm][3] of kpoints</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>kptfull</strong> &#8211; array[Nkpt][3] of kpoints</li>
+<li><strong>threshold</strong> &#8211; threshold for symmetry equality</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return weight:</th><td class="field-body">array[Nsymm] of weights (integrates to 1)</td>
+<tr class="field-even field"><th class="field-name">Return kptsymm:</th><td class="field-body"><p class="first">array[Nsymm][3] of kpoints</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return weight:</th><td class="field-body"><p class="first last">array[Nsymm] of weights (integrates to 1)</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -520,51 +785,102 @@ equally weighted. We would need a different (more complicated) algorithm if not 
 <dl class="method">
 <dt id="crystal.Crystal.remapbasis">
 <code class="descname">remapbasis</code><span class="sig-paren">(</span><em>supercell</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.remapbasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.remapbasis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes the basis definition, and using a supercell definition, returns a new basis
-:param supercell: integer array[3,3]
-:return: atomic basis</p>
+<dd><p>Takes the basis definition, and using a supercell definition, returns a new basis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>supercell</strong> &#8211; integer array[3,3]</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">atomic basis</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.simpleYAML">
 <code class="descname">simpleYAML</code><span class="sig-paren">(</span><em>a0=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.simpleYAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.simpleYAML" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a simplified YAML dump, in case we don&#8217;t want to output the full symmetry analysis
-:return: YAML dump</p>
+<dd><p>Creates a simplified YAML dump, in case we don&#8217;t want to output the full symmetry analysis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">YAML dump</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.sitelist">
 <code class="descname">sitelist</code><span class="sig-paren">(</span><em>chem</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.sitelist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.sitelist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of lists of Wyckoff-related sites for a given chemistry.
-Done with a single list comprehension&#8211;useful as input for diffusion calculation
-:param chem: index corresponding to chemistry to consider
-:return: list of lists of indices that are equivalent by symmetry</p>
+Done with a single list comprehension&#8211;useful as input for diffusion calculation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>chem</strong> &#8211; index corresponding to chemistry to consider</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of lists of indices that are equivalent by symmetry</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.strain">
 <code class="descname">strain</code><span class="sig-paren">(</span><em>eps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.strain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.strain" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a new Crystal object that is a strained version of the current.
-:param eps: strain tensor
-:return: new Crystal object, strained</p>
+<dd><p>Returns a new Crystal object that is a strained version of the current.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>eps</strong> &#8211; strain tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new Crystal object, strained</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.unit2cart">
 <code class="descname">unit2cart</code><span class="sig-paren">(</span><em>lattvec</em>, <em>uvec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.unit2cart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.unit2cart" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the cartesian coordinates of a position specified by its lattice and
-unit cell coordinates
-:param lattvec: 3-vector (integer) lattice vector in direct coordinates
-:param uvec: 3-vector (float) unit cell vector in direct coordinates
-:return: 3-vector (float) in Cartesian coordinates</p>
+unit cell coordinates</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lattvec</strong> &#8211; 3-vector (integer) lattice vector in direct coordinates</li>
+<li><strong>uvec</strong> &#8211; 3-vector (float) unit cell vector in direct coordinates</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">3-vector (float) in Cartesian coordinates</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="staticmethod">
 <dt id="crystal.Crystal.vectlist">
 <em class="property">static </em><code class="descname">vectlist</code><span class="sig-paren">(</span><em>vb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.vectlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.vectlist" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a list of orthonormal vectors corresponding to our vector basis.
-:param vb: (dim, v)
-:return: list of vectors</p>
+<dd><p>Returns a list of orthonormal vectors corresponding to our vector basis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vb</strong> &#8211; (dim, v)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of vectors</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -610,10 +926,19 @@ can be defined out-of-the-box.</p>
 negative = rotation + mirror operation, perpendicular to axis
 &#8220;special cases&#8221;: -1 = mirror, -2 = inversion</p>
 <p>eigenvect[0] = axis of rotation / mirror
-eigenvect[1], eigenvect[2] = orthonormal vectors to define the plane giving a right-handed</p>
-<blockquote>
-<div>coordinate system and where rotation around [0] is positive, and the positive imaginary
-eigenvector for the complex eigenvalue is [1] + i [2].</div></blockquote>
+eigenvect[1], eigenvect[2] = orthonormal vectors to define the plane giving a right-handed
+coordinate system and where rotation around [0] is positive, and the positive imaginary
+eigenvector for the complex eigenvalue is [1] + i [2].</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">type (integer)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of [ev0, ev1, ev2]</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="classmethod">
@@ -645,54 +970,122 @@ eigenvector for the complex eigenvalue is [1] + i [2].</div></blockquote>
 <dl class="function">
 <dt id="crystal.ProjectTensorBasis">
 <code class="descclassname">crystal.</code><code class="descname">ProjectTensorBasis</code><span class="sig-paren">(</span><em>tensor</em>, <em>basis</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#ProjectTensorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.ProjectTensorBasis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a tensor, project it onto the basis.
-:param tensor: tensor
-:param basis: list consisting of an orthonormal basis
-:return: tensor, projected</p>
+<dd><p>Given a tensor, project it onto the basis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tensor</strong> &#8211; tensor</li>
+<li><strong>basis</strong> &#8211; list consisting of an orthonormal basis</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">tensor, projected</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="crystal.SymmTensorBasis">
 <code class="descclassname">crystal.</code><code class="descname">SymmTensorBasis</code><span class="sig-paren">(</span><em>rottype</em>, <em>eigenvect</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#SymmTensorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.SymmTensorBasis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a symmetric second-rank tensor basis corresponding to the optype and eigenvectors
-for a GroupOp
-:param rottype: output from eigen()
-:param eigenvect: eigenvectors
-:return: list of 2nd-rank symmetric tensors making up the basis</p>
+for a GroupOp</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rottype</strong> &#8211; output from eigen()</li>
+<li><strong>eigenvect</strong> &#8211; eigenvectors</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of 2nd-rank symmetric tensors making up the basis</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="crystal.VectorBasis">
 <code class="descclassname">crystal.</code><code class="descname">VectorBasis</code><span class="sig-paren">(</span><em>rottype</em>, <em>eigenvect</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#VectorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.VectorBasis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a vector basis corresponding to the optype and eigenvectors for a GroupOp
-:param rottype: output from eigen()
-:param eigenvect: eigenvectors
-:return: (dim, vect) &#8211; dimensionality (0..3), vector defining line direction (1) or plane normal (2)</p>
+<dd><p>Returns a vector basis corresponding to the optype and eigenvectors for a GroupOp</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rottype</strong> &#8211; output from eigen()</li>
+<li><strong>eigenvect</strong> &#8211; eigenvectors</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(dim, vect) &#8211; dimensionality (0..3), vector defining line direction (1) or plane normal (2)</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="crystal.Voigtstrain">
 <code class="descclassname">crystal.</code><code class="descname">Voigtstrain</code><span class="sig-paren">(</span><em>e1</em>, <em>e2</em>, <em>e3</em>, <em>e4</em>, <em>e5</em>, <em>e6</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Voigtstrain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Voigtstrain" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a symmetric strain tensor from the Voigt reduced strain values.
-:param e1: xx
-:param e2: yy
-:param e3: zz
-:param e4: yz + zx
-:param e5: zx + xz
-:param e6: xy + yx
-:return: symmetric strain tensor</p>
+<dd><p>Returns a symmetric strain tensor from the Voigt reduced strain values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>e1</strong> &#8211; xx</li>
+<li><strong>e2</strong> &#8211; yy</li>
+<li><strong>e3</strong> &#8211; zz</li>
+<li><strong>e4</strong> &#8211; yz + zx</li>
+<li><strong>e5</strong> &#8211; zx + xz</li>
+<li><strong>e6</strong> &#8211; xy + yx</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">symmetric strain tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="crystal.incell">
 <code class="descclassname">crystal.</code><code class="descname">incell</code><span class="sig-paren">(</span><em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#incell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.incell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the vector inside the unit cell (in [0,1)**3)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vec</strong> &#8211; 3-vector (unit coord)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">3-vector</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="crystal.inhalf">
 <code class="descclassname">crystal.</code><code class="descname">inhalf</code><span class="sig-paren">(</span><em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#inhalf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.inhalf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the vector inside the centered cell (in [-0.5,0.5)**3)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vec</strong> &#8211; 3-vector (unit coord)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">3-vector</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">

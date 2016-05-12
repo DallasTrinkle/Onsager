@@ -156,6 +156,9 @@
 <div class="viewcode-block" id="incell"><a class="viewcode-back" href="../index.html#crystal.incell">[docs]</a><span class="k">def</span> <span class="nf">incell</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the vector inside the unit cell (in [0,1)**3)</span>
+
+<span class="sd">    :param vec: 3-vector (unit coord)</span>
+<span class="sd">    :return: 3-vector</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">vec</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">vec</span> <span class="o">+</span> <span class="mf">1.0e-8</span><span class="p">)</span></div>
 
@@ -163,6 +166,9 @@
 <div class="viewcode-block" id="inhalf"><a class="viewcode-back" href="../index.html#crystal.inhalf">[docs]</a><span class="k">def</span> <span class="nf">inhalf</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the vector inside the centered cell (in [-0.5,0.5)**3)</span>
+
+<span class="sd">    :param vec: 3-vector (unit coord)</span>
+<span class="sd">    :return: 3-vector</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">vec</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">vec</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span></div>
 
@@ -342,8 +348,11 @@
 
 <span class="sd">        eigenvect[0] = axis of rotation / mirror</span>
 <span class="sd">        eigenvect[1], eigenvect[2] = orthonormal vectors to define the plane giving a right-handed</span>
-<span class="sd">          coordinate system and where rotation around [0] is positive, and the positive imaginary</span>
-<span class="sd">          eigenvector for the complex eigenvalue is [1] + i [2].</span>
+<span class="sd">        coordinate system and where rotation around [0] is positive, and the positive imaginary</span>
+<span class="sd">        eigenvector for the complex eigenvalue is [1] + i [2].</span>
+
+<span class="sd">        :return: type (integer)</span>
+<span class="sd">        :return: list of [ev0, ev1, ev2]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sane__</span><span class="p">():</span>
@@ -414,6 +423,7 @@
 <div class="viewcode-block" id="VectorBasis"><a class="viewcode-back" href="../index.html#crystal.VectorBasis">[docs]</a><span class="k">def</span> <span class="nf">VectorBasis</span><span class="p">(</span><span class="n">rottype</span><span class="p">,</span> <span class="n">eigenvect</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a vector basis corresponding to the optype and eigenvectors for a GroupOp</span>
+
 <span class="sd">    :param rottype: output from eigen()</span>
 <span class="sd">    :param eigenvect: eigenvectors</span>
 <span class="sd">    :return: (dim, vect) -- dimensionality (0..3), vector defining line direction (1) or plane normal (2)</span>
@@ -428,6 +438,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a symmetric second-rank tensor basis corresponding to the optype and eigenvectors</span>
 <span class="sd">    for a GroupOp</span>
+
 <span class="sd">    :param rottype: output from eigen()</span>
 <span class="sd">    :param eigenvect: eigenvectors</span>
 <span class="sd">    :return: list of 2nd-rank symmetric tensors making up the basis</span>
@@ -467,6 +478,7 @@
 <div class="viewcode-block" id="CombineVectorBasis"><a class="viewcode-back" href="../index.html#crystal.CombineVectorBasis">[docs]</a><span class="k">def</span> <span class="nf">CombineVectorBasis</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Combines (intersects) two vector spaces into one.</span>
+
 <span class="sd">    :param b1: (dim, vect) -- dimensionality (0..3), vector defining line direction (1) or plane normal (2)</span>
 <span class="sd">    :param b2: (dim, vect)</span>
 <span class="sd">    :return: (dim, vect)</span>
@@ -497,6 +509,7 @@
 <div class="viewcode-block" id="CombineTensorBasis"><a class="viewcode-back" href="../index.html#crystal.CombineTensorBasis">[docs]</a><span class="k">def</span> <span class="nf">CombineTensorBasis</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Combines (intersects) two tensor spaces into one; uses SVD to compute null space.</span>
+
 <span class="sd">    :param b1: list of tensors</span>
 <span class="sd">    :param b2: list of tensors</span>
 <span class="sd">    :return: list of tensors</span>
@@ -521,6 +534,7 @@
 <div class="viewcode-block" id="ProjectTensorBasis"><a class="viewcode-back" href="../index.html#crystal.ProjectTensorBasis">[docs]</a><span class="k">def</span> <span class="nf">ProjectTensorBasis</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">basis</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a tensor, project it onto the basis.</span>
+
 <span class="sd">    :param tensor: tensor</span>
 <span class="sd">    :param basis: list consisting of an orthonormal basis</span>
 <span class="sd">    :return: tensor, projected</span>
@@ -533,6 +547,7 @@
 <div class="viewcode-block" id="Voigtstrain"><a class="viewcode-back" href="../index.html#crystal.Voigtstrain">[docs]</a><span class="k">def</span> <span class="nf">Voigtstrain</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">,</span> <span class="n">e3</span><span class="p">,</span> <span class="n">e4</span><span class="p">,</span> <span class="n">e5</span><span class="p">,</span> <span class="n">e6</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a symmetric strain tensor from the Voigt reduced strain values.</span>
+
 <span class="sd">    :param e1: xx</span>
 <span class="sd">    :param e2: yy</span>
 <span class="sd">    :param e3: zz</span>
@@ -628,6 +643,7 @@
 <div class="viewcode-block" id="Crystal.fromdict"><a class="viewcode-back" href="../index.html#crystal.Crystal.fromdict">[docs]</a>    <span class="k">def</span> <span class="nf">fromdict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">yamldict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a Crystal object from a YAML-created dictionary</span>
+
 <span class="sd">        :param yamldict: dictionary; must contain &#39;lattice&#39; (using *row* vectors!) and &#39;basis&#39;;</span>
 <span class="sd">        can contain optional &#39;lattice_constant&#39;</span>
 <span class="sd">        :return: Crystal(lattice.T, basis)</span>
@@ -643,6 +659,7 @@
 <div class="viewcode-block" id="Crystal.simpleYAML"><a class="viewcode-back" href="../index.html#crystal.Crystal.simpleYAML">[docs]</a>    <span class="k">def</span> <span class="nf">simpleYAML</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a simplified YAML dump, in case we don&#39;t want to output the full symmetry analysis</span>
+
 <span class="sd">        :return: YAML dump</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">({</span><span class="s1">&#39;lattice_constant&#39;</span><span class="p">:</span> <span class="n">a0</span><span class="p">,</span>
@@ -653,6 +670,7 @@
 <div class="viewcode-block" id="Crystal.chemindex"><a class="viewcode-back" href="../index.html#crystal.Crystal.chemindex">[docs]</a>    <span class="k">def</span> <span class="nf">chemindex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chemistry</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return index corresponding to chemistry; None if not present.</span>
+
 <span class="sd">        :param chemistry: value to check</span>
 <span class="sd">        :return: index corresponding to chemistry</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -664,6 +682,7 @@
 <div class="viewcode-block" id="Crystal.FCC"><a class="viewcode-back" href="../index.html#crystal.Crystal.FCC">[docs]</a>    <span class="k">def</span> <span class="nf">FCC</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a face-centered cubic crystal with lattice constant a0</span>
+
 <span class="sd">        :param a0: lattice constant</span>
 <span class="sd">        :return: FCC crystal</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -675,6 +694,7 @@
 <div class="viewcode-block" id="Crystal.BCC"><a class="viewcode-back" href="../index.html#crystal.Crystal.BCC">[docs]</a>    <span class="k">def</span> <span class="nf">BCC</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a body-centered cubic crystal with lattice constant a0</span>
+
 <span class="sd">        :param a0: lattice constant</span>
 <span class="sd">        :return: BCC crystal</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -686,6 +706,7 @@
 <div class="viewcode-block" id="Crystal.HCP"><a class="viewcode-back" href="../index.html#crystal.Crystal.HCP">[docs]</a>    <span class="k">def</span> <span class="nf">HCP</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">c_a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">8.</span><span class="o">/</span><span class="mf">3.</span><span class="p">),</span> <span class="n">chemistry</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a hexagonal closed packed crystal with lattice constant a0, c/a ratio c_a</span>
+
 <span class="sd">        :param a0: lattice constant</span>
 <span class="sd">        :param c_a: c/a ratio</span>
 <span class="sd">        :return: HCP crystal</span>
@@ -776,6 +797,7 @@
 <div class="viewcode-block" id="Crystal.remapbasis"><a class="viewcode-back" href="../index.html#crystal.Crystal.remapbasis">[docs]</a>    <span class="k">def</span> <span class="nf">remapbasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">supercell</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes the basis definition, and using a supercell definition, returns a new basis</span>
+
 <span class="sd">        :param supercell: integer array[3,3]</span>
 <span class="sd">        :return: atomic basis</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -825,6 +847,7 @@
 <div class="viewcode-block" id="Crystal.calcmetric"><a class="viewcode-back" href="../index.html#crystal.Crystal.calcmetric">[docs]</a>    <span class="k">def</span> <span class="nf">calcmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the volume of the cell and the metric tensor</span>
+
 <span class="sd">        :return: volume, metric tensor</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">))),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">)</span></div>
@@ -832,6 +855,7 @@
 <div class="viewcode-block" id="Crystal.inBZ"><a class="viewcode-back" href="../index.html#crystal.Crystal.inBZ">[docs]</a>    <span class="k">def</span> <span class="nf">inBZ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vec</span><span class="p">,</span> <span class="n">BZG</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Tells us if vec is inside our set of defining points.</span>
+
 <span class="sd">        :param vec: array [3], vector to be tested</span>
 <span class="sd">        :param BGZ: array [:,3], optional (default = self.BZG), array of vectors that define the BZ</span>
 <span class="sd">        :param threshold: double, optional, threshold to use for &quot;equality&quot;</span>
@@ -844,6 +868,7 @@
 <div class="viewcode-block" id="Crystal.genBZG"><a class="viewcode-back" href="../index.html#crystal.Crystal.genBZG">[docs]</a>    <span class="k">def</span> <span class="nf">genBZG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates the reciprocal lattice G points that define the Brillouin zone.</span>
+
 <span class="sd">        :return: array of G vectors that define the BZ, in Cartesian coordinates</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Start with a list of possible vectors; add those that define the BZ...</span>
@@ -861,6 +886,7 @@
 <div class="viewcode-block" id="Crystal.gengroup"><a class="viewcode-back" href="../index.html#crystal.Crystal.gengroup">[docs]</a>    <span class="k">def</span> <span class="nf">gengroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate all of the space group operations.</span>
+
 <span class="sd">        :return: list of group operations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">groupops</span> <span class="o">=</span> <span class="p">[]</span>
@@ -893,6 +919,7 @@
 <div class="viewcode-block" id="Crystal.strain"><a class="viewcode-back" href="../index.html#crystal.Crystal.strain">[docs]</a>    <span class="k">def</span> <span class="nf">strain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a new Crystal object that is a strained version of the current.</span>
+
 <span class="sd">        :param eps: strain tensor</span>
 <span class="sd">        :return: new Crystal object, strained</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -906,6 +933,7 @@
 <span class="sd">        Returns a new Crystal object that contains additional sites (assumed to be new chemistry).</span>
 <span class="sd">        This is intended to &quot;add in&quot; interstitial sites. Note: if the symmetry is to be</span>
 <span class="sd">        maintained, should be the output from Wyckoffpos().</span>
+
 <span class="sd">        :param basis: list (or list of lists) of new sites</span>
 <span class="sd">        :paran chemistry: (optional) list of chemistry names</span>
 <span class="sd">        :return: new Crystal object, with additional sites</span>
@@ -928,6 +956,7 @@
 <div class="viewcode-block" id="Crystal.pos2cart"><a class="viewcode-back" href="../index.html#crystal.Crystal.pos2cart">[docs]</a>    <span class="k">def</span> <span class="nf">pos2cart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lattvec</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the cartesian coordinates of an atom specified by its lattice and index</span>
+
 <span class="sd">        :param lattvec: 3-vector (integer) lattice vector in direct coordinates</span>
 <span class="sd">        :param ind: two-tuple index specifying the atom: (atomtype, atomindex)</span>
 <span class="sd">        :return: 3-vector (float) in Cartesian coordinates</span>
@@ -938,6 +967,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the cartesian coordinates of a position specified by its lattice and</span>
 <span class="sd">        unit cell coordinates</span>
+
 <span class="sd">        :param lattvec: 3-vector (integer) lattice vector in direct coordinates</span>
 <span class="sd">        :param uvec: 3-vector (float) unit cell vector in direct coordinates</span>
 <span class="sd">        :return: 3-vector (float) in Cartesian coordinates</span>
@@ -948,6 +978,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the lattvec and unit cell coord. corresponding to a position</span>
 <span class="sd">        in cartesian coord.</span>
+
 <span class="sd">        :param v: 3-vector (float) position in Cartesian coordinates</span>
 <span class="sd">        :return: 3-vector (integer) lattice vector in direct coordinates,</span>
 <span class="sd">         3-vector (float) inside unit cell</span>
@@ -959,6 +990,7 @@
 <div class="viewcode-block" id="Crystal.cart2pos"><a class="viewcode-back" href="../index.html#crystal.Crystal.cart2pos">[docs]</a>    <span class="k">def</span> <span class="nf">cart2pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the lattvec and index corresponding to an atomic position in cartesian coord.</span>
+
 <span class="sd">        :param v: 3-vector (float) position in Cartesian coordinates</span>
 <span class="sd">        :return: 3-vector (integer) lattice vector in direct coordinates, index tuple</span>
 <span class="sd">         of corresponding atom.</span>
@@ -976,6 +1008,7 @@
 <div class="viewcode-block" id="Crystal.g_direc"><a class="viewcode-back" href="../index.html#crystal.Crystal.g_direc">[docs]</a>    <span class="k">def</span> <span class="nf">g_direc</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">direc</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply a space group operation to a direction</span>
+
 <span class="sd">        :param g: group operation (GroupOp)</span>
 <span class="sd">        :param direc: 3-vector direction</span>
 <span class="sd">        :return: 3-vector direction</span>
@@ -989,6 +1022,7 @@
 <div class="viewcode-block" id="Crystal.g_tensor"><a class="viewcode-back" href="../index.html#crystal.Crystal.g_tensor">[docs]</a>    <span class="k">def</span> <span class="nf">g_tensor</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply a space group operation to a 2nd-rank tensor</span>
+
 <span class="sd">        :param g: group operation (GroupOp)</span>
 <span class="sd">        :param tensor: 2nd-rank tensor</span>
 <span class="sd">        :return: 2nd-rank tensor</span>
@@ -1002,6 +1036,7 @@
 <div class="viewcode-block" id="Crystal.g_pos"><a class="viewcode-back" href="../index.html#crystal.Crystal.g_pos">[docs]</a>    <span class="k">def</span> <span class="nf">g_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">lattvec</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply a space group operation to an atom position specified by its lattice and index</span>
+
 <span class="sd">        :param g: group operation (GroupOp)</span>
 <span class="sd">        :param lattvec: 3-vector (integer) lattice vector in direct coordinates</span>
 <span class="sd">        :param ind: two-tuple index specifying the atom: (atomtype, atomindex)</span>
@@ -1021,6 +1056,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply a space group operation to a vector position specified by its lattice and a location</span>
 <span class="sd">        in the unit cell in direct coordinates</span>
+
 <span class="sd">        :param g:  group operation (GroupOp)</span>
 <span class="sd">        :param lattvec: 3-vector (integer) lattice vector in direct coordinates</span>
 <span class="sd">        :param uvec: 3-vector (float) vector in direct coordinates</span>
@@ -1039,6 +1075,7 @@
 <div class="viewcode-block" id="Crystal.g_cart"><a class="viewcode-back" href="../index.html#crystal.Crystal.g_cart">[docs]</a>    <span class="k">def</span> <span class="nf">g_cart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply a space group operation to a (Cartesian) vector position</span>
+
 <span class="sd">        :param g: group operation (GroupOp)</span>
 <span class="sd">        :param x: 3-vector position in space</span>
 <span class="sd">        :return: 3-vector position in space (Cartesian coordinates)</span>
@@ -1051,6 +1088,7 @@
 <div class="viewcode-block" id="Crystal.g_direc_equivalent"><a class="viewcode-back" href="../index.html#crystal.Crystal.g_direc_equivalent">[docs]</a>    <span class="k">def</span> <span class="nf">g_direc_equivalent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Tells us if two directions are equivalent by according to the space group</span>
+
 <span class="sd">        :param d1: direction one (array[3])</span>
 <span class="sd">        :param d2: direction two (array[3])</span>
 <span class="sd">        :param threshold: threshold for equality</span>
@@ -1063,6 +1101,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate our point group indices. Done with crazy list comprehension due to the</span>
 <span class="sd">        structure of our basis.</span>
+
 <span class="sd">        :return: list of sets of point group operations that leave a site unchanged</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1077,6 +1116,7 @@
 <div class="viewcode-block" id="Crystal.genWyckoffsets"><a class="viewcode-back" href="../index.html#crystal.Crystal.genWyckoffsets">[docs]</a>    <span class="k">def</span> <span class="nf">genWyckoffsets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate our Wykcoff sets.</span>
+
 <span class="sd">        :return: set of sets of tuples of positions that correspond to identical Wyckoff positions</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1090,6 +1130,7 @@
 <div class="viewcode-block" id="Crystal.Wyckoffpos"><a class="viewcode-back" href="../index.html#crystal.Crystal.Wyckoffpos">[docs]</a>    <span class="k">def</span> <span class="nf">Wyckoffpos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uvec</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates all the equivalent Wyckoff positions for a unit cell vector.</span>
+
 <span class="sd">        :param uvec: 3-vector (float) vector in direct coordinates</span>
 <span class="sd">        :return: list of equivalent Wyckoff positions</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1103,6 +1144,7 @@
 <div class="viewcode-block" id="Crystal.VectorBasis"><a class="viewcode-back" href="../index.html#crystal.Crystal.VectorBasis">[docs]</a>    <span class="k">def</span> <span class="nf">VectorBasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates the vector basis corresponding to an atomic site</span>
+
 <span class="sd">        :param ind: tuple index for atom</span>
 <span class="sd">        :return: (dim, vect) -- dimension of basis, vector = normal for plane, direction for line</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1115,6 +1157,7 @@
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="Crystal.vectlist"><a class="viewcode-back" href="../index.html#crystal.Crystal.vectlist">[docs]</a>    <span class="k">def</span> <span class="nf">vectlist</span><span class="p">(</span><span class="n">vb</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns a list of orthonormal vectors corresponding to our vector basis.</span>
+
 <span class="sd">        :param vb: (dim, v)</span>
 <span class="sd">        :return: list of vectors</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1133,6 +1176,7 @@
 <div class="viewcode-block" id="Crystal.FullVectorBasis"><a class="viewcode-back" href="../index.html#crystal.Crystal.FullVectorBasis">[docs]</a>    <span class="k">def</span> <span class="nf">FullVectorBasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chem</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate our full vector basis, using the information from our crystal</span>
+
 <span class="sd">        :param chem: (optional) chemical index to consider; otherwise return a list of such</span>
 <span class="sd">        :return: (list) of our unique vector basis lattice functions, normalized; each is an array</span>
 <span class="sd">        :return: (list) of ouf VV &quot;outer&quot; expansion</span>
@@ -1167,6 +1211,7 @@
 <div class="viewcode-block" id="Crystal.SymmTensorBasis"><a class="viewcode-back" href="../index.html#crystal.Crystal.SymmTensorBasis">[docs]</a>    <span class="k">def</span> <span class="nf">SymmTensorBasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates the symmetric tensor basis corresponding to an atomic site</span>
+
 <span class="sd">        :param ind: tuple index for atom</span>
 <span class="sd">        :return: (dim, vect) -- dimension of basis, vector = normal for plane, direction for line</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1180,6 +1225,7 @@
 <span class="sd">        Generate the nearest neighbor list for a given cutoff. Only consider</span>
 <span class="sd">        neighbor vectors for atoms of the same type. Returns a list of</span>
 <span class="sd">        cartesian vectors.</span>
+
 <span class="sd">        :param ind: tuple index for atom</span>
 <span class="sd">        :param cutoff:  distance cutoff</span>
 <span class="sd">        :return: list of nearest neighbor vectors</span>
@@ -1300,6 +1346,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a list of lists of Wyckoff-related sites for a given chemistry.</span>
 <span class="sd">        Done with a single list comprehension--useful as input for diffusion calculation</span>
+
 <span class="sd">        :param chem: index corresponding to chemistry to consider</span>
 <span class="sd">        :return: list of lists of indices that are equivalent by symmetry</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1337,6 +1384,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes a fully expanded mesh, and reduces it by symmetry. Assumes every point is</span>
 <span class="sd">        equally weighted. We would need a different (more complicated) algorithm if not true...</span>
+
 <span class="sd">        :param kptfull: array[Nkpt][3] of kpoints</span>
 <span class="sd">        :param threshold: threshold for symmetry equality</span>
 
