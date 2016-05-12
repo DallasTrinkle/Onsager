@@ -12,11 +12,7 @@ Contents:
    :maxdepth: 2
 
    includeme
-
-Crystal:
-
-.. automodule:: crystal
-   :members:
+   crystal
 
 CrystalStars:
 
