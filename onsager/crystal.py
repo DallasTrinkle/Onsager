@@ -24,6 +24,9 @@ GROUPOP_YAMLTAG = '!GroupOp'
 def incell(vec):
     """
     Returns the vector inside the unit cell (in [0,1)**3)
+
+    :param vec: 3-vector (unit coord)
+    :return: 3-vector
     """
     return vec - np.floor(vec + 1.0e-8)
 
@@ -31,6 +34,9 @@ def incell(vec):
 def inhalf(vec):
     """
     Returns the vector inside the centered cell (in [-0.5,0.5)**3)
+
+    :param vec: 3-vector (unit coord)
+    :return: 3-vector
     """
     return vec - np.floor(vec + 0.5)
 
@@ -210,8 +216,11 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
 
         eigenvect[0] = axis of rotation / mirror
         eigenvect[1], eigenvect[2] = orthonormal vectors to define the plane giving a right-handed
-          coordinate system and where rotation around [0] is positive, and the positive imaginary
-          eigenvector for the complex eigenvalue is [1] + i [2].
+        coordinate system and where rotation around [0] is positive, and the positive imaginary
+        eigenvector for the complex eigenvalue is [1] + i [2].
+
+        :return: type (integer)
+        :return: list of [ev0, ev1, ev2]
         """
         if __debug__:
             if not self.__sane__():
@@ -282,6 +291,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
 def VectorBasis(rottype, eigenvect):
     """
     Returns a vector basis corresponding to the optype and eigenvectors for a GroupOp
+
     :param rottype: output from eigen()
     :param eigenvect: eigenvectors
     :return: (dim, vect) -- dimensionality (0..3), vector defining line direction (1) or plane normal (2)
@@ -296,6 +306,7 @@ def SymmTensorBasis(rottype, eigenvect):
     """
     Returns a symmetric second-rank tensor basis corresponding to the optype and eigenvectors
     for a GroupOp
+
     :param rottype: output from eigen()
     :param eigenvect: eigenvectors
     :return: list of 2nd-rank symmetric tensors making up the basis
@@ -335,6 +346,7 @@ def SymmTensorBasis(rottype, eigenvect):
 def CombineVectorBasis(b1, b2):
     """
     Combines (intersects) two vector spaces into one.
+
     :param b1: (dim, vect) -- dimensionality (0..3), vector defining line direction (1) or plane normal (2)
     :param b2: (dim, vect)
     :return: (dim, vect)
@@ -365,6 +377,7 @@ def CombineVectorBasis(b1, b2):
 def CombineTensorBasis(b1, b2, symmetric=True):
     """
     Combines (intersects) two tensor spaces into one; uses SVD to compute null space.
+
     :param b1: list of tensors
     :param b2: list of tensors
     :return: list of tensors
@@ -389,6 +402,7 @@ def CombineTensorBasis(b1, b2, symmetric=True):
 def ProjectTensorBasis(tensor, basis):
     """
     Given a tensor, project it onto the basis.
+
     :param tensor: tensor
     :param basis: list consisting of an orthonormal basis
     :return: tensor, projected
@@ -401,6 +415,7 @@ def ProjectTensorBasis(tensor, basis):
 def Voigtstrain(e1, e2, e3, e4, e5, e6):
     """
     Returns a symmetric strain tensor from the Voigt reduced strain values.
+
     :param e1: xx
     :param e2: yy
     :param e3: zz
@@ -496,6 +511,7 @@ class Crystal(object):
     def fromdict(cls, yamldict):
         """
         Creates a Crystal object from a YAML-created dictionary
+
         :param yamldict: dictionary; must contain 'lattice' (using *row* vectors!) and 'basis';
         can contain optional 'lattice_constant'
         :return: Crystal(lattice.T, basis)
@@ -511,6 +527,7 @@ class Crystal(object):
     def simpleYAML(self, a0=1.0):
         """
         Creates a simplified YAML dump, in case we don't want to output the full symmetry analysis
+
         :return: YAML dump
         """
         return yaml.dump({'lattice_constant': a0,
@@ -521,6 +538,7 @@ class Crystal(object):
     def chemindex(self, chemistry):
         """
         Return index corresponding to chemistry; None if not present.
+
         :param chemistry: value to check
         :return: index corresponding to chemistry
         """
@@ -532,6 +550,7 @@ class Crystal(object):
     def FCC(cls, a0, chemistry=None):
         """
         Create a face-centered cubic crystal with lattice constant a0
+
         :param a0: lattice constant
         :return: FCC crystal
         """
@@ -543,6 +562,7 @@ class Crystal(object):
     def BCC(cls, a0, chemistry=None):
         """
         Create a body-centered cubic crystal with lattice constant a0
+
         :param a0: lattice constant
         :return: BCC crystal
         """
@@ -554,6 +574,7 @@ class Crystal(object):
     def HCP(cls, a0, c_a=np.sqrt(8./3.), chemistry=None):
         """
         Create a hexagonal closed packed crystal with lattice constant a0, c/a ratio c_a
+
         :param a0: lattice constant
         :param c_a: c/a ratio
         :return: HCP crystal
@@ -644,6 +665,7 @@ class Crystal(object):
     def remapbasis(self, supercell):
         """
         Takes the basis definition, and using a supercell definition, returns a new basis
+
         :param supercell: integer array[3,3]
         :return: atomic basis
         """
@@ -693,6 +715,7 @@ class Crystal(object):
     def calcmetric(self):
         """
         Computes the volume of the cell and the metric tensor
+
         :return: volume, metric tensor
         """
         return abs(float(np.linalg.det(self.lattice))), np.dot(self.lattice.T, self.lattice)
@@ -700,6 +723,7 @@ class Crystal(object):
     def inBZ(self, vec, BZG=None, threshold=1e-5):
         """
         Tells us if vec is inside our set of defining points.
+
         :param vec: array [3], vector to be tested
         :param BGZ: array [:,3], optional (default = self.BZG), array of vectors that define the BZ
         :param threshold: double, optional, threshold to use for "equality"
@@ -712,6 +736,7 @@ class Crystal(object):
     def genBZG(self):
         """
         Generates the reciprocal lattice G points that define the Brillouin zone.
+
         :return: array of G vectors that define the BZ, in Cartesian coordinates
         """
         # Start with a list of possible vectors; add those that define the BZ...
@@ -729,6 +754,7 @@ class Crystal(object):
     def gengroup(self):
         """
         Generate all of the space group operations.
+
         :return: list of group operations
         """
         groupops = []
@@ -761,6 +787,7 @@ class Crystal(object):
     def strain(self, eps):
         """
         Returns a new Crystal object that is a strained version of the current.
+
         :param eps: strain tensor
         :return: new Crystal object, strained
         """
@@ -774,6 +801,7 @@ class Crystal(object):
         Returns a new Crystal object that contains additional sites (assumed to be new chemistry).
         This is intended to "add in" interstitial sites. Note: if the symmetry is to be
         maintained, should be the output from Wyckoffpos().
+
         :param basis: list (or list of lists) of new sites
         :paran chemistry: (optional) list of chemistry names
         :return: new Crystal object, with additional sites
@@ -796,6 +824,7 @@ class Crystal(object):
     def pos2cart(self, lattvec, ind):
         """
         Return the cartesian coordinates of an atom specified by its lattice and index
+
         :param lattvec: 3-vector (integer) lattice vector in direct coordinates
         :param ind: two-tuple index specifying the atom: (atomtype, atomindex)
         :return: 3-vector (float) in Cartesian coordinates
@@ -806,6 +835,7 @@ class Crystal(object):
         """
         Return the cartesian coordinates of a position specified by its lattice and
         unit cell coordinates
+
         :param lattvec: 3-vector (integer) lattice vector in direct coordinates
         :param uvec: 3-vector (float) unit cell vector in direct coordinates
         :return: 3-vector (float) in Cartesian coordinates
@@ -816,6 +846,7 @@ class Crystal(object):
         """
         Return the lattvec and unit cell coord. corresponding to a position
         in cartesian coord.
+
         :param v: 3-vector (float) position in Cartesian coordinates
         :return: 3-vector (integer) lattice vector in direct coordinates,
          3-vector (float) inside unit cell
@@ -827,6 +858,7 @@ class Crystal(object):
     def cart2pos(self, v):
         """
         Return the lattvec and index corresponding to an atomic position in cartesian coord.
+
         :param v: 3-vector (float) position in Cartesian coordinates
         :return: 3-vector (integer) lattice vector in direct coordinates, index tuple
          of corresponding atom.
@@ -844,6 +876,7 @@ class Crystal(object):
     def g_direc(g, direc):
         """
         Apply a space group operation to a direction
+
         :param g: group operation (GroupOp)
         :param direc: 3-vector direction
         :return: 3-vector direction
@@ -857,6 +890,7 @@ class Crystal(object):
     def g_tensor(g, tensor):
         """
         Apply a space group operation to a 2nd-rank tensor
+
         :param g: group operation (GroupOp)
         :param tensor: 2nd-rank tensor
         :return: 2nd-rank tensor
@@ -870,6 +904,7 @@ class Crystal(object):
     def g_pos(self, g, lattvec, ind):
         """
         Apply a space group operation to an atom position specified by its lattice and index
+
         :param g: group operation (GroupOp)
         :param lattvec: 3-vector (integer) lattice vector in direct coordinates
         :param ind: two-tuple index specifying the atom: (atomtype, atomindex)
@@ -889,6 +924,7 @@ class Crystal(object):
         """
         Apply a space group operation to a vector position specified by its lattice and a location
         in the unit cell in direct coordinates
+
         :param g:  group operation (GroupOp)
         :param lattvec: 3-vector (integer) lattice vector in direct coordinates
         :param uvec: 3-vector (float) vector in direct coordinates
@@ -907,6 +943,7 @@ class Crystal(object):
     def g_cart(self, g, x):
         """
         Apply a space group operation to a (Cartesian) vector position
+
         :param g: group operation (GroupOp)
         :param x: 3-vector position in space
         :return: 3-vector position in space (Cartesian coordinates)
@@ -919,6 +956,7 @@ class Crystal(object):
     def g_direc_equivalent(self, d1, d2, threshold=1e-8):
         """
         Tells us if two directions are equivalent by according to the space group
+
         :param d1: direction one (array[3])
         :param d2: direction two (array[3])
         :param threshold: threshold for equality
@@ -931,6 +969,7 @@ class Crystal(object):
         """
         Generate our point group indices. Done with crazy list comprehension due to the
         structure of our basis.
+
         :return: list of sets of point group operations that leave a site unchanged
         """
         if self.N == 1:
@@ -945,6 +984,7 @@ class Crystal(object):
     def genWyckoffsets(self):
         """
         Generate our Wykcoff sets.
+
         :return: set of sets of tuples of positions that correspond to identical Wyckoff positions
         """
         if self.N == 1:
@@ -958,6 +998,7 @@ class Crystal(object):
     def Wyckoffpos(self, uvec):
         """
         Generates all the equivalent Wyckoff positions for a unit cell vector.
+
         :param uvec: 3-vector (float) vector in direct coordinates
         :return: list of equivalent Wyckoff positions
         """
@@ -971,6 +1012,7 @@ class Crystal(object):
     def VectorBasis(self, ind):
         """
         Generates the vector basis corresponding to an atomic site
+
         :param ind: tuple index for atom
         :return: (dim, vect) -- dimension of basis, vector = normal for plane, direction for line
         """
@@ -983,6 +1025,7 @@ class Crystal(object):
     @staticmethod
     def vectlist(vb):
         """Returns a list of orthonormal vectors corresponding to our vector basis.
+
         :param vb: (dim, v)
         :return: list of vectors
         """
@@ -1001,6 +1044,7 @@ class Crystal(object):
     def FullVectorBasis(self, chem=None):
         """
         Generate our full vector basis, using the information from our crystal
+
         :param chem: (optional) chemical index to consider; otherwise return a list of such
         :return: (list) of our unique vector basis lattice functions, normalized; each is an array
         :return: (list) of ouf VV "outer" expansion
@@ -1035,6 +1079,7 @@ class Crystal(object):
     def SymmTensorBasis(self, ind):
         """
         Generates the symmetric tensor basis corresponding to an atomic site
+
         :param ind: tuple index for atom
         :return: (dim, vect) -- dimension of basis, vector = normal for plane, direction for line
         """
@@ -1048,6 +1093,7 @@ class Crystal(object):
         Generate the nearest neighbor list for a given cutoff. Only consider
         neighbor vectors for atoms of the same type. Returns a list of
         cartesian vectors.
+
         :param ind: tuple index for atom
         :param cutoff:  distance cutoff
         :return: list of nearest neighbor vectors
@@ -1168,6 +1214,7 @@ class Crystal(object):
         """
         Return a list of lists of Wyckoff-related sites for a given chemistry.
         Done with a single list comprehension--useful as input for diffusion calculation
+
         :param chem: index corresponding to chemistry to consider
         :return: list of lists of indices that are equivalent by symmetry
         """
@@ -1205,6 +1252,7 @@ class Crystal(object):
         """
         Takes a fully expanded mesh, and reduces it by symmetry. Assumes every point is
         equally weighted. We would need a different (more complicated) algorithm if not true...
+
         :param kptfull: array[Nkpt][3] of kpoints
         :param threshold: threshold for symmetry equality
 
