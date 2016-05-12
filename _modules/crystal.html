@@ -85,6 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#support">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crystal.html">Crystal</a></li>
 </ul>
 
             
@@ -153,7 +154,7 @@
 <span class="n">GROUPOP_YAMLTAG</span> <span class="o">=</span> <span class="s1">&#39;!GroupOp&#39;</span>
 
 
-<div class="viewcode-block" id="incell"><a class="viewcode-back" href="../index.html#crystal.incell">[docs]</a><span class="k">def</span> <span class="nf">incell</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
+<div class="viewcode-block" id="incell"><a class="viewcode-back" href="../crystal.html#crystal.incell">[docs]</a><span class="k">def</span> <span class="nf">incell</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the vector inside the unit cell (in [0,1)**3)</span>
 
@@ -163,7 +164,7 @@
     <span class="k">return</span> <span class="n">vec</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">vec</span> <span class="o">+</span> <span class="mf">1.0e-8</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="inhalf"><a class="viewcode-back" href="../index.html#crystal.inhalf">[docs]</a><span class="k">def</span> <span class="nf">inhalf</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
+<div class="viewcode-block" id="inhalf"><a class="viewcode-back" href="../crystal.html#crystal.inhalf">[docs]</a><span class="k">def</span> <span class="nf">inhalf</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the vector inside the centered cell (in [-0.5,0.5)**3)</span>
 
@@ -173,7 +174,7 @@
     <span class="k">return</span> <span class="n">vec</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">vec</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="maptranslation"><a class="viewcode-back" href="../index.html#crystal.maptranslation">[docs]</a><span class="k">def</span> <span class="nf">maptranslation</span><span class="p">(</span><span class="n">oldpos</span><span class="p">,</span> <span class="n">newpos</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<div class="viewcode-block" id="maptranslation"><a class="viewcode-back" href="../crystal.html#crystal.maptranslation">[docs]</a><span class="k">def</span> <span class="nf">maptranslation</span><span class="p">(</span><span class="n">oldpos</span><span class="p">,</span> <span class="n">newpos</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a list of transformed positions, identify if there&#39;s a translation vector</span>
 <span class="sd">    that maps from the current positions to the new position.</span>
@@ -228,7 +229,7 @@
         <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="GroupOp"><a class="viewcode-back" href="../index.html#crystal.GroupOp">[docs]</a><span class="k">class</span> <span class="nc">GroupOp</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;GroupOp&#39;</span><span class="p">,</span> <span class="s1">&#39;rot trans cartrot indexmap&#39;</span><span class="p">)):</span>
+<div class="viewcode-block" id="GroupOp"><a class="viewcode-back" href="../crystal.html#crystal.GroupOp">[docs]</a><span class="k">class</span> <span class="nc">GroupOp</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;GroupOp&#39;</span><span class="p">,</span> <span class="s1">&#39;rot trans cartrot indexmap&#39;</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class corresponding to a group operation. Based on namedtuple, so it is immutable.</span>
 
@@ -241,16 +242,16 @@
 <span class="sd">    :param indexmap: list of list, containing the atom mapping</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="GroupOp.incell"><a class="viewcode-back" href="../index.html#crystal.GroupOp.incell">[docs]</a>    <span class="k">def</span> <span class="nf">incell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GroupOp.incell"><a class="viewcode-back" href="../crystal.html#crystal.GroupOp.incell">[docs]</a>    <span class="k">def</span> <span class="nf">incell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a version of groupop where the translation is in the unit cell&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">GroupOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot</span><span class="p">,</span> <span class="n">incell</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">cartrot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexmap</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GroupOp.inhalf"><a class="viewcode-back" href="../index.html#crystal.GroupOp.inhalf">[docs]</a>    <span class="k">def</span> <span class="nf">inhalf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GroupOp.inhalf"><a class="viewcode-back" href="../crystal.html#crystal.GroupOp.inhalf">[docs]</a>    <span class="k">def</span> <span class="nf">inhalf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a version of groupop where the translation is in the centered unit cell&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">GroupOp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot</span><span class="p">,</span> <span class="n">inhalf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trans</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">cartrot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexmap</span><span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="GroupOp.ident"><a class="viewcode-back" href="../index.html#crystal.GroupOp.ident">[docs]</a>    <span class="k">def</span> <span class="nf">ident</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">basis</span><span class="p">):</span>
+<div class="viewcode-block" id="GroupOp.ident"><a class="viewcode-back" href="../crystal.html#crystal.GroupOp.ident">[docs]</a>    <span class="k">def</span> <span class="nf">ident</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">basis</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a group operation corresponding to identity for a given basis&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span> <span class="n">trans</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">cartrot</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
                        <span class="n">indexmap</span><span class="o">=</span><span class="p">[[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atomlist</span><span class="p">))]</span> <span class="k">for</span> <span class="n">atomlist</span> <span class="ow">in</span> <span class="n">basis</span><span class="p">])</span></div>
@@ -330,7 +331,7 @@
         <span class="k">if</span> <span class="n">det</span><span class="o">*</span><span class="n">tr</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">det</span><span class="o">*</span><span class="n">tr</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
         <span class="k">return</span> <span class="bp">True</span>
 
-<div class="viewcode-block" id="GroupOp.inv"><a class="viewcode-back" href="../index.html#crystal.GroupOp.inv">[docs]</a>    <span class="k">def</span> <span class="nf">inv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GroupOp.inv"><a class="viewcode-back" href="../crystal.html#crystal.GroupOp.inv">[docs]</a>    <span class="k">def</span> <span class="nf">inv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Construct and return the inverse of the group operation&quot;&quot;&quot;</span>
         <span class="n">inverse</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot</span><span class="p">)))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">GroupOp</span><span class="p">(</span><span class="n">inverse</span><span class="p">,</span>
@@ -339,7 +340,7 @@
                        <span class="p">[</span> <span class="p">[</span> <span class="n">x</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">x</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">([(</span><span class="n">y</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atomlist</span><span class="p">)])]</span>
                          <span class="k">for</span> <span class="n">atomlist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexmap</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="GroupOp.eigen"><a class="viewcode-back" href="../index.html#crystal.GroupOp.eigen">[docs]</a>    <span class="k">def</span> <span class="nf">eigen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GroupOp.eigen"><a class="viewcode-back" href="../crystal.html#crystal.GroupOp.eigen">[docs]</a>    <span class="k">def</span> <span class="nf">eigen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the type of group operation (single integer) and eigenvectors.</span>
 <span class="sd">        1 = identity</span>
 <span class="sd">        2, 3, 4, 6 = n- fold rotation around an axis</span>
@@ -407,20 +408,20 @@
         <span class="k">return</span> <span class="n">optype</span><span class="p">,</span> <span class="p">[</span><span class="n">eig0</span><span class="p">,</span> <span class="n">eig1</span><span class="p">,</span> <span class="n">eig2</span><span class="p">]</span></div>
 
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="GroupOp.GroupOp_representer"><a class="viewcode-back" href="../index.html#crystal.GroupOp.GroupOp_representer">[docs]</a>    <span class="k">def</span> <span class="nf">GroupOp_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="GroupOp.GroupOp_representer"><a class="viewcode-back" href="../crystal.html#crystal.GroupOp.GroupOp_representer">[docs]</a>    <span class="k">def</span> <span class="nf">GroupOp_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Output a GroupOp&quot;&quot;&quot;</span>
         <span class="c1"># asdict() returns an OrderedDictionary, so pass through dict()</span>
         <span class="c1"># had to rewrite _asdict() for some reason...?</span>
         <span class="k">return</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_mapping</span><span class="p">(</span><span class="n">GROUPOP_YAMLTAG</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">_asdict</span><span class="p">())</span></div>
 
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="GroupOp.GroupOp_constructor"><a class="viewcode-back" href="../index.html#crystal.GroupOp.GroupOp_constructor">[docs]</a>    <span class="k">def</span> <span class="nf">GroupOp_constructor</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+<div class="viewcode-block" id="GroupOp.GroupOp_constructor"><a class="viewcode-back" href="../crystal.html#crystal.GroupOp.GroupOp_constructor">[docs]</a>    <span class="k">def</span> <span class="nf">GroupOp_constructor</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Construct a GroupOp from YAML&quot;&quot;&quot;</span>
         <span class="c1"># ** turns the dictionary into parameters for GroupOp constructor</span>
         <span class="k">return</span> <span class="n">GroupOp</span><span class="p">(</span><span class="o">**</span><span class="n">loader</span><span class="o">.</span><span class="n">construct_mapping</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span></div></div>
 
 
-<div class="viewcode-block" id="VectorBasis"><a class="viewcode-back" href="../index.html#crystal.VectorBasis">[docs]</a><span class="k">def</span> <span class="nf">VectorBasis</span><span class="p">(</span><span class="n">rottype</span><span class="p">,</span> <span class="n">eigenvect</span><span class="p">):</span>
+<div class="viewcode-block" id="VectorBasis"><a class="viewcode-back" href="../crystal.html#crystal.VectorBasis">[docs]</a><span class="k">def</span> <span class="nf">VectorBasis</span><span class="p">(</span><span class="n">rottype</span><span class="p">,</span> <span class="n">eigenvect</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a vector basis corresponding to the optype and eigenvectors for a GroupOp</span>
 
@@ -434,7 +435,7 @@
     <span class="k">if</span> <span class="n">rottype</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">eigenvect</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># plane (pure mirror)</span>
     <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">eigenvect</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># line (all others--there&#39;s a rotation axis involved</span></div>
 
-<div class="viewcode-block" id="SymmTensorBasis"><a class="viewcode-back" href="../index.html#crystal.SymmTensorBasis">[docs]</a><span class="k">def</span> <span class="nf">SymmTensorBasis</span><span class="p">(</span><span class="n">rottype</span><span class="p">,</span> <span class="n">eigenvect</span><span class="p">):</span>
+<div class="viewcode-block" id="SymmTensorBasis"><a class="viewcode-back" href="../crystal.html#crystal.SymmTensorBasis">[docs]</a><span class="k">def</span> <span class="nf">SymmTensorBasis</span><span class="p">(</span><span class="n">rottype</span><span class="p">,</span> <span class="n">eigenvect</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a symmetric second-rank tensor basis corresponding to the optype and eigenvectors</span>
 <span class="sd">    for a GroupOp</span>
@@ -475,7 +476,7 @@
     <span class="k">return</span> <span class="p">[</span><span class="n">SymmTensor1</span><span class="p">(</span><span class="n">eigenvect</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
             <span class="n">SymmTensor2</span><span class="p">(</span><span class="n">eigenvect</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">eigenvect</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span></div>
 
-<div class="viewcode-block" id="CombineVectorBasis"><a class="viewcode-back" href="../index.html#crystal.CombineVectorBasis">[docs]</a><span class="k">def</span> <span class="nf">CombineVectorBasis</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">):</span>
+<div class="viewcode-block" id="CombineVectorBasis"><a class="viewcode-back" href="../crystal.html#crystal.CombineVectorBasis">[docs]</a><span class="k">def</span> <span class="nf">CombineVectorBasis</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Combines (intersects) two vector spaces into one.</span>
 
@@ -506,7 +507,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">b2</span></div>
 
-<div class="viewcode-block" id="CombineTensorBasis"><a class="viewcode-back" href="../index.html#crystal.CombineTensorBasis">[docs]</a><span class="k">def</span> <span class="nf">CombineTensorBasis</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="CombineTensorBasis"><a class="viewcode-back" href="../crystal.html#crystal.CombineTensorBasis">[docs]</a><span class="k">def</span> <span class="nf">CombineTensorBasis</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Combines (intersects) two tensor spaces into one; uses SVD to compute null space.</span>
 
@@ -531,7 +532,7 @@
     <span class="c1"># generator in the sum to construct the basis</span>
     <span class="k">return</span> <span class="p">[</span> <span class="nb">sum</span><span class="p">(</span><span class="n">b1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">alpha</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">alpha</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">nullspace</span> <span class="p">]</span></div>
 
-<div class="viewcode-block" id="ProjectTensorBasis"><a class="viewcode-back" href="../index.html#crystal.ProjectTensorBasis">[docs]</a><span class="k">def</span> <span class="nf">ProjectTensorBasis</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">basis</span><span class="p">):</span>
+<div class="viewcode-block" id="ProjectTensorBasis"><a class="viewcode-back" href="../crystal.html#crystal.ProjectTensorBasis">[docs]</a><span class="k">def</span> <span class="nf">ProjectTensorBasis</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">basis</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a tensor, project it onto the basis.</span>
 
@@ -544,7 +545,7 @@
     <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">b</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">tensor</span><span class="o">*</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">basis</span> <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Voigtstrain"><a class="viewcode-back" href="../index.html#crystal.Voigtstrain">[docs]</a><span class="k">def</span> <span class="nf">Voigtstrain</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">,</span> <span class="n">e3</span><span class="p">,</span> <span class="n">e4</span><span class="p">,</span> <span class="n">e5</span><span class="p">,</span> <span class="n">e6</span><span class="p">):</span>
+<div class="viewcode-block" id="Voigtstrain"><a class="viewcode-back" href="../crystal.html#crystal.Voigtstrain">[docs]</a><span class="k">def</span> <span class="nf">Voigtstrain</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">,</span> <span class="n">e3</span><span class="p">,</span> <span class="n">e4</span><span class="p">,</span> <span class="n">e5</span><span class="p">,</span> <span class="n">e6</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a symmetric strain tensor from the Voigt reduced strain values.</span>
 
@@ -561,7 +562,7 @@
 
 <span class="c1"># TODO: Add the ability to explicitly specify &quot;metastable&quot; states that should be considered the same chemistry, but not subject to reduction</span>
 <span class="c1"># TODO: Symmetry analysis that includes magnetic ordering (e.g., ferro- and anti-ferromagnetic ordering)</span>
-<div class="viewcode-block" id="Crystal"><a class="viewcode-back" href="../index.html#crystal.Crystal">[docs]</a><span class="k">class</span> <span class="nc">Crystal</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal"><a class="viewcode-back" href="../crystal.html#crystal.Crystal">[docs]</a><span class="k">class</span> <span class="nc">Crystal</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class that defines a crystal, as well as the symmetry analysis that goes along with it.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -640,7 +641,7 @@
         <span class="k">return</span> <span class="n">str_rep</span>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Crystal.fromdict"><a class="viewcode-back" href="../index.html#crystal.Crystal.fromdict">[docs]</a>    <span class="k">def</span> <span class="nf">fromdict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">yamldict</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.fromdict"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.fromdict">[docs]</a>    <span class="k">def</span> <span class="nf">fromdict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">yamldict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a Crystal object from a YAML-created dictionary</span>
 
@@ -656,7 +657,7 @@
         <span class="k">if</span> <span class="s1">&#39;chemistry&#39;</span> <span class="ow">in</span> <span class="n">yamldict</span><span class="p">:</span> <span class="n">chem</span> <span class="o">=</span> <span class="n">yamldict</span><span class="p">[</span><span class="s1">&#39;chemistry&#39;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">cls</span><span class="p">((</span><span class="n">lattice_constant</span><span class="o">*</span><span class="n">yamldict</span><span class="p">[</span><span class="s1">&#39;lattice&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">yamldict</span><span class="p">[</span><span class="s1">&#39;basis&#39;</span><span class="p">],</span> <span class="n">chem</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Crystal.simpleYAML"><a class="viewcode-back" href="../index.html#crystal.Crystal.simpleYAML">[docs]</a>    <span class="k">def</span> <span class="nf">simpleYAML</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.simpleYAML"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.simpleYAML">[docs]</a>    <span class="k">def</span> <span class="nf">simpleYAML</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a simplified YAML dump, in case we don&#39;t want to output the full symmetry analysis</span>
 
@@ -667,7 +668,7 @@
                           <span class="s1">&#39;basis&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">,</span>
                           <span class="s1">&#39;chemistry&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">})</span></div>
 
-<div class="viewcode-block" id="Crystal.chemindex"><a class="viewcode-back" href="../index.html#crystal.Crystal.chemindex">[docs]</a>    <span class="k">def</span> <span class="nf">chemindex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chemistry</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.chemindex"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.chemindex">[docs]</a>    <span class="k">def</span> <span class="nf">chemindex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chemistry</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return index corresponding to chemistry; None if not present.</span>
 
@@ -679,7 +680,7 @@
 
     <span class="c1"># a few &quot;convenient&quot; lattices</span>
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Crystal.FCC"><a class="viewcode-back" href="../index.html#crystal.Crystal.FCC">[docs]</a>    <span class="k">def</span> <span class="nf">FCC</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.FCC"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.FCC">[docs]</a>    <span class="k">def</span> <span class="nf">FCC</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a face-centered cubic crystal with lattice constant a0</span>
 
@@ -691,7 +692,7 @@
         <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.</span><span class="p">]])</span><span class="o">*</span><span class="n">a0</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)],</span> <span class="n">chem</span><span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Crystal.BCC"><a class="viewcode-back" href="../index.html#crystal.Crystal.BCC">[docs]</a>    <span class="k">def</span> <span class="nf">BCC</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.BCC"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.BCC">[docs]</a>    <span class="k">def</span> <span class="nf">BCC</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a body-centered cubic crystal with lattice constant a0</span>
 
@@ -703,7 +704,7 @@
         <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">]])</span><span class="o">*</span><span class="n">a0</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)],</span> <span class="n">chem</span><span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Crystal.HCP"><a class="viewcode-back" href="../index.html#crystal.Crystal.HCP">[docs]</a>    <span class="k">def</span> <span class="nf">HCP</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">c_a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">8.</span><span class="o">/</span><span class="mf">3.</span><span class="p">),</span> <span class="n">chemistry</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.HCP"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.HCP">[docs]</a>    <span class="k">def</span> <span class="nf">HCP</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a0</span><span class="p">,</span> <span class="n">c_a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">8.</span><span class="o">/</span><span class="mf">3.</span><span class="p">),</span> <span class="n">chemistry</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a hexagonal closed packed crystal with lattice constant a0, c/a ratio c_a</span>
 
@@ -719,7 +720,7 @@
                                  <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span><span class="mf">2.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="mf">4.</span><span class="p">]),</span>
                                   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span><span class="mf">3.</span><span class="o">/</span><span class="mi">4</span><span class="p">])],</span> <span class="n">chem</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Crystal.center"><a class="viewcode-back" href="../index.html#crystal.Crystal.center">[docs]</a>    <span class="k">def</span> <span class="nf">center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.center"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.center">[docs]</a>    <span class="k">def</span> <span class="nf">center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Center the atoms in the cell if there is an inversion operation present.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -744,7 +745,7 @@
                 <span class="n">shift</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="p">[[</span><span class="n">incell</span><span class="p">(</span><span class="n">atom</span> <span class="o">+</span> <span class="n">shift</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atomlist</span><span class="p">]</span> <span class="k">for</span> <span class="n">atomlist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Crystal.reduce"><a class="viewcode-back" href="../index.html#crystal.Crystal.reduce">[docs]</a>    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.reduce"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.reduce">[docs]</a>    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reduces the lattice and basis, if needed. Works (tail) recursively.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -794,7 +795,7 @@
         <span class="c1"># 3. tail recursion:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reduce</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Crystal.remapbasis"><a class="viewcode-back" href="../index.html#crystal.Crystal.remapbasis">[docs]</a>    <span class="k">def</span> <span class="nf">remapbasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">supercell</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.remapbasis"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.remapbasis">[docs]</a>    <span class="k">def</span> <span class="nf">remapbasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">supercell</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes the basis definition, and using a supercell definition, returns a new basis</span>
 
@@ -804,7 +805,7 @@
         <span class="n">invsuper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">supercell</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[[</span><span class="n">incell</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">invsuper</span><span class="p">,</span> <span class="n">u</span><span class="p">))</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">atomlist</span><span class="p">]</span> <span class="k">for</span> <span class="n">atomlist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Crystal.minlattice"><a class="viewcode-back" href="../index.html#crystal.Crystal.minlattice">[docs]</a>    <span class="k">def</span> <span class="nf">minlattice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.minlattice"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.minlattice">[docs]</a>    <span class="k">def</span> <span class="nf">minlattice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Try to find the optimal lattice vector definition for a crystal. Our definition of optimal</span>
 <span class="sd">        is (a) length of each lattice vector is minimal; (b) the vectors are ordered from</span>
@@ -844,7 +845,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remapbasis</span><span class="p">(</span><span class="nb">super</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">minlattice</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Crystal.calcmetric"><a class="viewcode-back" href="../index.html#crystal.Crystal.calcmetric">[docs]</a>    <span class="k">def</span> <span class="nf">calcmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.calcmetric"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.calcmetric">[docs]</a>    <span class="k">def</span> <span class="nf">calcmetric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the volume of the cell and the metric tensor</span>
 
@@ -852,7 +853,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">))),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Crystal.inBZ"><a class="viewcode-back" href="../index.html#crystal.Crystal.inBZ">[docs]</a>    <span class="k">def</span> <span class="nf">inBZ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vec</span><span class="p">,</span> <span class="n">BZG</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.inBZ"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.inBZ">[docs]</a>    <span class="k">def</span> <span class="nf">inBZ</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vec</span><span class="p">,</span> <span class="n">BZG</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Tells us if vec is inside our set of defining points.</span>
 
@@ -865,7 +866,7 @@
         <span class="c1"># checks that vec.G &lt; G^2 for all G (and throws out the option that vec == G, in case threshold == 0)</span>
         <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">G</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">G</span><span class="p">)</span> <span class="o">+</span> <span class="n">threshold</span><span class="p">)</span> <span class="k">for</span> <span class="n">G</span> <span class="ow">in</span> <span class="n">BZG</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">vec</span> <span class="o">==</span> <span class="n">G</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Crystal.genBZG"><a class="viewcode-back" href="../index.html#crystal.Crystal.genBZG">[docs]</a>    <span class="k">def</span> <span class="nf">genBZG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.genBZG"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.genBZG">[docs]</a>    <span class="k">def</span> <span class="nf">genBZG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates the reciprocal lattice G points that define the Brillouin zone.</span>
 
@@ -883,7 +884,7 @@
         <span class="c1"># ... and use a list comprehension to only keep those that still remain</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">vec</span> <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="n">BZG</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inBZ</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">BZG</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">)])</span></div>
 
-<div class="viewcode-block" id="Crystal.gengroup"><a class="viewcode-back" href="../index.html#crystal.Crystal.gengroup">[docs]</a>    <span class="k">def</span> <span class="nf">gengroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.gengroup"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.gengroup">[docs]</a>    <span class="k">def</span> <span class="nf">gengroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate all of the space group operations.</span>
 
@@ -916,7 +917,7 @@
                                             <span class="n">indexmap</span><span class="p">))</span>
         <span class="k">return</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">groupops</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Crystal.strain"><a class="viewcode-back" href="../index.html#crystal.Crystal.strain">[docs]</a>    <span class="k">def</span> <span class="nf">strain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eps</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.strain"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.strain">[docs]</a>    <span class="k">def</span> <span class="nf">strain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eps</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a new Crystal object that is a strained version of the current.</span>
 
@@ -928,7 +929,7 @@
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;strain is not a 3x3 tensor&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Crystal</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="n">eps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Crystal.addbasis"><a class="viewcode-back" href="../index.html#crystal.Crystal.addbasis">[docs]</a>    <span class="k">def</span> <span class="nf">addbasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.addbasis"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.addbasis">[docs]</a>    <span class="k">def</span> <span class="nf">addbasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a new Crystal object that contains additional sites (assumed to be new chemistry).</span>
 <span class="sd">        This is intended to &quot;add in&quot; interstitial sites. Note: if the symmetry is to be</span>
@@ -953,7 +954,7 @@
         <span class="k">else</span><span class="p">:</span> <span class="n">newchemistry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span> <span class="o">+</span> <span class="n">chemistry</span>
         <span class="k">return</span> <span class="n">Crystal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span> <span class="o">+</span> <span class="n">newbasis</span><span class="p">,</span> <span class="n">newchemistry</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Crystal.pos2cart"><a class="viewcode-back" href="../index.html#crystal.Crystal.pos2cart">[docs]</a>    <span class="k">def</span> <span class="nf">pos2cart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lattvec</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.pos2cart"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.pos2cart">[docs]</a>    <span class="k">def</span> <span class="nf">pos2cart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lattvec</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the cartesian coordinates of an atom specified by its lattice and index</span>
 
@@ -963,7 +964,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="n">lattvec</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span></div>
 
-<div class="viewcode-block" id="Crystal.unit2cart"><a class="viewcode-back" href="../index.html#crystal.Crystal.unit2cart">[docs]</a>    <span class="k">def</span> <span class="nf">unit2cart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lattvec</span><span class="p">,</span> <span class="n">uvec</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.unit2cart"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.unit2cart">[docs]</a>    <span class="k">def</span> <span class="nf">unit2cart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lattvec</span><span class="p">,</span> <span class="n">uvec</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the cartesian coordinates of a position specified by its lattice and</span>
 <span class="sd">        unit cell coordinates</span>
@@ -974,7 +975,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="n">lattvec</span> <span class="o">+</span> <span class="n">uvec</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Crystal.cart2unit"><a class="viewcode-back" href="../index.html#crystal.Crystal.cart2unit">[docs]</a>    <span class="k">def</span> <span class="nf">cart2unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.cart2unit"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.cart2unit">[docs]</a>    <span class="k">def</span> <span class="nf">cart2unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the lattvec and unit cell coord. corresponding to a position</span>
 <span class="sd">        in cartesian coord.</span>
@@ -987,7 +988,7 @@
         <span class="n">ucell</span> <span class="o">=</span> <span class="n">incell</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">u</span><span class="o">-</span><span class="n">ucell</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">ucell</span></div>
 
-<div class="viewcode-block" id="Crystal.cart2pos"><a class="viewcode-back" href="../index.html#crystal.Crystal.cart2pos">[docs]</a>    <span class="k">def</span> <span class="nf">cart2pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.cart2pos"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.cart2pos">[docs]</a>    <span class="k">def</span> <span class="nf">cart2pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the lattvec and index corresponding to an atomic position in cartesian coord.</span>
 
@@ -1005,7 +1006,7 @@
             <span class="k">return</span> <span class="n">latt</span><span class="p">,</span> <span class="n">indlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="Crystal.g_direc"><a class="viewcode-back" href="../index.html#crystal.Crystal.g_direc">[docs]</a>    <span class="k">def</span> <span class="nf">g_direc</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">direc</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.g_direc"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.g_direc">[docs]</a>    <span class="k">def</span> <span class="nf">g_direc</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">direc</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply a space group operation to a direction</span>
 
@@ -1019,7 +1020,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">cartrot</span><span class="p">,</span> <span class="n">direc</span><span class="p">)</span></div>
 
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="Crystal.g_tensor"><a class="viewcode-back" href="../index.html#crystal.Crystal.g_tensor">[docs]</a>    <span class="k">def</span> <span class="nf">g_tensor</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.g_tensor"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.g_tensor">[docs]</a>    <span class="k">def</span> <span class="nf">g_tensor</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply a space group operation to a 2nd-rank tensor</span>
 
@@ -1033,7 +1034,7 @@
             <span class="k">if</span> <span class="n">tensor</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">TypeError</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">cartrot</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">cartrot</span><span class="o">.</span><span class="n">T</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Crystal.g_pos"><a class="viewcode-back" href="../index.html#crystal.Crystal.g_pos">[docs]</a>    <span class="k">def</span> <span class="nf">g_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">lattvec</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.g_pos"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.g_pos">[docs]</a>    <span class="k">def</span> <span class="nf">g_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">lattvec</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply a space group operation to an atom position specified by its lattice and index</span>
 
@@ -1052,7 +1053,7 @@
         <span class="k">return</span> <span class="n">rotlatt</span> <span class="o">+</span> <span class="n">delu</span><span class="p">,</span> <span class="n">rotind</span></div>
 
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="Crystal.g_vect"><a class="viewcode-back" href="../index.html#crystal.Crystal.g_vect">[docs]</a>    <span class="k">def</span> <span class="nf">g_vect</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">lattvec</span><span class="p">,</span> <span class="n">uvec</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.g_vect"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.g_vect">[docs]</a>    <span class="k">def</span> <span class="nf">g_vect</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">lattvec</span><span class="p">,</span> <span class="n">uvec</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply a space group operation to a vector position specified by its lattice and a location</span>
 <span class="sd">        in the unit cell in direct coordinates</span>
@@ -1072,7 +1073,7 @@
         <span class="n">incellu</span> <span class="o">=</span> <span class="n">incell</span><span class="p">(</span><span class="n">rotu</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">rotlatt</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">rotu</span> <span class="o">-</span> <span class="n">incellu</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">incellu</span></div>
 
-<div class="viewcode-block" id="Crystal.g_cart"><a class="viewcode-back" href="../index.html#crystal.Crystal.g_cart">[docs]</a>    <span class="k">def</span> <span class="nf">g_cart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.g_cart"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.g_cart">[docs]</a>    <span class="k">def</span> <span class="nf">g_cart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply a space group operation to a (Cartesian) vector position</span>
 
@@ -1085,7 +1086,7 @@
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">TypeError</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">cartrot</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">trans</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Crystal.g_direc_equivalent"><a class="viewcode-back" href="../index.html#crystal.Crystal.g_direc_equivalent">[docs]</a>    <span class="k">def</span> <span class="nf">g_direc_equivalent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.g_direc_equivalent"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.g_direc_equivalent">[docs]</a>    <span class="k">def</span> <span class="nf">g_direc_equivalent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Tells us if two directions are equivalent by according to the space group</span>
 
@@ -1097,7 +1098,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">d1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_direc</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">d2</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Crystal.genpoint"><a class="viewcode-back" href="../index.html#crystal.Crystal.genpoint">[docs]</a>    <span class="k">def</span> <span class="nf">genpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.genpoint"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.genpoint">[docs]</a>    <span class="k">def</span> <span class="nf">genpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate our point group indices. Done with crazy list comprehension due to the</span>
 <span class="sd">        structure of our basis.</span>
@@ -1113,7 +1114,7 @@
                  <span class="k">for</span> <span class="n">atomindex</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atomlist</span><span class="p">))]</span>
                 <span class="k">for</span> <span class="n">atomtypeindex</span><span class="p">,</span> <span class="n">atomlist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="Crystal.genWyckoffsets"><a class="viewcode-back" href="../index.html#crystal.Crystal.genWyckoffsets">[docs]</a>    <span class="k">def</span> <span class="nf">genWyckoffsets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.genWyckoffsets"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.genWyckoffsets">[docs]</a>    <span class="k">def</span> <span class="nf">genWyckoffsets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate our Wykcoff sets.</span>
 
@@ -1127,7 +1128,7 @@
                                        <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">])</span>
                            <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomindices</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="Crystal.Wyckoffpos"><a class="viewcode-back" href="../index.html#crystal.Crystal.Wyckoffpos">[docs]</a>    <span class="k">def</span> <span class="nf">Wyckoffpos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uvec</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.Wyckoffpos"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.Wyckoffpos">[docs]</a>    <span class="k">def</span> <span class="nf">Wyckoffpos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uvec</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates all the equivalent Wyckoff positions for a unit cell vector.</span>
 
@@ -1141,7 +1142,7 @@
                 <span class="n">lis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">lis</span></div>
 
-<div class="viewcode-block" id="Crystal.VectorBasis"><a class="viewcode-back" href="../index.html#crystal.Crystal.VectorBasis">[docs]</a>    <span class="k">def</span> <span class="nf">VectorBasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.VectorBasis"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.VectorBasis">[docs]</a>    <span class="k">def</span> <span class="nf">VectorBasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates the vector basis corresponding to an atomic site</span>
 
@@ -1155,7 +1156,7 @@
 
     <span class="c1"># implemented as a static method as its a utility function</span>
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="Crystal.vectlist"><a class="viewcode-back" href="../index.html#crystal.Crystal.vectlist">[docs]</a>    <span class="k">def</span> <span class="nf">vectlist</span><span class="p">(</span><span class="n">vb</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.vectlist"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.vectlist">[docs]</a>    <span class="k">def</span> <span class="nf">vectlist</span><span class="p">(</span><span class="n">vb</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns a list of orthonormal vectors corresponding to our vector basis.</span>
 
 <span class="sd">        :param vb: (dim, v)</span>
@@ -1173,7 +1174,7 @@
             <span class="k">return</span> <span class="p">[</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">vb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="k">return</span> <span class="p">[</span> <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="p">]</span></div>
 
-<div class="viewcode-block" id="Crystal.FullVectorBasis"><a class="viewcode-back" href="../index.html#crystal.Crystal.FullVectorBasis">[docs]</a>    <span class="k">def</span> <span class="nf">FullVectorBasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chem</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.FullVectorBasis"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.FullVectorBasis">[docs]</a>    <span class="k">def</span> <span class="nf">FullVectorBasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chem</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate our full vector basis, using the information from our crystal</span>
 
@@ -1208,7 +1209,7 @@
         <span class="k">if</span> <span class="n">chem</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="k">return</span> <span class="n">VBlist</span><span class="p">,</span> <span class="n">VVlist</span>
         <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="n">VBlist</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">VVlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Crystal.SymmTensorBasis"><a class="viewcode-back" href="../index.html#crystal.Crystal.SymmTensorBasis">[docs]</a>    <span class="k">def</span> <span class="nf">SymmTensorBasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.SymmTensorBasis"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.SymmTensorBasis">[docs]</a>    <span class="k">def</span> <span class="nf">SymmTensorBasis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates the symmetric tensor basis corresponding to an atomic site</span>
 
@@ -1220,7 +1221,7 @@
                       <span class="p">[</span> <span class="n">SymmTensorBasis</span><span class="p">(</span><span class="o">*</span><span class="n">g</span><span class="o">.</span><span class="n">eigen</span><span class="p">())</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointG</span><span class="p">[</span><span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="p">]</span> <span class="p">)</span></div>
         <span class="c1"># , (3, np.zeros(3)) -- don&#39;t need initial value; if there&#39;s only one group op, it&#39;s identity</span>
 
-<div class="viewcode-block" id="Crystal.nnlist"><a class="viewcode-back" href="../index.html#crystal.Crystal.nnlist">[docs]</a>    <span class="k">def</span> <span class="nf">nnlist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.nnlist"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.nnlist">[docs]</a>    <span class="k">def</span> <span class="nf">nnlist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the nearest neighbor list for a given cutoff. Only consider</span>
 <span class="sd">        neighbor vectors for atoms of the same type. Returns a list of</span>
@@ -1247,7 +1248,7 @@
                     <span class="n">lis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dx</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">lis</span></div>
 
-<div class="viewcode-block" id="Crystal.jumpnetwork"><a class="viewcode-back" href="../index.html#crystal.Crystal.jumpnetwork">[docs]</a>    <span class="k">def</span> <span class="nf">jumpnetwork</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">closestdistance</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.jumpnetwork"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.jumpnetwork">[docs]</a>    <span class="k">def</span> <span class="nf">jumpnetwork</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">closestdistance</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the full jump network for a specific chemical index, out to a cutoff. Organized</span>
 <span class="sd">        by symmetry-unique transitions. Note that i-&gt;j and j-&gt;i are always related to one-another,</span>
@@ -1326,7 +1327,7 @@
         <span class="n">lis</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">entry</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span> <span class="n">i</span><span class="o">+</span><span class="n">j</span> <span class="o">+</span> <span class="mf">1e-3</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span><span class="n">dx</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">lis</span></div>
 
-<div class="viewcode-block" id="Crystal.jumpnetwork2lattice"><a class="viewcode-back" href="../index.html#crystal.Crystal.jumpnetwork2lattice">[docs]</a>    <span class="k">def</span> <span class="nf">jumpnetwork2lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">jumpnetwork</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.jumpnetwork2lattice"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.jumpnetwork2lattice">[docs]</a>    <span class="k">def</span> <span class="nf">jumpnetwork2lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">jumpnetwork</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert a &quot;standard&quot; jumpnetwork (that specifies displacement vectors dx) into a lattice</span>
 <span class="sd">        representation, where we replace dx with the lattice vector from i to j.</span>
@@ -1342,7 +1343,7 @@
                    <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">jumplist</span><span class="p">]</span>
                  <span class="k">for</span> <span class="n">jumplist</span> <span class="ow">in</span> <span class="n">jumpnetwork</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Crystal.sitelist"><a class="viewcode-back" href="../index.html#crystal.Crystal.sitelist">[docs]</a>    <span class="k">def</span> <span class="nf">sitelist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chem</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.sitelist"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.sitelist">[docs]</a>    <span class="k">def</span> <span class="nf">sitelist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chem</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a list of lists of Wyckoff-related sites for a given chemistry.</span>
 <span class="sd">        Done with a single list comprehension--useful as input for diffusion calculation</span>
@@ -1354,7 +1355,7 @@
                  <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wyckoff</span><span class="p">]</span>  <span class="c1"># converts to list of lists</span>
                  <span class="k">if</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">chem</span> <span class="p">])</span>  <span class="c1"># select only those with correct chemistry</span></div>
 
-<div class="viewcode-block" id="Crystal.fullkptmesh"><a class="viewcode-back" href="../index.html#crystal.Crystal.fullkptmesh">[docs]</a>    <span class="k">def</span> <span class="nf">fullkptmesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nmesh</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.fullkptmesh"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.fullkptmesh">[docs]</a>    <span class="k">def</span> <span class="nf">fullkptmesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nmesh</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a k-point mesh of density given by Nmesh; does not symmetrize but does put the</span>
 <span class="sd">        k-points inside the BZ. Does not return any *weights* as every point is equally weighted.</span>
@@ -1380,7 +1381,7 @@
                         <span class="n">k</span> <span class="o">-=</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">G</span>
         <span class="k">return</span> <span class="n">kptfull</span></div>
 
-<div class="viewcode-block" id="Crystal.reducekptmesh"><a class="viewcode-back" href="../index.html#crystal.Crystal.reducekptmesh">[docs]</a>    <span class="k">def</span> <span class="nf">reducekptmesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kptfull</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<div class="viewcode-block" id="Crystal.reducekptmesh"><a class="viewcode-back" href="../crystal.html#crystal.Crystal.reducekptmesh">[docs]</a>    <span class="k">def</span> <span class="nf">reducekptmesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kptfull</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes a fully expanded mesh, and reduces it by symmetry. Assumes every point is</span>
 <span class="sd">        equally weighted. We would need a different (more complicated) algorithm if not true...</span>
@@ -1431,7 +1432,7 @@
 
 
 <span class="c1"># YAML interfaces for types outside of this module</span>
-<div class="viewcode-block" id="ndarray_representer"><a class="viewcode-back" href="../index.html#crystal.ndarray_representer">[docs]</a><span class="k">def</span> <span class="nf">ndarray_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="ndarray_representer"><a class="viewcode-back" href="../crystal.html#crystal.ndarray_representer">[docs]</a><span class="k">def</span> <span class="nf">ndarray_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Output a numpy array&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_sequence</span><span class="p">(</span><span class="n">NDARRAY_YAMLTAG</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span></div>
 
