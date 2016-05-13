@@ -158,6 +158,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Analyzes the spherical harmonics and powers for a given Lmax; returns a</span>
 <span class="sd">        series of index functions.</span>
+
 <span class="sd">        :param Lmax: maximum l value to consider; equal to the sum of powers</span>
 <span class="sd">        :return NYlm: number of Ylm coefficients</span>
 <span class="sd">        :return Npower: number of power coefficients</span>
@@ -322,6 +323,7 @@
 <div class="viewcode-block" id="Taylor3D.powexp"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.powexp">[docs]</a>    <span class="k">def</span> <span class="nf">powexp</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given a vector u, normalize it and return the power expansion of uvec</span>
+
 <span class="sd">        :param u[3]: vector to apply</span>
 <span class="sd">        :param normalize: do we normalize u first?</span>
 <span class="sd">        :return upow[Npower]: ux uy uz products of powers</span>
@@ -350,6 +352,7 @@
 <div class="viewcode-block" id="Taylor3D.makepowercoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.makepowercoeff">[docs]</a>    <span class="k">def</span> <span class="nf">makepowercoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make our power coefficients for our construct expansion method</span>
+
 <span class="sd">        :return powercoeff[n][p]: vector we multiply by our power expansion to get the n&#39;th coefficients</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">powercoeff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">cls</span><span class="o">.</span><span class="n">Lmax</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">Npower</span><span class="p">))</span>
@@ -368,12 +371,13 @@
 <span class="sd">        Takes a &quot;basis&quot; for constructing an expansion -- list of vectors and matrices --</span>
 <span class="sd">        and constructs the expansions up to power N (default = Lmax)</span>
 <span class="sd">        Takes a direction expansion a and b, and returns the sum of the expansions.</span>
+
 <span class="sd">        :param basis = list((coeffmatrix, vect)): expansions to create;</span>
 <span class="sd">          sum(coeffmatrix * (vect*q)^n), for powers n = 0..N</span>
 <span class="sd">        :param N: maximum power to consider; for N=-1, use Lmax</span>
 <span class="sd">        :param pre: list of prefactors, defining the Taylor expansion. Default = 1</span>
 
-<span class="sd">        :returns list((n, lmax, powexpansion)), ... : our expansion, as input to create</span>
+<span class="sd">        :return list((n, lmax, powexpansion)), ... : our expansion, as input to create</span>
 <span class="sd">          Taylor3D objects</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">N</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span> <span class="n">N</span><span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">Lmax</span>
@@ -402,6 +406,7 @@
 <span class="sd">        then this is straightforward. However, we run into problems with *reductions*: e.g.,</span>
 <span class="sd">        for n=2, the power x^0 y^0 z^0 is, in reality, x^2+y^2+z^2, and hence *it must be</span>
 <span class="sd">        transformed* because we allow non-orthogonal transformation matrices.</span>
+
 <span class="sd">        :param qptrans: 3x3 matrix</span>
 <span class="sd">        :return: Lmax +1 x Npow x Npow transformation matrix [n][original pow][new pow] for</span>
 <span class="sd">        each n from 0 up to Lmax</span>
@@ -467,6 +472,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This calls *all* the class methods defined above, and stores them *for the class*</span>
 <span class="sd">        This is intended to be done *once*</span>
+
 <span class="sd">        :param Lmax: maximum power / orbital angular momentum</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">__INITIALIZED__</span><span class="p">:</span>
@@ -516,9 +522,10 @@
 <div class="viewcode-block" id="Taylor3D.addhdf5"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.addhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">addhdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds an HDF5 representation of object into an HDF5group (needs to already exist).</span>
-
 <span class="sd">        Example: if f is an open HDF5, then T3D.addhdf5(f.create_group(&#39;T3D&#39;)) will</span>
-<span class="sd">          (1) create the group named &#39;T3D&#39;, and then (2) put the T3D representation in that group.</span>
+<span class="sd">        (1) create the group named &#39;T3D&#39;, and then (2) put the T3D representation in</span>
+<span class="sd">        that group.</span>
+
 <span class="sd">        :param HDF5group: HDF5 group</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">HDF5group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
@@ -533,6 +540,7 @@
 <div class="viewcode-block" id="Taylor3D.loadhdf5"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.loadhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a new T3D from an HDF5 group.</span>
+
 <span class="sd">        :param HDFgroup: HDF5 group</span>
 <span class="sd">        :return: new T3D object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -549,6 +557,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds the initialized power expansion internals into an HDF5group--should be stored for a</span>
 <span class="sd">        sanity check</span>
+
 <span class="sd">        :param HDF5group:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">HDF5group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Internals of PowerExpansion class&#39;</span>
@@ -562,6 +571,7 @@
 <div class="viewcode-block" id="Taylor3D.checkinternalsHDF5"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.checkinternalsHDF5">[docs]</a>    <span class="k">def</span> <span class="nf">checkinternalsHDF5</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads the power expansion internals into an HDF5group, and performs sanity check</span>
+
 <span class="sd">        :param HDF5group:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">cls</span><span class="o">.</span><span class="n">__INITIALIZED__</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Must initialize first to perform sanity check&#39;</span><span class="p">)</span>
@@ -581,6 +591,7 @@
 <span class="sd">        This will be useful for doing slicing assignments. Because of the manner in</span>
 <span class="sd">        which slicing works for assignment, we create what looks like a *lot* of</span>
 <span class="sd">        zeros, by explicitly making the full range of l values.</span>
+
 <span class="sd">        :param nmin: minimum value of n</span>
 <span class="sd">        :param nmax: maximum value of n (inclusive)</span>
 <span class="sd">        :param shape: shape of matrix, as zeros would expect.</span>
@@ -593,6 +604,7 @@
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Indexes (or even slices) into our Taylor expansion.</span>
+
 <span class="sd">        :param key: indices for our Taylor expansion</span>
 <span class="sd">        :return: Taylor expansion after indexing</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -606,6 +618,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Indexes (or even slices) into our Taylor expansion and &quot;sets&quot;; really only intended to work</span>
 <span class="sd">        with another Taylor expansion</span>
+
 <span class="sd">        :param key: indices for our Taylor expansion</span>
 <span class="sd">        :param value: assignment value; really, should be</span>
 <span class="sd">        :return: Taylor expansion after indexing</span>
@@ -644,6 +657,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add additional coefficients into our object. No type checking. Only works if</span>
 <span class="sd">        terms are completely non-overlapping (otherwise, need to use sum).</span>
+
 <span class="sd">        :param coefflist: list((n, lmax, powexpansion))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># getattr is here *in case* someone passes us a Taylor3D type object...</span>
@@ -661,6 +675,7 @@
 <span class="sd">        (b) functions of a single parameter umagn, then we will compute and return the</span>
 <span class="sd">        function value. Otherwise, we return a dictionary mapping (n,l) tuple pairs into</span>
 <span class="sd">        values, and leave it at that.</span>
+
 <span class="sd">        :param u: three vector to evaluate; may (or may not) be normalized</span>
 <span class="sd">        :param fnu: dictionary of (n,l): value or function pairs.</span>
 <span class="sd">        :return value or dictionary: depending on fnu; default is dictionary</span>
@@ -677,6 +692,7 @@
 <div class="viewcode-block" id="Taylor3D.nl"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.nl">[docs]</a>    <span class="k">def</span> <span class="nf">nl</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of (n,l) pairs in the coefflist</span>
+
 <span class="sd">        :return nl_list: all of the (n,l) pairs that are present in our coefflist</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">([</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">coeff</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__sortkey</span><span class="p">)</span></div>
@@ -685,6 +701,7 @@
 <div class="viewcode-block" id="Taylor3D.negcoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.negcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">negcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Negates a coefficient expansion a</span>
+
 <span class="sd">        :param a = list((n, lmax, powexpansion): expansion of function in powers</span>
 <span class="sd">        :return coefflist: -a</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -698,6 +715,7 @@
 <div class="viewcode-block" id="Taylor3D.scalarproductcoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.scalarproductcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">scalarproductcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiplies an coefficient expansion a by a scalar c</span>
+
 <span class="sd">        :param c: scalar *or* dictionary mapping (n,l) to scalars</span>
 <span class="sd">        :param a = list((n, lmax, powexpansion): expansion of function in powers</span>
 <span class="sd">        :param inplace: modify a in place?</span>
@@ -727,6 +745,7 @@
 <div class="viewcode-block" id="Taylor3D.rotatecoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.rotatecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">rotatecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">npowtrans</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a rotated version of the expansion. Needs to use pad to work with reduced representations.</span>
+
 <span class="sd">        :param a: coefficiant list</span>
 <span class="sd">        :param npowtrans: Lmax+1 x Npow x Npow matrix, of [n,oldpow,newpow] corresponding to the rotation</span>
 <span class="sd">        :return: coefficient list, rotated</span>
@@ -752,6 +771,7 @@
 <div class="viewcode-block" id="Taylor3D.rotate"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.rotate">[docs]</a>    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">powtrans</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a rotated version of the expansion.</span>
+
 <span class="sd">        :param powtrans: Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation</span>
 <span class="sd">        :return: coefficient list, rotated</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -760,6 +780,7 @@
 <div class="viewcode-block" id="Taylor3D.irotate"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.irotate">[docs]</a>    <span class="k">def</span> <span class="nf">irotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">powtrans</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Rotate in place.</span>
+
 <span class="sd">        :param powtrans: Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation</span>
 <span class="sd">        :return: self</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -770,16 +791,17 @@
 <div class="viewcode-block" id="Taylor3D.sumcoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.sumcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">sumcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes Taylor3D expansion a and b, and returns the sum of the expansions.</span>
+
 <span class="sd">        :param: a, b = list((n, lmax, powexpansion)</span>
 <span class="sd">            written as a series of coefficients; n defines the magnitude function, which</span>
 <span class="sd">            is additive; lmax is the largest cumulative power of coefficients, and</span>
 <span class="sd">            powexpansion is a numpy array that can multiplied. We assume that a and b</span>
 <span class="sd">            have consistent shapes throughout--we *do not test this*; runtime will likely</span>
 <span class="sd">            fail if not true. The entries in the list are *tuples* of n, lmax, pow</span>
+
 <span class="sd">        :param alpha, beta:</span>
 <span class="sd">            optional scalars: c = alpha*a + beta*b; allows for more efficient expansions</span>
 <span class="sd">        :param inplace: True if the summation should modify a in place</span>
-
 <span class="sd">        :return c: coeff of sum of a and b (! NOTE ! does not return the class!)</span>
 <span class="sd">            sum of a and b</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -879,6 +901,7 @@
 <div class="viewcode-block" id="Taylor3D.tensorproductcoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.tensorproductcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">tensorproductcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">leftmultiply</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiplies an coefficient expansion a by a scalar c</span>
+
 <span class="sd">        :param c: array *or* dictionary mapping (n,l) to arrays</span>
 <span class="sd">        :param a = list((n, lmax, powexpansion): expansion of function in powers</span>
 <span class="sd">        :param leftmultiply: tensordot(c,a) vs. tensordot(a,c)</span>
@@ -924,13 +947,13 @@
 <div class="viewcode-block" id="Taylor3D.coeffproductcoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.coeffproductcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">coeffproductcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes a direction expansion a and b, and returns the product expansion.</span>
-<span class="sd">        :param a, b = list((n, lmax, powexpansion):</span>
-<span class="sd">            written as a series of coefficients; n defines the magnitude function, which</span>
-<span class="sd">            is additive; lmax is the largest cumulative power of coefficients, and</span>
-<span class="sd">            powexpansion is a numpy array that can multiplied. We assume that a and b</span>
-<span class="sd">            have consistent shapes throughout--we *do not test this*; runtime will likely</span>
-<span class="sd">            fail if not true. The entries in the list are *tuples* of n, lmax, pow</span>
 
+<span class="sd">        :param a, b = list((n, lmax, powexpansion):</span>
+<span class="sd">        written as a series of coefficients; n defines the magnitude function, which</span>
+<span class="sd">        is additive; lmax is the largest cumulative power of coefficients, and</span>
+<span class="sd">        powexpansion is a numpy array that can multiplied. We assume that a and b</span>
+<span class="sd">        have consistent shapes throughout--we *do not test this*; runtime will likely</span>
+<span class="sd">        fail if not true. The entries in the list are *tuples* of n, lmax, pow</span>
 <span class="sd">        :return c = list((n, lmax, powexpansion)): product of a and b</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># a little pythonic magic to work with *either* a list, or an object with a coefflist</span>
@@ -990,6 +1013,7 @@
     <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiply our expansion</span>
+
 <span class="sd">        :param other:</span>
 <span class="sd">        :return our expansion:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1002,6 +1026,7 @@
     <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiply our expansion</span>
+
 <span class="sd">        :param other:</span>
 <span class="sd">        :return our expansion:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1015,24 +1040,25 @@
 <div class="viewcode-block" id="Taylor3D.inversecoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.inversecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">inversecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">Nmax</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes a direction expansion , and returns the inversion expansion (approximated</span>
-<span class="sd">        based on the Taylor expansion of 1/(1-x) = sum_i=0^infinity x^i, or</span>
-<span class="sd">        (A + B)^-1 = ((1+BA^-1)A)^-1 = A^-1(1-(-BA^1))^-1 = A^1 sum_i=0 (-BA^-1)^n</span>
+<span class="sd">        based on the Taylor expansion of $1/(1-x) = \sum_{i=0}^{\infty} x^i$, or</span>
+<span class="sd">        $(A + B)^{-1} = ((1+BA{^-1})A)^{-1} = A{^-1}(1-(-BA{^1}))^{-1} = A^{-1} \sum_{i=0} (-BA^{-1})^i$</span>
+
 <span class="sd">        :param a = list((n, lmax, powexpansion):</span>
-<span class="sd">            written as a series of coefficients; n defines the magnitude function, which</span>
-<span class="sd">            is additive; lmax is the largest cumulative power of coefficients, and</span>
-<span class="sd">            powexpansion is a numpy array that can multiplied. We assume that a and b</span>
-<span class="sd">            have consistent shapes throughout--we *do not test this*; runtime will likely</span>
-<span class="sd">            fail if not true. The entries in the list are *tuples* of n, lmax, pow</span>
+<span class="sd">        written as a series of coefficients; n defines the magnitude function, which</span>
+<span class="sd">        is additive; lmax is the largest cumulative power of coefficients, and</span>
+<span class="sd">        powexpansion is a numpy array that can multiplied. We assume that a and b</span>
+<span class="sd">        have consistent shapes throughout--we *do not test this*; runtime will likely</span>
+<span class="sd">        fail if not true. The entries in the list are *tuples* of n, lmax, pow</span>
 <span class="sd">        :param Nmax: maximum remaining n value in expansion. Default value of 0 means</span>
-<span class="sd">          up to a discontinuity correction in an inversion, but higher (or lower) values are</span>
-<span class="sd">          possible.</span>
+<span class="sd">        up to a discontinuity correction in an inversion, but higher (or lower) values are</span>
+<span class="sd">        possible.</span>
 
 <span class="sd">        :return c = list((n, lmax, powexpansion)): inverse of a</span>
 
-<span class="sd">        NOTE: assumes SMALLEST n coefficient is the leading order; only works if that coefficient</span>
-<span class="sd">         is also isotropic (l=0). Otherwise, raises an error</span>
-<span class="sd">        NOTE: there is no sanity check on whether Nmax is reasonable given the expansion and Lmax</span>
-<span class="sd">         values; caveat emptor</span>
+<span class="sd">        NOTE: assumes SMALLEST n coefficient is the leading order; only works if that</span>
+<span class="sd">        coefficient is also isotropic (l=0). Otherwise, raises an error</span>
+<span class="sd">        NOTE: there is no sanity check on whether Nmax is reasonable given the expansion</span>
+<span class="sd">        and Lmax values; caveat emptor</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># a little pythonic magic to work with *either* a list, or an object with a coefflist</span>
         <span class="n">acoeff</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s1">&#39;coefflist&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">__sortkey</span><span class="p">)</span> <span class="c1"># fallback to a if not there... which assumes it&#39;s a list</span>
@@ -1075,6 +1101,7 @@
 <div class="viewcode-block" id="Taylor3D.inv"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.inv">[docs]</a>    <span class="k">def</span> <span class="nf">inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nmax</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the inverse of the expansion, up to order Nmax</span>
+
 <span class="sd">        :param Nmax: maximum order in the inverse expansion</span>
 <span class="sd">        :return: Taylor series of inverse</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1085,6 +1112,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Projects coefficients through Ylm space, then eliminates any zero contributions</span>
 <span class="sd">        (including possible reduction in l values, too).</span>
+
 <span class="sd">        :param a = list((n, lmax, powexpansion): expansion of function in powers</span>
 <span class="sd">        :param inplace: modify a in place?</span>
 <span class="sd">        :return coefflist: a</span>
@@ -1123,6 +1151,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Collects coefficients: sums up all the common n values. Best to be done *after*</span>
 <span class="sd">        reduce is called.</span>
+
 <span class="sd">        :param a = list((n, lmax, powexpansion): expansion of function in powers</span>
 <span class="sd">        :param inplace: modify a in place?</span>
 <span class="sd">        :return coefflist: a</span>
@@ -1173,6 +1202,7 @@
 <span class="sd">        reduced and collected first; if not, could lead to duplicated (n,l) entries in list, which</span>
 <span class="sd">        is inefficient (should still *evaluate* the same, just with extra steps). After this,</span>
 <span class="sd">        each (n,l) term *only* contains terms equal to l, rather than terms &lt;= l.</span>
+
 <span class="sd">        :param a = list((n, lmax, powexpansion): expansion of function in powers</span>
 <span class="sd">        :param inplace: modify a in place?</span>
 <span class="sd">        :return coefflist: a</span>
@@ -1215,6 +1245,7 @@
 <div class="viewcode-block" id="Taylor3D.truncatecoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.truncatecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">truncatecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">Nmax</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove the coefficients above a given Nmax; normally returns a new object</span>
+
 <span class="sd">        :param Nmax: maximum coefficient to include</span>
 <span class="sd">        :param a = list((n, lmax, powexpansion): expansion of function in powers</span>
 <span class="sd">        :param inplace: do it in place?</span>
@@ -1231,6 +1262,7 @@
 <div class="viewcode-block" id="Taylor3D.truncate"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.truncate">[docs]</a>    <span class="k">def</span> <span class="nf">truncate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nmax</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove the coefficients above a given Nmax; normally returns a new object</span>
+
 <span class="sd">        :param Nmax: maximum coefficient to include</span>
 <span class="sd">        :param inplace: do it in place?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
