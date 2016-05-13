@@ -907,8 +907,8 @@ class Taylor3D(object):
     def inversecoeff(cls, a, Nmax=0):
         """
         Takes a direction expansion , and returns the inversion expansion (approximated
-        based on the Taylor expansion of $1/(1-x) = \sum_{i=0}^{\infty} x^i$, or
-        $(A + B)^{-1} = ((1+BA{^-1})A)^{-1} = A{^-1}(1-(-BA{^1}))^{-1} = A^{-1} \sum_{i=0} (-BA^{-1})^i$
+        based on the Taylor expansion of :math:`1/(1-x) = \\sum_{i=0}^{\\infty} x^i`, or
+        :math:`(A + B)^{-1} = ((1+BA^{-1})A)^{-1} = A^{-1}(1-(-BA{^1}))^{-1} = A^{-1} \\sum_{i=0} (-BA^{-1})^i`
 
         :param a = list((n, lmax, powexpansion):
         written as a series of coefficients; n defines the magnitude function, which
