@@ -23,8 +23,8 @@ The code uses YAML files for input/output of diffusion data for the interstitial
 Release 0.9: Full release of Interstitial calculator, along with theory paper (see References below).
 
 References
-========
-* D. R. Trinkle, "Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors." [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)
+==========
+* Dallas R. Trinkle, "Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors." [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)
 
 Contributors
 ============
@@ -41,4 +41,4 @@ This work has been supported in part by
 * DOE/BES grant DE-FG02-05ER46217,
 * ONR grant N000141210752,
 * NSF/CDSE grant 1411106.
-* D. R. Trinkle began the theoretical work for this code during the long program on Material Defects at the [Institute for Pure and Applied Mathematics](https://www.ipam.ucla.edu/) at UCLA, Fall 2012, which is supported by the National Science Foundation.
+* Dallas R. Trinkle began the theoretical work for this code during the long program on Material Defects at the [Institute for Pure and Applied Mathematics](https://www.ipam.ucla.edu/) at UCLA, Fall 2012, which is supported by the National Science Foundation.

@@ -14,7 +14,7 @@ remaining function can be numerically inverse fourier transformed.
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-from . import PowerExpansion as PE
+from onsager import PowerExpansion as PE
 import itertools
 from numpy import linalg as LA
 from scipy.special import hyp1f1, gamma
@@ -28,6 +28,7 @@ class Fnl_p(object):
     def __init__(self, n, pm):
         """
         Exponential cutoff function in Fourier space (p)
+
         :param n: power
         :param pm: pmax value
         """
@@ -41,6 +42,7 @@ class Fnl_u(object):
     def __init__(self, n, l, pm, prefactor):
         """
         Inverse Fourier transform of exponential cutoff function into real space (u)
+
         :param n: power
         :param l: angular momentum
         :param pm: pmax value
@@ -65,6 +67,7 @@ class GFCrystalcalc(object):
         """
         Initializes our calculator with the appropriate topology / connectivity. Doesn't
         require, at this point, the site probabilities or transition rates to be known.
+
         :param crys: Crystal object
         :param chem: index identifying the diffusing species
         :param sitelist: list, grouped into Wyckoff common positions, of unique sites
@@ -122,6 +125,7 @@ class GFCrystalcalc(object):
 
         Example: if f is an open HDF5, then GFcalc.addhdf5(f.create_group('GFcalc')) will
           (1) create the group named 'GFcalc', and then (2) put the GFcalc representation in that group.
+
         :param HDF5group: HDF5 group
         """
         HDF5group.attrs['type'] = self.__class__.__name__
@@ -143,6 +147,7 @@ class GFCrystalcalc(object):
     def loadhdf5(cls, crys, HDF5group):
         """
         Creates a new GFcalc from an HDF5 group.
+
         :param crys: crystal object--MUST BE PASSED IN as it is not stored with the GFcalc
         :param HDFgroup: HDF5 group
         :return: new GFcalc object
@@ -167,6 +172,7 @@ class GFCrystalcalc(object):
     def FourierTransformJumps(self, jumpnetwork, N, kpts):
         """
         Generate the Fourier transform coefficients for each jump
+
         :param jumpnetwork: list of unique transitions, as lists of ((i,j), dx)
         :param N: number of sites
         :param kpts: array[Nkpt][3], in Cartesian (same coord. as dx)
@@ -184,6 +190,7 @@ class GFCrystalcalc(object):
     def TaylorExpandJumps(self, jumpnetwork, N):
         """
         Generate the Taylor expansion coefficients for each jump
+
         :param jumpnetwork: list of unique transitions, as lists of ((i,j), dx)
         :param N: number of sites
         :return: list of Taylor3D expansions of the jump network
@@ -229,6 +236,7 @@ class GFCrystalcalc(object):
         (Re)sets the rates, given the prefactors and Arrhenius factors for the sites and
         transitions, using the ordering according to sitelist and jumpnetwork. Initiates all of
         the calculations so that GF calculation is (fairly) efficient for each input.
+
         :param pre: list of prefactors for site probabilities
         :param betaene: list of beta*E (energy/kB T) for each site
         :param preT: list of prefactors for transition states
@@ -301,6 +309,7 @@ class GFCrystalcalc(object):
     def exp_dxq(self, dx):
         """
         Return the array of exp(-i q.dx) evaluated over the q-points, and accounting for symmetry
+
         :param dx: vector
         :return: array of exp(-i q.dx)
         """
@@ -310,6 +319,7 @@ class GFCrystalcalc(object):
     def __call__(self, i, j, dx):
         """
         Evaluate the Green function from site i to site j, separated by vector dx
+
         :param i: site index
         :param j: site index
         :param dx: vector pointing from i to j (can include lattice contributions)
@@ -331,6 +341,7 @@ class GFCrystalcalc(object):
     def DiagGamma(self, omega = None):
         """
         Diagonalize the gamma point (q=0) term
+
         :param omega: optional; the Taylor expansion to use. If None, use self.omega_Taylor
         :return: array of eigenvalues (r) and array of eigenvectors (vr) where vr[:,i] is the vector
          for eigenvalue r[i], and the r are sorted from 0 to decreasing values.
@@ -355,6 +366,7 @@ class GFCrystalcalc(object):
         """
         Return the diffusivity, or compute it if it's not already known. Uses omega_Taylor_D
         to compute with maximum efficiency.
+
         :param omega_Taylor_D: Taylor expansion of the diffusivity component
         :return: D [3,3] array
         """
@@ -379,6 +391,7 @@ class GFCrystalcalc(object):
     def biascorrection(self, etav = None):
         """
         Return the bias correction, or compute it if it's not already known. Uses etav to compute.
+
         :param etav: Taylor expansion of the bias correction
         :return eta: [N,3] array
         """
@@ -398,6 +411,7 @@ class GFCrystalcalc(object):
     def BlockRotateOmegaTaylor(self, omega_Taylor_rotate):
         """
         Returns block partitioned Taylor expansion of a rotated omega Taylor expansion.
+
         :param omega_Taylor_rotate: rotated into diffusive [0] / relaxive [1:] basis
         :return: dd, dr, rd, rr, and D = dd - dr*rr^-1*rd blocks
         """
@@ -421,6 +435,7 @@ class GFCrystalcalc(object):
         """
         Returns block inverted omega as a Taylor expansion, up to Nmax = 0 (discontinuity
         correction). Needs to be rotated such that leading order of D is isotropic.
+
         :param dd: diffusive/diffusive block (upper left)
         :param dr: diffusive/relaxive block (lower left)
         :param rd: relaxive/diffusive block (upper right)
