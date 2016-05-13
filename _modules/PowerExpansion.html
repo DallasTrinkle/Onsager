@@ -86,6 +86,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#support">Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../crystal.html">Crystal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PowerExpansion.html">PowerExpansion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GFcalc.html">GFcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OnsagerCalc.html">OnsagerCalc</a></li>
 </ul>
 
             
@@ -147,14 +151,14 @@
 <span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
 <span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">factorial</span>
 
-<div class="viewcode-block" id="Taylor3D"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D">[docs]</a><span class="k">class</span> <span class="nc">Taylor3D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D">[docs]</a><span class="k">class</span> <span class="nc">Taylor3D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class that stores a Taylor expansion of a function in 3D, and defines some arithmetic</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># a whole series of sorts of automated computation for setup</span>
 
     <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="Taylor3D.makeindexPowerYlm"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.makeindexPowerYlm">[docs]</a>    <span class="k">def</span> <span class="nf">makeindexPowerYlm</span><span class="p">(</span><span class="n">Lmax</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.makeindexPowerYlm"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.makeindexPowerYlm">[docs]</a>    <span class="k">def</span> <span class="nf">makeindexPowerYlm</span><span class="p">(</span><span class="n">Lmax</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Analyzes the spherical harmonics and powers for a given Lmax; returns a</span>
 <span class="sd">        series of index functions.</span>
@@ -198,7 +202,7 @@
         <span class="k">return</span> <span class="n">NYlm</span><span class="p">,</span> <span class="n">Npower</span><span class="p">,</span> <span class="n">pow2ind</span><span class="p">,</span> <span class="n">ind2pow</span><span class="p">,</span> <span class="n">Ylm2ind</span><span class="p">,</span> <span class="n">ind2Ylm</span><span class="p">,</span> <span class="n">powlrange</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.makeYlmpow"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.makeYlmpow">[docs]</a>    <span class="k">def</span> <span class="nf">makeYlmpow</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.makeYlmpow"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.makeYlmpow">[docs]</a>    <span class="k">def</span> <span class="nf">makeYlmpow</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the expansion of the Ylm&#39;s in powers of x,y,z. Done via brute force.</span>
 <span class="sd">        :return Ylmpow[lm, p]: expansion of each Ylm in powers</span>
@@ -224,7 +228,7 @@
         <span class="k">return</span> <span class="n">Ylmpow</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.makepowYlm"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.makepowYlm">[docs]</a>    <span class="k">def</span> <span class="nf">makepowYlm</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.makepowYlm"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.makepowYlm">[docs]</a>    <span class="k">def</span> <span class="nf">makepowYlm</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the expansion of the powers in Ylm&#39;s. Done using recursion relations</span>
 <span class="sd">        instead of direct calculation. Note: an alternative approach would be Gaussian</span>
@@ -287,7 +291,7 @@
         <span class="k">return</span> <span class="n">powYlm</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.makeLprojections"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.makeLprojections">[docs]</a>    <span class="k">def</span> <span class="nf">makeLprojections</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.makeLprojections"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.makeLprojections">[docs]</a>    <span class="k">def</span> <span class="nf">makeLprojections</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs a series of projection matrices for each l component in our power series</span>
 <span class="sd">        :return: projL[l][p][p&#39;]</span>
@@ -308,7 +312,7 @@
         <span class="k">return</span> <span class="n">projL</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.makedirectmult"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.makedirectmult">[docs]</a>    <span class="k">def</span> <span class="nf">makedirectmult</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.makedirectmult"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.makedirectmult">[docs]</a>    <span class="k">def</span> <span class="nf">makedirectmult</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return direcmult[p][p&#39;]: index that corresponds to the multiplication of power indices p and p&#39;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -320,7 +324,7 @@
         <span class="k">return</span> <span class="n">directmult</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.powexp"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.powexp">[docs]</a>    <span class="k">def</span> <span class="nf">powexp</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.powexp"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.powexp">[docs]</a>    <span class="k">def</span> <span class="nf">powexp</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given a vector u, normalize it and return the power expansion of uvec</span>
 
@@ -349,7 +353,7 @@
         <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="n">upow</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.makepowercoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.makepowercoeff">[docs]</a>    <span class="k">def</span> <span class="nf">makepowercoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.makepowercoeff"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.makepowercoeff">[docs]</a>    <span class="k">def</span> <span class="nf">makepowercoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make our power coefficients for our construct expansion method</span>
 
@@ -366,7 +370,7 @@
         <span class="k">return</span> <span class="n">powercoeff</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.constructexpansion"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.constructexpansion">[docs]</a>    <span class="k">def</span> <span class="nf">constructexpansion</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">N</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.constructexpansion"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.constructexpansion">[docs]</a>    <span class="k">def</span> <span class="nf">constructexpansion</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">N</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes a &quot;basis&quot; for constructing an expansion -- list of vectors and matrices --</span>
 <span class="sd">        and constructs the expansions up to power N (default = Lmax)</span>
@@ -396,7 +400,7 @@
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">c</span><span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.rotatedirections"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.rotatedirections">[docs]</a>    <span class="k">def</span> <span class="nf">rotatedirections</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">qptrans</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.rotatedirections"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.rotatedirections">[docs]</a>    <span class="k">def</span> <span class="nf">rotatedirections</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">qptrans</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes a transformation matrix qptrans, where q[i] = sum_j qptrans[i][j] p[j], and</span>
 <span class="sd">        returns the Npow x Npow transformation matrix for the new components in terms of</span>
@@ -468,7 +472,7 @@
     <span class="c1"># allow for Lmax to be *increased* as necessary, and all of the structures should be</span>
     <span class="c1"># &quot;backwards compatible&quot;. That said, this has not been tested.</span>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">__initTaylor3Dindexing__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">Lmax</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__initTaylor3Dindexing__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__initTaylor3Dindexing__">[docs]</a>    <span class="k">def</span> <span class="nf">__initTaylor3Dindexing__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">Lmax</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This calls *all* the class methods defined above, and stores them *for the class*</span>
 <span class="sd">        This is intended to be done *once*</span>
@@ -492,9 +496,9 @@
         <span class="n">cls</span><span class="o">.</span><span class="n">__internallist__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;pow2ind&#39;</span><span class="p">,</span> <span class="s1">&#39;ind2pow&#39;</span><span class="p">,</span> <span class="s1">&#39;Ylm2ind&#39;</span><span class="p">,</span> <span class="s1">&#39;ind2Ylm&#39;</span><span class="p">,</span>
                                 <span class="s1">&#39;powlrange&#39;</span><span class="p">,</span> <span class="s1">&#39;Ylmpow&#39;</span><span class="p">,</span> <span class="s1">&#39;powYlm&#39;</span><span class="p">,</span>
                                 <span class="s1">&#39;Lproj&#39;</span><span class="p">,</span> <span class="s1">&#39;directmult&#39;</span><span class="p">,</span> <span class="s1">&#39;powercoeff&#39;</span><span class="p">)</span>
-        <span class="n">cls</span><span class="o">.</span><span class="n">__INITIALIZED__</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">__INITIALIZED__</span> <span class="o">=</span> <span class="bp">True</span></div>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefflist</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">Lmax</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">nodeepcopy</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__init__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefflist</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">Lmax</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">nodeepcopy</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a Taylor3D object, with coefflist (default = empty)</span>
 
@@ -511,15 +515,15 @@
         <span class="k">if</span> <span class="n">nodeepcopy</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span> <span class="o">=</span> <span class="n">coefflist</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="n">coefflist</span> <span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="n">coefflist</span> <span class="p">]</span></div>
 
-<div class="viewcode-block" id="Taylor3D.copy"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.copy"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a copy of the current expansion</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Taylor3D.addhdf5"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.addhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">addhdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.addhdf5"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.addhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">addhdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds an HDF5 representation of object into an HDF5group (needs to already exist).</span>
 <span class="sd">        Example: if f is an open HDF5, then T3D.addhdf5(f.create_group(&#39;T3D&#39;)) will</span>
@@ -537,7 +541,7 @@
             <span class="n">HDF5group</span><span class="p">[</span><span class="n">coeffstr</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;l&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.loadhdf5"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.loadhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.loadhdf5"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.loadhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a new T3D from an HDF5 group.</span>
 
@@ -553,7 +557,7 @@
             <span class="n">t3d</span><span class="o">.</span><span class="n">coefflist</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">t3d</span></div>
 
-<div class="viewcode-block" id="Taylor3D.dumpinternalsHDF5"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.dumpinternalsHDF5">[docs]</a>    <span class="k">def</span> <span class="nf">dumpinternalsHDF5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.dumpinternalsHDF5"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.dumpinternalsHDF5">[docs]</a>    <span class="k">def</span> <span class="nf">dumpinternalsHDF5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds the initialized power expansion internals into an HDF5group--should be stored for a</span>
 <span class="sd">        sanity check</span>
@@ -568,7 +572,7 @@
             <span class="n">HDF5group</span><span class="p">[</span><span class="n">internal</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">internal</span><span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.checkinternalsHDF5"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.checkinternalsHDF5">[docs]</a>    <span class="k">def</span> <span class="nf">checkinternalsHDF5</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.checkinternalsHDF5"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.checkinternalsHDF5">[docs]</a>    <span class="k">def</span> <span class="nf">checkinternalsHDF5</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads the power expansion internals into an HDF5group, and performs sanity check</span>
 
@@ -585,7 +589,7 @@
         <span class="k">return</span> <span class="bp">True</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.zeros"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">nmin</span><span class="p">,</span> <span class="n">nmax</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.zeros"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">nmin</span><span class="p">,</span> <span class="n">nmax</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs (and returns) a &quot;zero&quot; Taylor expansion with the prescribed shape.</span>
 <span class="sd">        This will be useful for doing slicing assignments. Because of the manner in</span>
@@ -601,7 +605,7 @@
                      <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmin</span><span class="p">,</span> <span class="n">nmax</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
                      <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">Lmax</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span></div>
 
-    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__getitem__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__getitem__">[docs]</a>    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Indexes (or even slices) into our Taylor expansion.</span>
 
@@ -612,9 +616,9 @@
             <span class="n">keyt</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span><span class="p">,)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">keyt</span> <span class="o">=</span> <span class="n">key</span>
-        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">([(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">c</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">),)</span> <span class="o">+</span> <span class="n">keyt</span><span class="p">])</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span><span class="p">],</span> <span class="n">nodeepcopy</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">([(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">c</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">),)</span> <span class="o">+</span> <span class="n">keyt</span><span class="p">])</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span><span class="p">],</span> <span class="n">nodeepcopy</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__setitem__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__setitem__">[docs]</a>    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Indexes (or even slices) into our Taylor expansion and &quot;sets&quot;; really only intended to work</span>
 <span class="sd">        with another Taylor expansion</span>
@@ -637,9 +641,9 @@
                     <span class="n">c</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">),)</span> <span class="o">+</span> <span class="n">keyt</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">matched</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to do setitem where the rhs contains terms not present in lhs&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__str__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__str__">[docs]</a>    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        String representation for &quot;pretty printing&quot;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -651,9 +655,9 @@
                     <span class="n">strrep</span> <span class="o">=</span> <span class="n">strrep</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{} x^{} y^{} z^{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">coeff</span><span class="p">[</span><span class="n">p</span><span class="p">],</span>
                       <span class="bp">self</span><span class="o">.</span><span class="n">ind2pow</span><span class="p">[</span><span class="n">p</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind2pow</span><span class="p">[</span><span class="n">p</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind2pow</span><span class="p">[</span><span class="n">p</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
             <span class="n">strrep</span> <span class="o">=</span> <span class="n">strrep</span> <span class="o">+</span> <span class="s2">&quot; )</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="k">return</span> <span class="n">strrep</span>
+        <span class="k">return</span> <span class="n">strrep</span></div>
 
-<div class="viewcode-block" id="Taylor3D.addterms"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.addterms">[docs]</a>    <span class="k">def</span> <span class="nf">addterms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefflist</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.addterms"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.addterms">[docs]</a>    <span class="k">def</span> <span class="nf">addterms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefflist</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add additional coefficients into our object. No type checking. Only works if</span>
 <span class="sd">        terms are completely non-overlapping (otherwise, need to use sum).</span>
@@ -668,7 +672,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">coeff</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">coeff</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__sortkey</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">fnu</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__call__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">fnu</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method for evaluating our 3D Taylor expansion. We have two approaches: if we are</span>
 <span class="sd">        passed a dictionary in fnu that will map (n,l) tuple pairs to either (a) values or</span>
@@ -687,9 +691,9 @@
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">fv</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">u0</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">powlrange</span><span class="p">[</span><span class="n">l</span><span class="p">]],</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                            <span class="k">for</span> <span class="n">fv</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">l</span> <span class="p">,</span> <span class="n">coeff</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span><span class="p">)</span> <span class="p">)</span>
         <span class="c1"># otherwise, create a dictionary!</span>
-        <span class="k">return</span> <span class="p">{</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">l</span><span class="p">):</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">u0</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">powlrange</span><span class="p">[</span><span class="n">l</span><span class="p">]],</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">coeff</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">l</span><span class="p">):</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">u0</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">powlrange</span><span class="p">[</span><span class="n">l</span><span class="p">]],</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">coeff</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span><span class="p">}</span></div>
 
-<div class="viewcode-block" id="Taylor3D.nl"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.nl">[docs]</a>    <span class="k">def</span> <span class="nf">nl</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.nl"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.nl">[docs]</a>    <span class="k">def</span> <span class="nf">nl</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of (n,l) pairs in the coefflist</span>
 
@@ -698,7 +702,7 @@
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">([</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">coeff</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__sortkey</span><span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.negcoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.negcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">negcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.negcoeff"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.negcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">negcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Negates a coefficient expansion a</span>
 
@@ -712,7 +716,7 @@
         <span class="k">return</span> <span class="n">nega</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.scalarproductcoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.scalarproductcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">scalarproductcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.scalarproductcoeff"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.scalarproductcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">scalarproductcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiplies an coefficient expansion a by a scalar c</span>
 
@@ -742,7 +746,7 @@
         <span class="k">return</span> <span class="n">ca</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.rotatecoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.rotatecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">rotatecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">npowtrans</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.rotatecoeff"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.rotatecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">rotatecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">npowtrans</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a rotated version of the expansion. Needs to use pad to work with reduced representations.</span>
 
@@ -768,7 +772,7 @@
                                               <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)))</span>
             <span class="k">return</span> <span class="n">acoeff</span></div>
 
-<div class="viewcode-block" id="Taylor3D.rotate"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.rotate">[docs]</a>    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">powtrans</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.rotate"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.rotate">[docs]</a>    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">powtrans</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a rotated version of the expansion.</span>
 
@@ -777,7 +781,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotatecoeff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span><span class="p">,</span> <span class="n">powtrans</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Taylor3D.irotate"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.irotate">[docs]</a>    <span class="k">def</span> <span class="nf">irotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">powtrans</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.irotate"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.irotate">[docs]</a>    <span class="k">def</span> <span class="nf">irotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">powtrans</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Rotate in place.</span>
 
@@ -788,7 +792,7 @@
         <span class="k">return</span> <span class="bp">self</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.sumcoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.sumcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">sumcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.sumcoeff"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.sumcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">sumcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes Taylor3D expansion a and b, and returns the sum of the expansions.</span>
 
@@ -849,56 +853,56 @@
         <span class="n">c</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">__sortkey</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">c</span></div>
 
-    <span class="k">def</span> <span class="nf">__pos__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__pos__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__pos__">[docs]</a>    <span class="k">def</span> <span class="nf">__pos__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return +T3D&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
 
-    <span class="k">def</span> <span class="nf">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__neg__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__neg__">[docs]</a>    <span class="k">def</span> <span class="nf">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return -T3D&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">negcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">negcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
 
-    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__add__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__add__">[docs]</a>    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a set of Taylor expansions&quot;&quot;&quot;</span>
         <span class="c1"># if we&#39;re passed an array, just take it in stride</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s1">&#39;shape&#39;</span><span class="p">):</span> <span class="n">other</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
-        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sumcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sumcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">))</span></div>
 
-    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__radd__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__radd__">[docs]</a>    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a set of Taylor expansions&quot;&quot;&quot;</span>
         <span class="c1"># note: sum(), without a start value, uses 0, which then will call __radd__:</span>
         <span class="k">if</span> <span class="n">other</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="c1"># if we&#39;re passed an array, just take it in stride</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s1">&#39;shape&#39;</span><span class="p">):</span> <span class="n">other</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
-        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sumcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sumcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">))</span></div>
 
-    <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__iadd__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__iadd__">[docs]</a>    <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a set of Taylor expansions&quot;&quot;&quot;</span>
         <span class="c1"># if we&#39;re passed an array, just take it in stride</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s1">&#39;shape&#39;</span><span class="p">):</span> <span class="n">other</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sumcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
-    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__sub__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__sub__">[docs]</a>    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Subtract a set of Taylor expansions&quot;&quot;&quot;</span>
         <span class="c1"># if we&#39;re passed an array, just take it in stride</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s1">&#39;shape&#39;</span><span class="p">):</span> <span class="n">other</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
-        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sumcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sumcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span></div>
 
-    <span class="k">def</span> <span class="nf">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__rsub__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__rsub__">[docs]</a>    <span class="k">def</span> <span class="nf">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Subtract a set of Taylor expansions&quot;&quot;&quot;</span>
         <span class="c1"># if we&#39;re passed an array, just take it in stride</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s1">&#39;shape&#39;</span><span class="p">):</span> <span class="n">other</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
-        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sumcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sumcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
 
-    <span class="k">def</span> <span class="nf">__isub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__isub__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__isub__">[docs]</a>    <span class="k">def</span> <span class="nf">__isub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Subtract a set of Taylor expansions&quot;&quot;&quot;</span>
         <span class="c1"># if we&#39;re passed an array, just take it in stride</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s1">&#39;shape&#39;</span><span class="p">):</span> <span class="n">other</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sumcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.tensorproductcoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.tensorproductcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">tensorproductcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">leftmultiply</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.tensorproductcoeff"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.tensorproductcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">tensorproductcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">leftmultiply</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiplies an coefficient expansion a by a scalar c</span>
 
@@ -925,26 +929,26 @@
             <span class="k">else</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">an</span><span class="p">,</span> <span class="n">almax</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">apow</span><span class="p">,</span> <span class="n">cmult</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">))))</span>
         <span class="k">return</span> <span class="n">ca</span></div>
 
-<div class="viewcode-block" id="Taylor3D.ldot"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.ldot">[docs]</a>    <span class="k">def</span> <span class="nf">ldot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.ldot"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.ldot">[docs]</a>    <span class="k">def</span> <span class="nf">ldot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns c.self&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensorproductcoeff</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Taylor3D.rdot"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.rdot">[docs]</a>    <span class="k">def</span> <span class="nf">rdot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.rdot"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.rdot">[docs]</a>    <span class="k">def</span> <span class="nf">rdot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns self.c&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensorproductcoeff</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">leftmultiply</span><span class="o">=</span><span class="bp">False</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Taylor3D.ildot"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.ildot">[docs]</a>    <span class="k">def</span> <span class="nf">ildot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.ildot"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.ildot">[docs]</a>    <span class="k">def</span> <span class="nf">ildot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Computes c.self in place&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensorproductcoeff</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="Taylor3D.irdot"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.irdot">[docs]</a>    <span class="k">def</span> <span class="nf">irdot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.irdot"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.irdot">[docs]</a>    <span class="k">def</span> <span class="nf">irdot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Computes self.c in place&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coefflist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensorproductcoeff</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">leftmultiply</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.coeffproductcoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.coeffproductcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">coeffproductcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.coeffproductcoeff"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.coeffproductcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">coeffproductcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes a direction expansion a and b, and returns the product expansion.</span>
 
@@ -1010,7 +1014,7 @@
         <span class="n">c</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">__sortkey</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">c</span></div>
 
-    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__mul__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__mul__">[docs]</a>    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiply our expansion</span>
 
@@ -1021,9 +1025,9 @@
             <span class="n">coeff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalarproductcoeff</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">coeff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coeffproductcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="n">coeff</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="n">coeff</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.__rmul__"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.__rmul__">[docs]</a>    <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiply our expansion</span>
 
@@ -1034,10 +1038,10 @@
             <span class="n">coeff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalarproductcoeff</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">coeff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coeffproductcoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="n">coeff</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="n">coeff</span><span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.inversecoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.inversecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">inversecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">Nmax</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.inversecoeff"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.inversecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">inversecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">Nmax</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes a direction expansion , and returns the inversion expansion (approximated</span>
 <span class="sd">        based on the Taylor expansion of $1/(1-x) = \sum_{i=0}^{\infty} x^i$, or</span>
@@ -1098,7 +1102,7 @@
                          <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">c</span></div>
 
-<div class="viewcode-block" id="Taylor3D.inv"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.inv">[docs]</a>    <span class="k">def</span> <span class="nf">inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nmax</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.inv"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.inv">[docs]</a>    <span class="k">def</span> <span class="nf">inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nmax</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the inverse of the expansion, up to order Nmax</span>
 
@@ -1108,7 +1112,7 @@
         <span class="k">return</span> <span class="n">Taylor3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inversecoeff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nmax</span><span class="p">))</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.reducecoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.reducecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">reducecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.reducecoeff"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.reducecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">reducecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Projects coefficients through Ylm space, then eliminates any zero contributions</span>
 <span class="sd">        (including possible reduction in l values, too).</span>
@@ -1147,7 +1151,7 @@
         <span class="k">return</span> <span class="n">ra</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.collectcoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.collectcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">collectcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.collectcoeff"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.collectcoeff">[docs]</a>    <span class="k">def</span> <span class="nf">collectcoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Collects coefficients: sums up all the common n values. Best to be done *after*</span>
 <span class="sd">        reduce is called.</span>
@@ -1186,7 +1190,7 @@
             <span class="n">ca</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ca</span></div>
 
-<div class="viewcode-block" id="Taylor3D.reduce"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.reduce">[docs]</a>    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.reduce"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.reduce">[docs]</a>    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reduce the coefficients: eliminate any n that has zero coefficients, collect all of</span>
 <span class="sd">        the same values of n together. Done in place.</span>
@@ -1196,7 +1200,7 @@
         <span class="k">return</span> <span class="bp">self</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.separatecoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.separatecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">separatecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.separatecoeff"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.separatecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">separatecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Projects coefficients through Ylm space, one by one. Assumes they&#39;ve already been</span>
 <span class="sd">        reduced and collected first; if not, could lead to duplicated (n,l) entries in list, which</span>
@@ -1233,7 +1237,7 @@
         <span class="n">sa</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">__sortkey</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">sa</span></div>
 
-<div class="viewcode-block" id="Taylor3D.separate"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.separate">[docs]</a>    <span class="k">def</span> <span class="nf">separate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.separate"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.separate">[docs]</a>    <span class="k">def</span> <span class="nf">separate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Separate out the coefficients into (n,l) terms where *only* l contributions</span>
 <span class="sd">        appear in each.</span>
@@ -1242,7 +1246,7 @@
         <span class="k">return</span> <span class="bp">self</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Taylor3D.truncatecoeff"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.truncatecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">truncatecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">Nmax</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.truncatecoeff"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.truncatecoeff">[docs]</a>    <span class="k">def</span> <span class="nf">truncatecoeff</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">Nmax</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove the coefficients above a given Nmax; normally returns a new object</span>
 
@@ -1259,7 +1263,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="n">acoeff</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="n">Nmax</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Taylor3D.truncate"><a class="viewcode-back" href="../index.html#PowerExpansion.Taylor3D.truncate">[docs]</a>    <span class="k">def</span> <span class="nf">truncate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nmax</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Taylor3D.truncate"><a class="viewcode-back" href="../PowerExpansion.html#PowerExpansion.Taylor3D.truncate">[docs]</a>    <span class="k">def</span> <span class="nf">truncate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nmax</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove the coefficients above a given Nmax; normally returns a new object</span>
 

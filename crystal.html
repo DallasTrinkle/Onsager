@@ -31,6 +31,7 @@
 
   
     <link rel="top" title="Onsager 0.9 documentation" href="index.html"/>
+        <link rel="next" title="CrystalStars" href="CrystalStars.html"/>
         <link rel="prev" title="Onsager" href="includeme.html"/> 
 
   
@@ -86,6 +87,10 @@
 <li class="toctree-l1"><a class="reference internal" href="includeme.html#contributors">Contributors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="includeme.html#support">Support</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Crystal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
 </ul>
 
             
@@ -303,6 +308,61 @@
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal.Crystal.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>lattice</em>, <em>basis</em>, <em>chemistry=None</em>, <em>NOSYM=False</em>, <em>noreduce=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization; starts off with the lattice vector definition and the
+basis vectors. While it does not explicitly store the specific chemical
+elements involved, it does store that there are different elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lattice</strong> &#8211; array[3,3] or list of array[3]
+lattice vectors; if [3,3] array, then the vectors need to be in <em>column</em> format
+so that the first lattice vector is lattice[:,0]</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>:param basis</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">list of array[3] or list of list of array[3]</span><dd>crystalline basis vectors, in unit cell coordinates. If a list of lists, then
+there are multiple chemical elements, with each list corresponding to a unique
+element</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>chemistry</strong> &#8211; (optional) list of names of chemical elements</li>
+<li><strong>NOSYM</strong> &#8211; turn off all symmetry finding (except identity)</li>
+<li><strong>noreduce</strong> &#8211; do not attempt to reduce the atomic basis</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal.Crystal.__repr__">
+<code class="descname">__repr__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__repr__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>String representation of crystal (lattice + basis)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal.Crystal.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Human-readable version of crystal (lattice + basis)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="crystal.Crystal.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#crystal.Crystal.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
 </dd></dl>
 
 <dl class="method">
@@ -911,6 +971,54 @@ can be defined out-of-the-box.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="crystal.GroupOp.__add__">
+<code class="descname">__add__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__add__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a translation to our group operation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal.GroupOp.__eq__">
+<code class="descname">__eq__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__eq__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test for equality&#8211;we use numpy.isclose for comparison, since that&#8217;s what we usually care about</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal.GroupOp.__hash__">
+<code class="descname">__hash__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__hash__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hash, so that we can make sets of group operations</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal.GroupOp.__mul__">
+<code class="descname">__mul__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__mul__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two group operations to produce a new group operation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal.GroupOp.__ne__">
+<code class="descname">__ne__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__ne__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__ne__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inequality == not __eq__</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal.GroupOp.__sane__">
+<code class="descname">__sane__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__sane__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__sane__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if the cartrot and rot are consistent and &#8216;sane&#8217;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal.GroupOp.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Human-readable version of groupop</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystal.GroupOp.__sub__">
+<code class="descname">__sub__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__sub__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a (negative) translation to our group operation</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="crystal.GroupOp.eigen">
 <code class="descname">eigen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.eigen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.eigen" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the type of group operation (single integer) and eigenvectors.
@@ -1120,6 +1228,8 @@ None; the translation vector will be meaningless.</p>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="CrystalStars.html" class="btn btn-neutral float-right" title="CrystalStars" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="includeme.html" class="btn btn-neutral" title="Onsager" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

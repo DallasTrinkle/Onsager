@@ -1,0 +1,1072 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>PowerExpansion &mdash; Onsager 0.9 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Onsager 0.9 documentation" href="index.html"/>
+        <link rel="next" title="GFcalc" href="GFcalc.html"/>
+        <link rel="prev" title="CrystalStars" href="CrystalStars.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Onsager
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="includeme.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="includeme.html#contributors">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="includeme.html#support">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crystal.html">Crystal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PowerExpansion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Onsager</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>PowerExpansion</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/PowerExpansion.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="powerexpansion">
+<h1>PowerExpansion<a class="headerlink" href="#powerexpansion" title="Permalink to this headline">¶</a></h1>
+<p>PowerExpansion:</p>
+<p>The PowerExpansion module defines the <code class="docutils literal"><span class="pre">Taylor3D</span></code> class, which is for 3-dimensional (xyz) Taylor expansions of functions. It&#8217;s primary purpose is to be used in the calculation of the vacancy Green function, as it allows fairly straightforward block evaluation of the small <em>k</em> (large distance) transition matrix, and its inverse. This is key to removing the pole in the Green function evaluation.</p>
+<span class="target" id="module-PowerExpansion"></span><p>Power expansion class</p>
+<p>Class to store and manipulate 3-dimensional Taylor (power) expansions of functions
+Particularly useful for inverting the FT of the evolution matrix, and subtracting off
+analytically calculated IFT for the Green function.</p>
+<p>Really designed to get used by other code.</p>
+<dl class="class">
+<dt id="PowerExpansion.Taylor3D">
+<em class="property">class </em><code class="descclassname">PowerExpansion.</code><code class="descname">Taylor3D</code><span class="sig-paren">(</span><em>coefflist=[]</em>, <em>Lmax=4</em>, <em>nodeepcopy=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that stores a Taylor expansion of a function in 3D, and defines some arithmetic</p>
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__add__">
+<code class="descname">__add__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__add__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a set of Taylor expansions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>u</em>, <em>fnu=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for evaluating our 3D Taylor expansion. We have two approaches: if we are
+passed a dictionary in fnu that will map (n,l) tuple pairs to either (a) values or
+(b) functions of a single parameter umagn, then we will compute and return the
+function value. Otherwise, we return a dictionary mapping (n,l) tuple pairs into
+values, and leave it at that.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>u</strong> &#8211; three vector to evaluate; may (or may not) be normalized</li>
+<li><strong>fnu</strong> &#8211; dictionary of (n,l): value or function pairs.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return value or dictionary:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">depending on fnu; default is dictionary</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__getitem__">
+<code class="descname">__getitem__</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__getitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indexes (or even slices) into our Taylor expansion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> &#8211; indices for our Taylor expansion</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Taylor expansion after indexing</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__iadd__">
+<code class="descname">__iadd__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__iadd__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__iadd__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a set of Taylor expansions</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.__initTaylor3Dindexing__">
+<em class="property">classmethod </em><code class="descname">__initTaylor3Dindexing__</code><span class="sig-paren">(</span><em>Lmax</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__initTaylor3Dindexing__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__initTaylor3Dindexing__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This calls <em>all</em> the class methods defined above, and stores them <em>for the class</em>
+This is intended to be done <em>once</em></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Lmax</strong> &#8211; maximum power / orbital angular momentum</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>coefflist=[]</em>, <em>Lmax=4</em>, <em>nodeepcopy=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a Taylor3D object, with coefflist (default = empty)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>coefflist</strong> &#8211; list((n, lmax, powexpansion)). No type checking; default empty</li>
+<li><strong>Lmax</strong> &#8211; maximum power / orbital angular momentum</li>
+<li><strong>nodeepcopy</strong> &#8211; true if we don&#8217;t want to copy the matrices on creation of object
+(i.e., deep copy, which is the default)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Note: deep copy is strongly preferred. The <em>only</em> real reason to use nodeepcopy is
+when returning slices / indexing in arrays, but even then we have to be careful about
+doing things like reductions, etc., that modify matrices <em>in place</em>. We always copy
+the list, but that doesn&#8217;t make copies of the underlying matrices.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__isub__">
+<code class="descname">__isub__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__isub__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__isub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract a set of Taylor expansions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__mul__">
+<code class="descname">__mul__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__mul__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply our expansion</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return our expansion:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__neg__">
+<code class="descname">__neg__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__neg__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__neg__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return -T3D</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__pos__">
+<code class="descname">__pos__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__pos__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__pos__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return +T3D</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__radd__">
+<code class="descname">__radd__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__radd__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__radd__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a set of Taylor expansions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__rmul__">
+<code class="descname">__rmul__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__rmul__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__rmul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply our expansion</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return our expansion:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__rsub__">
+<code class="descname">__rsub__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__rsub__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__rsub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract a set of Taylor expansions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__setitem__">
+<code class="descname">__setitem__</code><span class="sig-paren">(</span><em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__setitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indexes (or even slices) into our Taylor expansion and &#8220;sets&#8221;; really only intended to work
+with another Taylor expansion</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>key</strong> &#8211; indices for our Taylor expansion</li>
+<li><strong>value</strong> &#8211; assignment value; really, should be</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Taylor expansion after indexing</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>String representation for &#8220;pretty printing&#8221;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.__sub__">
+<code class="descname">__sub__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__sub__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract a set of Taylor expansions</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="PowerExpansion.Taylor3D.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#PowerExpansion.Taylor3D.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.addhdf5">
+<code class="descname">addhdf5</code><span class="sig-paren">(</span><em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.addhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.addhdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an HDF5 representation of object into an HDF5group (needs to already exist).
+Example: if f is an open HDF5, then T3D.addhdf5(f.create_group(&#8216;T3D&#8217;)) will
+(1) create the group named &#8216;T3D&#8217;, and then (2) put the T3D representation in
+that group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> &#8211; HDF5 group</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.addterms">
+<code class="descname">addterms</code><span class="sig-paren">(</span><em>coefflist</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.addterms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.addterms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add additional coefficients into our object. No type checking. Only works if
+terms are completely non-overlapping (otherwise, need to use sum).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>coefflist</strong> &#8211; list((n, lmax, powexpansion))</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.checkinternalsHDF5">
+<em class="property">classmethod </em><code class="descname">checkinternalsHDF5</code><span class="sig-paren">(</span><em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.checkinternalsHDF5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.checkinternalsHDF5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the power expansion internals into an HDF5group, and performs sanity check</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> &#8211; </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.coeffproductcoeff">
+<em class="property">classmethod </em><code class="descname">coeffproductcoeff</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.coeffproductcoeff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.coeffproductcoeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a direction expansion a and b, and returns the product expansion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>b = list((n, lmax, powexpansion)</strong> (<em>a,</em>) &#8211; </td>
+</tr>
+</tbody>
+</table>
+<p>written as a series of coefficients; n defines the magnitude function, which
+is additive; lmax is the largest cumulative power of coefficients, and
+powexpansion is a numpy array that can multiplied. We assume that a and b
+have consistent shapes throughout&#8211;we <em>do not test this</em>; runtime will likely
+fail if not true. The entries in the list are <em>tuples</em> of n, lmax, pow
+:return c = list((n, lmax, powexpansion)): product of a and b</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.collectcoeff">
+<em class="property">classmethod </em><code class="descname">collectcoeff</code><span class="sig-paren">(</span><em>a</em>, <em>inplace=False</em>, <em>atol=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.collectcoeff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.collectcoeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collects coefficients: sums up all the common n values. Best to be done <em>after</em>
+reduce is called.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</li>
+<li><strong>inplace</strong> &#8211; modify a in place?</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return coefflist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">a</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.constructexpansion">
+<em class="property">classmethod </em><code class="descname">constructexpansion</code><span class="sig-paren">(</span><em>basis</em>, <em>N=-1</em>, <em>pre=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.constructexpansion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.constructexpansion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a &#8220;basis&#8221; for constructing an expansion &#8211; list of vectors and matrices &#8211;
+and constructs the expansions up to power N (default = Lmax)
+Takes a direction expansion a and b, and returns the sum of the expansions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>= list((coeffmatrix, vect))</strong> (<em>basis</em>) &#8211; expansions to create;
+sum(coeffmatrix * (vect*q)^n), for powers n = 0..N</li>
+<li><strong>N</strong> &#8211; maximum power to consider; for N=-1, use Lmax</li>
+<li><strong>pre</strong> &#8211; list of prefactors, defining the Taylor expansion. Default = 1</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>:return list((n, lmax, powexpansion)), ...</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">our expansion, as input to create</span><dd>Taylor3D objects</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a copy of the current expansion</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.dumpinternalsHDF5">
+<code class="descname">dumpinternalsHDF5</code><span class="sig-paren">(</span><em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.dumpinternalsHDF5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.dumpinternalsHDF5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the initialized power expansion internals into an HDF5group&#8211;should be stored for a
+sanity check</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> &#8211; </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.ildot">
+<code class="descname">ildot</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.ildot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.ildot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes c.self in place</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.inv">
+<code class="descname">inv</code><span class="sig-paren">(</span><em>Nmax=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.inv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.inv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the inverse of the expansion, up to order Nmax</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Nmax</strong> &#8211; maximum order in the inverse expansion</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Taylor series of inverse</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.inversecoeff">
+<em class="property">classmethod </em><code class="descname">inversecoeff</code><span class="sig-paren">(</span><em>a</em>, <em>Nmax=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.inversecoeff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.inversecoeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a direction expansion , and returns the inversion expansion (approximated
+based on the Taylor expansion of $1/(1-x) = sum_{i=0}^{infty} x^i$, or
+$(A + B)^{-1} = ((1+BA{^-1})A)^{-1} = A{^-1}(1-(-BA{^1}))^{-1} = A^{-1} sum_{i=0} (-BA^{-1})^i$</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; </td>
+</tr>
+</tbody>
+</table>
+<p>written as a series of coefficients; n defines the magnitude function, which
+is additive; lmax is the largest cumulative power of coefficients, and
+powexpansion is a numpy array that can multiplied. We assume that a and b
+have consistent shapes throughout&#8211;we <em>do not test this</em>; runtime will likely
+fail if not true. The entries in the list are <em>tuples</em> of n, lmax, pow
+:param Nmax: maximum remaining n value in expansion. Default value of 0 means
+up to a discontinuity correction in an inversion, but higher (or lower) values are
+possible.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return c = list((n, lmax, powexpansion)):</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">inverse of a</td>
+</tr>
+</tbody>
+</table>
+<p>NOTE: assumes SMALLEST n coefficient is the leading order; only works if that
+coefficient is also isotropic (l=0). Otherwise, raises an error
+NOTE: there is no sanity check on whether Nmax is reasonable given the expansion
+and Lmax values; caveat emptor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.irdot">
+<code class="descname">irdot</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.irdot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.irdot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes self.c in place</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.irotate">
+<code class="descname">irotate</code><span class="sig-paren">(</span><em>powtrans</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.irotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.irotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate in place.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>powtrans</strong> &#8211; Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.ldot">
+<code class="descname">ldot</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.ldot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.ldot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns c.self</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.loadhdf5">
+<em class="property">classmethod </em><code class="descname">loadhdf5</code><span class="sig-paren">(</span><em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.loadhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.loadhdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new T3D from an HDF5 group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDFgroup</strong> &#8211; HDF5 group</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new T3D object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.makeLprojections">
+<em class="property">classmethod </em><code class="descname">makeLprojections</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.makeLprojections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.makeLprojections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a series of projection matrices for each l component in our power series
+:return: projL[l][p][p&#8217;]</p>
+<blockquote>
+<div>projection of powers containing <em>only</em> l component.
+-1 component = sum(l=0..Lmax, projL[l]) = simplification projection</div></blockquote>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.makeYlmpow">
+<em class="property">classmethod </em><code class="descname">makeYlmpow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.makeYlmpow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.makeYlmpow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the expansion of the Ylm&#8217;s in powers of x,y,z. Done via brute force.
+:return Ylmpow[lm, p]: expansion of each Ylm in powers</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.makedirectmult">
+<em class="property">classmethod </em><code class="descname">makedirectmult</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.makedirectmult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.makedirectmult" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return direcmult[p][p&#8217;]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">index that corresponds to the multiplication of power indices p and p&#8217;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="PowerExpansion.Taylor3D.makeindexPowerYlm">
+<em class="property">static </em><code class="descname">makeindexPowerYlm</code><span class="sig-paren">(</span><em>Lmax</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.makeindexPowerYlm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.makeindexPowerYlm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analyzes the spherical harmonics and powers for a given Lmax; returns a
+series of index functions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Lmax</strong> &#8211; maximum l value to consider; equal to the sum of powers</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return NYlm:</th><td class="field-body">number of Ylm coefficients</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return Npower:</th><td class="field-body">number of power coefficients</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return pow2ind[n1][n2][n3]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">powers to index</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return ind2pow[n]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">powers for a given index</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return Ylm2ind[l][m]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">(l,m) to index</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return ind2Ylm[lm]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">(l,m) for a given index</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return powlrange[l]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">upper limit of power indices for a given l value; note: [-1] = 0</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.makepowYlm">
+<em class="property">classmethod </em><code class="descname">makepowYlm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.makepowYlm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.makepowYlm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the expansion of the powers in Ylm&#8217;s. Done using recursion relations
+instead of direct calculation. Note: an alternative approach would be Gaussian
+quadrature.
+:return powYlm[p][lm]: expansion of powers in Ylm; uses indexing scheme above</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.makepowercoeff">
+<em class="property">classmethod </em><code class="descname">makepowercoeff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.makepowercoeff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.makepowercoeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make our power coefficients for our construct expansion method</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return powercoeff[n][p]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">vector we multiply by our power expansion to get the n&#8217;th coefficients</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.negcoeff">
+<em class="property">classmethod </em><code class="descname">negcoeff</code><span class="sig-paren">(</span><em>a</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.negcoeff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.negcoeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Negates a coefficient expansion a</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return coefflist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">-a</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.nl">
+<code class="descname">nl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.nl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.nl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of (n,l) pairs in the coefflist</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return nl_list:</th><td class="field-body">all of the (n,l) pairs that are present in our coefflist</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.powexp">
+<em class="property">classmethod </em><code class="descname">powexp</code><span class="sig-paren">(</span><em>u</em>, <em>normalize=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.powexp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.powexp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a vector u, normalize it and return the power expansion of uvec</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>u[3]</strong> &#8211; vector to apply</li>
+<li><strong>normalize</strong> &#8211; do we normalize u first?</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return upow[Npower]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">ux uy uz products of powers</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return umagn:</th><td class="field-body"><p class="first last">magnitude of u (if normalized)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.rdot">
+<code class="descname">rdot</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.rdot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.rdot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns self.c</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.reduce">
+<code class="descname">reduce</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.reduce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.reduce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduce the coefficients: eliminate any n that has zero coefficients, collect all of
+the same values of n together. Done in place.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.reducecoeff">
+<em class="property">classmethod </em><code class="descname">reducecoeff</code><span class="sig-paren">(</span><em>a</em>, <em>inplace=False</em>, <em>atol=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.reducecoeff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.reducecoeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Projects coefficients through Ylm space, then eliminates any zero contributions
+(including possible reduction in l values, too).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</li>
+<li><strong>inplace</strong> &#8211; modify a in place?</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return coefflist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">a</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.rotate">
+<code class="descname">rotate</code><span class="sig-paren">(</span><em>powtrans</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.rotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.rotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a rotated version of the expansion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>powtrans</strong> &#8211; Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">coefficient list, rotated</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.rotatecoeff">
+<em class="property">classmethod </em><code class="descname">rotatecoeff</code><span class="sig-paren">(</span><em>a</em>, <em>npowtrans</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.rotatecoeff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.rotatecoeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a rotated version of the expansion. Needs to use pad to work with reduced representations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> &#8211; coefficiant list</li>
+<li><strong>npowtrans</strong> &#8211; Lmax+1 x Npow x Npow matrix, of [n,oldpow,newpow] corresponding to the rotation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">coefficient list, rotated</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.rotatedirections">
+<em class="property">classmethod </em><code class="descname">rotatedirections</code><span class="sig-paren">(</span><em>qptrans</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.rotatedirections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.rotatedirections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a transformation matrix qptrans, where q[i] = sum_j qptrans[i][j] p[j], and
+returns the Npow x Npow transformation matrix for the new components in terms of
+the old.
+NOTE: This is more complex than one might first realize. If we only work with cases
+where all of the entries for a given power n have those same n (that is, not reduced),
+then this is straightforward. However, we run into problems with <em>reductions</em>: e.g.,
+for n=2, the power x^0 y^0 z^0 is, in reality, x^2+y^2+z^2, and hence <em>it must be
+transformed</em> because we allow non-orthogonal transformation matrices.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>qptrans</strong> &#8211; 3x3 matrix</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Lmax +1 x Npow x Npow transformation matrix [n][original pow][new pow] for</td>
+</tr>
+</tbody>
+</table>
+<p>each n from 0 up to Lmax</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.scalarproductcoeff">
+<em class="property">classmethod </em><code class="descname">scalarproductcoeff</code><span class="sig-paren">(</span><em>c</em>, <em>a</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.scalarproductcoeff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.scalarproductcoeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiplies an coefficient expansion a by a scalar c</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>c</strong> &#8211; scalar <em>or</em> dictionary mapping (n,l) to scalars</li>
+<li><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</li>
+<li><strong>inplace</strong> &#8211; modify a in place?</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return coefflist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">c*a</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.separate">
+<code class="descname">separate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.separate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.separate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Separate out the coefficients into (n,l) terms where <em>only</em> l contributions
+appear in each.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.separatecoeff">
+<em class="property">classmethod </em><code class="descname">separatecoeff</code><span class="sig-paren">(</span><em>a</em>, <em>inplace=False</em>, <em>atol=1e-10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.separatecoeff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.separatecoeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Projects coefficients through Ylm space, one by one. Assumes they&#8217;ve already been
+reduced and collected first; if not, could lead to duplicated (n,l) entries in list, which
+is inefficient (should still <em>evaluate</em> the same, just with extra steps). After this,
+each (n,l) term <em>only</em> contains terms equal to l, rather than terms &lt;= l.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</li>
+<li><strong>inplace</strong> &#8211; modify a in place?</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return coefflist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">a</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.sumcoeff">
+<em class="property">classmethod </em><code class="descname">sumcoeff</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>alpha=1</em>, <em>beta=1</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.sumcoeff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.sumcoeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes Taylor3D expansion a and b, and returns the sum of the expansions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Param:</th><td class="field-body"><p class="first">a, b = list((n, lmax, powexpansion)
+written as a series of coefficients; n defines the magnitude function, which
+is additive; lmax is the largest cumulative power of coefficients, and
+powexpansion is a numpy array that can multiplied. We assume that a and b
+have consistent shapes throughout&#8211;we <em>do not test this</em>; runtime will likely
+fail if not true. The entries in the list are <em>tuples</em> of n, lmax, pow</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>beta</strong> (<em>alpha,</em>) &#8211; optional scalars: c = alpha*a + beta*b; allows for more efficient expansions</li>
+<li><strong>inplace</strong> &#8211; True if the summation should modify a in place</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return c:</th><td class="field-body"><p class="first last">coeff of sum of a and b (! NOTE ! does not return the class!)
+sum of a and b</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.tensorproductcoeff">
+<em class="property">classmethod </em><code class="descname">tensorproductcoeff</code><span class="sig-paren">(</span><em>c</em>, <em>a</em>, <em>leftmultiply=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.tensorproductcoeff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.tensorproductcoeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiplies an coefficient expansion a by a scalar c</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>c</strong> &#8211; array <em>or</em> dictionary mapping (n,l) to arrays</li>
+<li><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</li>
+<li><strong>leftmultiply</strong> &#8211; tensordot(c,a) vs. tensordot(a,c)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return coefflist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">c.a (or a.c)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PowerExpansion.Taylor3D.truncate">
+<code class="descname">truncate</code><span class="sig-paren">(</span><em>Nmax</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.truncate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.truncate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the coefficients above a given Nmax; normally returns a new object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Nmax</strong> &#8211; maximum coefficient to include</li>
+<li><strong>inplace</strong> &#8211; do it in place?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.truncatecoeff">
+<em class="property">classmethod </em><code class="descname">truncatecoeff</code><span class="sig-paren">(</span><em>a</em>, <em>Nmax</em>, <em>inplace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.truncatecoeff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.truncatecoeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the coefficients above a given Nmax; normally returns a new object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Nmax</strong> &#8211; maximum coefficient to include</li>
+<li><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</li>
+<li><strong>inplace</strong> &#8211; do it in place?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="PowerExpansion.Taylor3D.zeros">
+<em class="property">classmethod </em><code class="descname">zeros</code><span class="sig-paren">(</span><em>nmin</em>, <em>nmax</em>, <em>shape</em>, <em>dtype=&lt;class 'complex'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.zeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.zeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs (and returns) a &#8220;zero&#8221; Taylor expansion with the prescribed shape.
+This will be useful for doing slicing assignments. Because of the manner in
+which slicing works for assignment, we create what looks like a <em>lot</em> of
+zeros, by explicitly making the full range of l values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nmin</strong> &#8211; minimum value of n</li>
+<li><strong>nmax</strong> &#8211; maximum value of n (inclusive)</li>
+<li><strong>shape</strong> &#8211; shape of matrix, as zeros would expect.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Taylor3D, with a zero coefficient list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="GFcalc.html" class="btn btn-neutral float-right" title="GFcalc" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="CrystalStars.html" class="btn btn-neutral" title="CrystalStars" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Dallas R. Trinkle.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
