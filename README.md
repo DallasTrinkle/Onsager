@@ -24,7 +24,7 @@ Release 0.9: Full release of Interstitial calculator, along with theory paper (s
 
 References
 ========
-* D. R. Trinkle, "Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors." [arXiv:](http://arxiv.org/abs/)
+* D. R. Trinkle, "Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors." [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)
 
 Contributors
 ============
