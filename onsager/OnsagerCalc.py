@@ -22,9 +22,9 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 from scipy.linalg import pinv2, solve
-from . import GFcalc
-from . import crystal
-from . import crystalStars as stars
+from onsager import GFcalc
+from onsager import crystal
+from onsager import crystalStars as stars
 from functools import reduce
 import copy
 import collections
@@ -98,6 +98,7 @@ class Interstitial(object):
         """
         Generates a list of group operations that transform the first site in each site list
         into all of the other members
+
         :return: list of list of group ops that mirrors the structure of site list
         """
         groupops = []
@@ -116,6 +117,7 @@ class Interstitial(object):
         """
         Generates a list of group operations that transform the first jump in the jump
         network into all of the other members
+
         :return: list of list of group ops that mirrors the structure of jumpnetwork
         """
         groupops = []
@@ -141,6 +143,7 @@ class Interstitial(object):
         """
         Generates a list of symmetric tensor bases for the first representative site
         in our site list.
+
         :return: list of symmetric bases
         """
         return [self.crys.SymmTensorBasis((self.chem, sites[0])) for sites in self.sitelist]
@@ -149,6 +152,7 @@ class Interstitial(object):
         """
         Generates a list of symmetric tensor bases for the first representative transition
         in our jump network
+
         :return: list of symmetric bases
         """
         # there is probably another way to do a list comprehension here, but that
@@ -202,6 +206,7 @@ class Interstitial(object):
         """
         Returns a list of the elastic dipole on each site, given the dipoles
         for the representatives
+
         :param dipoles: list of dipoles for the first representative site
         :return: array of dipole for each site [site][3][3]
         """
@@ -220,6 +225,7 @@ class Interstitial(object):
         """
         Returns a list of the elastic dipole for each transition, given the dipoles
         for the representatives
+
         :param dipoles: list of dipoles for the first representative transition
         :return: lists of lists of dipole for each transition
         """
@@ -306,18 +312,15 @@ class Interstitial(object):
         and elastic dipoles/kB T
         The input list order corresponds to the sitelist and jumpnetwork
 
-        Parameters
-        ----------
-        pre : list of prefactors for unique sites
-        betaene : list of site energies divided by kB T
-        dipole: list of elastic dipoles divided by kB T
-        preT : list of prefactors for transition states
-        betaeneT: list of transition state energies divided by kB T
-        dipoleT: list of elastic dipoles divided by kB T
+        :param pre : list of prefactors for unique sites
+        :param betaene : list of site energies divided by kB T
+        :param dipole: list of elastic dipoles divided by kB T
+        :param preT : list of prefactors for transition states
+        :param betaeneT: list of transition state energies divided by kB T
+        :param dipoleT: list of elastic dipoles divided by kB T
 
-        Returns
-        -------
-        D[3,3], dD[3,3,3,3] : diffusivity as 3x3 tensor and elastodiffusion tensor as 3x3x3x3 tensor
+        :return D[3,3]: diffusivity as 3x3 tensor
+        :return dD[3,3,3,3]: elastodiffusion tensor as 3x3x3x3 tensor
         """
         def vector_tensor_outer(v,a):
             """Construct the outer product of v and a"""
@@ -405,6 +408,7 @@ class vacancyThermoKinetics(collections.namedtuple('vacancyThermoKinetics',
                                                    'pre betaene preT betaeneT')):
     """
     Class to store (in a hashable manner) the thermodynamics and kinetics for the vacancy
+
     :param pre: prefactors for sites
     :param betaene: energy for sites / kBT
     :param preT: prefactors for transition states
@@ -450,6 +454,7 @@ def vTKdict2arrays(vTKdict):
     """
     Takes a dictionary indexed by vTK objects, returns two arrays of vTK keys and values,
     and the splits to separate vTKarray back into vTK
+
     :param vTKdict: dictionary, indexed by vTK objects, whose entries are arrays
     :return vTKarray: array of vTK entries
     :return valarray: array of values
@@ -469,6 +474,7 @@ def arrays2vTKdict(vTKarray, valarray, vTKsplits):
     """
     Takes two arrays of vTK keys and values, and the splits to separate vTKarray back into vTK
     and returns a dictionary indexed by the vTK.
+
     :param vTKarray: array of vTK entries
     :param valarray: array of values
     :param vTKsplits: split placement for vTK entries
@@ -532,6 +538,7 @@ class VacancyMediated(object):
     def generate(self, Nthermo):
         """
         Generate the necessary stars, vector-stars, and jump networks based on the thermodynamic range.
+
         :param Nthermo : range of thermodynamic interactions, in terms of "shells",
             which is multiple summations of jumpvect
         """
@@ -625,6 +632,7 @@ class VacancyMediated(object):
         """
         Create tags for vacancy states, solute states, solute-vacancy complexes;
         omega0, omega1, and omega2 transition states.
+
         :return tags: dictionary of tags; each is a list-of-lists
         :return tagdict: dictionary that maps tag into the index of the corresponding list.
         """
@@ -686,7 +694,8 @@ class VacancyMediated(object):
         Adds an HDF5 representation of object into an HDF5group (needs to already exist).
 
         Example: if f is an open HDF5, then VacancyMediated.addhdf5(f.create_group('Diffuser')) will
-          (1) create the group named 'Diffuser', and then (2) put the VacancyMediated representation in that group.
+        (1) create the group named 'Diffuser', and then (2) put the VacancyMediated representation in that group.
+
         :param HDF5group: HDF5 group
         """
         HDF5group.attrs['type'] = self.__class__.__name__
@@ -751,6 +760,7 @@ class VacancyMediated(object):
     def loadhdf5(cls, HDF5group):
         """
         Creates a new VacancyMediated diffuser from an HDF5 group.
+
         :param HDFgroup: HDF5 group
         :return: new StarSet object
         """
@@ -821,6 +831,7 @@ class VacancyMediated(object):
         """
         Return a list of pairs of endpoints for a vacancy jump, corresponding to omega1 or omega2
         Solute at the origin, vacancy hopping between two sites. Defined by om1_jumpnetwork
+
         :param fivefreqindex: 1 or 2, corresponding to omega1 or omega2
 
         :return omegalist: list of tuples of PairStates

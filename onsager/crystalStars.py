@@ -26,7 +26,7 @@ import numpy as np
 import collections
 import copy
 import itertools
-from . import crystal
+from onsager import crystal
 
 # YAML tags
 PAIRSTATE_YAMLTAG = '!PairState'
@@ -177,6 +177,7 @@ crystal.yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
 def PSlist2array(PSlist):
     """
     Take in a list of pair states; return arrays that can be stored in HDF5 format
+
     :param PSlist: list of pair states
     :return ij: int_array[N][2] = (i,j)
     :return R: int[N][3]
@@ -193,6 +194,7 @@ def PSlist2array(PSlist):
 def array2PSlist(ij, R, dx):
     """
     Take in arrays of ij, R, dx (from HDF5), return a list of PairStates
+
     :param ij: int_array[N][2] = (i,j)
     :param R: int[N][3]
     :param dx: float[N][3]
@@ -203,6 +205,7 @@ def array2PSlist(ij, R, dx):
 def doublelist2flatlistindex(listlist):
     """
     Takes a list of lists, returns a flattened list and an index array
+
     :param listlist: list of lists of objects
     :return flatlist: flat list of objects (preserving order)
     :return indexarray: array indexing which original list it came from
@@ -217,6 +220,7 @@ def doublelist2flatlistindex(listlist):
 def flatlistindex2doublelist(flatlist, indexarray):
     """
     Takes a flattened list and an index array, returns a list of lists
+
     :param flatlist: flat list of objects (preserving order)
     :param indexarray: array indexing which original list it came from
     :return listlist: list of lists of objects
@@ -238,8 +242,8 @@ class StarSet(object):
         chemical index.
 
         :param jumpnetwork: list of symmetry unique jumps, as a list of list of tuples; either
-          ((i,j), dx) for jump from i to j with displacement dx, or
-          ((i,j), R) for jump from i in unit cell 0 -> j in unit cell R
+        ((i,j), dx) for jump from i to j with displacement dx, or
+        ((i,j), R) for jump from i in unit cell 0 -> j in unit cell R
         :param crys: crystal where jumps take place
         :param chem: chemical index of atom to consider jumps
         :param Nshells: number of shells to generate
@@ -361,7 +365,8 @@ class StarSet(object):
         Adds an HDF5 representation of object into an HDF5group (needs to already exist).
 
         Example: if f is an open HDF5, then StarSet.addhdf5(f.create_group('StarSet')) will
-          (1) create the group named 'StarSet', and then (2) put the StarSet representation in that group.
+        (1) create the group named 'StarSet', and then (2) put the StarSet representation in that group.
+
         :param HDF5group: HDF5 group
         """
         HDF5group.attrs['type'] = self.__class__.__name__
@@ -385,6 +390,7 @@ class StarSet(object):
     def loadhdf5(cls, crys, HDF5group):
         """
         Creates a new StarSet from an HDF5 group.
+
         :param crys: crystal object--MUST BE PASSED IN as it is not stored with the StarSet
         :param HDFgroup: HDF5 group
         :return: new StarSet object
@@ -534,13 +540,16 @@ class StarSet(object):
     def jumpnetwork_omega1(self):
         """
         Generate a jumpnetwork corresponding to vacancy jumping while the solute remains fixed.
+
         :return jumpnetwork: list of symmetry unique jumps; list of list of tuples (i,f), dx where
-          i,f index into states for the initial and final states, and dx = displacement of vacancy
-          in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
+        i,f index into states for the initial and final states, and dx = displacement of vacancy
+        in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
+
         :return jumptype: list of indices corresponding to the (original) jump type for each
-          symmetry unique jump; useful for constructing a LIMB approximation
+        symmetry unique jump; useful for constructing a LIMB approximation
+
         :return starpair: list of tuples of the star indices of the i and f states for each
-          symmetry unique jump
+        symmetry unique jump
         """
         if self.Nshells < 1: return []
         jumpnetwork = []
@@ -567,13 +576,16 @@ class StarSet(object):
     def jumpnetwork_omega2(self):
         """
         Generate a jumpnetwork corresponding to vacancy exchanging with a solute.
+
         :return jumpnetwork: list of symmetry unique jumps; list of list of tuples (i,f), dx where
-          i,f index into states for the initial and final states, and dx = displacement of vacancy
-          in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
+        i,f index into states for the initial and final states, and dx = displacement of vacancy
+        in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
+
         :return jumptype: list of indices corresponding to the (original) jump type for each
-          symmetry unique jump; useful for constructing a LIMB approximation
+        symmetry unique jump; useful for constructing a LIMB approximation
+
         :return starpair: list of tuples of the star indices of the i and f states for each
-          symmetry unique jump
+        symmetry unique jump
         """
         if self.Nshells < 1: return []
         jumpnetwork = []
@@ -599,6 +611,7 @@ class StarSet(object):
     def symmequivjumplist(self, i, f, dx):
         """
         Returns a list of tuples of symmetry equivalent jumps
+
         :param i: index of initial state
         :param f: index of final state
         :param dx: displacement vector
@@ -621,6 +634,7 @@ class StarSet(object):
         """
         Construct a starSet using endpoint subtraction from starset S1 to starset S2. Can (will)
         include zero. Points from vacancy states of S1 to vacancy states of S2.
+
         :param S1: starSet for start
         :param S2: starSet for final
         :param threshold: threshold for sorting magnitudes (can influence symmetry efficiency)
@@ -689,8 +703,8 @@ class StarSetMeta(StarSet):
         chemical index.
 
         :param jumpnetwork: list of symmetry unique jumps, as a list of list of tuples; either
-          ((i,j), dx) for jump from i to j with displacement dx, or
-          ((i,j), R) for jump from i in unit cell 0 -> j in unit cell R
+        ((i,j), dx) for jump from i to j with displacement dx, or
+        ((i,j), R) for jump from i in unit cell 0 -> j in unit cell R
         :param crys: crystal where jumps take place
         :param chem: chemical index of atom to consider jumps
         :param Nshells: number of shells to generate
@@ -785,7 +799,7 @@ class StarSetMeta(StarSet):
         are PairStates that iszero() is True; they are only included if they have a nonzero VectorBasis.
 
         :param Nshells: number of shells to generate; this is interpreted as subsequent
-          "sums" of jumplist (as we need the solute to be connected to the vacancy by at least one jump)
+        "sums" of jumplist (as we need the solute to be connected to the vacancy by at least one jump)
         :param threshold: threshold for determining equality with symmetry
         :param originstates: include origin states in generate?
         """
@@ -914,6 +928,7 @@ class StarSetMeta(StarSet):
     def jumpnetwork_omega2(self):
         """
         Generate a jumpnetwork corresponding to vacancy exchanging with a solute.
+
         :return jumpnetwork: list of symmetry unique jumps; list of list of tuples (i,f), dx where
           i,f index into states for the initial and final states, and dx = displacement of vacancy
           in Cartesian coordinates. Note: if (i,f), dx is present, so is (f,i), -dx
@@ -967,6 +982,7 @@ class VectorStarSet(object):
     def __init__(self, starset=None):
         """
         Initiates a vector-star generator; work with a given star.
+
         :param starset: StarSet, from which we pull nearly all of the info that we need
 
         vecpos: list of "positions" (state indices) for each vector star (list of lists)
@@ -982,6 +998,7 @@ class VectorStarSet(object):
     def generate(self, starset, threshold=1e-8):
         """
         Construct the actual vectors stars
+
         :param starset: StarSet, from which we pull nearly all of the info that we need
         """
         if starset.Nshells == 0: return
@@ -1078,6 +1095,7 @@ class VectorStarSet(object):
     def generateouter(self):
         """
         Generate our outer products for our star-vectors.
+
         :return outer: array [3, 3, Nvstars, Nvstars]
             outer[:, :, i, j] is the 3x3 tensor outer product for two vector-stars vs[i] and vs[j]
         """
@@ -1095,6 +1113,7 @@ class VectorStarSet(object):
         Example: if f is an open HDF5, then StarSet.addhdf5(f.create_group('VectorStarSet')) will
           (1) create the group named 'VectorStarSet', and then (2) put the VectorStarSet
           representation in that group.
+
         :param HDF5group: HDF5 group
         """
         HDF5group.attrs['type'] = self.__class__.__name__
@@ -1107,6 +1126,7 @@ class VectorStarSet(object):
     def loadhdf5(cls, SSet, HDF5group):
         """
         Creates a new StarSet from an HDF5 group.
+
         :param SSet: StarSet--MUST BE PASSED IN as it is not stored with the VectorStarSet
         :param HDFgroup: HDF5 group
         :return: new StarSet object
@@ -1126,13 +1146,14 @@ class VectorStarSet(object):
         Construct the GF matrix expansion in terms of the star vectors, and indexed
         to GFstarset. Now takes in a VectorBasis; if not an empty set, returns the
         expansion of the vector stars to the "origin states" as represented by the VB.
+
         :param VectorBasis: (optional) list of [Nsites, 3]
-            the vector basis in the unit cell for the solute states
+        the vector basis in the unit cell for the solute states
         :return GFexpansion: array[Nsv, Nsv, NGFstars]
-            the GF matrix[i, j] = sum(GFexpansion[i, j, k] * GF(starGF[k]))
+        the GF matrix[i, j] = sum(GFexpansion[i, j, k] * GF(starGF[k]))
         :return GFstarset: starSet corresponding to the GF
         :return GFOSexpansion: array[NVB, Nsv, NGFstars]
-            the GF matrix[os, i] = sum(GFOSexpansion[os, i, k] * GF(starGF[k]))
+        the GF matrix[os, i] = sum(GFOSexpansion[os, i, k] * GF(starGF[k]))
         """
         if self.Nvstars == 0:
             return None
@@ -1190,21 +1211,21 @@ class VectorStarSet(object):
         is a non-empty VectorBasis we will want to account for them there.
 
         :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
-          corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
-          are indices corresponding to states in our starset.
+        corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
+        are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
         :param VectorBasis: (optional) list of [Nsites, 3]
-            the vector basis in the unit cell for the solute states
+        the vector basis in the unit cell for the solute states
         :return rate0expansion: array[Nsv, Nsv, Njump_omega0]
-            the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k]); *IF* NVB>0
-            we "hijack" this and use it for [NVB, Nsv, Njump_omega0], as we're doing an omega2
-            calc and rate0expansion won't be used *anyway*.
+        the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k]); *IF* NVB>0
+        we "hijack" this and use it for [NVB, Nsv, Njump_omega0], as we're doing an omega2
+        calc and rate0expansion won't be used *anyway*.
         :return rate0escape: array[Nsv, Njump_omega0]
-            the escape contributions: omega0[i,i] += sum(rate0escape[i,k]*omega0[k]*probfactor(PS[k]))
+        the escape contributions: omega0[i,i] += sum(rate0escape[i,k]*omega0[k]*probfactor(PS[k]))
         :return rate1expansion: array[Nsv, Nsv, Njump_omega1]
-            the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])
+        the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])
         :return rate1escape: array[Nsv, Njump_omega1]
-            the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega0[k]*probfactor(PS[k]))
+        the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega0[k]*probfactor(PS[k]))
         """
         if self.Nvstars == 0: return None
         rate0expansion = np.zeros((self.Nvstars, self.Nvstars, len(self.starset.jumpnetwork_index)))
@@ -1256,14 +1277,14 @@ class VectorStarSet(object):
         if there are origin states, they get the negative summed bias of the others.
 
         :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
-          corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
-          are indices corresponding to states in our starset.
+        corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
+        are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
 
         :return bias0expansion: array[Nsv, Njump_omega0]
-            the gen0 vector[i] = sum(bias0expasion[i, k] * sqrt(probfactor0[PS[k]]) * omega0[k])
+        the gen0 vector[i] = sum(bias0expasion[i, k] * sqrt(probfactor0[PS[k]]) * omega0[k])
         :return bias1expansion: array[Nsv, Njump_omega1]
-            the gen1 vector[i] = sum(bias1expansion[i, k] * sqrt(probfactor[PS[k]] * omega1[k])
+        the gen1 vector[i] = sum(bias1expansion[i, k] * sqrt(probfactor[PS[k]] * omega1[k])
         """
         if self.Nvstars == 0: return None
         bias0expansion = np.zeros((self.Nvstars, len(self.starset.jumpnetwork_index)))
@@ -1296,14 +1317,14 @@ class VectorStarSet(object):
         omega0 and omega(1/2).
 
         :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
-          corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
-          are indices corresponding to states in our starset.
+        corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
+        are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
 
         :return D0expansion: array[3,3, Njump_omega0]
-            the D0[a,b,jt] = sum(D0expansion[a,b, jt] * sqrt(probfactor0[PS[jt][0]]*probfactor0[PS[jt][1]) * omega0[jt])
+        the D0[a,b,jt] = sum(D0expansion[a,b, jt] * sqrt(probfactor0[PS[jt][0]]*probfactor0[PS[jt][1]) * omega0[jt])
         :return D1expansion: array[3,3, Njump_omega1]
-            the D1[a,b,k] = sum(D1expansion[a,b, k] * sqrt(probfactor[PS[k][0]]*probfactor[PS[k][1]) * omega[k])
+        the D1[a,b,k] = sum(D1expansion[a,b, k] * sqrt(probfactor[PS[k][0]]*probfactor[PS[k][1]) * omega[k])
         """
         if self.Nvstars == 0: return None
         D0expansion = np.zeros((3,3, len(self.starset.jumpnetwork_index)))
