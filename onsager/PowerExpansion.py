@@ -25,6 +25,7 @@ class Taylor3D(object):
         """
         Analyzes the spherical harmonics and powers for a given Lmax; returns a
         series of index functions.
+
         :param Lmax: maximum l value to consider; equal to the sum of powers
         :return NYlm: number of Ylm coefficients
         :return Npower: number of power coefficients
@@ -189,6 +190,7 @@ class Taylor3D(object):
     def powexp(cls, u, normalize=True):
         """
         Given a vector u, normalize it and return the power expansion of uvec
+
         :param u[3]: vector to apply
         :param normalize: do we normalize u first?
         :return upow[Npower]: ux uy uz products of powers
@@ -217,6 +219,7 @@ class Taylor3D(object):
     def makepowercoeff(cls):
         """
         Make our power coefficients for our construct expansion method
+
         :return powercoeff[n][p]: vector we multiply by our power expansion to get the n'th coefficients
         """
         powercoeff = np.zeros((cls.Lmax+1, cls.Npower))
@@ -235,12 +238,13 @@ class Taylor3D(object):
         Takes a "basis" for constructing an expansion -- list of vectors and matrices --
         and constructs the expansions up to power N (default = Lmax)
         Takes a direction expansion a and b, and returns the sum of the expansions.
+
         :param basis = list((coeffmatrix, vect)): expansions to create;
           sum(coeffmatrix * (vect*q)^n), for powers n = 0..N
         :param N: maximum power to consider; for N=-1, use Lmax
         :param pre: list of prefactors, defining the Taylor expansion. Default = 1
 
-        :returns list((n, lmax, powexpansion)), ... : our expansion, as input to create
+        :return list((n, lmax, powexpansion)), ... : our expansion, as input to create
           Taylor3D objects
         """
         if N<0: N=cls.Lmax
@@ -269,6 +273,7 @@ class Taylor3D(object):
         then this is straightforward. However, we run into problems with *reductions*: e.g.,
         for n=2, the power x^0 y^0 z^0 is, in reality, x^2+y^2+z^2, and hence *it must be
         transformed* because we allow non-orthogonal transformation matrices.
+
         :param qptrans: 3x3 matrix
         :return: Lmax +1 x Npow x Npow transformation matrix [n][original pow][new pow] for
         each n from 0 up to Lmax
@@ -334,6 +339,7 @@ class Taylor3D(object):
         """
         This calls *all* the class methods defined above, and stores them *for the class*
         This is intended to be done *once*
+
         :param Lmax: maximum power / orbital angular momentum
         """
         if cls.__INITIALIZED__:
@@ -383,9 +389,10 @@ class Taylor3D(object):
     def addhdf5(self, HDF5group):
         """
         Adds an HDF5 representation of object into an HDF5group (needs to already exist).
-
         Example: if f is an open HDF5, then T3D.addhdf5(f.create_group('T3D')) will
-          (1) create the group named 'T3D', and then (2) put the T3D representation in that group.
+        (1) create the group named 'T3D', and then (2) put the T3D representation in
+        that group.
+
         :param HDF5group: HDF5 group
         """
         HDF5group.attrs['type'] = self.__class__.__name__
@@ -400,6 +407,7 @@ class Taylor3D(object):
     def loadhdf5(cls, HDF5group):
         """
         Creates a new T3D from an HDF5 group.
+
         :param HDFgroup: HDF5 group
         :return: new T3D object
         """
@@ -416,6 +424,7 @@ class Taylor3D(object):
         """
         Adds the initialized power expansion internals into an HDF5group--should be stored for a
         sanity check
+
         :param HDF5group:
         """
         HDF5group.attrs['description'] = 'Internals of PowerExpansion class'
@@ -429,6 +438,7 @@ class Taylor3D(object):
     def checkinternalsHDF5(cls, HDF5group):
         """
         Reads the power expansion internals into an HDF5group, and performs sanity check
+
         :param HDF5group:
         """
         if not cls.__INITIALIZED__: raise ValueError('Must initialize first to perform sanity check')
@@ -448,6 +458,7 @@ class Taylor3D(object):
         This will be useful for doing slicing assignments. Because of the manner in
         which slicing works for assignment, we create what looks like a *lot* of
         zeros, by explicitly making the full range of l values.
+
         :param nmin: minimum value of n
         :param nmax: maximum value of n (inclusive)
         :param shape: shape of matrix, as zeros would expect.
@@ -460,6 +471,7 @@ class Taylor3D(object):
     def __getitem__(self, key):
         """
         Indexes (or even slices) into our Taylor expansion.
+
         :param key: indices for our Taylor expansion
         :return: Taylor expansion after indexing
         """
@@ -473,6 +485,7 @@ class Taylor3D(object):
         """
         Indexes (or even slices) into our Taylor expansion and "sets"; really only intended to work
         with another Taylor expansion
+
         :param key: indices for our Taylor expansion
         :param value: assignment value; really, should be
         :return: Taylor expansion after indexing
@@ -511,6 +524,7 @@ class Taylor3D(object):
         """
         Add additional coefficients into our object. No type checking. Only works if
         terms are completely non-overlapping (otherwise, need to use sum).
+
         :param coefflist: list((n, lmax, powexpansion))
         """
         # getattr is here *in case* someone passes us a Taylor3D type object...
@@ -528,6 +542,7 @@ class Taylor3D(object):
         (b) functions of a single parameter umagn, then we will compute and return the
         function value. Otherwise, we return a dictionary mapping (n,l) tuple pairs into
         values, and leave it at that.
+
         :param u: three vector to evaluate; may (or may not) be normalized
         :param fnu: dictionary of (n,l): value or function pairs.
         :return value or dictionary: depending on fnu; default is dictionary
@@ -544,6 +559,7 @@ class Taylor3D(object):
     def nl(self):
         """
         Returns a list of (n,l) pairs in the coefflist
+
         :return nl_list: all of the (n,l) pairs that are present in our coefflist
         """
         return sorted([ (n,l) for (n,l,coeff) in self.coefflist], key=self.__sortkey)
@@ -552,6 +568,7 @@ class Taylor3D(object):
     def negcoeff(cls, a):
         """
         Negates a coefficient expansion a
+
         :param a = list((n, lmax, powexpansion): expansion of function in powers
         :return coefflist: -a
         """
@@ -565,6 +582,7 @@ class Taylor3D(object):
     def scalarproductcoeff(cls, c, a, inplace=False):
         """
         Multiplies an coefficient expansion a by a scalar c
+
         :param c: scalar *or* dictionary mapping (n,l) to scalars
         :param a = list((n, lmax, powexpansion): expansion of function in powers
         :param inplace: modify a in place?
@@ -594,6 +612,7 @@ class Taylor3D(object):
     def rotatecoeff(cls, a, npowtrans, inplace=False):
         """
         Return a rotated version of the expansion. Needs to use pad to work with reduced representations.
+
         :param a: coefficiant list
         :param npowtrans: Lmax+1 x Npow x Npow matrix, of [n,oldpow,newpow] corresponding to the rotation
         :return: coefficient list, rotated
@@ -619,6 +638,7 @@ class Taylor3D(object):
     def rotate(self, powtrans):
         """
         Return a rotated version of the expansion.
+
         :param powtrans: Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation
         :return: coefficient list, rotated
         """
@@ -627,6 +647,7 @@ class Taylor3D(object):
     def irotate(self, powtrans):
         """
         Rotate in place.
+
         :param powtrans: Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation
         :return: self
         """
@@ -637,16 +658,17 @@ class Taylor3D(object):
     def sumcoeff(cls, a, b, alpha=1, beta=1, inplace=False):
         """
         Takes Taylor3D expansion a and b, and returns the sum of the expansions.
+
         :param: a, b = list((n, lmax, powexpansion)
             written as a series of coefficients; n defines the magnitude function, which
             is additive; lmax is the largest cumulative power of coefficients, and
             powexpansion is a numpy array that can multiplied. We assume that a and b
             have consistent shapes throughout--we *do not test this*; runtime will likely
             fail if not true. The entries in the list are *tuples* of n, lmax, pow
+
         :param alpha, beta:
             optional scalars: c = alpha*a + beta*b; allows for more efficient expansions
         :param inplace: True if the summation should modify a in place
-
         :return c: coeff of sum of a and b (! NOTE ! does not return the class!)
             sum of a and b
         """
@@ -746,6 +768,7 @@ class Taylor3D(object):
     def tensorproductcoeff(cls, c, a, leftmultiply=True):
         """
         Multiplies an coefficient expansion a by a scalar c
+
         :param c: array *or* dictionary mapping (n,l) to arrays
         :param a = list((n, lmax, powexpansion): expansion of function in powers
         :param leftmultiply: tensordot(c,a) vs. tensordot(a,c)
@@ -791,13 +814,13 @@ class Taylor3D(object):
     def coeffproductcoeff(cls, a, b):
         """
         Takes a direction expansion a and b, and returns the product expansion.
-        :param a, b = list((n, lmax, powexpansion):
-            written as a series of coefficients; n defines the magnitude function, which
-            is additive; lmax is the largest cumulative power of coefficients, and
-            powexpansion is a numpy array that can multiplied. We assume that a and b
-            have consistent shapes throughout--we *do not test this*; runtime will likely
-            fail if not true. The entries in the list are *tuples* of n, lmax, pow
 
+        :param a, b = list((n, lmax, powexpansion):
+        written as a series of coefficients; n defines the magnitude function, which
+        is additive; lmax is the largest cumulative power of coefficients, and
+        powexpansion is a numpy array that can multiplied. We assume that a and b
+        have consistent shapes throughout--we *do not test this*; runtime will likely
+        fail if not true. The entries in the list are *tuples* of n, lmax, pow
         :return c = list((n, lmax, powexpansion)): product of a and b
         """
         # a little pythonic magic to work with *either* a list, or an object with a coefflist
@@ -857,6 +880,7 @@ class Taylor3D(object):
     def __mul__(self, other):
         """
         Multiply our expansion
+
         :param other:
         :return our expansion:
         """
@@ -869,6 +893,7 @@ class Taylor3D(object):
     def __rmul__(self, other):
         """
         Multiply our expansion
+
         :param other:
         :return our expansion:
         """
@@ -882,24 +907,25 @@ class Taylor3D(object):
     def inversecoeff(cls, a, Nmax=0):
         """
         Takes a direction expansion , and returns the inversion expansion (approximated
-        based on the Taylor expansion of 1/(1-x) = sum_i=0^infinity x^i, or
-        (A + B)^-1 = ((1+BA^-1)A)^-1 = A^-1(1-(-BA^1))^-1 = A^1 sum_i=0 (-BA^-1)^n
+        based on the Taylor expansion of $1/(1-x) = \sum_{i=0}^{\infty} x^i$, or
+        $(A + B)^{-1} = ((1+BA{^-1})A)^{-1} = A{^-1}(1-(-BA{^1}))^{-1} = A^{-1} \sum_{i=0} (-BA^{-1})^i$
+
         :param a = list((n, lmax, powexpansion):
-            written as a series of coefficients; n defines the magnitude function, which
-            is additive; lmax is the largest cumulative power of coefficients, and
-            powexpansion is a numpy array that can multiplied. We assume that a and b
-            have consistent shapes throughout--we *do not test this*; runtime will likely
-            fail if not true. The entries in the list are *tuples* of n, lmax, pow
+        written as a series of coefficients; n defines the magnitude function, which
+        is additive; lmax is the largest cumulative power of coefficients, and
+        powexpansion is a numpy array that can multiplied. We assume that a and b
+        have consistent shapes throughout--we *do not test this*; runtime will likely
+        fail if not true. The entries in the list are *tuples* of n, lmax, pow
         :param Nmax: maximum remaining n value in expansion. Default value of 0 means
-          up to a discontinuity correction in an inversion, but higher (or lower) values are
-          possible.
+        up to a discontinuity correction in an inversion, but higher (or lower) values are
+        possible.
 
         :return c = list((n, lmax, powexpansion)): inverse of a
 
-        NOTE: assumes SMALLEST n coefficient is the leading order; only works if that coefficient
-         is also isotropic (l=0). Otherwise, raises an error
-        NOTE: there is no sanity check on whether Nmax is reasonable given the expansion and Lmax
-         values; caveat emptor
+        NOTE: assumes SMALLEST n coefficient is the leading order; only works if that
+        coefficient is also isotropic (l=0). Otherwise, raises an error
+        NOTE: there is no sanity check on whether Nmax is reasonable given the expansion
+        and Lmax values; caveat emptor
         """
         # a little pythonic magic to work with *either* a list, or an object with a coefflist
         acoeff = sorted(getattr(a, 'coefflist', a), key=cls.__sortkey) # fallback to a if not there... which assumes it's a list
@@ -942,6 +968,7 @@ class Taylor3D(object):
     def inv(self, Nmax=0):
         """
         Return the inverse of the expansion, up to order Nmax
+
         :param Nmax: maximum order in the inverse expansion
         :return: Taylor series of inverse
         """
@@ -952,6 +979,7 @@ class Taylor3D(object):
         """
         Projects coefficients through Ylm space, then eliminates any zero contributions
         (including possible reduction in l values, too).
+
         :param a = list((n, lmax, powexpansion): expansion of function in powers
         :param inplace: modify a in place?
         :return coefflist: a
@@ -990,6 +1018,7 @@ class Taylor3D(object):
         """
         Collects coefficients: sums up all the common n values. Best to be done *after*
         reduce is called.
+
         :param a = list((n, lmax, powexpansion): expansion of function in powers
         :param inplace: modify a in place?
         :return coefflist: a
@@ -1040,6 +1069,7 @@ class Taylor3D(object):
         reduced and collected first; if not, could lead to duplicated (n,l) entries in list, which
         is inefficient (should still *evaluate* the same, just with extra steps). After this,
         each (n,l) term *only* contains terms equal to l, rather than terms <= l.
+
         :param a = list((n, lmax, powexpansion): expansion of function in powers
         :param inplace: modify a in place?
         :return coefflist: a
@@ -1082,6 +1112,7 @@ class Taylor3D(object):
     def truncatecoeff(cls, a, Nmax, inplace=False):
         """
         Remove the coefficients above a given Nmax; normally returns a new object
+
         :param Nmax: maximum coefficient to include
         :param a = list((n, lmax, powexpansion): expansion of function in powers
         :param inplace: do it in place?
@@ -1098,6 +1129,7 @@ class Taylor3D(object):
     def truncate(self, Nmax, inplace=False):
         """
         Remove the coefficients above a given Nmax; normally returns a new object
+
         :param Nmax: maximum coefficient to include
         :param inplace: do it in place?
         """

@@ -1,6 +1,7 @@
-=======
 Onsager
 =======
+
+Documentation now available at the [Onsager github page](http://dallastrinkle.github.io/Onsager/). Please cite as [![DOI](https://zenodo.org/badge/14172/DallasTrinkle/Onsager.svg)](https://zenodo.org/badge/latestdoi/14172/DallasTrinkle/Onsager)
 
 The Onsager package provides routines for the general calculation of transport coefficients in vacancy-mediated diffusion and interstitial diffusion. It does this using a Green function approach, combined with point group symmetry reduction for maximum efficiency.
 
@@ -13,19 +14,17 @@ Typical usage looks like::
 
     ...
 
-Many of the subpackages within Onsager are support for the main attraction, which is in OnsagerCalc. An example of how to use the OnsagerCalc pieces is shown in fivefreq.py, which computes the well-known five-frequency model for vacancy- mediated solute transport in an FCC lattice. It can very easily be modified to use a different lattice / NNvect set.
+Many of the subpackages within Onsager are support for the main attraction, which is in OnsagerCalc. Interstitial calculation examples are avaliable in `bin`, including three YAML input files, as well as a interstitial diffuser. An example of vacancy-mediated diffusion is shown in `bin/fivefreq.py`, which computes the well-known five-frequency model for substitutional solute transport in an FCC lattice.
 
-The tests for the package are include in test; tests.py will run all of the tests in the directory with verbosity level 2. This can be time-consuming (on the order of tens of minutes) to run all tests.
+The tests for the package are include in `test`; `tests.py` will run all of the tests in the directory with verbosity level 2. This can be time-consuming (on the order of several of minutes) to run all tests; coverage is currently >90%.
 
-The newest update (0.2) includes an improved "crystal" class to handle a general crystal type, with full space group symmetry, and associated analysis; and an Interstitial class within OnsagerCalc that can compute diffusion and the elastodiffusion (derivative of diffusion with respect to strain) tensors. These also include YAML support for input as well as output of classes.
+The code uses YAML files for input/output of diffusion data for the interstitial calculator. The vacancy-mediated calculator requires much more data, and uses HDF5 format to save/reload as needed. The vacancy-mediated calculator uses tags (unique human-readable-ish strings) to identify all (symmetry-unique) vacancy, solute, and complex states, and transitions between them.
 
-Update 0.2.1: corrected a sign error in the definition of elastic dipole.
+Release 0.9: Full release of Interstitial calculator, along with theory paper (see References below).
 
-Update 0.3: an entirely new implementation of the Onsager calculation is now included. This is based on the crystal class; two examples are shown in the examples directory as iPython notebooks. This allows for the use of crystals that are not simple Bravais lattices for vacancy-mediated diffusion. YAML support is also included to output a diffuser (and read back in).
-
-Update 0.4: cleanup of code, removing old implementations and tests; updated for speed, and inclusion of HDF5 format for reading and writing of VacancyMediated objects.
-
-Update 0.5: fix of an error in the calculation of the Green function for a solute for cases with reduced symmetry (lattice has a non-null vector basis), that required the inclusion of "origin states." Also added tags to VacancyMediated calculator to make the identification of structures to compute corresponding to states (metastable and transition) easier.
+References
+========
+* D. R. Trinkle, "Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors." [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)
 
 Contributors
 ============
@@ -39,7 +38,7 @@ Support
 =======
 This work has been supported in part by
 
-* DOE/BES Computation Materials and Chemical Sciences Network on "Computational Microstructure Science,"
 * DOE/BES grant DE-FG02-05ER46217,
 * ONR grant N000141210752,
 * NSF/CDSE grant 1411106.
+* D. R. Trinkle began the theoretical work for this code during the long program on Material Defects at the [Institute for Pure and Applied Mathematics](https://www.ipam.ucla.edu/) at UCLA, Fall 2012, which is supported by the National Science Foundation.
