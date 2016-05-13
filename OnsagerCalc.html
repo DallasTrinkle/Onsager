@@ -138,6 +138,654 @@
 <h1>OnsagerCalc<a class="headerlink" href="#onsagercalc" title="Permalink to this headline">¶</a></h1>
 <p>OnsagerCalc:</p>
 <p>The OnsagerCalc module defines the <code class="docutils literal"><span class="pre">Intersitial</span></code> class (for computation of interstitial-mediated diffusion), and <code class="docutils literal"><span class="pre">VacancyMediated</span></code> class (for computation of vacancy-mediated diffusion).</p>
+<span class="target" id="module-OnsagerCalc"></span><p>Onsager calculator module: Interstitialcy mechanism and Vacancy-mediated mechanism</p>
+<p>Class to create an Onsager &#8220;calculator&#8221;, which brings two functionalities:
+1. determines <em>what</em> input is needed to compute the Onsager (mobility, or L) tensors
+2. constructs the function that calculates those tensors, given the input values.</p>
+<p>This class is designed to be combined with code that can, e.g., automatically
+run some sort of atomistic-scale (DFT, classical potential) calculation of site
+energies, and energy barriers, and then in concert with scripts to convert such data
+into rates and probabilities, this will allow for efficient evaluation of transport
+coefficients.</p>
+<p>This implementation will be for vacancy-mediated solute diffusion assumes the dilute limit.
+The mathematics is based on a Green function solution for the vacancy diffusion. The
+computation of the GF is included in the GFcalc module.</p>
+<p>Now with HDF5 write / read capability for VacancyMediated module</p>
+<dl class="class">
+<dt id="OnsagerCalc.Interstitial">
+<em class="property">class </em><code class="descclassname">OnsagerCalc.</code><code class="descname">Interstitial</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to compute interstitial diffusivity; uses structure of crystal to do most
+of the heavy lifting in terms of symmetry, etc.</p>
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization; takes an underlying crystal, a choice of atomic chemistry,
+a corresponding Wyckoff site list and jump network.</p>
+<p>:param crys : Crystal object
+:param chem : integer, index into the basis of crys, corresponding to the chemical element that hops
+:param sitelist : list of lists of indices, site indices where the atom may hop;</p>
+<blockquote>
+<div>grouped by symmetry equivalency</div></blockquote>
+<dl class="docutils">
+<dt>:param jumpnetwork</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">list of lists of tuples: ( (i, j), dx )</span><dd>symmetry unique transitions; each list is all of the possible transitions
+from site i to site j with jump vector dx; includes i-&gt;j and j-&gt;i</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="OnsagerCalc.Interstitial.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#OnsagerCalc.Interstitial.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.diffusivity">
+<code class="descname">diffusivity</code><span class="sig-paren">(</span><em>pre</em>, <em>betaene</em>, <em>preT</em>, <em>betaeneT</em>, <em>CalcDeriv=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.diffusivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.diffusivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the diffusivity for our element given prefactors and energies/kB T.
+Also returns the negative derivative of diffusivity with respect to beta (used to compute
+the activation barrier tensor) if CalcDeriv = True
+The input list order corresponds to the sitelist and jumpnetwork</p>
+<p>:param pre : list of prefactors for unique sites
+:param betaene : list of site energies divided by kB T
+:param preT : list of prefactors for transition states
+:param betaeneT: list of transition state energies divided by kB T</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return D[3,3]:</th><td class="field-body">diffusivity as a 3x3 tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return DE[3,3]:</th><td class="field-body">diffusivity times activation barrier (if CalcDeriv == True)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.elastodiffusion">
+<code class="descname">elastodiffusion</code><span class="sig-paren">(</span><em>pre</em>, <em>betaene</em>, <em>dipole</em>, <em>preT</em>, <em>betaeneT</em>, <em>dipoleT</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.elastodiffusion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.elastodiffusion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the elastodiffusion tensor for our element given prefactors, energies/kB T,
+and elastic dipoles/kB T
+The input list order corresponds to the sitelist and jumpnetwork</p>
+<p>:param pre : list of prefactors for unique sites
+:param betaene : list of site energies divided by kB T
+:param dipole: list of elastic dipoles divided by kB T
+:param preT : list of prefactors for transition states
+:param betaeneT: list of transition state energies divided by kB T
+:param dipoleT: list of elastic dipoles divided by kB T</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return D[3,3]:</th><td class="field-body">diffusivity as 3x3 tensor</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return dD[3,3,3,3]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">elastodiffusion tensor as 3x3x3x3 tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.generateJumpGroupOps">
+<code class="descname">generateJumpGroupOps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.generateJumpGroupOps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.generateJumpGroupOps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a list of group operations that transform the first jump in the jump
+network into all of the other members</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of list of group ops that mirrors the structure of jumpnetwork</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.generateJumpSymmTensorBasis">
+<code class="descname">generateJumpSymmTensorBasis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.generateJumpSymmTensorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.generateJumpSymmTensorBasis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a list of symmetric tensor bases for the first representative transition
+in our jump network</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of symmetric bases</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.generateSiteGroupOps">
+<code class="descname">generateSiteGroupOps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.generateSiteGroupOps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.generateSiteGroupOps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a list of group operations that transform the first site in each site list
+into all of the other members</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of list of group ops that mirrors the structure of site list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.generateSiteSymmTensorBasis">
+<code class="descname">generateSiteSymmTensorBasis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.generateSiteSymmTensorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.generateSiteSymmTensorBasis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a list of symmetric tensor bases for the first representative site
+in our site list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of symmetric bases</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.jumpDipoles">
+<code class="descname">jumpDipoles</code><span class="sig-paren">(</span><em>dipoles</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.jumpDipoles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.jumpDipoles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of the elastic dipole for each transition, given the dipoles
+for the representatives</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dipoles</strong> &#8211; list of dipoles for the first representative transition</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">lists of lists of dipole for each transition</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="OnsagerCalc.Interstitial.jumpnetworkYAML">
+<em class="property">static </em><code class="descname">jumpnetworkYAML</code><span class="sig-paren">(</span><em>jumpnetwork</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.jumpnetworkYAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.jumpnetworkYAML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dumps a &#8220;sample&#8221; YAML formatted version of the jumpnetwork with data to be entered</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.ratelist">
+<code class="descname">ratelist</code><span class="sig-paren">(</span><em>pre</em>, <em>betaene</em>, <em>preT</em>, <em>betaeneT</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.ratelist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.ratelist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of lists of rates, matched to jumpnetwork</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.siteDipoles">
+<code class="descname">siteDipoles</code><span class="sig-paren">(</span><em>dipoles</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.siteDipoles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.siteDipoles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of the elastic dipole on each site, given the dipoles
+for the representatives</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dipoles</strong> &#8211; list of dipoles for the first representative site</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array of dipole for each site [site][3][3]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="OnsagerCalc.Interstitial.sitelistYAML">
+<em class="property">static </em><code class="descname">sitelistYAML</code><span class="sig-paren">(</span><em>sitelist</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.sitelistYAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.sitelistYAML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dumps a &#8220;sample&#8221; YAML formatted version of the sitelist with data to be entered</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.siteprob">
+<code class="descname">siteprob</code><span class="sig-paren">(</span><em>pre</em>, <em>betaene</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.siteprob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.siteprob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns our site probabilities, normalized, as a vector</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.symmratelist">
+<code class="descname">symmratelist</code><span class="sig-paren">(</span><em>pre</em>, <em>betaene</em>, <em>preT</em>, <em>betaeneT</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.symmratelist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.symmratelist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of lists of symmetrized rates, matched to jumpnetwork</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="OnsagerCalc.VacancyMediated">
+<em class="property">class </em><code class="descclassname">OnsagerCalc.</code><code class="descname">VacancyMediated</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nthermo=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to compute vacancy-mediated solute transport coefficients, specifically
+L_vv (vacancy diffusion), L_ss (solute), and L_sv (off-diagonal). As part of that,
+it determines <em>what</em> quantities are needed as inputs in order to perform this calculation.</p>
+<p>Based on crystal class. Also now includes its own GF calculator and cacheing.</p>
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.Lij">
+<code class="descname">Lij</code><span class="sig-paren">(</span><em>bFV</em>, <em>bFS</em>, <em>bFSV</em>, <em>bFT0</em>, <em>bFT1</em>, <em>bFT2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.Lij"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.Lij" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv from the scaled free energies.
+The Green function entries are calculated from the omega0 info. As this is the most
+time-consuming part of the calculation, we cache these values with a dictionary
+and hash function.
+Used by Lij.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bFV[NWyckoff]</strong> &#8211; beta*eneV - ln(preV) (relative to minimum value)</li>
+<li><strong>bFS[NWyckoff]</strong> &#8211; beta*eneS - ln(preS) (relative to minimum value)</li>
+<li><strong>bFSV[Nthermo]</strong> &#8211; beta*eneSV - ln(preSV) (excess)</li>
+<li><strong>bFT0[Nomega0]</strong> &#8211; beta*eneT0 - ln(preT0) (relative to minimum value of bFV)</li>
+<li><strong>bFT1[Nomega1]</strong> &#8211; beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)</li>
+<li><strong>bFT2[Nomega2]</strong> &#8211; beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return Lvv[3, 3]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">vacancy-vacancy; needs to be multiplied by cv/kBT</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return Lss[3, 3]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">solute-solute; needs to be multiplied by cv*cs/kBT</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return Lsv[3, 3]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">solute-vacancy; needs to be multiplied by cv*cs/kBT</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return Lvv1[3, 3]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nthermo=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create our diffusion calculator for a given crystal structure, chemical identity,
+jumpnetwork (for the vacancy) and thermodynamic shell.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>crys</strong> &#8211; Crystal object</li>
+<li><strong>chem</strong> &#8211; index identifying the diffusing species</li>
+<li><strong>sitelist</strong> &#8211; list, grouped into Wyckoff common positions, of unique sites</li>
+<li><strong>jumpnetwork</strong> &#8211; list of unique transitions as lists of ((i,j), dx)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="OnsagerCalc.VacancyMediated.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#OnsagerCalc.VacancyMediated.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.addhdf5">
+<code class="descname">addhdf5</code><span class="sig-paren">(</span><em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.addhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.addhdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an HDF5 representation of object into an HDF5group (needs to already exist).</p>
+<p>Example: if f is an open HDF5, then VacancyMediated.addhdf5(f.create_group(&#8216;Diffuser&#8217;)) will
+(1) create the group named &#8216;Diffuser&#8217;, and then (2) put the VacancyMediated representation in that group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> &#8211; HDF5 group</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.generate">
+<code class="descname">generate</code><span class="sig-paren">(</span><em>Nthermo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the necessary stars, vector-stars, and jump networks based on the thermodynamic range.</p>
+<dl class="docutils">
+<dt>:param Nthermo</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">range of thermodynamic interactions, in terms of &#8220;shells&#8221;,</span><dd>which is multiple summations of jumpvect</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.generatematrices">
+<code class="descname">generatematrices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.generatematrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.generatematrices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates all the matrices and &#8220;helper&#8221; pieces, based on our jump networks.
+This has been separated out in case the user wants to, e.g., prune / modify the networks
+after they&#8217;ve been created with generate(), then generatematrices() can be rerun.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.generatetags">
+<code class="descname">generatetags</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.generatetags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.generatetags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create tags for vacancy states, solute states, solute-vacancy complexes;
+omega0, omega1, and omega2 transition states.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return tags:</th><td class="field-body">dictionary of tags; each is a list-of-lists</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return tagdict:</th><td class="field-body">dictionary that maps tag into the index of the corresponding list.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.interactlist">
+<code class="descname">interactlist</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.interactlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.interactlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of solute-vacancy configurations for interactions. The points correspond
+to a vector between a solute atom and a vacancy. Defined by Stars.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return statelist:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of PairStates for the solute-vacancy interactions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="OnsagerCalc.VacancyMediated.loadhdf5">
+<em class="property">classmethod </em><code class="descname">loadhdf5</code><span class="sig-paren">(</span><em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.loadhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.loadhdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new VacancyMediated diffuser from an HDF5 group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDFgroup</strong> &#8211; HDF5 group</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new StarSet object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.makeLIMBpreene">
+<code class="descname">makeLIMBpreene</code><span class="sig-paren">(</span><em>preS</em>, <em>eneS</em>, <em>preSV</em>, <em>eneSV</em>, <em>preT0</em>, <em>eneT0</em>, <em>**ignoredextraarguments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.makeLIMBpreene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.makeLIMBpreene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates corresponding energies / prefactors for corresponding to LIMB
+(Linearized interpolation of migration barrier approximation). Returns a dictionary.
+(we ignore extra arguments so that a dictionary including additional entries can be passed)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>preS[NWyckoff]</strong> &#8211; prefactor for solute formation</li>
+<li><strong>eneS[NWyckoff]</strong> &#8211; solute formation energy</li>
+<li><strong>preSV[Nthermo]</strong> &#8211; prefactor for solute-vacancy interaction</li>
+<li><strong>eneSV[Nthermo]</strong> &#8211; solute-vacancy binding energy</li>
+<li><strong>preT0[Nomeg0]</strong> &#8211; prefactor for vacancy jump transitions (follows jumpnetwork)</li>
+<li><strong>eneT0[Nomega0]</strong> &#8211; transition energy for vacancy jumps</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return preT1[Nomega1]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">prefactor for omega1-style transitions (follows om1_jn)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return eneT1[Nomega1]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">transition energy/kBT for omega1-style jumps</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return preT2[Nomega2]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">prefactor for omega2-style transitions (follows om2_jn)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return eneT2[Nomega2]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">transition energy/kBT for omega2-style jumps</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.maketracerpreene">
+<code class="descname">maketracerpreene</code><span class="sig-paren">(</span><em>preT0</em>, <em>eneT0</em>, <em>**ignoredextraarguments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.maketracerpreene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.maketracerpreene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates corresponding energies / prefactors for an isotopic tracer. Returns a dictionary.
+(we ignore extra arguments so that a dictionary including additional entries can be passed)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>preT0[Nomeg0]</strong> &#8211; prefactor for vacancy jump transitions (follows jumpnetwork)</li>
+<li><strong>eneT0[Nomega0]</strong> &#8211; transition energy state for vacancy jumps</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return preS[NWyckoff]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">prefactor for solute formation</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return eneS[NWyckoff]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">solute formation energy</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return preSV[Nthermo]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">prefactor for solute-vacancy interaction</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return eneSV[Nthermo]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">solute-vacancy binding energy</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return preT1[Nomega1]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">prefactor for omega1-style transitions (follows om1_jn)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return eneT1[Nomega1]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">transition energy for omega1-style jumps</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return preT2[Nomega2]:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">prefactor for omega2-style transitions (follows om2_jn)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return eneT2[Nomega2]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">transition energy for omega2-style jumps</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.omegalist">
+<code class="descname">omegalist</code><span class="sig-paren">(</span><em>fivefreqindex=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.omegalist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.omegalist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of pairs of endpoints for a vacancy jump, corresponding to omega1 or omega2
+Solute at the origin, vacancy hopping between two sites. Defined by om1_jumpnetwork</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fivefreqindex</strong> &#8211; 1 or 2, corresponding to omega1 or omega2</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return omegalist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of tuples of PairStates</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return omegajumptype:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">index of corresponding omega0 jumptype</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="OnsagerCalc.VacancyMediated.preene2betafree">
+<em class="property">static </em><code class="descname">preene2betafree</code><span class="sig-paren">(</span><em>kT</em>, <em>preV</em>, <em>eneV</em>, <em>preS</em>, <em>eneS</em>, <em>preSV</em>, <em>eneSV</em>, <em>preT0</em>, <em>eneT0</em>, <em>preT1</em>, <em>eneT1</em>, <em>preT2</em>, <em>eneT2</em>, <em>**ignoredextraarguments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.preene2betafree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.preene2betafree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in a series of prefactors (e^(S/kB)) and energies, and return beta*free energy for
+energies and transition state energies. Used to provide scaled values to Lij() and _lij().
+Can specify all of the entries using a dictionary; e.g., preene2betafree(kT, <a href="#id1"><span class="problematic" id="id2">**</span></a>data_dict)
+and then send that output as input to Lij: Lij(<a href="#id3"><span class="problematic" id="id4">*</span></a>preene2betafree(kT, <a href="#id5"><span class="problematic" id="id6">**</span></a>data_dict))
+(we ignore extra arguments so that a dictionary including additional entries can be passed)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>kT</strong> &#8211; temperature times Boltzmann&#8217;s constant kB</li>
+<li><strong>preV</strong> &#8211; prefactor for vacancy formation (prod of inverse vibrational frequencies)</li>
+<li><strong>eneV</strong> &#8211; vacancy formation energy</li>
+<li><strong>preS</strong> &#8211; prefactor for solute formation (prod of inverse vibrational frequencies)</li>
+<li><strong>eneS</strong> &#8211; solute formation energy</li>
+<li><strong>preSV</strong> &#8211; excess prefactor for solute-vacancy binding</li>
+<li><strong>eneSV</strong> &#8211; solute-vacancy binding energy</li>
+<li><strong>preT0</strong> &#8211; prefactor for vacancy transition state</li>
+<li><strong>eneT0</strong> &#8211; energy for vacancy transition state (relative to eneV)</li>
+<li><strong>preT1</strong> &#8211; prefactor for vacancy swing transition state</li>
+<li><strong>eneT1</strong> &#8211; energy for vacancy swing transition state (relative to eneV + eneS + eneSV)</li>
+<li><strong>preT2</strong> &#8211; prefactor for vacancy exchange transition state</li>
+<li><strong>eneT2</strong> &#8211; energy for vacancy exchange transition state (relative to eneV + eneS + eneSV)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return bFV:</th><td class="field-body"><p class="first">beta*eneV - ln(preV) (relative to minimum value)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return bFS:</th><td class="field-body"><p class="first">beta*eneS - ln(preS) (relative to minimum value)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return bFSV:</th><td class="field-body"><p class="first">beta*eneSV - ln(preSV) (excess)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return bFT0:</th><td class="field-body"><p class="first">beta*eneT0 - ln(preT0) (relative to minimum value of bFV)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return bFT1:</th><td class="field-body"><p class="first">beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return bFT2:</th><td class="field-body"><p class="first last">beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="OnsagerCalc.VacancyMediatedMeta">
+<em class="property">class </em><code class="descclassname">OnsagerCalc.</code><code class="descname">VacancyMediatedMeta</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nthermo=0</em>, <em>meta_tags=[]</em>, <em>jumpnetwork2=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediatedMeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediatedMeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trying out metastable preening</p>
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediatedMeta.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nthermo=0</em>, <em>meta_tags=[]</em>, <em>jumpnetwork2=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediatedMeta.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediatedMeta.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>will fill it later</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediatedMeta.generatekineticmeta">
+<code class="descname">generatekineticmeta</code><span class="sig-paren">(</span><em>Nthermo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediatedMeta.generatekineticmeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediatedMeta.generatekineticmeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>no idea. will fill it later</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediatedMeta.generatethermometa">
+<code class="descname">generatethermometa</code><span class="sig-paren">(</span><em>Nthermo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediatedMeta.generatethermometa"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediatedMeta.generatethermometa" title="Permalink to this definition">¶</a></dt>
+<dd><p>will fill it later</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediatedMeta.gfconstruct">
+<code class="descname">gfconstruct</code><span class="sig-paren">(</span><em>Nthermo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediatedMeta.gfconstruct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediatedMeta.gfconstruct" title="Permalink to this definition">¶</a></dt>
+<dd><p>no idea. will fill it later</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="OnsagerCalc.arrays2vTKdict">
+<code class="descclassname">OnsagerCalc.</code><code class="descname">arrays2vTKdict</code><span class="sig-paren">(</span><em>vTKarray</em>, <em>valarray</em>, <em>vTKsplits</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#arrays2vTKdict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.arrays2vTKdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes two arrays of vTK keys and values, and the splits to separate vTKarray back into vTK
+and returns a dictionary indexed by the vTK.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vTKarray</strong> &#8211; array of vTK entries</li>
+<li><strong>valarray</strong> &#8211; array of values</li>
+<li><strong>vTKsplits</strong> &#8211; split placement for vTK entries</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return vTKdict:</th><td class="field-body"><p class="first last">dictionary, indexed by vTK objects, whose entries are arrays</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="OnsagerCalc.vTKdict2arrays">
+<code class="descclassname">OnsagerCalc.</code><code class="descname">vTKdict2arrays</code><span class="sig-paren">(</span><em>vTKdict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#vTKdict2arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.vTKdict2arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a dictionary indexed by vTK objects, returns two arrays of vTK keys and values,
+and the splits to separate vTKarray back into vTK</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vTKdict</strong> &#8211; dictionary, indexed by vTK objects, whose entries are arrays</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return vTKarray:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">array of vTK entries</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return valarray:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">array of values</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return vTKsplits:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">split placement for vTK entries</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="OnsagerCalc.vacancyThermoKinetics">
+<em class="property">class </em><code class="descclassname">OnsagerCalc.</code><code class="descname">vacancyThermoKinetics</code><a class="reference internal" href="_modules/OnsagerCalc.html#vacancyThermoKinetics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.vacancyThermoKinetics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to store (in a hashable manner) the thermodynamics and kinetics for the vacancy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pre</strong> &#8211; prefactors for sites</li>
+<li><strong>betaene</strong> &#8211; energy for sites / kBT</li>
+<li><strong>preT</strong> &#8211; prefactors for transition states</li>
+<li><strong>betaeneT</strong> &#8211; transition state energy for sites / kBT</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="OnsagerCalc.vacancyThermoKinetics.vacancyThermoKinetics_constructor">
+<em class="property">static </em><code class="descname">vacancyThermoKinetics_constructor</code><span class="sig-paren">(</span><em>loader</em>, <em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#vacancyThermoKinetics.vacancyThermoKinetics_constructor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.vacancyThermoKinetics.vacancyThermoKinetics_constructor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a GroupOp from YAML</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="OnsagerCalc.vacancyThermoKinetics.vacancyThermoKinetics_representer">
+<em class="property">static </em><code class="descname">vacancyThermoKinetics_representer</code><span class="sig-paren">(</span><em>dumper</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#vacancyThermoKinetics.vacancyThermoKinetics_representer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.vacancyThermoKinetics.vacancyThermoKinetics_representer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output a PairState</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 

@@ -139,6 +139,306 @@
 <h1>GFcalc<a class="headerlink" href="#gfcalc" title="Permalink to this headline">¶</a></h1>
 <p>GFcalc:</p>
 <p>The GFcalc module defines the <code class="docutils literal"><span class="pre">GFCrystalcalc</span></code> class for the evaluation of the vacancy Green function.</p>
+<span class="target" id="module-GFcalc"></span><p>GFcalc module</p>
+<p>Code to compute the lattice Green function for diffusion; this entails inverting
+the &#8220;diffusion&#8221; matrix, which is infinite, singular, and has translational
+invariance. The solution involves fourier transforming to reciprocal space,
+inverting, and inverse fourier transforming back to real (lattice) space. The
+complication is that the inversion produces a second order pole which must be
+treated analytically. Subtracting off the pole then produces a discontinuity at
+the gamma-point (q=0), which also should be treated analytically. Then, the
+remaining function can be numerically inverse fourier transformed.</p>
+<dl class="class">
+<dt id="GFcalc.GFCrystalcalc">
+<em class="property">class </em><code class="descclassname">GFcalc.</code><code class="descname">GFCrystalcalc</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nmax=4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class calculator for the Green function, designed to work with the Crystal class.</p>
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.BlockInvertOmegaTaylor">
+<code class="descname">BlockInvertOmegaTaylor</code><span class="sig-paren">(</span><em>dd</em>, <em>dr</em>, <em>rd</em>, <em>rr</em>, <em>D</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.BlockInvertOmegaTaylor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.BlockInvertOmegaTaylor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns block inverted omega as a Taylor expansion, up to Nmax = 0 (discontinuity
+correction). Needs to be rotated such that leading order of D is isotropic.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dd</strong> &#8211; diffusive/diffusive block (upper left)</li>
+<li><strong>dr</strong> &#8211; diffusive/relaxive block (lower left)</li>
+<li><strong>rd</strong> &#8211; relaxive/diffusive block (upper right)</li>
+<li><strong>rr</strong> &#8211; relaxive/relaxive block (lower right)</li>
+<li><strong>D</strong> &#8211; dd - dr*rr^-1*rd (diffusion)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Taylor expansion of g in block form, and reduced (collected terms)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.BlockRotateOmegaTaylor">
+<code class="descname">BlockRotateOmegaTaylor</code><span class="sig-paren">(</span><em>omega_Taylor_rotate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.BlockRotateOmegaTaylor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.BlockRotateOmegaTaylor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns block partitioned Taylor expansion of a rotated omega Taylor expansion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>omega_Taylor_rotate</strong> &#8211; rotated into diffusive [0] / relaxive [1:] basis</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dd, dr, rd, rr, and D = dd - dr*rr^-1*rd blocks</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.BreakdownGroups">
+<code class="descname">BreakdownGroups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.BreakdownGroups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.BreakdownGroups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes in a crystal, and a chemistry, and constructs the indexing breakdown for each
+(i,j) pair.
+:return grouparray: array[NG][3][3] of the NG group operations
+:return indexpair: array[N][N][NG][2] of the index pair for each group operation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.DiagGamma">
+<code class="descname">DiagGamma</code><span class="sig-paren">(</span><em>omega=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.DiagGamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.DiagGamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Diagonalize the gamma point (q=0) term</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>omega</strong> &#8211; optional; the Taylor expansion to use. If None, use self.omega_Taylor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array of eigenvalues (r) and array of eigenvectors (vr) where vr[:,i] is the vector
+for eigenvalue r[i], and the r are sorted from 0 to decreasing values.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.Diffusivity">
+<code class="descname">Diffusivity</code><span class="sig-paren">(</span><em>omega_Taylor_D=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.Diffusivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.Diffusivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the diffusivity, or compute it if it&#8217;s not already known. Uses omega_Taylor_D
+to compute with maximum efficiency.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>omega_Taylor_D</strong> &#8211; Taylor expansion of the diffusivity component</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">D [3,3] array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.FourierTransformJumps">
+<code class="descname">FourierTransformJumps</code><span class="sig-paren">(</span><em>jumpnetwork</em>, <em>N</em>, <em>kpts</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.FourierTransformJumps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.FourierTransformJumps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the Fourier transform coefficients for each jump</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>jumpnetwork</strong> &#8211; list of unique transitions, as lists of ((i,j), dx)</li>
+<li><strong>N</strong> &#8211; number of sites</li>
+<li><strong>kpts</strong> &#8211; array[Nkpt][3], in Cartesian (same coord. as dx)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">array[Njump][Nkpt][Nsite][Nsite] of FT of the jump network</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">array[Nsite][Njump] multiplicity of jump on each site</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.SetRates">
+<code class="descname">SetRates</code><span class="sig-paren">(</span><em>pre</em>, <em>betaene</em>, <em>preT</em>, <em>betaeneT</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.SetRates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.SetRates" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Re)sets the rates, given the prefactors and Arrhenius factors for the sites and
+transitions, using the ordering according to sitelist and jumpnetwork. Initiates all of
+the calculations so that GF calculation is (fairly) efficient for each input.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pre</strong> &#8211; list of prefactors for site probabilities</li>
+<li><strong>betaene</strong> &#8211; list of beta*E (energy/kB T) for each site</li>
+<li><strong>preT</strong> &#8211; list of prefactors for transition states</li>
+<li><strong>betaeneT</strong> &#8211; list of beta*ET (energy/kB T) for each transition state</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.SymmRates">
+<code class="descname">SymmRates</code><span class="sig-paren">(</span><em>pre</em>, <em>betaene</em>, <em>preT</em>, <em>betaeneT</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.SymmRates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.SymmRates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of lists of symmetrized rates, matched to jumpnetwork</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.TaylorExpandJumps">
+<code class="descname">TaylorExpandJumps</code><span class="sig-paren">(</span><em>jumpnetwork</em>, <em>N</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.TaylorExpandJumps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.TaylorExpandJumps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the Taylor expansion coefficients for each jump</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>jumpnetwork</strong> &#8211; list of unique transitions, as lists of ((i,j), dx)</li>
+<li><strong>N</strong> &#8211; number of sites</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of Taylor3D expansions of the jump network</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>i</em>, <em>j</em>, <em>dx</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the Green function from site i to site j, separated by vector dx</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>i</strong> &#8211; site index</li>
+<li><strong>j</strong> &#8211; site index</li>
+<li><strong>dx</strong> &#8211; vector pointing from i to j (can include lattice contributions)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Green function</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nmax=4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes our calculator with the appropriate topology / connectivity. Doesn&#8217;t
+require, at this point, the site probabilities or transition rates to be known.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>crys</strong> &#8211; Crystal object</li>
+<li><strong>chem</strong> &#8211; index identifying the diffusing species</li>
+<li><strong>sitelist</strong> &#8211; list, grouped into Wyckoff common positions, of unique sites</li>
+<li><strong>jumpnetwork</strong> &#8211; list of unique transitions as lists of ((i,j), dx)</li>
+<li><strong>Nmax</strong> &#8211; maximum range as estimator for kpt mesh generation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="GFcalc.GFCrystalcalc.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#GFcalc.GFCrystalcalc.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.addhdf5">
+<code class="descname">addhdf5</code><span class="sig-paren">(</span><em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.addhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.addhdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an HDF5 representation of object into an HDF5group (needs to already exist).</p>
+<dl class="docutils">
+<dt>Example: if f is an open HDF5, then GFcalc.addhdf5(f.create_group(&#8216;GFcalc&#8217;)) will</dt>
+<dd><ol class="first last arabic simple">
+<li>create the group named &#8216;GFcalc&#8217;, and then (2) put the GFcalc representation in that group.</li>
+</ol>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> &#8211; HDF5 group</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.biascorrection">
+<code class="descname">biascorrection</code><span class="sig-paren">(</span><em>etav=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.biascorrection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.biascorrection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the bias correction, or compute it if it&#8217;s not already known. Uses etav to compute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>etav</strong> &#8211; Taylor expansion of the bias correction</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return eta:</th><td class="field-body">[N,3] array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.exp_dxq">
+<code class="descname">exp_dxq</code><span class="sig-paren">(</span><em>dx</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.exp_dxq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.exp_dxq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the array of exp(-i q.dx) evaluated over the q-points, and accounting for symmetry</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dx</strong> &#8211; vector</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array of exp(-i q.dx)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="GFcalc.GFCrystalcalc.loadhdf5">
+<em class="property">classmethod </em><code class="descname">loadhdf5</code><span class="sig-paren">(</span><em>crys</em>, <em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.loadhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.loadhdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new GFcalc from an HDF5 group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>crys</strong> &#8211; crystal object&#8211;MUST BE PASSED IN as it is not stored with the GFcalc</li>
+<li><strong>HDFgroup</strong> &#8211; HDF5 group</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">new GFcalc object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
