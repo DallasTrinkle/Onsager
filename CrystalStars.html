@@ -139,6 +139,835 @@
 <h1>CrystalStars<a class="headerlink" href="#crystalstars" title="Permalink to this headline">¶</a></h1>
 <p>CrystalStars:</p>
 <p>The crystalStars module defines the classes corresponding to stars (in this case, for solute-vacancy complexes that are equivalent by space group symmetry), and vector stars (the inclusion of a vector basis on the stars). These modules are primarily responsible for all the symmetry analysis, and converting that into matrix forms for rapid numerical evaluation as needed.</p>
+<span class="target" id="module-crystalStars"></span><p>Stars module, modified to work with crystal class</p>
+<p>Classes to generate star sets, double star sets, and vector star sets; a lot of indexing functionality.</p>
+<p>NOTE: The naming follows that of stars; the functionality is extremely similar, and this code
+was modified as little as possible to translate that functionality to <em>crystals</em> which possess
+a basis. In the case of a single atom basis, this should reduce to the stars object functionality.</p>
+<p>The big changes are:</p>
+<ul class="simple">
+<li>Replacing NNvect star (which represents the jumps) with the jumpnetwork type found in crystal</li>
+<li>Using the jumpnetwork_latt representation from crystal</li>
+<li>Representing a &#8220;point&#8221; as a solute + vacancy. In this case, it is a tuple (s,v) of unit cell
+indices and a vector dx or dR (dx = Cartesian vector pointing from solute to vacancy;
+dR = lattice vector pointing from unit cell of solute to unit cell of vacancy). This is equivalent
+to our old representation if the tuple (s,v) = (0,0) for all sites. Due to translational invariance,
+the solute always stays inside the unit cell</li>
+<li>Using indices into the point list rather than just making lists of the vectors themselves. This
+is because the &#8220;points&#8221; now have a more complex representation (see above).</li>
+</ul>
+<dl class="function">
+<dt id="crystalStars.PSlist2array">
+<code class="descclassname">crystalStars.</code><code class="descname">PSlist2array</code><span class="sig-paren">(</span><em>PSlist</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PSlist2array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PSlist2array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take in a list of pair states; return arrays that can be stored in HDF5 format</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>PSlist</strong> &#8211; list of pair states</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return ij:</th><td class="field-body">int_array[N][2] = (i,j)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return R:</th><td class="field-body">int[N][3]</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return dx:</th><td class="field-body">float[N][3]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="crystalStars.PairState">
+<em class="property">class </em><code class="descclassname">crystalStars.</code><code class="descname">PairState</code><a class="reference internal" href="_modules/crystalStars.html#PairState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class corresponding to a &#8220;pair&#8221; state; in this case, a solute-vacancy pair, but can
+also be a transition state pair. The solute (or initial state) is in unit cell 0, in position
+indexed i; the vacancy (or final state) is in unit cell R, in position indexed j.
+The cartesian vector dx connects them. We can add and subtract, negate, and &#8220;endpoint&#8221;
+subtract (useful for determining what Green function entry to use)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>i</strong> &#8211; index of the first member of the pair (solute)</li>
+<li><strong>j</strong> &#8211; index of the second member of the pair (vacancy)</li>
+<li><strong>R</strong> &#8211; lattice vector pointing from unit cell of i to unit cell of j</li>
+<li><strong>dx</strong> &#8211; Cartesian vector pointing from first to second member of pair</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="crystalStars.PairState.PairState_constructor">
+<em class="property">static </em><code class="descname">PairState_constructor</code><span class="sig-paren">(</span><em>loader</em>, <em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.PairState_constructor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.PairState_constructor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a GroupOp from YAML</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="crystalStars.PairState.PairState_representer">
+<em class="property">static </em><code class="descname">PairState_representer</code><span class="sig-paren">(</span><em>dumper</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.PairState_representer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.PairState_representer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output a PairState</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.PairState.__add__">
+<code class="descname">__add__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__add__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two states: works if and only if self.j == other.i
+(i,j) R + (j,k) R&#8217; = (i,k) R+R&#8217;  : works for thinking about transitions...
+Note: a + b != b + a, and may be that only one of those is even defined</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.PairState.__eq__">
+<code class="descname">__eq__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__eq__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test for equality&#8211;we don&#8217;t bother checking dx</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.PairState.__hash__">
+<code class="descname">__hash__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__hash__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hash, so that we can make sets of states</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.PairState.__ne__">
+<code class="descname">__ne__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__ne__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__ne__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inequality == not __eq__</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.PairState.__neg__">
+<code class="descname">__neg__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__neg__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__neg__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Negation of state (swap members of pair)
+- (i,j) R = (j,i) -R
+Note: a + (-a) == (-a) + a == 0 because we define what &#8220;zero&#8221; is.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.PairState.__sane__">
+<code class="descname">__sane__</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__sane__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__sane__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if the dx value makes sense given everything else...</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.PairState.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Human readable version</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.PairState.__sub__">
+<code class="descname">__sub__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__sub__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a negative:
+a-b points from initial of a to initial of b if same final state
+(i,j) R - (k,j) R&#8217; = (i,k) R-R&#8217;
+Note: this means that (a-b) + b = a, but b + (a-b) is an error. (b-a) + a = b</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.PairState.__xor__">
+<code class="descname">__xor__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__xor__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__xor__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtraction on the endpoints (sort of the &#8220;opposite&#8221; of a-b):
+a^b points from final of b to final of a if same initial state
+(i,j) R ^ (i,k) R&#8217; = (k,j) R-R&#8217;
+Note: b + (a^b) = a but (a^b) + b is an error. a + (b^a) = b</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="crystalStars.PairState.fromcrys">
+<em class="property">classmethod </em><code class="descname">fromcrys</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>ij</em>, <em>dx</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.fromcrys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.fromcrys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert (i,j), dx into PairState</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="crystalStars.PairState.fromcrys_latt">
+<em class="property">classmethod </em><code class="descname">fromcrys_latt</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>ij</em>, <em>R</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.fromcrys_latt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.fromcrys_latt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert (i,j), R into PairState</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.PairState.g">
+<code class="descname">g</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>g</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.g"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.g" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply group operation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>crys</strong> &#8211; crystal</li>
+<li><strong>chem</strong> &#8211; chemical index</li>
+<li><strong>g</strong> &#8211; group operation (from crys)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">PairState corresponding to group operation applied to self</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.PairState.iszero">
+<code class="descname">iszero</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.iszero"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.iszero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quicker than self == PairState.zero()</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="crystalStars.PairState.zero">
+<em class="property">classmethod </em><code class="descname">zero</code><span class="sig-paren">(</span><em>n=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.zero"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.zero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a &#8220;zero&#8221; state</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="crystalStars.StarSet">
+<em class="property">class </em><code class="descclassname">crystalStars.</code><code class="descname">StarSet</code><span class="sig-paren">(</span><em>jumpnetwork</em>, <em>crys</em>, <em>chem</em>, <em>Nshells=0</em>, <em>lattice=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to construct stars, and be able to efficiently index.</p>
+<dl class="method">
+<dt id="crystalStars.StarSet.__add__">
+<code class="descname">__add__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__add__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two StarSets together; done by making a copy of one, and iadding</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.__iadd__">
+<code class="descname">__iadd__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__iadd__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.__iadd__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another StarSet to this one; very similar to generate()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>jumpnetwork</em>, <em>crys</em>, <em>chem</em>, <em>Nshells=0</em>, <em>lattice=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initiates a star set generator for a given jumpnetwork, crystal, and specified
+chemical index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>jumpnetwork</strong> &#8211; list of symmetry unique jumps, as a list of list of tuples; either
+((i,j), dx) for jump from i to j with displacement dx, or
+((i,j), R) for jump from i in unit cell 0 -&gt; j in unit cell R</li>
+<li><strong>crys</strong> &#8211; crystal where jumps take place</li>
+<li><strong>chem</strong> &#8211; chemical index of atom to consider jumps</li>
+<li><strong>Nshells</strong> &#8211; number of shells to generate</li>
+<li><strong>lattice</strong> &#8211; which form does the jumpnetwork take?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>crys: crystal structure
+chem: chemical index of atom that&#8217;s jumping
+Nshells: number of shells (addi
+jumpnetwork_index: list of lists of indices into jumplist; matches structure of jumpnetwork
+jumplist: list of jumps, as pair states (i=initial state, j=final state)
+states: list of pair states, out to Nshells
+Nstates: size of list
+stars: list of lists of indices into states; each list are states equivalent by symmetry
+Nstars: size of list
+index[Nstates]: index of star that state belongs to</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Human readable version</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="crystalStars.StarSet.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#crystalStars.StarSet.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.addhdf5">
+<code class="descname">addhdf5</code><span class="sig-paren">(</span><em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.addhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.addhdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an HDF5 representation of object into an HDF5group (needs to already exist).</p>
+<p>Example: if f is an open HDF5, then StarSet.addhdf5(f.create_group(&#8216;StarSet&#8217;)) will
+(1) create the group named &#8216;StarSet&#8217;, and then (2) put the StarSet representation in that group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> &#8211; HDF5 group</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><em>empty=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a copy of the StarSet; done as efficiently as possible; empty means skip the shells, etc.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.diffgenerate">
+<code class="descname">diffgenerate</code><span class="sig-paren">(</span><em>S1</em>, <em>S2</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.diffgenerate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.diffgenerate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a starSet using endpoint subtraction from starset S1 to starset S2. Can (will)
+include zero. Points from vacancy states of S1 to vacancy states of S2.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>S1</strong> &#8211; starSet for start</li>
+<li><strong>S2</strong> &#8211; starSet for final</li>
+<li><strong>threshold</strong> &#8211; threshold for sorting magnitudes (can influence symmetry efficiency)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.generate">
+<code class="descname">generate</code><span class="sig-paren">(</span><em>Nshells</em>, <em>threshold=1e-08</em>, <em>originstates=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the points and the stars in the set. Now includes &#8220;origin states&#8221; by default; these
+are PairStates that iszero() is True; they are only included if they have a nonzero VectorBasis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Nshells</strong> &#8211; number of shells to generate; this is interpreted as subsequent
+&#8220;sums&#8221; of jumplist (as we need the solute to be connected to the vacancy by at least one jump)</li>
+<li><strong>threshold</strong> &#8211; threshold for determining equality with symmetry</li>
+<li><strong>originstates</strong> &#8211; include origin states in generate?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.jumpnetwork_omega1">
+<code class="descname">jumpnetwork_omega1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.jumpnetwork_omega1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.jumpnetwork_omega1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a jumpnetwork corresponding to vacancy jumping while the solute remains fixed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return jumpnetwork:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of symmetry unique jumps; list of list of tuples (i,f), dx where</td>
+</tr>
+</tbody>
+</table>
+<p>i,f index into states for the initial and final states, and dx = displacement of vacancy
+in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
+:return jumptype: list of indices corresponding to the (original) jump type for each
+symmetry unique jump; useful for constructing a LIMB approximation
+:return starpair: list of tuples of the star indices of the i and f states for each
+symmetry unique jump</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.jumpnetwork_omega2">
+<code class="descname">jumpnetwork_omega2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.jumpnetwork_omega2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.jumpnetwork_omega2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a jumpnetwork corresponding to vacancy exchanging with a solute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return jumpnetwork:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of symmetry unique jumps; list of list of tuples (i,f), dx where</td>
+</tr>
+</tbody>
+</table>
+<p>i,f index into states for the initial and final states, and dx = displacement of vacancy
+in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
+:return jumptype: list of indices corresponding to the (original) jump type for each
+symmetry unique jump; useful for constructing a LIMB approximation
+:return starpair: list of tuples of the star indices of the i and f states for each
+symmetry unique jump</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="crystalStars.StarSet.loadhdf5">
+<em class="property">classmethod </em><code class="descname">loadhdf5</code><span class="sig-paren">(</span><em>crys</em>, <em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.loadhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.loadhdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new StarSet from an HDF5 group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>crys</strong> &#8211; crystal object&#8211;MUST BE PASSED IN as it is not stored with the StarSet</li>
+<li><strong>HDFgroup</strong> &#8211; HDF5 group</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">new StarSet object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.starindex">
+<code class="descname">starindex</code><span class="sig-paren">(</span><em>PS</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.starindex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.starindex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the index for the star to which pair state PS belongs; None if not found</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.stateindex">
+<code class="descname">stateindex</code><span class="sig-paren">(</span><em>PS</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.stateindex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.stateindex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the index of pair state PS; None if not found</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.symmatch">
+<code class="descname">symmatch</code><span class="sig-paren">(</span><em>PS1</em>, <em>PS2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.symmatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.symmatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if there exists a group operation that makes PS1 == PS2.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSet.symmequivjumplist">
+<code class="descname">symmequivjumplist</code><span class="sig-paren">(</span><em>i</em>, <em>f</em>, <em>dx</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.symmequivjumplist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.symmequivjumplist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of tuples of symmetry equivalent jumps</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>i</strong> &#8211; index of initial state</li>
+<li><strong>f</strong> &#8211; index of final state</li>
+<li><strong>dx</strong> &#8211; displacement vector</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return symmjumplist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of tuples of ((gi, gf), gdx) for every group op</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="crystalStars.StarSetMeta">
+<em class="property">class </em><code class="descclassname">crystalStars.</code><code class="descname">StarSetMeta</code><span class="sig-paren">(</span><em>jumpnetwork</em>, <em>crys</em>, <em>chem</em>, <em>Nshells=0</em>, <em>lattice=False</em>, <em>meta_tags=[]</em>, <em>jumpnetwork2=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSetMeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSetMeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Testing meta states with star set</p>
+<dl class="method">
+<dt id="crystalStars.StarSetMeta.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>jumpnetwork</em>, <em>crys</em>, <em>chem</em>, <em>Nshells=0</em>, <em>lattice=False</em>, <em>meta_tags=[]</em>, <em>jumpnetwork2=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSetMeta.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSetMeta.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initiates a star set generator for a given jumpnetwork, crystal, and specified
+chemical index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>jumpnetwork</strong> &#8211; list of symmetry unique jumps, as a list of list of tuples; either</td>
+</tr>
+</tbody>
+</table>
+<p>((i,j), dx) for jump from i to j with displacement dx, or
+((i,j), R) for jump from i in unit cell 0 -&gt; j in unit cell R
+:param crys: crystal where jumps take place
+:param chem: chemical index of atom to consider jumps
+:param Nshells: number of shells to generate
+:param lattice: which form does the jumpnetwork take?</p>
+<p>crys: crystal structure
+chem: chemical index of atom that&#8217;s jumping
+Nshells: number of shells (addi
+jumpnetwork_index: list of lists of indices into jumplist; matches structure of jumpnetwork
+jumplist: list of jumps, as pair states (i=initial state, j=final state)
+states: list of pair states, out to Nshells
+Nstates: size of list
+stars: list of lists of indices into states; each list are states equivalent by symmetry
+Nstars: size of list
+index[Nstates]: index of star that state belongs to</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSetMeta.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><em>empty=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSetMeta.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSetMeta.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a copy of the StarSet; done as efficiently as possible; empty means skip the shells, etc.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSetMeta.generate">
+<code class="descname">generate</code><span class="sig-paren">(</span><em>Nshells</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSetMeta.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSetMeta.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the points and the stars in the set. Now includes &#8220;origin states&#8221; by default; these
+are PairStates that iszero() is True; they are only included if they have a nonzero VectorBasis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Nshells</strong> &#8211; number of shells to generate; this is interpreted as subsequent</td>
+</tr>
+</tbody>
+</table>
+<p>&#8220;sums&#8221; of jumplist (as we need the solute to be connected to the vacancy by at least one jump)
+:param threshold: threshold for determining equality with symmetry
+:param originstates: include origin states in generate?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.StarSetMeta.jumpnetwork_omega2">
+<code class="descname">jumpnetwork_omega2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSetMeta.jumpnetwork_omega2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSetMeta.jumpnetwork_omega2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a jumpnetwork corresponding to vacancy exchanging with a solute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return jumpnetwork:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of symmetry unique jumps; list of list of tuples (i,f), dx where
+i,f index into states for the initial and final states, and dx = displacement of vacancy
+in Cartesian coordinates. Note: if (i,f), dx is present, so is (f,i), -dx</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return jumptype:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of indices corresponding to the (original) jump type for each
+symmetry unique jump; useful for constructing a LIMB approximation</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return starpair:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of tuples of the star indices of the i and f states for each
+symmetry unique jump</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="crystalStars.VectorStarSet">
+<em class="property">class </em><code class="descclassname">crystalStars.</code><code class="descname">VectorStarSet</code><span class="sig-paren">(</span><em>starset=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to construct vector star sets, and be able to efficiently index.</p>
+<dl class="method">
+<dt id="crystalStars.VectorStarSet.GFexpansion">
+<code class="descname">GFexpansion</code><span class="sig-paren">(</span><em>VectorBasis=()</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.GFexpansion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.GFexpansion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the GF matrix expansion in terms of the star vectors, and indexed
+to GFstarset. Now takes in a VectorBasis; if not an empty set, returns the
+expansion of the vector stars to the &#8220;origin states&#8221; as represented by the VB.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>VectorBasis</strong> &#8211; (optional) list of [Nsites, 3]</td>
+</tr>
+</tbody>
+</table>
+<p>the vector basis in the unit cell for the solute states
+:return GFexpansion: array[Nsv, Nsv, NGFstars]
+the GF matrix[i, j] = sum(GFexpansion[i, j, k] * GF(starGF[k]))
+:return GFstarset: starSet corresponding to the GF
+:return GFOSexpansion: array[NVB, Nsv, NGFstars]
+the GF matrix[os, i] = sum(GFOSexpansion[os, i, k] * GF(starGF[k]))</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.VectorStarSet.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>starset=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initiates a vector-star generator; work with a given star.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>starset</strong> &#8211; StarSet, from which we pull nearly all of the info that we need</td>
+</tr>
+</tbody>
+</table>
+<p>vecpos: list of &#8220;positions&#8221; (state indices) for each vector star (list of lists)
+vecvec: list of vectors for each vector star (list of lists of vectors)
+Nvstars: number of vector stars</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="crystalStars.VectorStarSet.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#crystalStars.VectorStarSet.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.VectorStarSet.addhdf5">
+<code class="descname">addhdf5</code><span class="sig-paren">(</span><em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.addhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.addhdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an HDF5 representation of object into an HDF5group (needs to already exist).</p>
+<dl class="docutils">
+<dt>Example: if f is an open HDF5, then StarSet.addhdf5(f.create_group(&#8216;VectorStarSet&#8217;)) will</dt>
+<dd>(1) create the group named &#8216;VectorStarSet&#8217;, and then (2) put the VectorStarSet
+representation in that group.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> &#8211; HDF5 group</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.VectorStarSet.bareexpansions">
+<code class="descname">bareexpansions</code><span class="sig-paren">(</span><em>jumpnetwork</em>, <em>jumptype</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.bareexpansions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.bareexpansions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the bare diffusivity expansion in terms of the jumpnetwork.
+We return the reference (0) contribution so that the change can be determined; this
+is useful for the vacancy contributions.
+This saves us from having to deal with issues with our outer shell where we only
+have a fraction of the escapes, but as long as the kinetic shell is one more than
+the thermodynamics (so that the interaction energy is 0, hence no change in probability),
+this will work. The PS (pair stars) is useful for including the probability factor
+for the endpoint of the jump; we just call it the &#8216;probfactor&#8217; below.</p>
+<p>Note also: this <em>currently assumes</em> that the displacement vector <em>does not change</em> between
+omega0 and omega(1/2).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>jumpnetwork</strong> &#8211; jumpnetwork of symmetry unique omega1-type jumps,</td>
+</tr>
+</tbody>
+</table>
+<p>corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
+are indices corresponding to states in our starset.
+:param jumptype: specific omega0 jump type that the jump corresponds to</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return D0expansion:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">array[3,3, Njump_omega0]</td>
+</tr>
+</tbody>
+</table>
+<p>the D0[a,b,jt] = sum(D0expansion[a,b, jt] * sqrt(probfactor0[PS[jt][0]]*probfactor0[PS[jt][1]) * omega0[jt])
+:return D1expansion: array[3,3, Njump_omega1]
+the D1[a,b,k] = sum(D1expansion[a,b, k] * sqrt(probfactor[PS[k][0]]*probfactor[PS[k][1]) * omega[k])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.VectorStarSet.biasexpansions">
+<code class="descname">biasexpansions</code><span class="sig-paren">(</span><em>jumpnetwork</em>, <em>jumptype</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.biasexpansions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.biasexpansions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the bias1 and bias0 vector expansion in terms of the jumpnetwork.
+We return the bias0 contribution so that the db = bias1 - bias0 can be determined.
+This saves us from having to deal with issues with our outer shell where we only
+have a fraction of the escapes, but as long as the kinetic shell is one more than
+the thermodynamics (so that the interaction energy is 0, hence no change in probability),
+this will work. The PS (pair stars) is useful for including the probability factor
+for the endpoint of the jump; we just call it the &#8216;probfactor&#8217; below.
+<em>Note:</em> this used to be separated into bias1expansion, and bias2expansion,and
+had terms that are now in rateexpansions.
+Note also that if jumpnetwork_omega2 is passed, it also works for that. However,
+in that case we have a different approach for the calculation of bias1expansion:
+if there are origin states, they get the negative summed bias of the others.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>jumpnetwork</strong> &#8211; jumpnetwork of symmetry unique omega1-type jumps,</td>
+</tr>
+</tbody>
+</table>
+<p>corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
+are indices corresponding to states in our starset.
+:param jumptype: specific omega0 jump type that the jump corresponds to</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return bias0expansion:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">array[Nsv, Njump_omega0]</td>
+</tr>
+</tbody>
+</table>
+<p>the gen0 vector[i] = sum(bias0expasion[i, k] * sqrt(probfactor0[PS[k]]) * omega0[k])
+:return bias1expansion: array[Nsv, Njump_omega1]
+the gen1 vector[i] = sum(bias1expansion[i, k] * sqrt(probfactor[PS[k]] * omega1[k])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.VectorStarSet.generate">
+<code class="descname">generate</code><span class="sig-paren">(</span><em>starset</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the actual vectors stars</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>starset</strong> &#8211; StarSet, from which we pull nearly all of the info that we need</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.VectorStarSet.generateouter">
+<code class="descname">generateouter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.generateouter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.generateouter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate our outer products for our star-vectors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return outer:</th><td class="field-body">array [3, 3, Nvstars, Nvstars]
+outer[:, :, i, j] is the 3x3 tensor outer product for two vector-stars vs[i] and vs[j]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="crystalStars.VectorStarSet.loadhdf5">
+<em class="property">classmethod </em><code class="descname">loadhdf5</code><span class="sig-paren">(</span><em>SSet</em>, <em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.loadhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.loadhdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new StarSet from an HDF5 group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>SSet</strong> &#8211; StarSet&#8211;MUST BE PASSED IN as it is not stored with the VectorStarSet</li>
+<li><strong>HDFgroup</strong> &#8211; HDF5 group</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">new StarSet object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.VectorStarSet.periodicvectorexpansion">
+<code class="descname">periodicvectorexpansion</code><span class="sig-paren">(</span><em>elemtype='solute'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.periodicvectorexpansion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.periodicvectorexpansion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the expansion from vectors on sites in the cell that are periodic to
+our vectorstar basis. This is used to map from the rate-bias correction vectors into
+the vectorstar basis, to correct for situations where the vacancy jumps themselves
+have bias.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>elemtype</strong> &#8211; &#8216;solute&#8217; or &#8216;vacancy&#8217;, depending on which site we need to check.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return periodicexpansion:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">[Nvstars, Nsites, 3], to map Nsites,3 into Nvstars</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.VectorStarSet.rateexpansions">
+<code class="descname">rateexpansions</code><span class="sig-paren">(</span><em>jumpnetwork</em>, <em>jumptype</em>, <em>VectorBasis=()</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.rateexpansions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.rateexpansions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the omega0 and omega1 matrix expansions in terms of the jumpnetwork;
+includes the escape terms separately. The escape terms are tricky because they have
+probability factors that differ from the transitions; the PS (pair stars) is useful for
+finding this. We just call it the &#8216;probfactor&#8217; below.
+<em>Note:</em> this used to be separated into rate0expansion, and rate1expansion, and
+partly in bias1expansion. Note also that if jumpnetwork_omega2 is passed, it also works
+for that. However, in that case we have a different approach for the calculation of
+rate0expansion: if there are origin states, then we need to &#8220;jump&#8221; to those; if there
+is a non-empty VectorBasis we will want to account for them there.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>jumpnetwork</strong> &#8211; jumpnetwork of symmetry unique omega1-type jumps,</td>
+</tr>
+</tbody>
+</table>
+<p>corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
+are indices corresponding to states in our starset.
+:param jumptype: specific omega0 jump type that the jump corresponds to
+:param VectorBasis: (optional) list of [Nsites, 3]
+the vector basis in the unit cell for the solute states
+:return rate0expansion: array[Nsv, Nsv, Njump_omega0]
+the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k]); <em>IF</em> NVB&gt;0
+we &#8220;hijack&#8221; this and use it for [NVB, Nsv, Njump_omega0], as we&#8217;re doing an omega2
+calc and rate0expansion won&#8217;t be used <em>anyway</em>.
+:return rate0escape: array[Nsv, Njump_omega0]
+the escape contributions: omega0[i,i] += sum(rate0escape[i,k]*omega0[k]*probfactor(PS[k]))
+:return rate1expansion: array[Nsv, Nsv, Njump_omega1]
+the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])
+:return rate1escape: array[Nsv, Njump_omega1]
+the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega0[k]*probfactor(PS[k]))</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crystalStars.VectorStarSet.unitcellVectorBasisfolddown">
+<code class="descname">unitcellVectorBasisfolddown</code><span class="sig-paren">(</span><em>VectorBasis</em>, <em>elemtype='solute'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.unitcellVectorBasisfolddown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.unitcellVectorBasisfolddown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the expansion to &#8220;fold down&#8221; from starvector to a VectorBasis in the
+unit cell
+:param VectorBasis: list of (N,3) matrices, corresponding to (normalized) vectors
+:param elemtype: &#8216;solute&#8217; of &#8216;vacancy&#8217;, depending on which site we need to reduce
+:return: folddown: [NV, Nvstars] to map vstars to VectorBasis</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="crystalStars.array2PSlist">
+<code class="descclassname">crystalStars.</code><code class="descname">array2PSlist</code><span class="sig-paren">(</span><em>ij</em>, <em>R</em>, <em>dx</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#array2PSlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.array2PSlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take in arrays of ij, R, dx (from HDF5), return a list of PairStates</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ij</strong> &#8211; int_array[N][2] = (i,j)</li>
+<li><strong>R</strong> &#8211; int[N][3]</li>
+<li><strong>dx</strong> &#8211; float[N][3]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return PSlist:</th><td class="field-body"><p class="first last">list of pair states</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="crystalStars.doublelist2flatlistindex">
+<code class="descclassname">crystalStars.</code><code class="descname">doublelist2flatlistindex</code><span class="sig-paren">(</span><em>listlist</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#doublelist2flatlistindex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.doublelist2flatlistindex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of lists, returns a flattened list and an index array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>listlist</strong> &#8211; list of lists of objects</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return flatlist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">flat list of objects (preserving order)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return indexarray:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">array indexing which original list it came from</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="crystalStars.flatlistindex2doublelist">
+<code class="descclassname">crystalStars.</code><code class="descname">flatlistindex2doublelist</code><span class="sig-paren">(</span><em>flatlist</em>, <em>indexarray</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#flatlistindex2doublelist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.flatlistindex2doublelist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a flattened list and an index array, returns a list of lists</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>flatlist</strong> &#8211; flat list of objects (preserving order)</li>
+<li><strong>indexarray</strong> &#8211; array indexing which original list it came from</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return listlist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of lists of objects</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 
 
