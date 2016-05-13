@@ -347,19 +347,16 @@ chemical index.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>jumpnetwork</strong> &#8211; list of symmetry unique jumps, as a list of list of tuples; either
-((i,j), dx) for jump from i to j with displacement dx, or
-((i,j), R) for jump from i in unit cell 0 -&gt; j in unit cell R</li>
-<li><strong>crys</strong> &#8211; crystal where jumps take place</li>
-<li><strong>chem</strong> &#8211; chemical index of atom to consider jumps</li>
-<li><strong>Nshells</strong> &#8211; number of shells to generate</li>
-<li><strong>lattice</strong> &#8211; which form does the jumpnetwork take?</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>jumpnetwork</strong> &#8211; list of symmetry unique jumps, as a list of list of tuples; either</td>
 </tr>
 </tbody>
 </table>
+<p>((i,j), dx) for jump from i to j with displacement dx, or
+((i,j), R) for jump from i in unit cell 0 -&gt; j in unit cell R
+:param crys: crystal where jumps take place
+:param chem: chemical index of atom to consider jumps
+:param Nshells: number of shells to generate
+:param lattice: which form does the jumpnetwork take?</p>
 <p>crys: crystal structure
 chem: chemical index of atom that&#8217;s jumping
 Nshells: number of shells (addi
@@ -461,11 +458,27 @@ are PairStates that iszero() is True; they are only included if they have a nonz
 </tbody>
 </table>
 <p>i,f index into states for the initial and final states, and dx = displacement of vacancy
-in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
-:return jumptype: list of indices corresponding to the (original) jump type for each
-symmetry unique jump; useful for constructing a LIMB approximation
-:return starpair: list of tuples of the star indices of the i and f states for each
-symmetry unique jump</p>
+in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return jumptype:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of indices corresponding to the (original) jump type for each</td>
+</tr>
+</tbody>
+</table>
+<p>symmetry unique jump; useful for constructing a LIMB approximation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return starpair:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of tuples of the star indices of the i and f states for each</td>
+</tr>
+</tbody>
+</table>
+<p>symmetry unique jump</p>
 </dd></dl>
 
 <dl class="method">
