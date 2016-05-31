@@ -646,18 +646,26 @@ class Crystal(object):
                 atomindex = i
         if maxlen == 1:
             return
+        # if we don't have spins, just make a big list of lists of 0, otherwise there's too many "if spins None..."
+        if self.spins is None:
+            sp = [[0 for u in atomlist] for atomlist in self.basis]
+        else:
+            sp = self.spins
         # We need to first check against reducibility of atomic positions: try out non-trivial displacements
-        initpos = self.basis[atomindex][0]
+        initpos,initsp = self.basis[atomindex][0], sp[atomindex][0]
         trans = False
-        for newpos in self.basis[atomindex]:
+        for newpos,newsp in zip(self.basis[atomindex], sp[atomindex]):
             t = newpos - initpos
             if np.allclose(t, 0): continue
+            if not np.allclose(initsp,newsp): continue
             trans = True
-            for atomlist in self.basis:
-                for u in atomlist:
-                    if np.all([not np.all(abs(inhalf(u + t - v))<threshold) for v in atomlist]):
+            for atomlist, spinlist in zip(self.basis, sp):
+                for u, sp in zip(atomlist, spinlist):
+                    if np.all([not np.all(abs(inhalf(u + t - v))<threshold) for v in atomlist])
                         trans = False
                         break
+                    # check spins... much more complicated:
+
             if trans: break
         # end the recursion here:
         if not trans: return
