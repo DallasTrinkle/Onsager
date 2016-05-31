@@ -661,6 +661,7 @@ class Crystal(object):
             trans = True
             for atomlist, spinlist in zip(self.basis, sp):
                 for u, s in zip(atomlist, spinlist):
+                    # edited to only check against translations with the same spin:
                     if np.all([not np.all(abs(inhalf(u + t - v))<threshold)
                                for v,vs in zip(atomlist,spinlist)
                                if np.allclose(s,vs)]):
@@ -680,14 +681,19 @@ class Crystal(object):
         self.lattice = np.dot(self.lattice, supercell)
         # 2. update the basis
         newbasis = []
-        for atomlist in self.basis:
+        newspins = []
+        for atomlist,spinlist in zip(self.basis,sp):
             newatomlist = []
-            for u in atomlist:
+            newspinlist = []
+            for u,s in zip(atomlist,spinlist):
                 v = incell(np.dot(invsuper, u))
                 if np.all([not np.allclose(v, v1) for v1 in newatomlist]):
                     newatomlist.append(v)
+                    newspinlist.append(s)
             newbasis.append(newatomlist)
+            newspins.append(newspinlist)
         self.basis = newbasis
+        if self.spins is not None: self.spins = newspins
         # 3. tail recursion:
         self.reduce()
 

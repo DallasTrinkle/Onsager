@@ -623,6 +623,30 @@ class CrystalClassTests(unittest.TestCase):
             self.assertTrue(np.isclose(np.dot(x,x), 0.5*self.a0*self.a0))
 
 
+class CrystalSpinTests(unittest.TestCase):
+    """Tests for crystal class when spins are involved"""
+    longMessage = False
+
+    def setUp(self):
+        self.a0 = 2.
+        self.latt = self.a0*np.eye(3)
+        # RockSalt:
+        self.basis = [[np.array([0., 0., 0.]), np.array([0., 0.5, 0.5]),
+                       np.array([0.5, 0., 0.5]), np.array([0.5, 0.5, 0.])],
+                      [np.array([0., 0., 0.5]), np.array([0., 0.5, 0.]),
+                       np.array([0.5, 0., 0.]), np.array([0.5, 0.5, 0.5])] ]
+        self.spins = [[1, -1, -1, 1], [0, 0, 0, 0]]
+
+    def testUN(self):
+        """Uranium-Nitride structure"""
+        crys = crystal.Crystal(self.latt, self.basis, self.spins, ['U', 'N'])
+        # print(crys)
+        self.assertTrue(crys is not None)
+        self.assertEqual(len(crys.basis), 2)
+        self.assertEqual(len(crys.basis[0]), 2)
+        self.assertEqual(len(crys.basis[1]), 2)
+
+
 class YAMLTests(unittest.TestCase):
     """Tests to make sure we can use YAML to write and read our classes."""
     def testarrayYAML(self):
