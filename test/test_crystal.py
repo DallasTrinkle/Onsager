@@ -628,7 +628,7 @@ class CrystalSpinTests(unittest.TestCase):
     longMessage = False
 
     def setUp(self):
-        self.a0 = 2.
+        self.a0 = 1.0
         self.latt = self.a0*np.eye(3)
         # RockSalt:
         self.basis = [[np.array([0., 0., 0.]), np.array([0., 0.5, 0.5]),
@@ -639,12 +639,25 @@ class CrystalSpinTests(unittest.TestCase):
 
     def testUN(self):
         """Uranium-Nitride structure"""
-        crys = crystal.Crystal(self.latt, self.basis, self.spins, ['U', 'N'])
+        crys = crystal.Crystal(self.latt, self.basis, ['U', 'N'], self.spins)
         # print(crys)
         self.assertTrue(crys is not None)
         self.assertEqual(len(crys.basis), 2)
         self.assertEqual(len(crys.basis[0]), 2)
         self.assertEqual(len(crys.basis[1]), 2)
+
+    def testAddBasis(self):
+        """Uranium-Nitride, with addbasis"""
+        UNcrys = crystal.Crystal(self.latt, self.basis, ['U', 'N'], self.spins)
+        print(UNcrys)
+        Ucrys =  crystal.Crystal(self.latt, self.basis[0], ['U'], self.spins[0])
+        print(Ucrys)
+        UNnewcrys = Ucrys.addbasis(Ucrys.Wyckoffpos(np.dot(Ucrys.invlatt,np.array([0.,0.,0.5*self.a0]))),
+                                                    ['N'], [0,0])
+        print(UNnewcrys)
+        self.assertEqual(len(UNnewcrys.basis), 2)
+        self.assertEqual(len(UNnewcrys.basis[0]), 2)
+        self.assertEqual(len(UNnewcrys.basis[1]), 2)
 
 
 class YAMLTests(unittest.TestCase):

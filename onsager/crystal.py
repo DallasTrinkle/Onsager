@@ -438,7 +438,7 @@ class Crystal(object):
     magnitude either 0 or 1.
     """
 
-    def __init__(self, lattice, basis, spins=None, chemistry=None, NOSYM=False, noreduce=False):
+    def __init__(self, lattice, basis, chemistry=None, spins=None, NOSYM=False, noreduce=False):
         """
         Initialization; starts off with the lattice vector definition and the
         basis vectors. While it does not explicitly store the specific chemical
@@ -451,10 +451,10 @@ class Crystal(object):
             crystalline basis vectors, in unit cell coordinates. If a list of lists, then
             there are multiple chemical elements, with each list corresponding to a unique
             element
+        :param chemistry: (optional) list of names of chemical elements
         :param spins: (optional) list of numbers (complex) / vectors or list of list of same
             spins for individual atoms; if not None, needs to match the basis. Can either be
             scalars or vectors, corresponding to collinear or non-collinear magnetism
-        :param chemistry: (optional) list of names of chemical elements
         :param NOSYM: turn off all symmetry finding (except identity)
         :param noreduce: do not attempt to reduce the atomic basis
         """
@@ -542,7 +542,7 @@ class Crystal(object):
         if 'spins' in yamldict: spins = yamldict['spins']
         chem = None
         if 'chemistry' in yamldict: chem = yamldict['chemistry']
-        return cls((lattice_constant*yamldict['lattice']).T, yamldict['basis'], spins, chem)
+        return cls((lattice_constant*yamldict['lattice']).T, yamldict['basis'], chem, spins)
 
     def simpleYAML(self, a0=1.0):
         """
@@ -831,17 +831,19 @@ class Crystal(object):
                 raise TypeError('strain is not a 3x3 tensor')
         return Crystal(np.dot(np.eye(3) + eps, self.lattice), self.basis)
 
-    def addbasis(self, basis, chemistry=None):
+    def addbasis(self, basis, chemistry=None, spins=None):
         """
         Returns a new Crystal object that contains additional sites (assumed to be new chemistry).
         This is intended to "add in" interstitial sites. Note: if the symmetry is to be
         maintained, should be the output from Wyckoffpos().
 
         :param basis: list (or list of lists) of new sites
-        :paran chemistry: (optional) list of chemistry names
+        :param chemistry: (optional) list of chemistry names
+        :param spins: (optional) list of spins
         :return: new Crystal object, with additional sites
         """
         if type(basis) is not list: raise TypeError('basis needs to be a list or list of lists')
+        if spins is not None and type(spins) is not list: raise TypeError('spins needs to be a list or list of lists')
         if type(basis[0]) == np.ndarray:
             for u in basis:
                 if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, basis))
@@ -852,9 +854,23 @@ class Crystal(object):
                 for u in elem:
                     if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, elem))
             newbasis = [[incell(u) for u in atombasis] for atombasis in basis]
-        if chemistry is None: newchemistry = self.chemistry + [i + self.Nchem for i in range(len(basis))]
+        if chemistry is None: newchemistry = self.chemistry + [i + self.Nchem for i in range(len(newbasis))]
         else: newchemistry = self.chemistry + chemistry
-        return Crystal(self.lattice, self.basis + newbasis, newchemistry)
+        # a little complicated: need to deal with (1) no spin at all; (2) having no spin and adding;
+        # (3) having spin and adding something without; (4) having spin and adding it.
+        if spins is not None:
+            if type(spins[0]) is not list: sp = [spins]
+            else: sp = spins
+            if self.spins is None:
+                newspins = [[0 for u in atomlist] for atomlist in self.basis] + sp
+            else:
+                newspins = self.spins + sp
+        else:
+            if self.spins is None:
+                newspins = None
+            else:
+                newspins = self.spins + [[0 for u in atomlist] for atomlist in newbasis]
+        return Crystal(self.lattice, self.basis + newbasis, newchemistry, newspins)
 
     def pos2cart(self, lattvec, ind):
         """
