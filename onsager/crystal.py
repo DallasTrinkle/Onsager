@@ -660,12 +660,12 @@ class Crystal(object):
             if not np.allclose(initsp,newsp): continue
             trans = True
             for atomlist, spinlist in zip(self.basis, sp):
-                for u, sp in zip(atomlist, spinlist):
-                    if np.all([not np.all(abs(inhalf(u + t - v))<threshold) for v in atomlist])
+                for u, s in zip(atomlist, spinlist):
+                    if np.all([not np.all(abs(inhalf(u + t - v))<threshold)
+                               for v,vs in zip(atomlist,spinlist)
+                               if np.allclose(s,vs)]):
                         trans = False
                         break
-                    # check spins... much more complicated:
-
             if trans: break
         # end the recursion here:
         if not trans: return
