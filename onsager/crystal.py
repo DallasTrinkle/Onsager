@@ -12,6 +12,7 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 import collections
+import copy
 import yaml ### use crystal.yaml to call--may need to change in the future
 from functools import reduce
 
@@ -432,9 +433,12 @@ def Voigtstrain(e1, e2, e3, e4, e5, e6):
 class Crystal(object):
     """
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.
+    Now includes optional spins. These can be vectors or "scalar" spins, for which we need
+    to consider a phase factor. In general, they can be complex. Ideally, they should have
+    magnitude either 0 or 1.
     """
 
-    def __init__(self, lattice, basis, chemistry=None, NOSYM=False, noreduce=False):
+    def __init__(self, lattice, basis, spins=None, chemistry=None, NOSYM=False, noreduce=False):
         """
         Initialization; starts off with the lattice vector definition and the
         basis vectors. While it does not explicitly store the specific chemical
@@ -443,10 +447,13 @@ class Crystal(object):
         :param lattice: array[3,3] or list of array[3]
             lattice vectors; if [3,3] array, then the vectors need to be in *column* format
             so that the first lattice vector is lattice[:,0]
-        :param basis : list of array[3] or list of list of array[3]
+        :param basis: list of array[3] or list of list of array[3]
             crystalline basis vectors, in unit cell coordinates. If a list of lists, then
             there are multiple chemical elements, with each list corresponding to a unique
             element
+        :param spins: (optional) list of numbers (complex) / vectors or list of list of same
+            spins for individual atoms; if not None, needs to match the basis. Can either be
+            scalars or vectors, corresponding to collinear or non-collinear magnetism
         :param chemistry: (optional) list of names of chemical elements
         :param NOSYM: turn off all symmetry finding (except identity)
         :param noreduce: do not attempt to reduce the atomic basis
@@ -471,6 +478,14 @@ class Crystal(object):
                 for u in elem:
                     if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, elem))
             self.basis = [[incell(u) for u in atombasis] for atombasis in basis]
+        if spins is not None:
+            if type(spins) is not list: raise TypeError('spins needs to be a list or list of lists')
+            if type(spins[0]) is list:
+                self.spins = copy.deepcopy(spins)
+            else:
+                self.spins = [copy.deepcopy(spins)]
+        else:
+            self.spins = None
         if not noreduce: self.reduce()  # clean up basis as needed
         self.minlattice()  # clean up lattice vectors as needed
         self.invlatt = np.linalg.inv(self.lattice)
@@ -495,7 +510,8 @@ class Crystal(object):
     def __repr__(self):
         """String representation of crystal (lattice + basis)"""
         return 'Crystal(' + repr(self.lattice).replace('\n','').replace('\t','') + ',' + \
-               repr(self.basis) + ', chemistry=' + repr(self.chemistry) + ')'
+               repr(self.basis) + ', spins=' + repr(self.spins) + \
+               ', chemistry=' + repr(self.chemistry) + ')'
 
     def __str__(self):
         """Human-readable version of crystal (lattice + basis)"""
@@ -503,8 +519,10 @@ class Crystal(object):
             self.lattice.T[0], self.lattice.T[1], self.lattice.T[2])
         for chemind, atoms in enumerate(self.basis):
             for atomind, pos in enumerate(atoms):
-                str_rep = str_rep + "\n  ({}) {}.{} = {}".format(self.chemistry[chemind],
-                                                               chemind, atomind, pos)
+                if self.spins is None: s=''
+                else: s=' sp={}'.format(self.spins[chemind][atomind])
+                str_rep = str_rep + "\n  ({}) {}.{} = {}{}".format(self.chemistry[chemind],
+                                                               chemind, atomind, pos, s)
         return str_rep
 
     @classmethod
@@ -520,9 +538,11 @@ class Crystal(object):
         if 'basis' not in yamldict: raise IndexError('{} does not contain "basis"'.format(yamldict))
         lattice_constant = 1.
         if 'lattice_constant' in yamldict: lattice_constant = yamldict['lattice_constant']
+        spins=None
+        if 'spins' in yamldict: spins = yamldict['spins']
         chem = None
         if 'chemistry' in yamldict: chem = yamldict['chemistry']
-        return cls((lattice_constant*yamldict['lattice']).T, yamldict['basis'], chem)
+        return cls((lattice_constant*yamldict['lattice']).T, yamldict['basis'], spins, chem)
 
     def simpleYAML(self, a0=1.0):
         """
@@ -533,6 +553,7 @@ class Crystal(object):
         return yaml.dump({'lattice_constant': a0,
                           'lattice': self.lattice.T/a0,
                           'basis': self.basis,
+                          'spins': self.spins,
                           'chemistry': self.chemistry})
 
     def chemindex(self, chemistry):
