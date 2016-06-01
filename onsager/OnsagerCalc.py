@@ -22,13 +22,11 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 from scipy.linalg import pinv2, solve
+import copy, collections, itertools
+from functools import reduce
 from onsager import GFcalc
 from onsager import crystal
 from onsager import crystalStars as stars
-from functools import reduce
-import copy
-import collections
-import itertools
 
 
 class Interstitial(object):

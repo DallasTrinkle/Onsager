@@ -648,6 +648,38 @@ class CrystalSpinTests(unittest.TestCase):
         self.assertEqual(len(crys.Wyckoff), 2,
                          msg='Not matching Wyckoff?\n{}\n{}'.format(crys.Wyckoff,crys))
 
+    def testmaptrans(self):
+        """Does our map translation operate correctly with spins?"""
+        basis = [[np.array([0,0,0])]]
+        spins = [[1]]
+        trans, indexmap = crystal.maptranslation(basis, basis, spins, spins)
+        self.assertTrue(np.allclose(trans, np.array([0,0,0])))
+        self.assertEqual(indexmap, [[0]])
+
+        oldbasis = [[np.array([0.2,0,0])]]
+        newbasis = [[np.array([-0.2,0,0])]]
+        oldspins = [[1]]
+        newspins = [[-1]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis, oldspins, newspins)
+        self.assertEqual(indexmap, None)  # should NOT be able to do this mapping with spins!
+
+        oldbasis = [[np.array([0.,0.,0.]), np.array([1./3.,2./3.,1./2.])]]
+        newbasis = [[np.array([0.,0.,0.]), np.array([-1./3.,-2./3.,-1./2.])]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
+        self.assertTrue(np.allclose(trans, np.array([1./3.,-1./3.,-1./2.])))
+        self.assertEqual(indexmap, [[1,0]])
+
+        oldbasis = [[np.array([0.,0.,0.])], [np.array([1./3.,2./3.,1./2.]), np.array([2./3.,1./3.,1./2.])]]
+        newbasis = [[np.array([0.,0.,0.])], [np.array([2./3.,1./3.,1./2.]), np.array([1./3.,2./3.,1./2.])]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
+        self.assertTrue(np.allclose(trans, np.array([0.,0.,0.])))
+        self.assertEqual(indexmap, [[0],[1,0]])
+
+        oldbasis = [[np.array([0.,0.,0.]), np.array([1./3.,2./3.,1./2.])]]
+        newbasis = [[np.array([0.,0.,0.]), np.array([-1./4.,-1./2.,-1./2.])]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
+        self.assertEqual(indexmap, None)
+
     def testAddBasis(self):
         """Uranium-Nitride, with addbasis"""
         UNcrys = crystal.Crystal(self.latt, self.basis, ['U', 'N'], self.spins)

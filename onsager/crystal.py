@@ -11,8 +11,7 @@ Class to store definition of a crystal, along with some analysis
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-import collections
-import copy
+import collections, copy, itertools
 import yaml ### use crystal.yaml to call--may need to change in the future
 from functools import reduce
 
@@ -42,18 +41,23 @@ def inhalf(vec):
     return vec - np.floor(vec + 0.5)
 
 
-def maptranslation(oldpos, newpos, threshold=1e-8):
+def maptranslation(oldpos, newpos, oldspins=None, newspins=None, threshold=1e-8):
     """
     Given a list of transformed positions, identify if there's a translation vector
     that maps from the current positions to the new position.
 
     :param oldpos: list of list of array[3]
     :param newpos: list of list of array[3], same layout as oldpos
+    :param oldspins: (optional) list of list of numbers/arrays
+    :param newspins: (optional) list of list of numbers/arrays
     :return: translation (array[3]), mapping (list of list of indices)
 
     The mapping specifies the index that the *translated* atom corresponds to in the
     original position set. If unable to construct a mapping, the mapping return is
     None; the translation vector will be meaningless.
+
+    If old/newspins are given then ONLY mapping thats maintain spin are considered.
+    This means that a loop is needed to consider possible spin phase factors.
     """
     # type-checking:
     if __debug__:
@@ -64,6 +68,21 @@ def maptranslation(oldpos, newpos, threshold=1e-8):
             if type(a) is not list: raise TypeError("element of oldpos {} is not a list".format(a))
             if type(b) is not list: raise TypeError("element of newpos {} is not a list".format(b))
             if len(a) != len(b): raise IndexError("{} and {} do not have the same length".format(a, b))
+        if (oldspins is None) != (newspins is None): raise TypeError('give both or neither spin arguments')
+        if oldspins is not None:
+            if type(oldspins) is not list: raise TypeError('oldspins is not a list')
+            if type(newspins) is not list: raise TypeError('newspins is not a list')
+            if len(oldspins) != len(newspins): raise IndexError(
+                "{} and {} do not have the same length".format(oldspins, newspins))
+            for a, b in zip(oldspins, newspins):
+                if type(a) is not list: raise TypeError("element of oldspins {} is not a list".format(a))
+                if type(b) is not list: raise TypeError("element of newspins {} is not a list".format(b))
+                if len(a) != len(b): raise IndexError("{} and {} do not have the same length".format(a, b))
+    if oldspins is None:
+        oldspins = [[0 for u in atomlist] for atomlist in oldpos]
+    if newspins is None:
+        newspins = oldspins
+
     # Work with the shortest possible list for identifying translations
     maxlen = 0
     atomindex = 0
@@ -77,12 +96,13 @@ def maptranslation(oldpos, newpos, threshold=1e-8):
         foundmap = True
         # now check against all the others, and construct the mapping
         indexmap = []
-        for atomlist0, atomlist1 in zip(oldpos, newpos):
+        for atomlist0, spinlist0, atomlist1, spinlist1 in zip(oldpos, oldspins, newpos, newspins):
             # work through the "new" positions
             if not foundmap: break
             maplist = []
-            for rua in atomlist1:
-                for j, uj in enumerate(atomlist0):
+            for rua, sp1 in zip(atomlist1, spinlist1):
+                for j, uj, sp0 in zip(itertools.count(), atomlist0, spinlist0):
+                    if not np.allclose(sp0, sp1): continue  # only allow maps that have same spin
                     if np.all(abs(inhalf(uj - rua - trans))<threshold):
                         maplist.append(j)
                         break
