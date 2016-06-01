@@ -647,6 +647,11 @@ class CrystalSpinTests(unittest.TestCase):
         self.assertEqual(len(crys.basis[1]), 2)
         self.assertEqual(len(crys.Wyckoff), 2,
                          msg='Not matching Wyckoff?\n{}\n{}'.format(crys.Wyckoff,crys))
+        tetlatt = self.a0*np.array([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.01]])
+        tetcrys = crystal.Crystal(tetlatt, self.basis, ['U', 'N'])
+        # the tetragonal distortion has 1 U and 1 N (when there's no spin), so the group op list
+        # is twice as big, and includes translations for each
+        self.assertEqual(len(crys.G), 2*len(tetcrys.G))
 
     def testmaptrans(self):
         """Does our map translation operate correctly with spins?"""
@@ -681,15 +686,15 @@ class CrystalSpinTests(unittest.TestCase):
     def testAddBasis(self):
         """Uranium-Nitride, with addbasis"""
         UNcrys = crystal.Crystal(self.latt, self.basis, ['U', 'N'], self.spins)
-        print(UNcrys)
         Ucrys =  crystal.Crystal(self.latt, self.basis[0], ['U'], self.spins[0])
-        print(Ucrys)
         UNnewcrys = Ucrys.addbasis(Ucrys.Wyckoffpos(Ucrys.cart2unit(np.array([0.,0.,0.5*self.a0]))[1]),
                                                     ['N'], [0,0])
-        print(UNnewcrys)
-        self.assertEqual(len(UNnewcrys.basis), 2)
-        self.assertEqual(len(UNnewcrys.basis[0]), 2)
-        self.assertEqual(len(UNnewcrys.basis[1]), 2)
+        self.assertEqual(len(UNnewcrys.basis), 2,
+                         msg="Failed? {}\n+ basis:\n{}\ndoesn't match:\n{}".format(Ucrys,UNnewcrys,UNcrys))
+        self.assertEqual(len(UNnewcrys.basis[0]), 2,
+                         msg="Failed? {}\n+ basis:\n{}\ndoesn't match:\n{}".format(Ucrys,UNnewcrys,UNcrys))
+        self.assertEqual(len(UNnewcrys.basis[1]), 2,
+                         msg="Failed? {}\n+ basis:\n{}\ndoesn't match:\n{}".format(Ucrys,UNnewcrys,UNcrys))
 
 
 class YAMLTests(unittest.TestCase):
