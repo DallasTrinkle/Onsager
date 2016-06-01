@@ -663,22 +663,20 @@ class CrystalSpinTests(unittest.TestCase):
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis, oldspins, newspins)
         self.assertEqual(indexmap, None)  # should NOT be able to do this mapping with spins!
 
-        oldbasis = [[np.array([0.,0.,0.]), np.array([1./3.,2./3.,1./2.])]]
-        newbasis = [[np.array([0.,0.,0.]), np.array([-1./3.,-2./3.,-1./2.])]]
-        trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
-        self.assertTrue(np.allclose(trans, np.array([1./3.,-1./3.,-1./2.])))
-        self.assertEqual(indexmap, [[1,0]])
-
-        oldbasis = [[np.array([0.,0.,0.])], [np.array([1./3.,2./3.,1./2.]), np.array([2./3.,1./3.,1./2.])]]
-        newbasis = [[np.array([0.,0.,0.])], [np.array([2./3.,1./3.,1./2.]), np.array([1./3.,2./3.,1./2.])]]
-        trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
+        oldbasis = [[np.array([0.,0.,0.]), np.array([0.,0.5,0.5]),
+                     np.array([0.5,0.,0.5]), np.array([0.5,0.5,0.])]]
+        newbasis = oldbasis
+        oldspins,newspins = [[2,-2,-1,1]], [[2,-2,-1,1]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis, oldspins, newspins)
         self.assertTrue(np.allclose(trans, np.array([0.,0.,0.])))
-        self.assertEqual(indexmap, [[0],[1,0]])
+        self.assertEqual(indexmap, [[0,1,2,3]])
 
-        oldbasis = [[np.array([0.,0.,0.]), np.array([1./3.,2./3.,1./2.])]]
-        newbasis = [[np.array([0.,0.,0.]), np.array([-1./4.,-1./2.,-1./2.])]]
-        trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
-        self.assertEqual(indexmap, None)
+        oldspins,newspins = [[2,-2,-1,1]], [[1,-1,-2,2]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis, oldspins, newspins)
+        self.assertTrue(np.allclose(np.abs(trans[0]), 0.5))
+        self.assertTrue(np.allclose(np.abs(trans[1]), 0.5))
+        self.assertTrue(np.allclose(np.abs(trans[2]), 0.))
+        self.assertEqual(indexmap, [[3,2,1,0]])
 
     def testAddBasis(self):
         """Uranium-Nitride, with addbasis"""
