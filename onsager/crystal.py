@@ -12,6 +12,7 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 import collections, copy, itertools
+from numbers import Number
 import yaml ### use crystal.yaml to call--may need to change in the future
 from functools import reduce
 
@@ -228,6 +229,22 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
                        [ [ x for i,x in sorted([(y,j) for j,y in enumerate(atomlist)])]
                          for atomlist in self.indexmap])
 
+    @staticmethod
+    def optype(rot):
+        """Returns the type of group operation (single integer) and eigenvectors.
+        1 = identity
+        2, 3, 4, 6 = n- fold rotation around an axis
+        negative = rotation + mirror operation, perpendicular to axis
+        "special cases": -1 = mirror, -2 = inversion
+        :param rot: rotation matrix (can be the integer rot)
+        :return: type (integer)
+        """
+        tr = np.int(rot.trace())
+        if np.linalg.det(rot) > 0:
+            return (2, 3, 4, 6, 1)[tr + 1]  # trace determines the rotation type
+        else:
+            return (-2, -3, -4, -6, -1)[tr + 3]  # trace determines the rotation type
+
     def eigen(self):
         """Returns the type of group operation (single integer) and eigenvectors.
         1 = identity
@@ -246,13 +263,9 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         if __debug__:
             if not self.__sane__():
                 raise ValueError('Bad GroupOp:\n{}'.format(self))
+        optype = self.optype(self.rot)
+        det = 1 if optype>0 else -1
         tr = np.int(self.rot.trace())
-        if np.linalg.det(self.rot) > 0:
-            det = 1
-            optype = (2, 3, 4, 6, 1)[tr + 1] # trace determines the rotation type
-        else:
-            det = -1
-            optype = (-2, -3, -4, -6, -1)[tr + 3] # trace determines the rotation type
         # two trivial cases: identity, inversion:
         if optype == 1 or optype == -2:
             return optype, np.eye(3)
@@ -523,7 +536,7 @@ class Crystal(object):
         self.BZG = self.genBZG()
         self.center()  # should do before gengroup so that inversion is centered at origin
         if NOSYM: self.G = frozenset([GroupOp.ident(self.basis)])
-        else: self.G = self.gengroup()  # do before genpoint
+        else: self.G = self.gengroup  # do before genpoint
         self.pointG = self.genpoint()
         self.Wyckoff = self.genWyckoffsets()
 
@@ -668,18 +681,18 @@ class Crystal(object):
             return
         # if we don't have spins, just make a big list of lists of 0, otherwise there's too many "if spins None..."
         if self.spins is None:
-            sp = [[0 for u in atomlist] for atomlist in self.basis]
+            spins = [[0 for u in atomlist] for atomlist in self.basis]
         else:
-            sp = self.spins
+            spins = self.spins
         # We need to first check against reducibility of atomic positions: try out non-trivial displacements
-        initpos,initsp = self.basis[atomindex][0], sp[atomindex][0]
+        initpos,initsp = self.basis[atomindex][0], spins[atomindex][0]
         trans = False
-        for newpos,newsp in zip(self.basis[atomindex], sp[atomindex]):
+        for newpos,newsp in zip(self.basis[atomindex], spins[atomindex]):
             t = newpos - initpos
             if np.allclose(t, 0): continue
             if not np.allclose(initsp,newsp): continue
             trans = True
-            for atomlist, spinlist in zip(self.basis, sp):
+            for atomlist, spinlist in zip(self.basis, spins):
                 for u, s in zip(atomlist, spinlist):
                     # edited to only check against translations with the same spin:
                     if np.all([not np.all(abs(inhalf(u + t - v))<threshold)
@@ -702,7 +715,7 @@ class Crystal(object):
         # 2. update the basis
         newbasis = []
         newspins = []
-        for atomlist,spinlist in zip(self.basis,sp):
+        for atomlist,spinlist in zip(self.basis,spins):
             newatomlist = []
             newspinlist = []
             for u,s in zip(atomlist,spinlist):
@@ -806,12 +819,21 @@ class Crystal(object):
         # ... and use a list comprehension to only keep those that still remain
         return np.array([0.5 * vec for vec in BZG if self.inBZ(vec, BZG, threshold=0)])
 
+    @property
     def gengroup(self):
         """
-        Generate all of the space group operations.
+        Generate all of the space group operations. Now handles spins! Doesn't store
+        spin phase factors for each group operation, though.
 
         :return: list of group operations
         """
+        def rootsofunity(optype):
+            """Return an iterable of roots of unity to try for GroupOp type optype"""
+            # always include negation
+            N = (2,2,6,4,0,6)[abs(optype)-1]  # (+-1, +-2, +-3, +-4, .., +-6)
+            if N==2: return (1,-1)
+            return tuple(np.exp(n*np.pi*2j/N) for n in range(N))
+
         groupops = []
         supercellvect = [np.array((n0, n1, n2))
                          for n0 in range(-1, 2)
@@ -821,22 +843,37 @@ class Crystal(object):
         matchvect = [[u for u in supercellvect
                       if np.isclose(np.dot(u, np.dot(self.metric, u)),
                                     self.metric[d, d])] for d in range(3)]
+        # if we don't have spins, just make a big list of lists of 0, otherwise there's too many "if spins None..."
+        if self.spins is None:
+            spins = [[0 for u in atomlist] for atomlist in self.basis]
+        else:
+            spins = self.spins
         for supercell in (np.array((r0, r1, r2)).T
                       for r0 in matchvect[0]
                       for r1 in matchvect[1]
                       for r2 in matchvect[2]
                       if abs(np.inner(r0, np.cross(r1, r2))) == 1):
             if np.allclose(np.dot(supercell.T, np.dot(self.metric, supercell)), self.metric):
-                # possible operation--need to check the atomic positions
-                trans, indexmap = maptranslation(self.basis,
-                                                 [[np.dot(supercell, u)
-                                                   for u in atomlist]
-                                                  for atomlist in self.basis])
-                if indexmap is not None:
-                    groupops.append(GroupOp(supercell,
-                                            trans,
-                                            np.dot(self.lattice, np.dot(supercell, self.invlatt)),
-                                            indexmap))
+                # possible operation--need to check the atomic positions with spin phase factors
+                optype = GroupOp.optype(supercell)
+                cartrot = np.dot(self.lattice, np.dot(supercell, self.invlatt))
+                # apply cartesian rotation to spins... if they're vectors; else, do nothing
+                rotspins = [ [ s if isinstance(s,Number) else np.dot(cartrot,s)
+                               for s in spinlist]
+                             for spinlist in spins]
+                # if det * tr < -1 or det * tr > 3: return False
+                for phase in rootsofunity(optype):
+                    newspins = [ [phase*s for s in spinlist] for spinlist in rotspins]
+                    trans, indexmap = maptranslation(self.basis,
+                                                     [[np.dot(supercell, u)
+                                                       for u in atomlist]
+                                                      for atomlist in self.basis],
+                                                     spins, newspins)
+                    if indexmap is not None:
+                        groupops.append(GroupOp(supercell,
+                                                trans,
+                                                cartrot,
+                                                indexmap))
         return frozenset(groupops)
 
     def strain(self, eps):
