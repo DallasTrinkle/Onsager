@@ -709,6 +709,8 @@ class Crystal(object):
             supercell = np.eye(3)
             supercell[:, d] = t[:]
             if not np.allclose(np.linalg.det(supercell), 0):
+                if np.linalg.det(supercell) < 0:
+                    supercell[:,d-1] = -supercell[:,d-1]
                 break
         invsuper = np.linalg.inv(supercell)
         self.lattice = np.dot(self.lattice, supercell)
