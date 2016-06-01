@@ -645,6 +645,8 @@ class CrystalSpinTests(unittest.TestCase):
         self.assertEqual(len(crys.basis), 2)
         self.assertEqual(len(crys.basis[0]), 2)
         self.assertEqual(len(crys.basis[1]), 2)
+        self.assertEqual(len(crys.Wyckoff), 2,
+                         msg='Not matching Wyckoff?\n{}\n{}'.format(crys.Wyckoff,crys))
 
     def testAddBasis(self):
         """Uranium-Nitride, with addbasis"""
@@ -652,7 +654,7 @@ class CrystalSpinTests(unittest.TestCase):
         print(UNcrys)
         Ucrys =  crystal.Crystal(self.latt, self.basis[0], ['U'], self.spins[0])
         print(Ucrys)
-        UNnewcrys = Ucrys.addbasis(Ucrys.Wyckoffpos(np.dot(Ucrys.invlatt,np.array([0.,0.,0.5*self.a0]))),
+        UNnewcrys = Ucrys.addbasis(Ucrys.Wyckoffpos(Ucrys.cart2unit(np.array([0.,0.,0.5*self.a0]))[1]),
                                                     ['N'], [0,0])
         print(UNnewcrys)
         self.assertEqual(len(UNnewcrys.basis), 2)
