@@ -832,9 +832,8 @@ class Crystal(object):
         def rootsofunity(optype):
             """Return an iterable of roots of unity to try for GroupOp type optype"""
             # always include negation
-            N = (2,2,6,4,0,6)[abs(optype)-1]  # (+-1, +-2, +-3, +-4, .., +-6)
-            if N==2: return (1,-1)
-            return tuple(np.exp(n*np.pi*2j/N) for n in range(N))
+            rot2, rot4, rot6 = (1,-1), (1,-1,1j,-1j), tuple(np.exp(n*np.pi*2j/6) for n in range(6))
+            return (rot2,rot2,rot6,rot4,None,rot6)[abs(optype)-1]  # (+-1, +-2, +-3, +-4, .., +-6)
 
         groupops = []
         supercellvect = [np.array((n0, n1, n2))
@@ -859,8 +858,9 @@ class Crystal(object):
                 # possible operation--need to check the atomic positions with spin phase factors
                 optype = GroupOp.optype(supercell)
                 cartrot = np.dot(self.lattice, np.dot(supercell, self.invlatt))
+                detrot = 1 if optype>0 else -1
                 # apply cartesian rotation to spins... if they're vectors; else, do nothing
-                rotspins = [ [ s if isinstance(s,Number) else np.dot(cartrot,s)
+                rotspins = [ [ detrot*s if isinstance(s,Number) else np.dot(cartrot,s)
                                for s in spinlist]
                              for spinlist in spins]
                 # if det * tr < -1 or det * tr > 3: return False
