@@ -43,9 +43,10 @@ class Supercell(object):
         self.N = self.crys.N
         self.chemistry = [crys.chemistry[n] if n<crys.Nchem else '' for n in range(self.Nchem)]
         self.size, self.translist = self.maketrans(self.super)
+        self.pos = self.makesites()
         self.G = self.gengroup()
 
-    __copyattr__ = ('chemistry', 'size', 'N', 'translist')
+    __copyattr__ = ('chemistry', 'N', 'size', 'translist', 'pos', 'G')
     def copy(self):
         """
         Make a copy of the supercell; initializes, then copies over copyattr's.
@@ -103,13 +104,24 @@ class Supercell(object):
                 trans.append(tv)
                 transset.add(ttup)
         if len(trans) != N:
-            raise ArithmeticError('Somehow did not generate the correct number of transitions? {}!={}'.format(N, len(trans)))
+            raise ArithmeticError('Somehow did not generate the correct number of translations? {}!={}'.format(N, len(trans)))
         return N, trans
+
+    def makesites(self):
+        """
+        Generate the array corresponding to the sites; the indexing is based on the translations
+        and the atomindices in crys. These may not all be filled when the supercell is finished.
+        :return pos: array [N*size, 3] of (supercell) unit cell positions.
+        """
+        pos = np.zeros((self.N*self.size, 3))
+        return pos
 
     def gengroup(self):
         """
         Generate the group operations internal to the supercell
         :return Gset: set of GroupOps
         """
-        return set([crystal.GroupOp.ident([[i for i in range(self.N*self.size)]])])
+        Gset = set()
+
+        return frozenset([crystal.GroupOp.ident([[i for i in range(self.N*self.size)]])])
 

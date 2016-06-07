@@ -55,8 +55,13 @@ class TypeTests(unittest.TestCase):
             size,tlist = supercell.Supercell.maketrans(randsuper)
             self.assertTrue(len(tlist)==size)
 
+    def testSites(self):
+        """Do we have the correct sites in our supercell?"""
+        super = supercell.Supercell(self.crys, self.one)
+        self.assertTrue(np.allclose(super.pos[0], np.zeros(3)))
+
     def testGroupOps(self):
-        """Do we correctly generate group operations inside the supercell"""
+        """Do we correctly generate group operations inside the supercell?"""
         for nmat in (self.one, 2*self.one, np.array([[0,1,1],[1,0,1],[1,1,0]])):
             super = supercell.Supercell(self.crys, nmat)
             self.assertEqual(len(super.G), len(self.crys.G)*super.size)
