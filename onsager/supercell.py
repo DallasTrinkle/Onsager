@@ -88,15 +88,19 @@ class Supercell(object):
         N= abs(int(np.round(np.linalg.det(super))))
         invsuper = np.round(np.linalg.inv(super)*N).astype(int)
         maxN = abs(super).max()
+        transset = set()
         trans = []
         for nvect in [np.array((n0,n1,n2))
                       for n0 in range(-maxN,maxN+1)
                       for n1 in range(-maxN,maxN+1)
                       for n2 in range(-maxN,maxN+1)]:
-            tv = np.dot(invsuper, nvect)
-            if np.all(tv>=0) and np.all(tv<N): trans.append(tv)
+            tv = np.dot(invsuper, nvect)%N
+            ttup = tuple(tv)
+            # if np.all(tv>=0) and np.all(tv<N): trans.append(tv)
+            if ttup not in transset:
+                trans.append(tv)
+                transset.add(ttup)
         if len(trans) != N:
-            print(trans)
             raise ArithmeticError('Somehow did not generate the correct number of transitions? {}!={}'.format(N, len(trans)))
         return N, trans
 

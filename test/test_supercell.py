@@ -48,5 +48,11 @@ class TypeTests(unittest.TestCase):
         self.assertEqual(size, 2)
         for tv in tlist:
             self.assertTrue(np.all(tv == 0) or np.all(tv == 1))
+        # Try making a whole series of supercells; if they fail, will raise an Arithmetic exception:
+        for n in range(100):
+            randsuper = np.random.randint(-5,6,size=(3,3))
+            if np.allclose(np.linalg.det(randsuper), 0): continue
+            size,tlist = supercell.Supercell.maketrans(randsuper)
+            self.assertTrue(len(tlist)==size)
 
 
