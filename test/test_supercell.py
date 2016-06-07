@@ -35,7 +35,7 @@ class TypeTests(unittest.TestCase):
         self.assertEqual(super, super2, msg="{}\n!=\n{}".format(super, super2))
 
     def testTrans(self):
-        """Test the code that generates the translations"""
+        """Can we correctly generates the translations?"""
         size,tlist = supercell.Supercell.maketrans(self.one)
         self.assertEqual(size,1)
         self.assertTrue(np.all(tlist[0]==0))
@@ -54,5 +54,14 @@ class TypeTests(unittest.TestCase):
             if np.allclose(np.linalg.det(randsuper), 0): continue
             size,tlist = supercell.Supercell.maketrans(randsuper)
             self.assertTrue(len(tlist)==size)
+
+    def testGroupOps(self):
+        """Do we correctly generate group operations inside the supercell"""
+        for nmat in (self.one, 2*self.one, np.array([[0,1,1],[1,0,1],[1,1,0]])):
+            super = supercell.Supercell(self.crys, nmat)
+            self.assertEqual(len(super.G), len(self.crys.G)*super.size)
+
+
+
 
 

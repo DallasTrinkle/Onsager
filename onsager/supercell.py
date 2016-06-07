@@ -40,10 +40,12 @@ class Supercell(object):
         self.super = super.copy()
         self.interstitial = copy.deepcopy(interstitial)
         self.Nchem = crys.Nchem+1 if Nchem<crys.Nchem else Nchem
+        self.N = self.crys.N
         self.chemistry = [crys.chemistry[n] if n<crys.Nchem else '' for n in range(self.Nchem)]
         self.size, self.translist = self.maketrans(self.super)
+        self.G = self.gengroup()
 
-    __copyattr__ = ('chemistry', 'size', 'translist')
+    __copyattr__ = ('chemistry', 'size', 'N', 'translist')
     def copy(self):
         """
         Make a copy of the supercell; initializes, then copies over copyattr's.
@@ -103,4 +105,11 @@ class Supercell(object):
         if len(trans) != N:
             raise ArithmeticError('Somehow did not generate the correct number of transitions? {}!={}'.format(N, len(trans)))
         return N, trans
+
+    def gengroup(self):
+        """
+        Generate the group operations internal to the supercell
+        :return Gset: set of GroupOps
+        """
+        return set([crystal.GroupOp.ident([[i for i in range(self.N*self.size)]])])
 

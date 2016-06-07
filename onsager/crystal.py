@@ -179,12 +179,13 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
 
     def __hash__(self):
         """Hash, so that we can make sets of group operations"""
-        ### we are a little conservative, and only use the rotation to define the hash. This means
-        ### we will get collisions for the same rotation but different translations. The reason is
+        ### we are a little conservative, and only use the rotation and indexmap to define the hash. This means
+        ### we will get collisions for the same rotation but different unit cell translations. The reason is
         ### that __eq__ uses "isclose" on our translations, and we don't have a good way to handle
         ### that in a hash function. We lose a little bit on efficiency if we construct a set that
         ### has a whole lot of translation operations, but that's not usually what we will do.
-        return hash(self.rot.data.tobytes())
+        # return hash(self.rot.data.tobytes())
+        return hash(self.rot.data.tobytes()) ^ hash(self.indexmap)
 
     def __add__(self, other):
         """Add a translation to our group operation"""
@@ -535,7 +536,7 @@ class Crystal(object):
         self.BZG = self.genBZG()
         self.center()  # should do before gengroup so that inversion is centered at origin
         if NOSYM: self.G = frozenset([GroupOp.ident(self.basis)])
-        else: self.G = self.gengroup  # do before genpoint
+        else: self.G = self.gengroup()  # do before genpoint
         self.pointG = self.genpoint()
         self.Wyckoff = self.genWyckoffsets()
 
@@ -820,7 +821,6 @@ class Crystal(object):
         # ... and use a list comprehension to only keep those that still remain
         return np.array([0.5 * vec for vec in BZG if self.inBZ(vec, BZG, threshold=0)])
 
-    @property
     def gengroup(self):
         """
         Generate all of the space group operations. Now handles spins! Doesn't store
