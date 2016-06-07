@@ -85,7 +85,7 @@ class Supercell(object):
         :return size: integer, corresponding to number of unit cells
         :return trans: list of integer vectors (to be divided by `size`) corresponding to unit cell positions
         """
-        N= abs(int(np.linalg.det(super)))
+        N= abs(int(np.round(np.linalg.det(super))))
         invsuper = np.round(np.linalg.inv(super)*N).astype(int)
         maxN = abs(super).max()
         trans = []
@@ -96,6 +96,7 @@ class Supercell(object):
             tv = np.dot(invsuper, nvect)
             if np.all(tv>=0) and np.all(tv<N): trans.append(tv)
         if len(trans) != N:
+            print(trans)
             raise ArithmeticError('Somehow did not generate the correct number of transitions? {}!={}'.format(N, len(trans)))
         return N, trans
 

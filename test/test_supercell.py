@@ -33,3 +33,20 @@ class TypeTests(unittest.TestCase):
         super = supercell.Supercell(self.crys, self.one)
         super2 = super.copy()
         self.assertEqual(super, super2, msg="{}\n!=\n{}".format(super, super2))
+
+    def testTrans(self):
+        """Test the code that generates the translations"""
+        size,tlist = supercell.Supercell.maketrans(self.one)
+        self.assertEqual(size,1)
+        self.assertTrue(np.all(tlist[0]==0))
+        size,tlist = supercell.Supercell.maketrans(2*self.one)
+        self.assertEqual(size, 8)
+        for tv in tlist:
+            self.assertTrue(all(tvi ==0 or tvi == 4 for tvi in tv))
+        super=np.array([[0,1,1],[1,0,1],[1,1,0]])
+        size,tlist = supercell.Supercell.maketrans(super)
+        self.assertEqual(size, 2)
+        for tv in tlist:
+            self.assertTrue(np.all(tv == 0) or np.all(tv == 1))
+
+
