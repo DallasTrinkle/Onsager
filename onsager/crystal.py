@@ -110,10 +110,10 @@ def maptranslation(oldpos, newpos, oldspins=None, newspins=None, threshold=1e-8)
             if len(maplist) != len(atomlist0):
                 foundmap = False
             else:
-                indexmap.append(maplist)
+                indexmap.append(tuple(maplist))
         if foundmap: break
     if foundmap:
-        return trans, indexmap
+        return trans, tuple(indexmap)
     else:
         return None, None
 
@@ -128,7 +128,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     :param rot: np.array(3,3) integer idempotent matrix
     :param trans: np.array(3) real vector
     :param cartrot: np.array(3,3) real unitary matrix
-    :param indexmap: list of list, containing the atom mapping
+    :param indexmap: tuples of tuples, containing the atom mapping
     """
 
     def incell(self):
@@ -143,7 +143,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     def ident(cls, basis):
         """Return a group operation corresponding to identity for a given basis"""
         return cls(rot=np.eye(3, dtype=int), trans=np.zeros(3), cartrot=np.eye(3),
-                       indexmap=[[i for i in range(len(atomlist))] for atomlist in basis])
+                       indexmap=tuple(tuple(i for i in range(len(atomlist))) for atomlist in basis))
 
     def __str__(self):
         """Human-readable version of groupop"""
@@ -205,8 +205,8 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         return GroupOp(np.dot(self.rot, other.rot),
                        np.dot(self.rot, other.trans) + self.trans,
                        np.dot(self.cartrot, other.cartrot),
-                       [ [atomlist0[i] for i in atomlist1]
-                         for atomlist0, atomlist1 in zip(self.indexmap, other.indexmap)])
+                       tuple( tuple(atomlist0[i] for i in atomlist1)
+                         for atomlist0, atomlist1 in zip(self.indexmap, other.indexmap)))
 
     def __sane__(self):
         """Return true if the cartrot and rot are consistent and 'sane'"""
@@ -226,8 +226,8 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         return GroupOp(inverse,
                        -np.dot(inverse, self.trans),
                        self.cartrot.T,
-                       [ [ x for i,x in sorted([(y,j) for j,y in enumerate(atomlist)])]
-                         for atomlist in self.indexmap])
+                       tuple( tuple( x for i,x in sorted([(y,j) for j,y in enumerate(atomlist)]))
+                         for atomlist in self.indexmap))
 
     @staticmethod
     def optype(rot):

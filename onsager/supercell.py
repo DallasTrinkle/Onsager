@@ -43,14 +43,14 @@ class Supercell(object):
         self.chemistry = [crys.chemistry[n] if n<crys.Nchem else '' for n in range(self.Nchem)]
         self.size, self.translist = self.maketrans(self.super)
 
-    __copyattr__ = ('chemistry', 'size')
+    __copyattr__ = ('chemistry', 'size', 'translist')
     def copy(self):
         """
         Make a copy of the supercell; initializes, then copies over copyattr's.
         :return: new supercell object, copy of the original
         """
         supercopy = Supercell(self.crys, self.super, self.interstitial, self.Nchem)
-        for attr in self.__copyattr__: setattr(supercopy, attr, copy.copy(getattr(self, attr)))
+        for attr in self.__copyattr__: setattr(supercopy, attr, copy.deepcopy(getattr(self, attr)))
         return supercopy
 
     def __eq__(self, other):
