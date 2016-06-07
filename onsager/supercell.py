@@ -40,13 +40,17 @@ class Supercell(object):
         self.super = super.copy()
         self.interstitial = copy.deepcopy(interstitial)
         self.Nchem = crys.Nchem+1 if Nchem<crys.Nchem else Nchem
+        self.chemistry = [crys.chemistry[n] if n<crys.Nchem else '' for n in range(self.Nchem)]
+        self.size, self.translist = self.maketrans(self.super)
 
+    __copyattr__ = ('chemistry', 'size')
     def copy(self):
         """
-        Make a copy of the supercell
+        Make a copy of the supercell; initializes, then copies over copyattr's.
         :return: new supercell object, copy of the original
         """
         supercopy = Supercell(self.crys, self.super, self.interstitial, self.Nchem)
+        for attr in self.__copyattr__: setattr(supercopy, attr, copy.copy(getattr(self, attr)))
         return supercopy
 
     def __eq__(self, other):
@@ -67,7 +71,31 @@ class Supercell(object):
     def __str__(self):
         """Human readable version of supercell"""
         str = "Supercell of crystal:\n{crys}\n".format(crys=self.crys)
-        if self.interstitial != (): str = str + "Interstitial sites: {}\n".format(self.interstitial)
+        # if self.interstitial != (): str = str + "Interstitial sites: {}\n".format(self.interstitial)
         str = str + "Supercell vectors:\n{}".format(self.super.T)
+        str = str + ''.join([c+'_i ' if n in self.interstitial else c+' ' for n,c in enumerate(self.chemistry)])
         return str
+
+    @staticmethod
+    def maketrans(super):
+        """
+        Takes in a supercell matrix, and returns a list of all translations of the unit cell that
+        remain inside the supercell
+        :param super: 3x3 integer matrix
+        :return size: integer, corresponding to number of unit cells
+        :return trans: list of integer vectors (to be divided by `size`) corresponding to unit cell positions
+        """
+        N= abs(int(np.linalg.det(super)))
+        invsuper = np.round(np.linalg.inv(super)*N).astype(int)
+        maxN = abs(super).max()
+        trans = []
+        for nvect in [np.array((n0,n1,n2))
+                      for n0 in range(-maxN,maxN+1)
+                      for n1 in range(-maxN,maxN+1)
+                      for n2 in range(-maxN,maxN+1)]:
+            tv = np.dot(invsuper, nvect)
+            if np.all(tv>=0) and np.all(tv<N): trans.append(tv)
+        if len(trans) != N:
+            raise ArithmeticError('Somehow did not generate the correct number of transitions? {}!={}'.format(N, len(trans)))
+        return N, trans
 
