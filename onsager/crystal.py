@@ -462,7 +462,6 @@ def Voigtstrain(e1, e2, e3, e4, e5, e6):
 
 
 # TODO: Add the ability to explicitly specify "metastable" states that should be considered the same chemistry, but not subject to reduction
-# TODO: Symmetry analysis that includes magnetic ordering (e.g., ferro- and anti-ferromagnetic ordering)
 class Crystal(object):
     """
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.

@@ -41,3 +41,32 @@ class Supercell(object):
         self.interstitial = copy.deepcopy(interstitial)
         self.Nchem = crys.Nchem+1 if Nchem<crys.Nchem else Nchem
 
+    def copy(self):
+        """
+        Make a copy of the supercell
+        :return: new supercell object, copy of the original
+        """
+        supercopy = Supercell(self.crys, self.super, self.interstitial, self.Nchem)
+        return supercopy
+
+    def __eq__(self, other):
+        """
+        Return True if two supercells are equal; this means they should have the same occupancy
+        *and* the same ordering
+        :param other: supercell for comparison
+        :return: True if same crystal, supercell, occupancy, and ordering; False otherwise
+        """
+        return isinstance(other, self.__class__) and \
+               False
+
+    def __ne__(self, other):
+        """Inequality == not __eq__"""
+        return not self.__eq__(other)
+
+    def __str__(self):
+        """Human readable version of supercell"""
+        str = "Supercell of crystal:\n{crys}\n".format(crys=self.crys)
+        if self.interstitial != (): str = str + "Interstitial sites: {}\n".format(self.interstitial)
+        str = str + "Supercell vectors:\n{}".format(self.super.T)
+        return str
+

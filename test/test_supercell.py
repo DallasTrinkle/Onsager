@@ -11,6 +11,8 @@ import onsager.supercell as supercell
 
 class TypeTests(unittest.TestCase):
     """Tests to make sure we can make a supercell object."""
+    longMessage = False
+
     def setUp(self):
         self.crys = crystal.Crystal.FCC(1.,'Al')
         self.one = np.eye(3, dtype=int)
@@ -25,3 +27,9 @@ class TypeTests(unittest.TestCase):
         super = supercell.Supercell(self.crys, self.one, Nchem=5)
         self.assertNotEqual(super, None)
         self.assertEqual(super.Nchem, 5)
+
+    def testEqualityCopy(self):
+        """Can we copy a supercell, and is it equal to itself?"""
+        super = supercell.Supercell(self.crys, self.one)
+        super2 = super.copy()
+        self.assertEqual(super, super2, msg="{}\n!=\n{}".format(super, super2))
