@@ -56,8 +56,9 @@ class Supercell(object):
         :param other: supercell for comparison
         :return: True if same crystal, supercell, occupancy, and ordering; False otherwise
         """
-        return isinstance(other, self.__class__) and \
-               False
+        ### Will need more....
+        return isinstance(other, self.__class__) and np.all(self.super==other.super) and \
+               self.interstitial == other.interstitial
 
     def __ne__(self, other):
         """Inequality == not __eq__"""
