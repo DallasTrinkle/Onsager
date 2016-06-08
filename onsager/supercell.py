@@ -54,14 +54,15 @@ class Supercell(object):
                 indexset = next((iset for iset in self.crys.Wyckoff if (c,i) in iset),None)
                 self.Wyckofflist.append(frozenset([self.crys.atomindices.index(ci) for ci in indexset]))
                 self.Wyckoffchem.append(self.crys.chemistry[c])
-        self.size, self.invsuper, self.translist = self.maketrans(self.super)
-        self.transdict = {tuple(t):n for n,t in enumerate(self.translist)}
+        self.size, self.invsuper, self.translist, self.transdict = self.maketrans(self.super)
+        # self.transdict = {tuple(t):n for n,t in enumerate(self.translist)}
         self.pos, self.occ = self.makesites(), -1*np.ones(self.N*self.size, dtype=int)
         self.G = self.gengroup()
 
+    # some attributes we want to do equate, others we want deepcopy. Equate should not be modified.
     __copyattr__ = ('chemistry', 'N', 'size', 'invsuper',
-                    'Wyckofflist', 'Wyckoffchem',
-                    'translist', 'transdict', 'pos', 'occ', 'G')
+                    'Wyckofflist', 'Wyckoffchem', 'occ')
+    __eqattr__ = ('translist', 'transdict', 'pos', 'G')
 
     def copy(self):
         """
@@ -70,6 +71,7 @@ class Supercell(object):
         """
         supercopy = Supercell(self.crys, self.super, self.interstitial, self.Nchem)
         for attr in self.__copyattr__: setattr(supercopy, attr, copy.deepcopy(getattr(self, attr)))
+        for attr in self.__eqattr__: setattr(supercopy, attr, getattr(self, attr))
         return supercopy
 
     def __eq__(self, other):
@@ -105,13 +107,13 @@ class Supercell(object):
         :param super: 3x3 integer matrix
         :return size: integer, corresponding to number of unit cells
         :return invsuper: integer matrix inverse of supercell (needs to be divided by size)
-        :return trans: list of integer vectors (to be divided by `size`) corresponding to unit cell positions
+        :return translist: list of integer vectors (to be divided by `size`) corresponding to unit cell positions
+        :return transdict: dictionary of tuples and their corresponding index (inverse of trans)
         """
         size = abs(int(np.round(np.linalg.det(super))))
         invsuper = np.round(np.linalg.inv(super) * size).astype(int)
         maxN = abs(super).max()
-        transset = set()
-        trans = []
+        translist, transdict = [], {}
         for nvect in [np.array((n0, n1, n2))
                       for n0 in range(-maxN, maxN + 1)
                       for n1 in range(-maxN, maxN + 1)
@@ -119,13 +121,13 @@ class Supercell(object):
             tv = np.dot(invsuper, nvect) % size
             ttup = tuple(tv)
             # if np.all(tv>=0) and np.all(tv<N): trans.append(tv)
-            if ttup not in transset:
-                trans.append(tv)
-                transset.add(ttup)
-        if len(trans) != size:
+            if ttup not in transdict:
+                transdict[ttup] = len(translist)
+                translist.append(tv)
+        if len(translist) != size:
             raise ArithmeticError(
                 'Somehow did not generate the correct number of translations? {}!={}'.format(size, len(trans)))
-        return size, invsuper, trans
+        return size, invsuper, translist, transdict
 
     def makesites(self):
         """

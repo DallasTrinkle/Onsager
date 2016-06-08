@@ -36,15 +36,15 @@ class TypeTests(unittest.TestCase):
 
     def testTrans(self):
         """Can we correctly generates the translations?"""
-        size,invsup,tlist = supercell.Supercell.maketrans(self.one)
+        size,invsup,tlist,tdict = supercell.Supercell.maketrans(self.one)
         self.assertEqual(size,1)
         self.assertTrue(np.all(tlist[0]==0))
-        size,invsup,tlist = supercell.Supercell.maketrans(2*self.one)
+        size,invsup,tlist,tdict = supercell.Supercell.maketrans(2*self.one)
         self.assertEqual(size, 8)
         for tv in tlist:
             self.assertTrue(all(tvi ==0 or tvi == 4 for tvi in tv))
         super=np.array([[0,1,1],[1,0,1],[1,1,0]])
-        size,invsup,tlist = supercell.Supercell.maketrans(super)
+        size,invsup,tlist,tdict = supercell.Supercell.maketrans(super)
         self.assertEqual(size, 2)
         for tv in tlist:
             self.assertTrue(np.all(tv == 0) or np.all(tv == 1))
@@ -52,7 +52,7 @@ class TypeTests(unittest.TestCase):
         for n in range(100):
             randsuper = np.random.randint(-5,6,size=(3,3))
             if np.allclose(np.linalg.det(randsuper), 0): continue
-            size,invsup,tlist = supercell.Supercell.maketrans(randsuper)
+            size,invsup,tlist,tdict = supercell.Supercell.maketrans(randsuper)
             self.assertTrue(len(tlist)==size)
 
     def testSites(self):
