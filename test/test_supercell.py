@@ -62,10 +62,11 @@ class TypeTests(unittest.TestCase):
 
     def testGroupOps(self):
         """Do we correctly generate group operations inside the supercell?"""
-        for nmat in (self.one, 2*self.one, np.array([[0,1,1],[1,0,1],[1,1,0]])):
+        for nmat in (self.one, 2*self.one, np.array([[-1,1,1],[1,-1,1],[1,1,-1]])):
             super = supercell.Supercell(self.crys, nmat)
-            print(super)
-            # self.assertEqual(len(super.G), len(self.crys.G)*super.size)
+            # print(super)
+            # for g in super.G: if np.all(g.rot==self.one): print(g)
+            self.assertEqual(len(super.G), len(self.crys.G)*super.size)
 
 
 
