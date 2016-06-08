@@ -44,6 +44,7 @@ class Supercell(object):
         self.Nchem = crys.Nchem + 1 if Nchem < crys.Nchem else Nchem
         if empty: return
         # everything else that follows is "derived" from those initial parameters
+        self.lattice = np.dot(self.crys.lattice, self.super)
         self.N = self.crys.N
         self.atomindices, self.indexatom = self.crys.atomindices, \
                                            {ci: n for n, ci in enumerate(self.crys.atomindices)}
@@ -62,12 +63,12 @@ class Supercell(object):
         # self.transdict = {tuple(t):n for n,t in enumerate(self.translist)}
         self.pos, self.occ = self.makesites(), -1 * np.ones(self.N * self.size, dtype=int)
         if NOSYM:
-            self.G = frozenset(crystal.GroupOp.ident([self.pos]))
+            self.G = frozenset([crystal.GroupOp.ident([self.pos])])
         else:
             self.G = self.gengroup()
 
     # some attributes we want to do equate, others we want deepcopy. Equate should not be modified.
-    __copyattr__ = ('chemistry', 'N', 'size', 'invsuper',
+    __copyattr__ = ('lattice', 'N', 'chemistry', 'size', 'invsuper',
                     'Wyckofflist', 'Wyckoffchem', 'occ')
     __eqattr__ = ('translist', 'transdict', 'pos', 'G')
 
@@ -163,6 +164,7 @@ class Supercell(object):
             else:
                 # divide out the size (in inverse super). Should still be an integer matrix (and hence, a symmetry)
                 Rsuper //= self.size
+            # for t, u in zip(self.translist, unittranslist):
             for u in unittranslist:
                 # first, make the corresponding group operation by adding the unit cell translation:
                 g = g0 + u
@@ -179,7 +181,7 @@ class Supercell(object):
                         # convert to a tuple, to the index into transdict
                         # THEN multiply by self.N, and add the index of the new Wyckoff site. Whew!
                         indexmap.append(
-                            self.transdict[tuple(np.dot(self.invsuper, Rp) % self.size)] * self.N + self.indexatom[ci])
+                            self.transdict[tuple(np.dot(self.invsuper, Rp) % self.size)] * self.N + self.indexatom[ci1])
                 if len(set(indexmap)) != self.N*self.size:
                     raise ArithmeticError('Did not produce a correct index mapping for GroupOp:\n{}'.format(g))
                 Glist.append(crystal.GroupOp(rot=Rsuper, cartrot=g0.cartrot, trans=tsuper,
