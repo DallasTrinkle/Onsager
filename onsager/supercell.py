@@ -16,6 +16,7 @@ import collections, copy
 from . import crystal
 from functools import reduce
 
+
 # YAML tags:
 # interfaces are either at the bottom, or staticmethods in the corresponding object
 # NDARRAY_YAMLTAG = '!numpy.ndarray'
@@ -25,6 +26,7 @@ class Supercell(object):
     """
     A class that defines a Supercell of a crystal
     """
+
     def __init__(self, crys, super, interstitial=(), Nchem=-1, empty=False):
         """
         Initialize our supercell
@@ -39,14 +41,18 @@ class Supercell(object):
         self.crys = crys
         self.super = super.copy()
         self.interstitial = copy.deepcopy(interstitial)
-        self.Nchem = crys.Nchem+1 if Nchem<crys.Nchem else Nchem
+        self.Nchem = crys.Nchem + 1 if Nchem < crys.Nchem else Nchem
         self.N = self.crys.N
-        self.chemistry = [crys.chemistry[n] if n<crys.Nchem else '' for n in range(self.Nchem)]
-        self.size, self.translist = self.maketrans(self.super)
-        self.pos = self.makesites()
+        self.chemistry = [crys.chemistry[n] if n < crys.Nchem else '' for n in range(self.Nchem+1)]
+        self.chemistry[-1] = 'v'
+        self.size, self.invsuper, self.translist = self.maketrans(self.super)
+        self.transdict = {tuple(t):n for n,t in enumerate(self.translist)}
+        self.pos, self.occ = self.makesites(), -1*np.ones(self.N*self.size, dtype=int)
         self.G = self.gengroup()
 
-    __copyattr__ = ('chemistry', 'N', 'size', 'translist', 'pos', 'G')
+    __copyattr__ = ('chemistry', 'N', 'size', 'invsuper',
+                    'translist', 'transdict', 'pos', 'occ', 'G')
+
     def copy(self):
         """
         Make a copy of the supercell; initializes, then copies over copyattr's.
@@ -64,8 +70,8 @@ class Supercell(object):
         :return: True if same crystal, supercell, occupancy, and ordering; False otherwise
         """
         ### Will need more....
-        return isinstance(other, self.__class__) and np.all(self.super==other.super) and \
-               self.interstitial == other.interstitial
+        return isinstance(other, self.__class__) and np.all(self.super == other.super) and \
+               self.interstitial == other.interstitial and np.allclose(self.pos, other.pos)
 
     def __ne__(self, other):
         """Inequality == not __eq__"""
@@ -75,8 +81,10 @@ class Supercell(object):
         """Human readable version of supercell"""
         str = "Supercell of crystal:\n{crys}\n".format(crys=self.crys)
         # if self.interstitial != (): str = str + "Interstitial sites: {}\n".format(self.interstitial)
-        str = str + "Supercell vectors:\n{}".format(self.super.T)
-        str = str + ''.join([c+'_i ' if n in self.interstitial else c+' ' for n,c in enumerate(self.chemistry)])
+        str = str + "Supercell vectors:\n{}\nChemistry: ".format(self.super.T)
+        str = str + ','.join([c + '_i' if n in self.interstitial else c for n, c in enumerate(self.chemistry[:-1])])
+        str = str + '\nPositions:\n'
+        str = str + '\n'.join([u.__str__() + ': ' + self.chemistry[o] for u,o in zip(self.pos, self.occ)])
         return str
 
     @staticmethod
@@ -86,26 +94,28 @@ class Supercell(object):
         remain inside the supercell
         :param super: 3x3 integer matrix
         :return size: integer, corresponding to number of unit cells
+        :return invsuper: integer matrix inverse of supercell (needs to be divided by size)
         :return trans: list of integer vectors (to be divided by `size`) corresponding to unit cell positions
         """
-        N= abs(int(np.round(np.linalg.det(super))))
-        invsuper = np.round(np.linalg.inv(super)*N).astype(int)
+        size = abs(int(np.round(np.linalg.det(super))))
+        invsuper = np.round(np.linalg.inv(super) * size).astype(int)
         maxN = abs(super).max()
         transset = set()
         trans = []
-        for nvect in [np.array((n0,n1,n2))
-                      for n0 in range(-maxN,maxN+1)
-                      for n1 in range(-maxN,maxN+1)
-                      for n2 in range(-maxN,maxN+1)]:
-            tv = np.dot(invsuper, nvect)%N
+        for nvect in [np.array((n0, n1, n2))
+                      for n0 in range(-maxN, maxN + 1)
+                      for n1 in range(-maxN, maxN + 1)
+                      for n2 in range(-maxN, maxN + 1)]:
+            tv = np.dot(invsuper, nvect) % size
             ttup = tuple(tv)
             # if np.all(tv>=0) and np.all(tv<N): trans.append(tv)
             if ttup not in transset:
                 trans.append(tv)
                 transset.add(ttup)
-        if len(trans) != N:
-            raise ArithmeticError('Somehow did not generate the correct number of translations? {}!={}'.format(N, len(trans)))
-        return N, trans
+        if len(trans) != size:
+            raise ArithmeticError(
+                'Somehow did not generate the correct number of translations? {}!={}'.format(size, len(trans)))
+        return size, invsuper, trans
 
     def makesites(self):
         """
@@ -113,8 +123,9 @@ class Supercell(object):
         and the atomindices in crys. These may not all be filled when the supercell is finished.
         :return pos: array [N*size, 3] of (supercell) unit cell positions.
         """
-        pos = np.zeros((self.N*self.size, 3))
-        return pos
+        invN = 1/self.size
+        basislist = [np.dot(self.invsuper, self.crys.basis[c][i]) for (c, i) in self.crys.atomindices]
+        return np.array([crystal.incell((t+u)*invN) for t in self.translist for u in basislist])
 
     def gengroup(self):
         """
@@ -123,5 +134,4 @@ class Supercell(object):
         """
         Gset = set()
 
-        return frozenset([crystal.GroupOp.ident([[i for i in range(self.N*self.size)]])])
-
+        return frozenset([crystal.GroupOp.ident([[i for i in range(self.N * self.size)]])])
