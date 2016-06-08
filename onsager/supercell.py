@@ -180,6 +180,8 @@ class Supercell(object):
                         # THEN multiply by self.N, and add the index of the new Wyckoff site. Whew!
                         indexmap.append(
                             self.transdict[tuple(np.dot(self.invsuper, Rp) % self.size)] * self.N + self.indexatom[ci])
+                if len(set(indexmap)) != self.N*self.size:
+                    raise ArithmeticError('Did not produce a correct index mapping for GroupOp:\n{}'.format(g))
                 Glist.append(crystal.GroupOp(rot=Rsuper, cartrot=g0.cartrot, trans=tsuper,
                                              indexmap=(tuple(indexmap),)))
         return frozenset(Glist)
