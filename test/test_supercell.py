@@ -24,7 +24,7 @@ class FCCSuperTests(unittest.TestCase):
         """Can we make a supercell object?"""
         super = supercell.Supercell(self.crys, self.one)
         self.assertNotEqual(super, None)
-        self.assertEqual(super.Nchem, 2)
+        self.assertEqual(super.Nchem, self.crys.Nchem+1)
         super = supercell.Supercell(self.crys, self.one, interstitial=(1,))
         self.assertNotEqual(super, None)
         super = supercell.Supercell(self.crys, self.one, Nchem=5)
@@ -107,4 +107,25 @@ class HCPSuperTests(FCCSuperTests):
     def setUp(self):
         self.crys = crystal.Crystal.HCP(1., chemistry='Ti')
         self.one = np.eye(3, dtype=int)
-        self.groupsupers = (self.one, 2 * self.one, 3 * self.one, np.array([[2, 0, 0], [0, 2, 0], [0, 0, 3]]))
+        self.groupsupers = (self.one, 2 * self.one, 3 * self.one,
+                            np.array([[2, 0, 0], [0, 2, 0], [0, 0, 3]]),
+                            np.array([[1, 1, 0], [0, 1, 0], [0, 0, 2]]))
+
+
+class InterstitialSuperTests(HCPSuperTests):
+    """Tests to make sure we can make a supercell object: HCP + interstitials"""
+    longMessage = False
+
+    def setUp(self):
+        crys = crystal.Crystal.HCP(1., chemistry='Ti')
+        self.crys = crys.addbasis(crys.Wyckoffpos(np.array([0., 0., 0.5])), chemistry=['O'])
+        self.one = np.eye(3, dtype=int)
+        self.groupsupers = (self.one, 2 * self.one,
+                            np.array([[2, 0, 0], [0, 2, 0], [0, 0, 3]]),
+                            np.array([[1, 1, 0], [0, 1, 0], [0, 0, 2]]))
+
+    def testFillPeriodic(self):
+        super = supercell.Supercell(self.crys, 3*self.one, interstitial=[1])
+        super.fillperiodic((0,0))
+        self.assertEqual(len(super.chemorder[0]), super.size*len(self.crys.basis[0]))
+        # print(super)

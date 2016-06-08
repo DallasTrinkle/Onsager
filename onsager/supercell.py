@@ -12,7 +12,7 @@ Class to store supercells of crystals: along with some analysis
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-import collections, copy, warnings
+import collections, copy, itertools, warnings
 from . import crystal
 from functools import reduce
 
@@ -62,6 +62,7 @@ class Supercell(object):
         self.size, self.invsuper, self.translist, self.transdict = self.maketrans(self.super)
         # self.transdict = {tuple(t):n for n,t in enumerate(self.translist)}
         self.pos, self.occ = self.makesites(), -1 * np.ones(self.N * self.size, dtype=int)
+        self.chemorder = [[] for n in range(self.Nchem)]
         if NOSYM:
             self.G = frozenset([crystal.GroupOp.ident([self.pos])])
         else:
@@ -69,7 +70,7 @@ class Supercell(object):
 
     # some attributes we want to do equate, others we want deepcopy. Equate should not be modified.
     __copyattr__ = ('lattice', 'N', 'chemistry', 'size', 'invsuper',
-                    'Wyckofflist', 'Wyckoffchem', 'occ')
+                    'Wyckofflist', 'Wyckoffchem', 'occ', 'chemorder')
     __eqattr__ = ('translist', 'transdict', 'pos', 'G')
 
     def copy(self):
@@ -102,7 +103,9 @@ class Supercell(object):
         str = "Supercell of crystal:\n{crys}\n".format(crys=self.crys)
         # if self.interstitial != (): str = str + "Interstitial sites: {}\n".format(self.interstitial)
         str = str + "Supercell vectors:\n{}\nChemistry: ".format(self.super.T)
-        str = str + ','.join([c + '_i' if n in self.interstitial else c for n, c in enumerate(self.chemistry[:-1])])
+        str = str + ','.join([c + '_i({})'.format(len(l)) if n in self.interstitial else c + '({})'.format(len(l))
+                              for n, c, l in
+                              zip(itertools.count(), self.chemistry[:-1], self.chemorder)])
         str = str + '\nPositions:\n'
         str = str + '\n'.join([u.__str__() + ': ' + self.chemistry[o] for u, o in zip(self.pos, self.occ)])
         return str
@@ -187,3 +190,47 @@ class Supercell(object):
                 Glist.append(crystal.GroupOp(rot=Rsuper, cartrot=g0.cartrot, trans=tsuper,
                                              indexmap=(tuple(indexmap),)))
         return frozenset(Glist)
+
+    def definesolute(self, c, chemistry):
+        """
+        Set the name of the chemistry of chemical index c. Only works for substitutional solutes.
+        :param c: index
+        :param chemistry: string
+        """
+        cind = c%(self.Nchem+1)
+        if c<self.crys.Nchem or c==self.Nchem:
+            raise IndexError('Trying to set the chemistry for a lattice atom / vacancy')
+        self.chemistry[c] = chemistry
+
+    def setocc(self, ind, c):
+        """
+        Set the occupancy of position indexed by ind, to chemistry c. Used by all the other algorithms.
+        :param ind: integer index
+        :param c: chemistry index
+        """
+        if c<-2 or c>self.crys.Nchem:
+            raise IndexError('Trying to occupy with a non-defined chemistry: {} out of range'.format(c))
+        corig = self.occ[ind]
+        if corig != c:
+            if corig>=0:
+                # remove from chemorder list (if not vacancy)
+                co = self.chemorder[corig]
+                co.pop(co.index(ind))
+            if c>=0:
+                # add to chemorder list (if not vacancy)
+                self.chemorder[c].append(ind)
+            # finally: set the occupancy
+            self.occ[ind] = c
+
+    def fillperiodic(self, ci, Wyckoff=True):
+        """
+        Occupies all of the (Wyckoff) sites corresponding to chemical index with the appropriate chemistry
+        :param ci: tuple of (chem, index) in crystal
+        :param Wyckoff: (optional) if False, *only* occupy the specific tuple, but still periodically
+        """
+        if __debug__:
+            if ci not in self.indexatom: raise IndexError('Tuple {} not a corresponding atom index'.format(ci))
+        ind = self.indexatom[ci]
+        indlist = next((nset for nset in self.Wyckofflist if ind in nset), None) if Wyckoff else (ind,)
+        for i in [n*self.N+i for n in range(self.size) for i in indlist]:
+            self.setocc(i, ci[0])
