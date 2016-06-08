@@ -12,7 +12,7 @@ Class to store supercells of crystals: along with some analysis
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-import collections, copy
+import collections, copy, warnings
 from . import crystal
 from functools import reduce
 
@@ -45,12 +45,22 @@ class Supercell(object):
         self.N = self.crys.N
         self.chemistry = [crys.chemistry[n] if n < crys.Nchem else '' for n in range(self.Nchem+1)]
         self.chemistry[-1] = 'v'
+        self.Wyckofflist, self.Wyckoffchem = [], []
+        for n,(c,i) in enumerate(self.crys.atomindices):
+            for wset in self.Wyckofflist:
+                if n in wset: break
+            if len(self.Wyckofflist)==0 or n not in wset:
+                # grab the set of (c,i) of Wyckoff sets:
+                indexset = next((iset for iset in self.crys.Wyckoff if (c,i) in iset),None)
+                self.Wyckofflist.append(frozenset([self.crys.atomindices.index(ci) for ci in indexset]))
+                self.Wyckoffchem.append(self.crys.chemistry[c])
         self.size, self.invsuper, self.translist = self.maketrans(self.super)
         self.transdict = {tuple(t):n for n,t in enumerate(self.translist)}
         self.pos, self.occ = self.makesites(), -1*np.ones(self.N*self.size, dtype=int)
         self.G = self.gengroup()
 
     __copyattr__ = ('chemistry', 'N', 'size', 'invsuper',
+                    'Wyckofflist', 'Wyckoffchem',
                     'translist', 'transdict', 'pos', 'occ', 'G')
 
     def copy(self):
@@ -123,15 +133,25 @@ class Supercell(object):
         and the atomindices in crys. These may not all be filled when the supercell is finished.
         :return pos: array [N*size, 3] of (supercell) unit cell positions.
         """
-        invN = 1/self.size
+        invsize = 1/self.size
         basislist = [np.dot(self.invsuper, self.crys.basis[c][i]) for (c, i) in self.crys.atomindices]
-        return np.array([crystal.incell((t+u)*invN) for t in self.translist for u in basislist])
+        return np.array([crystal.incell((t+u)*invsize) for t in self.translist for u in basislist])
 
     def gengroup(self):
         """
         Generate the group operations internal to the supercell
         :return Gset: set of GroupOps
         """
-        Gset = set()
+        Glist = []
+        invsize = 1/self.size
+        for g0 in self.crys.G:
+            Rnew = np.dot(self.invsuper, np.dot(g0.rot, self.super))
+            if not np.all(Rnew % self.size == 0):
+                warnings.warn('Broken symmetry? GroupOp:\n{}\nnot a symmetry operation?'.format(g0),
+                              RuntimeWarning, stacklevel=2)
+                continue
+            coordtrans = []
+            for t in self.translist:
+                tnew = (np.dot(self.invsuper, g0.trans) + t)*invsize
 
         return frozenset([crystal.GroupOp.ident([[i for i in range(self.N * self.size)]])])
