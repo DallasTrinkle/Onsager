@@ -13,6 +13,7 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 import collections, copy, itertools, warnings
+from numbers import Integral
 from . import crystal
 from functools import reduce
 
@@ -145,6 +146,30 @@ class Supercell(object):
         self.chemorder = [[indexmap[ind] for ind in clist] for clist in self.chemorder]
         return self
 
+    def index(self, pos):
+        """
+        Return the index that corresponds to the position *closest* to pos in the supercell.
+        Done in direct coordinates of the supercell.
+        :param pos: 3-vector
+        :return index: index of closest position
+        """
+        index, dist2 = None, 3.
+        for ind, u in enumerate(self.pos):
+            delta = crystal.inhalf(pos-u)
+            d2 = np.sum(delta*delta)
+            if d2<dist2: index, dist2 = ind, d2
+        return index
+
+    def __getitem__(self, key):
+        """
+        Index into supercell
+        :param key: index (either an int, a slice, or a position)
+        :return: chemical occupation at that point
+        """
+        if isinstance(key, Integral) or isinstance(key, slice): return self.occ[key]
+        if isinstance(key, np.ndarray) and key.shape==(3,): return self.occ[self.index(key)]
+        raise TypeError('Inappropriate key {}'.format(key))
+
     def __sane__(self):
         """Return True if supercell occupation and chemorder are consistent"""
         occset=set()
@@ -194,7 +219,7 @@ class Supercell(object):
         """
         Generate the array corresponding to the sites; the indexing is based on the translations
         and the atomindices in crys. These may not all be filled when the supercell is finished.
-        :return pos: array [N*size, 3] of (supercell) unit cell positions.
+        :return pos: array [N*size, 3] of supercell positions in direct coordinates
         """
         invsize = 1 / self.size
         basislist = [np.dot(self.invsuper, self.crys.basis[c][i]) for (c, i) in self.atomindices]

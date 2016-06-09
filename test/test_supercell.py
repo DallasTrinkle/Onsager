@@ -122,6 +122,19 @@ class FCCSuperTests(unittest.TestCase):
             if not super.__sane__():
                 self.assertTrue(False, msg='Supercell:\n{}\nnot sane?'.format(super))
 
+    def testIndex(self):
+        """Test that we can use index into our supercell appropriately"""
+        for n in range(10):
+            randsuper = np.random.randint(-5, 6, size=(3, 3))
+            if np.allclose(np.linalg.det(randsuper), 0): continue
+            # for efficiency we don't bother generating group ops,
+            # and also to avoid warnings about broken symmetry
+            super = supercell.Supercell(self.crys, randsuper, NOSYM=True)
+            for ind, u in enumerate(super.pos):
+                self.assertEqual(ind, super.index(u))
+                delta = np.random.uniform(-0.01,0.01,size=3)
+                self.assertEqual(ind, super.index(crystal.incell(u+delta)))
+
     def testMultiply(self):
         """Can we multiply a supercell by our group operations successfully?"""
         super = supercell.Supercell(self.crys, 3 * self.one, Nsolute=1)
@@ -140,6 +153,11 @@ class FCCSuperTests(unittest.TestCase):
             for n in range(super.size*super.N):
                 g_occ[g.indexmap[0][n]] = super.occ[n]
             self.assertTrue(np.all(g_occ == gsuper.occ))
+            # rotate a few sites, see if they match up:
+            for ind in np.random.randint(super.size*super.N, size=Ntests//10):
+                gu = crystal.incell(np.dot(g.rot, super.pos[ind]) + g.trans)
+                self.assertIsInstance(gu, np.ndarray)
+                self.assertEqual(gsuper[gu], super[ind])
         # quick test of multiplying the other direction, and in-place (which should all call the same code)
         self.assertEqual(gsuper, super*g)
         super *= g
