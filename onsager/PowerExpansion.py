@@ -504,7 +504,6 @@ class Taylor3D(object):
                     c[(slice(0,None,None),) + keyt] = cv
             if not matched:
                 raise ValueError("Attempted to do setitem where the rhs contains terms not present in lhs")
-        return self
 
     def __str__(self):
         """

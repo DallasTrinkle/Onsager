@@ -170,6 +170,19 @@ class Supercell(object):
         if isinstance(key, np.ndarray) and key.shape==(3,): return self.occ[self.index(key)]
         raise TypeError('Inappropriate key {}'.format(key))
 
+    def __setitem__(self, key, value):
+        """
+        Set specific composition for site; uses same indexing as __getitem__
+        :param key: index (either an int, a slice, or a position)
+        :param value: chemical occupation at that point
+        """
+        if isinstance(key, slice):
+            return NotImplemented
+        index = None
+        if isinstance(key, Integral): index = key
+        if isinstance(key, np.ndarray) and key.shape==(3,): index=self.index(key)
+        self.setocc(index, value)
+
     def __sane__(self):
         """Return True if supercell occupation and chemorder are consistent"""
         occset=set()

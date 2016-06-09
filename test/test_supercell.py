@@ -134,6 +134,16 @@ class FCCSuperTests(unittest.TestCase):
                 self.assertEqual(ind, super.index(u))
                 delta = np.random.uniform(-0.01,0.01,size=3)
                 self.assertEqual(ind, super.index(crystal.incell(u+delta)))
+            # test out setting by making a copy "by hand"
+            randcopy = super.copy()  # starts out empty, too.
+            Ntests = 100
+            for c, ind in zip(np.random.randint(-1, super.Nchem, size=Ntests),
+                              np.random.randint(super.size * super.N, size=Ntests)):
+                super.setocc(ind, c)
+            for c,poslist in enumerate(super.occposlist()):
+                for pos in poslist:
+                    randcopy[pos] = c
+            self.assertEqual(super, randcopy)
 
     def testMultiply(self):
         """Can we multiply a supercell by our group operations successfully?"""
