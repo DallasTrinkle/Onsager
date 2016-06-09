@@ -125,6 +125,7 @@ class InterstitialSuperTests(HCPSuperTests):
                             np.array([[1, 1, 0], [0, 1, 0], [0, 0, 2]]))
 
     def testFillPeriodic(self):
+        """Can we fill up our periodic cell?"""
         super = supercell.Supercell(self.crys, 3*self.one, interstitial=[1])
         super.fillperiodic((0,0))
         self.assertEqual(len(super.chemorder[0]), super.size*len(self.crys.basis[0]))
@@ -139,4 +140,23 @@ class InterstitialSuperTests(HCPSuperTests):
             i = self.crys.atomindices.index(ci)
             for n in range(super.size):
                 self.assertIn(n*super.N+i, super.chemorder[0])
-        # print(super)
+
+    def testIndexExceptions(self):
+        """Do we get raise indexing errors as appropriate?"""
+        super = supercell.Supercell(self.crys, 3*self.one, interstitial=[1])
+        with self.assertRaises(IndexError):
+            super.definesolute(0, 'Mg')
+        with self.assertRaises(IndexError):
+            super.definesolute(-1, 'Mg')
+        with self.assertRaises(IndexError):
+            super.definesolute(2, 'Mg')
+        with self.assertRaises(IndexError):
+            super.setocc(0, 2)
+        with self.assertRaises(IndexError):
+            super.setocc(super.size*super.N, 0)
+        # and... all of the following should be *safe* operations:
+        super.setocc(0,0)
+        super.setocc(-1,0)
+        super = supercell.Supercell(self.crys, self.one, interstitial=[1], Nsolute=1)
+        super.definesolute(2, 'Mg')
+
