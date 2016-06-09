@@ -140,6 +140,10 @@ class FCCSuperTests(unittest.TestCase):
             for n in range(super.size*super.N):
                 g_occ[g.indexmap[0][n]] = super.occ[n]
             self.assertTrue(np.all(g_occ == gsuper.occ))
+        # quick test of multiplying the other direction, and in-place (which should all call the same code)
+        self.assertEqual(gsuper, super*g)
+        super *= g
+        self.assertEqual(gsuper, super )
 
 
 class HCPSuperTests(FCCSuperTests):
