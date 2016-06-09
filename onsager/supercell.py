@@ -100,12 +100,20 @@ class Supercell(object):
         """Inequality == not __eq__"""
         return not self.__eq__(other)
 
+    def stoichiometry(self):
+        """Return a string representing the current stoichiometry"""
+        return ','.join([c + '_i({})'.format(len(l))
+                         if n in self.interstitial
+                         else c + '({})'.format(len(l))
+                         for n, c, l in zip(itertools.count(),
+                                            self.chemistry[:-1],
+                                            self.chemorder)])
+
     def __str__(self):
         """Human readable version of supercell"""
         str = "Supercell of crystal:\n{crys}\n".format(crys=self.crys)
         str += "Supercell vectors:\n{}\nChemistry: ".format(self.super.T)
-        str += ','.join([c + '_i({})'.format(len(l)) if n in self.interstitial else c + '({})'.format(len(l))
-                         for n, c, l in zip(itertools.count(), self.chemistry[:-1], self.chemorder)])
+        str += self.stoichiometry()
         str += '\nPositions:\n'
         str += '\n'.join([u.__str__() + ': ' + self.chemistry[o] for u, o in zip(self.pos, self.occ)])
         return str
@@ -329,3 +337,59 @@ class Supercell(object):
         :return occposlist: list of lists of supercell coord. positions
         """
         return [[self.pos[ind] for ind in clist] for clist in self.chemorder]
+
+    def POSCAR(self, name=None, stoichiometry=True):
+        """
+        Return a VASP-style POSCAR, returned as a string
+        :param name: (optional) name to use for first list
+        :param stoichiometry: (optional) if True, append stoichiometry to name
+        :return POSCAR: string
+        """
+        POSCAR = "" if name is None else name
+        if stoichiometry: POSCAR += " " + self.stoichiometry()
+        POSCAR += """
+1.0
+{a[0][0]:20.15f} {a[1][0]:20.15f} {a[2][0]:20.15f}
+{a[0][1]:20.15f} {a[1][1]:20.15f} {a[2][1]:20.15f}
+{a[0][2]:20.15f} {a[1][2]:20.15f} {a[2][2]:20.15f}
+""".format(a=self.lattice)
+        POSCAR += ' '.join(['{}'.format(len(clist)) for clist in self.chemorder])
+        POSCAR += '\nDirect\n'
+        POSCAR += '\n'.join([" {u[0]:17.15f} {u[1]:17.15f} {u[2]:17.15f}".format(u=u)
+                             for clist in self.occposlist() for u in clist])
+        return POSCAR
+
+    __vacancyformat__ = "v_{sitechem}"
+    __interstitialformat__ = "{chem}_i"
+    __antisiteformat__ = "{chem}_{sitechem}"
+    def KrogerVink(self):
+        """
+        Attempt to make a "simple" string of the supercell, using Kroger-Vink notation.
+        That is, we identify: vacancies, antisites, and interstitial sites, and return a string.
+        NOTE: there is no relative charges, so this is a pseudo-KV notation
+        :return KV: string representation
+        """
+        defectlist = {}
+        sitechem = [self.chemistry[c] for (c,i) in self.atomindices]
+        def adddefect(name):
+            if name in defectlist: defectlist[name] += 1
+            else: defectlist[name] = 1
+        for wset, chem in zip(self.Wyckofflist, self.Wyckoffchem):
+            for i in wset:
+                if self.atomindices[i][0] in self.interstitial:
+                    for n in range(self.size):
+                        ind = n*self.N+i
+                        c=self.occ[ind]
+                        if c != -1: adddefect(self.__interstitialformat__.format(chem=self.chemistry[c]))
+                else:
+                    sc = sitechem[i]
+                    for n in range(self.size):
+                        ind = n*self.N+i
+                        c=self.occ[ind]
+                        if self.chemistry[c] != sc:
+                            if c == -1: adddefect(self.__vacancyformat__.format(sitechem=sitechem[i]))
+                            else: adddefect(self.__antisiteformat__.format(chem=self.chemistry[c],
+                                                                           sitechem=sc))
+        return '+'.join(["{}{}".format(defectlist[name],name)
+                         if defectlist[name]>1 else name
+                         for name in sorted(defectlist.keys())])
