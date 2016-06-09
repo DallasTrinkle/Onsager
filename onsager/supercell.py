@@ -27,21 +27,21 @@ class Supercell(object):
     A class that defines a Supercell of a crystal
     """
 
-    def __init__(self, crys, super, interstitial=(), Nchem=-1, empty=False, NOSYM=False):
+    def __init__(self, crys, super, interstitial=(), Nsolute=0, empty=False, NOSYM=False):
         """
         Initialize our supercell
 
         :param crys: crystal object
         :param super: 3x3 integer matrix
         :param interstitial: (optional) list/tuple of indices that correspond to interstitial sites
-        :param Nchem: (optional) number of distinct chemical elements to consider; default = crys.Nchem+1
-        :param empty: optional; designed to allow "copy" to work
-        :param NOSYM: optional; does not do symmetry analysis (intended ONLY for testing purposes)
+        :param Nsolute: (optional) number of substitutional solute elements to consider; default=0
+        :param empty: (optional) designed to allow "copy" to work--skips all derived info
+        :param NOSYM: (optional) does not do symmetry analysis (intended ONLY for testing purposes)
         """
         self.crys = crys
         self.super = super.copy()
         self.interstitial = copy.deepcopy(interstitial)
-        self.Nchem = crys.Nchem + 1 if Nchem < crys.Nchem else Nchem
+        self.Nchem = crys.Nchem + Nsolute if Nsolute > 0 else crys.Nchem
         if empty: return
         # everything else that follows is "derived" from those initial parameters
         self.lattice = np.dot(self.crys.lattice, self.super)
@@ -78,7 +78,8 @@ class Supercell(object):
         Make a copy of the supercell; initializes, then copies over copyattr's.
         :return: new supercell object, copy of the original
         """
-        supercopy = Supercell(self.crys, self.super, self.interstitial, self.Nchem)
+        supercopy = self.__class__(self.crys, self.super, self.interstitial, self.Nchem-self.crys.Nchem,
+                                   empty=True)
         for attr in self.__copyattr__: setattr(supercopy, attr, copy.deepcopy(getattr(self, attr)))
         for attr in self.__eqattr__: setattr(supercopy, attr, getattr(self, attr))
         return supercopy

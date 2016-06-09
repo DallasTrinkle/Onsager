@@ -24,12 +24,12 @@ class FCCSuperTests(unittest.TestCase):
         """Can we make a supercell object?"""
         super = supercell.Supercell(self.crys, self.one)
         self.assertNotEqual(super, None)
-        self.assertEqual(super.Nchem, self.crys.Nchem+1)
+        self.assertEqual(super.Nchem, self.crys.Nchem)
         super = supercell.Supercell(self.crys, self.one, interstitial=(1,))
         self.assertNotEqual(super, None)
-        super = supercell.Supercell(self.crys, self.one, Nchem=5)
+        super = supercell.Supercell(self.crys, self.one, Nsolute=5)
         self.assertNotEqual(super, None)
-        self.assertEqual(super.Nchem, 5)
+        self.assertEqual(super.Nchem, self.crys.Nchem+5)
 
     def testEqualityCopy(self):
         """Can we copy a supercell, and is it equal to itself?"""
@@ -128,4 +128,15 @@ class InterstitialSuperTests(HCPSuperTests):
         super = supercell.Supercell(self.crys, 3*self.one, interstitial=[1])
         super.fillperiodic((0,0))
         self.assertEqual(len(super.chemorder[0]), super.size*len(self.crys.basis[0]))
+        for n in range(1,super.Nchem):
+            self.assertEqual(len(super.chemorder[n]), 0)
+        for ind in range(super.size*super.N):
+            if ind in super.chemorder[0]:
+                self.assertEqual(super.occ[ind], 0)  # occupied with correct chemistry
+            else:
+                self.assertEqual(super.occ[ind], -1)  # vacancy
+        for ci in next((wset for wset in self.crys.Wyckoff if (0,0) in wset), None):
+            i = self.crys.atomindices.index(ci)
+            for n in range(super.size):
+                self.assertIn(n*super.N+i, super.chemorder[0])
         # print(super)
