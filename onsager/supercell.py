@@ -453,5 +453,11 @@ class Supercell(object):
         :return mapping: list of maps, such that (g*self).chemorder[c][mapping[c][i]] == other.chemorder[c][i]
         """
         selfdefects, otherdefects = self.defectindices(), other.defectindices()
+        for k,v in selfdefects.items():
+            if k not in otherdefects: return None, None
+            if len(v) != len(otherdefects[k]): return None, None
+        for k,v in otherdefects.items():
+            if k not in selfdefects: return None, None
+            if len(v) != len(selfdefects[k]): return None, None
         return None,None
 

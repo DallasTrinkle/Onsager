@@ -215,6 +215,12 @@ class FCCSuperTests(unittest.TestCase):
                 super.setocc(indpoppush, c)
         supercopy.reorder(revmap)
         self.assertOrderingSuperEqual(super, supercopy)
+        # test out a bad mapping:
+        badmap = [[i%2 for i in range(len(clist))] for clist in super.chemorder]
+        with self.assertRaises(ValueError):
+            supercopy.reorder(badmap)
+        self.assertOrderingSuperEqual(super, supercopy)
+
 
     def testEquivalenceMap(self):
         """Can we construct an equivalence map between two supercells?"""
