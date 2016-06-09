@@ -531,7 +531,8 @@ class VacancyMediated(object):
         self.vkinetic = stars.VectorStarSet()
         self.generate(Nthermo)
         self.generatematrices()
-        self.tags, self.tagdict = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
+        # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2 (see __taglist__)
+        self.tags, self.tagdict, self.tagdicttype = self.generatetags()
 
     def generate(self, Nthermo):
         """
@@ -633,9 +634,9 @@ class VacancyMediated(object):
 
         :return tags: dictionary of tags; each is a list-of-lists
         :return tagdict: dictionary that maps tag into the index of the corresponding list.
+        :return tagdicttype: dictionary that maps tag into the key for the corresponding list.
         """
-        tags = {}
-        tagdict = {}
+        tags, tagdict, tagdicttype = {}, {}, {}
         basis = self.crys.basis[self.chem]  # shortcut
         def single_defect(DEFECT_TAG, u):
             return SINGLE_DEFECT_TAG.format(type=DEFECT_TAG, u1=u[0], u2=u[1], u3=u[2])
@@ -665,14 +666,13 @@ class VacancyMediated(object):
                                           complex2=double_defect(self.kinetic.states[j]))
                            for ((i,j), dx) in jumplist] for jumplist in self.om2_jn]
         # make the "tagdict" for quick indexing!
-        for taglist in tags.values():
+        for tagtype, taglist in tags.items():
             for i, tagset in enumerate(taglist):
                 for tag in tagset:
                     if tag in tagdict:
                         raise ValueError('Generated repeated tags? {} found twice.'.format(tag))
-                    else:
-                        tagdict[tag] = i
-        return tags, tagdict
+                    else: tagdict[tag], tagdicttype[tag] = i, tagtype
+        return tags, tagdict, tagdicttype
 
     # this is part of our *class* definition: list of data that can be directly assigned / read
     __HDF5list__ = ('chem', 'N', 'invmap', 'VectorBasis', 'VV', 'NVB',
@@ -804,15 +804,14 @@ class VacancyMediated(object):
         else:
             diffuser.GFvalues, diffuser.Lvvvalues, diffuser.etavvalues = {}, {}, {}
         # tags
-        diffuser.tags = {}
+        diffuser.tags, diffuser.tagdict, diffuser.tagdicttype = {}, {}, {}
         for tag in cls.__taglist__:
             # needed because of how HDF5 stores strings...
             utf8list = [ str(data, encoding='utf-8') for data in HDF5group[tag + '_taglist'].value ]
             diffuser.tags[tag] = stars.flatlistindex2doublelist(utf8list, HDF5group[tag + '_tagindex'])
-        diffuser.tagdict = {}
-        for taglist in diffuser.tags.values():
+        for tagtype, taglist in diffuser.tags.items():
             for i, tags in enumerate(taglist):
-                for tag in tags: diffuser.tagdict[tag] = i
+                for tag in tags: diffuser.tagdict[tag], diffuser.tagdicttype[tag] = i, tagtype
         return diffuser
 
     def interactlist(self):
@@ -916,16 +915,58 @@ class VacancyMediated(object):
         """
         Generates
         :param usertagdict: dictionary where the keys are tags, and the values are tuples: (pre, ene)
-        :param VERBOSE: (optional) if True, also return a dictionary of missing tags, and duplicate tags
+        :param VERBOSE: (optional) if True, also return a dictionary of missing tags, duplicate tags, and bad tags
         :return thermodict: dictionary of ene's and pre's corresponding to usertagdict
         :return missingdict: dictionary with keys corresponding to tag types, and the values are
           lists of lists of symmetry equivalent tags that are missing
         :return duplicatelist: list of all tags in usertagdict that duplicate information
+        :return badtaglist: list of all tags in usertagdict that aren't found in our dictionary
         """
-        thermodict={}
+        N, Nst, Nom0 = len(self.sitelist), self.thermo.Nstars, len(self.om0_jn)
+        # basic thermodict; note: we *don't* prefill omega1 and omega2, because LIMB does that later
+        thermodict={'preV': np.ones(N), 'eneV': np.zeros(N),
+                    'preS': np.ones(N), 'eneS': np.zeros(N),
+                    'preSV': np.ones(Nst), 'eneSV': np.zeros(Nst),
+                    'preT0': np.ones(Nom0), 'eneT0': np.zeros(Nom0)}
+        for tagstring, prename, enename in (('vacancy', 'preV', 'eneV'),
+                                            ('solute', 'preS', 'eneS'),
+                                            ('solute-vacancy', 'preSV', 'eneSV'),
+                                            ('omega0', 'preT0', 'eneT0')):
+            for taglist in self.tags[tagstring]:
+                for i,tags in enumerate(taglist):
+                    for t in tags:
+                        if t in usertagdict:
+                            thermodict[prename][i], thermodict[enename][i] = usertagdict[t]
+                            break
+        # "backfill" with LIMB so that the rest is meaningful:
+        thermodict.update(self.makeLIMBpreene(**thermodict))
+        for tagstring, prename, enename in (('omega1', 'preT1', 'eneT1'),
+                                            ('omega2', 'preT2', 'eneT2')):
+            for taglist in self.tags[tagstring]:
+                for i, tags in enumerate(taglist):
+                    for t in tags:
+                        if t in usertagdict:
+                            thermodict[prename][i], thermodict[enename][i] = usertagdict[t]
+                            break
         if not VERBOSE: return thermodict
-        missingdict, duplicatelist = {},[]
-        return thermodict, missingdict, duplicatelist
+        missingdict, duplicatelist, badtaglist = {}, [], []
+        # go through all the types of tags, and construct a list of lists of missing tags for each
+        for tagtype,taglist in self.tags.items():
+            missinglist=[]
+            for tags in taglist:
+                # check for *any* representative found for this list of tags
+                if not any([t in usertagdict for t in tags]): missinglist.append(tags)
+            if len(missinglist)>0: missingdict[tagtype]=missinglist
+        # now make the duplicate list and bad tag list
+        foundtagset=set()
+        for usertag in usertagdict:
+            if usertag in foundtagset: duplicatelist.append(usertag)
+            else:
+                if usertag not in self.tagdict: badtaglist.append(usertag)
+                else:
+                    for t in self.tags[self.tagdicttype[usertag]][self.tagdict[usertag]]:
+                        foundtagset.add(t)
+        return thermodict, missingdict, duplicatelist, badtaglist
 
     @staticmethod
     def preene2betafree(kT, preV, eneV, preS, eneS, preSV, eneSV,
@@ -1241,7 +1282,6 @@ class VacancyMediatedMeta(VacancyMediated):
         """
         no idea. will fill it later
         """
-        # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
         # Vector star set, generates a LOT of our calculation:
         self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
         # empty dictionaries to store GF values
