@@ -913,7 +913,8 @@ class VacancyMediated(object):
 
     def tags2preene(self, usertagdict, VERBOSE=False):
         """
-        Generates
+        Generates energies and prefactors based on a dictionary of tags.
+
         :param usertagdict: dictionary where the keys are tags, and the values are tuples: (pre, ene)
         :param VERBOSE: (optional) if True, also return a dictionary of missing tags, duplicate tags, and bad tags
         :return thermodict: dictionary of ene's and pre's corresponding to usertagdict

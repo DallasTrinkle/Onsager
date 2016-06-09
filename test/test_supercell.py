@@ -20,6 +20,14 @@ class FCCSuperTests(unittest.TestCase):
         self.one = np.eye(3, dtype=int)
         self.groupsupers = (self.one, 2 * self.one, np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]))
 
+    def assertOrderingSuperEqual(self, s0, s1):
+        if s0 != s1:
+            failmsg = ""
+            for op0list, op1list in zip(s0.occposlist(), s1.occposlist()):
+                for p0, p1 in zip(op0list, op1list): failmsg += "{} {}\n".format(p0, p1)
+                failmsg += "\n"
+            self.assertEqual(s0, s1, msg=failmsg)
+
     def testSuper(self):
         """Can we make a supercell object?"""
         super = supercell.Supercell(self.crys, self.one)
@@ -136,7 +144,7 @@ class FCCSuperTests(unittest.TestCase):
                 self.assertEqual(ind, super.index(crystal.incell(u+delta)))
             # test out setting by making a copy "by hand"
             randcopy = super.copy()  # starts out empty, too.
-            Ntests = 100
+            Ntests = 30
             for c, ind in zip(np.random.randint(-1, super.Nchem, size=Ntests),
                               np.random.randint(super.size * super.N, size=Ntests)):
                 super.setocc(ind, c)
@@ -171,7 +179,60 @@ class FCCSuperTests(unittest.TestCase):
         # quick test of multiplying the other direction, and in-place (which should all call the same code)
         self.assertEqual(gsuper, super*g)
         super *= g
-        self.assertEqual(gsuper, super )
+        self.assertEqual(gsuper, super)
+
+    def testReorder(self):
+        """Can we reorder a supercell?"""
+        super = supercell.Supercell(self.crys, 3 * self.one, Nsolute=1)
+        # set up some random occupancy
+        Ntests = 100
+        for c, ind in zip(np.random.randint(-1, super.Nchem, size=Ntests),
+                          np.random.randint(super.size * super.N, size=Ntests)):
+            super.setocc(ind, c)
+        # Try some simple reorderings: 1. unity permutation; 2. pop+push; 3. reversal
+        supercopy = super.copy()
+        unitymap = [[i for i in range(len(clist))] for clist in super.chemorder]
+        supercopy.reorder(unitymap)
+        self.assertOrderingSuperEqual(super, supercopy)
+        popmap = []
+        for c, clist in enumerate(super.chemorder):
+            n = len(clist)
+            popmap.append([(i+1)%n for i in range(n)])
+            indpoppush = clist[0]
+            super.setocc(indpoppush, -1)
+            super.setocc(indpoppush, c)  # *now* should be at the *end* of the chemorder list
+        supercopy.reorder(popmap)
+        self.assertOrderingSuperEqual(super, supercopy)
+        revmap = []
+        for c, clist in enumerate(super.chemorder):
+            n = len(clist)
+            revmap.append([(n-1-i) for i in range(n)])
+            cl = clist.copy()  # need to be careful, since clist gets modified by our popping...
+            for indpoppush in cl:
+                super.setocc(indpoppush, -1)
+            cl.reverse()
+            for indpoppush in cl:
+                super.setocc(indpoppush, c)
+        supercopy.reorder(revmap)
+        self.assertOrderingSuperEqual(super, supercopy)
+
+    def testEquivalenceMap(self):
+        """Can we construct an equivalence map between two supercells?"""
+        super = supercell.Supercell(self.crys, 3 * self.one, Nsolute=1)
+        # set up some random occupancy
+        Ntests = 100
+        for c, ind in zip(np.random.randint(-1, super.Nchem, size=Ntests),
+                          np.random.randint(super.size * super.N, size=Ntests)):
+            super.setocc(ind, c)
+        supercopy = super.copy()
+        # first equivalence test: introduce some random permutations of ordering of supercell
+        for ind in np.random.randint(super.size*super.N, size=Ntests):
+            c, super[ind] = super[ind], -1
+            super[ind] = c
+        g, mapping = supercopy.equivalencemap(super)
+        self.assertNotEqual(g, None, msg='Cannot map between permutation?')
+        supercopy.reorder(mapping)
+        self.assertOrderingSuperEqual(super, supercopy)
 
 
 class HCPSuperTests(FCCSuperTests):

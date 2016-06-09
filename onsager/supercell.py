@@ -72,11 +72,12 @@ class Supercell(object):
     # some attributes we want to do equate, others we want deepcopy. Equate should not be modified.
     __copyattr__ = ('lattice', 'N', 'chemistry', 'size', 'invsuper',
                     'Wyckofflist', 'Wyckoffchem', 'occ', 'chemorder')
-    __eqattr__ = ('translist', 'transdict', 'pos', 'G')
+    __eqattr__ = ('atomindices', 'indexatom', 'translist', 'transdict', 'pos', 'G')
 
     def copy(self):
         """
-        Make a copy of the supercell; initializes, then copies over copyattr's.
+        Make a copy of the supercell; initializes, then copies over `__copyattr__` and `__eqattr__`.
+
         :return: new supercell object, copy of the original
         """
         supercopy = self.__class__(self.crys, self.super, self.interstitial, self.Nchem-self.crys.Nchem,
@@ -89,6 +90,7 @@ class Supercell(object):
         """
         Return True if two supercells are equal; this means they should have the same occupancy.
         *and* the same ordering
+
         :param other: supercell for comparison
         :return: True if same crystal, supercell, occupancy, and ordering; False otherwise
         """
@@ -121,6 +123,7 @@ class Supercell(object):
     def __mul__(self, other):
         """
         Multiply by a GroupOp; returns a new supercell (constructed via copy).
+
         :param other: must be a GroupOp (and *should* be a GroupOp of the supercell!)
         :return: rotated supercell
         """
@@ -132,6 +135,7 @@ class Supercell(object):
     def __rmul__(self, other):
         """
         Multiply by a GroupOp; returns a new supercell (constructed via copy).
+
         :param other: must be a GroupOp (and *should* be a GroupOp of the supercell!)
         :return: rotated supercell
         """
@@ -141,6 +145,7 @@ class Supercell(object):
     def __imul__(self, other):
         """
         Multiply by a GroupOp, in place.
+
         :param other: must be a GroupOp (and *should* be a GroupOp of the supercell!)
         :return: self
         """
@@ -154,14 +159,16 @@ class Supercell(object):
         self.chemorder = [[indexmap[ind] for ind in clist] for clist in self.chemorder]
         return self
 
-    def index(self, pos):
+    def index(self, pos, threshold=1.):
         """
         Return the index that corresponds to the position *closest* to pos in the supercell.
-        Done in direct coordinates of the supercell.
+        Done in direct coordinates of the supercell, using periodic boundary conditions.
+
         :param pos: 3-vector
+        :param threshold: (optional) minimum squared "distance" in supercell for a match; default=1.
         :return index: index of closest position
         """
-        index, dist2 = None, 3.
+        index, dist2 = None, threshold
         for ind, u in enumerate(self.pos):
             delta = crystal.inhalf(pos-u)
             d2 = np.sum(delta*delta)
@@ -171,6 +178,7 @@ class Supercell(object):
     def __getitem__(self, key):
         """
         Index into supercell
+
         :param key: index (either an int, a slice, or a position)
         :return: chemical occupation at that point
         """
@@ -181,6 +189,7 @@ class Supercell(object):
     def __setitem__(self, key, value):
         """
         Set specific composition for site; uses same indexing as __getitem__
+
         :param key: index (either an int, a slice, or a position)
         :param value: chemical occupation at that point
         """
@@ -211,6 +220,7 @@ class Supercell(object):
         """
         Takes in a supercell matrix, and returns a list of all translations of the unit cell that
         remain inside the supercell
+
         :param super: 3x3 integer matrix
         :return size: integer, corresponding to number of unit cells
         :return invsuper: integer matrix inverse of supercell (needs to be divided by size)
@@ -240,6 +250,7 @@ class Supercell(object):
         """
         Generate the array corresponding to the sites; the indexing is based on the translations
         and the atomindices in crys. These may not all be filled when the supercell is finished.
+
         :return pos: array [N*size, 3] of supercell positions in direct coordinates
         """
         invsize = 1 / self.size
@@ -249,6 +260,7 @@ class Supercell(object):
     def gengroup(self):
         """
         Generate the group operations internal to the supercell
+
         :return Gset: set of GroupOps
         """
         Glist = []
@@ -290,6 +302,7 @@ class Supercell(object):
     def definesolute(self, c, chemistry):
         """
         Set the name of the chemistry of chemical index c. Only works for substitutional solutes.
+
         :param c: index
         :param chemistry: string
         """
@@ -301,6 +314,7 @@ class Supercell(object):
     def setocc(self, ind, c):
         """
         Set the occupancy of position indexed by ind, to chemistry c. Used by all the other algorithms.
+
         :param ind: integer index
         :param c: chemistry index
         """
@@ -320,7 +334,8 @@ class Supercell(object):
 
     def fillperiodic(self, ci, Wyckoff=True):
         """
-        Occupies all of the (Wyckoff) sites corresponding to chemical index with the appropriate chemistry
+        Occupies all of the (Wyckoff) sites corresponding to chemical index with the appropriate chemistry.
+
         :param ci: tuple of (chem, index) in crystal
         :param Wyckoff: (optional) if False, *only* occupy the specific tuple, but still periodically
         """
@@ -333,14 +348,16 @@ class Supercell(object):
 
     def occposlist(self):
         """
-        Returns a list of lists of occupied positions, in (chem)order
+        Returns a list of lists of occupied positions, in (chem)order.
+
         :return occposlist: list of lists of supercell coord. positions
         """
         return [[self.pos[ind] for ind in clist] for clist in self.chemorder]
 
     def POSCAR(self, name=None, stoichiometry=True):
         """
-        Return a VASP-style POSCAR, returned as a string
+        Return a VASP-style POSCAR, returned as a string.
+
         :param name: (optional) name to use for first list
         :param stoichiometry: (optional) if True, append stoichiometry to name
         :return POSCAR: string
@@ -362,34 +379,79 @@ class Supercell(object):
     __vacancyformat__ = "v_{sitechem}"
     __interstitialformat__ = "{chem}_i"
     __antisiteformat__ = "{chem}_{sitechem}"
-    def KrogerVink(self):
+    def defectindices(self):
         """
-        Attempt to make a "simple" string of the supercell, using Kroger-Vink notation.
-        That is, we identify: vacancies, antisites, and interstitial sites, and return a string.
-        NOTE: there is no relative charges, so this is a pseudo-KV notation
-        :return KV: string representation
+        Return a dictionary that corresponds to the "defect" content of the supercell.
+
+        :return defects: dictionary, keyed by defect type, with a set of indices of corresponding defects
         """
-        defectlist = {}
+        def adddefect(name, index):
+            if name in defects: defects[name].add(index)
+            else: defects[name] = set([index])
+        defects={}
         sitechem = [self.chemistry[c] for (c,i) in self.atomindices]
-        def adddefect(name):
-            if name in defectlist: defectlist[name] += 1
-            else: defectlist[name] = 1
         for wset, chem in zip(self.Wyckofflist, self.Wyckoffchem):
             for i in wset:
                 if self.atomindices[i][0] in self.interstitial:
                     for n in range(self.size):
                         ind = n*self.N+i
                         c=self.occ[ind]
-                        if c != -1: adddefect(self.__interstitialformat__.format(chem=self.chemistry[c]))
+                        if c != -1: adddefect(self.__interstitialformat__.format(chem=self.chemistry[c]), ind)
                 else:
                     sc = sitechem[i]
                     for n in range(self.size):
                         ind = n*self.N+i
                         c=self.occ[ind]
                         if self.chemistry[c] != sc:
-                            if c == -1: adddefect(self.__vacancyformat__.format(sitechem=sitechem[i]))
-                            else: adddefect(self.__antisiteformat__.format(chem=self.chemistry[c],
-                                                                           sitechem=sc))
-        return '+'.join(["{}{}".format(defectlist[name],name)
-                         if defectlist[name]>1 else name
-                         for name in sorted(defectlist.keys())])
+                            name = self.__vacancyformat__.format(sitechem=sitechem[i]) \
+                                if c == -1 else \
+                                self.__antisiteformat__.format(chem=self.chemistry[c], sitechem=sc)
+                            adddefect(name, ind)
+        return defects
+
+    def KrogerVink(self):
+        """
+        Attempt to make a "simple" string based on the defectindices, using Kroger-Vink notation.
+        That is, we identify: vacancies, antisites, and interstitial sites, and return a string.
+        NOTE: there is no relative charges, so this is a pseudo-KV notation.
+
+        :return KV: string representation
+        """
+        defects = self.defectindices()
+        return '+'.join(["{}{}".format(len(defects[name]),name)
+                         if len(defects[name])>1 else name
+                         for name in sorted(defects.keys())])
+
+    def reorder(self, mapping):
+        """
+        Reorder (in place) the occupied sites. Does not change the occupancies, only the ordering
+        for "presentation".
+
+        :param mapping: list of maps; will make newchemorder[c][i] = chemorder[c][mapping[c][i]]
+
+        If mapping is not a proper permutation, raises ValueError.
+        """
+        neworder = [[clist[cmap[i]] for i in range(len(clist))]
+                    for clist, cmap in zip(self.chemorder, mapping)]
+        self.chemorder, oldorder = neworder, self.chemorder
+        if not self.__sane__():
+            self.chemorder = oldorder
+            raise ValueError('Mapping {} is not a proper permutation'.format(mapping))
+
+    def equivalencemap(self, other):
+        """
+        Given the super `other` we want to find a group operation that transforms `self` into other.
+        This is a GroupOp *along* with an index mapping of chemorder. The index mapping is to get
+        the occposlist to match up: `(g*self).occposlist()[c][mapping[c][i]] == other.occposlist()[c][i]`
+        (We can write a similar expression using chemorder, since chemorder indexes into pos).
+        We're going to return both g and mapping.
+        *Remember:* `g` does not change the presentation ordering; `mapping` is necessary for full equivalence.
+        If no such equivalence, return None,None.
+
+        :param other: Supercell
+        :return g: GroupOp to transform sites from `self` to `other`
+        :return mapping: list of maps, such that (g*self).chemorder[c][mapping[c][i]] == other.chemorder[c][i]
+        """
+        selfdefects, otherdefects = self.defectindices(), other.defectindices()
+        return None,None
+
