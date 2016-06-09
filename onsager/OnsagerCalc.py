@@ -950,22 +950,18 @@ class VacancyMediated(object):
                             break
         if not VERBOSE: return thermodict
         missingdict, duplicatelist, badtaglist = {}, [], []
-        # go through all the types of tags, and construct a list of lists of missing tags for each
-        for tagtype,taglist in self.tags.items():
-            missinglist=[]
-            for tags in taglist:
-                # check for *any* representative found for this list of tags
-                if not any([t in usertagdict for t in tags]): missinglist.append(tags)
-            if len(missinglist)>0: missingdict[tagtype]=missinglist
-        # now make the duplicate list and bad tag list
-        foundtagset=set()
+        tupledict = {(tagtype,n): [] for tagtype,taglist in self.tags.items() for n in range(len(taglist))}
+        # go through all the types of tags and interactions, and construct a list of usertags for each
         for usertag in usertagdict:
-            if usertag in foundtagset: duplicatelist.append(usertag)
-            else:
-                if usertag not in self.tagdict: badtaglist.append(usertag)
-                else:
-                    for t in self.tags[self.tagdicttype[usertag]][self.tagdict[usertag]]:
-                        foundtagset.add(t)
+            if usertag not in self.tagdict: badtaglist.append(usertag)
+            else: tupledict[(self.tagdicttype[usertag], self.tagdict[usertag])].append(usertag)
+        # each entry should appear once, and only once
+        for k,v in tupledict.items():
+            if len(v)==0:
+                if v in missingdict: missingdict[v].append(self.tags[k[0]][k[1]])
+                else: missingdict[v] =  [self.tags[k[0]][k[1]]]
+            elif len(v)>1:
+                duplicatelist.append(v)
         return thermodict, missingdict, duplicatelist, badtaglist
 
     @staticmethod
