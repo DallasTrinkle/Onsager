@@ -919,7 +919,7 @@ class VacancyMediated(object):
         :return thermodict: dictionary of ene's and pre's corresponding to usertagdict
         :return missingdict: dictionary with keys corresponding to tag types, and the values are
           lists of lists of symmetry equivalent tags that are missing
-        :return duplicatelist: list of all tags in usertagdict that duplicate information
+        :return duplicatelist: list of lists of tags in usertagdict that are (symmetry) duplicates
         :return badtaglist: list of all tags in usertagdict that aren't found in our dictionary
         """
         N, Nst, Nom0 = len(self.sitelist), self.thermo.Nstars, len(self.om0_jn)
@@ -932,22 +932,20 @@ class VacancyMediated(object):
                                             ('solute', 'preS', 'eneS'),
                                             ('solute-vacancy', 'preSV', 'eneSV'),
                                             ('omega0', 'preT0', 'eneT0')):
-            for taglist in self.tags[tagstring]:
-                for i,tags in enumerate(taglist):
-                    for t in tags:
-                        if t in usertagdict:
-                            thermodict[prename][i], thermodict[enename][i] = usertagdict[t]
-                            break
+            for i,tags in enumerate(self.tags[tagstring]):
+                for t in tags:
+                    if t in usertagdict:
+                        thermodict[prename][i], thermodict[enename][i] = usertagdict[t]
+                        break
         # "backfill" with LIMB so that the rest is meaningful:
         thermodict.update(self.makeLIMBpreene(**thermodict))
         for tagstring, prename, enename in (('omega1', 'preT1', 'eneT1'),
                                             ('omega2', 'preT2', 'eneT2')):
-            for taglist in self.tags[tagstring]:
-                for i, tags in enumerate(taglist):
-                    for t in tags:
-                        if t in usertagdict:
-                            thermodict[prename][i], thermodict[enename][i] = usertagdict[t]
-                            break
+            for i, tags in enumerate(self.tags[tagstring]):
+                for t in tags:
+                    if t in usertagdict:
+                        thermodict[prename][i], thermodict[enename][i] = usertagdict[t]
+                        break
         if not VERBOSE: return thermodict
         missingdict, duplicatelist, badtaglist = {}, [], []
         tupledict = {(tagtype,n): [] for tagtype,taglist in self.tags.items() for n in range(len(taglist))}
@@ -958,8 +956,8 @@ class VacancyMediated(object):
         # each entry should appear once, and only once
         for k,v in tupledict.items():
             if len(v)==0:
-                if v in missingdict: missingdict[v].append(self.tags[k[0]][k[1]])
-                else: missingdict[v] =  [self.tags[k[0]][k[1]]]
+                if k[0] in missingdict: missingdict[k[0]].append(self.tags[k[0]][k[1]])
+                else: missingdict[k[0]] =  [self.tags[k[0]][k[1]]]
             elif len(v)>1:
                 duplicatelist.append(v)
         return thermodict, missingdict, duplicatelist, badtaglist
