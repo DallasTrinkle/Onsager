@@ -86,14 +86,14 @@ class Supercell(object):
 
     def __eq__(self, other):
         """
-        Return True if two supercells are equal; this means they should have the same occupancy
+        Return True if two supercells are equal; this means they should have the same occupancy.
         *and* the same ordering
         :param other: supercell for comparison
         :return: True if same crystal, supercell, occupancy, and ordering; False otherwise
         """
-        ### Will need more....
         return isinstance(other, self.__class__) and np.all(self.super == other.super) and \
-               self.interstitial == other.interstitial and np.allclose(self.pos, other.pos)
+               self.interstitial == other.interstitial and np.allclose(self.pos, other.pos) and \
+               np.all(self.occ == other.occ) and self.chemorder == other.chemorder
 
     def __ne__(self, other):
         """Inequality == not __eq__"""
@@ -102,13 +102,11 @@ class Supercell(object):
     def __str__(self):
         """Human readable version of supercell"""
         str = "Supercell of crystal:\n{crys}\n".format(crys=self.crys)
-        # if self.interstitial != (): str = str + "Interstitial sites: {}\n".format(self.interstitial)
-        str = str + "Supercell vectors:\n{}\nChemistry: ".format(self.super.T)
-        str = str + ','.join([c + '_i({})'.format(len(l)) if n in self.interstitial else c + '({})'.format(len(l))
-                              for n, c, l in
-                              zip(itertools.count(), self.chemistry[:-1], self.chemorder)])
-        str = str + '\nPositions:\n'
-        str = str + '\n'.join([u.__str__() + ': ' + self.chemistry[o] for u, o in zip(self.pos, self.occ)])
+        str += "Supercell vectors:\n{}\nChemistry: ".format(self.super.T)
+        str += ','.join([c + '_i({})'.format(len(l)) if n in self.interstitial else c + '({})'.format(len(l))
+                         for n, c, l in zip(itertools.count(), self.chemistry[:-1], self.chemorder)])
+        str += '\nPositions:\n'
+        str += '\n'.join([u.__str__() + ': ' + self.chemistry[o] for u, o in zip(self.pos, self.occ)])
         return str
 
     def __mul__(self, other):
@@ -139,6 +137,12 @@ class Supercell(object):
         """
         if not isinstance(other, crystal.GroupOp): return NotImplemented
         # This requires some careful manipulation: we need to modify (1) occ, and (2) chemorder
+        indexmap = other.indexmap[0]
+        gocc = self.occ.copy()
+        for ind, gind in enumerate(indexmap):
+            gocc[gind] = self.occ[ind]
+        self.occ = gocc
+        self.chemorder = [[indexmap[ind] for ind in clist] for clist in self.chemorder]
         return self
 
     def __sane__(self):
