@@ -99,6 +99,29 @@ class FCCSuperTests(unittest.TestCase):
                         self.assertTrue(np.allclose(gu, super.pos[gi]),
                                         msg="{}\nProblem with GroupOp:\n{}\nIndexing: {} != {}".format(super, g, gu, super.pos[gi]))
 
+    def testSanity(self):
+        """Does __sane__ operate as it should?"""
+        # we use NOSYM for speed only
+        super = supercell.Supercell(self.crys, 3*self.one, Nsolute=1, NOSYM=True)
+        self.assertTrue(super.__sane__(), msg='Empty supercell not sane?')
+        # do a bunch of random operations, make sure we remain sane:
+        Ntests = 100
+        for c,ind in zip(np.random.randint(-1, super.Nchem, size=Ntests),
+                         np.random.randint(super.size*super.N, size=Ntests)):
+            super.setocc(ind, c)
+            if not super.__sane__():
+                self.assertTrue(False, msg='Supercell:\n{}\nnot sane?'.format(super))
+        # Now! Break sanity (and then repair it)
+        for c, ind in zip(np.random.randint(-1, super.Nchem, size=Ntests),
+                          np.random.randint(super.size * super.N, size=Ntests)):
+            c0 = super.occ[ind]
+            if c==c0: continue
+            super.occ[ind] = c
+            self.assertFalse(super.__sane__())
+            super.occ[ind] = c0
+            if not super.__sane__():
+                self.assertTrue(False, msg='Supercell:\n{}\nnot sane?'.format(super))
+
 
 class HCPSuperTests(FCCSuperTests):
     """Tests to make sure we can make a supercell object: based on HCP"""

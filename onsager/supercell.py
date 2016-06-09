@@ -29,7 +29,7 @@ class Supercell(object):
 
     def __init__(self, crys, super, interstitial=(), Nsolute=0, empty=False, NOSYM=False):
         """
-        Initialize our supercell
+        Initialize our supercell to an empty supercell.
 
         :param crys: crystal object
         :param super: 3x3 integer matrix
@@ -110,6 +110,52 @@ class Supercell(object):
         str = str + '\nPositions:\n'
         str = str + '\n'.join([u.__str__() + ': ' + self.chemistry[o] for u, o in zip(self.pos, self.occ)])
         return str
+
+    def __mul__(self, other):
+        """
+        Multiply by a GroupOp; returns a new supercell (constructed via copy).
+        :param other: must be a GroupOp (and *should* be a GroupOp of the supercell!)
+        :return: rotated supercell
+        """
+        if not isinstance(other, crystal.GroupOp):
+            raise ArithmeticError('Can only multiply a supercell by a GroupOp')
+        gsuper = self.copy()
+        gsuper *= other
+        return gsuper
+
+    def __rmul__(self, other):
+        """
+        Multiply by a GroupOp; returns a new supercell (constructed via copy).
+        :param other: must be a GroupOp (and *should* be a GroupOp of the supercell!)
+        :return: rotated supercell
+        """
+        return self.__mul__(other)
+
+    def __imul__(self, other):
+        """
+        Multiply by a GroupOp, in place.
+        :param other: must be a GroupOp (and *should* be a GroupOp of the supercell!)
+        :return: self
+        """
+        if not isinstance(other, crystal.GroupOp):
+            raise ArithmeticError('Can only multiply a supercell by a GroupOp')
+        # This requires some careful manipulation: we need to modify (1) occ, and (2) chemorder
+        return self
+
+    def __sane__(self):
+        """Return True if supercell occupation and chemorder are consistent"""
+        occset=set()
+        for c, clist in enumerate(self.chemorder):
+            for ind in clist:
+                # check that occupancy (from chemorder) is correct:
+                if self.occ[ind] != c: return False
+                # record as an occupied state
+                occset.add(ind)
+        # now make sure that every site *not* in occset is, in fact, vacant
+        for ind, c in enumerate(self.occ):
+            if ind not in occset:
+                if c!=-1: return False
+        return True
 
     @staticmethod
     def maketrans(super):
@@ -235,3 +281,10 @@ class Supercell(object):
         indlist = next((nset for nset in self.Wyckofflist if ind in nset), None) if Wyckoff else (ind,)
         for i in [n*self.N+i for n in range(self.size) for i in indlist]:
             self.setocc(i, ci[0])
+
+    def occposlist(self):
+        """
+        Returns a list of lists of occupied positions, in (chem)order
+        :return occposlist: list of lists of supercell coord. positions
+        """
+        return [[self.pos[ind] for ind in clist] for clist in self.chemorder]
