@@ -760,7 +760,7 @@ class VacancyMediated(object):
         Creates a new VacancyMediated diffuser from an HDF5 group.
 
         :param HDFgroup: HDF5 group
-        :return: new StarSet object
+        :return: new VacancyMediated diffuser object from HDF5
         """
         diffuser = cls(None, None, None, None)  # initialize
         diffuser.crys = crystal.yaml.load(HDF5group['crystal_yaml'].value)
@@ -911,6 +911,21 @@ class VacancyMediated(object):
             preT2[j] = preT0[jt]*np.sqrt(preSVkin[SP[0]]*preSVkin[SP[1]])
             eneT2[j] = eneT0[jt] + 0.5*(eneSVkin[SP[0]]+eneSVkin[SP[1]])
         return {'preT1': preT1, 'eneT1': eneT1, 'preT2': preT2, 'eneT2': eneT2}
+
+    def tags2preene(self, usertagdict, VERBOSE=False):
+        """
+        Generates
+        :param usertagdict: dictionary where the keys are tags, and the values are tuples: (pre, ene)
+        :param VERBOSE: (optional) if True, also return a dictionary of missing tags, and duplicate tags
+        :return thermodict: dictionary of ene's and pre's corresponding to usertagdict
+        :return missingdict: dictionary with keys corresponding to tag types, and the values are
+          lists of lists of symmetry equivalent tags that are missing
+        :return duplicatelist: list of all tags in usertagdict that duplicate information
+        """
+        thermodict={}
+        if not VERBOSE: return thermodict
+        missingdict, duplicatelist = {},[]
+        return thermodict, missingdict, duplicatelist
 
     @staticmethod
     def preene2betafree(kT, preV, eneV, preS, eneS, preSV, eneSV,
