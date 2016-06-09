@@ -202,7 +202,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     def __mul__(self, other):
         """Multiply two group operations to produce a new group operation"""
         if __debug__:
-            if type(other) is not GroupOp: raise TypeError
+            if type(other) is not GroupOp: return NotImplemented
         return GroupOp(np.dot(self.rot, other.rot),
                        np.dot(self.rot, other.trans) + self.trans,
                        np.dot(self.cartrot, other.cartrot),

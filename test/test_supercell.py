@@ -122,6 +122,20 @@ class FCCSuperTests(unittest.TestCase):
             if not super.__sane__():
                 self.assertTrue(False, msg='Supercell:\n{}\nnot sane?'.format(super))
 
+    def testMultiply(self):
+        """Can we multiply a supercell by our group operations successfully?"""
+        super = supercell.Supercell(self.crys, 3 * self.one, Nsolute=1, NOSYM=True)
+        # set up some random occupancy
+        Ntests = 100
+        for c, ind in zip(np.random.randint(-1, super.Nchem, size=Ntests),
+                          np.random.randint(super.size * super.N, size=Ntests)):
+            super.setocc(ind, c)
+        for g in super.G:
+            gsuper = g*super
+            if not gsuper.__sane__():
+                self.assertTrue(False, msg='GroupOp:\n{}\nbreaks sanity?'.format(g))
+
+
 
 class HCPSuperTests(FCCSuperTests):
     """Tests to make sure we can make a supercell object: based on HCP"""

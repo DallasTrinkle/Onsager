@@ -117,8 +117,7 @@ class Supercell(object):
         :param other: must be a GroupOp (and *should* be a GroupOp of the supercell!)
         :return: rotated supercell
         """
-        if not isinstance(other, crystal.GroupOp):
-            raise ArithmeticError('Can only multiply a supercell by a GroupOp')
+        if not isinstance(other, crystal.GroupOp): return NotImplemented
         gsuper = self.copy()
         gsuper *= other
         return gsuper
@@ -129,6 +128,7 @@ class Supercell(object):
         :param other: must be a GroupOp (and *should* be a GroupOp of the supercell!)
         :return: rotated supercell
         """
+        if not isinstance(other, crystal.GroupOp): return NotImplemented
         return self.__mul__(other)
 
     def __imul__(self, other):
@@ -137,8 +137,7 @@ class Supercell(object):
         :param other: must be a GroupOp (and *should* be a GroupOp of the supercell!)
         :return: self
         """
-        if not isinstance(other, crystal.GroupOp):
-            raise ArithmeticError('Can only multiply a supercell by a GroupOp')
+        if not isinstance(other, crystal.GroupOp): return NotImplemented
         # This requires some careful manipulation: we need to modify (1) occ, and (2) chemorder
         return self
 
