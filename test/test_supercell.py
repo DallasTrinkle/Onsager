@@ -234,3 +234,12 @@ class InterstitialSuperTests(HCPSuperTests):
         super = supercell.Supercell(self.crys, self.one, interstitial=[1], Nsolute=1)
         super.definesolute(2, 'Mg')
 
+    def testYAML(self):
+        """Can we read/write YAML representation of a supercell?"""
+        super = supercell.Supercell(self.crys, 3*self.one, interstitial=[1])
+        YAMLstring = crystal.yaml.dump(super)
+        superYAML = crystal.yaml.load(YAMLstring)
+        self.assertEqual(super, superYAML)
+        # print(YAMLstring)
+
+
