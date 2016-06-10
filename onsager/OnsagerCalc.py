@@ -32,18 +32,24 @@ from onsager import crystalStars as stars
 class Interstitial(object):
     """
     A class to compute interstitial diffusivity; uses structure of crystal to do most
-    of the heavy lifting in terms of symmetry, etc.
+    of the heavy lifting in terms of symmetry.
+
+    Takes in a crystal that contains the interstitial as one of the chemical elements,
+    to be specified by `chem`, the sitelist (list of symmetry equivalent sites), and
+    jumpnetwork. Both of the latter can be computed automatically from `crys` methods,
+    but as they are lists, can also be editted or constructed by hand.
     """
+
     def __init__(self, crys, chem, sitelist, jumpnetwork):
         """
         Initialization; takes an underlying crystal, a choice of atomic chemistry,
         a corresponding Wyckoff site list and jump network.
 
-        :param crys : Crystal object
-        :param chem : integer, index into the basis of crys, corresponding to the chemical element that hops
-        :param sitelist : list of lists of indices, site indices where the atom may hop;
+        :param crys: Crystal object
+        :param chem: integer, index into the basis of crys, corresponding to the chemical element that hops
+        :param sitelist: list of lists of indices, site indices where the atom may hop;
           grouped by symmetry equivalency
-        :param jumpnetwork : list of lists of tuples: ( (i, j), dx )
+        :param jumpnetwork: list of lists of tuples: ( (i, j), dx )
             symmetry unique transitions; each list is all of the possible transitions
             from site i to site j with jump vector dx; includes i->j and j->i
         """
@@ -52,7 +58,7 @@ class Interstitial(object):
         self.sitelist = sitelist
         self.N = sum(1 for w in sitelist for i in w)
         self.invmap = [0 for w in sitelist for i in w]
-        for ind,w in enumerate(sitelist):
+        for ind, w in enumerate(sitelist):
             for i in w:
                 self.invmap[i] = ind
         self.jumpnetwork = jumpnetwork
@@ -63,23 +69,23 @@ class Interstitial(object):
         self.omega_invertible = True
         if self.NV > 0:
             # invertible if inversion is present
-            self.omega_invertible = any( np.allclose(g.cartrot, -np.eye(3)) for g in crys.G )
+            self.omega_invertible = any(np.allclose(g.cartrot, -np.eye(3)) for g in crys.G)
         if self.omega_invertible:
             # invertible, so just use solve for speed (omega is technically *negative* definite)
-            self.bias_solver = lambda omega,b: -solve(-omega, b, sym_pos=True)
+            self.bias_solver = lambda omega, b: -solve(-omega, b, sym_pos=True)
         else:
             # pseudoinverse required:
-            self.bias_solver = lambda omega,b: np.dot(pinv2(omega), b)
+            self.bias_solver = lambda omega, b: np.dot(pinv2(omega), b)
         # these pieces are needed in order to compute the elastodiffusion tensor
-        self.sitegroupops = self.generateSiteGroupOps() # list of group ops to take first rep. into whole list
-        self.jumpgroupops = self.generateJumpGroupOps() # list of group ops to take first rep. into whole list
-        self.siteSymmTensorBasis = self.generateSiteSymmTensorBasis() # projections for *first rep. only*
-        self.jumpSymmTensorBasis = self.generateJumpSymmTensorBasis() # projections for *first rep. only*
+        self.sitegroupops = self.generateSiteGroupOps()  # list of group ops to take first rep. into whole list
+        self.jumpgroupops = self.generateJumpGroupOps()  # list of group ops to take first rep. into whole list
+        self.siteSymmTensorBasis = self.generateSiteSymmTensorBasis()  # projections for *first rep. only*
+        self.jumpSymmTensorBasis = self.generateJumpSymmTensorBasis()  # projections for *first rep. only*
 
     @staticmethod
     def sitelistYAML(sitelist):
         """Dumps a "sample" YAML formatted version of the sitelist with data to be entered"""
-        return crystal.yaml.dump({'Dipole': [np.zeros((3,3)) for w in sitelist],
+        return crystal.yaml.dump({'Dipole': [np.zeros((3, 3)) for w in sitelist],
                                   'Energy': [0 for w in sitelist],
                                   'Prefactor': [1 for w in sitelist],
                                   'sitelist': sitelist})
@@ -87,7 +93,7 @@ class Interstitial(object):
     @staticmethod
     def jumpnetworkYAML(jumpnetwork):
         """Dumps a "sample" YAML formatted version of the jumpnetwork with data to be entered"""
-        return crystal.yaml.dump({'DipoleT': [np.zeros((3,3)) for t in jumpnetwork],
+        return crystal.yaml.dump({'DipoleT': [np.zeros((3, 3)) for t in jumpnetwork],
                                   'EnergyT': [0 for t in jumpnetwork],
                                   'PrefactorT': [1 for t in jumpnetwork],
                                   'jumpnetwork': jumpnetwork})
@@ -95,9 +101,9 @@ class Interstitial(object):
     def generateSiteGroupOps(self):
         """
         Generates a list of group operations that transform the first site in each site list
-        into all of the other members
+        into all of the other members; one group operation for each.
 
-        :return: list of list of group ops that mirrors the structure of site list
+        :return siteGroupOps: list of list of group ops that mirrors the structure of site list
         """
         groupops = []
         for sites in self.sitelist:
@@ -114,24 +120,24 @@ class Interstitial(object):
     def generateJumpGroupOps(self):
         """
         Generates a list of group operations that transform the first jump in the jump
-        network into all of the other members
+        network into all of the other members; one group operation for each.
 
-        :return: list of list of group ops that mirrors the structure of jumpnetwork
+        :return siteGroupOps: list of list of group ops that mirrors the structure of jumpnetwork.
         """
         groupops = []
         for jumps in self.jumpnetwork:
-            (i0,j0), dx0 = jumps[0]
+            (i0, j0), dx0 = jumps[0]
             oplist = []
-            for (i,j), dx in jumps:
+            for (i, j), dx in jumps:
                 for g in self.crys.G:
                     # more complex: have to check the tuple (i,j) *and* the rotation of dx
                     # AND against the possibility that we are looking at the reverse jump too
                     if (g.indexmap[self.chem][i0] == i
                         and g.indexmap[self.chem][j0] == j
-                        and np.allclose(dx, np.dot(g.cartrot, dx0)) ) or \
+                        and np.allclose(dx, np.dot(g.cartrot, dx0))) or \
                             (g.indexmap[self.chem][i0] == j
                              and g.indexmap[self.chem][j0] == i
-                             and np.allclose(dx, -np.dot(g.cartrot, dx0)) ):
+                             and np.allclose(dx, -np.dot(g.cartrot, dx0))):
                         oplist.append(g)
                         break
             groupops.append(oplist)
@@ -142,7 +148,7 @@ class Interstitial(object):
         Generates a list of symmetric tensor bases for the first representative site
         in our site list.
 
-        :return: list of symmetric bases
+        :return TensorSet: list of symmetric tensors
         """
         return [self.crys.SymmTensorBasis((self.chem, sites[0])) for sites in self.sitelist]
 
@@ -151,13 +157,13 @@ class Interstitial(object):
         Generates a list of symmetric tensor bases for the first representative transition
         in our jump network
 
-        :return: list of symmetric bases
+        :return TensorSet: list of list of symmetric tensors
         """
         # there is probably another way to do a list comprehension here, but that
         # will likely be nigh unreadable.
         lis = []
         for jumps in self.jumpnetwork:
-            (i,j), dx = jumps[0]
+            (i, j), dx = jumps[0]
             # more complex: have to check the tuple (i,j) *and* the rotation of dx
             # AND against the possibility that we are looking at the reverse jump too
             lis.append(reduce(crystal.CombineTensorBasis,
@@ -165,52 +171,52 @@ class Interstitial(object):
                                for g in self.crys.G
                                if (g.indexmap[self.chem][i] == i and
                                    g.indexmap[self.chem][j] == j and
-                                   np.allclose(dx, np.dot(g.cartrot, dx)) ) or
+                                   np.allclose(dx, np.dot(g.cartrot, dx))) or
                                (g.indexmap[self.chem][i] == j and
                                 g.indexmap[self.chem][j] == i and
-                                np.allclose(dx, -np.dot(g.cartrot, dx)) ) ] ) )
+                                np.allclose(dx, -np.dot(g.cartrot, dx)))]))
         return lis
 
     def siteprob(self, pre, betaene):
         """Returns our site probabilities, normalized, as a vector"""
         # be careful to make sure that we don't under-/over-flow on beta*ene
         minbetaene = min(betaene)
-        rho = np.array([ pre[w]*np.exp(minbetaene-betaene[w]) for w in self.invmap])
-        return rho/sum(rho)
+        rho = np.array([pre[w] * np.exp(minbetaene - betaene[w]) for w in self.invmap])
+        return rho / sum(rho)
 
     def ratelist(self, pre, betaene, preT, betaeneT):
         """Returns a list of lists of rates, matched to jumpnetwork"""
         # the ij tuple in each transition list is the i->j pair
         # invmap[i] tells you which Wyckoff position i maps to (in the sitelist)
         # trying to avoid under-/over-flow
-        siteene = np.array([ betaene[w] for w in self.invmap])
-        sitepre = np.array([ pre[w] for w in self.invmap])
-        return [ [ pT*np.exp(siteene[i]-beT)/sitepre[i]
-                   for (i,j), dx in t ]
-                 for t, pT, beT in zip(self.jumpnetwork, preT, betaeneT) ]
+        siteene = np.array([betaene[w] for w in self.invmap])
+        sitepre = np.array([pre[w] for w in self.invmap])
+        return [[pT * np.exp(siteene[i] - beT) / sitepre[i]
+                 for (i, j), dx in t]
+                for t, pT, beT in zip(self.jumpnetwork, preT, betaeneT)]
 
     def symmratelist(self, pre, betaene, preT, betaeneT):
         """Returns a list of lists of symmetrized rates, matched to jumpnetwork"""
         # the ij tuple in each transition list is the i->j pair
         # invmap[i] tells you which Wyckoff position i maps to (in the sitelist)
         # trying to avoid under-/over-flow
-        siteene = np.array([ betaene[w] for w in self.invmap])
-        sitepre = np.array([ pre[w] for w in self.invmap])
-        return [ [ pT*np.exp(0.5*siteene[i]+0.5*siteene[j]-beT)/np.sqrt(sitepre[i]*sitepre[j])
-                   for (i,j), dx in t ]
-                 for t, pT, beT in zip(self.jumpnetwork, preT, betaeneT) ]
+        siteene = np.array([betaene[w] for w in self.invmap])
+        sitepre = np.array([pre[w] for w in self.invmap])
+        return [[pT * np.exp(0.5 * siteene[i] + 0.5 * siteene[j] - beT) / np.sqrt(sitepre[i] * sitepre[j])
+                 for (i, j), dx in t]
+                for t, pT, beT in zip(self.jumpnetwork, preT, betaeneT)]
 
     def siteDipoles(self, dipoles):
         """
         Returns a list of the elastic dipole on each site, given the dipoles
-        for the representatives
+        for the representatives. ("populating" the full set of dipoles)
 
         :param dipoles: list of dipoles for the first representative site
-        :return: array of dipole for each site [site][3][3]
+        :return dipolelist: array of dipole for each site [site][3][3]
         """
         # difficult to do with list comprehension since we're mapping from Wyckoff positions
         # to site indices; need to create the "blank" list first, then map into it.
-        lis = np.zeros((self.N, 3, 3)) # blank list to index into
+        lis = np.zeros((self.N, 3, 3))  # blank list to index into
         for dipole, basis, sites, groupops in zip(dipoles, self.siteSymmTensorBasis,
                                                   self.sitelist, self.sitegroupops):
             symmdipole = crystal.ProjectTensorBasis(dipole, basis)
@@ -222,37 +228,40 @@ class Interstitial(object):
     def jumpDipoles(self, dipoles):
         """
         Returns a list of the elastic dipole for each transition, given the dipoles
-        for the representatives
+        for the representatives. ("populating" the full set of dipoles)
 
         :param dipoles: list of dipoles for the first representative transition
-        :return: lists of lists of dipole for each transition
+        :return dipolelist: list of lists of dipole for each jump[site][3][3]
         """
         # symmetrize them first via projection
-        symmdipoles = [ crystal.ProjectTensorBasis(dipole, basis)
-                        for dipole, basis in zip(dipoles, self.jumpSymmTensorBasis)]
-        return [ [ self.crys.g_tensor(g, dipole) for g in groupops ]
-                 for groupops, dipole in zip(self.jumpgroupops, symmdipoles) ]
+        symmdipoles = [crystal.ProjectTensorBasis(dipole, basis)
+                       for dipole, basis in zip(dipoles, self.jumpSymmTensorBasis)]
+        return [[self.crys.g_tensor(g, dipole) for g in groupops]
+                for groupops, dipole in zip(self.jumpgroupops, symmdipoles)]
 
-    def diffusivity(self, pre, betaene, preT, betaeneT, CalcDeriv = False):
+    def diffusivity(self, pre, betaene, preT, betaeneT, CalcDeriv=False):
         """
         Computes the diffusivity for our element given prefactors and energies/kB T.
         Also returns the negative derivative of diffusivity with respect to beta (used to compute
         the activation barrier tensor) if CalcDeriv = True
         The input list order corresponds to the sitelist and jumpnetwork
 
-        :param pre : list of prefactors for unique sites
-        :param betaene : list of site energies divided by kB T
-        :param preT : list of prefactors for transition states
+        :param pre: list of prefactors for unique sites
+        :param betaene: list of site energies divided by kB T
+        :param preT: list of prefactors for transition states
         :param betaeneT: list of transition state energies divided by kB T
-
         :return D[3,3]: diffusivity as a 3x3 tensor
         :return DE[3,3]: diffusivity times activation barrier (if CalcDeriv == True)
         """
         if __debug__:
-            if len(pre) != len(self.sitelist): raise IndexError("length of prefactor {} doesn't match sitelist".format(pre))
-            if len(betaene) != len(self.sitelist): raise IndexError("length of energies {} doesn't match sitelist".format(betaene))
-            if len(preT) != len(self.jumpnetwork): raise IndexError("length of prefactor {} doesn't match jump network".format(preT))
-            if len(betaeneT) != len(self.jumpnetwork): raise IndexError("length of energies {} doesn't match jump network".format(betaeneT))
+            if len(pre) != len(self.sitelist): raise IndexError(
+                "length of prefactor {} doesn't match sitelist".format(pre))
+            if len(betaene) != len(self.sitelist): raise IndexError(
+                "length of energies {} doesn't match sitelist".format(betaene))
+            if len(preT) != len(self.jumpnetwork): raise IndexError(
+                "length of prefactor {} doesn't match jump network".format(preT))
+            if len(betaeneT) != len(self.jumpnetwork): raise IndexError(
+                "length of energies {} doesn't match jump network".format(betaeneT))
         rho = self.siteprob(pre, betaene)
         sqrtrho = np.sqrt(rho)
         ratelist = self.ratelist(pre, betaene, preT, betaeneT)
@@ -261,25 +270,25 @@ class Interstitial(object):
         domega_ij = np.zeros((self.N, self.N))
         bias_i = np.zeros((self.N, 3))
         dbias_i = np.zeros((self.N, 3))
-        D0 = np.zeros((3,3))
-        Dcorrection = np.zeros((3,3))
-        Db = np.zeros((3,3))
+        D0 = np.zeros((3, 3))
+        Dcorrection = np.zeros((3, 3))
+        Db = np.zeros((3, 3))
         # bookkeeping for energies:
-        siteene = np.array([ betaene[w] for w in self.invmap])
+        siteene = np.array([betaene[w] for w in self.invmap])
         # transene = [ [ bET for (i,j), dx in t ] for t, bET in zip(self.jumpnetwork, betaeneT)]
         Eave = np.dot(rho, siteene)
 
         for transitionset, rates, symmrates, bET in zip(self.jumpnetwork, ratelist, symmratelist, betaeneT):
-            for ((i,j), dx), rate, symmrate in zip(transitionset, rates, symmrates):
+            for ((i, j), dx), rate, symmrate in zip(transitionset, rates, symmrates):
                 # symmrate = sqrtrho[i]*invsqrtrho[j]*rate
                 omega_ij[i, j] += symmrate
                 omega_ij[i, i] -= rate
-                domega_ij[i, j] += symmrate*(bET - 0.5*(siteene[i]+siteene[j]))
-                domega_ij[i, i] -= rate*(bET - siteene[i])
-                bias_i[i] += sqrtrho[i]*rate*dx
-                dbias_i[i] += sqrtrho[i]*rate*dx*(bET - 0.5*(siteene[i]+Eave))
-                D0 += 0.5*np.outer(dx, dx)*rho[i]*rate
-                Db += 0.5*np.outer(dx, dx)*rho[i]*rate*(bET - Eave)
+                domega_ij[i, j] += symmrate * (bET - 0.5 * (siteene[i] + siteene[j]))
+                domega_ij[i, i] -= rate * (bET - siteene[i])
+                bias_i[i] += sqrtrho[i] * rate * dx
+                dbias_i[i] += sqrtrho[i] * rate * dx * (bET - 0.5 * (siteene[i] + Eave))
+                D0 += 0.5 * np.outer(dx, dx) * rho[i] * rate
+                Db += 0.5 * np.outer(dx, dx) * rho[i] * rate * (bET - Eave)
         if self.NV > 0:
             # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
             omega_v = np.zeros((self.NV, self.NV))
@@ -290,8 +299,8 @@ class Interstitial(object):
                 bias_v[a] = np.trace(np.dot(bias_i.T, va))
                 dbias_v[a] = np.trace(np.dot(dbias_i.T, va))
                 for b, vb in enumerate(self.VectorBasis):
-                    omega_v[a,b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
-                    domega_v[a,b] = np.trace(np.dot(va.T, np.dot(domega_ij, vb)))
+                    omega_v[a, b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
+                    domega_v[a, b] = np.trace(np.dot(va.T, np.dot(domega_ij, vb)))
             gamma_v = self.bias_solver(omega_v, bias_v)
             dgamma_v = np.dot(domega_v, gamma_v)
             Dcorrection = np.dot(np.dot(self.VV, bias_v), gamma_v)
@@ -310,97 +319,104 @@ class Interstitial(object):
         and elastic dipoles/kB T
         The input list order corresponds to the sitelist and jumpnetwork
 
-        :param pre : list of prefactors for unique sites
-        :param betaene : list of site energies divided by kB T
+        :param pre: list of prefactors for unique sites
+        :param betaene: list of site energies divided by kB T
         :param dipole: list of elastic dipoles divided by kB T
-        :param preT : list of prefactors for transition states
+        :param preT: list of prefactors for transition states
         :param betaeneT: list of transition state energies divided by kB T
         :param dipoleT: list of elastic dipoles divided by kB T
-
         :return D[3,3]: diffusivity as 3x3 tensor
         :return dD[3,3,3,3]: elastodiffusion tensor as 3x3x3x3 tensor
         """
-        def vector_tensor_outer(v,a):
+
+        def vector_tensor_outer(v, a):
             """Construct the outer product of v and a"""
-            va = np.zeros((3,3,3))
-            for i,j,k in ((i,j,k) for i in range(3) for j in range(3) for k in range(3)):
-                va[i,j,k] = v[i]*a[j,k]
+            va = np.zeros((3, 3, 3))
+            for i, j, k in ((i, j, k) for i in range(3) for j in range(3) for k in range(3)):
+                va[i, j, k] = v[i] * a[j, k]
             return va
 
         def tensor_tensor_outer(a, b):
             """Construct the outer product of a and b"""
-            ab = np.zeros((3,3,3,3))
-            for i,j,k,l in ((i,j,k,l) for i in range(3) for j in range(3) for k in range(3) for l in range(3)):
-                ab[i,j,k,l] = a[i,j]*b[k,l]
+            ab = np.zeros((3, 3, 3, 3))
+            for i, j, k, l in ((i, j, k, l) for i in range(3) for j in range(3) for k in range(3) for l in range(3)):
+                ab[i, j, k, l] = a[i, j] * b[k, l]
             return ab
 
         if __debug__:
-            if len(pre) != len(self.sitelist): raise IndexError("length of prefactor {} doesn't match sitelist".format(pre))
-            if len(betaene) != len(self.sitelist): raise IndexError("length of energies {} doesn't match sitelist".format(betaene))
-            if len(dipole) != len(self.sitelist): raise IndexError("length of dipoles {} doesn't match sitelist".format(dipole))
-            if len(preT) != len(self.jumpnetwork): raise IndexError("length of prefactor {} doesn't match jump network".format(preT))
-            if len(betaeneT) != len(self.jumpnetwork): raise IndexError("length of energies {} doesn't match jump network".format(betaeneT))
-            if len(dipoleT) != len(self.jumpnetwork): raise IndexError("length of dipoles {} doesn't match jump network".format(dipoleT))
+            if len(pre) != len(self.sitelist): raise IndexError(
+                "length of prefactor {} doesn't match sitelist".format(pre))
+            if len(betaene) != len(self.sitelist): raise IndexError(
+                "length of energies {} doesn't match sitelist".format(betaene))
+            if len(dipole) != len(self.sitelist): raise IndexError(
+                "length of dipoles {} doesn't match sitelist".format(dipole))
+            if len(preT) != len(self.jumpnetwork): raise IndexError(
+                "length of prefactor {} doesn't match jump network".format(preT))
+            if len(betaeneT) != len(self.jumpnetwork): raise IndexError(
+                "length of energies {} doesn't match jump network".format(betaeneT))
+            if len(dipoleT) != len(self.jumpnetwork): raise IndexError(
+                "length of dipoles {} doesn't match jump network".format(dipoleT))
         rho = self.siteprob(pre, betaene)
         sqrtrho = np.sqrt(rho)
         ratelist = self.ratelist(pre, betaene, preT, betaeneT)
         symmratelist = self.symmratelist(pre, betaene, preT, betaeneT)
         omega_ij = np.zeros((self.N, self.N))
         bias_i = np.zeros((self.N, 3))
-        biasP_i = np.zeros((self.N, 3,3,3))
-        domega_ij = np.zeros((self.N, self.N, 3,3))
+        biasP_i = np.zeros((self.N, 3, 3, 3))
+        domega_ij = np.zeros((self.N, self.N, 3, 3))
         sitedipoles = self.siteDipoles(dipole)
         jumpdipoles = self.jumpDipoles(dipoleT)
-        dipoleave = np.tensordot(rho, sitedipoles, [(0), (0)]) # average dipole
+        dipoleave = np.tensordot(rho, sitedipoles, [(0), (0)])  # average dipole
 
-        D0 = np.zeros((3,3))
-        Dp = np.zeros((3,3,3,3))
+        D0 = np.zeros((3, 3))
+        Dp = np.zeros((3, 3, 3, 3))
         for transitionset, rates, symmrates, dipoles in zip(self.jumpnetwork, ratelist, symmratelist, jumpdipoles):
-            for ((i,j), dx), rate, symmrate, dipole in zip(transitionset, rates, symmrates, dipoles):
+            for ((i, j), dx), rate, symmrate, dipole in zip(transitionset, rates, symmrates, dipoles):
                 # symmrate = sqrtrho[i]*invsqrtrho[j]*rate
                 omega_ij[i, j] += symmrate
                 omega_ij[i, i] -= rate
-                domega_ij[i, j] -= symmrate*(dipole - 0.5*(sitedipoles[i] + sitedipoles[j]))
-                domega_ij[i, i] += rate*(dipole - sitedipoles[i])
-                bias_i[i] += sqrtrho[i]*rate*dx
-                biasP_i[i] += vector_tensor_outer(sqrtrho[i]*rate*dx, dipole - 0.5*(sitedipoles[i] + dipoleave))
-                D0 += 0.5*np.outer(dx, dx)*rho[i]*rate
-                Dp += 0.5*tensor_tensor_outer(np.outer(dx, dx)*rho[i]*rate, dipole - dipoleave)
+                domega_ij[i, j] -= symmrate * (dipole - 0.5 * (sitedipoles[i] + sitedipoles[j]))
+                domega_ij[i, i] += rate * (dipole - sitedipoles[i])
+                bias_i[i] += sqrtrho[i] * rate * dx
+                biasP_i[i] += vector_tensor_outer(sqrtrho[i] * rate * dx, dipole - 0.5 * (sitedipoles[i] + dipoleave))
+                D0 += 0.5 * np.outer(dx, dx) * rho[i] * rate
+                Dp += 0.5 * tensor_tensor_outer(np.outer(dx, dx) * rho[i] * rate, dipole - dipoleave)
         if self.NV > 0:
             omega_v = np.zeros((self.NV, self.NV))
             bias_v = np.zeros(self.NV)
-            domega_v = np.zeros((self.NV, self.NV, 3,3))
+            domega_v = np.zeros((self.NV, self.NV, 3, 3))
             # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
             for a, va in enumerate(self.VectorBasis):
-                bias_v[a] = np.tensordot(bias_i, va, ((0,1),(0,1))) # can also use trace(dot(bias_i.T, va))
+                bias_v[a] = np.tensordot(bias_i, va, ((0, 1), (0, 1)))  # can also use trace(dot(bias_i.T, va))
                 for b, vb in enumerate(self.VectorBasis):
-                    omega_v[a,b] = np.tensordot(va, np.tensordot(omega_ij, vb, ((1),(0))), ((0,1),(0,1)))
-                    domega_v[a,b] = np.tensordot(va, np.tensordot(domega_ij, vb, ((1),(0))), ((0,1),(0,3)))
+                    omega_v[a, b] = np.tensordot(va, np.tensordot(omega_ij, vb, ((1), (0))), ((0, 1), (0, 1)))
+                    domega_v[a, b] = np.tensordot(va, np.tensordot(domega_ij, vb, ((1), (0))), ((0, 1), (0, 3)))
             gamma_v = self.bias_solver(omega_v, bias_v)
-            dg = np.tensordot(domega_v, gamma_v,((1),(0)))
+            dg = np.tensordot(domega_v, gamma_v, ((1), (0)))
             # need to project gamma_v *back onto* our sites; not sure if we can just do with a dot since
             # self.VectorBasis is a list of Nx3 matrices
-            gamma_i = sum( g*va for g, va in zip(gamma_v, self.VectorBasis) )
+            gamma_i = sum(g * va for g, va in zip(gamma_v, self.VectorBasis))
             D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
-            for c,d in ((c,d) for c in range(3) for d in range(3)):
-                Dp[:,:,c,d] += np.tensordot(gamma_i, biasP_i[:,:,c,d], ((0),(0))) + \
-                               np.tensordot(biasP_i[:,:,c,d], gamma_i, ((0),(0)))
-            Dp += np.tensordot(np.tensordot(self.VV, gamma_v, ((3),(0))), dg, ((2),(0)))
+            for c, d in ((c, d) for c in range(3) for d in range(3)):
+                Dp[:, :, c, d] += np.tensordot(gamma_i, biasP_i[:, :, c, d], ((0), (0))) + \
+                                  np.tensordot(biasP_i[:, :, c, d], gamma_i, ((0), (0)))
+            Dp += np.tensordot(np.tensordot(self.VV, gamma_v, ((3), (0))), dg, ((2), (0)))
 
-        for a,b,c,d in ((a,b,c,d) for a in range(3) for b in range(3) for c in range(3) for d in range(3)):
-            if a==c:
-                Dp[a,b,c,d] += 0.5*D0[b,d]
-            if a==d:
-                Dp[a,b,c,d] += 0.5*D0[b,c]
-            if b==c:
-                Dp[a,b,c,d] += 0.5*D0[a,d]
-            if b==d:
-                Dp[a,b,c,d] += 0.5*D0[a,c]
+        for a, b, c, d in ((a, b, c, d) for a in range(3) for b in range(3) for c in range(3) for d in range(3)):
+            if a == c:
+                Dp[a, b, c, d] += 0.5 * D0[b, d]
+            if a == d:
+                Dp[a, b, c, d] += 0.5 * D0[b, c]
+            if b == c:
+                Dp[a, b, c, d] += 0.5 * D0[a, d]
+            if b == d:
+                Dp[a, b, c, d] += 0.5 * D0[a, c]
         return D0, Dp
 
 
 # YAML tags
 VACANCYTHERMOKINETICS_YAMLTAG = '!VacancyThermoKinetics'
+
 
 class vacancyThermoKinetics(collections.namedtuple('vacancyThermoKinetics',
                                                    'pre betaene preT betaeneT')):
@@ -412,6 +428,7 @@ class vacancyThermoKinetics(collections.namedtuple('vacancyThermoKinetics',
     :param preT: prefactors for transition states
     :param betaeneT: transition state energy for sites / kBT
     """
+
     def __repr__(self):
         return "{}(pre={}, betaene={}, preT={}, betaeneT={})".format(self.__class__.__name__,
                                                                      self.pre, self.betaene,
@@ -447,6 +464,7 @@ class vacancyThermoKinetics(collections.namedtuple('vacancyThermoKinetics',
         # ** turns the dictionary into parameters for GroupOp constructor
         return vacancyThermoKinetics(**loader.construct_mapping(node, deep=True))
 
+
 # HDF5 conversion routines: vTK indexed dictionaries
 def vTKdict2arrays(vTKdict):
     """
@@ -460,13 +478,14 @@ def vTKdict2arrays(vTKdict):
     """
     if len(vTKdict.keys()) == 0: return None, None, None
     vTKexample = [k for k in vTKdict.keys()][0]
-    vTKsplits = np.cumsum(np.array([ len(v) for v in vTKexample ]))[:-1]
+    vTKsplits = np.cumsum(np.array([len(v) for v in vTKexample]))[:-1]
     vTKlist = []
     vallist = []
     for k, v in zip(vTKdict.keys(), vTKdict.values()):
-        vTKlist.append(np.hstack(k)) # k.pre, k.betaene, k.preT, k.betaeneT
+        vTKlist.append(np.hstack(k))  # k.pre, k.betaene, k.preT, k.betaeneT
         vallist.append(v)
     return np.array(vTKlist), np.array(vallist), vTKsplits
+
 
 def arrays2vTKdict(vTKarray, valarray, vTKsplits):
     """
@@ -478,11 +497,12 @@ def arrays2vTKdict(vTKarray, valarray, vTKsplits):
     :param vTKsplits: split placement for vTK entries
     :return vTKdict: dictionary, indexed by vTK objects, whose entries are arrays
     """
-    if all( x is None for x in (vTKarray, valarray, vTKsplits)): return {}
+    if all(x is None for x in (vTKarray, valarray, vTKsplits)): return {}
     vTKdict = {}
     for vTKa, val in zip(vTKarray, valarray):
         vTKdict[vacancyThermoKinetics(*np.hsplit(vTKa, vTKsplits))] = val
     return vTKdict
+
 
 # database tags
 SOLUTE_TAG = 's'
@@ -500,9 +520,15 @@ class VacancyMediated(object):
     L_vv (vacancy diffusion), L_ss (solute), and L_sv (off-diagonal). As part of that,
     it determines *what* quantities are needed as inputs in order to perform this calculation.
 
-    Based on crystal class. Also now includes its own GF calculator and cacheing.
+    Based on crystal class. Also now includes its own GF calculator and cacheing, and
+    storage in HDF5 format.
+
+    Requires a crystal, chemical identity of vacancy, list of symmetry-equivalent
+    sites for that chemistry, and a jumpnetwork for the vacancy. The thermodynamic
+    range (number of "shells" -- see `crystalStars.StarSet` for precise definition).
     """
-    def __init__(self, crys, chem, sitelist, jumpnetwork, Nthermo = 0):
+
+    def __init__(self, crys, chem, sitelist, jumpnetwork, Nthermo=0):
         """
         Create our diffusion calculator for a given crystal structure, chemical identity,
         jumpnetwork (for the vacancy) and thermodynamic shell.
@@ -519,11 +545,11 @@ class VacancyMediated(object):
         self.jumpnetwork = copy.deepcopy(jumpnetwork)
         self.N = sum(len(w) for w in sitelist)
         self.invmap = np.zeros(self.N, dtype=int)
-        for ind,w in enumerate(sitelist):
+        for ind, w in enumerate(sitelist):
             for i in w:
                 self.invmap[i] = ind
-        self.om0_jn= copy.deepcopy(jumpnetwork)
-        self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4) # Nmax?
+        self.om0_jn = copy.deepcopy(jumpnetwork)
+        self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4)  # Nmax?
         # do some initial setup:
         self.thermo = stars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
         self.NNstar = stars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
@@ -538,7 +564,7 @@ class VacancyMediated(object):
         """
         Generate the necessary stars, vector-stars, and jump networks based on the thermodynamic range.
 
-        :param Nthermo : range of thermodynamic interactions, in terms of "shells",
+        :param Nthermo: range of thermodynamic interactions, in terms of "shells",
             which is multiple summations of jumpvect
         """
         if Nthermo == getattr(self, 'Nthermo', 0): return
@@ -555,8 +581,8 @@ class VacancyMediated(object):
             self.GFexpansion, self.GFstarset, self.GFOSexpansion, self.GFOSOSexpansion = \
                 self.vkinetic.GFexpansion(self.VectorBasis)
         else:
-            self.VectorBasis.shape = (0,self.N,3)
-            self.VV.shape = (3,3,0,0)
+            self.VectorBasis.shape = (0, self.N, 3)
+            self.VV.shape = (3, 3, 0, 0)
             self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
             self.GFOSexpansion, self.GFOSOSexpansion = np.array([]), np.array([])
         # some indexing helpers:
@@ -570,8 +596,8 @@ class VacancyMediated(object):
         self.outerkin = [s for s in range(self.kinetic.Nstars)
                          if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None]
         self.vstar2kin = [self.kinetic.index[Rs[0]] for Rs in self.vkinetic.vecpos]
-        self.kin2vstar = [ [j for j in range(self.vkinetic.Nvstars) if self.vstar2kin[j] == i]
-                           for i in range(self.kinetic.Nstars)]
+        self.kin2vstar = [[j for j in range(self.vkinetic.Nvstars) if self.vstar2kin[j] == i]
+                          for i in range(self.kinetic.Nstars)]
         # jumpnetwork, jumptype (omega0), star-pair for jump
         self.om1_jn, self.om1_jt, self.om1_SP = self.kinetic.jumpnetwork_omega1()
         self.om2_jn, self.om2_jt, self.om2_SP = self.kinetic.jumpnetwork_omega2()
@@ -604,8 +630,8 @@ class VacancyMediated(object):
         self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
         # self.etaSperiodic = self.vkinetic.periodicvectorexpansion('solute')
         # self.etaVperiodic = self.vkinetic.periodicvectorexpansion('vacancy')
-        self.etaV2VB= self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'vacancy')
-        self.etaS2VB= self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'solute')
+        self.etaV2VB = self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'vacancy')
+        self.etaS2VB = self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'solute')
 
         # more indexing helpers:
         # kineticsvWyckoff: Wyckoff position of solute and vacancy for kinetic stars
@@ -613,9 +639,9 @@ class VacancyMediated(object):
         # omega1svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega1
         # omega2svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega2
         self.kineticsvWyckoff = [(self.invmap[PS.i], self.invmap[PS.j]) for PS in
-                         [self.kinetic.states[si[0]] for si in self.kinetic.stars]]
+                                 [self.kinetic.states[si[0]] for si in self.kinetic.stars]]
         self.omega0vacancyWyckoff = [(self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
-                                    for jumplist in self.om0_jn]
+                                     for jumplist in self.om0_jn]
         self.omega1svsvWyckoff = [(self.invmap[self.kinetic.states[jumplist[0][0][0]].i],
                                    self.invmap[self.kinetic.states[jumplist[0][0][0]].j],
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
@@ -638,40 +664,44 @@ class VacancyMediated(object):
         """
         tags, tagdict, tagdicttype = {}, {}, {}
         basis = self.crys.basis[self.chem]  # shortcut
+
         def single_defect(DEFECT_TAG, u):
             return SINGLE_DEFECT_TAG.format(type=DEFECT_TAG, u1=u[0], u2=u[1], u3=u[2])
+
         def double_defect(PS):
             return DOUBLE_DEFECT_TAG.format( \
-                    state1=single_defect(SOLUTE_TAG, basis[PS.i]), \
-                    state2=single_defect(VACANCY_TAG, basis[PS.j] + PS.R))
+                state1=single_defect(SOLUTE_TAG, basis[PS.i]), \
+                state2=single_defect(VACANCY_TAG, basis[PS.j] + PS.R))
+
         def omega1(PS1, PS2):
             return OM1_TAG.format( \
-                    solute=single_defect(SOLUTE_TAG, basis[PS1.i]),
-                    vac1=single_defect(VACANCY_TAG, basis[PS1.j] + PS1.R), \
-                    vac2=single_defect(VACANCY_TAG, basis[PS2.j] + PS2.R))
+                solute=single_defect(SOLUTE_TAG, basis[PS1.i]),
+                vac1=single_defect(VACANCY_TAG, basis[PS1.j] + PS1.R), \
+                vac2=single_defect(VACANCY_TAG, basis[PS2.j] + PS2.R))
 
-        tags['vacancy'] = [ [ single_defect(VACANCY_TAG, basis[s]) for s in sites]
-                            for sites in self.sitelist]
-        tags['solute'] = [ [ single_defect(SOLUTE_TAG, basis[s]) for s in sites]
+        tags['vacancy'] = [[single_defect(VACANCY_TAG, basis[s]) for s in sites]
                            for sites in self.sitelist]
-        tags['solute-vacancy'] = [ [ double_defect(self.thermo.states[s]) for s in starlist]
-                                   for starlist in self.thermo.stars]
+        tags['solute'] = [[single_defect(SOLUTE_TAG, basis[s]) for s in sites]
+                          for sites in self.sitelist]
+        tags['solute-vacancy'] = [[double_defect(self.thermo.states[s]) for s in starlist]
+                                  for starlist in self.thermo.stars]
         tags['omega0'] = [[OM0_TAG.format(vac1=single_defect(VACANCY_TAG, basis[i]),
-                                          vac2=single_defect(VACANCY_TAG, basis[j]+dx))
-                           for ((i,j), dx) in jumplist]
+                                          vac2=single_defect(VACANCY_TAG, basis[j] + dx))
+                           for ((i, j), dx) in jumplist]
                           for jumplist in self.crys.jumpnetwork2lattice(self.chem, self.om0_jn)]
         tags['omega1'] = [[omega1(self.kinetic.states[i], self.kinetic.states[j])
-                           for ((i,j), dx) in jumplist] for jumplist in self.om1_jn]
+                           for ((i, j), dx) in jumplist] for jumplist in self.om1_jn]
         tags['omega2'] = [[OM2_TAG.format(complex1=double_defect(self.kinetic.states[i]),
                                           complex2=double_defect(self.kinetic.states[j]))
-                           for ((i,j), dx) in jumplist] for jumplist in self.om2_jn]
+                           for ((i, j), dx) in jumplist] for jumplist in self.om2_jn]
         # make the "tagdict" for quick indexing!
         for tagtype, taglist in tags.items():
             for i, tagset in enumerate(taglist):
                 for tag in tagset:
                     if tag in tagdict:
                         raise ValueError('Generated repeated tags? {} found twice.'.format(tag))
-                    else: tagdict[tag], tagdicttype[tag] = i, tagtype
+                    else:
+                        tagdict[tag], tagdicttype[tag] = i, tagtype
         return tags, tagdict, tagdicttype
 
     # this is part of our *class* definition: list of data that can be directly assigned / read
@@ -714,8 +744,8 @@ class VacancyMediated(object):
         # convert jumplist:
         jumplist, jumpindex = stars.doublelist2flatlistindex(self.jumpnetwork)
         HDF5group['jump_ij'], HDF5group['jump_dx'], HDF5group['jump_index'] = \
-            np.array([np.array((i,j)) for ((i,j), dx) in jumplist]), \
-            np.array([dx for ((i,j), dx) in jumplist]), \
+            np.array([np.array((i, j)) for ((i, j), dx) in jumplist]), \
+            np.array([dx for ((i, j), dx) in jumplist]), \
             jumpindex
         # objects with their own addhdf5 functionality:
         self.GFcalc.addhdf5(HDF5group.create_group('GFcalc'))
@@ -728,14 +758,14 @@ class VacancyMediated(object):
         # jump networks:
         jumplist, jumpindex = stars.doublelist2flatlistindex(self.om1_jn)
         HDF5group['omega1_ij'], HDF5group['omega1_dx'], HDF5group['omega1_index'] = \
-            np.array([np.array((i,j)) for ((i,j), dx) in jumplist]), \
-            np.array([dx for ((i,j), dx) in jumplist]), \
+            np.array([np.array((i, j)) for ((i, j), dx) in jumplist]), \
+            np.array([dx for ((i, j), dx) in jumplist]), \
             jumpindex
 
         jumplist, jumpindex = stars.doublelist2flatlistindex(self.om2_jn)
         HDF5group['omega2_ij'], HDF5group['omega2_dx'], HDF5group['omega2_index'] = \
-            np.array([np.array((i,j)) for ((i,j), dx) in jumplist]), \
-            np.array([dx for ((i,j), dx) in jumplist]), \
+            np.array([np.array((i, j)) for ((i, j), dx) in jumplist]), \
+            np.array([dx for ((i, j), dx) in jumplist]), \
             jumpindex
 
         HDF5group['kin2vstar_array'], HDF5group['kin2vstar_index'] = \
@@ -760,20 +790,22 @@ class VacancyMediated(object):
         Creates a new VacancyMediated diffuser from an HDF5 group.
 
         :param HDFgroup: HDF5 group
-        :return: new VacancyMediated diffuser object from HDF5
+        :return VacancyMediated: new VacancyMediated diffuser object from HDF5
         """
         diffuser = cls(None, None, None, None)  # initialize
         diffuser.crys = crystal.yaml.load(HDF5group['crystal_yaml'].value)
         for internal in cls.__HDF5list__:
             setattr(diffuser, internal, HDF5group[internal].value)
-        diffuser.sitelist = [[] for i in range(max(diffuser.invmap)+1)]
+        diffuser.sitelist = [[] for i in range(max(diffuser.invmap) + 1)]
         for i, site in enumerate(diffuser.invmap):
             diffuser.sitelist[site].append(i)
 
         # convert jumplist:
         diffuser.jumpnetwork = stars.flatlistindex2doublelist([((ij[0], ij[1]), dx) for ij, dx in \
-                                                               zip(HDF5group['jump_ij'].value, HDF5group['jump_dx'].value)], HDF5group['jump_index'])
-        diffuser.om0_jn= copy.deepcopy(diffuser.jumpnetwork)
+                                                               zip(HDF5group['jump_ij'].value,
+                                                                   HDF5group['jump_dx'].value)],
+                                                              HDF5group['jump_index'])
+        diffuser.om0_jn = copy.deepcopy(diffuser.jumpnetwork)
 
         # objects with their own addhdf5 functionality:
         diffuser.GFcalc = GFcalc.GFCrystalcalc.loadhdf5(diffuser.crys, HDF5group['GFcalc'])
@@ -785,9 +817,11 @@ class VacancyMediated(object):
 
         # jump networks:
         diffuser.om1_jn = stars.flatlistindex2doublelist([((ij[0], ij[1]), dx) for ij, dx in \
-                                                          zip(HDF5group['omega1_ij'].value, HDF5group['omega1_dx'].value)], HDF5group['omega1_index'])
+                                                          zip(HDF5group['omega1_ij'].value,
+                                                              HDF5group['omega1_dx'].value)], HDF5group['omega1_index'])
         diffuser.om2_jn = stars.flatlistindex2doublelist([((ij[0], ij[1]), dx) for ij, dx in \
-                                                          zip(HDF5group['omega2_ij'].value, HDF5group['omega2_dx'].value)], HDF5group['omega2_index'])
+                                                          zip(HDF5group['omega2_ij'].value,
+                                                              HDF5group['omega2_dx'].value)], HDF5group['omega2_index'])
 
         diffuser.kin2vstar = stars.flatlistindex2doublelist(HDF5group['kin2vstar_array'],
                                                             HDF5group['kin2vstar_index'])
@@ -799,15 +833,15 @@ class VacancyMediated(object):
                                                 HDF5group['Lvvvalues_values'],
                                                 HDF5group['Lvvvalues_splits'])
             diffuser.etavvalues = arrays2vTKdict(HDF5group['etavvalues_vTK'],
-                                                HDF5group['etavvalues_values'],
-                                                HDF5group['etavvalues_splits'])
+                                                 HDF5group['etavvalues_values'],
+                                                 HDF5group['etavvalues_splits'])
         else:
             diffuser.GFvalues, diffuser.Lvvvalues, diffuser.etavvalues = {}, {}, {}
         # tags
         diffuser.tags, diffuser.tagdict, diffuser.tagdicttype = {}, {}, {}
         for tag in cls.__taglist__:
             # needed because of how HDF5 stores strings...
-            utf8list = [ str(data, encoding='utf-8') for data in HDF5group[tag + '_taglist'].value ]
+            utf8list = [str(data, encoding='utf-8') for data in HDF5group[tag + '_taglist'].value]
             diffuser.tags[tag] = stars.flatlistindex2doublelist(utf8list, HDF5group[tag + '_tagindex'])
         for tagtype, taglist in diffuser.tags.items():
             for i, tags in enumerate(taglist):
@@ -830,13 +864,12 @@ class VacancyMediated(object):
         Solute at the origin, vacancy hopping between two sites. Defined by om1_jumpnetwork
 
         :param fivefreqindex: 1 or 2, corresponding to omega1 or omega2
-
         :return omegalist: list of tuples of PairStates
         :return omegajumptype: index of corresponding omega0 jumptype
         """
         if 0 == getattr(self, 'Nthermo', 0): raise ValueError('Need to set thermodynamic range first')
         om, jt = {1: (self.om1_jn, self.om1_jt),
-                  2: (self.om2_jn, self.om2_jt)}.get(fivefreqindex, (None,None))
+                  2: (self.om2_jn, self.om2_jt)}.get(fivefreqindex, (None, None))
         if om is None: raise ValueError('Five frequency index should be 1 or 2')
         return [(self.kinetic.states[jlist[0][0][0]], self.kinetic.states[jlist[0][0][1]]) for jlist in om], \
                jt.copy()
@@ -848,7 +881,6 @@ class VacancyMediated(object):
 
         :param preT0[Nomeg0]: prefactor for vacancy jump transitions (follows jumpnetwork)
         :param eneT0[Nomega0]: transition energy state for vacancy jumps
-
         :return preS[NWyckoff]: prefactor for solute formation
         :return eneS[NWyckoff]: solute formation energy
         :return preSV[Nthermo]: prefactor for solute-vacancy interaction
@@ -883,7 +915,6 @@ class VacancyMediated(object):
         :param eneSV[Nthermo]: solute-vacancy binding energy
         :param preT0[Nomeg0]: prefactor for vacancy jump transitions (follows jumpnetwork)
         :param eneT0[Nomega0]: transition energy for vacancy jumps
-
         :return preT1[Nomega1]: prefactor for omega1-style transitions (follows om1_jn)
         :return eneT1[Nomega1]: transition energy/kBT for omega1-style jumps
         :return preT2[Nomega2]: prefactor for omega2-style transitions (follows om2_jn)
@@ -892,8 +923,8 @@ class VacancyMediated(object):
         # we need the prefactors and energies for all of our kinetic stars... without the
         # vacancy part (since that reference is already in preT0 and eneT0); we're going
         # to add these to preT0 and eneT0 to get the TS prefactor/energy for w1 and w2 jumps
-        eneSVkin = np.array([eneS[s] for (s,v) in self.kineticsvWyckoff], dtype=float)  # avoid ints
-        preSVkin = np.array([preS[s] for (s,v) in self.kineticsvWyckoff], dtype=float)  # avoid ints
+        eneSVkin = np.array([eneS[s] for (s, v) in self.kineticsvWyckoff], dtype=float)  # avoid ints
+        preSVkin = np.array([preS[s] for (s, v) in self.kineticsvWyckoff], dtype=float)  # avoid ints
         for tindex, kindex in enumerate(self.thermo2kin):
             eneSVkin[kindex] += eneSV[tindex]
             preSVkin[kindex] *= preSV[tindex]
@@ -901,14 +932,14 @@ class VacancyMediated(object):
         eneT1 = np.zeros(len(self.om1_jn))
         for j, jt, SP in zip(itertools.count(), self.om1_jt, self.om1_SP):
             # need to include solute energy / prefactors
-            preT1[j] = preT0[jt]*np.sqrt(preSVkin[SP[0]]*preSVkin[SP[1]])
-            eneT1[j] = eneT0[jt] + 0.5*(eneSVkin[SP[0]]+eneSVkin[SP[1]])
+            preT1[j] = preT0[jt] * np.sqrt(preSVkin[SP[0]] * preSVkin[SP[1]])
+            eneT1[j] = eneT0[jt] + 0.5 * (eneSVkin[SP[0]] + eneSVkin[SP[1]])
         preT2 = np.ones(len(self.om2_jn))
         eneT2 = np.zeros(len(self.om2_jn))
         for j, jt, SP in zip(itertools.count(), self.om2_jt, self.om2_SP):
             # need to include solute energy / prefactors
-            preT2[j] = preT0[jt]*np.sqrt(preSVkin[SP[0]]*preSVkin[SP[1]])
-            eneT2[j] = eneT0[jt] + 0.5*(eneSVkin[SP[0]]+eneSVkin[SP[1]])
+            preT2[j] = preT0[jt] * np.sqrt(preSVkin[SP[0]] * preSVkin[SP[1]])
+            eneT2[j] = eneT0[jt] + 0.5 * (eneSVkin[SP[0]] + eneSVkin[SP[1]])
         return {'preT1': preT1, 'eneT1': eneT1, 'preT2': preT2, 'eneT2': eneT2}
 
     def tags2preene(self, usertagdict, VERBOSE=False):
@@ -925,15 +956,15 @@ class VacancyMediated(object):
         """
         N, Nst, Nom0 = len(self.sitelist), self.thermo.Nstars, len(self.om0_jn)
         # basic thermodict; note: we *don't* prefill omega1 and omega2, because LIMB does that later
-        thermodict={'preV': np.ones(N), 'eneV': np.zeros(N),
-                    'preS': np.ones(N), 'eneS': np.zeros(N),
-                    'preSV': np.ones(Nst), 'eneSV': np.zeros(Nst),
-                    'preT0': np.ones(Nom0), 'eneT0': np.zeros(Nom0)}
+        thermodict = {'preV': np.ones(N), 'eneV': np.zeros(N),
+                      'preS': np.ones(N), 'eneS': np.zeros(N),
+                      'preSV': np.ones(Nst), 'eneSV': np.zeros(Nst),
+                      'preT0': np.ones(Nom0), 'eneT0': np.zeros(Nom0)}
         for tagstring, prename, enename in (('vacancy', 'preV', 'eneV'),
                                             ('solute', 'preS', 'eneS'),
                                             ('solute-vacancy', 'preSV', 'eneSV'),
                                             ('omega0', 'preT0', 'eneT0')):
-            for i,tags in enumerate(self.tags[tagstring]):
+            for i, tags in enumerate(self.tags[tagstring]):
                 for t in tags:
                     if t in usertagdict:
                         thermodict[prename][i], thermodict[enename][i] = usertagdict[t]
@@ -949,17 +980,21 @@ class VacancyMediated(object):
                         break
         if not VERBOSE: return thermodict
         missingdict, duplicatelist, badtaglist = {}, [], []
-        tupledict = {(tagtype,n): [] for tagtype,taglist in self.tags.items() for n in range(len(taglist))}
+        tupledict = {(tagtype, n): [] for tagtype, taglist in self.tags.items() for n in range(len(taglist))}
         # go through all the types of tags and interactions, and construct a list of usertags for each
         for usertag in usertagdict:
-            if usertag not in self.tagdict: badtaglist.append(usertag)
-            else: tupledict[(self.tagdicttype[usertag], self.tagdict[usertag])].append(usertag)
+            if usertag not in self.tagdict:
+                badtaglist.append(usertag)
+            else:
+                tupledict[(self.tagdicttype[usertag], self.tagdict[usertag])].append(usertag)
         # each entry should appear once, and only once
-        for k,v in tupledict.items():
-            if len(v)==0:
-                if k[0] in missingdict: missingdict[k[0]].append(self.tags[k[0]][k[1]])
-                else: missingdict[k[0]] =  [self.tags[k[0]][k[1]]]
-            elif len(v)>1:
+        for k, v in tupledict.items():
+            if len(v) == 0:
+                if k[0] in missingdict:
+                    missingdict[k[0]].append(self.tags[k[0]][k[1]])
+                else:
+                    missingdict[k[0]] = [self.tags[k[0]][k[1]]]
+            elif len(v) > 1:
                 duplicatelist.append(v)
         return thermodict, missingdict, duplicatelist, badtaglist
 
@@ -967,10 +1002,11 @@ class VacancyMediated(object):
     def preene2betafree(kT, preV, eneV, preS, eneS, preSV, eneSV,
                         preT0, eneT0, preT1, eneT1, preT2, eneT2, **ignoredextraarguments):
         """
-        Read in a series of prefactors (e^(S/kB)) and energies, and return beta*free energy for
-        energies and transition state energies. Used to provide scaled values to Lij() and _lij().
-        Can specify all of the entries using a dictionary; e.g., preene2betafree(kT, **data_dict)
-        and then send that output as input to Lij: Lij(*preene2betafree(kT, **data_dict))
+        Read in a series of prefactors (:math:`\\exp(S/k_\\text{B})`) and energies, and return
+        :math:`\\beta F` for energies and transition state energies. Used to provide scaled values
+        to Lij() and _lij().
+        Can specify all of the entries using a dictionary; e.g., `preene2betafree(kT, **data_dict)`
+        and then send that output as input to Lij: `Lij(*preene2betafree(kT, **data_dict))`
         (we ignore extra arguments so that a dictionary including additional entries can be passed)
 
         :param kT: temperature times Boltzmann's constant kB
@@ -986,7 +1022,6 @@ class VacancyMediated(object):
         :param eneT1: energy for vacancy swing transition state (relative to eneV + eneS + eneSV)
         :param preT2: prefactor for vacancy exchange transition state
         :param eneT2: energy for vacancy exchange transition state (relative to eneV + eneS + eneSV)
-
         :return bFV: beta*eneV - ln(preV) (relative to minimum value)
         :return bFS: beta*eneS - ln(preS) (relative to minimum value)
         :return bFSV: beta*eneSV - ln(preSV) (excess)
@@ -995,13 +1030,13 @@ class VacancyMediated(object):
         :return bFT2: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
         """
         # do anything to treat kT -> 0?
-        beta = 1/kT
-        bFV = beta*eneV - np.log(preV)
-        bFS = beta*eneS - np.log(preS)
-        bFSV = beta*eneSV - np.log(preSV)
-        bFT0 = beta*eneT0 - np.log(preT0)
-        bFT1 = beta*eneT1 - np.log(preT1)
-        bFT2 = beta*eneT2 - np.log(preT2)
+        beta = 1 / kT
+        bFV = beta * eneV - np.log(preV)
+        bFS = beta * eneS - np.log(preS)
+        bFSV = beta * eneSV - np.log(preSV)
+        bFT0 = beta * eneT0 - np.log(preT0)
+        bFT1 = beta * eneT1 - np.log(preT1)
+        bFT2 = beta * eneT2 - np.log(preT2)
 
         bFVmin = np.min(bFV)
         bFSmin = np.min(bFS)
@@ -1022,7 +1057,6 @@ class VacancyMediated(object):
         :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
         :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
         :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
-
         :return omega0[Nomega0]: symmetric rate for omega0 jumps
         :return omega1[Nomega1]: symmetric rate for omega1 jumps
         :return omega2[Nomega2]: symmetric rate for omega2 jumps
@@ -1032,24 +1066,24 @@ class VacancyMediated(object):
         """
         omega0 = np.zeros(len(self.om0_jn))
         omega0escape = np.zeros((len(self.sitelist), len(self.om0_jn)))
-        for j, bF, (v1,v2) in zip(itertools.count(), bFT0, self.omega0vacancyWyckoff):
-            omega0escape[v1,j] = np.exp(-bF + bFV[v1])
-            omega0escape[v2,j] = np.exp(-bF + bFV[v2])
-            omega0[j] = np.sqrt(omega0escape[v1,j]*omega0escape[v2,j])
+        for j, bF, (v1, v2) in zip(itertools.count(), bFT0, self.omega0vacancyWyckoff):
+            omega0escape[v1, j] = np.exp(-bF + bFV[v1])
+            omega0escape[v2, j] = np.exp(-bF + bFV[v2])
+            omega0[j] = np.sqrt(omega0escape[v1, j] * omega0escape[v2, j])
         omega1 = np.zeros(len(self.om1_jn))
         omega1escape = np.zeros((self.vkinetic.Nvstars, len(self.om1_jn)))
-        for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega1svsvWyckoff,
-                                                               self.om1_jt, self.om1_SP, bFT1):
-            omF, omB = np.exp(-bFT+bFS[s1]+bFV[v1]+bFSV[st1]), np.exp(-bFT+bFS[s2]+bFV[v2]+bFSV[st2])
-            omega1[j] = np.sqrt(omF*omB)
+        for j, (s1, v1, s2, v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega1svsvWyckoff,
+                                                                  self.om1_jt, self.om1_SP, bFT1):
+            omF, omB = np.exp(-bFT + bFS[s1] + bFV[v1] + bFSV[st1]), np.exp(-bFT + bFS[s2] + bFV[v2] + bFSV[st2])
+            omega1[j] = np.sqrt(omF * omB)
             for vst1 in self.kin2vstar[st1]: omega1escape[vst1, j] = omF
             for vst2 in self.kin2vstar[st2]: omega1escape[vst2, j] = omB
         omega2 = np.zeros(len(self.om2_jn))
         omega2escape = np.zeros((self.vkinetic.Nvstars, len(self.om2_jn)))
-        for j, (s1,v1,s2,v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega2svsvWyckoff,
-                                                               self.om2_jt, self.om2_SP, bFT2):
-            omF, omB = np.exp(-bFT+bFS[s1]+bFV[v1]+bFSV[st1]), np.exp(-bFT+bFS[s2]+bFV[v2]+bFSV[st2])
-            omega2[j] = np.sqrt(omF*omB)
+        for j, (s1, v1, s2, v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega2svsvWyckoff,
+                                                                  self.om2_jt, self.om2_SP, bFT2):
+            omF, omB = np.exp(-bFT + bFS[s1] + bFV[v1] + bFSV[st1]), np.exp(-bFT + bFS[s2] + bFV[v2] + bFSV[st2])
+            omega2[j] = np.sqrt(omF * omB)
             for vst1 in self.kin2vstar[st1]: omega2escape[vst1, j] = omF
             for vst2 in self.kin2vstar[st2]: omega2escape[vst2, j] = omB
         return omega0, omega1, omega2, \
@@ -1069,7 +1103,6 @@ class VacancyMediated(object):
         :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
         :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
         :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
-
         :return Lvv[3, 3]: vacancy-vacancy; needs to be multiplied by cv/kBT
         :return Lss[3, 3]: solute-solute; needs to be multiplied by cv*cs/kBT
         :return Lsv[3, 3]: solute-vacancy; needs to be multiplied by cv*cs/kBT
@@ -1094,16 +1127,18 @@ class VacancyMediated(object):
             self.etavvalues[vTK] = etav
 
         # 2. set up probabilities for solute-vacancy configurations
-        probV = np.array([np.exp(min(bFV)-bFV[wi]) for wi in self.invmap])
-        probV *= self.N/np.sum(probV)  # normalize
-        probS = np.array([np.exp(min(bFS)-bFS[wi]) for wi in self.invmap])
-        probS *= self.N/np.sum(probS)  # normalize
-        bFSVkin = np.array([bFS[s]+bFV[v] for (s,v) in self.kineticsvWyckoff])
-        prob = np.array([probS[s]*probV[v] for (s,v) in self.kineticsvWyckoff])
+        probV = np.array([np.exp(min(bFV) - bFV[wi]) for wi in self.invmap])
+        probV *= self.N / np.sum(probV)  # normalize
+        probS = np.array([np.exp(min(bFS) - bFS[wi]) for wi in self.invmap])
+        probS *= self.N / np.sum(probS)  # normalize
+        bFSVkin = np.array([bFS[s] + bFV[v] for (s, v) in self.kineticsvWyckoff])
+        prob = np.array([probS[s] * probV[v] for (s, v) in self.kineticsvWyckoff])
         for tindex, kindex in enumerate(self.thermo2kin):
             bFSVkin[kindex] += bFSV[tindex]
-            if self.kinetic.states[self.kinetic.stars[kindex][0]].iszero(): prob[kindex] = 0
-            else: prob[kindex] *= np.exp(-bFSV[tindex])
+            if self.kinetic.states[self.kinetic.stars[kindex][0]].iszero():
+                prob[kindex] = 0
+            else:
+                prob[kindex] *= np.exp(-bFSV[tindex])
 
         # 3. set up symmetric rates: omega0, omega1, omega2
         #    and escape rates omega0escape, omega1escape, omega2escape
@@ -1116,37 +1151,37 @@ class VacancyMediated(object):
         # are treated below--they only need to be considered *if* there is broken symmetry, such
         # that we have a non-empty VectorBasis in our *unit cell* (NVB > 0)
         # 4a. Bare diffusivities
-        symmprobV0 = np.array([np.sqrt(probV[sp[0]]*probV[sp[1]]) for sp in self.omega0vacancyWyckoff])
-        symmprobSV1 = np.array([np.sqrt(prob[sp[0]]*prob[sp[1]]) for sp in self.om1_SP])
-        symmprobSV2 = np.array([np.sqrt(prob[sp[0]]*prob[sp[1]]) for sp in self.om2_SP])
-        D0ss = np.dot(self.Dom2, omega2*symmprobSV2)/self.N
-        D0vv = D0ss + (np.dot(self.Dom1, omega1*symmprobSV1) -
-                       np.dot(self.Dom1_om0 + self.Dom2_om0, omega0*symmprobV0))/self.N
+        symmprobV0 = np.array([np.sqrt(probV[sp[0]] * probV[sp[1]]) for sp in self.omega0vacancyWyckoff])
+        symmprobSV1 = np.array([np.sqrt(prob[sp[0]] * prob[sp[1]]) for sp in self.om1_SP])
+        symmprobSV2 = np.array([np.sqrt(prob[sp[0]] * prob[sp[1]]) for sp in self.om2_SP])
+        D0ss = np.dot(self.Dom2, omega2 * symmprobSV2) / self.N
+        D0vv = D0ss + (np.dot(self.Dom1, omega1 * symmprobSV1) -
+                       np.dot(self.Dom1_om0 + self.Dom2_om0, omega0 * symmprobV0)) / self.N
 
         # 4b. Bias vectors (before correction) and rate matrices
         biasSvec = np.zeros(self.vkinetic.Nvstars)
         biasVvec = np.zeros(self.vkinetic.Nvstars)
         om2 = np.dot(self.om2expansion, omega2)
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
-                   np.dot(self.om2expansion, omega2) # - np.dot(self.om2_om0, omega0)
-        for sv,starindex in enumerate(self.vstar2kin):
+                   np.dot(self.om2expansion, omega2)  # - np.dot(self.om2_om0, omega0)
+        for sv, starindex in enumerate(self.vstar2kin):
             svvacindex = self.kin2vacancy[starindex]  # vacancy
-            delta_om[sv,sv] += np.dot(self.om1escape[sv,:],omega1escape[sv,:]) - \
-                               np.dot(self.om1_om0escape[sv,:], omega0escape[svvacindex,:]) + \
-                               np.dot(self.om2escape[sv,:], omega2escape[sv,:]) - \
-                               np.dot(self.om2_om0escape[sv,:], omega0escape[svvacindex,:])
+            delta_om[sv, sv] += np.dot(self.om1escape[sv, :], omega1escape[sv, :]) - \
+                                np.dot(self.om1_om0escape[sv, :], omega0escape[svvacindex, :]) + \
+                                np.dot(self.om2escape[sv, :], omega2escape[sv, :]) - \
+                                np.dot(self.om2_om0escape[sv, :], omega0escape[svvacindex, :])
             om2[sv, sv] += np.dot(self.om2escape[sv, :], omega2escape[sv, :])
             # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
-            biasSvec[sv] = -np.dot(self.om2bias[sv,:], omega2escape[sv,:])*np.sqrt(prob[starindex])
-            biasVvec[sv] = np.dot(self.om1bias[sv,:], omega1escape[sv,:])*np.sqrt(prob[starindex]) - \
-                           np.dot(self.om1_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex]) - \
+            biasSvec[sv] = -np.dot(self.om2bias[sv, :], omega2escape[sv, :]) * np.sqrt(prob[starindex])
+            biasVvec[sv] = np.dot(self.om1bias[sv, :], omega1escape[sv, :]) * np.sqrt(prob[starindex]) - \
+                           np.dot(self.om1_b0[sv, :], omega0escape[svvacindex, :]) * np.sqrt(probV[svvacindex]) - \
                            biasSvec[sv] - \
-                           np.dot(self.om2_b0[sv,:], omega0escape[svvacindex,:])*np.sqrt(probV[svvacindex])
+                           np.dot(self.om2_b0[sv, :], omega0escape[svvacindex, :]) * np.sqrt(probV[svvacindex])
 
         # 5. compute Green function:
         G0 = np.dot(self.GFexpansion, GF)
-        if self.NVB==0:
+        if self.NVB == 0:
             G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         else:
             delta_omOS = -np.dot(self.om2_om0, omega0)
@@ -1163,7 +1198,7 @@ class VacancyMediated(object):
             biasSbar = np.dot(self.etaS2VB, biasSvec)  # folddown to VB
             om2bar = np.dot(self.etaS2VB, np.dot(om2, self.etaS2VB.T))  # VB x VB
             etaSbar = np.dot(pinv2(om2bar), biasSbar)  # VB only...
-            D0ss += np.dot(np.dot(self.VV, etaSbar), biasSbar)/self.N
+            D0ss += np.dot(np.dot(self.VV, etaSbar), biasSbar) / self.N
 
             dbiasS = np.dot(np.dot(om2, self.etaS2VB.T), etaSbar)  # expand back out to sites
             biasSvec -= dbiasS
@@ -1176,20 +1211,21 @@ class VacancyMediated(object):
             # delta_om_G0 = np.dot(self.etaV2VB, np.dot(delta_om, G0))  # [NVB, NVS]
 
         # 6. Compute bias contributions to Onsager coefficients
-        etaVvec, etaSvec = np.dot(G,biasVvec), np.dot(G,biasSvec)
+        etaVvec, etaSvec = np.dot(G, biasVvec), np.dot(G, biasSvec)
         outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer, etaSvec)
 
-        L1ss = np.dot(outer_etaSvec, biasSvec)/self.N
-        L1sv = np.dot(outer_etaSvec, biasVvec)/self.N
-        L1vv = np.dot(outer_etaVvec, biasVvec)/self.N
-        if self.NVB>0:
+        L1ss = np.dot(outer_etaSvec, biasSvec) / self.N
+        L1sv = np.dot(outer_etaSvec, biasVvec) / self.N
+        L1vv = np.dot(outer_etaVvec, biasVvec) / self.N
+        if self.NVB > 0:
             etaV0 = np.tensordot(self.VectorBasis, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
             outer_etaV0 = np.dot(self.VV, etaV0)
             L1vv += np.dot(outer_etaV0,
-                           2*np.dot(self.etaV2VB-delta_om_G0, biasVvec)
-                           -np.dot(delta_om_bar, etaV0))/self.N
+                           2 * np.dot(self.etaV2VB - delta_om_G0, biasVvec)
+                           - np.dot(delta_om_bar, etaV0)) / self.N
 
         return L0vv, D0ss + L1ss, -D0ss + L1sv, D0vv + L1vv
+
 
 class VacancyMediatedMeta(VacancyMediated):
     """Trying out metastable preening"""
@@ -1199,7 +1235,7 @@ class VacancyMediatedMeta(VacancyMediated):
         will fill it later
         """
         if not meta_tags:
-            VacancyMediated.__init__(self,crys, chem, sitelist, jumpnetwork, Nthermo)
+            VacancyMediated.__init__(self, crys, chem, sitelist, jumpnetwork, Nthermo)
         else:
             if all(x is None for x in (crys, chem, sitelist, jumpnetwork)): return  # blank object
             self.crys = crys
@@ -1208,11 +1244,11 @@ class VacancyMediatedMeta(VacancyMediated):
             self.jumpnetwork = copy.deepcopy(jumpnetwork)
             self.N = sum(len(w) for w in sitelist)
             self.invmap = np.zeros(self.N, dtype=int)
-            for ind,w in enumerate(sitelist):
+            for ind, w in enumerate(sitelist):
                 for i in w:
                     self.invmap[i] = ind
             self.om0_jn = copy.deepcopy(jumpnetwork)
-            self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4) # Nmax?
+            self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4)  # Nmax?
             # do some initial setup:
             self.thermo = stars.StarSetMeta(self.jumpnetwork, self.crys, self.chem, Nthermo, meta_tags=meta_tags,
                                             jumpnetwork2=jumpnetwork2)
@@ -1228,8 +1264,8 @@ class VacancyMediatedMeta(VacancyMediated):
             self.tags = self.generatetags()  # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2
             self.tagdict = {}
             for taglist in self.tags.values():
-               for i, tags in enumerate(taglist):
-                  for tag in tags: self.tagdict[tag] = i
+                for i, tags in enumerate(taglist):
+                    for tag in tags: self.tagdict[tag] = i
 
     def generatethermometa(self, Nthermo):
         """
@@ -1238,7 +1274,6 @@ class VacancyMediatedMeta(VacancyMediated):
         if Nthermo == getattr(self, 'Nthermo', 0): return
         self.Nthermo = Nthermo
         self.thermo.generate(Nthermo)
-
 
         # generate and prune kinetic data
         self.generatekineticmeta(Nthermo)
@@ -1262,8 +1297,8 @@ class VacancyMediatedMeta(VacancyMediated):
         self.outerkin = [s for s in range(self.kinetic.Nstars)
                          if self.thermo.stateindex(self.kinetic.states[self.kinetic.stars[s][0]]) is None]
         self.vstar2kin = [self.kinetic.index[Rs[0]] for Rs in self.vkinetic.vecpos]
-        self.kin2vstar = [ [j for j in range(self.vkinetic.Nvstars) if self.vstar2kin[j] == i]
-                           for i in range(self.kinetic.Nstars)]
+        self.kin2vstar = [[j for j in range(self.vkinetic.Nvstars) if self.vstar2kin[j] == i]
+                          for i in range(self.kinetic.Nstars)]
         # jumpnetwork, jumptype (omega0), star-pair for jump
         self.om1_jn, self.om1_jt, self.om1_SP = self.kinetic.jumpnetwork_omega1()
         self.om2_jn, self.om2_jt, self.om2_SP = self.kinetic.jumpnetwork_omega2()
@@ -1295,9 +1330,9 @@ class VacancyMediatedMeta(VacancyMediated):
         # omega1svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega1
         # omega2svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega2
         self.kineticsvWyckoff = [(self.invmap[PS.i], self.invmap[PS.j]) for PS in
-                         [self.kinetic.states[si[0]] for si in self.kinetic.stars]]
+                                 [self.kinetic.states[si[0]] for si in self.kinetic.stars]]
         self.omega0vacancyWyckoff = [(self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
-                                    for jumplist in self.om0_jn]
+                                     for jumplist in self.om0_jn]
         self.omega1svsvWyckoff = [(self.invmap[self.kinetic.states[jumplist[0][0][0]].i],
                                    self.invmap[self.kinetic.states[jumplist[0][0][0]].j],
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
@@ -1308,6 +1343,7 @@ class VacancyMediatedMeta(VacancyMediated):
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
                                    self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
                                   for jumplist in self.om2_jn]
+
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
 crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)
