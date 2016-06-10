@@ -29,7 +29,6 @@ from onsager import crystal
 from onsager import crystalStars as stars
 from onsager import supercell
 
-
 # database tags
 INTERSTITIAL_TAG = 'i'
 TRANSITION_TAG = '{state1}^{state2}'
@@ -131,7 +130,7 @@ class Interstitial(object):
                                          state2=single_state(ui + np.dot(self.crys.invlatt, dx)))
 
         tags['states'] = [[single_state(basis[s]) for s in sites]
-                           for sites in self.sitelist]
+                          for sites in self.sitelist]
         tags['transitions'] = [[transition(basis[i], dx) for ((i, j), dx) in jumplist]
                                for jumplist in self.jumpnetwork]
         # make the "tagdict" for quick indexing!
@@ -160,14 +159,14 @@ class Interstitial(object):
         basesupercell = supercell.Supercell(self.crys, super_n, interstitial=(self.chem,), Nsolute=0)
         basis = self.crys.basis[self.chem]
         # fill up the supercell with all the *other* atoms
-        for (c,i) in self.crys.atomindices:
-            if c==self.chem: continue
-            basesupercell.fillperiodic((c,i), Wyckoff=False)  # for efficiency
+        for (c, i) in self.crys.atomindices:
+            if c == self.chem: continue
+            basesupercell.fillperiodic((c, i), Wyckoff=False)  # for efficiency
         for sites, tags in zip(self.sitelist, self.tags['states']):
-            i, tag =sites[0], tags[0]
+            i, tag = sites[0], tags[0]
             u = basis[i]
             super = basesupercell.copy()
-            ind = np.dot(super.invsuper, u)/super.size
+            ind = np.dot(super.invsuper, u) / super.size
             # put an interstitial in that single state; the "first" one is fine:
             super[ind] = self.chem
             superdict['states'][tag] = super
@@ -177,14 +176,14 @@ class Interstitial(object):
             u0 = self.crys.basis[self.chem][i0]
             u1 = u0 + np.dot(self.crys.invlatt, dx0)  # should correspond to the j0
             super0, super1 = basesupercell.copy(), basesupercell.copy()
-            ind0, ind1 = np.dot(super0.invsuper, u0)/super.size, np.dot(super1.invsuper, u1)/super.size
+            ind0, ind1 = np.dot(super0.invsuper, u0) / super.size, np.dot(super1.invsuper, u1) / super.size
             # put interstitials at our corresponding sites
             super0[ind0], super1[ind1] = self.chem, self.chem
             superdict['transitions'][tag] = (super0, super1)
             # determine the mappings:
             superdict['transmapping'][tag] = tuple()
             for s in (super0, super1):
-                for k,v in superdict['states'].items():
+                for k, v in superdict['states'].items():
                     # attempt the mapping
                     g, mapping = v.equivalencemap(s)
                     if g is not None:
