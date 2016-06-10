@@ -1,1 +1,1 @@
-__all__ = [ "crystal", "crystalStars", "GFcalc", "OnsagerCalc", "PowerExpansion"]
+__all__ = [ "crystal", "crystalStars", "supercell", "GFcalc", "OnsagerCalc", "PowerExpansion"]
