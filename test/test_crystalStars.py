@@ -17,60 +17,71 @@ import onsager.crystalStars as stars
 def setuportho():
     crys = crystal.Crystal(np.array([[3, 0, 0], [0, 2, 0], [0, 0, 1]], dtype=float),
                            [[np.zeros(3)]])
-    jumpnetwork = [ [((0,0), np.array([3.,0.,0.])),((0,0), np.array([-3.,0.,0.]))],
-                    [((0,0), np.array([0.,2.,0.])),((0,0), np.array([0.,-2.,0.]))],
-                    [((0,0), np.array([0.,0.,1.])),((0,0), np.array([0.,0.,-1.]))] ]
+    jumpnetwork = [[((0, 0), np.array([3., 0., 0.])), ((0, 0), np.array([-3., 0., 0.]))],
+                   [((0, 0), np.array([0., 2., 0.])), ((0, 0), np.array([0., -2., 0.]))],
+                   [((0, 0), np.array([0., 0., 1.])), ((0, 0), np.array([0., 0., -1.]))]]
     return crys, jumpnetwork
+
 
 def orthorates():
     return np.array([3., 2., 1.])
 
+
 def setupcubic():
     crys = crystal.Crystal(np.eye(3), [[np.zeros(3)]])
-    jumpnetwork = [ [((0,0), np.array([1.,0.,0.])), ((0,0), np.array([-1.,0.,0.])),
-                     ((0,0), np.array([0.,1.,0.])), ((0,0), np.array([0.,-1.,0.])),
-                     ((0,0), np.array([0.,0.,1.])), ((0,0), np.array([0.,0.,-1.]))]]
+    jumpnetwork = [[((0, 0), np.array([1., 0., 0.])), ((0, 0), np.array([-1., 0., 0.])),
+                    ((0, 0), np.array([0., 1., 0.])), ((0, 0), np.array([0., -1., 0.])),
+                    ((0, 0), np.array([0., 0., 1.])), ((0, 0), np.array([0., 0., -1.]))]]
     return crys, jumpnetwork
 
+
 def cubicrates():
-    return np.array([1./6.])
+    return np.array([1. / 6.])
+
 
 def setupFCC():
     lattice = crystal.Crystal.FCC(2.)
-    jumpnetwork = lattice.jumpnetwork(0, 2.*np.sqrt(0.5)+0.01)
+    jumpnetwork = lattice.jumpnetwork(0, 2. * np.sqrt(0.5) + 0.01)
     return lattice, jumpnetwork
 
+
 def FCCrates():
-    return np.array([1./12.])
+    return np.array([1. / 12.])
+
 
 def setupHCP():
     lattice = crystal.Crystal.HCP(1.)
     jumpnetwork = lattice.jumpnetwork(0, 1.01)
     return lattice, jumpnetwork
 
+
 def HCPrates():
-    return np.array([1./12., 1./12.])
+    return np.array([1. / 12., 1. / 12.])
+
 
 def setupBCC():
     lattice = crystal.Crystal.BCC(1.)
-    jumpnetwork = lattice.jumpnetwork(0, np.sqrt(0.75)+0.01)
+    jumpnetwork = lattice.jumpnetwork(0, np.sqrt(0.75) + 0.01)
     return lattice, jumpnetwork
 
+
 def BCCrates():
-    return np.array([1./8.])
+    return np.array([1. / 8.])
+
 
 def setupB2():
     lattice = crystal.Crystal(np.eye(3), [np.array([0., 0., 0.]), np.array([0.45, 0.45, 0.45])])
     jumpnetwork = lattice.jumpnetwork(0, 0.9)
     return lattice, jumpnetwork
 
+
 def B2rates():
-    return np.array([1./8., 1./8., 1./8.])
+    return np.array([1. / 8., 1. / 8., 1. / 8.])
 
 
 class PairStateTests(unittest.TestCase):
     """Tests of the PairState class"""
-    longMessage=False
+    longMessage = False
 
     def setUp(self):
         self.hcp = crystal.Crystal.HCP(1.0)
@@ -79,65 +90,65 @@ class PairStateTests(unittest.TestCase):
         """Is zero consistent?"""
         zero = stars.PairState.zero()
         self.assertTrue(zero.iszero())
-        self.assertTrue(stars.PairState.fromcrys(self.hcp, 0, (0,0), np.zeros(3)).iszero())
+        self.assertTrue(stars.PairState.fromcrys(self.hcp, 0, (0, 0), np.zeros(3)).iszero())
 
     def testArithmetic(self):
         """Does addition,subtraction, and endpoint subtraction work as expected?"""
-        pos1 = self.hcp.pos2cart(np.array([0,0,0]), (0,0))  # first site
-        pos2 = self.hcp.pos2cart(np.array([0,0,0]), (0,1))  # second site
-        pos1a1 = self.hcp.pos2cart(np.array([1,0,0]), (0,0))  # first + a1
-        pos2a1 = self.hcp.pos2cart(np.array([1,0,0]), (0,1))  # second + a1
-        pos1a2 = self.hcp.pos2cart(np.array([0,1,0]), (0,0))  # first + a2
-        pos2a2 = self.hcp.pos2cart(np.array([0,1,0]), (0,1))  # second + a2
-        ps1 = stars.PairState.fromcrys(self.hcp, 0, (0,0), pos1a1 - pos1)
-        ps2 = stars.PairState.fromcrys(self.hcp, 0, (0,0), 2*(pos1a1 - pos1))
+        pos1 = self.hcp.pos2cart(np.array([0, 0, 0]), (0, 0))  # first site
+        pos2 = self.hcp.pos2cart(np.array([0, 0, 0]), (0, 1))  # second site
+        pos1a1 = self.hcp.pos2cart(np.array([1, 0, 0]), (0, 0))  # first + a1
+        pos2a1 = self.hcp.pos2cart(np.array([1, 0, 0]), (0, 1))  # second + a1
+        pos1a2 = self.hcp.pos2cart(np.array([0, 1, 0]), (0, 0))  # first + a2
+        pos2a2 = self.hcp.pos2cart(np.array([0, 1, 0]), (0, 1))  # second + a2
+        ps1 = stars.PairState.fromcrys(self.hcp, 0, (0, 0), pos1a1 - pos1)
+        ps2 = stars.PairState.fromcrys(self.hcp, 0, (0, 0), 2 * (pos1a1 - pos1))
         self.assertEqual(ps1 + ps1, ps2)
-        ps2 = stars.PairState.fromcrys(self.hcp, 0, (1,0), pos1 - pos2)
+        ps2 = stars.PairState.fromcrys(self.hcp, 0, (1, 0), pos1 - pos2)
         with self.assertRaises(ArithmeticError):
             ps1 + ps2
-        ps3 = stars.PairState.fromcrys(self.hcp, 0, (1,0), pos1a1 - pos2)
+        ps3 = stars.PairState.fromcrys(self.hcp, 0, (1, 0), pos1a1 - pos2)
         self.assertEqual(ps2 + ps1, ps3)
-        ps4 = stars.PairState.fromcrys(self.hcp, 0, (0,1), pos2a1 - pos1)
+        ps4 = stars.PairState.fromcrys(self.hcp, 0, (0, 1), pos2a1 - pos1)
         self.assertEqual(ps1 - ps2, ps4)
         for i in [ps1, ps2, ps3, ps4]:
             self.assertTrue((i - i).iszero())
             self.assertTrue((i ^ i).iszero())  # endpoint subtraction!
         # endpoint subtraction: 0.(000):1.(010) ^ 0.(000):1.(000)  == 1.(000):1.(010)
-        ps1 = stars.PairState.fromcrys(self.hcp, 0, (0,1), pos2a2 - pos1)
-        ps2 = stars.PairState.fromcrys(self.hcp, 0, (0,1), pos2 - pos1)
-        ps3 = stars.PairState.fromcrys(self.hcp, 0, (1,1), pos2a2 - pos2)
+        ps1 = stars.PairState.fromcrys(self.hcp, 0, (0, 1), pos2a2 - pos1)
+        ps2 = stars.PairState.fromcrys(self.hcp, 0, (0, 1), pos2 - pos1)
+        ps3 = stars.PairState.fromcrys(self.hcp, 0, (1, 1), pos2a2 - pos2)
         self.assertEqual(ps1 ^ ps2, ps3)
         with self.assertRaises(ArithmeticError):
             ps1 ^ ps3
-        self.assertEqual(stars.PairState.fromcrys(self.hcp, 0, (1,0), pos1 - pos2),
-                         - stars.PairState.fromcrys(self.hcp, 0, (0,1), pos2 - pos1))
+        self.assertEqual(stars.PairState.fromcrys(self.hcp, 0, (1, 0), pos1 - pos2),
+                         - stars.PairState.fromcrys(self.hcp, 0, (0, 1), pos2 - pos1))
 
     def testGroupOps(self):
         """Applying group operations?"""
-        pos1 = self.hcp.pos2cart(np.array([0,0,0]), (0,0))  # first site
-        pos2 = self.hcp.pos2cart(np.array([0,0,0]), (0,1))  # second site
-        pos1a1 = self.hcp.pos2cart(np.array([1,0,0]), (0,0))  # first + a1
-        pos2a1 = self.hcp.pos2cart(np.array([1,0,0]), (0,1))  # second + a1
-        pos1a2 = self.hcp.pos2cart(np.array([0,1,0]), (0,0))  # first + a2
-        pos2a2 = self.hcp.pos2cart(np.array([0,1,0]), (0,1))  # second + a2
-        pos1a3 = self.hcp.pos2cart(np.array([0,0,1]), (0,0))  # first + a3
-        pos2a3 = self.hcp.pos2cart(np.array([0,0,1]), (0,1))  # second + a3
-        iterlist = [(0,pos1), (1,pos2),
-                    (0,pos1a1), (1,pos2a1),
-                    (0,pos1a2), (1,pos2a2),
-                    (0,pos1a3), (1,pos2a3)]
+        pos1 = self.hcp.pos2cart(np.array([0, 0, 0]), (0, 0))  # first site
+        pos2 = self.hcp.pos2cart(np.array([0, 0, 0]), (0, 1))  # second site
+        pos1a1 = self.hcp.pos2cart(np.array([1, 0, 0]), (0, 0))  # first + a1
+        pos2a1 = self.hcp.pos2cart(np.array([1, 0, 0]), (0, 1))  # second + a1
+        pos1a2 = self.hcp.pos2cart(np.array([0, 1, 0]), (0, 0))  # first + a2
+        pos2a2 = self.hcp.pos2cart(np.array([0, 1, 0]), (0, 1))  # second + a2
+        pos1a3 = self.hcp.pos2cart(np.array([0, 0, 1]), (0, 0))  # first + a3
+        pos2a3 = self.hcp.pos2cart(np.array([0, 0, 1]), (0, 1))  # second + a3
+        iterlist = [(0, pos1), (1, pos2),
+                    (0, pos1a1), (1, pos2a1),
+                    (0, pos1a2), (1, pos2a2),
+                    (0, pos1a3), (1, pos2a3)]
         zero = stars.PairState.zero()
         for g in self.hcp.G:
             self.assertTrue((zero.g(self.hcp, 0, g)).iszero())
-        for i,x1 in iterlist:
-            for j,x2 in iterlist:
-                ps = stars.PairState.fromcrys(self.hcp, 0, (i,j), x2-x1)
+        for i, x1 in iterlist:
+            for j, x2 in iterlist:
+                ps = stars.PairState.fromcrys(self.hcp, 0, (i, j), x2 - x1)
                 self.assertTrue(ps.__sane__(self.hcp, 0), msg="{} is not sane?".format(ps))
                 for g in self.hcp.G:
                     # apply directly to the vectors, and get the site index from the group op
                     gi, gx1 = g.indexmap[0][i], self.hcp.g_cart(g, x1)
                     gj, gx2 = g.indexmap[0][j], self.hcp.g_cart(g, x2)
-                    gpsdirect = stars.PairState.fromcrys(self.hcp, 0, (gi,gj), gx2-gx1)
+                    gpsdirect = stars.PairState.fromcrys(self.hcp, 0, (gi, gj), gx2 - gx1)
                     gps = ps.g(self.hcp, 0, g)
                     self.assertEqual(gps, gpsdirect,
                                      msg="{}\n*{} =\n{} !=\n{}".format(g, ps, gps, gpsdirect))
@@ -145,7 +156,7 @@ class PairStateTests(unittest.TestCase):
 
 class StarTests(unittest.TestCase):
     """Set of tests that our star code is behaving correctly for a general materials"""
-    longMessage=False
+    longMessage = False
 
     def setUp(self):
         self.crys, self.jumpnetwork = setuportho()
@@ -158,13 +169,13 @@ class StarTests(unittest.TestCase):
             ps1 = starset.states[i1]
             for i2 in starset.stars[starindex]:
                 ps2 = starset.states[i2]
-                if not any( ps1 == ps2.g(self.crys, self.chem, g) for g in self.crys.G):
+                if not any(ps1 == ps2.g(self.crys, self.chem, g) for g in self.crys.G):
                     return False
         return True
 
     def testStarConsistent(self):
         """Check that the counts (Npts, Nstars) make sense, with Nshells = 1..4"""
-        for n in range(1,5):
+        for n in range(1, 5):
             self.starset.generate(n)
             for starindex in range(self.starset.Nstars):
                 self.assertTrue(self.isclosed(self.starset, starindex))
@@ -197,7 +208,7 @@ class StarTests(unittest.TestCase):
                                 msg='Could not find state {} from s1 in s2'.format(s1.states[s[0]]))
             self.assertEqual(len(s), len(s2.stars[s2ind]),
                              msg='Star in s1 has different length than star in s2? {} != {}'.format(
-                                     len(s), len(s2.stars[s2ind])))
+                                 len(s), len(s2.stars[s2ind])))
             for i1 in s:
                 ps1 = s1.states[i1]
                 self.assertEqual(s2ind, s2.starindex(ps1),
@@ -229,7 +240,7 @@ class CubicStarTests(StarTests):
 
     def testStarConsistent(self):
         """Check that the counts (Npts, Nstars) make sense for cubic, with Nshells = 1..4"""
-        for n in range(1,5):
+        for n in range(1, 5):
             self.starset.generate(n)
             for starindex in range(self.starset.Nstars):
                 self.assertTrue(self.isclosed(self.starset, starindex))
@@ -247,6 +258,7 @@ class CubicStarTests(StarTests):
                                  msg='Count for {} should be {}, got {}'.format(
                                      self.starset.states[s[0]].dx, num, len(s)))
 
+
 class HCPStarTests(StarTests):
     """Set of tests that our star code is behaving correctly for HCP"""
 
@@ -263,7 +275,8 @@ class HCPStarTests(StarTests):
         for si in dS.stars[0]:
             self.assertTrue(dS.states[si].iszero())
         # 0, a1, a1+a2, 2a1; p, p+a1, p+a1+a2, p+2a1; c, c+a1 (p=pyramidal vector)
-        self.assertEqual(dS.Nstars, 4+4+2)
+        self.assertEqual(dS.Nstars, 4 + 4 + 2)
+
 
 class FCCStarTests(CubicStarTests):
     """Set of tests that our star code is behaving correctly for FCC"""
@@ -288,6 +301,7 @@ class FCCStarTests(CubicStarTests):
         self.starset.generate(3)
         self.assertEqual(self.starset.Nstars, 8)
 
+
 # replaced DoubleStarTests
 class JumpNetworkTests(unittest.TestCase):
     """Set of tests that our JumpNetwork is behaving correctly."""
@@ -302,14 +316,14 @@ class JumpNetworkTests(unittest.TestCase):
         """Can we generate jumpnetworks?"""
         self.starset.generate(1)
         jumpnetwork1, jt, sp = self.starset.jumpnetwork_omega1()
-        self.assertEqual(len(jumpnetwork1),1)
+        self.assertEqual(len(jumpnetwork1), 1)
         self.assertEqual(jt[0], 0)
-        self.assertEqual(sp[0], (0,0))
+        self.assertEqual(sp[0], (0, 0))
         jumpnetwork2, jt, sp = self.starset.jumpnetwork_omega2()
-        self.assertEqual(len(jumpnetwork2),1)
+        self.assertEqual(len(jumpnetwork2), 1)
         self.assertEqual(len(jumpnetwork2[0]), len(self.jumpnetwork[0]))
         self.assertEqual(jt[0], 0)
-        self.assertEqual(sp[0], (0,0))
+        self.assertEqual(sp[0], (0, 0))
 
     def testJumpNetworkCount(self):
         """Check that the counts in the jumpnetwork make sense for FCC, with Nshells = 1, 2"""
@@ -329,25 +343,25 @@ class JumpNetworkTests(unittest.TestCase):
         self.starset.generate(2)
         self.assertEqual(self.starset.Nstars, 4)
         jumpnetwork, jt, sp = self.starset.jumpnetwork_omega1()
-        self.assertEqual(len(jumpnetwork), 4+1+2)
-        self.assertEqual(sum(len(jlist) for jlist in jumpnetwork), 12*11 + 6*8 + 24*7 + 12*5)
+        self.assertEqual(len(jumpnetwork), 4 + 1 + 2)
+        self.assertEqual(sum(len(jlist) for jlist in jumpnetwork), 12 * 11 + 6 * 8 + 24 * 7 + 12 * 5)
         # check that nothing changed with the larger StarSet
         jumpnetwork2, jt, sp = self.starset.jumpnetwork_omega2()
-        self.assertEqual(len(jumpnetwork2),1)
+        self.assertEqual(len(jumpnetwork2), 1)
         self.assertEqual(len(jumpnetwork2[0]), len(self.jumpnetwork[0]))
         self.assertEqual(jt[0], 0)
-        self.assertEqual(sp[0], (0,0))
+        self.assertEqual(sp[0], (0, 0))
 
     def testJumpNetworkindices(self):
         """Check that our indexing works correctly for Nshell=1..3"""
         for nshells in range(1, 4):
             self.starset.generate(nshells)
             jumpnetwork, jt, sp = self.starset.jumpnetwork_omega1()
-            for jumplist, (s1,s2) in zip(jumpnetwork, sp):
-                for (i,f), dx in jumplist:
+            for jumplist, (s1, s2) in zip(jumpnetwork, sp):
+                for (i, f), dx in jumplist:
                     si = self.starset.index[i]
                     sf = self.starset.index[f]
-                    self.assertTrue((s1,s2) == (si,sf) or (s1,s2) == (sf,si))
+                    self.assertTrue((s1, s2) == (si, sf) or (s1, s2) == (sf, si))
 
 
 class VectorStarTests(unittest.TestCase):
@@ -363,7 +377,7 @@ class VectorStarTests(unittest.TestCase):
         """Can we generate star-vectors that make sense?"""
         self.starset.generate(1)
         self.vecstarset = stars.VectorStarSet(self.starset)
-        self.assertTrue(self.vecstarset.Nvstars>0)
+        self.assertTrue(self.vecstarset.Nvstars > 0)
 
     def VectorStarConsistent(self, nshells):
         """Do the star vectors obey the definition?"""
@@ -390,12 +404,12 @@ class VectorStarTests(unittest.TestCase):
                         self.assertAlmostEqual(1., dp,
                                                msg='Failed normality for {}/{} and {}/{}'.format(
                                                    self.starset.states[s1[0]], v1[0],
-                                                       self.starset.states[s2[0]], v2[0]))
+                                                   self.starset.states[s2[0]], v2[0]))
                     else:
                         self.assertAlmostEqual(0., dp,
                                                msg='Failed orthogonality for {}/{} and {}/{}'.format(
                                                    self.starset.states[s1[0]], v1[0],
-                                                       self.starset.states[s2[0]], v2[0]))
+                                                   self.starset.states[s2[0]], v2[0]))
 
     def testVectorStarConsistent(self):
         """Do the star vectors obey the definition?"""
@@ -448,6 +462,7 @@ class VectorStarTests(unittest.TestCase):
 
 class VectorStarFCCTests(VectorStarTests):
     """Set of tests that our VectorStar class is behaving correctly, for FCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupFCC()
         self.chem = 0
@@ -471,7 +486,7 @@ class VectorStarFCCTests(VectorStarTests):
         self.vecstarset = stars.VectorStarSet(self.starset)
         # with cubic symmetry, these all have to equal 1/3 * identity, and
         # with a diagonal matrix
-        testouter = 1./3.*np.eye(3)
+        testouter = 1. / 3. * np.eye(3)
         for outer in [self.vecstarset.outer[:, :, i, i]
                       for i in range(self.vecstarset.Nvstars)]:
             self.assertTrue(np.allclose(outer, testouter))
@@ -481,8 +496,10 @@ class VectorStarFCCTests(VectorStarTests):
                       if i != j]:
             self.assertTrue(np.allclose(outer, 0))
 
+
 class VectorStarHCPTests(VectorStarTests):
     """Set of tests that our VectorStar class is behaving correctly, for HCP"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupHCP()
         self.chem = 0
@@ -494,10 +511,12 @@ class VectorStarHCPTests(VectorStarTests):
         self.vecstarset = stars.VectorStarSet(self.starset)
         # two stars, with two vectors: one basal, one along c (more or less)
         self.assertEqual(self.starset.Nstars, 2)
-        self.assertEqual(self.vecstarset.Nvstars, 2+2)
+        self.assertEqual(self.vecstarset.Nvstars, 2 + 2)
+
 
 class VectorStarBCCTests(VectorStarTests):
     """Set of tests that our VectorStar class is behaving correctly, for BCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupBCC()
         self.chem = 0
@@ -511,8 +530,10 @@ class VectorStarBCCTests(VectorStarTests):
         self.assertEqual(self.starset.Nstars, 4)
         self.assertEqual(self.vecstarset.Nvstars, 4)
 
+
 class VectorStarB2Tests(VectorStarTests):
     """Set of tests that our VectorStar class is behaving correctly, for B2"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupB2()
         self.chem = 0
@@ -532,6 +553,7 @@ import onsager.GFcalc as GFcalc
 
 class VectorStarGFlinearTests(unittest.TestCase):
     """Set of tests that make sure we can construct the GF matrix as a linear combination"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setuportho()
         self.rates = orthorates()
@@ -573,20 +595,24 @@ class VectorStarGFlinearTests(unittest.TestCase):
                 g = 0
                 for si, vi in zip(self.vecstarset.vecpos[i], self.vecstarset.vecvec[i]):
                     for sj, vj in zip(self.vecstarset.vecpos[j], self.vecstarset.vecvec[j]):
-                        try: ds = self.starset.states[sj] ^ self.starset.states[si]
-                        except: continue
-                        g += np.dot(vi, vj)*self.GF(ds.i, ds.j, ds.dx)
+                        try:
+                            ds = self.starset.states[sj] ^ self.starset.states[si]
+                        except:
+                            continue
+                        g += np.dot(vi, vj) * self.GF(ds.i, ds.j, ds.dx)
                 self.assertAlmostEqual(g, np.dot(GFexpand[i, j, :], gexpand))
-        # Removed this test. It's not generally true.
-        # self.assertAlmostEqual(np.sum(GFexpand), 0)
-        # print(np.dot(GFexpand, gexpand))
+                # Removed this test. It's not generally true.
+                # self.assertAlmostEqual(np.sum(GFexpand), 0)
+                # print(np.dot(GFexpand, gexpand))
 
     def testConstructGF(self):
         """Test the construction of the GF using double-nn shell"""
         self.ConstructGF(2)
 
+
 class VectorStarGFFCClinearTests(VectorStarGFlinearTests):
     """Set of tests that make sure we can construct the GF matrix as a linear combination for FCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupFCC()
         self.rates = FCCrates()
@@ -605,8 +631,10 @@ class VectorStarGFFCClinearTests(VectorStarGFlinearTests):
         """Test the construction of the GF using double-nn shell"""
         self.ConstructGF(2)
 
+
 class VectorStarGFHCPlinearTests(VectorStarGFlinearTests):
     """Set of tests that make sure we can construct the GF matrix as a linear combination for HCP"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupHCP()
         self.rates = HCPrates()
@@ -625,8 +653,10 @@ class VectorStarGFHCPlinearTests(VectorStarGFlinearTests):
         """Test the construction of the GF using double-nn shell"""
         self.ConstructGF(2)
 
+
 class VectorStarGFBCClinearTests(VectorStarGFlinearTests):
     """Set of tests that make sure we can construct the GF matrix as a linear combination for BCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupBCC()
         self.rates = BCCrates()
@@ -645,8 +675,10 @@ class VectorStarGFBCClinearTests(VectorStarGFlinearTests):
         """Test the construction of the GF using double-nn shell"""
         self.ConstructGF(2)
 
+
 class VectorStarGFB2linearTests(VectorStarGFlinearTests):
     """Set of tests that make sure we can construct the GF matrix as a linear combination for B2"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupB2()
         self.rates = B2rates()
@@ -670,6 +702,7 @@ class VectorStarOmega0Tests(unittest.TestCase):
     """Set of tests for our expansion of omega_0"""
 
     longMessage = False
+
     def setUp(self):
         self.crys, self.jumpnetwork = setuportho()
         self.rates = orthorates()
@@ -681,7 +714,7 @@ class VectorStarOmega0Tests(unittest.TestCase):
         # NOTE: now we only take omega0 *here* to be those equivalent to omega1 jumps; the exchange
         # terms are handled in omega2; the jumps outside the kinetic shell simply contributed onsite escape
         # terms that get subtracted away, since the outer kinetic shell *has* to have zero energy
-        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
         jumpnetwork_omega1, jt, sp = self.starset.jumpnetwork_omega1()
         self.vecstarset = stars.VectorStarSet(self.starset)
         rate0expand, rate0escape, rate1expand, rate1escape = self.vecstarset.rateexpansions(jumpnetwork_omega1, jt)
@@ -695,7 +728,7 @@ class VectorStarOmega0Tests(unittest.TestCase):
         om0matrix = np.zeros((self.starset.Nstates, self.starset.Nstates))
         for ns, PS in enumerate(self.starset.states):
             for rate, jumplist in zip(self.rates, self.starset.jumpnetwork_index):
-                for TS in [ self.starset.jumplist[jumpindex] for jumpindex in jumplist]:
+                for TS in [self.starset.jumplist[jumpindex] for jumpindex in jumplist]:
                     if PS.j == TS.i:
                         nsend = self.starset.stateindex(PS + TS)
                         if nsend is not None:
@@ -707,15 +740,17 @@ class VectorStarOmega0Tests(unittest.TestCase):
                 om0_sv = 0
                 for i0, v0 in zip(sRv0, svv0):
                     for i1, v1 in zip(sRv1, svv1):
-                        om0_sv += np.dot(v0, v1)*om0matrix[i0,i1]
+                        om0_sv += np.dot(v0, v1) * om0matrix[i0, i1]
                 om0_sv_comp = np.dot(rate0expand[i, j], om0expand)
                 if i == j: om0_sv_comp += np.dot(rate0escape[i], om0expand)
                 self.assertAlmostEqual(om0_sv, om0_sv_comp,
                                        msg='Failed to match {}, {}: {} != {}'.format(
                                            i, j, om0_sv, om0_sv_comp))
 
+
 class VectorStarFCCOmega0Tests(VectorStarOmega0Tests):
     """Set of tests for our expansion of omega_0 for FCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupFCC()
         self.rates = FCCrates()
@@ -723,8 +758,10 @@ class VectorStarFCCOmega0Tests(VectorStarOmega0Tests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarHCPOmega0Tests(VectorStarOmega0Tests):
     """Set of tests for our expansion of omega_0 for HCP"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupHCP()
         self.rates = HCPrates()
@@ -732,8 +769,10 @@ class VectorStarHCPOmega0Tests(VectorStarOmega0Tests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarBCCOmega0Tests(VectorStarOmega0Tests):
     """Set of tests for our expansion of omega_0 for BCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupBCC()
         self.rates = BCCrates()
@@ -741,8 +780,10 @@ class VectorStarBCCOmega0Tests(VectorStarOmega0Tests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarB2Omega0Tests(VectorStarOmega0Tests):
     """Set of tests for our expansion of omega_0 for B2"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupB2()
         self.rates = B2rates()
@@ -755,6 +796,7 @@ class VectorStarOmegalinearTests(unittest.TestCase):
     """Set of tests for our expansion of omega_1"""
 
     longMessage = False
+
     def setUp(self):
         self.crys, self.jumpnetwork = setuportho()
         # self.rates = orthorates()
@@ -763,7 +805,7 @@ class VectorStarOmegalinearTests(unittest.TestCase):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testConstructOmega1(self):
-        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         jumpnetwork_omega1, jt, sp = self.starset.jumpnetwork_omega1()
         rate0expand, rate0escape, rate1expand, rate1escape = self.vecstarset.rateexpansions(jumpnetwork_omega1, jt)
@@ -787,11 +829,13 @@ class VectorStarOmegalinearTests(unittest.TestCase):
                 if i == j: om1_sv_comp += np.dot(rate1escape[i], om1expand)
                 self.assertAlmostEqual(om1, om1_sv_comp,
                                        msg='Failed to match {}, {}: {} != {}'.format(
-                                               i, j, om1, om1_sv_comp))
-        # print(np.dot(rateexpand, om1expand))
+                                           i, j, om1, om1_sv_comp))
+                # print(np.dot(rateexpand, om1expand))
+
 
 class VectorStarFCCOmegalinearTests(VectorStarOmegalinearTests):
     """Set of tests for our expansion of omega_1 for FCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupFCC()
         # self.rates = FCCrates()
@@ -799,8 +843,10 @@ class VectorStarFCCOmegalinearTests(VectorStarOmegalinearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarHCPOmegalinearTests(VectorStarOmegalinearTests):
     """Set of tests for our expansion of omega_1 for HCP"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupHCP()
         # self.rates = HCPrates()
@@ -808,8 +854,10 @@ class VectorStarHCPOmegalinearTests(VectorStarOmegalinearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarBCCOmegalinearTests(VectorStarOmegalinearTests):
     """Set of tests for our expansion of omega_1 for BCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupBCC()
         # self.rates = HCPrates()
@@ -817,8 +865,10 @@ class VectorStarBCCOmegalinearTests(VectorStarOmegalinearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarB2OmegalinearTests(VectorStarOmegalinearTests):
     """Set of tests for our expansion of omega_1 for B2"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupB2()
         # self.rates = HCPrates()
@@ -831,6 +881,7 @@ class VectorStarOmega2linearTests(unittest.TestCase):
     """Set of tests for our expansion of omega_2"""
 
     longMessage = False
+
     def setUp(self):
         self.crys, self.jumpnetwork = setuportho()
         self.rates = orthorates()
@@ -839,7 +890,7 @@ class VectorStarOmega2linearTests(unittest.TestCase):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testConstructOmega2(self):
-        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         jumpnetwork_omega2, jt, sp = self.starset.jumpnetwork_omega2()
         rate0expand, rate0escape, rate2expand, rate2escape = self.vecstarset.rateexpansions(jumpnetwork_omega2, jt)
@@ -863,10 +914,12 @@ class VectorStarOmega2linearTests(unittest.TestCase):
                 if i == j: om2_sv_comp += np.dot(rate2escape[i], om2expand)
                 self.assertAlmostEqual(om2, om2_sv_comp,
                                        msg='Failed to match {}, {}: {} != {}'.format(
-                                               i, j, om2, om2_sv_comp))
+                                           i, j, om2, om2_sv_comp))
+
 
 class VectorStarFCCOmega2linearTests(VectorStarOmega2linearTests):
     """Set of tests for our expansion of omega_2 for FCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupFCC()
         self.rates = FCCrates()
@@ -874,8 +927,10 @@ class VectorStarFCCOmega2linearTests(VectorStarOmega2linearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarHCPOmega2linearTests(VectorStarOmega2linearTests):
     """Set of tests for our expansion of omega_2 for HCP"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupHCP()
         self.rates = HCPrates()
@@ -883,8 +938,10 @@ class VectorStarHCPOmega2linearTests(VectorStarOmega2linearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarBCCOmega2linearTests(VectorStarOmega2linearTests):
     """Set of tests for our expansion of omega_2 for BCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupBCC()
         self.rates = BCCrates()
@@ -892,8 +949,10 @@ class VectorStarBCCOmega2linearTests(VectorStarOmega2linearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarB2Omega2linearTests(VectorStarOmega2linearTests):
     """Set of tests for our expansion of omega_2 for B2"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupB2()
         self.rates = B2rates()
@@ -906,6 +965,7 @@ class VectorStarBias2linearTests(unittest.TestCase):
     """Set of tests for our expansion of bias vector (2)"""
 
     longMessage = False
+
     def setUp(self):
         self.crys, self.jumpnetwork = setuportho()
         self.rates = orthorates()
@@ -914,38 +974,40 @@ class VectorStarBias2linearTests(unittest.TestCase):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testConstructBias2(self):
-        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         jumpnetwork_omega2, jt, sp = self.starset.jumpnetwork_omega2()
         bias0expand, bias2expand = self.vecstarset.biasexpansions(jumpnetwork_omega2, jt)
         # make omega2 twice omega0:
         alpha = 2.
-        om2expand = alpha*self.rates
+        om2expand = alpha * self.rates
         om0expand = self.rates.copy()
         self.assertEqual(np.shape(bias2expand),
                          (self.vecstarset.Nvstars, len(self.jumpnetwork)))
-        biasvec = np.zeros((self.starset.Nstates, 3)) # bias vector: only the exchange hops
+        biasvec = np.zeros((self.starset.Nstates, 3))  # bias vector: only the exchange hops
         for jumplist, rate in zip(jumpnetwork_omega2, self.rates):
             for (IS, FS), dx in jumplist:
                 for i in range(self.starset.Nstates):
                     if IS == i:
-                        biasvec[i, :] += dx*(alpha-1)*rate
+                        biasvec[i, :] += dx * (alpha - 1) * rate
         # construct the same bias vector using our expansion
         biasveccomp = np.zeros((self.starset.Nstates, 3))
         for b2, b0, svpos, svvec in zip(np.dot(bias2expand, om2expand),
-                                          np.dot(bias0expand, om0expand),
-                                          self.vecstarset.vecpos,
-                                          self.vecstarset.vecvec):
+                                        np.dot(bias0expand, om0expand),
+                                        self.vecstarset.vecpos,
+                                        self.vecstarset.vecvec):
             # test the construction
             for Ri, vi in zip(svpos, svvec):
-                biasveccomp[Ri, :] += (b2-b0)*vi
+                biasveccomp[Ri, :] += (b2 - b0) * vi
         for i in range(self.starset.Nstates):
             self.assertTrue(np.allclose(biasvec[i], biasveccomp[i]),
                             msg='Failure for state {}: {}\n{} != {}'.format(
-                                    i, self.starset.states[i], biasvec[i], biasveccomp[i]))
+                                i, self.starset.states[i], biasvec[i], biasveccomp[i]))
+
 
 class VectorStarFCCBias2linearTests(VectorStarBias2linearTests):
     """Set of tests for our expansion of bias vector (2) for FCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupFCC()
         self.rates = FCCrates()
@@ -953,8 +1015,10 @@ class VectorStarFCCBias2linearTests(VectorStarBias2linearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarHCPBias2linearTests(VectorStarBias2linearTests):
     """Set of tests for our expansion of bias vector (2) for HCP"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupHCP()
         self.rates = HCPrates()
@@ -962,8 +1026,10 @@ class VectorStarHCPBias2linearTests(VectorStarBias2linearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarBCCBias2linearTests(VectorStarBias2linearTests):
     """Set of tests for our expansion of bias vector (2) for BCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupBCC()
         self.rates = BCCrates()
@@ -971,8 +1037,10 @@ class VectorStarBCCBias2linearTests(VectorStarBias2linearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarB2Bias2linearTests(VectorStarBias2linearTests):
     """Set of tests for our expansion of bias vector (2) for B2"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupB2()
         self.rates = B2rates()
@@ -983,10 +1051,12 @@ class VectorStarB2Bias2linearTests(VectorStarBias2linearTests):
 
 import onsager.OnsagerCalc as OnsagerCalc  # we use this for the Interstitial Calculator
 
+
 class VectorStarBias1linearTests(unittest.TestCase):
     """Set of tests for our expansion of bias vector (1)"""
 
     longMessage = False
+
     def setUp(self):
         self.crys, self.jumpnetwork = setuportho()
         self.rates = orthorates()
@@ -995,7 +1065,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testConstructBias1(self):
-        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         jumpnetwork_omega1, jt, sp = self.starset.jumpnetwork_omega1()
         bias0expand, bias1expand = self.vecstarset.biasexpansions(jumpnetwork_omega1, jt)
@@ -1003,32 +1073,32 @@ class VectorStarBias1linearTests(unittest.TestCase):
         om0expand = self.rates.copy()
         self.assertEqual(np.shape(bias1expand),
                          (self.vecstarset.Nvstars, len(jumpnetwork_omega1)))
-        biasvec = np.zeros((self.starset.Nstates, 3)) # bias vector: only the exchange hops
+        biasvec = np.zeros((self.starset.Nstates, 3))  # bias vector: only the exchange hops
         for jumplist, rate, om0type in zip(jumpnetwork_omega1, om1expand, jt):
             om0 = om0expand[om0type]
             for (IS, FS), dx in jumplist:
                 for i in range(self.starset.Nstates):
                     if IS == i:
-                        biasvec[i, :] += dx*(rate - om0)
+                        biasvec[i, :] += dx * (rate - om0)
         # construct the same bias vector using our expansion
         biasveccomp = np.zeros((self.starset.Nstates, 3))
         for b1, b0, svpos, svvec in zip(np.dot(bias1expand, om1expand),
-                                          np.dot(bias0expand, om0expand),
-                                          self.vecstarset.vecpos,
-                                          self.vecstarset.vecvec):
+                                        np.dot(bias0expand, om0expand),
+                                        self.vecstarset.vecpos,
+                                        self.vecstarset.vecvec):
             # test the construction
             for Ri, vi in zip(svpos, svvec):
-                biasveccomp[Ri, :] += (b1-b0)*vi
+                biasveccomp[Ri, :] += (b1 - b0) * vi
         for i in range(self.starset.Nstates):
             self.assertTrue(np.allclose(biasvec[i], biasveccomp[i]),
                             msg='Failure for state {}: {}\n{} != {}'.format(
-                                    i, self.starset.states[i], biasvec[i], biasveccomp[i]))
+                                i, self.starset.states[i], biasvec[i], biasveccomp[i]))
 
     def testPeriodicBias(self):
         vectorbasislist = OnsagerCalc.Interstitial(self.crys, self.chem, self.sitelist, self.jumpnetwork).VectorBasis
         # we *should* have some projection if there's a vectorbasis, so only continue if this is empty
         if len(vectorbasislist) != 0: return
-        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         for type in ('solute', 'vacancy'):
             self.assertTrue(np.allclose(self.vecstarset.periodicvectorexpansion(type), 0))
@@ -1036,6 +1106,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
 
 class VectorStarFCCBias1linearTests(VectorStarBias1linearTests):
     """Set of tests for our expansion of bias vector (1) for FCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupFCC()
         self.rates = FCCrates()
@@ -1043,8 +1114,10 @@ class VectorStarFCCBias1linearTests(VectorStarBias1linearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarHCPBias1linearTests(VectorStarBias1linearTests):
     """Set of tests for our expansion of bias vector (1) for HCP"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupHCP()
         self.rates = HCPrates()
@@ -1052,8 +1125,10 @@ class VectorStarHCPBias1linearTests(VectorStarBias1linearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarBCCBias1linearTests(VectorStarBias1linearTests):
     """Set of tests for our expansion of bias vector (1) for BCC"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupBCC()
         self.rates = BCCrates()
@@ -1061,8 +1136,10 @@ class VectorStarBCCBias1linearTests(VectorStarBias1linearTests):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
+
 class VectorStarB2Bias1linearTests(VectorStarBias1linearTests):
     """Set of tests for our expansion of bias vector (1) for B2"""
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupB2()
         self.rates = B2rates()
@@ -1075,6 +1152,7 @@ class VectorStarPeriodicBias(unittest.TestCase):
     """Set of tests for our expansion of periodic bias vector (1)"""
 
     longMessage = False
+
     def setUp(self):
         self.crys, self.jumpnetwork = setupB2()
         self.chem = 0
@@ -1082,23 +1160,23 @@ class VectorStarPeriodicBias(unittest.TestCase):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testPeriodicBias(self):
-        self.starset.generate(2) # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         vectorbasislist = self.crys.FullVectorBasis(self.chem)[0]
         NVB = len(vectorbasislist)
         for elemtype, attr in zip(['vacancy', 'solute'], ['j', 'i']):
             periodicexpansion = self.vecstarset.periodicvectorexpansion(elemtype)
-            VBexpansion = self.vecstarset.unitcellVectorBasisfolddown(vectorbasislist,elemtype)
+            VBexpansion = self.vecstarset.unitcellVectorBasisfolddown(vectorbasislist, elemtype)
             for n in range(self.vecstarset.Nvstars):
                 for i in range(NVB):
-                    self.assertTrue(np.allclose(np.tensordot(vectorbasislist[i,:,:],
-                                                             periodicexpansion[n,:,:],
-                                                             axes=((0,1),(0,1))), VBexpansion[i,n]))
-            vb = sum( (2.*u-1)*vect for u,vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist) )
-            svexp = np.tensordot(periodicexpansion, vb, axes=((1,2), (0,1)))
+                    self.assertTrue(np.allclose(np.tensordot(vectorbasislist[i, :, :],
+                                                             periodicexpansion[n, :, :],
+                                                             axes=((0, 1), (0, 1))), VBexpansion[i, n]))
+            vb = sum((2. * u - 1) * vect for u, vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist))
+            svexp = np.tensordot(periodicexpansion, vb, axes=((1, 2), (0, 1)))
             vbdirect = np.array([vb[getattr(PS, attr)] for PS in self.starset.states])
             vbexp = np.zeros((self.starset.Nstates, 3))
             for i, svR, svv in zip(stars.itertools.count(), self.vecstarset.vecpos, self.vecstarset.vecvec):
                 for s, v in zip(svR, svv):
-                    vbexp[s, :] += v*svexp[i]
+                    vbexp[s, :] += v * svexp[i]
             self.assertTrue(np.allclose(vbdirect, vbexp))

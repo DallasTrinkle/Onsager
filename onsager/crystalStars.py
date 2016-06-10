@@ -31,6 +31,7 @@ from onsager import crystal
 # YAML tags
 PAIRSTATE_YAMLTAG = '!PairState'
 
+
 class PairState(collections.namedtuple('PairState', 'i j R dx')):
     """
     A class corresponding to a "pair" state; in this case, a solute-vacancy pair, but can
@@ -55,7 +56,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         """Convert (i,j), dx into PairState"""
         return cls(i=ij[0],
                    j=ij[1],
-                   R=np.round(np.dot(crys.invlatt,dx) - crys.basis[chem][ij[1]] + crys.basis[chem][ij[0]]).astype(int),
+                   R=np.round(np.dot(crys.invlatt, dx) - crys.basis[chem][ij[1]] + crys.basis[chem][ij[0]]).astype(int),
                    dx=dx)
 
     @classmethod
@@ -72,7 +73,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
 
     def __sane__(self, crys, chem):
         """Determine if the dx value makes sense given everything else..."""
-        return np.allclose(self.dx, np.dot(crys.lattice, self.R + crys.basis[chem][self.j]- crys.basis[chem][self.i]))
+        return np.allclose(self.dx, np.dot(crys.lattice, self.R + crys.basis[chem][self.j] - crys.basis[chem][self.i]))
 
     def iszero(self):
         """Quicker than self == PairState.zero()"""
@@ -101,8 +102,10 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         if self.iszero() and self.j == -1: return other
         if other.iszero() and other.i == -1: return self
         if self.j != other.i:
-            raise ArithmeticError('Can only add matching endpoints: ({} {})+({} {}) not compatible'.format(self.i, self.j, other.i, other.j))
-        return self.__class__(i=self.i, j=other.j, R=self.R+other.R, dx=self.dx+other.dx)
+            raise ArithmeticError(
+                'Can only add matching endpoints: ({} {})+({} {}) not compatible'.format(self.i, self.j, other.i,
+                                                                                         other.j))
+        return self.__class__(i=self.i, j=other.j, R=self.R + other.R, dx=self.dx + other.dx)
 
     def __neg__(self):
         """Negation of state (swap members of pair)
@@ -130,8 +133,10 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         # if self.iszero(): raise ArithmeticError('Cannot endpoint substract from zero')
         # if other.iszero(): raise ArithmeticError('Cannot endpoint subtract zero')
         if self.i != other.i:
-            raise ArithmeticError('Can only endpoint subtract matching starts: ({} {})^({} {}) not compatible'.format(self.i, self.j, other.i, other.j))
-        return self.__class__(i=other.j, j=self.j, R=self.R-other.R, dx=self.dx - other.dx)
+            raise ArithmeticError(
+                'Can only endpoint subtract matching starts: ({} {})^({} {}) not compatible'.format(self.i, self.j,
+                                                                                                    other.i, other.j))
+        return self.__class__(i=other.j, j=self.j, R=self.R - other.R, dx=self.dx - other.dx)
 
     def g(self, crys, chem, g):
         """
@@ -140,12 +145,12 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         :param crys: crystal
         :param chem: chemical index
         :param g: group operation (from crys)
-        :return: PairState corresponding to group operation applied to self
+        :return g*PairState: corresponding to group operation applied to self
         """
         gRi, (c, gi) = crys.g_pos(g, np.zeros(3, dtype=int), (chem, self.i))
         gRj, (c, gj) = crys.g_pos(g, self.R, (chem, self.j))
         gdx = crys.g_direc(g, self.dx)
-        return self.__class__(i=gi, j=gj, R=gRj-gRi, dx=gdx)
+        return self.__class__(i=gi, j=gj, R=gRj - gRi, dx=gdx)
 
     def __str__(self):
         """Human readable version"""
@@ -170,8 +175,10 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         # ** turns the dictionary into parameters for PairState constructor
         return PairState(**loader.construct_mapping(node, deep=True))
 
+
 crystal.yaml.add_representer(PairState, PairState.PairState_representer)
 crystal.yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
+
 
 # HDF5 conversion routines: PairState, and list-of-list structures
 def PSlist2array(PSlist):
@@ -184,12 +191,13 @@ def PSlist2array(PSlist):
     :return dx: float[N][3]
     """
     N = len(PSlist)
-    ij = np.zeros((N,2), dtype=int)
-    R = np.zeros((N,3), dtype=int)
-    dx = np.zeros((N,3))
+    ij = np.zeros((N, 2), dtype=int)
+    R = np.zeros((N, 3), dtype=int)
+    dx = np.zeros((N, 3))
     for n, PS in enumerate(PSlist):
-        ij[n,0], ij[n,1], R[n,:], dx[n,:] = PS.i, PS.j, PS.R, PS.dx
+        ij[n, 0], ij[n, 1], R[n, :], dx[n, :] = PS.i, PS.j, PS.R, PS.dx
     return ij, R, dx
+
 
 def array2PSlist(ij, R, dx):
     """
@@ -200,7 +208,8 @@ def array2PSlist(ij, R, dx):
     :param dx: float[N][3]
     :return PSlist: list of pair states
     """
-    return [ PairState(i=ij0[0], j=ij0[1], R=R0, dx=dx0) for ij0, R0, dx0 in zip(ij, R, dx)]
+    return [PairState(i=ij0[0], j=ij0[1], R=R0, dx=dx0) for ij0, R0, dx0 in zip(ij, R, dx)]
+
 
 def doublelist2flatlistindex(listlist):
     """
@@ -217,6 +226,7 @@ def doublelist2flatlistindex(listlist):
         indexlist += [ind for j in entries]
     return flatlist, np.array(indexlist)
 
+
 def flatlistindex2doublelist(flatlist, indexarray):
     """
     Takes a flattened list and an index array, returns a list of lists
@@ -226,7 +236,7 @@ def flatlistindex2doublelist(flatlist, indexarray):
     :return listlist: list of lists of objects
     """
     Nlist = max(indexarray) + 1
-    listlist = [ [] for n in range(Nlist)]
+    listlist = [[] for n in range(Nlist)]
     for entry, ind in zip(flatlist, indexarray):
         listlist[ind].append(entry)
     return listlist
@@ -234,32 +244,37 @@ def flatlistindex2doublelist(flatlist, indexarray):
 
 class StarSet(object):
     """
-    A class to construct stars, and be able to efficiently index.
+    A class to construct crystal stars, and be able to efficiently index.
+
+    Takes in a jumpnetwork, which is used to construct the corresponding stars, a crystal
+    object with which to operate, a specification of the chemical index for the atom moving
+    (needs to be consistent with jumpnetwork and crys), and then the number of shells.
+
+    In this case, `shells` = number of successive "jumps" from a state. As an example,
+    in FCC, 1 shell = 1st neighbor, 2 shell = 1-4th neighbors.
     """
+
     def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False):
         """
         Initiates a star set generator for a given jumpnetwork, crystal, and specified
         chemical index.
 
         :param jumpnetwork: list of symmetry unique jumps, as a list of list of tuples; either
-        ((i,j), dx) for jump from i to j with displacement dx, or
-        ((i,j), R) for jump from i in unit cell 0 -> j in unit cell R
+            `((i,j), dx)` for jump from i to j with displacement dx, or
+            `((i,j), R)` for jump from i in unit cell 0 -> j in unit cell R
         :param crys: crystal where jumps take place
         :param chem: chemical index of atom to consider jumps
         :param Nshells: number of shells to generate
         :param lattice: which form does the jumpnetwork take?
-
-        crys: crystal structure
-        chem: chemical index of atom that's jumping
-        Nshells: number of shells (addi
-        jumpnetwork_index: list of lists of indices into jumplist; matches structure of jumpnetwork
-        jumplist: list of jumps, as pair states (i=initial state, j=final state)
-        states: list of pair states, out to Nshells
-        Nstates: size of list
-        stars: list of lists of indices into states; each list are states equivalent by symmetry
-        Nstars: size of list
-        index[Nstates]: index of star that state belongs to
         """
+        # jumpnetwork_index: list of lists of indices into jumplist; matches structure of jumpnetwork
+        # jumplist: list of jumps, as pair states (i=initial state, j=final state)
+        # states: list of pair states, out to Nshells
+        # Nstates: size of list
+        # stars: list of lists of indices into states; each list are states equivalent by symmetry
+        # Nstars: size of list
+        # index[Nstates]: index of star that state belongs to
+
         # empty StarSet
         if all(x is None for x in (jumpnetwork, crys, chem)): return
         self.jumpnetwork_index = []  # list of list of indices into...
@@ -270,8 +285,10 @@ class StarSet(object):
             for ij, v in jlist:
                 self.jumpnetwork_index[-1].append(ind)
                 ind += 1
-                if lattice: PS = PairState.fromcrys_latt(crys, chem, ij, v)
-                else: PS = PairState.fromcrys(crys, chem, ij, v)
+                if lattice:
+                    PS = PairState.fromcrys_latt(crys, chem, ij, v)
+                else:
+                    PS = PairState.fromcrys(crys, chem, ij, v)
                 self.jumplist.append(PS)
         self.crys = crys
         self.chem = chem
@@ -298,21 +315,25 @@ class StarSet(object):
         """
         if Nshells == getattr(self, 'Nshells', -1): return
         self.Nshells = Nshells
-        if Nshells > 0: stateset = set(self.jumplist)
-        else: stateset = set([])
+        if Nshells > 0:
+            stateset = set(self.jumplist)
+        else:
+            stateset = set([])
         lastshell = stateset.copy()
         if originstates:
             for i in range(len(self.crys.basis[self.chem])):
                 stateset.add(PairState.zero(i))
-        for i in range(Nshells-1):
+        for i in range(Nshells - 1):
             # add all NNvect to last shell produced, always excluding 0
             # lastshell = [v1+v2 for v1 in lastshell for v2 in self.NNvect if not all(abs(v1 + v2) < threshold)]
             nextshell = set([])
             for s1 in lastshell:
                 for s2 in self.jumplist:
                     # this try/except structure lets us attempt addition and kick out if not possible
-                    try: s = s1 + s2
-                    except: continue
+                    try:
+                        s = s1 + s2
+                    except:
+                        continue
                     if not s.iszero():
                         nextshell.add(s)
                         stateset.add(s)
@@ -332,8 +353,8 @@ class StarSet(object):
             self.stars = []
             xmin = 0
             for xmax in x2_indices:
-                complist_stars = [] # for finding unique stars
-                symmstate_list = [] # list of sets corresponding to those stars...
+                complist_stars = []  # for finding unique stars
+                symmstate_list = []  # list of sets corresponding to those stars...
                 for xi in range(xmin, xmax):
                     x = self.states[xi]
                     # is this a new rep. for a unique star?
@@ -349,8 +370,9 @@ class StarSet(object):
                         complist_stars.append([xi])
                         symmstate_list.append(set([x.g(self.crys, self.chem, g) for g in self.crys.G]))
                 self.stars += complist_stars
-                xmin=xmax
-        else: self.stars = [[]]
+                xmin = xmax
+        else:
+            self.stars = [[]]
         self.Nstars = len(self.stars)
         # generate index: which star is each state a member of?
         self.index = np.zeros(self.Nstates, dtype=int)
@@ -393,7 +415,7 @@ class StarSet(object):
 
         :param crys: crystal object--MUST BE PASSED IN as it is not stored with the StarSet
         :param HDFgroup: HDF5 group
-        :return: new StarSet object
+        :return StarSet: new StarSet object
         """
         SSet = cls(None, None, None)  # initialize
         SSet.crys = crys
@@ -434,7 +456,8 @@ class StarSet(object):
             newStarSet.Nstates = self.Nstates
             newStarSet.index = self.index.copy()
             newStarSet.indexdict = self.indexdict.copy()
-        else: newStarSet.generate(0)
+        else:
+            newStarSet.generate(0)
         return newStarSet
 
     # removed combine; all it does is generate(s1.Nshells + s2.Nshells) with lots of checks...
@@ -473,8 +496,10 @@ class StarSet(object):
         for s1 in self.states[:Nold]:
             for s2 in other.states:
                 # this try/except structure lets us attempt addition and kick out if not possible
-                try: s = s1 + s2
-                except: continue
+                try:
+                    s = s1 + s2
+                except:
+                    continue
                 if not s.iszero() and not s in oldstateset: newstateset.add(s)
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
         self.states += sorted([s for s in newstateset], key=PairState.sortkey)
@@ -490,8 +515,8 @@ class StarSet(object):
         # x2_indices now contains a list of indices with the same magnitudes
         xmin = Nold
         for xmax in x2_indices:
-            complist_stars = [] # for finding unique stars
-            symmstate_list = [] # list of sets corresponding to those stars...
+            complist_stars = []  # for finding unique stars
+            symmstate_list = []  # list of sets corresponding to those stars...
             for xi in range(xmin, xmax):
                 x = self.states[xi]
                 # is this a new rep. for a unique star?
@@ -507,10 +532,10 @@ class StarSet(object):
                     complist_stars.append([xi])
                     symmstate_list.append(set([x.g(self.crys, self.chem, g) for g in self.crys.G]))
             self.stars += complist_stars
-            xmin=xmax
+            xmin = xmax
         self.Nstates = Nnew
         # generate new index entries: which star is each state a member of?
-        self.index = np.pad(self.index, (0, Nnew-Nold), mode='constant')
+        self.index = np.pad(self.index, (0, Nnew - Nold), mode='constant')
         Nold = self.Nstars
         Nnew = len(self.stars)
         for si in range(Nold, Nnew):
@@ -524,13 +549,17 @@ class StarSet(object):
     # replaces pointindex:
     def stateindex(self, PS):
         """Return the index of pair state PS; None if not found"""
-        try: return self.indexdict[PS][0]
-        except: return None
+        try:
+            return self.indexdict[PS][0]
+        except:
+            return None
 
     def starindex(self, PS):
         """Return the index for the star to which pair state PS belongs; None if not found"""
-        try: return self.indexdict[PS][1]
-        except: return None
+        try:
+            return self.indexdict[PS][1]
+        except:
+            return None
 
     def symmatch(self, PS1, PS2):
         """True if there exists a group operation that makes PS1 == PS2."""
@@ -542,31 +571,31 @@ class StarSet(object):
         Generate a jumpnetwork corresponding to vacancy jumping while the solute remains fixed.
 
         :return jumpnetwork: list of symmetry unique jumps; list of list of tuples (i,f), dx where
-        i,f index into states for the initial and final states, and dx = displacement of vacancy
-        in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
-
+            i,f index into states for the initial and final states, and dx = displacement of vacancy
+            in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
         :return jumptype: list of indices corresponding to the (original) jump type for each
-        symmetry unique jump; useful for constructing a LIMB approximation
-
+            symmetry unique jump; useful for constructing a LIMB approximation
         :return starpair: list of tuples of the star indices of the i and f states for each
-        symmetry unique jump
+            symmetry unique jump
         """
         if self.Nshells < 1: return []
         jumpnetwork = []
         jumptype = []
         starpair = []
         for jt, jumpindices in enumerate(self.jumpnetwork_index):
-            for jump in [ self.jumplist[j] for j in jumpindices]:
+            for jump in [self.jumplist[j] for j in jumpindices]:
                 for i, PSi in enumerate(self.states):
                     if PSi.iszero(): continue
                     # attempt to add...
-                    try: PSf = PSi + jump
-                    except: continue
+                    try:
+                        PSf = PSi + jump
+                    except:
+                        continue
                     if PSf.iszero(): continue
                     f = self.stateindex(PSf)
                     if f is None: continue  # outside our StarSet
                     # see if we've already generated this jump (works since all of our states are distinct)
-                    if any(any( i==i0 and f==f0 for (i0,f0), dx in jlist) for jlist in jumpnetwork): continue
+                    if any(any(i == i0 and f == f0 for (i0, f0), dx in jlist) for jlist in jumpnetwork): continue
                     dx = PSf.dx - PSi.dx
                     jumpnetwork.append(self.symmequivjumplist(i, f, dx))
                     jumptype.append(jt)
@@ -578,30 +607,30 @@ class StarSet(object):
         Generate a jumpnetwork corresponding to vacancy exchanging with a solute.
 
         :return jumpnetwork: list of symmetry unique jumps; list of list of tuples (i,f), dx where
-        i,f index into states for the initial and final states, and dx = displacement of vacancy
-        in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
-
+            i,f index into states for the initial and final states, and dx = displacement of vacancy
+            in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
         :return jumptype: list of indices corresponding to the (original) jump type for each
-        symmetry unique jump; useful for constructing a LIMB approximation
-
+            symmetry unique jump; useful for constructing a LIMB approximation
         :return starpair: list of tuples of the star indices of the i and f states for each
-        symmetry unique jump
+            symmetry unique jump
         """
         if self.Nshells < 1: return []
         jumpnetwork = []
         jumptype = []
         starpair = []
         for jt, jumpindices in enumerate(self.jumpnetwork_index):
-            for jump in [ self.jumplist[j] for j in jumpindices]:
+            for jump in [self.jumplist[j] for j in jumpindices]:
                 for i, PSi in enumerate(self.states):
                     if PSi.iszero(): continue
                     # attempt to add...
-                    try: PSf = PSi + jump
-                    except: continue
+                    try:
+                        PSf = PSi + jump
+                    except:
+                        continue
                     if not PSf.iszero(): continue
                     f = self.stateindex(-PSi)  # exchange
                     # see if we've already generated this jump (works since all of our states are distinct)
-                    if any(any( i==i0 and f==f0 for (i0,f0), dx in jlist) for jlist in jumpnetwork): continue
+                    if any(any(i == i0 and f == f0 for (i0, f0), dx in jlist) for jlist in jumpnetwork): continue
                     dx = -PSi.dx  # the vacancy jumps into the solute position (exchange)
                     jumpnetwork.append(self.symmequivjumplist(i, f, dx))
                     jumptype.append(jt)
@@ -619,14 +648,14 @@ class StarSet(object):
         """
         PSi = self.states[i]
         PSf = self.states[f]
-        symmjumplist = [((i,f), dx)]
-        if i != f: symmjumplist.append(((f,i), -dx)) # i should not equal f... but in case we allow 0 as a jump
+        symmjumplist = [((i, f), dx)]
+        if i != f: symmjumplist.append(((f, i), -dx))  # i should not equal f... but in case we allow 0 as a jump
         for g in self.crys.G:
-            gi, gf, gdx = self.stateindex(PSi.g(self.crys, self.chem, g)),\
-                          self.stateindex(PSf.g(self.crys, self.chem, g)),\
+            gi, gf, gdx = self.stateindex(PSi.g(self.crys, self.chem, g)), \
+                          self.stateindex(PSf.g(self.crys, self.chem, g)), \
                           self.crys.g_direc(g, dx)
-            if not any( gi==i0 and gf==f0 for (i0,f0), dx in symmjumplist):
-                symmjumplist.append(((gi,gf), gdx))
+            if not any(gi == i0 and gf == f0 for (i0, f0), dx in symmjumplist):
+                symmjumplist.append(((gi, gf), gdx))
                 if gi != gf: symmjumplist.append(((gf, gi), -gdx))
         return symmjumplist
 
@@ -646,8 +675,10 @@ class StarSet(object):
         for s1 in S1.states:
             for s2 in S2.states:
                 # this try/except structure lets us attempt addition and kick out if not possible
-                try: s = s2 ^ s1  # points from vacancy state of s1 to vacancy state of s2
-                except: continue
+                try:
+                    s = s2 ^ s1  # points from vacancy state of s1 to vacancy state of s2
+                except:
+                    continue
                 stateset.add(s)
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
         self.states = sorted([s for s in stateset], key=PairState.sortkey)
@@ -664,8 +695,8 @@ class StarSet(object):
             self.stars = []
             xmin = 0
             for xmax in x2_indices:
-                complist_stars = [] # for finding unique stars
-                symmstate_list = [] # list of sets corresponding to those stars...
+                complist_stars = []  # for finding unique stars
+                symmstate_list = []  # list of sets corresponding to those stars...
                 for xi in range(xmin, xmax):
                     x = self.states[xi]
                     # is this a new rep. for a unique star?
@@ -681,8 +712,9 @@ class StarSet(object):
                         complist_stars.append([xi])
                         symmstate_list.append(set([x.g(self.crys, self.chem, g) for g in self.crys.G]))
                 self.stars += complist_stars
-                xmin=xmax
-        else: self.stars = [[]]
+                xmin = xmax
+        else:
+            self.stars = [[]]
         self.Nstars = len(self.stars)
         # generate index: which star is each state a member of?
         self.index = np.zeros(self.Nstates, dtype=int)
@@ -697,30 +729,31 @@ class StarSetMeta(StarSet):
     """
     Testing meta states with star set
     """
+
     def __init__(self, jumpnetwork, crys, chem, Nshells=0, lattice=False, meta_tags=[], jumpnetwork2=[]):
         """
         Initiates a star set generator for a given jumpnetwork, crystal, and specified
         chemical index.
 
         :param jumpnetwork: list of symmetry unique jumps, as a list of list of tuples; either
-        ((i,j), dx) for jump from i to j with displacement dx, or
-        ((i,j), R) for jump from i in unit cell 0 -> j in unit cell R
+            ((i,j), dx) for jump from i to j with displacement dx, or
+            ((i,j), R) for jump from i in unit cell 0 -> j in unit cell R
         :param crys: crystal where jumps take place
         :param chem: chemical index of atom to consider jumps
         :param Nshells: number of shells to generate
         :param lattice: which form does the jumpnetwork take?
-
-        crys: crystal structure
-        chem: chemical index of atom that's jumping
-        Nshells: number of shells (addi
-        jumpnetwork_index: list of lists of indices into jumplist; matches structure of jumpnetwork
-        jumplist: list of jumps, as pair states (i=initial state, j=final state)
-        states: list of pair states, out to Nshells
-        Nstates: size of list
-        stars: list of lists of indices into states; each list are states equivalent by symmetry
-        Nstars: size of list
-        index[Nstates]: index of star that state belongs to
         """
+        # crys: crystal structure
+        # chem: chemical index of atom that's jumping
+        # Nshells: number of shells (addi
+        # jumpnetwork_index: list of lists of indices into jumplist; matches structure of jumpnetwork
+        # jumplist: list of jumps, as pair states (i=initial state, j=final state)
+        # states: list of pair states, out to Nshells
+        # Nstates: size of list
+        # stars: list of lists of indices into states; each list are states equivalent by symmetry
+        # Nstars: size of list
+        # index[Nstates]: index of star that state belongs to
+
         # empty StarSet
         if all(x is None for x in (jumpnetwork, crys, chem)): return
         self.jumpnetwork_index = []  # list of list of indices into...
@@ -741,8 +774,10 @@ class StarSetMeta(StarSet):
             for ij, v in jlist:
                 self.jumpnetwork_index[-1].append(ind)
                 ind += 1
-                if lattice: PS = PairState.fromcrys_latt(crys, chem, ij, v)
-                else: PS = PairState.fromcrys(crys, chem, ij, v)
+                if lattice:
+                    PS = PairState.fromcrys_latt(crys, chem, ij, v)
+                else:
+                    PS = PairState.fromcrys(crys, chem, ij, v)
                 self.jumplist.append(PS)
                 # for site_index, sites in enumerate(self.crys.sitelist(0)):
                 #     if PS.i in sites:
@@ -760,8 +795,10 @@ class StarSetMeta(StarSet):
                 for ij, v in jlist:
                     self.jumpnetwork_index2[-1].append(ind)
                     ind += 1
-                    if lattice: PS = PairState.fromcrys_latt(crys, chem, ij, v)
-                    else: PS = PairState.fromcrys(crys, chem, ij, v)
+                    if lattice:
+                        PS = PairState.fromcrys_latt(crys, chem, ij, v)
+                    else:
+                        PS = PairState.fromcrys(crys, chem, ij, v)
                     self.jumplist2.append(PS)
         else:
             self.jumpnetwork_index2 = self.jumpnetwork_index.copy()
@@ -788,10 +825,10 @@ class StarSetMeta(StarSet):
             newStarSet.indexdict = self.indexdict.copy()
             newStarSet.meta_tags = self.meta_tags.copy()
             newStarSet.jumplist2 = self.jumplist2.copy()
-            newStarSet.jumpnetwork_index2 =copy.deepcopy(self.jumpnetwork_index2)
-        else: newStarSet.generate(0)
+            newStarSet.jumpnetwork_index2 = copy.deepcopy(self.jumpnetwork_index2)
+        else:
+            newStarSet.generate(0)
         return newStarSet
-
 
     def generate(self, Nshells, threshold=1e-8):
         """
@@ -799,7 +836,7 @@ class StarSetMeta(StarSet):
         are PairStates that iszero() is True; they are only included if they have a nonzero VectorBasis.
 
         :param Nshells: number of shells to generate; this is interpreted as subsequent
-        "sums" of jumplist (as we need the solute to be connected to the vacancy by at least one jump)
+            "sums" of jumplist (as we need the solute to be connected to the vacancy by at least one jump)
         :param threshold: threshold for determining equality with symmetry
         :param originstates: include origin states in generate?
         """
@@ -807,8 +844,8 @@ class StarSetMeta(StarSet):
         self.Nshells = Nshells
         if Nshells > 0:
             state_delete_list = []
-            #print(meta_tags)
-            #print(self.crys.sitelist(0))
+            # print(meta_tags)
+            # print(self.crys.sitelist(0))
             for state_indx, state in enumerate(self.jumplist):
                 for site_index, sites in enumerate(self.crys.sitelist(0)):
                     if state.i in sites:
@@ -816,18 +853,18 @@ class StarSetMeta(StarSet):
                     if state.j in sites:
                         j_indx = site_index
                 if self.meta_tags[i_indx]:
-                        #if state.i is not state.j:
-                        state_delete_list.append(state_indx)
-                        continue
+                    # if state.i is not state.j:
+                    state_delete_list.append(state_indx)
+                    continue
                 elif self.meta_tags[j_indx]:
-                        state_delete_list.append(state_indx)
-                        continue
+                    state_delete_list.append(state_indx)
+                    continue
 
-                # for site_index, sites in enumerate(self.crys.sitelist(0)):
-                #    if state.i in sites and meta_tags[site_index]:
-                #         if state.i is not state.j:
-                #             state_delete_list.append(state_indx)
-                #             break
+                    # for site_index, sites in enumerate(self.crys.sitelist(0)):
+                    #    if state.i in sites and meta_tags[site_index]:
+                    #         if state.i is not state.j:
+                    #             state_delete_list.append(state_indx)
+                    #             break
             indx = 0
             tempstates = []
             for state_indx, state in enumerate(self.jumplist):
@@ -840,15 +877,17 @@ class StarSetMeta(StarSet):
             stateset = set([])
             workingset = stateset.copy()
         lastshell = workingset.copy()
-        for i in range(Nshells-1):
+        for i in range(Nshells - 1):
             # add all NNvect to last shell produced, always excluding 0
             # lastshell = [v1+v2 for v1 in lastshell for v2 in self.NNvect if not all(abs(v1 + v2) < threshold)]
             nextshell = set([])
             for s1 in lastshell:
                 for s2 in self.jumplist:
                     # this try/except structure lets us attempt addition and kick out if not possible
-                    try: s = s1 + s2
-                    except: continue
+                    try:
+                        s = s1 + s2
+                    except:
+                        continue
                     if not s.iszero():
                         to_add = True
                         i_indx = 0
@@ -874,12 +913,12 @@ class StarSetMeta(StarSet):
                         if to_add:
                             nextshell.add(s)
                             stateset.add(s)
-                    # else:
-                    #     for site_index, sites in enumerate(self.crys.sitelist(0)):
-                    #        if s.i in sites and meta_tags[site_index]:
-                    #             nextshell.add(s)
-                    #             stateset.add(s)
-                    #             break
+                            # else:
+                            #     for site_index, sites in enumerate(self.crys.sitelist(0)):
+                            #        if s.i in sites and meta_tags[site_index]:
+                            #             nextshell.add(s)
+                            #             stateset.add(s)
+                            #             break
 
             lastshell = nextshell
         # now to sort our set of vectors (easiest by magnitude, and then reduce down:
@@ -897,8 +936,8 @@ class StarSetMeta(StarSet):
             self.stars = []
             xmin = 0
             for xmax in x2_indices:
-                complist_stars = [] # for finding unique stars
-                symmstate_list = [] # list of sets corresponding to those stars...
+                complist_stars = []  # for finding unique stars
+                symmstate_list = []  # list of sets corresponding to those stars...
                 for xi in range(xmin, xmax):
                     x = self.states[xi]
                     # is this a new rep. for a unique star?
@@ -914,8 +953,9 @@ class StarSetMeta(StarSet):
                         complist_stars.append([xi])
                         symmstate_list.append(set([x.g(self.crys, self.chem, g) for g in self.crys.G]))
                 self.stars += complist_stars
-                xmin=xmax
-        else: self.stars = [[]]
+                xmin = xmax
+        else:
+            self.stars = [[]]
         self.Nstars = len(self.stars)
         # generate index: which star is each state a member of?
         self.index = np.zeros(self.Nstates, dtype=int)
@@ -930,12 +970,12 @@ class StarSetMeta(StarSet):
         Generate a jumpnetwork corresponding to vacancy exchanging with a solute.
 
         :return jumpnetwork: list of symmetry unique jumps; list of list of tuples (i,f), dx where
-          i,f index into states for the initial and final states, and dx = displacement of vacancy
-          in Cartesian coordinates. Note: if (i,f), dx is present, so is (f,i), -dx
+            i,f index into states for the initial and final states, and dx = displacement of vacancy
+            in Cartesian coordinates. Note: if (i,f), dx is present, so is (f,i), -dx
         :return jumptype: list of indices corresponding to the (original) jump type for each
-          symmetry unique jump; useful for constructing a LIMB approximation
+            symmetry unique jump; useful for constructing a LIMB approximation
         :return starpair: list of tuples of the star indices of the i and f states for each
-          symmetry unique jump
+            symmetry unique jump
         """
 
         if self.Nshells < 1: return []
@@ -959,14 +999,16 @@ class StarSetMeta(StarSet):
                     elif self.meta_tags[i_i_indx] or self.meta_tags[i_j_indx]:
                         continue
                     # attempt to add...
-                    try: PSf = PSi + jump
-                    except: continue
+                    try:
+                        PSf = PSi + jump
+                    except:
+                        continue
 
                     if not PSf.iszero():
                         continue
                     f = self.stateindex(-PSi)  # exchange
                     # see if we've already generated this jump (works since all of our states are distinct)
-                    if any(any( i==i0 and f==f0 for (i0,f0), dx in jlist) for jlist in jumpnetwork): continue
+                    if any(any(i == i0 and f == f0 for (i0, f0), dx in jlist) for jlist in jumpnetwork): continue
                     dx = -PSi.dx  # the vacancy jumps into the solute position (exchange)
                     jumpnetwork.append(self.symmequivjumplist(i, f, dx))
                     jumptype.append(jt)
@@ -974,21 +1016,23 @@ class StarSetMeta(StarSet):
         return jumpnetwork, jumptype, starpair
 
 
-
 class VectorStarSet(object):
     """
     A class to construct vector star sets, and be able to efficiently index.
+
+    All based on a StarSet
     """
+
     def __init__(self, starset=None):
         """
         Initiates a vector-star generator; work with a given star.
 
         :param starset: StarSet, from which we pull nearly all of the info that we need
-
-        vecpos: list of "positions" (state indices) for each vector star (list of lists)
-        vecvec: list of vectors for each vector star (list of lists of vectors)
-        Nvstars: number of vector stars
         """
+        # vecpos: list of "positions" (state indices) for each vector star (list of lists)
+        # vecvec: list of vectors for each vector star (list of lists of vectors)
+        # Nvstars: number of vector stars
+
         self.starset = None
         self.Nvstars = 0
         if starset is not None:
@@ -1013,8 +1057,8 @@ class VectorStarSet(object):
             if PS0.iszero():
                 # origin state; we can easily generate our vlist
                 vlist = starset.crys.vectlist(starset.crys.VectorBasis((self.starset.chem, PS0.i)))
-                scale = 1./np.sqrt(len(s)) # normalization factor; vectors are already normalized
-                vlist = [v*scale for v in vlist]
+                scale = 1. / np.sqrt(len(s))  # normalization factor; vectors are already normalized
+                vlist = [v * scale for v in vlist]
                 # add the positions
                 for v in vlist:
                     self.vecpos.append(s.copy())
@@ -1028,9 +1072,9 @@ class VectorStarSet(object):
             else:
                 # not an origin state
                 vpara = PS0.dx
-                scale = 1./np.sqrt(len(s)*np.dot(vpara, vpara)) # normalization factor
+                scale = 1. / np.sqrt(len(s) * np.dot(vpara, vpara))  # normalization factor
                 self.vecpos.append(s.copy())
-                self.vecvec.append([states[si].dx*scale for si in s])
+                self.vecvec.append([states[si].dx * scale for si in s])
                 # next, try to generate perpendicular star-vectors, if present:
                 v0 = np.cross(vpara, np.array([0, 0, 1.]))
                 if np.dot(v0, v0) < threshold:
@@ -1057,7 +1101,7 @@ class VectorStarSet(object):
                         g11 = np.dot(v1, gv1)
                         g01 = np.dot(v0, gv1)
                         g10 = np.dot(v1, gv0)
-                        if abs((abs(g00*g11 - g01*g10) - 1)) > threshold or abs(g01-g10) > threshold:
+                        if abs((abs(g00 * g11 - g01 * g10) - 1)) > threshold or abs(g01 - g10) > threshold:
                             # we don't have an orthogonal matrix, or we have a rotation, so kick out
                             Nvect = 0
                             continue
@@ -1070,12 +1114,12 @@ class VectorStarSet(object):
                                 v0 = v1
                                 Nvect = 1
                                 continue
-                            v0 = (g01*v0 + (1 - g00)*v1)/np.sqrt(g01*g10 + (1 - g00)**2)
+                            v0 = (g01 * v0 + (1 - g00) * v1) / np.sqrt(g01 * g10 + (1 - g00) ** 2)
                             Nvect = 1
                 # so... do we have any vectors to add?
                 if Nvect > 0:
-                    v0 /= np.sqrt(len(s)*np.dot(v0, v0))
-                    v1 /= np.sqrt(len(s)*np.dot(v1, v1))
+                    v0 /= np.sqrt(len(s) * np.dot(v0, v0))
+                    v1 /= np.sqrt(len(s) * np.dot(v1, v1))
                     vlist = [v0]
                     if Nvect > 1:
                         vlist.append(v1)
@@ -1125,11 +1169,11 @@ class VectorStarSet(object):
     @classmethod
     def loadhdf5(cls, SSet, HDF5group):
         """
-        Creates a new StarSet from an HDF5 group.
+        Creates a new VectorStarSet from an HDF5 group.
 
         :param SSet: StarSet--MUST BE PASSED IN as it is not stored with the VectorStarSet
         :param HDFgroup: HDF5 group
-        :return: new StarSet object
+        :return VectorStarSet: new VectorStarSet object
         """
         VSSet = cls(None)  # initialize
         VSSet.starset = SSet
@@ -1148,12 +1192,12 @@ class VectorStarSet(object):
         expansion of the vector stars to the "origin states" as represented by the VB.
 
         :param VectorBasis: (optional) list of [Nsites, 3]
-        the vector basis in the unit cell for the solute states
+            the vector basis in the unit cell for the solute states
         :return GFexpansion: array[Nsv, Nsv, NGFstars]
-        the GF matrix[i, j] = sum(GFexpansion[i, j, k] * GF(starGF[k]))
+            the GF matrix[i, j] = sum(GFexpansion[i, j, k] * GF(starGF[k]))
         :return GFstarset: starSet corresponding to the GF
         :return GFOSexpansion: array[NVB, Nsv, NGFstars]
-        the GF matrix[os, i] = sum(GFOSexpansion[os, i, k] * GF(starGF[k]))
+            the GF matrix[os, i] = sum(GFOSexpansion[os, i, k] * GF(starGF[k]))
         """
         if self.Nvstars == 0:
             return None
@@ -1164,36 +1208,40 @@ class VectorStarSet(object):
         if NVB > 0:
             GFOSexpansion = np.zeros((NVB, self.Nvstars, GFstarset.Nstars))
             GFOSOSexpansion = np.zeros((NVB, NVB, GFstarset.Nstars))
-            zeroPS = [PairState.zero(n) for n in range(VectorBasis[0].shape[0])] # number of sites
+            zeroPS = [PairState.zero(n) for n in range(VectorBasis[0].shape[0])]  # number of sites
         for i in range(self.Nvstars):
             for si, vi in zip(self.vecpos[i], self.vecvec[i]):
-                for j in range(i,self.Nvstars):
+                for j in range(i, self.Nvstars):
                     for sj, vj in zip(self.vecpos[j], self.vecvec[j]):
-                        try: ds = self.starset.states[sj] ^ self.starset.states[si]
-                        except: continue
+                        try:
+                            ds = self.starset.states[sj] ^ self.starset.states[si]
+                        except:
+                            continue
                         k = GFstarset.starindex(ds)
                         if k is None: raise ArithmeticError('GF star not large enough to include {}?'.format(ds))
                         GFexpansion[i, j, k] += np.dot(vi, vj)
-                if NVB>0:
+                if NVB > 0:
                     for j, VB in enumerate(VectorBasis):
                         for n, fs in enumerate(zeroPS):
-                            try: ds = fs ^ self.starset.states[si]
-                            except: continue
+                            try:
+                                ds = fs ^ self.starset.states[si]
+                            except:
+                                continue
                             k = GFstarset.starindex(ds)
                             if k is None: raise ArithmeticError('GF star not large enough to include {}?'.format(ds))
-                            GFOSexpansion[j, i, k] += np.dot(VB[n,:], vi)
+                            GFOSexpansion[j, i, k] += np.dot(VB[n, :], vi)
         if NVB > 0:
             OSindex = [GFstarset.starindex(zPS) for zPS in zeroPS]
             for j, VB in enumerate(VectorBasis):
                 for n, k in enumerate(OSindex):
-                    v2 = np.dot(VB[n,:], VB[n,:])
-                    GFOSOSexpansion[j,j,k] += v2
+                    v2 = np.dot(VB[n, :], VB[n, :])
+                    GFOSOSexpansion[j, j, k] += v2
 
         # symmetrize
         for i in range(self.Nvstars):
-            for j in range(0,i):
+            for j in range(0, i):
                 GFexpansion[i, j, :] = GFexpansion[j, i, :]
-        if NVB>0:
+        if NVB > 0:
             return GFexpansion, GFstarset, GFOSexpansion, GFOSOSexpansion
         else:
             return GFexpansion, GFstarset
@@ -1211,21 +1259,21 @@ class VectorStarSet(object):
         is a non-empty VectorBasis we will want to account for them there.
 
         :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
-        corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
-        are indices corresponding to states in our starset.
+            corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
+            are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
         :param VectorBasis: (optional) list of [Nsites, 3]
-        the vector basis in the unit cell for the solute states
+            the vector basis in the unit cell for the solute states
         :return rate0expansion: array[Nsv, Nsv, Njump_omega0]
-        the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k]); *IF* NVB>0
-        we "hijack" this and use it for [NVB, Nsv, Njump_omega0], as we're doing an omega2
-        calc and rate0expansion won't be used *anyway*.
+            the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k]); *IF* NVB>0
+            we "hijack" this and use it for [NVB, Nsv, Njump_omega0], as we're doing an omega2
+            calc and rate0expansion won't be used *anyway*.
         :return rate0escape: array[Nsv, Njump_omega0]
-        the escape contributions: omega0[i,i] += sum(rate0escape[i,k]*omega0[k]*probfactor(PS[k]))
+            the escape contributions: omega0[i,i] += sum(rate0escape[i,k]*omega0[k]*probfactor(PS[k]))
         :return rate1expansion: array[Nsv, Nsv, Njump_omega1]
-        the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])
+            the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])
         :return rate1escape: array[Nsv, Njump_omega1]
-        the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega0[k]*probfactor(PS[k]))
+            the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega0[k]*probfactor(PS[k]))
         """
         if self.Nvstars == 0: return None
         rate0expansion = np.zeros((self.Nvstars, self.Nvstars, len(self.starset.jumpnetwork_index)))
@@ -1246,13 +1294,13 @@ class VectorStarSet(object):
                             for j in range(self.Nvstars):
                                 for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                     if Rj == FS:
-                                        if NVB==0: rate0expansion[i, j, jt] += np.dot(vi, vj)
+                                        if NVB == 0: rate0expansion[i, j, jt] += np.dot(vi, vj)
                                         rate1expansion[i, j, k] += np.dot(vi, vj)
-                            if NVB>0:
+                            if NVB > 0:
                                 # work through the VB, and dot into the "origin state" given by the solute
                                 wi = self.starset.states[IS].i
                                 for j, VB in enumerate(VectorBasis):
-                                    rate0expansion[j, i, jt] += np.dot(VB[wi,:], vi)
+                                    rate0expansion[j, i, jt] += np.dot(VB[wi, :], vi)
 
         # symmetrize
         # for i in range(self.Nvstars):
@@ -1277,14 +1325,13 @@ class VectorStarSet(object):
         if there are origin states, they get the negative summed bias of the others.
 
         :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
-        corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
-        are indices corresponding to states in our starset.
+            corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
+            are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
-
         :return bias0expansion: array[Nsv, Njump_omega0]
-        the gen0 vector[i] = sum(bias0expasion[i, k] * sqrt(probfactor0[PS[k]]) * omega0[k])
+            the gen0 vector[i] = sum(bias0expasion[i, k] * sqrt(probfactor0[PS[k]]) * omega0[k])
         :return bias1expansion: array[Nsv, Njump_omega1]
-        the gen1 vector[i] = sum(bias1expansion[i, k] * sqrt(probfactor[PS[k]] * omega1[k])
+            the gen1 vector[i] = sum(bias1expansion[i, k] * sqrt(probfactor[PS[k]] * omega1[k])
         """
         if self.Nvstars == 0: return None
         bias0expansion = np.zeros((self.Nvstars, len(self.starset.jumpnetwork_index)))
@@ -1295,7 +1342,7 @@ class VectorStarSet(object):
                 # run through the star-vectors; just use first as representative
                 for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
                     if svR[0] == IS:
-                        geom_bias = np.dot(svv[0], dx)*len(svR)
+                        geom_bias = np.dot(svv[0], dx) * len(svR)
                         bias0expansion[i, jt] += geom_bias
                         bias1expansion[i, k] += geom_bias
         return bias0expansion, bias1expansion
@@ -1317,22 +1364,21 @@ class VectorStarSet(object):
         omega0 and omega(1/2).
 
         :param jumpnetwork: jumpnetwork of symmetry unique omega1-type jumps,
-        corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
-        are indices corresponding to states in our starset.
+            corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
+            are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
-
         :return D0expansion: array[3,3, Njump_omega0]
-        the D0[a,b,jt] = sum(D0expansion[a,b, jt] * sqrt(probfactor0[PS[jt][0]]*probfactor0[PS[jt][1]) * omega0[jt])
+            the D0[a,b,jt] = sum(D0expansion[a,b, jt] * sqrt(probfactor0[PS[jt][0]]*probfactor0[PS[jt][1]) * omega0[jt])
         :return D1expansion: array[3,3, Njump_omega1]
-        the D1[a,b,k] = sum(D1expansion[a,b, k] * sqrt(probfactor[PS[k][0]]*probfactor[PS[k][1]) * omega[k])
+            the D1[a,b,k] = sum(D1expansion[a,b, k] * sqrt(probfactor[PS[k][0]]*probfactor[PS[k][1]) * omega[k])
         """
         if self.Nvstars == 0: return None
-        D0expansion = np.zeros((3,3, len(self.starset.jumpnetwork_index)))
-        D1expansion = np.zeros((3,3, len(jumpnetwork)))
+        D0expansion = np.zeros((3, 3, len(self.starset.jumpnetwork_index)))
+        D1expansion = np.zeros((3, 3, len(jumpnetwork)))
         for k, jt, jumplist in zip(itertools.count(), jumptype, jumpnetwork):
-            d0 = np.sum(0.5*np.outer(dx,dx) for ISFS, dx in jumplist)  # we don't need initial/final state
-            D0expansion[:,:,jt] += d0
-            D1expansion[:,:,k] += d0
+            d0 = np.sum(0.5 * np.outer(dx, dx) for ISFS, dx in jumplist)  # we don't need initial/final state
+            D0expansion[:, :, jt] += d0
+            D1expansion[:, :, k] += d0
         return D0expansion, D1expansion
 
     def periodicvectorexpansion(self, elemtype='solute'):
@@ -1372,5 +1418,5 @@ class VectorStarSet(object):
             for s, v in zip(svR, svv):
                 ind = getattr(self.starset.states[s], attr)
                 for j, vb in enumerate(VectorBasis):
-                    folddown[j, i] += np.dot(vb[ind,:],v)
+                    folddown[j, i] += np.dot(vb[ind, :], v)
         return folddown
