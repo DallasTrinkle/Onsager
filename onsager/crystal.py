@@ -1270,7 +1270,7 @@ class Crystal(object):
         :param cutoff: distance cutoff
         :param closestdistance: closest distance allowed in transition (can be a list)
         :return jumpnetwork: list of symmetry-unique transitions; each is a list of tuples:
-          `((i,j), dx)` corresponding to jump from :math:`i\to j` with vector :math:`\mathbf{\delta x}`
+          `((i,j), dx)` corresponding to jump from :math:`i \\to j` with vector :math:`\mathbf{\delta x}`
         """
 
         # should we consider changing the lists to tuples? Not sure if there's any efficiency gain
@@ -1346,7 +1346,7 @@ class Crystal(object):
 
         :param chem: index corresponding to the chemistry to consider
         :param jumpnetwork: list of symmetry-unique transitions; each is a list of tuples:
-          `((i,j), dx)` corresponding to jump from :math:`i\to j` with vector :math:`\mathbf{\delta x}`
+          `((i,j), dx)` corresponding to jump from :math:`i \\to j` with vector :math:`\mathbf{\delta x}`
         :return jumplattice: list of symmetry-unique transitions; each is a list of tuples:
           `((i,j), R)` corresponding to jump from i in unit cell 0 -> j in unit cell R
         """
