@@ -191,7 +191,8 @@ values, and leave it at that.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> &#8211; indices for our Taylor expansion</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Taylor expansion after indexing</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return Taylor3D:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Taylor expansion after indexing</td>
 </tr>
 </tbody>
 </table>
@@ -206,7 +207,7 @@ values, and leave it at that.</p>
 <dl class="classmethod">
 <dt id="PowerExpansion.Taylor3D.__initTaylor3Dindexing__">
 <em class="property">classmethod </em><code class="descname">__initTaylor3Dindexing__</code><span class="sig-paren">(</span><em>Lmax</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__initTaylor3Dindexing__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__initTaylor3Dindexing__" title="Permalink to this definition">¶</a></dt>
-<dd><p>This calls <em>all</em> the class methods defined above, and stores them <em>for the class</em>
+<dd><p>This calls <em>all</em> the class methods defined above, and stores them <em>for the class</em>.
 This is intended to be done <em>once</em></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -228,18 +229,19 @@ This is intended to be done <em>once</em></p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>coefflist</strong> &#8211; list((n, lmax, powexpansion)). No type checking; default empty</li>
-<li><strong>Lmax</strong> &#8211; maximum power / orbital angular momentum</li>
+<li><strong>Lmax</strong> &#8211; maximum power / orbital angular momentum; can be set only once the
+first time a Taylor expansion is constructed, and is set for all objects</li>
 <li><strong>nodeepcopy</strong> &#8211; true if we don&#8217;t want to copy the matrices on creation of object
-(i.e., deep copy, which is the default)</li>
+(i.e., deep copy, which is the default) <strong>Note:</strong> deep copy is strongly preferred.
+The <em>only</em> real reason to use nodeepcopy is when returning slices / indexing in
+arrays, but even then we have to be careful about doing things like reductions,
+etc., that modify matrices <em>in place</em>. We always copy the list, but that
+doesn&#8217;t make copies of the underlying matrices.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<p>Note: deep copy is strongly preferred. The <em>only</em> real reason to use nodeepcopy is
-when returning slices / indexing in arrays, but even then we have to be careful about
-doing things like reductions, etc., that modify matrices <em>in place</em>. We always copy
-the list, but that doesn&#8217;t make copies of the underlying matrices.</p>
 </dd></dl>
 
 <dl class="method">
@@ -258,8 +260,8 @@ the list, but that doesn&#8217;t make copies of the underlying matrices.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return our expansion:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return Taylor3D:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">expansion of product</td>
 </tr>
 </tbody>
 </table>
@@ -293,8 +295,8 @@ the list, but that doesn&#8217;t make copies of the underlying matrices.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return our expansion:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return Taylor3D:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">expansion of product</td>
 </tr>
 </tbody>
 </table>
@@ -331,7 +333,7 @@ with another Taylor expansion</p>
 <dl class="method">
 <dt id="PowerExpansion.Taylor3D.__str__">
 <code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.__str__" title="Permalink to this definition">¶</a></dt>
-<dd><p>String representation for &#8220;pretty printing&#8221;</p>
+<dd><p>Human readable string representation</p>
 </dd></dl>
 
 <dl class="method">
@@ -386,7 +388,7 @@ terms are completely non-overlapping (otherwise, need to use sum).</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> &#8211; HDF5 group</td>
 </tr>
 </tbody>
 </table>
@@ -400,16 +402,22 @@ terms are completely non-overlapping (otherwise, need to use sum).</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>b = list((n, lmax, powexpansion)</strong> (<em>a,</em>) &#8211; </td>
-</tr>
-</tbody>
-</table>
-<p>written as a series of coefficients; n defines the magnitude function, which
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> &#8211; list((n, lmax, powexpansion)</li>
+<li><strong>b</strong> &#8211; list((n, lmax, powexpansion)
+written as a series of coefficients; n defines the magnitude function, which
 is additive; lmax is the largest cumulative power of coefficients, and
 powexpansion is a numpy array that can multiplied. We assume that a and b
 have consistent shapes throughout&#8211;we <em>do not test this</em>; runtime will likely
-fail if not true. The entries in the list are <em>tuples</em> of n, lmax, pow
-:return c = list((n, lmax, powexpansion)): product of a and b</p>
+fail if not true. The entries in the list are <em>tuples</em> of n, lmax, pow</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return c:</th><td class="field-body"><p class="first last">list((n, lmax, powexpansion)), product of <cite>a</cite> and <cite>b</cite></p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="classmethod">
@@ -422,7 +430,7 @@ reduce is called.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</li>
+<li><strong>a</strong> &#8211; list((n, lmax, powexpansion), expansion of function in powers</li>
 <li><strong>inplace</strong> &#8211; modify a in place?</li>
 </ul>
 </td>
@@ -445,7 +453,7 @@ Takes a direction expansion a and b, and returns the sum of the expansions.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>= list((coeffmatrix, vect))</strong> (<em>basis</em>) &#8211; expansions to create;
 sum(coeffmatrix * (vect*q)^n), for powers n = 0..N</li>
 <li><strong>N</strong> &#8211; maximum power to consider; for N=-1, use Lmax</li>
@@ -453,12 +461,13 @@ sum(coeffmatrix * (vect*q)^n), for powers n = 0..N</li>
 </ul>
 </td>
 </tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return list((n, lmax, powexpansion)),...:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">our expansion, as input to create
+Taylor3D objects</p>
+</td>
+</tr>
 </tbody>
 </table>
-<dl class="docutils">
-<dt>:return list((n, lmax, powexpansion)), ...</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">our expansion, as input to create</span><dd>Taylor3D objects</dd>
-</dl>
 </dd></dl>
 
 <dl class="method">
@@ -476,7 +485,7 @@ sanity check</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> &#8211; HDF5 group</td>
 </tr>
 </tbody>
 </table>
@@ -485,7 +494,7 @@ sanity check</p>
 <dl class="method">
 <dt id="PowerExpansion.Taylor3D.ildot">
 <code class="descname">ildot</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.ildot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.ildot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes c.self in place</p>
+<dd><p>Computes <span class="math">\(c\cdot self\)</span> in place</p>
 </dd></dl>
 
 <dl class="method">
@@ -498,7 +507,8 @@ sanity check</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Nmax</strong> &#8211; maximum order in the inverse expansion</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Taylor series of inverse</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return Taylor3D^-1:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Taylor series of inverse</td>
 </tr>
 </tbody>
 </table>
@@ -510,41 +520,38 @@ sanity check</p>
 <dd><p>Takes a direction expansion , and returns the inversion expansion (approximated
 based on the Taylor expansion of <span class="math">\(1/(1-x) = \sum_{i=0}^{\infty} x^i\)</span>, or
 <span class="math">\((A + B)^{-1} = ((1+BA^{-1})A)^{-1} = A^{-1}(1-(-BA{^1}))^{-1} = A^{-1} \sum_{i=0} (-BA^{-1})^i\)</span></p>
+<p>NOTE: assumes SMALLEST n coefficient is the leading order; only works if that
+coefficient is also isotropic (l=0). Otherwise, raises an error.
+NOTE: there is no sanity check on whether Nmax is reasonable given the expansion
+and Lmax values; <em>caveat emptor</em>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; </td>
-</tr>
-</tbody>
-</table>
-<p>written as a series of coefficients; n defines the magnitude function, which
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> &#8211; = list((n, lmax, powexpansion)
+written as a series of coefficients; n defines the magnitude function, which
 is additive; lmax is the largest cumulative power of coefficients, and
 powexpansion is a numpy array that can multiplied. We assume that a and b
 have consistent shapes throughout&#8211;we <em>do not test this</em>; runtime will likely
-fail if not true. The entries in the list are <em>tuples</em> of n, lmax, pow
-:param Nmax: maximum remaining n value in expansion. Default value of 0 means
+fail if not true. The entries in the list are <em>tuples</em> of n, lmax, pow</li>
+<li><strong>Nmax</strong> &#8211; maximum remaining n value in expansion. Default value of 0 means
 up to a discontinuity correction in an inversion, but higher (or lower) values are
-possible.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Return c = list((n, lmax, powexpansion)):</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">inverse of a</td>
+possible.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return c:</th><td class="field-body"><p class="first last">list((n, lmax, powexpansion)), inverse of a</p>
+</td>
 </tr>
 </tbody>
 </table>
-<p>NOTE: assumes SMALLEST n coefficient is the leading order; only works if that
-coefficient is also isotropic (l=0). Otherwise, raises an error
-NOTE: there is no sanity check on whether Nmax is reasonable given the expansion
-and Lmax values; caveat emptor</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="PowerExpansion.Taylor3D.irdot">
 <code class="descname">irdot</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.irdot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.irdot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes self.c in place</p>
+<dd><p>Computes <span class="math">\(self\cdot c\)</span> in place</p>
 </dd></dl>
 
 <dl class="method">
@@ -566,7 +573,7 @@ and Lmax values; caveat emptor</p>
 <dl class="method">
 <dt id="PowerExpansion.Taylor3D.ldot">
 <code class="descname">ldot</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.ldot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.ldot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns c.self</p>
+<dd><p>Returns <span class="math">\(c\cdot self\)</span></p>
 </dd></dl>
 
 <dl class="classmethod">
@@ -579,7 +586,7 @@ and Lmax values; caveat emptor</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDFgroup</strong> &#8211; HDF5 group</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new T3D object</td>
+<tr class="field-even field"><th class="field-name">Return T3D:</th><td class="field-body">new T3D object</td>
 </tr>
 </tbody>
 </table>
@@ -588,18 +595,32 @@ and Lmax values; caveat emptor</p>
 <dl class="classmethod">
 <dt id="PowerExpansion.Taylor3D.makeLprojections">
 <em class="property">classmethod </em><code class="descname">makeLprojections</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.makeLprojections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.makeLprojections" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructs a series of projection matrices for each l component in our power series
-:return: projL[l][p][p&#8217;]</p>
-<blockquote>
-<div>projection of powers containing <em>only</em> l component.
--1 component = sum(l=0..Lmax, projL[l]) = simplification projection</div></blockquote>
+<dd><p>Constructs a series of projection matrices for each l component in our power series</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">projL[l][p][p&#8217;]
+projection of powers containing <em>only</em> l component.
+-1 component = sum(l=0..Lmax, projL[l]) = simplification projection</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="classmethod">
 <dt id="PowerExpansion.Taylor3D.makeYlmpow">
 <em class="property">classmethod </em><code class="descname">makeYlmpow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.makeYlmpow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.makeYlmpow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Construct the expansion of the Ylm&#8217;s in powers of x,y,z. Done via brute force.
-:return Ylmpow[lm, p]: expansion of each Ylm in powers</p>
+<dd><p>Construct the expansion of the Ylm&#8217;s in powers of x,y,z. Done via brute force.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return Ylmpow[lm, p]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">expansion of each Ylm in powers</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="classmethod">
@@ -655,8 +676,16 @@ series of index functions.</p>
 <em class="property">classmethod </em><code class="descname">makepowYlm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.makepowYlm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.makepowYlm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct the expansion of the powers in Ylm&#8217;s. Done using recursion relations
 instead of direct calculation. Note: an alternative approach would be Gaussian
-quadrature.
-:return powYlm[p][lm]: expansion of powers in Ylm; uses indexing scheme above</p>
+quadrature.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return powYlm[p][lm]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">expansion of powers in Ylm; uses indexing scheme above</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="classmethod">
@@ -733,7 +762,7 @@ quadrature.
 <dl class="method">
 <dt id="PowerExpansion.Taylor3D.rdot">
 <code class="descname">rdot</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.rdot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.rdot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns self.c</p>
+<dd><p>Returns <span class="math">\(self\cdot c\)</span></p>
 </dd></dl>
 
 <dl class="method">
@@ -753,7 +782,7 @@ the same values of n together. Done in place.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</li>
+<li><strong>a</strong> &#8211; list((n, lmax, powexpansion), expansion of function in powers</li>
 <li><strong>inplace</strong> &#8211; modify a in place?</li>
 </ul>
 </td>
@@ -776,7 +805,8 @@ the same values of n together. Done in place.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>powtrans</strong> &#8211; Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">coefficient list, rotated</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return rTaylor3D:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Taylor expansion, rotated</td>
 </tr>
 </tbody>
 </table>
@@ -796,7 +826,7 @@ the same values of n together. Done in place.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">coefficient list, rotated</p>
+<tr class="field-even field"><th class="field-name">Return rcoeff:</th><td class="field-body"><p class="first last">coefficient list, rotated</p>
 </td>
 </tr>
 </tbody>
@@ -812,19 +842,20 @@ the old.
 NOTE: This is more complex than one might first realize. If we only work with cases
 where all of the entries for a given power n have those same n (that is, not reduced),
 then this is straightforward. However, we run into problems with <em>reductions</em>: e.g.,
-for n=2, the power x^0 y^0 z^0 is, in reality, x^2+y^2+z^2, and hence <em>it must be
-transformed</em> because we allow non-orthogonal transformation matrices.</p>
+for n=2, the power <span class="math">\(x^0 y^0 z^0\)</span> is, in reality, <span class="math">\(x^2+y^2+z^2\)</span>, and hence
+<em>it must be transformed</em> because we allow non-orthogonal transformation matrices.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>qptrans</strong> &#8211; 3x3 matrix</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Lmax +1 x Npow x Npow transformation matrix [n][original pow][new pow] for</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return npowtrans:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">[Lmax +1][Npow][Npow] transformation matrix [n][original pow][new pow]
+for each n from 0 up to Lmax</td>
 </tr>
 </tbody>
 </table>
-<p>each n from 0 up to Lmax</p>
 </dd></dl>
 
 <dl class="classmethod">
@@ -853,8 +884,7 @@ transformed</em> because we allow non-orthogonal transformation matrices.</p>
 <dl class="method">
 <dt id="PowerExpansion.Taylor3D.separate">
 <code class="descname">separate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PowerExpansion.html#Taylor3D.separate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PowerExpansion.Taylor3D.separate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Separate out the coefficients into (n,l) terms where <em>only</em> l contributions
-appear in each.</p>
+<dd><p>Separate out the coefficients into (n,l) terms where <em>only</em> l contributions appear in each.</p>
 </dd></dl>
 
 <dl class="classmethod">
@@ -869,7 +899,7 @@ each (n,l) term <em>only</em> contains terms equal to l, rather than terms &lt;=
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</li>
+<li><strong>a</strong> &#8211; list((n, lmax, powexpansion), expansion of function in powers</li>
 <li><strong>inplace</strong> &#8211; modify a in place?</li>
 </ul>
 </td>
@@ -963,7 +993,7 @@ sum of a and b</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>Nmax</strong> &#8211; maximum coefficient to include</li>
-<li><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</li>
+<li><strong>a</strong> &#8211; list((n, lmax, powexpansion), expansion of function in powers</li>
 <li><strong>inplace</strong> &#8211; do it in place?</li>
 </ul>
 </td>
@@ -990,7 +1020,8 @@ zeros, by explicitly making the full range of l values.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Taylor3D, with a zero coefficient list</p>
+<tr class="field-even field"><th class="field-name" colspan="2">Return Taylor3D:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">Taylor3D, with a zero coefficient list</p>
 </td>
 </tr>
 </tbody>

@@ -153,6 +153,9 @@ remaining function can be numerically inverse fourier transformed.</p>
 <dt id="GFcalc.GFCrystalcalc">
 <em class="property">class </em><code class="descclassname">GFcalc.</code><code class="descname">GFCrystalcalc</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nmax=4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class calculator for the Green function, designed to work with the Crystal class.</p>
+<p>This computes the bare vacancy GF. It requires a crystal, chemical identity for the
+vacancy, list of symmetry unique sites (to define energies / entropies uniquely), and
+a corresponding jumpnetwork for that vacancy.</p>
 <dl class="method">
 <dt id="GFcalc.GFCrystalcalc.BlockInvertOmegaTaylor">
 <code class="descname">BlockInvertOmegaTaylor</code><span class="sig-paren">(</span><em>dd</em>, <em>dr</em>, <em>rd</em>, <em>rr</em>, <em>D</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.BlockInvertOmegaTaylor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.BlockInvertOmegaTaylor" title="Permalink to this definition">¶</a></dt>
@@ -167,11 +170,11 @@ correction). Needs to be rotated such that leading order of D is isotropic.</p>
 <li><strong>dr</strong> &#8211; diffusive/relaxive block (lower left)</li>
 <li><strong>rd</strong> &#8211; relaxive/diffusive block (upper right)</li>
 <li><strong>rr</strong> &#8211; relaxive/relaxive block (lower right)</li>
-<li><strong>D</strong> &#8211; dd - dr*rr^-1*rd (diffusion)</li>
+<li><strong>D</strong> &#8211; <span class="math">\(dd - dr (rr)^{-1} rd\)</span> (diffusion)</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Taylor expansion of g in block form, and reduced (collected terms)</p>
+<tr class="field-even field"><th class="field-name">Return gT:</th><td class="field-body"><p class="first last">Taylor expansion of g in block form, and reduced (collected terms)</p>
 </td>
 </tr>
 </tbody>
@@ -186,9 +189,15 @@ correction). Needs to be rotated such that leading order of D is isotropic.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>omega_Taylor_rotate</strong> &#8211; rotated into diffusive [0] / relaxive [1:] basis</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dd, dr, rd, rr, and D = dd - dr*rr^-1*rd blocks</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>omega_Taylor_rotate</strong> &#8211; rotated into diffusive [0] / relaxive [1:] basis</li>
+<li><strong>dd</strong> &#8211; diffusive/diffusive block (upper left)</li>
+<li><strong>dr</strong> &#8211; diffusive/relaxive block (lower left)</li>
+<li><strong>rd</strong> &#8211; relaxive/diffusive block (upper right)</li>
+<li><strong>rr</strong> &#8211; relaxive/relaxive block (lower right)</li>
+<li><strong>D</strong> &#8211; <span class="math">\(dd - dr (rr)^{-1} rd\)</span> (diffusion)</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -213,8 +222,9 @@ correction). Needs to be rotated such that leading order of D is isotropic.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>omega</strong> &#8211; optional; the Taylor expansion to use. If None, use self.omega_Taylor</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array of eigenvalues (r) and array of eigenvectors (vr) where vr[:,i] is the vector
-for eigenvalue r[i], and the r are sorted from 0 to decreasing values.</td>
+<tr class="field-even field"><th class="field-name">Return r:</th><td class="field-body">array of eigenvalues, sorted from 0 to decreasing values.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return vr:</th><td class="field-body">array of eigenvectors where vr[:,i] is the vector for eigenvalue r[i]</td>
 </tr>
 </tbody>
 </table>
@@ -231,7 +241,7 @@ to compute with maximum efficiency.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>omega_Taylor_D</strong> &#8211; Taylor expansion of the diffusivity component</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">D [3,3] array</td>
+<tr class="field-even field"><th class="field-name">Return D:</th><td class="field-body">diffusivity [3,3] array</td>
 </tr>
 </tbody>
 </table>
@@ -252,10 +262,10 @@ to compute with maximum efficiency.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">array[Njump][Nkpt][Nsite][Nsite] of FT of the jump network</p>
+<tr class="field-even field"><th class="field-name">Return FTjumps:</th><td class="field-body"><p class="first">array[Njump][Nkpt][Nsite][Nsite] of FT of the jump network</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">array[Nsite][Njump] multiplicity of jump on each site</p>
+<tr class="field-odd field"><th class="field-name">Return SEjumps:</th><td class="field-body"><p class="first last">array[Nsite][Njump] multiplicity of jump on each site</p>
 </td>
 </tr>
 </tbody>
@@ -272,15 +282,12 @@ the calculations so that GF calculation is (fairly) efficient for each input.</p
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>pre</strong> &#8211; list of prefactors for site probabilities</li>
 <li><strong>betaene</strong> &#8211; list of beta*E (energy/kB T) for each site</li>
 <li><strong>preT</strong> &#8211; list of prefactors for transition states</li>
 <li><strong>betaeneT</strong> &#8211; list of beta*ET (energy/kB T) for each transition state</li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
 </td>
 </tr>
 </tbody>
@@ -307,7 +314,8 @@ the calculations so that GF calculation is (fairly) efficient for each input.</p
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of Taylor3D expansions of the jump network</p>
+<tr class="field-even field"><th class="field-name" colspan="2">Return T3Djumps:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of Taylor3D expansions of the jump network</p>
 </td>
 </tr>
 </tbody>
@@ -329,7 +337,7 @@ the calculations so that GF calculation is (fairly) efficient for each input.</p
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Green function</p>
+<tr class="field-even field"><th class="field-name">Return G:</th><td class="field-body"><p class="first last">Green function value</p>
 </td>
 </tr>
 </tbody>
@@ -368,13 +376,8 @@ require, at this point, the site probabilities or transition rates to be known.<
 <dt id="GFcalc.GFCrystalcalc.addhdf5">
 <code class="descname">addhdf5</code><span class="sig-paren">(</span><em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.addhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.addhdf5" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds an HDF5 representation of object into an HDF5group (needs to already exist).</p>
-<dl class="docutils">
-<dt>Example: if f is an open HDF5, then GFcalc.addhdf5(f.create_group(&#8216;GFcalc&#8217;)) will</dt>
-<dd><ol class="first last arabic simple">
-<li>create the group named &#8216;GFcalc&#8217;, and then (2) put the GFcalc representation in that group.</li>
-</ol>
-</dd>
-</dl>
+<p>Example: if f is an open HDF5, then GFcalc.addhdf5(f.create_group(&#8216;GFcalc&#8217;)) will
+(1) create the group named &#8216;GFcalc&#8217;, and then (2) put the GFcalc representation in that group.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -411,7 +414,8 @@ require, at this point, the site probabilities or transition rates to be known.<
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dx</strong> &#8211; vector</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array of exp(-i q.dx)</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return exp(-i q.dx):</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">array of <span class="math">\(\exp(-i \cdot dx)\)</span></td>
 </tr>
 </tbody>
 </table>
@@ -431,7 +435,7 @@ require, at this point, the site probabilities or transition rates to be known.<
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">new GFcalc object</p>
+<tr class="field-even field"><th class="field-name">Return GFcalc:</th><td class="field-body"><p class="first last">new GFcalc object</p>
 </td>
 </tr>
 </tbody>

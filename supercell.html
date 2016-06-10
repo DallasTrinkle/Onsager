@@ -141,16 +141,19 @@
 <p>Supercell:</p>
 <p>The supercell module defines the <code class="docutils literal"><span class="pre">supercell</span></code> class for building supercells from <code class="docutils literal"><span class="pre">crystal.Crystal</span></code> classes.</p>
 <span class="target" id="module-supercell"></span><p>Supercell class</p>
-<p>Class to store supercells of crystals: along with some analysis
-1. add/remove/substitute atoms
-2. output POSCAR format (possibly other formats?)
-3. find the transformation map between two different representations of the same supercell
-4. construct an NEB pathway between two supercells
-5. possibly input from CONTCAR? extract displacements?</p>
+<p>Class to store supercells of crystals. A supercell is a lattice model of a crystal, with
+periodically repeating unit cells. In that framework we can</p>
+<ol class="arabic simple">
+<li>add/remove/substitute atoms</li>
+<li>find the transformation map between two different representations of the same supercell</li>
+<li>output POSCAR format (possibly other formats?)</li>
+</ol>
 <dl class="class">
 <dt id="supercell.Supercell">
 <em class="property">class </em><code class="descclassname">supercell.</code><code class="descname">Supercell</code><span class="sig-paren">(</span><em>crys</em>, <em>super</em>, <em>interstitial=()</em>, <em>Nsolute=0</em>, <em>empty=False</em>, <em>NOSYM=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell" title="Permalink to this definition">¶</a></dt>
-<dd><p>A class that defines a Supercell of a crystal</p>
+<dd><p>A class that defines a Supercell of a crystal.</p>
+<p>Takes in a crystal, a supercell (3x3 integer matrix). We can identify sites
+as interstitial sites, and specify if we&#8217;ll have solutes.</p>
 <dl class="method">
 <dt id="supercell.Supercell.KrogerVink">
 <code class="descname">KrogerVink</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.KrogerVink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.KrogerVink" title="Permalink to this definition">¶</a></dt>

@@ -160,7 +160,8 @@
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of tensors</p>
+<tr class="field-even field"><th class="field-name" colspan="2">Return tensorbasis:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of 2nd-rank symmetric tensors making up the basis</p>
 </td>
 </tr>
 </tbody>
@@ -181,7 +182,10 @@
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(dim, vect)</p>
+<tr class="field-even field"><th class="field-name">Return dim:</th><td class="field-body"><p class="first">dimensionality, 0..3</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return vect:</th><td class="field-body"><p class="first last">vector defining line direction (1) or plane normal (2)</p>
 </td>
 </tr>
 </tbody>
@@ -195,6 +199,8 @@
 Now includes optional spins. These can be vectors or &#8220;scalar&#8221; spins, for which we need
 to consider a phase factor. In general, they can be complex. Ideally, they should have
 magnitude either 0 or 1.</p>
+<p>Specified by a lattice (3 vectors), a basis (list of lists of positions in direct coordinates).
+Can also name the elements (chemistry), and specify spin degrees of freedom.</p>
 <dl class="classmethod">
 <dt id="crystal.Crystal.BCC">
 <em class="property">classmethod </em><code class="descname">BCC</code><span class="sig-paren">(</span><em>a0</em>, <em>chemistry=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.BCC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.BCC" title="Permalink to this definition">¶</a></dt>
@@ -205,7 +211,8 @@ magnitude either 0 or 1.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>a0</strong> &#8211; lattice constant</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">BCC crystal</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return BCC crystal:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
@@ -221,7 +228,8 @@ magnitude either 0 or 1.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>a0</strong> &#8211; lattice constant</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">FCC crystal</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return FCC crystal:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
@@ -237,9 +245,11 @@ magnitude either 0 or 1.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>chem</strong> &#8211; (optional) chemical index to consider; otherwise return a list of such</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(list) of our unique vector basis lattice functions, normalized; each is an array</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return VBfunctions:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">(list) of our unique vector basis lattice functions, normalized; each is an array
+(NVbasis x Nsites x 3)</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(list) of ouf VV &#8220;outer&#8221; expansion</td>
+<tr class="field-odd field"><th class="field-name">Return VVouter:</th><td class="field-body">(list) of ouf VV &#8220;outer&#8221; expansion (NVbasis x NVbasis for each chemistry)</td>
 </tr>
 </tbody>
 </table>
@@ -255,12 +265,12 @@ magnitude either 0 or 1.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>a0</strong> &#8211; lattice constant</li>
-<li><strong>c_a</strong> &#8211; c/a ratio</li>
+<li><strong>c_a</strong> &#8211; (optional) c/a ratio, default=ideal <span class="math">\(\sqrt{8/3}\)</span></li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">HCP crystal</p>
-</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return HCP crystal:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
@@ -276,7 +286,8 @@ magnitude either 0 or 1.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ind</strong> &#8211; tuple index for atom</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(dim, vect) &#8211; dimension of basis, vector = normal for plane, direction for line</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return tensorbasis:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of 2nd-rank symmetric tensors making up the basis</td>
 </tr>
 </tbody>
 </table>
@@ -292,7 +303,9 @@ magnitude either 0 or 1.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ind</strong> &#8211; tuple index for atom</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(dim, vect) &#8211; dimension of basis, vector = normal for plane, direction for line</td>
+<tr class="field-even field"><th class="field-name">Return dim:</th><td class="field-body">dimensionality, 0..3</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return vect:</th><td class="field-body">vector defining line direction (1) or plane normal (2)</td>
 </tr>
 </tbody>
 </table>
@@ -308,7 +321,8 @@ magnitude either 0 or 1.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uvec</strong> &#8211; 3-vector (float) vector in direct coordinates</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of equivalent Wyckoff positions</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return Wyckofflist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of equivalent Wyckoff positions</td>
 </tr>
 </tbody>
 </table>
@@ -380,7 +394,7 @@ maintained, should be the output from Wyckoffpos().</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">new Crystal object, with additional sites</p>
+<tr class="field-even field"><th class="field-name">Return Crystal:</th><td class="field-body"><p class="first last">new crystal object, with additional sites</p>
 </td>
 </tr>
 </tbody>
@@ -395,7 +409,10 @@ maintained, should be the output from Wyckoffpos().</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">volume, metric tensor</td>
+<tr class="field-odd field"><th class="field-name">Return volume:</th><td class="field-body">cell volume</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return metric tensor:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">3x3</td>
 </tr>
 </tbody>
 </table>
@@ -411,9 +428,9 @@ maintained, should be the output from Wyckoffpos().</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>v</strong> &#8211; 3-vector (float) position in Cartesian coordinates</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">3-vector (integer) lattice vector in direct coordinates, index tuple
-of corresponding atom.
-Returns None on tuple if no match</td>
+<tr class="field-even field"><th class="field-name">Return lattvec:</th><td class="field-body">3-vector (integer) lattice vector in direct coordinates,</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return (c,i):</th><td class="field-body">tuple of matching basis atom; None if no match</td>
 </tr>
 </tbody>
 </table>
@@ -430,8 +447,9 @@ in cartesian coord.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>v</strong> &#8211; 3-vector (float) position in Cartesian coordinates</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">3-vector (integer) lattice vector in direct coordinates,
-3-vector (float) inside unit cell</td>
+<tr class="field-even field"><th class="field-name">Return lattvec:</th><td class="field-body">3-vector (integer) lattice vector in direct coordinates,</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return uvec:</th><td class="field-body">3-vector (float) inside unit cell, in direct coordinates</td>
 </tr>
 </tbody>
 </table>
@@ -453,7 +471,7 @@ in cartesian coord.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>chemistry</strong> &#8211; value to check</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">index corresponding to chemistry</td>
+<tr class="field-even field"><th class="field-name">Return index:</th><td class="field-body">corresponding to chemistry</td>
 </tr>
 </tbody>
 </table>
@@ -462,17 +480,19 @@ in cartesian coord.</p>
 <dl class="classmethod">
 <dt id="crystal.Crystal.fromdict">
 <em class="property">classmethod </em><code class="descname">fromdict</code><span class="sig-paren">(</span><em>yamldict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.fromdict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.fromdict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a Crystal object from a YAML-created dictionary</p>
+<dd><p>Creates a Crystal object from a <em>very simple</em> YAML-created dictionary</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>yamldict</strong> &#8211; dictionary; must contain &#8216;lattice&#8217; (using <em>row</em> vectors!) and &#8216;basis&#8217;;</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>yamldict</strong> &#8211; dictionary; must contain &#8216;lattice&#8217; (using <em>row</em> vectors!) and &#8216;basis&#8217;;
+can contain optional &#8216;lattice_constant&#8217;</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return Crystal(lattice.T, basis):</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">new crystal object</td>
 </tr>
 </tbody>
 </table>
-<p>can contain optional &#8216;lattice_constant&#8217;
-:return: Crystal(lattice.T, basis)</p>
 </dd></dl>
 
 <dl class="method">
@@ -506,7 +526,7 @@ k-points inside the BZ. Does not return any <em>weights</em> as every point is e
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">3-vector position in space (Cartesian coordinates)</p>
+<tr class="field-even field"><th class="field-name">Return gx:</th><td class="field-body"><p class="first last">3-vector position in space (Cartesian coordinates)</p>
 </td>
 </tr>
 </tbody>
@@ -527,7 +547,7 @@ k-points inside the BZ. Does not return any <em>weights</em> as every point is e
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">3-vector direction</p>
+<tr class="field-even field"><th class="field-name">Return gdirec:</th><td class="field-body"><p class="first last">3-vector direction</p>
 </td>
 </tr>
 </tbody>
@@ -549,7 +569,8 @@ k-points inside the BZ. Does not return any <em>weights</em> as every point is e
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if equivalent by a point group operation</p>
+<tr class="field-even field"><th class="field-name" colspan="2">Return equivalent:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">True if equivalent by a point group operation</p>
 </td>
 </tr>
 </tbody>
@@ -571,7 +592,10 @@ k-points inside the BZ. Does not return any <em>weights</em> as every point is e
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">3-vector (integer) lattice vector in direct coordinates, index</p>
+<tr class="field-even field"><th class="field-name">Return glatt:</th><td class="field-body"><p class="first">3-vector (integer) lattice vector in direct coordinates</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return gindex:</th><td class="field-body"><p class="first last">tuple of new basis atom</p>
 </td>
 </tr>
 </tbody>
@@ -592,7 +616,7 @@ k-points inside the BZ. Does not return any <em>weights</em> as every point is e
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">2nd-rank tensor</p>
+<tr class="field-even field"><th class="field-name">Return gtensor:</th><td class="field-body"><p class="first last">2nd-rank tensor</p>
 </td>
 </tr>
 </tbody>
@@ -612,11 +636,11 @@ in the unit cell in direct coordinates</p>
 <li><strong>g</strong> &#8211; group operation (GroupOp)</li>
 <li><strong>lattvec</strong> &#8211; 3-vector (integer) lattice vector in direct coordinates</li>
 <li><strong>uvec</strong> &#8211; 3-vector (float) vector in direct coordinates</li>
+<li><strong>guvec</strong> &#8211; 3-vector (float) vector in direct coordinates</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">3-vector (integer) lattice vector in direct coordinates, location in unit cell in
-direct coordinates</p>
+<tr class="field-even field"><th class="field-name">Return glatt:</th><td class="field-body"><p class="first last">3-vector (integer) lattice vector in direct coordinates</p>
 </td>
 </tr>
 </tbody>
@@ -631,7 +655,7 @@ direct coordinates</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">array of G vectors that define the BZ, in Cartesian coordinates</td>
+<tr class="field-odd field"><th class="field-name">Return Garray:</th><td class="field-body">array of G vectors that define the BZ, in Cartesian coordinates</td>
 </tr>
 </tbody>
 </table>
@@ -645,7 +669,8 @@ direct coordinates</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">set of sets of tuples of positions that correspond to identical Wyckoff positions</td>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return Wyckoffsets:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">set of sets of tuples of positions that correspond to identical Wyckoff positions</td>
 </tr>
 </tbody>
 </table>
@@ -660,7 +685,7 @@ spin phase factors for each group operation, though.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of group operations</td>
+<tr class="field-odd field"><th class="field-name">Return Gset:</th><td class="field-body">frozenset of group operations</td>
 </tr>
 </tbody>
 </table>
@@ -675,7 +700,8 @@ structure of our basis.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of sets of point group operations that leave a site unchanged</td>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return Gpointlists:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of lists of frozensets of point group operations that leave a site unchanged</td>
 </tr>
 </tbody>
 </table>
@@ -696,7 +722,7 @@ structure of our basis.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">False if outside the BZ, True otherwise</p>
+<tr class="field-even field"><th class="field-name">Return inBZ:</th><td class="field-body"><p class="first last">False if outside the BZ, True otherwise</p>
 </td>
 </tr>
 </tbody>
@@ -721,8 +747,9 @@ parameter.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of symmetry-unique transitions; each is a list of tuples:
-((i,j), dx) corresponding to jump from i-&gt;j with vector dx</p>
+<tr class="field-even field"><th class="field-name" colspan="2">Return jumpnetwork:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of symmetry-unique transitions; each is a list of tuples:
+<cite>((i,j), dx)</cite> corresponding to jump from <span class="math">\(i \to j\)</span> with vector <span class="math">\(\mathbf{\delta x}\)</span></p>
 </td>
 </tr>
 </tbody>
@@ -741,12 +768,13 @@ representation, where we replace dx with the lattice vector from i to j.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>chem</strong> &#8211; index corresponding to the chemistry to consider</li>
 <li><strong>jumpnetwork</strong> &#8211; list of symmetry-unique transitions; each is a list of tuples:
-((i,j), dx) corresponding to jump from i-&gt;j with vector dx</li>
+<cite>((i,j), dx)</cite> corresponding to jump from <span class="math">\(i \to j\)</span> with vector <span class="math">\(\mathbf{\delta x}\)</span></li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of symmetry-unique transitions; each is a list of tuples:
-((i,j), R) corresponding to jump from i in unit cell 0 -&gt; j in unit cell R</p>
+<tr class="field-even field"><th class="field-name" colspan="2">Return jumplattice:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of symmetry-unique transitions; each is a list of tuples:
+<cite>((i,j), R)</cite> corresponding to jump from i in unit cell 0 -&gt; j in unit cell R</p>
 </td>
 </tr>
 </tbody>
@@ -759,7 +787,7 @@ representation, where we replace dx with the lattice vector from i to j.</p>
 <dd><p>Try to find the optimal lattice vector definition for a crystal. Our definition of optimal
 is (a) length of each lattice vector is minimal; (b) the vectors are ordered from
 shortest to longest; (c) the vectors have minimal dot product; (d) the basis is right-handed.</p>
-<p>Works recursively.</p>
+<p>Works recursively, and in-place.</p>
 </dd></dl>
 
 <dl class="method">
@@ -778,7 +806,7 @@ cartesian vectors.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of nearest neighbor vectors</p>
+<tr class="field-even field"><th class="field-name">Return nnlist:</th><td class="field-body"><p class="first last">list of nearest neighbor vectors</p>
 </td>
 </tr>
 </tbody>
@@ -799,7 +827,7 @@ cartesian vectors.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">3-vector (float) in Cartesian coordinates</p>
+<tr class="field-even field"><th class="field-name">Return v:</th><td class="field-body"><p class="first last">3-vector (float) in Cartesian coordinates</p>
 </td>
 </tr>
 </tbody>
@@ -847,7 +875,8 @@ equally weighted. We would need a different (more complicated) algorithm if not 
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>supercell</strong> &#8211; integer array[3,3]</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">atomic basis</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return atomic basis:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of list of positions</td>
 </tr>
 </tbody>
 </table>
@@ -861,7 +890,7 @@ equally weighted. We would need a different (more complicated) algorithm if not 
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">YAML dump</td>
+<tr class="field-odd field"><th class="field-name">Return YAML:</th><td class="field-body">string dump</td>
 </tr>
 </tbody>
 </table>
@@ -878,7 +907,8 @@ Done with a single list comprehension&#8211;useful as input for diffusion calcul
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>chem</strong> &#8211; index corresponding to chemistry to consider</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of lists of indices that are equivalent by symmetry</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return symmequivsites:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of lists of indices that are equivalent by symmetry</td>
 </tr>
 </tbody>
 </table>
@@ -894,7 +924,7 @@ Done with a single list comprehension&#8211;useful as input for diffusion calcul
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>eps</strong> &#8211; strain tensor</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new Crystal object, strained</td>
+<tr class="field-even field"><th class="field-name">Return Crystal:</th><td class="field-body">new crystal object, strained</td>
 </tr>
 </tbody>
 </table>
@@ -915,7 +945,7 @@ unit cell coordinates</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">3-vector (float) in Cartesian coordinates</p>
+<tr class="field-even field"><th class="field-name">Return v:</th><td class="field-body"><p class="first last">3-vector (float) in Cartesian coordinates</p>
 </td>
 </tr>
 </tbody>
@@ -932,7 +962,7 @@ unit cell coordinates</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vb</strong> &#8211; (dim, v)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of vectors</td>
+<tr class="field-even field"><th class="field-name">Return vlist:</th><td class="field-body">list of vectors</td>
 </tr>
 </tbody>
 </table>
@@ -1036,9 +1066,10 @@ eigenvector for the complex eigenvalue is [1] + i [2].</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">type (integer)</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">integer</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of [ev0, ev1, ev2]</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return eigenvectors:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of [ev0, ev1, ev2]</td>
 </tr>
 </tbody>
 </table>
@@ -1075,9 +1106,17 @@ eigenvector for the complex eigenvalue is [1] + i [2].</p>
 1 = identity
 2, 3, 4, 6 = n- fold rotation around an axis
 negative = rotation + mirror operation, perpendicular to axis
-&#8220;special cases&#8221;: -1 = mirror, -2 = inversion
-:param rot: rotation matrix (can be the integer rot)
-:return: type (integer)</p>
+&#8220;special cases&#8221;: -1 = mirror, -2 = inversion</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rot</strong> &#8211; rotation matrix (can be the integer rot)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">integer</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -1096,7 +1135,7 @@ negative = rotation + mirror operation, perpendicular to axis
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">tensor, projected</p>
+<tr class="field-even field"><th class="field-name">Return tensor:</th><td class="field-body"><p class="first last">tensor, projected</p>
 </td>
 </tr>
 </tbody>
@@ -1118,7 +1157,8 @@ for a GroupOp</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of 2nd-rank symmetric tensors making up the basis</p>
+<tr class="field-even field"><th class="field-name" colspan="2">Return tensorbasis:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of 2nd-rank symmetric tensors making up the basis</p>
 </td>
 </tr>
 </tbody>
@@ -1139,7 +1179,10 @@ for a GroupOp</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(dim, vect) &#8211; dimensionality (0..3), vector defining line direction (1) or plane normal (2)</p>
+<tr class="field-even field"><th class="field-name">Return dim:</th><td class="field-body"><p class="first">dimensionality, 0..3</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return vect:</th><td class="field-body"><p class="first last">vector defining line direction (1) or plane normal (2)</p>
 </td>
 </tr>
 </tbody>
@@ -1164,7 +1207,7 @@ for a GroupOp</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">symmetric strain tensor</p>
+<tr class="field-even field"><th class="field-name">Return strain:</th><td class="field-body"><p class="first last">symmetric strain tensor</p>
 </td>
 </tr>
 </tbody>
@@ -1208,6 +1251,11 @@ for a GroupOp</p>
 <code class="descclassname">crystal.</code><code class="descname">maptranslation</code><span class="sig-paren">(</span><em>oldpos</em>, <em>newpos</em>, <em>oldspins=None</em>, <em>newspins=None</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#maptranslation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.maptranslation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a list of transformed positions, identify if there&#8217;s a translation vector
 that maps from the current positions to the new position.</p>
+<p>The mapping specifies the index that the <em>translated</em> atom corresponds to in the
+original position set. If unable to construct a mapping, the mapping return is
+None; the translation vector will be meaningless.</p>
+<p>If old/newspins are given then ONLY mappings that maintain spin are considered.
+This means that a loop is needed to consider possible spin phase factors.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1220,16 +1268,15 @@ that maps from the current positions to the new position.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">translation (array[3]), mapping (list of list of indices)</p>
+<tr class="field-even field"><th class="field-name" colspan="2">Return translation:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">array[3]</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return mapping:</th><td class="field-body"><p class="first last">list of list of indices</p>
 </td>
 </tr>
 </tbody>
 </table>
-<p>The mapping specifies the index that the <em>translated</em> atom corresponds to in the
-original position set. If unable to construct a mapping, the mapping return is
-None; the translation vector will be meaningless.</p>
-<p>If old/newspins are given then ONLY mapping thats maintain spin are considered.
-This means that a loop is needed to consider possible spin phase factors.</p>
 </dd></dl>
 
 <dl class="function">

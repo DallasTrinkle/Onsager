@@ -156,22 +156,33 @@ computation of the GF is included in the GFcalc module.</p>
 <dt id="OnsagerCalc.Interstitial">
 <em class="property">class </em><code class="descclassname">OnsagerCalc.</code><code class="descname">Interstitial</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class to compute interstitial diffusivity; uses structure of crystal to do most
-of the heavy lifting in terms of symmetry, etc.</p>
+of the heavy lifting in terms of symmetry.</p>
+<p>Takes in a crystal that contains the interstitial as one of the chemical elements,
+to be specified by <cite>chem</cite>, the sitelist (list of symmetry equivalent sites), and
+jumpnetwork. Both of the latter can be computed automatically from <cite>crys</cite> methods,
+but as they are lists, can also be editted or constructed by hand.</p>
 <dl class="method">
 <dt id="OnsagerCalc.Interstitial.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialization; takes an underlying crystal, a choice of atomic chemistry,
 a corresponding Wyckoff site list and jump network.</p>
-<p>:param crys : Crystal object
-:param chem : integer, index into the basis of crys, corresponding to the chemical element that hops
-:param sitelist : list of lists of indices, site indices where the atom may hop;</p>
-<blockquote>
-<div>grouped by symmetry equivalency</div></blockquote>
-<dl class="docutils">
-<dt>:param jumpnetwork</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">list of lists of tuples: ( (i, j), dx )</span><dd>symmetry unique transitions; each list is all of the possible transitions
-from site i to site j with jump vector dx; includes i-&gt;j and j-&gt;i</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>crys</strong> &#8211; Crystal object</li>
+<li><strong>chem</strong> &#8211; integer, index into the basis of crys, corresponding to the chemical element that hops</li>
+<li><strong>sitelist</strong> &#8211; list of lists of indices, site indices where the atom may hop;
+grouped by symmetry equivalency</li>
+<li><strong>jumpnetwork</strong> &#8211; list of lists of tuples: ( (i, j), dx )
+symmetry unique transitions; each list is all of the possible transitions
+from site i to site j with jump vector dx; includes i-&gt;j and j-&gt;i</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -187,17 +198,23 @@ from site i to site j with jump vector dx; includes i-&gt;j and j-&gt;i</dd>
 Also returns the negative derivative of diffusivity with respect to beta (used to compute
 the activation barrier tensor) if CalcDeriv = True
 The input list order corresponds to the sitelist and jumpnetwork</p>
-<p>:param pre : list of prefactors for unique sites
-:param betaene : list of site energies divided by kB T
-:param preT : list of prefactors for transition states
-:param betaeneT: list of transition state energies divided by kB T</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return D[3,3]:</th><td class="field-body">diffusivity as a 3x3 tensor</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pre</strong> &#8211; list of prefactors for unique sites</li>
+<li><strong>betaene</strong> &#8211; list of site energies divided by kB T</li>
+<li><strong>preT</strong> &#8211; list of prefactors for transition states</li>
+<li><strong>betaeneT</strong> &#8211; list of transition state energies divided by kB T</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return DE[3,3]:</th><td class="field-body">diffusivity times activation barrier (if CalcDeriv == True)</td>
+<tr class="field-even field"><th class="field-name">Return D[3,3]:</th><td class="field-body"><p class="first">diffusivity as a 3x3 tensor</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return DE[3,3]:</th><td class="field-body"><p class="first last">diffusivity times activation barrier (if CalcDeriv == True)</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -209,20 +226,26 @@ The input list order corresponds to the sitelist and jumpnetwork</p>
 <dd><p>Computes the elastodiffusion tensor for our element given prefactors, energies/kB T,
 and elastic dipoles/kB T
 The input list order corresponds to the sitelist and jumpnetwork</p>
-<p>:param pre : list of prefactors for unique sites
-:param betaene : list of site energies divided by kB T
-:param dipole: list of elastic dipoles divided by kB T
-:param preT : list of prefactors for transition states
-:param betaeneT: list of transition state energies divided by kB T
-:param dipoleT: list of elastic dipoles divided by kB T</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return D[3,3]:</th><td class="field-body">diffusivity as 3x3 tensor</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pre</strong> &#8211; list of prefactors for unique sites</li>
+<li><strong>betaene</strong> &#8211; list of site energies divided by kB T</li>
+<li><strong>dipole</strong> &#8211; list of elastic dipoles divided by kB T</li>
+<li><strong>preT</strong> &#8211; list of prefactors for transition states</li>
+<li><strong>betaeneT</strong> &#8211; list of transition state energies divided by kB T</li>
+<li><strong>dipoleT</strong> &#8211; list of elastic dipoles divided by kB T</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return dD[3,3,3,3]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">elastodiffusion tensor as 3x3x3x3 tensor</td>
+<tr class="field-even field"><th class="field-name">Return D[3,3]:</th><td class="field-body"><p class="first">diffusivity as 3x3 tensor</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return dD[3,3,3,3]:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">elastodiffusion tensor as 3x3x3x3 tensor</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -232,12 +255,13 @@ The input list order corresponds to the sitelist and jumpnetwork</p>
 <dt id="OnsagerCalc.Interstitial.generateJumpGroupOps">
 <code class="descname">generateJumpGroupOps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.generateJumpGroupOps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.generateJumpGroupOps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a list of group operations that transform the first jump in the jump
-network into all of the other members</p>
+network into all of the other members; one group operation for each.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of list of group ops that mirrors the structure of jumpnetwork</td>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return siteGroupOps:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of list of group ops that mirrors the structure of jumpnetwork.</td>
 </tr>
 </tbody>
 </table>
@@ -252,7 +276,8 @@ in our jump network</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of symmetric bases</td>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return TensorSet:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of list of symmetric tensors</td>
 </tr>
 </tbody>
 </table>
@@ -262,12 +287,13 @@ in our jump network</p>
 <dt id="OnsagerCalc.Interstitial.generateSiteGroupOps">
 <code class="descname">generateSiteGroupOps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.generateSiteGroupOps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.generateSiteGroupOps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a list of group operations that transform the first site in each site list
-into all of the other members</p>
+into all of the other members; one group operation for each.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of list of group ops that mirrors the structure of site list</td>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return siteGroupOps:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of list of group ops that mirrors the structure of site list</td>
 </tr>
 </tbody>
 </table>
@@ -282,7 +308,8 @@ in our site list.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of symmetric bases</td>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return TensorSet:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of symmetric tensors</td>
 </tr>
 </tbody>
 </table>
@@ -292,14 +319,15 @@ in our site list.</p>
 <dt id="OnsagerCalc.Interstitial.jumpDipoles">
 <code class="descname">jumpDipoles</code><span class="sig-paren">(</span><em>dipoles</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.jumpDipoles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.jumpDipoles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of the elastic dipole for each transition, given the dipoles
-for the representatives</p>
+for the representatives. (&#8220;populating&#8221; the full set of dipoles)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dipoles</strong> &#8211; list of dipoles for the first representative transition</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">lists of lists of dipole for each transition</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return dipolelist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of lists of dipole for each jump[site][3][3]</td>
 </tr>
 </tbody>
 </table>
@@ -321,14 +349,15 @@ for the representatives</p>
 <dt id="OnsagerCalc.Interstitial.siteDipoles">
 <code class="descname">siteDipoles</code><span class="sig-paren">(</span><em>dipoles</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.siteDipoles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.siteDipoles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of the elastic dipole on each site, given the dipoles
-for the representatives</p>
+for the representatives. (&#8220;populating&#8221; the full set of dipoles)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dipoles</strong> &#8211; list of dipoles for the first representative site</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array of dipole for each site [site][3][3]</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return dipolelist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">array of dipole for each site [site][3][3]</td>
 </tr>
 </tbody>
 </table>
@@ -360,7 +389,11 @@ for the representatives</p>
 <dd><p>A class to compute vacancy-mediated solute transport coefficients, specifically
 L_vv (vacancy diffusion), L_ss (solute), and L_sv (off-diagonal). As part of that,
 it determines <em>what</em> quantities are needed as inputs in order to perform this calculation.</p>
-<p>Based on crystal class. Also now includes its own GF calculator and cacheing.</p>
+<p>Based on crystal class. Also now includes its own GF calculator and cacheing, and
+storage in HDF5 format.</p>
+<p>Requires a crystal, chemical identity of vacancy, list of symmetry-equivalent
+sites for that chemistry, and a jumpnetwork for the vacancy. The thermodynamic
+range (number of &#8220;shells&#8221; &#8211; see <cite>crystalStars.StarSet</cite> for precise definition).</p>
 <dl class="method">
 <dt id="OnsagerCalc.VacancyMediated.Lij">
 <code class="descname">Lij</code><span class="sig-paren">(</span><em>bFV</em>, <em>bFS</em>, <em>bFSV</em>, <em>bFT0</em>, <em>bFT1</em>, <em>bFT2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.Lij"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.Lij" title="Permalink to this definition">¶</a></dt>
@@ -450,10 +483,15 @@ jumpnetwork (for the vacancy) and thermodynamic shell.</p>
 <dt id="OnsagerCalc.VacancyMediated.generate">
 <code class="descname">generate</code><span class="sig-paren">(</span><em>Nthermo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.generate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate the necessary stars, vector-stars, and jump networks based on the thermodynamic range.</p>
-<dl class="docutils">
-<dt>:param Nthermo</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">range of thermodynamic interactions, in terms of &#8220;shells&#8221;,</span><dd>which is multiple summations of jumpvect</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Nthermo</strong> &#8211; range of thermodynamic interactions, in terms of &#8220;shells&#8221;,
+which is multiple summations of jumpvect</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -510,7 +548,8 @@ to a vector between a solute atom and a vacancy. Defined by Stars.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDFgroup</strong> &#8211; HDF5 group</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new VacancyMediated diffuser object from HDF5</td>
+<tr class="field-even field"><th class="field-name" colspan="2">Return VacancyMediated:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">new VacancyMediated diffuser object from HDF5</td>
 </tr>
 </tbody>
 </table>
@@ -631,10 +670,11 @@ Solute at the origin, vacancy hopping between two sites. Defined by om1_jumpnetw
 <dl class="staticmethod">
 <dt id="OnsagerCalc.VacancyMediated.preene2betafree">
 <em class="property">static </em><code class="descname">preene2betafree</code><span class="sig-paren">(</span><em>kT</em>, <em>preV</em>, <em>eneV</em>, <em>preS</em>, <em>eneS</em>, <em>preSV</em>, <em>eneSV</em>, <em>preT0</em>, <em>eneT0</em>, <em>preT1</em>, <em>eneT1</em>, <em>preT2</em>, <em>eneT2</em>, <em>**ignoredextraarguments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.preene2betafree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.preene2betafree" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read in a series of prefactors (e^(S/kB)) and energies, and return beta*free energy for
-energies and transition state energies. Used to provide scaled values to Lij() and _lij().
-Can specify all of the entries using a dictionary; e.g., preene2betafree(kT, <a href="#id1"><span class="problematic" id="id2">**</span></a>data_dict)
-and then send that output as input to Lij: Lij(<a href="#id3"><span class="problematic" id="id4">*</span></a>preene2betafree(kT, <a href="#id5"><span class="problematic" id="id6">**</span></a>data_dict))
+<dd><p>Read in a series of prefactors (<span class="math">\(\exp(S/k_\text{B})\)</span>) and energies, and return
+<span class="math">\(\beta F\)</span> for energies and transition state energies. Used to provide scaled values
+to Lij() and _lij().
+Can specify all of the entries using a dictionary; e.g., <cite>preene2betafree(kT, **data_dict)</cite>
+and then send that output as input to Lij: <cite>Lij(*preene2betafree(kT, **data_dict))</cite>
 (we ignore extra arguments so that a dictionary including additional entries can be passed)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

@@ -139,12 +139,12 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Supercell class</span>
 
-<span class="sd">Class to store supercells of crystals: along with some analysis</span>
+<span class="sd">Class to store supercells of crystals. A supercell is a lattice model of a crystal, with</span>
+<span class="sd">periodically repeating unit cells. In that framework we can</span>
+
 <span class="sd">1. add/remove/substitute atoms</span>
-<span class="sd">2. output POSCAR format (possibly other formats?)</span>
-<span class="sd">3. find the transformation map between two different representations of the same supercell</span>
-<span class="sd">4. construct an NEB pathway between two supercells</span>
-<span class="sd">5. possibly input from CONTCAR? extract displacements?</span>
+<span class="sd">2. find the transformation map between two different representations of the same supercell</span>
+<span class="sd">3. output POSCAR format (possibly other formats?)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Dallas R. Trinkle&#39;</span>
@@ -158,7 +158,10 @@
 
 <div class="viewcode-block" id="Supercell"><a class="viewcode-back" href="../supercell.html#supercell.Supercell">[docs]</a><span class="k">class</span> <span class="nc">Supercell</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A class that defines a Supercell of a crystal</span>
+<span class="sd">    A class that defines a Supercell of a crystal.</span>
+
+<span class="sd">    Takes in a crystal, a supercell (3x3 integer matrix). We can identify sites</span>
+<span class="sd">    as interstitial sites, and specify if we&#39;ll have solutes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Supercell.__init__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="nb">super</span><span class="p">,</span> <span class="n">interstitial</span><span class="o">=</span><span class="p">(),</span> <span class="n">Nsolute</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">empty</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">NOSYM</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
