@@ -534,16 +534,32 @@ class InterstitialTests(unittest.TestCase):
 
     def testSupercell(self):
         """Can we construct proper supercells for our diffuser?"""
-        super_n = np.array([[-2,2,2], [2,-2,2], [2,2,-2]])
-        supercelldict = self.Dfcc.makesupercells(super_n)
-        for key in ('states', 'transitions', 'transmapping'):
-            self.assertIn(key, supercelldict)
-        # check that *every* supercell only has one defect in it:
-        for k, v in supercelldict['states'].items():
-            defectcontent = v.defectindices()
-            self.assertEqual(len(defectcontent), 1, msg='{} has multiple defect types?'.format(k))
-            for indset in defectcontent.values():
-                self.assertEqual(len(indset), 1, msg='{} has multiple defects?'.format(k))
+        for super_n, diffuser in ((np.array([[-2,2,2], [2,-2,2], [2,2,-2]]), self.Dfcc),
+                                  (np.array([[3,0,0], [0,3,0], [0,0,2]]), self.Dhcp)):
+            supercelldict = diffuser.makesupercells(super_n)
+            for key in ('states', 'transitions', 'transmapping'):
+                self.assertIn(key, supercelldict)
+            # check that *every* supercell only has one defect in it:
+            for k, v in supercelldict['states'].items():
+                defectcontent = v.defectindices()
+                self.assertEqual(len(defectcontent), 1, msg='{} has multiple defect types?'.format(k))
+                for indset in defectcontent.values():
+                    self.assertEqual(len(indset), 1, msg='{} has multiple defects?'.format(k))
+            for k, v in supercelldict['transitions'].items():
+                self.assertEqual(len(v), 2, msg='{} does not have two entries?'.format(k))
+                self.assertIn(k, supercelldict['transmapping'])
+                for s in v:
+                    defectcontent = s.defectindices()
+                    self.assertEqual(len(defectcontent), 1, msg='{} has multiple defect types?'.format(k))
+                    for indset in defectcontent.values():
+                        self.assertEqual(len(indset), 1, msg='{} has multiple defects?'.format(k))
+            for k, v in supercelldict['transmapping'].items():
+                self.assertEqual(len(v), 2, msg='{} does not have two entries?'.format(k))
+                self.assertIn(k, supercelldict['transitions'])
+                for s in v:
+                    self.assertIn(s[0], supercelldict['states'])
+                    self.assertNotEqual(s[1], None)
+                    self.assertNotEqual(s[2], None)
 
     def testDiffusivity(self):
         """Diffusivity"""
