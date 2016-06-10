@@ -23,9 +23,11 @@ class FCCSuperTests(unittest.TestCase):
     def assertOrderingSuperEqual(self, s0, s1, msg=""):
         if s0 != s1:
             failmsg = msg + '\n'
-            for line0, line1 in zip(s0.__str__().splitlines(), s1.__str__().splitlines()):
+            for line0, line1 in itertools.zip_longest(s0.__str__().splitlines(),
+                                                      s1.__str__().splitlines(),
+                                                      fillvalue=' - '):
                 failmsg += line0 + '\t' + line1 + '\n'
-            self.assertEqual(s0, s1, msg=failmsg)
+            self.fail(msg=failmsg)
 
     def testSuper(self):
         """Can we make a supercell object?"""
@@ -239,7 +241,7 @@ class FCCSuperTests(unittest.TestCase):
         g, mapping = supercopy.equivalencemap(super)
         self.assertNotEqual(g, None, msg='Cannot map between permutation?')
         supercopy.reorder(mapping)
-        self.assertOrderingSuperEqual(super, supercopy, msg='Inproper map from random permutation')
+        self.assertOrderingSuperEqual(super, supercopy, msg='Improper map from random permutation')
 
 
 class HCPSuperTests(FCCSuperTests):

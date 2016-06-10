@@ -116,8 +116,9 @@ class Supercell(object):
         str = "Supercell of crystal:\n{crys}\n".format(crys=self.crys)
         str += "Supercell vectors:\n{}\nChemistry: ".format(self.super.T)
         str += self.stoichiometry()
+        str += '\nKroger-Vink: ' + self.KrogerVink()
         str += '\nPositions:\n'
-        str += '\n'.join([u.__str__() + ': ' + self.chemistry[o] for u, o in zip(self.pos, self.occ)])
+        str += '\n'.join([u.__str__() + ' ' + self.chemistry[o] for u, o in zip(self.pos, self.occ)])
         str += '\nOrdering:\n'
         str += '\n'.join([u.__str__() + ' ' + c for c,ulist in zip(self.chemistry, self.occposlist())
                           for u in ulist])
@@ -455,6 +456,7 @@ class Supercell(object):
         :return g: GroupOp to transform sites from `self` to `other`
         :return mapping: list of maps, such that (g*self).chemorder[c][mapping[c][i]] == other.chemorder[c][i]
         """
+        # 1. check that our defects even match up:
         selfdefects, otherdefects = self.defectindices(), other.defectindices()
         for k,v in selfdefects.items():
             if k not in otherdefects: return None, None
@@ -462,7 +464,31 @@ class Supercell(object):
         for k,v in otherdefects.items():
             if k not in selfdefects: return None, None
             if len(v) != len(selfdefects[k]): return None, None
-        g = crystal.GroupOp.ident([self.pos])
-        mapping = [[i for i in range(len(clist))] for clist in self.chemorder]
+
+        # 2. identify the shortest common set of defects:
+        defcount = {k: len(v) for k,v in selfdefects.items()}
+        deftype = min(defcount, key=defcount.get)  # key to min value from dictionary
+        shortset, matchset = selfdefects[deftype], otherdefects[deftype]
+
+        mapping = None
+        gocc = self.occ.copy()
+        for g in self.G:
+            # 3. check against the shortest list of defects:
+            indexmap = g.indexmap[0]
+            if any(indexmap[i] not in matchset for i in shortset): continue
+            # 4. having checked that shortlist, check the full mapping:
+            for ind, gind in enumerate(indexmap):
+                gocc[gind] = self.occ[ind]
+            if np.any(gocc != other.occ): continue
+            # 5. we have a winner. Now it's all up to getting the mapping; done with index()
+            gorder = [[indexmap[ind] for ind in clist] for clist in self.chemorder]
+            mapping = []
+            for gclist, otherlist in zip(gorder, other.chemorder):
+                mapping.append([gclist.index(index) for index in otherlist])
+            break
+
+        # g = crystal.GroupOp.ident([self.pos])
+        # mapping = [[i for i in range(len(clist))] for clist in self.chemorder]
+        if mapping is None: return None, mapping
         return g, mapping
 
