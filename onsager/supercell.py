@@ -18,11 +18,6 @@ from . import crystal
 from functools import reduce
 
 
-# YAML tags:
-# interfaces are either at the bottom, or staticmethods in the corresponding object
-# NDARRAY_YAMLTAG = '!numpy.ndarray'
-# GROUPOP_YAMLTAG = '!GroupOp'
-
 class Supercell(object):
     """
     A class that defines a Supercell of a crystal
@@ -80,7 +75,7 @@ class Supercell(object):
 
         :return: new supercell object, copy of the original
         """
-        supercopy = self.__class__(self.crys, self.super, self.interstitial, self.Nchem-self.crys.Nchem,
+        supercopy = self.__class__(self.crys, self.super, self.interstitial, self.Nchem - self.crys.Nchem,
                                    empty=True)
         for attr in self.__copyattr__: setattr(supercopy, attr, copy.deepcopy(getattr(self, attr)))
         for attr in self.__eqattr__: setattr(supercopy, attr, getattr(self, attr))
@@ -120,7 +115,7 @@ class Supercell(object):
         str += '\nPositions:\n'
         str += '\n'.join([u.__str__() + ' ' + self.chemistry[o] for u, o in zip(self.pos, self.occ)])
         str += '\nOrdering:\n'
-        str += '\n'.join([u.__str__() + ' ' + c for c,ulist in zip(self.chemistry, self.occposlist())
+        str += '\n'.join([u.__str__() + ' ' + c for c, ulist in zip(self.chemistry, self.occposlist())
                           for u in ulist])
         return str
 
@@ -174,9 +169,9 @@ class Supercell(object):
         """
         index, dist2 = None, threshold
         for ind, u in enumerate(self.pos):
-            delta = crystal.inhalf(pos-u)
-            d2 = np.sum(delta*delta)
-            if d2<dist2: index, dist2 = ind, d2
+            delta = crystal.inhalf(pos - u)
+            d2 = np.sum(delta * delta)
+            if d2 < dist2: index, dist2 = ind, d2
         return index
 
     def __getitem__(self, key):
@@ -187,7 +182,7 @@ class Supercell(object):
         :return: chemical occupation at that point
         """
         if isinstance(key, Integral) or isinstance(key, slice): return self.occ[key]
-        if isinstance(key, np.ndarray) and key.shape==(3,): return self.occ[self.index(key)]
+        if isinstance(key, np.ndarray) and key.shape == (3,): return self.occ[self.index(key)]
         raise TypeError('Inappropriate key {}'.format(key))
 
     def __setitem__(self, key, value):
@@ -197,16 +192,15 @@ class Supercell(object):
         :param key: index (either an int, a slice, or a position)
         :param value: chemical occupation at that point
         """
-        if isinstance(key, slice):
-            return NotImplemented
+        if isinstance(key, slice): return NotImplemented
         index = None
         if isinstance(key, Integral): index = key
-        if isinstance(key, np.ndarray) and key.shape==(3,): index=self.index(key)
+        if isinstance(key, np.ndarray) and key.shape == (3,): index = self.index(key)
         self.setocc(index, value)
 
     def __sane__(self):
         """Return True if supercell occupation and chemorder are consistent"""
-        occset=set()
+        occset = set()
         for c, clist in enumerate(self.chemorder):
             for ind in clist:
                 # check that occupancy (from chemorder) is correct:
@@ -216,7 +210,7 @@ class Supercell(object):
         # now make sure that every site *not* in occset is, in fact, vacant
         for ind, c in enumerate(self.occ):
             if ind not in occset:
-                if c!=-1: return False
+                if c != -1: return False
         return True
 
     @staticmethod
@@ -241,7 +235,6 @@ class Supercell(object):
                       for n2 in range(-maxN, maxN + 1)]:
             tv = np.dot(invsuper, nvect) % size
             ttup = tuple(tv)
-            # if np.all(tv>=0) and np.all(tv<N): trans.append(tv)
             if ttup not in transdict:
                 transdict[ttup] = len(translist)
                 translist.append(tv)
@@ -265,26 +258,26 @@ class Supercell(object):
         """
         Generate the group operations internal to the supercell
 
-        :return Gset: set of GroupOps
+        :return G: set of GroupOps
         """
         Glist = []
-        unittranslist = [np.dot(self.super, t)//self.size for t in self.translist]
+        unittranslist = [np.dot(self.super, t) // self.size for t in self.translist]
         invsize = 1 / self.size
         for g0 in self.crys.G:
             Rsuper = np.dot(self.invsuper, np.dot(g0.rot, self.super))
             if not np.all(Rsuper % self.size == 0):
-                warnings.warn('Broken symmetry? GroupOp:\n{}\nnot a symmetry operation of supercell?\nRsuper=\n{}'.format(g0, Rsuper),
-                              RuntimeWarning, stacklevel=2)
+                warnings.warn(
+                    'Broken symmetry? GroupOp:\n{}\nnot a symmetry operation of supercell?\nRsuper=\n{}'.format(g0,
+                                                                                                                Rsuper),
+                    RuntimeWarning, stacklevel=2)
                 continue
             else:
                 # divide out the size (in inverse super). Should still be an integer matrix (and hence, a symmetry)
                 Rsuper //= self.size
-            # for t, u in zip(self.translist, unittranslist):
             for u in unittranslist:
                 # first, make the corresponding group operation by adding the unit cell translation:
                 g = g0 + u
                 # translation vector *in the supercell*; go ahead and keep it inside the supercell, too.
-                # tsuper = ((np.dot(self.invsuper, g0.trans) + t) % self.size) * invsize
                 tsuper = (np.dot(self.invsuper, g.trans) % self.size) * invsize
                 # finally: indexmap!!
                 indexmap = []
@@ -297,7 +290,7 @@ class Supercell(object):
                         # THEN multiply by self.N, and add the index of the new Wyckoff site. Whew!
                         indexmap.append(
                             self.transdict[tuple(np.dot(self.invsuper, Rp) % self.size)] * self.N + self.indexatom[ci1])
-                if len(set(indexmap)) != self.N*self.size:
+                if len(set(indexmap)) != self.N * self.size:
                     raise ArithmeticError('Did not produce a correct index mapping for GroupOp:\n{}'.format(g))
                 Glist.append(crystal.GroupOp(rot=Rsuper, cartrot=g0.cartrot, trans=tsuper,
                                              indexmap=(tuple(indexmap),)))
@@ -310,8 +303,7 @@ class Supercell(object):
         :param c: index
         :param chemistry: string
         """
-        cind = c%(self.Nchem+1)
-        if c<self.crys.Nchem or c==self.Nchem:
+        if c < self.crys.Nchem or c >= self.Nchem:
             raise IndexError('Trying to set the chemistry for a lattice atom / vacancy')
         self.chemistry[c] = chemistry
 
@@ -322,15 +314,15 @@ class Supercell(object):
         :param ind: integer index
         :param c: chemistry index
         """
-        if c<-2 or c>self.crys.Nchem:
+        if c < -2 or c > self.crys.Nchem:
             raise IndexError('Trying to occupy with a non-defined chemistry: {} out of range'.format(c))
         corig = self.occ[ind]
         if corig != c:
-            if corig>=0:
+            if corig >= 0:
                 # remove from chemorder list (if not vacancy)
                 co = self.chemorder[corig]
                 co.pop(co.index(ind))
-            if c>=0:
+            if c >= 0:
                 # add to chemorder list (if not vacancy)
                 self.chemorder[c].append(ind)
             # finally: set the occupancy
@@ -348,7 +340,7 @@ class Supercell(object):
             if ci not in self.indexatom: raise IndexError('Tuple {} not a corresponding atom index'.format(ci))
         ind = self.indexatom[ci]
         indlist = next((nset for nset in self.Wyckofflist if ind in nset), None) if Wyckoff else (ind,)
-        for i in [n*self.N+i for n in range(self.size) for i in indlist]:
+        for i in [n * self.N + i for n in range(self.size) for i in indlist]:
             self.setocc(i, ci[0])
         return self
 
@@ -385,29 +377,34 @@ class Supercell(object):
     __vacancyformat__ = "v_{sitechem}"
     __interstitialformat__ = "{chem}_i"
     __antisiteformat__ = "{chem}_{sitechem}"
+
     def defectindices(self):
         """
         Return a dictionary that corresponds to the "defect" content of the supercell.
 
         :return defects: dictionary, keyed by defect type, with a set of indices of corresponding defects
         """
+
         def adddefect(name, index):
-            if name in defects: defects[name].add(index)
-            else: defects[name] = set([index])
-        defects={}
-        sitechem = [self.chemistry[c] for (c,i) in self.atomindices]
+            if name in defects:
+                defects[name].add(index)
+            else:
+                defects[name] = set([index])
+
+        defects = {}
+        sitechem = [self.chemistry[c] for (c, i) in self.atomindices]
         for wset, chem in zip(self.Wyckofflist, self.Wyckoffchem):
             for i in wset:
                 if self.atomindices[i][0] in self.interstitial:
                     for n in range(self.size):
-                        ind = n*self.N+i
-                        c=self.occ[ind]
+                        ind = n * self.N + i
+                        c = self.occ[ind]
                         if c != -1: adddefect(self.__interstitialformat__.format(chem=self.chemistry[c]), ind)
                 else:
                     sc = sitechem[i]
                     for n in range(self.size):
-                        ind = n*self.N+i
-                        c=self.occ[ind]
+                        ind = n * self.N + i
+                        c = self.occ[ind]
                         if self.chemistry[c] != sc:
                             name = self.__vacancyformat__.format(sitechem=sitechem[i]) \
                                 if c == -1 else \
@@ -424,8 +421,8 @@ class Supercell(object):
         :return KV: string representation
         """
         defects = self.defectindices()
-        return '+'.join(["{}{}".format(len(defects[name]),name)
-                         if len(defects[name])>1 else name
+        return '+'.join(["{}{}".format(len(defects[name]), name)
+                         if len(defects[name]) > 1 else name
                          for name in sorted(defects.keys())])
 
     def reorder(self, mapping):
@@ -462,15 +459,15 @@ class Supercell(object):
         """
         # 1. check that our defects even match up:
         selfdefects, otherdefects = self.defectindices(), other.defectindices()
-        for k,v in selfdefects.items():
+        for k, v in selfdefects.items():
             if k not in otherdefects: return None, None
             if len(v) != len(otherdefects[k]): return None, None
-        for k,v in otherdefects.items():
+        for k, v in otherdefects.items():
             if k not in selfdefects: return None, None
             if len(v) != len(selfdefects[k]): return None, None
 
         # 2. identify the shortest common set of defects:
-        defcount = {k: len(v) for k,v in selfdefects.items()}
+        defcount = {k: len(v) for k, v in selfdefects.items()}
         deftype = min(defcount, key=defcount.get)  # key to min value from dictionary
         shortset, matchset = selfdefects[deftype], otherdefects[deftype]
 
@@ -493,4 +490,3 @@ class Supercell(object):
 
         if mapping is None: return None, mapping
         return g, mapping
-
