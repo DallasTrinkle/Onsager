@@ -476,6 +476,9 @@ omega0, omega1, and omega2 transition states.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Return tagdict:</th><td class="field-body">dictionary that maps tag into the index of the corresponding list.</td>
 </tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return tagdicttype:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">dictionary that maps tag into the key for the corresponding list.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -506,7 +509,7 @@ to a vector between a solute atom and a vacancy. Defined by Stars.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDFgroup</strong> &#8211; HDF5 group</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new StarSet object</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new VacancyMediated diffuser object from HDF5</td>
 </tr>
 </tbody>
 </table>
@@ -669,6 +672,41 @@ and then send that output as input to Lij: Lij(<a href="#id3"><span class="probl
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return bFT2:</th><td class="field-body"><p class="first last">beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.tags2preene">
+<code class="descname">tags2preene</code><span class="sig-paren">(</span><em>usertagdict</em>, <em>VERBOSE=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.tags2preene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.tags2preene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates energies and prefactors based on a dictionary of tags.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>usertagdict</strong> &#8211; dictionary where the keys are tags, and the values are tuples: (pre, ene)</li>
+<li><strong>VERBOSE</strong> &#8211; (optional) if True, also return a dictionary of missing tags, duplicate tags, and bad tags</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return thermodict:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">dictionary of ene&#8217;s and pre&#8217;s corresponding to usertagdict</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return missingdict:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">dictionary with keys corresponding to tag types, and the values are
+lists of lists of symmetry equivalent tags that are missing</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return duplicatelist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">list of lists of tags in usertagdict that are (symmetry) duplicates</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return badtaglist:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of all tags in usertagdict that aren&#8217;t found in our dictionary</p>
 </td>
 </tr>
 </tbody>

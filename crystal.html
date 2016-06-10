@@ -189,8 +189,11 @@
 
 <dl class="class">
 <dt id="crystal.Crystal">
-<em class="property">class </em><code class="descclassname">crystal.</code><code class="descname">Crystal</code><span class="sig-paren">(</span><em>lattice</em>, <em>basis</em>, <em>chemistry=None</em>, <em>NOSYM=False</em>, <em>noreduce=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal" title="Permalink to this definition">¶</a></dt>
-<dd><p>A class that defines a crystal, as well as the symmetry analysis that goes along with it.</p>
+<em class="property">class </em><code class="descclassname">crystal.</code><code class="descname">Crystal</code><span class="sig-paren">(</span><em>lattice</em>, <em>basis</em>, <em>chemistry=None</em>, <em>spins=None</em>, <em>NOSYM=False</em>, <em>noreduce=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class that defines a crystal, as well as the symmetry analysis that goes along with it.
+Now includes optional spins. These can be vectors or &#8220;scalar&#8221; spins, for which we need
+to consider a phase factor. In general, they can be complex. Ideally, they should have
+magnitude either 0 or 1.</p>
 <dl class="classmethod">
 <dt id="crystal.Crystal.BCC">
 <em class="property">classmethod </em><code class="descname">BCC</code><span class="sig-paren">(</span><em>a0</em>, <em>chemistry=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.BCC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.BCC" title="Permalink to this definition">¶</a></dt>
@@ -312,7 +315,7 @@
 
 <dl class="method">
 <dt id="crystal.Crystal.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>lattice</em>, <em>basis</em>, <em>chemistry=None</em>, <em>NOSYM=False</em>, <em>noreduce=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>lattice</em>, <em>basis</em>, <em>chemistry=None</em>, <em>spins=None</em>, <em>NOSYM=False</em>, <em>noreduce=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialization; starts off with the lattice vector definition and the
 basis vectors. While it does not explicitly store the specific chemical
 elements involved, it does store that there are different elements.</p>
@@ -320,24 +323,18 @@ elements involved, it does store that there are different elements.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lattice</strong> &#8211; array[3,3] or list of array[3]
-lattice vectors; if [3,3] array, then the vectors need to be in <em>column</em> format
-so that the first lattice vector is lattice[:,0]</td>
-</tr>
-</tbody>
-</table>
-<dl class="docutils">
-<dt>:param basis</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">list of array[3] or list of list of array[3]</span><dd>crystalline basis vectors, in unit cell coordinates. If a list of lists, then
-there are multiple chemical elements, with each list corresponding to a unique
-element</dd>
-</dl>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>lattice</strong> &#8211; array[3,3] or list of array[3]
+lattice vectors; if [3,3] array, then the vectors need to be in <em>column</em> format
+so that the first lattice vector is lattice[:,0]</li>
+<li><strong>basis</strong> &#8211; list of array[3] or list of list of array[3]
+crystalline basis vectors, in unit cell coordinates. If a list of lists, then
+there are multiple chemical elements, with each list corresponding to a unique
+element</li>
 <li><strong>chemistry</strong> &#8211; (optional) list of names of chemical elements</li>
+<li><strong>spins</strong> &#8211; (optional) list of numbers (complex) / vectors or list of list of same
+spins for individual atoms; if not None, needs to match the basis. Can either be
+scalars or vectors, corresponding to collinear or non-collinear magnetism</li>
 <li><strong>NOSYM</strong> &#8211; turn off all symmetry finding (except identity)</li>
 <li><strong>noreduce</strong> &#8211; do not attempt to reduce the atomic basis</li>
 </ul>
@@ -367,7 +364,7 @@ element</dd>
 
 <dl class="method">
 <dt id="crystal.Crystal.addbasis">
-<code class="descname">addbasis</code><span class="sig-paren">(</span><em>basis</em>, <em>chemistry=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.addbasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.addbasis" title="Permalink to this definition">¶</a></dt>
+<code class="descname">addbasis</code><span class="sig-paren">(</span><em>basis</em>, <em>chemistry=None</em>, <em>spins=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.addbasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.addbasis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a new Crystal object that contains additional sites (assumed to be new chemistry).
 This is intended to &#8220;add in&#8221; interstitial sites. Note: if the symmetry is to be
 maintained, should be the output from Wyckoffpos().</p>
@@ -375,12 +372,15 @@ maintained, should be the output from Wyckoffpos().</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>basis</strong> &#8211; list (or list of lists) of new sites</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>basis</strong> &#8211; list (or list of lists) of new sites</li>
+<li><strong>chemistry</strong> &#8211; (optional) list of chemistry names</li>
+<li><strong>spins</strong> &#8211; (optional) list of spins</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Paran chemistry:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">(optional) list of chemistry names</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">new Crystal object, with additional sites</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">new Crystal object, with additional sites</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -653,7 +653,8 @@ direct coordinates</p>
 <dl class="method">
 <dt id="crystal.Crystal.gengroup">
 <code class="descname">gengroup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.gengroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.gengroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate all of the space group operations.</p>
+<dd><p>Generate all of the space group operations. Now handles spins! Doesn&#8217;t store
+spin phase factors for each group operation, though.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -952,7 +953,7 @@ can be defined out-of-the-box.</p>
 <li><strong>rot</strong> &#8211; np.array(3,3) integer idempotent matrix</li>
 <li><strong>trans</strong> &#8211; np.array(3) real vector</li>
 <li><strong>cartrot</strong> &#8211; np.array(3,3) real unitary matrix</li>
-<li><strong>indexmap</strong> &#8211; list of list, containing the atom mapping</li>
+<li><strong>indexmap</strong> &#8211; tuples of tuples, containing the atom mapping</li>
 </ul>
 </td>
 </tr>
@@ -1064,6 +1065,18 @@ eigenvector for the complex eigenvalue is [1] + i [2].</p>
 <dt id="crystal.GroupOp.inv">
 <code class="descname">inv</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.inv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.inv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct and return the inverse of the group operation</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="crystal.GroupOp.optype">
+<em class="property">static </em><code class="descname">optype</code><span class="sig-paren">(</span><em>rot</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.optype"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.optype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the type of group operation (single integer) and eigenvectors.
+1 = identity
+2, 3, 4, 6 = n- fold rotation around an axis
+negative = rotation + mirror operation, perpendicular to axis
+&#8220;special cases&#8221;: -1 = mirror, -2 = inversion
+:param rot: rotation matrix (can be the integer rot)
+:return: type (integer)</p>
 </dd></dl>
 
 </dd></dl>
@@ -1191,7 +1204,7 @@ for a GroupOp</p>
 
 <dl class="function">
 <dt id="crystal.maptranslation">
-<code class="descclassname">crystal.</code><code class="descname">maptranslation</code><span class="sig-paren">(</span><em>oldpos</em>, <em>newpos</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#maptranslation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.maptranslation" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">crystal.</code><code class="descname">maptranslation</code><span class="sig-paren">(</span><em>oldpos</em>, <em>newpos</em>, <em>oldspins=None</em>, <em>newspins=None</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#maptranslation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.maptranslation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a list of transformed positions, identify if there&#8217;s a translation vector
 that maps from the current positions to the new position.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1201,6 +1214,8 @@ that maps from the current positions to the new position.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>oldpos</strong> &#8211; list of list of array[3]</li>
 <li><strong>newpos</strong> &#8211; list of list of array[3], same layout as oldpos</li>
+<li><strong>oldspins</strong> &#8211; (optional) list of list of numbers/arrays</li>
+<li><strong>newspins</strong> &#8211; (optional) list of list of numbers/arrays</li>
 </ul>
 </td>
 </tr>
@@ -1212,6 +1227,8 @@ that maps from the current positions to the new position.</p>
 <p>The mapping specifies the index that the <em>translated</em> atom corresponds to in the
 original position set. If unable to construct a mapping, the mapping return is
 None; the translation vector will be meaningless.</p>
+<p>If old/newspins are given then ONLY mapping thats maintain spin are considered.
+This means that a loop is needed to consider possible spin phase factors.</p>
 </dd></dl>
 
 <dl class="function">
