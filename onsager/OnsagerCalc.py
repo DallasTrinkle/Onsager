@@ -132,7 +132,7 @@ class Interstitial(object):
 
         tags['states'] = [[single_state(basis[s]) for s in sites]
                            for sites in self.sitelist]
-        tags['transitions'] = [[transition(i, dx) for ((i, j), dx) in jumplist]
+        tags['transitions'] = [[transition(basis[i], dx) for ((i, j), dx) in jumplist]
                                for jumplist in self.jumpnetwork]
         # make the "tagdict" for quick indexing!
         for tagtype, taglist in tags.items():
@@ -158,24 +158,38 @@ class Interstitial(object):
         """
         superdict = {'states': {}, 'transitions': {}, 'transmapping': {}}
         basesupercell = supercell.Supercell(self.crys, super_n, interstitial=(self.chem,), Nsolute=0)
+        basis = self.crys.basis[self.chem]
         # fill up the supercell with all the *other* atoms
         for (c,i) in self.crys.atomindices:
             if c==self.chem: continue
             basesupercell.fillperiodic((c,i), Wyckoff=False)  # for efficiency
-        for sites in self.sitelist:
-            i=sites[0]
-            tag = SINGLE_DEFECT_TAG.format(type=INTERSTITIAL_TAG, u=self.crys.basis[self.chem][i])
+        for sites, tags in zip(self.sitelist, self.tags['states']):
+            i, tag =sites[0], tags[0]
+            u = basis[i]
             super = basesupercell.copy()
+            ind = np.dot(super.invsuper, u)/super.size
             # put an interstitial in that single state; the "first" one is fine:
-            n = super.indexatom[(self.chem, i)]
-            super[n] = self.chem
+            super[ind] = self.chem
             superdict['states'][tag] = super
-        for jumps in self.jumpnetwork:
+        for jumps, tags in zip(self.jumpnetwork, self.tags['transitions']):
             (i0, j0), dx0 = jumps[0]
+            tag = tags[0]
             u0 = self.crys.basis[self.chem][i0]
             u1 = u0 + np.dot(self.crys.invlatt, dx0)  # should correspond to the j0
-            tag = TRANSITION_TAG.format(state1=SINGLE_DEFECT_TAG.format(type=INTERSTITIAL_TAG, u=u0),
-                                        state2=SINGLE_DEFECT_TAG.format(type=INTERSTITIAL_TAG, u=u1))
+            super0, super1 = basesupercell.copy(), basesupercell.copy()
+            ind0, ind1 = np.dot(super0.invsuper, u0)/super.size, np.dot(super1.invsuper, u1)/super.size
+            # put interstitials at our corresponding sites
+            super0[ind0], super1[ind1] = self.chem, self.chem
+            superdict['transitions'][tag] = (super0, super1)
+            # determine the mappings:
+            superdict['transmapping'][tag] = tuple()
+            for s in (super0, super1):
+                for k,v in superdict['states'].items():
+                    # attempt the mapping
+                    g, mapping = v.equivalencemap(s)
+                    if g is not None:
+                        superdict['transmapping'][tag] += ((k, g, mapping),)
+                        break
         return superdict
 
     def generateSiteGroupOps(self):

@@ -380,11 +380,11 @@ class InterstitialTests(unittest.TestCase):
                          [np.array([0., 0., 0.]), np.array([0., 0., 0.5]),
                           np.array([1. / 3., 2. / 3., 0.625]), np.array([1. / 3., 2. / 3., 0.875]),
                           np.array([2. / 3., 1. / 3., 0.125]), np.array([2. / 3., 1. / 3., 0.375])]]
-        self.HCP_intercrys = crystal.Crystal(self.hexlatt, self.hcpbasis)
+        self.HCP_intercrys = crystal.Crystal(self.hexlatt, self.hcpbasis, chemistry=['Mg', 'O'])
         self.HCP_jumpnetwork = self.HCP_intercrys.jumpnetwork(1, self.a0 * 0.7)  # tuned to avoid t->t in basal plane
         self.HCP_sitelist = self.HCP_intercrys.sitelist(1)
         self.Dhcp = OnsagerCalc.Interstitial(self.HCP_intercrys, 1, self.HCP_sitelist, self.HCP_jumpnetwork)
-        self.FCC_intercrys = crystal.Crystal(self.fcclatt, self.fccbasis)
+        self.FCC_intercrys = crystal.Crystal(self.fcclatt, self.fccbasis, chemistry=['Pd', 'H'])
         self.FCC_jumpnetwork = self.FCC_intercrys.jumpnetwork(1, self.a0 * 0.48)
         self.FCC_sitelist = self.FCC_intercrys.sitelist(1)
         self.Dfcc = OnsagerCalc.Interstitial(self.FCC_intercrys, 1, self.FCC_sitelist, self.FCC_jumpnetwork)
@@ -536,8 +536,14 @@ class InterstitialTests(unittest.TestCase):
         """Can we construct proper supercells for our diffuser?"""
         super_n = np.array([[-2,2,2], [2,-2,2], [2,2,-2]])
         supercelldict = self.Dfcc.makesupercells(super_n)
-        for keys in ('states', 'transitions', 'mapping'):
-            self.assertIn(keys, supercelldict)
+        for key in ('states', 'transitions', 'transmapping'):
+            self.assertIn(key, supercelldict)
+        # check that *every* supercell only has one defect in it:
+        for k, v in supercelldict['states'].items():
+            defectcontent = v.defectindices()
+            self.assertEqual(len(defectcontent), 1, msg='{} has multiple defect types?'.format(k))
+            for indset in defectcontent.values():
+                self.assertEqual(len(indset), 1, msg='{} has multiple defects?'.format(k))
 
     def testDiffusivity(self):
         """Diffusivity"""

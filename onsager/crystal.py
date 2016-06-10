@@ -541,7 +541,7 @@ class Crystal(object):
         self.N = len(self.atomindices)
         self.Nchem = len(self.basis)
         if chemistry is None:
-            self.chemistry = [i for i in range(self.Nchem)]
+            self.chemistry = ['{}'.format(i) for i in range(self.Nchem)]
         else:
             self.chemistry = chemistry.copy()
         self.volume, self.metric = self.calcmetric()

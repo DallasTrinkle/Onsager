@@ -106,7 +106,7 @@ class Supercell(object):
                          if n in self.interstitial
                          else c + '({})'.format(len(l))
                          for n, c, l in zip(itertools.count(),
-                                            self.chemistry[:-1],
+                                            self.chemistry,
                                             self.chemorder)])
 
     def __str__(self):
