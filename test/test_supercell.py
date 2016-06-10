@@ -20,12 +20,11 @@ class FCCSuperTests(unittest.TestCase):
         self.one = np.eye(3, dtype=int)
         self.groupsupers = (self.one, 2 * self.one, np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]))
 
-    def assertOrderingSuperEqual(self, s0, s1):
+    def assertOrderingSuperEqual(self, s0, s1, msg=""):
         if s0 != s1:
-            failmsg = ""
-            for op0list, op1list in zip(s0.occposlist(), s1.occposlist()):
-                for p0, p1 in zip(op0list, op1list): failmsg += "{} {}\n".format(p0, p1)
-                failmsg += "\n"
+            failmsg = msg + '\n'
+            for line0, line1 in zip(s0.__str__().splitlines(), s1.__str__().splitlines()):
+                failmsg += line0 + '\t' + line1 + '\n'
             self.assertEqual(s0, s1, msg=failmsg)
 
     def testSuper(self):
@@ -43,7 +42,7 @@ class FCCSuperTests(unittest.TestCase):
         """Can we copy a supercell, and is it equal to itself?"""
         super = supercell.Supercell(self.crys, self.one)
         super2 = super.copy()
-        self.assertEqual(super, super2, msg="{}\n!=\n{}".format(super, super2))
+        self.assertOrderingSuperEqual(super, super2, msg="copy not equal")
 
     def testTrans(self):
         """Can we correctly generates the translations?"""
@@ -151,7 +150,7 @@ class FCCSuperTests(unittest.TestCase):
             for c,poslist in enumerate(super.occposlist()):
                 for pos in poslist:
                     randcopy[pos] = c
-            self.assertEqual(super, randcopy)
+            self.assertOrderingSuperEqual(super, randcopy, msg='Indexing fail?')
 
     def testMultiply(self):
         """Can we multiply a supercell by our group operations successfully?"""
@@ -175,15 +174,16 @@ class FCCSuperTests(unittest.TestCase):
             for ind in np.random.randint(super.size*super.N, size=Ntests//10):
                 gu = crystal.incell(np.dot(g.rot, super.pos[ind]) + g.trans)
                 self.assertIsInstance(gu, np.ndarray)
-                self.assertEqual(gsuper[gu], super[ind])
+                self.assertOrderingSuperEqual(gsuper[gu], super[ind], msg='Group operation fail?')
         # quick test of multiplying the other direction, and in-place (which should all call the same code)
-        self.assertEqual(gsuper, super*g)
+        self.assertOrderingSuperEqual(gsuper, super*g, msg='Other rotation fail?')
         super *= g
-        self.assertEqual(gsuper, super)
+        self.assertOrderingSuperEqual(gsuper, super, msg='In place rotation fail?')
 
     def testReorder(self):
         """Can we reorder a supercell?"""
         super = supercell.Supercell(self.crys, 3 * self.one, Nsolute=1)
+        super.definesolute(super.Nchem-1, 's')
         # set up some random occupancy
         Ntests = 100
         for c, ind in zip(np.random.randint(-1, super.Nchem, size=Ntests),
@@ -193,7 +193,7 @@ class FCCSuperTests(unittest.TestCase):
         supercopy = super.copy()
         unitymap = [[i for i in range(len(clist))] for clist in super.chemorder]
         supercopy.reorder(unitymap)
-        self.assertOrderingSuperEqual(super, supercopy)
+        self.assertOrderingSuperEqual(super, supercopy, msg='Reordering fail with unity?')
         popmap = []
         for c, clist in enumerate(super.chemorder):
             n = len(clist)
@@ -202,7 +202,7 @@ class FCCSuperTests(unittest.TestCase):
             super.setocc(indpoppush, -1)
             super.setocc(indpoppush, c)  # *now* should be at the *end* of the chemorder list
         supercopy.reorder(popmap)
-        self.assertOrderingSuperEqual(super, supercopy)
+        self.assertOrderingSuperEqual(super, supercopy, msg='Reordering fail with "pop/push"?')
         revmap = []
         for c, clist in enumerate(super.chemorder):
             n = len(clist)
@@ -214,17 +214,18 @@ class FCCSuperTests(unittest.TestCase):
             for indpoppush in cl:
                 super.setocc(indpoppush, c)
         supercopy.reorder(revmap)
-        self.assertOrderingSuperEqual(super, supercopy)
+        self.assertOrderingSuperEqual(super, supercopy, msg='Reordering fail with reverse?')
         # test out a bad mapping:
         badmap = [[i%2 for i in range(len(clist))] for clist in super.chemorder]
         with self.assertRaises(ValueError):
             supercopy.reorder(badmap)
-        self.assertOrderingSuperEqual(super, supercopy)
+        self.assertOrderingSuperEqual(super, supercopy, msg='Reordering is not safe after fail?')
 
 
     def testEquivalenceMap(self):
         """Can we construct an equivalence map between two supercells?"""
         super = supercell.Supercell(self.crys, 3 * self.one, Nsolute=1)
+        super.definesolute(super.Nchem-1, 's')
         # set up some random occupancy
         Ntests = 100
         for c, ind in zip(np.random.randint(-1, super.Nchem, size=Ntests),
@@ -238,7 +239,7 @@ class FCCSuperTests(unittest.TestCase):
         g, mapping = supercopy.equivalencemap(super)
         self.assertNotEqual(g, None, msg='Cannot map between permutation?')
         supercopy.reorder(mapping)
-        self.assertOrderingSuperEqual(super, supercopy)
+        self.assertOrderingSuperEqual(super, supercopy, msg='Inproper map from random permutation')
 
 
 class HCPSuperTests(FCCSuperTests):
@@ -306,7 +307,7 @@ class InterstitialSuperTests(HCPSuperTests):
         super = supercell.Supercell(self.crys, 3*self.one, interstitial=[1])
         YAMLstring = crystal.yaml.dump(super)
         superYAML = crystal.yaml.load(YAMLstring)
-        self.assertEqual(super, superYAML)
+        self.assertOrderingSuperEqual(super, superYAML, msg='YAML write/read fail?')
         # print(YAMLstring)
 
 

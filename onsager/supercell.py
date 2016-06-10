@@ -118,6 +118,9 @@ class Supercell(object):
         str += self.stoichiometry()
         str += '\nPositions:\n'
         str += '\n'.join([u.__str__() + ': ' + self.chemistry[o] for u, o in zip(self.pos, self.occ)])
+        str += '\nOrdering:\n'
+        str += '\n'.join([u.__str__() + ' ' + c for c,ulist in zip(self.chemistry, self.occposlist())
+                          for u in ulist])
         return str
 
     def __mul__(self, other):
@@ -459,5 +462,7 @@ class Supercell(object):
         for k,v in otherdefects.items():
             if k not in selfdefects: return None, None
             if len(v) != len(selfdefects[k]): return None, None
-        return None,None
+        g = crystal.GroupOp.ident([self.pos])
+        mapping = [[i for i in range(len(clist))] for clist in self.chemorder]
+        return g, mapping
 
