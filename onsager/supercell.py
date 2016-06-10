@@ -14,7 +14,7 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 import collections, copy, itertools, warnings
 from numbers import Integral
-from . import crystal
+from onsager import crystal
 from functools import reduce
 
 

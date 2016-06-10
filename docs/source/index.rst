@@ -9,6 +9,7 @@ Contents:
    includeme
    crystal
    CrystalStars
+   supercell
    PowerExpansion
    GFcalc
    OnsagerCalc
