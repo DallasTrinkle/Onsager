@@ -787,6 +787,55 @@ class VacancyMediated(object):
                         tagdict[tag], tagdicttype[tag] = i, tagtype
         return tags, tagdict, tagdicttype
 
+    def makesupercells(self, super_n):
+        """
+        Take in a supercell matrix, then generate all of the supercells needed to compute
+        site energies and transitions (corresponding to the representatives).
+
+        :param super_n: 3x3 integer matrix to define our supercell
+        :return superdict: dictionary of `states`, `transitions`, and `transmapping` that
+            correspond to dictionaries with tags.
+            superdict['states'][i] = supercell of state;
+            superdict['transitions'][n] = (supercell initial, supercell final);
+            superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+        """
+        superdict = {'states': {}, 'transitions': {}, 'transmapping': {}}
+        basesupercell = supercell.Supercell(self.crys, super_n, Nsolute=1)
+        basesupercell.definesolute(self.crys.Nchem, 'solute')
+        basis = self.crys.basis[self.chem]
+        # fill up the supercell with all the *other* atoms
+        # for (c, i) in self.crys.atomindices:
+        #     if c == self.chem: continue
+        #     basesupercell.fillperiodic((c, i), Wyckoff=False)  # for efficiency
+        # for sites, tags in zip(self.sitelist, self.tags['states']):
+        #     i, tag = sites[0], tags[0]
+        #     u = basis[i]
+        #     super = basesupercell.copy()
+        #     ind = np.dot(super.invsuper, u) / super.size
+        #     # put an interstitial in that single state; the "first" one is fine:
+        #     super[ind] = self.chem
+        #     superdict['states'][tag] = super
+        # for jumps, tags in zip(self.jumpnetwork, self.tags['transitions']):
+        #     (i0, j0), dx0 = jumps[0]
+        #     tag = tags[0]
+        #     u0 = self.crys.basis[self.chem][i0]
+        #     u1 = u0 + np.dot(self.crys.invlatt, dx0)  # should correspond to the j0
+        #     super0, super1 = basesupercell.copy(), basesupercell.copy()
+        #     ind0, ind1 = np.dot(super0.invsuper, u0) / super.size, np.dot(super1.invsuper, u1) / super.size
+        #     # put interstitials at our corresponding sites
+        #     super0[ind0], super1[ind1] = self.chem, self.chem
+        #     superdict['transitions'][tag] = (super0, super1)
+        #     # determine the mappings:
+        #     superdict['transmapping'][tag] = tuple()
+        #     for s in (super0, super1):
+        #         for k, v in superdict['states'].items():
+        #             # attempt the mapping
+        #             g, mapping = v.equivalencemap(s)
+        #             if g is not None:
+        #                 superdict['transmapping'][tag] += ((k, g, mapping),)
+        #                 break
+        return superdict
+
     # this is part of our *class* definition: list of data that can be directly assigned / read
     __HDF5list__ = ('chem', 'N', 'invmap', 'VectorBasis', 'VV', 'NVB',
                     'thermo2kin', 'kin2vacancy', 'outerkin', 'vstar2kin',

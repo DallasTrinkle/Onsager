@@ -258,6 +258,53 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                         msg='Failure to match correlation ({}, {}), got {}, {}'.format(
                             self.correlx, self.correlz, -Lss[0, 0] / Lsv[0, 0], -Lss[2, 2] / Lsv[2, 2]))
 
+    def testSupercell(self):
+        """Can we construct proper supercells for our diffuser?"""
+        diffuser = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        super_n = np.array([[3, 0, 0], [0, 3, 0], [0, 0, 2]])
+        supercelldict = diffuser.makesupercells(super_n)
+        for key in ('states', 'transitions', 'transmapping'):
+            self.assertIn(key, supercelldict)
+            self.assertGreaterEqual(len(supercelldict[key]), 1)
+        # check that *every* supercell only has one defect in it:
+        # for k, v in supercelldict['states'].items():
+        #     defectcontent = v.defectindices()
+        #     self.assertEqual(len(defectcontent), 1, msg='{} has multiple defect types?'.format(k))
+        #     for indset in defectcontent.values():
+        #         self.assertEqual(len(indset), 1, msg='{} has multiple defects?'.format(k))
+        #         for ind in indset: pass  # do this to get the single index in indset, assign to ind
+        #     # check that we've got a supercell with the correct; look at the position of the interstitial
+        #     basis = crystal.incell(np.dot(v.super, v.pos[ind]))
+        #     crysbasis = diffuser.crys.basis[diffuser.chem][diffuser.sitelist[diffuser.tagdict[k]][0]]
+        #     self.assertTrue(np.allclose(basis, crysbasis), '{} has interstitial at {} not {}'.format(k, basis, crysbasis))
+        # for k, v in supercelldict['transitions'].items():
+        #     self.assertEqual(len(v), 2, msg='{} does not have two entries?'.format(k))
+        #     self.assertIn(k, supercelldict['transmapping'])
+        #     indices = tuple()
+        #     for s in v:
+        #         defectcontent = s.defectindices()
+        #         self.assertEqual(len(defectcontent), 1, msg='{} has multiple defect types?'.format(k))
+        #         for indset in defectcontent.values():
+        #             self.assertEqual(len(indset), 1, msg='{} has multiple defects?'.format(k))
+        #             for ind in indset: indices += (ind,)  # append to our list
+        #     # check initial state, final state, and deltax
+        #     (i0,j0), dx0 = diffuser.jumpnetwork[diffuser.tagdict[k]][0]
+        #     basis = crystal.incell(np.dot(v[0].super, v[0].pos[indices[0]]))
+        #     crysbasis = diffuser.crys.basis[diffuser.chem][i0]
+        #     self.assertTrue(np.allclose(basis, crysbasis), '{} has interstitial at {} not {}'.format(k, basis, crysbasis))
+        #     basis = crystal.incell(np.dot(v[1].super, v[1].pos[indices[1]]))
+        #     crysbasis = diffuser.crys.basis[diffuser.chem][j0]
+        #     self.assertTrue(np.allclose(basis, crysbasis), '{} has interstitial at {} not {}'.format(k, basis, crysbasis))
+        #     dx = np.dot(v[0].lattice, crystal.inhalf(v[1].pos[indices[1]] - v[0].pos[indices[0]]))
+        #     self.assertTrue(np.allclose(dx, dx0), '{} has interstitial moving {} not {}'.format(k, dx, dx0))
+        # for k, v in supercelldict['transmapping'].items():
+        #     self.assertEqual(len(v), 2, msg='{} does not have two entries?'.format(k))
+        #     self.assertIn(k, supercelldict['transitions'])
+        #     for s in v:
+        #         self.assertIn(s[0], supercelldict['states'])
+        #         self.assertNotEqual(s[1], None)
+        #         self.assertNotEqual(s[2], None)
+
 
 class CrystalOnsagerTestsB2(unittest.TestCase):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
