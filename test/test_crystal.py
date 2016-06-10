@@ -8,33 +8,36 @@ import unittest
 import numpy as np
 import onsager.crystal as crystal
 
+
 class UnitCellTests(unittest.TestCase):
     """Tests to make sure incell and halfcell work as expected."""
+
     def testincell(self):
         """In cell testing"""
-        a = np.array([4./3., -2./3.,19./9.])
-        b = np.array([1./3., 1./3., 1./9.])
+        a = np.array([4. / 3., -2. / 3., 19. / 9.])
+        b = np.array([1. / 3., 1. / 3., 1. / 9.])
         self.assertTrue(np.allclose(crystal.incell(a), b))
 
     def testhalfcell(self):
         """Half cell testing"""
-        a = np.array([4./3., -2./3.,17./9.])
-        b = np.array([1./3., 1./3., -1./9.])
+        a = np.array([4. / 3., -2. / 3., 17. / 9.])
+        b = np.array([1. / 3., 1. / 3., -1. / 9.])
         self.assertTrue(np.allclose(crystal.inhalf(a), b))
 
 
 class GroupOperationTests(unittest.TestCase):
     """Tests for our group operations."""
+
     def setUp(self):
-        self.rot = np.array([[0,1,0],
-                             [1,0,0],
-                             [0,0,1]])
+        self.rot = np.array([[0, 1, 0],
+                             [1, 0, 0],
+                             [0, 0, 1]])
         self.trans = np.zeros(3)
-        self.cartrot = np.array([[0.,1.,0.],
-                                 [1.,0.,0.],
-                                 [0.,0.,1.]])
+        self.cartrot = np.array([[0., 1., 0.],
+                                 [1., 0., 0.],
+                                 [0., 0., 1.]])
         self.indexmap = ((0,),)
-        self.mirrorop = crystal.GroupOp(self.rot,self.trans,self.cartrot,self.indexmap)
+        self.mirrorop = crystal.GroupOp(self.rot, self.trans, self.cartrot, self.indexmap)
         self.ident = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), ((0,),))
 
     def testEquality(self):
@@ -47,30 +50,30 @@ class GroupOperationTests(unittest.TestCase):
         """Can we add a vector to our group operation and get a new one?"""
         with self.assertRaises(TypeError):
             self.mirrorop + 0
-        v1 = np.array([1,0,0])
+        v1 = np.array([1, 0, 0])
         newop = self.mirrorop + v1
-        mirroroptrans = crystal.GroupOp(self.rot,self.trans + v1,self.cartrot,self.indexmap)
+        mirroroptrans = crystal.GroupOp(self.rot, self.trans + v1, self.cartrot, self.indexmap)
         self.assertEqual(newop, mirroroptrans)
         self.assertTrue(np.allclose((self.ident - v1).trans, -v1))
 
     def testMultiplication(self):
         """Does group operation multiplication work correctly?"""
-        self.assertEqual(self.mirrorop*self.mirrorop, self.ident)
-        v1 = np.array([1,0,0])
+        self.assertEqual(self.mirrorop * self.mirrorop, self.ident)
+        v1 = np.array([1, 0, 0])
         trans = self.ident + v1
-        self.assertEqual(trans*trans, self.ident + 2*v1)
-        rot3 = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), ((1,2,0),))
-        ident3 = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), ((0,1,2),))
-        self.assertEqual(rot3*rot3*rot3, ident3)
+        self.assertEqual(trans * trans, self.ident + 2 * v1)
+        rot3 = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), ((1, 2, 0),))
+        ident3 = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), ((0, 1, 2),))
+        self.assertEqual(rot3 * rot3 * rot3, ident3)
 
     def testInversion(self):
         """Is the product with the inverse equal to identity?"""
         self.assertEqual(self.ident.inv, self.ident.inv)
-        self.assertEqual(self.mirrorop*(self.mirrorop.inv()), self.ident)
-        v1 = np.array([1,0,0])
+        self.assertEqual(self.mirrorop * (self.mirrorop.inv()), self.ident)
+        v1 = np.array([1, 0, 0])
         trans = self.ident + v1
         self.assertEqual(trans.inv(), self.ident - v1)
-        inversion = crystal.GroupOp(-np.eye(3,dtype=int), np.zeros(3), -np.eye(3), ((0,),))
+        inversion = crystal.GroupOp(-np.eye(3, dtype=int), np.zeros(3), -np.eye(3), ((0,),))
         self.assertEqual(inversion.inv(), inversion)
         invtrans = inversion + v1
         self.assertEqual(invtrans.inv(), invtrans)
@@ -91,12 +94,12 @@ class GroupOperationTests(unittest.TestCase):
         cartrot = np.eye(3)
         rottype, eigenvect = (crystal.GroupOp(rot, self.trans, cartrot, self.indexmap)).eigen()
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
-        self.assertEqual(rottype, 1) # should be the identity
+        self.assertEqual(rottype, 1)  # should be the identity
         self.assertTrue(np.allclose(eigenvect, np.eye(3)))
         basis = crystal.VectorBasis(rottype, eigenvect)
-        self.assertEqual(basis[0], 3) # should be a sphere
-        tensorbasis = crystal.SymmTensorBasis(rottype, eigenvect) # at some point in the future, generalize
-        self.assertEqual(len(tensorbasis), 6) # should be 6 unique symmetric tensors
+        self.assertEqual(basis[0], 3)  # should be a sphere
+        tensorbasis = crystal.SymmTensorBasis(rottype, eigenvect)  # at some point in the future, generalize
+        self.assertEqual(len(tensorbasis), 6)  # should be 6 unique symmetric tensors
         for t in tensorbasis:
             self.assertTrue(np.all(t == t.T), msg="{} is not symmetric".format(t))
             for t2 in tensorbasis:
@@ -108,12 +111,12 @@ class GroupOperationTests(unittest.TestCase):
         cartrot = -np.eye(3)
         rottype, eigenvect = (crystal.GroupOp(rot, self.trans, cartrot, self.indexmap)).eigen()
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
-        self.assertEqual(rottype, -2) # should be the identity
+        self.assertEqual(rottype, -2)  # should be the identity
         self.assertTrue(np.allclose(eigenvect, np.eye(3)))
         basis = crystal.VectorBasis(rottype, eigenvect)
-        self.assertEqual(basis[0], 0) # should be a point
-        tensorbasis = crystal.SymmTensorBasis(rottype, eigenvect) # at some point in the future, generalize
-        self.assertEqual(len(tensorbasis), 6) # should be 6 unique symmetric tensors
+        self.assertEqual(basis[0], 0)  # should be a point
+        tensorbasis = crystal.SymmTensorBasis(rottype, eigenvect)  # at some point in the future, generalize
+        self.assertEqual(len(tensorbasis), 6)  # should be 6 unique symmetric tensors
         for t in tensorbasis:
             self.assertTrue(np.all(t == t.T), msg="{} is not symmetric".format(t))
             self.assertAlmostEqual(np.dot(t.flatten(), t.flatten()), 1)
@@ -122,21 +125,21 @@ class GroupOperationTests(unittest.TestCase):
                     self.assertAlmostEqual(np.dot(t.flatten(), t2.flatten()), 0)
 
         # mirror through the y=x line: (x,y) -> (y,x)
-        rot = np.array([[0,1,0],[1,0,0],[0,0,1]])
-        cartrot = np.array([[0.,1.,0.],[1.,0.,0.],[0.,0.,1.]])
+        rot = np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]])
+        cartrot = np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 1.]])
         rottype, eigenvect = (crystal.GroupOp(rot, self.trans, cartrot, self.indexmap)).eigen()
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
         self.assertEqual(rottype, -1)
         self.assertTrue(np.isclose(abs(np.dot(eigenvect[0],
-                                              np.array([1/np.sqrt(2), -1/np.sqrt(2),0]))), 1))
-        self.assertTrue(np.allclose(-eigenvect[0], np.dot(rot, eigenvect[0]))) # inverts
-        self.assertTrue(np.allclose(eigenvect[1], np.dot(rot, eigenvect[1]))) # leaves unchanged
-        self.assertTrue(np.allclose(eigenvect[2], np.dot(rot, eigenvect[2]))) # leaves unchanged
+                                              np.array([1 / np.sqrt(2), -1 / np.sqrt(2), 0]))), 1))
+        self.assertTrue(np.allclose(-eigenvect[0], np.dot(rot, eigenvect[0])))  # inverts
+        self.assertTrue(np.allclose(eigenvect[1], np.dot(rot, eigenvect[1])))  # leaves unchanged
+        self.assertTrue(np.allclose(eigenvect[2], np.dot(rot, eigenvect[2])))  # leaves unchanged
         basis = crystal.VectorBasis(rottype, eigenvect)
-        self.assertEqual(basis[0], 2) # should be a plane
+        self.assertEqual(basis[0], 2)  # should be a plane
         self.assertTrue(np.allclose(basis[1], eigenvect[0]))
-        tensorbasis = crystal.SymmTensorBasis(rottype, eigenvect) # at some point in the future, generalize
-        self.assertEqual(len(tensorbasis), 4) # should be 4 unique symmetric tensors
+        tensorbasis = crystal.SymmTensorBasis(rottype, eigenvect)  # at some point in the future, generalize
+        self.assertEqual(len(tensorbasis), 4)  # should be 4 unique symmetric tensors
         for t in tensorbasis:
             # check symmetry, and remaining unchanged with operations
             self.assertTrue(np.all(t == t.T), msg="{} is not symmetric".format(t))
@@ -149,19 +152,19 @@ class GroupOperationTests(unittest.TestCase):
                     self.assertAlmostEqual(np.dot(t.flatten(), t2.flatten()), 0)
 
         # three-fold rotation around the body-center
-        rot = np.array([[0,1,0],[0,0,1],[1,0,0]])
-        cartrot = np.array([[0.,1.,0.],[0.,0.,1.],[1.,0.,0.]])
+        rot = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
+        cartrot = np.array([[0., 1., 0.], [0., 0., 1.], [1., 0., 0.]])
         rottype, eigenvect = (crystal.GroupOp(rot, self.trans, cartrot, self.indexmap)).eigen()
         self.assertEqual(rottype, 3)
         self.assertTrue(np.isclose(np.linalg.det(eigenvect), 1))
         self.assertTrue(np.isclose(abs(np.dot(eigenvect[0],
-                                              np.array([1/np.sqrt(3), 1/np.sqrt(3), 1/np.sqrt(3)]))), 1))
-        self.assertTrue(np.allclose(eigenvect[0], np.dot(rot, eigenvect[0]))) # our rotation axis
+                                              np.array([1 / np.sqrt(3), 1 / np.sqrt(3), 1 / np.sqrt(3)]))), 1))
+        self.assertTrue(np.allclose(eigenvect[0], np.dot(rot, eigenvect[0])))  # our rotation axis
         basis = crystal.VectorBasis(rottype, eigenvect)
-        self.assertEqual(basis[0], 1) # should be a line
+        self.assertEqual(basis[0], 1)  # should be a line
         self.assertTrue(np.allclose(basis[1], eigenvect[0]))
-        tensorbasis = crystal.SymmTensorBasis(rottype, eigenvect) # at some point in the future, generalize
-        self.assertEqual(len(tensorbasis), 2) # should be 2 unique symmetric tensors
+        tensorbasis = crystal.SymmTensorBasis(rottype, eigenvect)  # at some point in the future, generalize
+        self.assertEqual(len(tensorbasis), 2)  # should be 2 unique symmetric tensors
         for t in tensorbasis:
             # check symmetry, and remaining unchanged with operations
             self.assertTrue(np.all(t == t.T), msg="{} is not symmetric".format(t))
@@ -179,34 +182,34 @@ class GroupOperationTests(unittest.TestCase):
         sphere = (3, np.zeros(3))
         point = (0, np.zeros(3))
         plane1 = (2, np.array([0., 0., 1.]))
-        plane2 = (2, np.array([1., 1., 1.])/np.sqrt(3))
+        plane2 = (2, np.array([1., 1., 1.]) / np.sqrt(3))
         line1 = (1, np.array([1., 0., 0.]))
         line2 = (1, np.array([0., 1., 0.]))
-        line3 = (1, np.array([1., -1., 0.])/np.sqrt(2))
+        line3 = (1, np.array([1., -1., 0.]) / np.sqrt(2))
 
         for t in [sphere, point, plane1, plane2, line1, line2, line3]:
             self.assertEqual(crystal.CombineVectorBasis(t, t)[0], t[0])
         res = crystal.CombineVectorBasis(line1, plane1)
-        self.assertEqual(res[0], 1) # should be a line
+        self.assertEqual(res[0], 1)  # should be a line
         self.assertTrue(np.isclose(abs(np.dot(res[1], line1[1])), 1))
         res = crystal.CombineVectorBasis(plane1, plane2)
-        self.assertEqual(res[0], 1) # should be a line
+        self.assertEqual(res[0], 1)  # should be a line
         self.assertTrue(np.isclose(abs(np.dot(res[1], line3[1])), 1))
         res = crystal.CombineVectorBasis(plane1, line1)
-        self.assertEqual(res[0], 1) # should be a line
+        self.assertEqual(res[0], 1)  # should be a line
         self.assertTrue(np.isclose(abs(np.dot(res[1], line1[1])), 1))
         res = crystal.CombineVectorBasis(plane2, line1)
-        self.assertEqual(res[0], 0) # should be a point
+        self.assertEqual(res[0], 0)  # should be a point
         res = crystal.CombineVectorBasis(line1, line2)
-        self.assertEqual(res[0], 0) # should be a point
+        self.assertEqual(res[0], 0)  # should be a point
 
     def testCombineTensorBasis(self):
         """Test the intersection of tensor bases"""
-        fullbasis = crystal.SymmTensorBasis(1, np.eye(3)) # full basis (identity)
-        yzbasis = crystal.SymmTensorBasis(-1, np.eye(3)) # mirror through the x axis
-        xzbasis = crystal.SymmTensorBasis(-1, [np.array([0.,1.,0.]), np.array([0.,0.,1.]), np.array([1.,0.,0.])])
-        rotbasis =  crystal.SymmTensorBasis(3, np.eye(3)) # 120 deg rot through the x axis
-        rotbasis2 = crystal.SymmTensorBasis(3, [np.array([0.,0.,1.]), np.array([1.,0.,0.]), np.array([0.,1.,0.])])
+        fullbasis = crystal.SymmTensorBasis(1, np.eye(3))  # full basis (identity)
+        yzbasis = crystal.SymmTensorBasis(-1, np.eye(3))  # mirror through the x axis
+        xzbasis = crystal.SymmTensorBasis(-1, [np.array([0., 1., 0.]), np.array([0., 0., 1.]), np.array([1., 0., 0.])])
+        rotbasis = crystal.SymmTensorBasis(3, np.eye(3))  # 120 deg rot through the x axis
+        rotbasis2 = crystal.SymmTensorBasis(3, [np.array([0., 0., 1.]), np.array([1., 0., 0.]), np.array([0., 1., 0.])])
         for b in [fullbasis, yzbasis, xzbasis, rotbasis, rotbasis2]:
             combbasis = crystal.CombineTensorBasis(fullbasis, b)
             self.assertEqual(len(b), len(combbasis))
@@ -214,13 +217,12 @@ class GroupOperationTests(unittest.TestCase):
             self.assertEqual(len(b), len(combbasis))
         combbasis = crystal.CombineTensorBasis(yzbasis, rotbasis)
         self.assertEqual(len(combbasis), len(crystal.CombineTensorBasis(rotbasis, yzbasis)))
-        self.assertEqual(len(combbasis), len(rotbasis)) # should be two left here
+        self.assertEqual(len(combbasis), len(rotbasis))  # should be two left here
         combbasis = crystal.CombineTensorBasis(rotbasis, rotbasis2)
-        self.assertEqual(len(combbasis), 1) # if there's only one, it has to be 1/sqrt(3).
-        self.assertAlmostEqual(1, abs(np.dot(combbasis[0].flatten(), np.eye(3).flatten()/np.sqrt(3))))
+        self.assertEqual(len(combbasis), 1)  # if there's only one, it has to be 1/sqrt(3).
+        self.assertAlmostEqual(1, abs(np.dot(combbasis[0].flatten(), np.eye(3).flatten() / np.sqrt(3))))
         combbasis = crystal.CombineTensorBasis(yzbasis, xzbasis)
         self.assertEqual(len(combbasis), 3)
-
 
 
 class CrystalClassTests(unittest.TestCase):
@@ -228,75 +230,75 @@ class CrystalClassTests(unittest.TestCase):
 
     def setUp(self):
         self.a0 = 2.5
-        self.c_a = np.sqrt(8./3.)
-        self.sclatt = self.a0*np.eye(3)
-        self.fcclatt = self.a0*np.array([[0, 0.5, 0.5],
-                                         [0.5, 0, 0.5],
-                                         [0.5, 0.5, 0]])
-        self.bcclatt = self.a0*np.array([[-0.5, 0.5, 0.5],
-                                         [0.5, -0.5, 0.5],
-                                         [0.5, 0.5, -0.5]])
-        self.hexlatt = self.a0*np.array([[0.5, 0.5, 0],
-                                         [-np.sqrt(0.75), np.sqrt(0.75), 0],
-                                         [0, 0, self.c_a]])
-        self.basis = [np.array([0.,0.,0.])]
+        self.c_a = np.sqrt(8. / 3.)
+        self.sclatt = self.a0 * np.eye(3)
+        self.fcclatt = self.a0 * np.array([[0, 0.5, 0.5],
+                                           [0.5, 0, 0.5],
+                                           [0.5, 0.5, 0]])
+        self.bcclatt = self.a0 * np.array([[-0.5, 0.5, 0.5],
+                                           [0.5, -0.5, 0.5],
+                                           [0.5, 0.5, -0.5]])
+        self.hexlatt = self.a0 * np.array([[0.5, 0.5, 0],
+                                           [-np.sqrt(0.75), np.sqrt(0.75), 0],
+                                           [0, 0, self.c_a]])
+        self.basis = [np.array([0., 0., 0.])]
 
     def isscMetric(self, crys, a0=0):
-        if a0==0: a0=self.a0
-        self.assertAlmostEqual(crys.volume, a0**3)
+        if a0 == 0: a0 = self.a0
+        self.assertAlmostEqual(crys.volume, a0 ** 3)
         for i, a2 in enumerate(crys.metric.flatten()):
-            if i%4 == 0:
+            if i % 4 == 0:
                 # diagonal element
-                self.assertAlmostEqual(a2, a0**2)
+                self.assertAlmostEqual(a2, a0 ** 2)
             else:
                 # off-diagonal element
                 self.assertAlmostEqual(a2, 0)
 
     def isfccMetric(self, crys, a0=0):
-        if a0==0: a0=self.a0
-        self.assertAlmostEqual(crys.volume, 0.25*a0**3)
+        if a0 == 0: a0 = self.a0
+        self.assertAlmostEqual(crys.volume, 0.25 * a0 ** 3)
         for i, a2 in enumerate(crys.metric.flatten()):
-            if i%4 == 0:
+            if i % 4 == 0:
                 # diagonal element
-                self.assertAlmostEqual(a2, 0.5*a0**2)
+                self.assertAlmostEqual(a2, 0.5 * a0 ** 2)
             else:
                 # off-diagonal element
-                self.assertAlmostEqual(a2, 0.25*a0**2)
+                self.assertAlmostEqual(a2, 0.25 * a0 ** 2)
 
     def isbccMetric(self, crys, a0=0):
-        if a0==0: a0=self.a0
-        self.assertAlmostEqual(crys.volume, 0.5*a0**3)
+        if a0 == 0: a0 = self.a0
+        self.assertAlmostEqual(crys.volume, 0.5 * a0 ** 3)
         for i, a2 in enumerate(crys.metric.flatten()):
-            if i%4 == 0:
+            if i % 4 == 0:
                 # diagonal element
-                self.assertAlmostEqual(a2, 0.75*a0**2)
+                self.assertAlmostEqual(a2, 0.75 * a0 ** 2)
             else:
                 # off-diagonal element
-                self.assertAlmostEqual(a2, -0.25*a0**2)
+                self.assertAlmostEqual(a2, -0.25 * a0 ** 2)
 
     def ishexMetric(self, crys, a0=0, c_a=0):
-        if a0==0: a0=self.a0
-        if c_a==0: c_a=self.c_a
-        self.assertAlmostEqual(crys.volume, np.sqrt(0.75)*c_a*a0**3)
-        self.assertAlmostEqual(crys.metric[0,0], a0**2)
-        self.assertAlmostEqual(crys.metric[1,1], a0**2)
-        self.assertAlmostEqual(crys.metric[0,1], -0.5*a0**2)
-        self.assertAlmostEqual(crys.metric[2,2], (c_a*a0)**2)
-        self.assertAlmostEqual(crys.metric[0,2], 0)
-        self.assertAlmostEqual(crys.metric[1,2], 0)
+        if a0 == 0: a0 = self.a0
+        if c_a == 0: c_a = self.c_a
+        self.assertAlmostEqual(crys.volume, np.sqrt(0.75) * c_a * a0 ** 3)
+        self.assertAlmostEqual(crys.metric[0, 0], a0 ** 2)
+        self.assertAlmostEqual(crys.metric[1, 1], a0 ** 2)
+        self.assertAlmostEqual(crys.metric[0, 1], -0.5 * a0 ** 2)
+        self.assertAlmostEqual(crys.metric[2, 2], (c_a * a0) ** 2)
+        self.assertAlmostEqual(crys.metric[0, 2], 0)
+        self.assertAlmostEqual(crys.metric[1, 2], 0)
 
     def isspacegroup(self, crys):
         """Check that the space group obeys all group definitions: not fast."""
         # 1. Contains the identity: O(group size)
         identity = None
         for g in crys.G:
-            if np.all(g.rot == np.eye(3, dtype=int) ):
+            if np.all(g.rot == np.eye(3, dtype=int)):
                 identity = g
                 self.assertTrue(np.allclose(g.trans, 0),
                                 msg="Identity has bad translation: {}".format(g.trans))
                 for atommap in g.indexmap:
                     for i, j in enumerate(atommap):
-                        self.assertTrue(i==j,
+                        self.assertTrue(i == j,
                                         msg="Identity has bad indexmap: {}".format(g.indexmap))
         self.assertTrue(identity is not None, msg="Missing identity")
         # 2. Check for inverses: O(group size^2)
@@ -309,7 +311,7 @@ class CrystalClassTests(unittest.TestCase):
         # 3. Closed under multiplication: g.g': O(group size^3)
         for g in crys.G:
             for gp in crys.G:
-                product = (g*gp).inhalf()
+                product = (g * gp).inhalf()
                 self.assertIn(product, crys.G,
                               msg="Missing product op:\n{}\n{}|{} *\n{}\n{}|{} = \n{}\n{}|{}".format(
                                   g.rot, g.cartrot, g.trans,
@@ -320,77 +322,78 @@ class CrystalClassTests(unittest.TestCase):
         """Does the simple cubic lattice have the right volume and metric?"""
         crys = crystal.Crystal(self.sclatt, self.basis)
         self.isscMetric(crys)
-        self.assertEqual(len(crys.basis), 1)    # one chemistry
-        self.assertEqual(len(crys.basis[0]), 1) # one atom in the unit cell
+        self.assertEqual(len(crys.basis), 1)  # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
 
     def testfccMetric(self):
         """Does the face-centered cubic lattice have the right volume and metric?"""
         crys = crystal.Crystal(self.fcclatt, self.basis)
         self.isfccMetric(crys)
-        self.assertEqual(len(crys.basis), 1)    # one chemistry
-        self.assertEqual(len(crys.basis[0]), 1) # one atom in the unit cell
+        self.assertEqual(len(crys.basis), 1)  # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
 
     def testbccMetric(self):
         """Does the body-centered cubic lattice have the right volume and metric?"""
         crys = crystal.Crystal(self.bcclatt, self.basis)
         self.isbccMetric(crys)
-        self.assertEqual(len(crys.basis), 1)    # one chemistry
-        self.assertEqual(len(crys.basis[0]), 1) # one atom in the unit cell
+        self.assertEqual(len(crys.basis), 1)  # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
 
     def testscReduce(self):
         """If we start with a supercell, does it get reduced back to our start?"""
-        nsuper = np.array([[2,0,0],[0,2,0],[0,0,1]], dtype=int)
+        nsuper = np.array([[2, 0, 0], [0, 2, 0], [0, 0, 1]], dtype=int)
         doublebasis = [self.basis[0], np.array([0.5, 0, 0]) + self.basis[0],
                        np.array([0, 0.5, 0]) + self.basis[0], np.array([0.5, 0.5, 0]) + self.basis[0]]
         crys = crystal.Crystal(np.dot(self.sclatt, nsuper), doublebasis)
         self.isscMetric(crys)
-        self.assertEqual(len(crys.basis), 1)    # one chemistry
-        self.assertEqual(len(crys.basis[0]), 1) # one atom in the unit cell
+        self.assertEqual(len(crys.basis), 1)  # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
 
     def testscReduce2(self):
         """If we start with a supercell, does it get reduced back to our start?"""
-        nsuper = np.array([[5,-3,0],[1,-1,3],[-2,1,1]], dtype=int)
+        nsuper = np.array([[5, -3, 0], [1, -1, 3], [-2, 1, 1]], dtype=int)
         crys = crystal.Crystal(np.dot(self.sclatt, nsuper), self.basis)
         self.isscMetric(crys)
-        self.assertEqual(len(crys.basis), 1)    # one chemistry
-        self.assertEqual(len(crys.basis[0]), 1) # one atom in the unit cell
+        self.assertEqual(len(crys.basis), 1)  # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
 
     def testbccReduce2(self):
         """If we start with a supercell, does it get reduced back to our start?"""
-        basis = [[np.array([0.,0.,0.]), np.array([0.5,0.5,0.5])]]
+        basis = [[np.array([0., 0., 0.]), np.array([0.5, 0.5, 0.5])]]
         crys = crystal.Crystal(self.sclatt, basis)
         self.isbccMetric(crys)
-        self.assertEqual(len(crys.basis), 1)    # one chemistry
-        self.assertEqual(len(crys.basis[0]), 1) # one atom in the unit cell
+        self.assertEqual(len(crys.basis), 1)  # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
 
     def testscShift(self):
         """If we start with a supercell, does it get reduced back to our start?"""
-        nsuper = np.array([[5,-3,0],[1,-1,3],[-2,1,1]], dtype=int)
+        nsuper = np.array([[5, -3, 0], [1, -1, 3], [-2, 1, 1]], dtype=int)
         basis = [np.array([0.33, -0.25, 0.45])]
         crys = crystal.Crystal(np.dot(self.sclatt, nsuper), basis)
         self.isscMetric(crys)
-        self.assertEqual(len(crys.basis), 1)    # one chemistry
-        self.assertEqual(len(crys.basis[0]), 1) # one atom in the unit cell
-        self.assertTrue(np.allclose(crys.basis[0][0], np.array([0,0,0])))
+        self.assertEqual(len(crys.basis), 1)  # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
+        self.assertTrue(np.allclose(crys.basis[0][0], np.array([0, 0, 0])))
 
     def testhcp(self):
         """If we start with a supercell, does it get reduced back to our start?"""
-        basis = [np.array([0, 0, 0]), np.array([1./3., 2./3., 1./2.])]
+        basis = [np.array([0, 0, 0]), np.array([1. / 3., 2. / 3., 1. / 2.])]
         crys = crystal.Crystal(self.hexlatt, basis)
         self.ishexMetric(crys)
-        self.assertEqual(len(crys.basis), 1)    # one chemistry
-        self.assertEqual(len(crys.basis[0]), 2) # two atoms in the unit cell
+        self.assertEqual(len(crys.basis), 1)  # one chemistry
+        self.assertEqual(len(crys.basis[0]), 2)  # two atoms in the unit cell
         # there needs to be [1/3,2/3,1/4] or [1/3,2/3,3/4], and then the opposite
         # it's a little clunky; there's probably a better way to test this:
-        if np.any([ np.allclose(u, np.array([1./3.,2./3.,0.25]))
-                    for atomlist in crys.basis for u in atomlist]):
-            self.assertTrue(np.any([ np.allclose(u, np.array([2./3.,1./3.,0.75]))
-                                     for atomlist in crys.basis for u in atomlist]))
-        elif np.any([ np.allclose(u, np.array([1./3.,2./3.,0.75]))
-                      for atomlist in crys.basis for u in atomlist]):
-            self.assertTrue(np.any([ np.allclose(u, np.array([2./3.,1./3.,0.25]))
-                                     for atomlist in crys.basis for u in atomlist]))
-        else: self.assertTrue(False, msg="HCP basis not correct")
+        if np.any([np.allclose(u, np.array([1. / 3., 2. / 3., 0.25]))
+                   for atomlist in crys.basis for u in atomlist]):
+            self.assertTrue(np.any([np.allclose(u, np.array([2. / 3., 1. / 3., 0.75]))
+                                    for atomlist in crys.basis for u in atomlist]))
+        elif np.any([np.allclose(u, np.array([1. / 3., 2. / 3., 0.75]))
+                     for atomlist in crys.basis for u in atomlist]):
+            self.assertTrue(np.any([np.allclose(u, np.array([2. / 3., 1. / 3., 0.25]))
+                                    for atomlist in crys.basis for u in atomlist]))
+        else:
+            self.assertTrue(False, msg="HCP basis not correct")
         self.assertEqual(len(crys.G), 24)
         # for g in crys.G:
         #     print g.rot
@@ -416,12 +419,12 @@ class CrystalClassTests(unittest.TestCase):
 
     def testomegagroupops(self):
         """Build the omega lattice; make sure the space group is correct"""
-        basis = [[np.array([0.,0.,0.]),
-                  np.array([1./3.,2./3.,0.5]),
-                  np.array([2./3.,1./3.,0.5])]]
+        basis = [[np.array([0., 0., 0.]),
+                  np.array([1. / 3., 2. / 3., 0.5]),
+                  np.array([2. / 3., 1. / 3., 0.5])]]
         crys = crystal.Crystal(self.hexlatt, basis)
         self.assertEqual(crys.N, 3)
-        self.assertEqual(crys.atomindices, [(0,0), (0,1), (0,2)])
+        self.assertEqual(crys.atomindices, [(0, 0), (0, 1), (0, 2)])
         self.assertEqual(len(crys.G), 24)
         self.isspacegroup(crys)
 
@@ -431,48 +434,50 @@ class CrystalClassTests(unittest.TestCase):
         lattvect = np.array([2, -1, 3])
         for ind in crys.atomindices:
             b = crys.basis[ind[0]][ind[1]]
-            pos = crys.lattice[:,0]*(lattvect[0] + b[0]) + \
-                  crys.lattice[:,1]*(lattvect[1] + b[1]) + \
-                  crys.lattice[:,2]*(lattvect[2] + b[2])
+            pos = crys.lattice[:, 0] * (lattvect[0] + b[0]) + \
+                  crys.lattice[:, 1] * (lattvect[1] + b[1]) + \
+                  crys.lattice[:, 2] * (lattvect[2] + b[2])
             self.assertTrue(np.allclose(pos, crys.pos2cart(lattvect, ind)))
-        basis = [[np.array([0.,0.,0.]),
-                  np.array([1./3.,2./3.,0.5]),
-                  np.array([2./3.,1./3.,0.5])]]
+        basis = [[np.array([0., 0., 0.]),
+                  np.array([1. / 3., 2. / 3., 0.5]),
+                  np.array([2. / 3., 1. / 3., 0.5])]]
         crys = crystal.Crystal(self.hexlatt, basis)
         for ind in crys.atomindices:
             b = crys.basis[ind[0]][ind[1]]
-            pos = crys.lattice[:,0]*(lattvect[0] + b[0]) + \
-                  crys.lattice[:,1]*(lattvect[1] + b[1]) + \
-                  crys.lattice[:,2]*(lattvect[2] + b[2])
+            pos = crys.lattice[:, 0] * (lattvect[0] + b[0]) + \
+                  crys.lattice[:, 1] * (lattvect[1] + b[1]) + \
+                  crys.lattice[:, 2] * (lattvect[2] + b[2])
             self.assertTrue(np.allclose(pos, crys.pos2cart(lattvect, ind)))
 
     def testmaptrans(self):
         """Does our map translation operate correctly?"""
-        basis = [[np.array([0,0,0])]]
+        basis = [[np.array([0, 0, 0])]]
         trans, indexmap = crystal.maptranslation(basis, basis)
-        self.assertTrue(np.allclose(trans, np.array([0,0,0])))
+        self.assertTrue(np.allclose(trans, np.array([0, 0, 0])))
         self.assertEqual(indexmap, ((0,),))
 
-        oldbasis = [[np.array([0.2,0,0])]]
-        newbasis = [[np.array([-0.2,0,0])]]
+        oldbasis = [[np.array([0.2, 0, 0])]]
+        newbasis = [[np.array([-0.2, 0, 0])]]
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
-        self.assertTrue(np.allclose(trans, np.array([0.4,0,0])))
+        self.assertTrue(np.allclose(trans, np.array([0.4, 0, 0])))
         self.assertEqual(indexmap, ((0,),))
 
-        oldbasis = [[np.array([0.,0.,0.]), np.array([1./3.,2./3.,1./2.])]]
-        newbasis = [[np.array([0.,0.,0.]), np.array([-1./3.,-2./3.,-1./2.])]]
+        oldbasis = [[np.array([0., 0., 0.]), np.array([1. / 3., 2. / 3., 1. / 2.])]]
+        newbasis = [[np.array([0., 0., 0.]), np.array([-1. / 3., -2. / 3., -1. / 2.])]]
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
-        self.assertTrue(np.allclose(trans, np.array([1./3.,-1./3.,-1./2.])))
-        self.assertEqual(indexmap, ((1,0),))
+        self.assertTrue(np.allclose(trans, np.array([1. / 3., -1. / 3., -1. / 2.])))
+        self.assertEqual(indexmap, ((1, 0),))
 
-        oldbasis = [[np.array([0.,0.,0.])], [np.array([1./3.,2./3.,1./2.]), np.array([2./3.,1./3.,1./2.])]]
-        newbasis = [[np.array([0.,0.,0.])], [np.array([2./3.,1./3.,1./2.]), np.array([1./3.,2./3.,1./2.])]]
+        oldbasis = [[np.array([0., 0., 0.])],
+                    [np.array([1. / 3., 2. / 3., 1. / 2.]), np.array([2. / 3., 1. / 3., 1. / 2.])]]
+        newbasis = [[np.array([0., 0., 0.])],
+                    [np.array([2. / 3., 1. / 3., 1. / 2.]), np.array([1. / 3., 2. / 3., 1. / 2.])]]
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
-        self.assertTrue(np.allclose(trans, np.array([0.,0.,0.])))
-        self.assertEqual(indexmap, ((0,),(1,0)))
+        self.assertTrue(np.allclose(trans, np.array([0., 0., 0.])))
+        self.assertEqual(indexmap, ((0,), (1, 0)))
 
-        oldbasis = [[np.array([0.,0.,0.]), np.array([1./3.,2./3.,1./2.])]]
-        newbasis = [[np.array([0.,0.,0.]), np.array([-1./4.,-1./2.,-1./2.])]]
+        oldbasis = [[np.array([0., 0., 0.]), np.array([1. / 3., 2. / 3., 1. / 2.])]]
+        newbasis = [[np.array([0., 0., 0.]), np.array([-1. / 4., -1. / 2., -1. / 2.])]]
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
         self.assertEqual(indexmap, None)
 
@@ -480,25 +485,25 @@ class CrystalClassTests(unittest.TestCase):
         """Test out that we can apply group operations to directions"""
         crys = crystal.Crystal(self.fcclatt, self.basis)
         # 1. direction
-        direc = np.array([2.,0.,0.])
+        direc = np.array([2., 0., 0.])
         direc2 = np.dot(direc, direc)
         count = np.zeros(3, dtype=int)
         for g in crys.G:
             rotdirec = crys.g_direc(g, direc)
             self.assertAlmostEqual(np.dot(rotdirec, rotdirec), direc2)
-            costheta = np.dot(rotdirec, direc)/direc2
+            costheta = np.dot(rotdirec, direc) / direc2
             self.assertTrue(np.isclose(costheta, 1) or np.isclose(costheta, 0) or np.isclose(costheta, -1))
-            count[int(round(costheta+1))] += 1
-        self.assertEqual(count[0], 8) ## antiparallel
-        self.assertEqual(count[1], 32) ## perpendicular
-        self.assertEqual(count[2], 8) ## parallel
+            count[int(round(costheta + 1))] += 1
+        self.assertEqual(count[0], 8)  ## antiparallel
+        self.assertEqual(count[1], 32)  ## perpendicular
+        self.assertEqual(count[2], 8)  ## parallel
 
     def testomegagroupops_positions(self):
         """Test out that we can apply group operations to positions"""
         # 2. position = lattice vector + 2-tuple atom-index
-        basis = [[np.array([0.,0.,0.]),
-                  np.array([1./3.,2./3.,0.5]),
-                  np.array([2./3.,1./3.,0.5])]]
+        basis = [[np.array([0., 0., 0.]),
+                  np.array([1. / 3., 2. / 3., 0.5]),
+                  np.array([2. / 3., 1. / 3., 0.5])]]
         crys = crystal.Crystal(self.hexlatt, basis)
         lattvec = np.array([-2, 3, 1])
         for ind in crys.atomindices:
@@ -524,9 +529,9 @@ class CrystalClassTests(unittest.TestCase):
 
     def testinverspos(self):
         """Test the inverses of pos2cart and unit2cart"""
-        basis = [[np.array([0.,0.,0.]),
-                  np.array([1./3.,2./3.,0.5]),
-                  np.array([2./3.,1./3.,0.5])]]
+        basis = [[np.array([0., 0., 0.]),
+                  np.array([1. / 3., 2. / 3., 0.5]),
+                  np.array([2. / 3., 1. / 3., 0.5])]]
         crys = crystal.Crystal(self.hexlatt, basis)
         lattvec = np.array([-2, 3, 1])
         for ind in crys.atomindices:
@@ -535,19 +540,19 @@ class CrystalClassTests(unittest.TestCase):
             self.assertTrue(np.allclose(uback, crys.basis[ind[0]][ind[1]]))
             lattback, indback = crys.cart2pos(crys.pos2cart(lattvec, ind))
             self.assertTrue(np.all(lattback == lattvec))
-            self.assertEqual(indback,ind)
-        lattback, indback = crys.cart2pos(np.array([0.25*self.a0, 0.25*self.a0, 0.]))
+            self.assertEqual(indback, ind)
+        lattback, indback = crys.cart2pos(np.array([0.25 * self.a0, 0.25 * self.a0, 0.]))
         self.assertIsNone(indback)
 
     def testWyckoff(self):
         """Test grouping for Wyckoff positions"""
-        basis = [[np.array([0.,0.,0.]),
-                  np.array([1./3.,2./3.,0.5]),
-                  np.array([2./3.,1./3.,0.5])]]
+        basis = [[np.array([0., 0., 0.]),
+                  np.array([1. / 3., 2. / 3., 0.5]),
+                  np.array([2. / 3., 1. / 3., 0.5])]]
         crys = crystal.Crystal(self.hexlatt, basis)
         # crys.Wyckoff : frozen set of frozen sets of tuples that are all equivalent
-        Wyckoffind = {frozenset([(0,0)]),
-                      frozenset([(0,1), (0,2)])}
+        Wyckoffind = {frozenset([(0, 0)]),
+                      frozenset([(0, 1), (0, 2)])}
         self.assertEqual(crys.Wyckoff, Wyckoffind)
         # now ask it to generate the set of all equivalent points
         for wyckset in crys.Wyckoff:
@@ -563,50 +568,50 @@ class CrystalClassTests(unittest.TestCase):
     def testVectorBasis(self):
         """Test for the generation of a vector (and tensor) basis for sites in a crystal: oct. + tet."""
         # start with HCP, then "build out" a lattice that includes interstitial sites
-        basis = [[np.array([1./3.,2./3.,0.25]),
-                  np.array([2./3.,1./3.,0.75])]]
+        basis = [[np.array([1. / 3., 2. / 3., 0.25]),
+                  np.array([2. / 3., 1. / 3., 0.75])]]
         HCPcrys = crystal.Crystal(self.hexlatt, basis)
         octset = HCPcrys.Wyckoffpos(np.array([0., 0., 0.5]))
-        tetset = HCPcrys.Wyckoffpos(np.array([1./3., 2./3., 0.5]))
+        tetset = HCPcrys.Wyckoffpos(np.array([1. / 3., 2. / 3., 0.5]))
         self.assertEqual(len(octset), 2)
         self.assertEqual(len(tetset), 4)
         # now, build up HCP + interstitials (which are of a *different chemistry*)
         HCP_intercrys = crystal.Crystal(self.hexlatt, basis + [octset + tetset])
         for i in range(2):
-            vbas = HCP_intercrys.VectorBasis((1,i)) # for our octahedral site
-            self.assertEqual(vbas[0], 0) # should be a point
-            tbas = HCP_intercrys.SymmTensorBasis((1,i))
+            vbas = HCP_intercrys.VectorBasis((1, i))  # for our octahedral site
+            self.assertEqual(vbas[0], 0)  # should be a point
+            tbas = HCP_intercrys.SymmTensorBasis((1, i))
             self.assertEqual(len(tbas), 2)
             for t in tbas:
-                for tij in (t[i,j] for i in range(3) for j in range(3) if i!=j):
+                for tij in (t[i, j] for i in range(3) for j in range(3) if i != j):
                     self.assertAlmostEqual(0, tij)
-                self.assertAlmostEqual(t[0,0], t[1,1])
+                self.assertAlmostEqual(t[0, 0], t[1, 1])
         for i in range(2, 6):
-            vbas = HCP_intercrys.VectorBasis((1,i)) # for our tetrahedal sites
-            self.assertEqual(vbas[0], 1) # should be a line
-            self.assertEqual(vbas[1][0], 0) # pointing vertically up
-            self.assertEqual(vbas[1][1], 0) # pointing vertically up
-            tbas = HCP_intercrys.SymmTensorBasis((1,i))
+            vbas = HCP_intercrys.VectorBasis((1, i))  # for our tetrahedal sites
+            self.assertEqual(vbas[0], 1)  # should be a line
+            self.assertEqual(vbas[1][0], 0)  # pointing vertically up
+            self.assertEqual(vbas[1][1], 0)  # pointing vertically up
+            tbas = HCP_intercrys.SymmTensorBasis((1, i))
             self.assertEqual(len(tbas), 2)
             for t in tbas:
-                for tij in (t[i,j] for i in range(3) for j in range(3) if i!=j):
+                for tij in (t[i, j] for i in range(3) for j in range(3) if i != j):
                     self.assertAlmostEqual(0, tij)
-                self.assertAlmostEqual(t[0,0], t[1,1])
+                self.assertAlmostEqual(t[0, 0], t[1, 1])
 
     def testJumpNetwork(self):
         """Test for the generation of our jump network between octahedral and tetrahedral sites."""
         # start with HCP, then "build out" a lattice that includes interstitial sites
-        basis = [[np.array([1./3.,2./3.,0.25]),
-                  np.array([2./3.,1./3.,0.75])]]
+        basis = [[np.array([1. / 3., 2. / 3., 0.25]),
+                  np.array([2. / 3., 1. / 3., 0.75])]]
         HCPcrys = crystal.Crystal(self.hexlatt, basis)
         octset = HCPcrys.Wyckoffpos(np.array([0., 0., 0.5]))
-        tetset = HCPcrys.Wyckoffpos(np.array([1./3., 2./3., 0.625]))
+        tetset = HCPcrys.Wyckoffpos(np.array([1. / 3., 2. / 3., 0.625]))
         self.assertEqual(len(octset), 2)
         self.assertEqual(len(tetset), 4)
         # now, build up HCP + interstitials (which are of a *different chemistry*)
         HCP_intercrys = crystal.Crystal(self.hexlatt, basis + [octset + tetset])
-        jumpnetwork = HCP_intercrys.jumpnetwork(1, self.a0*0.8, 0.5*self.a0) # tuned to avoid t->t in basal plane
-        self.assertEqual(len(jumpnetwork), 2) # should contain o->t/t->o and t->t networks
+        jumpnetwork = HCP_intercrys.jumpnetwork(1, self.a0 * 0.8, 0.5 * self.a0)  # tuned to avoid t->t in basal plane
+        self.assertEqual(len(jumpnetwork), 2)  # should contain o->t/t->o and t->t networks
         self.assertEqual(sorted(len(t) for t in jumpnetwork), [4, 24])
         # print crystal.yaml.dump(jumpnetwork)
         # for i, t in enumerate(jumpnetwork):
@@ -617,10 +622,10 @@ class CrystalClassTests(unittest.TestCase):
     def testNNfcc(self):
         """Test of the nearest neighbor construction"""
         crys = crystal.Crystal(self.fcclatt, self.basis)
-        nnlist = crys.nnlist((0,0), 0.9*self.a0)
+        nnlist = crys.nnlist((0, 0), 0.9 * self.a0)
         self.assertEqual(len(nnlist), 12)
         for x in nnlist:
-            self.assertTrue(np.isclose(np.dot(x,x), 0.5*self.a0*self.a0))
+            self.assertTrue(np.isclose(np.dot(x, x), 0.5 * self.a0 * self.a0))
 
 
 class CrystalSpinTests(unittest.TestCase):
@@ -629,12 +634,12 @@ class CrystalSpinTests(unittest.TestCase):
 
     def setUp(self):
         self.a0 = 1.0
-        self.latt = self.a0*np.eye(3)
+        self.latt = self.a0 * np.eye(3)
         # RockSalt:
         self.basis = [[np.array([0., 0., 0.]), np.array([0., 0.5, 0.5]),
                        np.array([0.5, 0., 0.5]), np.array([0.5, 0.5, 0.])],
                       [np.array([0., 0., 0.5]), np.array([0., 0.5, 0.]),
-                       np.array([0.5, 0., 0.]), np.array([0.5, 0.5, 0.5])] ]
+                       np.array([0.5, 0., 0.]), np.array([0.5, 0.5, 0.5])]]
         self.spins = [[1, -1, -1, 1], [0, 0, 0, 0]]
 
     def testUN(self):
@@ -646,62 +651,63 @@ class CrystalSpinTests(unittest.TestCase):
         self.assertEqual(len(crys.basis[0]), 2)
         self.assertEqual(len(crys.basis[1]), 2)
         self.assertEqual(len(crys.Wyckoff), 2,
-                         msg='Not matching Wyckoff?\n{}\n{}'.format(crys.Wyckoff,crys))
-        tetlatt = self.a0*np.array([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.01]])
+                         msg='Not matching Wyckoff?\n{}\n{}'.format(crys.Wyckoff, crys))
+        tetlatt = self.a0 * np.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.01]])
         tetcrys = crystal.Crystal(tetlatt, self.basis, ['U', 'N'])
         # the tetragonal distortion has 1 U and 1 N (when there's no spin), so the group op list
         # is twice as big, and includes translations for each
-        self.assertEqual(len(crys.G), 2*len(tetcrys.G))
+        self.assertEqual(len(crys.G), 2 * len(tetcrys.G))
 
     def testmaptrans(self):
         """Does our map translation operate correctly with spins?"""
-        basis = [[np.array([0,0,0])]]
+        basis = [[np.array([0, 0, 0])]]
         spins = [[1]]
         trans, indexmap = crystal.maptranslation(basis, basis, spins, spins)
-        self.assertTrue(np.allclose(trans, np.array([0,0,0])))
+        self.assertTrue(np.allclose(trans, np.array([0, 0, 0])))
         self.assertEqual(indexmap, ((0,),))
 
-        oldbasis = [[np.array([0.2,0,0])]]
-        newbasis = [[np.array([-0.2,0,0])]]
+        oldbasis = [[np.array([0.2, 0, 0])]]
+        newbasis = [[np.array([-0.2, 0, 0])]]
         oldspins = [[1]]
         newspins = [[-1]]
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis, oldspins, newspins)
         self.assertEqual(indexmap, None)  # should NOT be able to do this mapping with spins!
 
-        oldbasis = [[np.array([0.,0.,0.]), np.array([0.,0.5,0.5]),
-                     np.array([0.5,0.,0.5]), np.array([0.5,0.5,0.])]]
+        oldbasis = [[np.array([0., 0., 0.]), np.array([0., 0.5, 0.5]),
+                     np.array([0.5, 0., 0.5]), np.array([0.5, 0.5, 0.])]]
         newbasis = oldbasis
-        oldspins,newspins = [[2,-2,-1,1]], [[2,-2,-1,1]]
+        oldspins, newspins = [[2, -2, -1, 1]], [[2, -2, -1, 1]]
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis, oldspins, newspins)
-        self.assertTrue(np.allclose(trans, np.array([0.,0.,0.])))
-        self.assertEqual(indexmap, ((0,1,2,3),))
+        self.assertTrue(np.allclose(trans, np.array([0., 0., 0.])))
+        self.assertEqual(indexmap, ((0, 1, 2, 3),))
 
-        oldspins,newspins = [[2,-2,-1,1]], [[1,-1,-2,2]]
+        oldspins, newspins = [[2, -2, -1, 1]], [[1, -1, -2, 2]]
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis, oldspins, newspins)
         self.assertTrue(np.allclose(np.abs(trans[0]), 0.5))
         self.assertTrue(np.allclose(np.abs(trans[1]), 0.5))
         self.assertTrue(np.allclose(np.abs(trans[2]), 0.))
-        self.assertEqual(indexmap, ((3,2,1,0),))
+        self.assertEqual(indexmap, ((3, 2, 1, 0),))
 
     def testAddBasis(self):
         """Uranium-Nitride, with addbasis"""
         UNcrys = crystal.Crystal(self.latt, self.basis, ['U', 'N'], self.spins)
-        Ucrys =  crystal.Crystal(self.latt, self.basis[0], ['U'], self.spins[0])
-        UNnewcrys = Ucrys.addbasis(Ucrys.Wyckoffpos(Ucrys.cart2unit(np.array([0.,0.,0.5*self.a0]))[1]),
-                                                    ['N'], [0,0])
+        Ucrys = crystal.Crystal(self.latt, self.basis[0], ['U'], self.spins[0])
+        UNnewcrys = Ucrys.addbasis(Ucrys.Wyckoffpos(Ucrys.cart2unit(np.array([0., 0., 0.5 * self.a0]))[1]),
+                                   ['N'], [0, 0])
         self.assertEqual(len(UNnewcrys.basis), 2,
-                         msg="Failed? {}\n+ basis:\n{}\ndoesn't match:\n{}".format(Ucrys,UNnewcrys,UNcrys))
+                         msg="Failed? {}\n+ basis:\n{}\ndoesn't match:\n{}".format(Ucrys, UNnewcrys, UNcrys))
         self.assertEqual(len(UNnewcrys.basis[0]), 2,
-                         msg="Failed? {}\n+ basis:\n{}\ndoesn't match:\n{}".format(Ucrys,UNnewcrys,UNcrys))
+                         msg="Failed? {}\n+ basis:\n{}\ndoesn't match:\n{}".format(Ucrys, UNnewcrys, UNcrys))
         self.assertEqual(len(UNnewcrys.basis[1]), 2,
-                         msg="Failed? {}\n+ basis:\n{}\ndoesn't match:\n{}".format(Ucrys,UNnewcrys,UNcrys))
+                         msg="Failed? {}\n+ basis:\n{}\ndoesn't match:\n{}".format(Ucrys, UNnewcrys, UNcrys))
 
 
 class YAMLTests(unittest.TestCase):
     """Tests to make sure we can use YAML to write and read our classes."""
+
     def testarrayYAML(self):
         """Test that we can write and read an array"""
-        for a in [np.array([1]), np.array([1.,0.,0.]), np.eye(3, dtype=float), np.eye(3, dtype=int)]:
+        for a in [np.array([1]), np.array([1., 0., 0.]), np.eye(3, dtype=float), np.eye(3, dtype=int)]:
             # we could do this with one call; if we want to add tests for the format later
             # they should go in between here.
             awrite = crystal.yaml.dump(a)
@@ -711,7 +717,7 @@ class YAMLTests(unittest.TestCase):
 
     def testSetYAML(self):
         """Test that we can use YAML to write and read a frozenset"""
-        for a in [frozenset([]), frozenset([1]), frozenset([0,1,1]), frozenset(list(range(10)))]:
+        for a in [frozenset([]), frozenset([1]), frozenset([0, 1, 1]), frozenset(list(range(10)))]:
             awrite = crystal.yaml.dump(a)
             aread = crystal.yaml.load(awrite)
             self.assertEqual(a, aread)
@@ -719,8 +725,8 @@ class YAMLTests(unittest.TestCase):
 
     def testGroupOpYAML(self):
         """Test that we can write and read a GroupOp"""
-        g = crystal.GroupOp(np.eye(3,dtype=int),
-                            np.array([0.,0.,0.]),
+        g = crystal.GroupOp(np.eye(3, dtype=int),
+                            np.array([0., 0., 0.]),
                             np.eye(3),
                             ((0,),))
         # crystal.yaml.add_representer(crystal.GroupOp, crystal.GroupOp_representer)
@@ -732,13 +738,13 @@ class YAMLTests(unittest.TestCase):
     def testCrystalYAML(self):
         """Test that we can write and read a crystal"""
         a0 = 2.5
-        c_a = np.sqrt(8./3.)
-        hexlatt = a0*np.array([[0.5, 0.5, 0],
-                               [-np.sqrt(0.75), np.sqrt(0.75), 0],
-                               [0, 0, c_a]])
-        basis = [[np.array([0.,0.,0.]),
-                  np.array([1./3.,2./3.,0.5]),
-                  np.array([2./3.,1./3.,0.5])]]
+        c_a = np.sqrt(8. / 3.)
+        hexlatt = a0 * np.array([[0.5, 0.5, 0],
+                                 [-np.sqrt(0.75), np.sqrt(0.75), 0],
+                                 [0, 0, c_a]])
+        basis = [[np.array([0., 0., 0.]),
+                  np.array([1. / 3., 2. / 3., 0.5]),
+                  np.array([2. / 3., 1. / 3., 0.5])]]
         crys = crystal.Crystal(hexlatt, basis)
         cryswrite = crystal.yaml.dump(crys)
         crysread = crystal.yaml.load(cryswrite)
@@ -759,13 +765,13 @@ class YAMLTests(unittest.TestCase):
     def testCrystalYAMLsimplified(self):
         """Test that we can read a simplified crystal input"""
         a0 = 2.5
-        c_a = np.sqrt(8./3.)
-        hexlatt = a0*np.array([[0.5, 0.5, 0],
-                               [-np.sqrt(0.75), np.sqrt(0.75), 0],
-                               [0, 0, c_a]])
-        basis = [[np.array([0.,0.,0.]),
-                  np.array([1./3.,2./3.,0.5]),
-                  np.array([2./3.,1./3.,0.5])]]
+        c_a = np.sqrt(8. / 3.)
+        hexlatt = a0 * np.array([[0.5, 0.5, 0],
+                                 [-np.sqrt(0.75), np.sqrt(0.75), 0],
+                                 [0, 0, c_a]])
+        basis = [[np.array([0., 0., 0.]),
+                  np.array([1. / 3., 2. / 3., 0.5]),
+                  np.array([2. / 3., 1. / 3., 0.5])]]
         crys = crystal.Crystal(hexlatt, basis)
         yamlstr = """lattice_constant: 2.5
 lattice: {YAMLtag}
@@ -777,7 +783,7 @@ basis:
   - {YAMLtag} [0.3333333333333333, 0.6666666666666666, 0.5]
   - {YAMLtag} [0.6666666666666666, 0.3333333333333333, 0.5]
 chemistry:
-- Ti""".format(YAMLtag = crystal.NDARRAY_YAMLTAG) # rather than hard-coding the tag...
+- Ti""".format(YAMLtag=crystal.NDARRAY_YAMLTAG)  # rather than hard-coding the tag...
         crysread = crystal.Crystal.fromdict(crystal.yaml.load(yamlstr))
         self.assertIsInstance(crysread, crystal.Crystal)
         self.assertTrue(np.allclose(crys.lattice, crysread.lattice))
@@ -793,12 +799,14 @@ chemistry:
         self.assertEqual(crys.pointG, crysread.pointG)
         self.assertEqual(crys.Wyckoff, crysread.Wyckoff)
 
+
 class KPTgentest(unittest.TestCase):
     """Tests for KPT mesh pieces of Crystal class"""
+
     def setUp(self):
         self.a0 = 1.0
-        self.sclatt = self.a0*np.eye(3)
-        self.basis = [np.array([0.,0.,0.])]
+        self.sclatt = self.a0 * np.eye(3)
+        self.basis = [np.array([0., 0., 0.])]
         self.crys = crystal.Crystal(self.sclatt, self.basis)
         self.N = (4, 4, 4)
 
@@ -847,7 +855,7 @@ class KPTgentest(unittest.TestCase):
         """Do we produce a correct irreducible wedge?"""
         Nkpt = np.prod(self.N)
         kptfull = self.crys.fullkptmesh(self.N)
-        kpts, wts = self.crys.reducekptmesh(kptfull) # self.crys.fullkptmesh(self.N)
+        kpts, wts = self.crys.reducekptmesh(kptfull)  # self.crys.fullkptmesh(self.N)
         for i, k in enumerate(kpts):
             # We want to determine what the weight for each point should be, and compare
             # dealing with the BZ edges is complicated; so we skip that in our tests
@@ -861,18 +869,18 @@ class KPTgentest(unittest.TestCase):
                     basewt *= 3
                 self.assertAlmostEqual(basewt, wts[i])
         # integration test
-        wtfull = np.array((1/Nkpt ,)*Nkpt)
+        wtfull = np.array((1 / Nkpt,) * Nkpt)
         self.assertAlmostEqual(sum(wtfull * [np.cos(sum(k)) for k in kptfull]),
                                sum(wts * [np.cos(sum(k)) for k in kpts]))
         self.assertNotAlmostEqual(sum(wtfull * [np.cos(k[0]) for k in kptfull]),
-                                   sum(wts * [np.cos(k[0]) for k in kpts]))
+                                  sum(wts * [np.cos(k[0]) for k in kpts]))
 
     def testKPT_integration(self):
         """Do we get integral values that we expect? 1/(2pi)^3 int cos(kx+ky+kz)^3 = 1/2"""
         Nkpt = np.prod(self.N)
         kptfull = self.crys.fullkptmesh(self.N)
-        wtfull = np.array((1/Nkpt ,)*Nkpt)
-        kpts, wts = self.crys.reducekptmesh(kptfull) # self.crys.fullkptmesh(self.N)
+        wtfull = np.array((1 / Nkpt,) * Nkpt)
+        kpts, wts = self.crys.reducekptmesh(kptfull)  # self.crys.fullkptmesh(self.N)
         self.assertAlmostEqual(sum(wtfull * [np.cos(sum(k)) ** 2 for k in kptfull]), 0.5)
         self.assertAlmostEqual(sum(wts * [np.cos(sum(k)) ** 2 for k in kpts]), 0.5)
         self.assertAlmostEqual(sum(wtfull * [np.cos(sum(k)) for k in kptfull]), 0)

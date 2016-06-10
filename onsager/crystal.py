@@ -13,7 +13,7 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 import collections, copy, itertools
 from numbers import Number
-import yaml ### use crystal.yaml to call--may need to change in the future
+import yaml  ### use crystal.yaml to call--may need to change in the future
 from functools import reduce
 
 # YAML tags:
@@ -47,18 +47,19 @@ def maptranslation(oldpos, newpos, oldspins=None, newspins=None, threshold=1e-8)
     Given a list of transformed positions, identify if there's a translation vector
     that maps from the current positions to the new position.
 
-    :param oldpos: list of list of array[3]
-    :param newpos: list of list of array[3], same layout as oldpos
-    :param oldspins: (optional) list of list of numbers/arrays
-    :param newspins: (optional) list of list of numbers/arrays
-    :return: translation (array[3]), mapping (list of list of indices)
-
     The mapping specifies the index that the *translated* atom corresponds to in the
     original position set. If unable to construct a mapping, the mapping return is
     None; the translation vector will be meaningless.
 
-    If old/newspins are given then ONLY mapping thats maintain spin are considered.
+    If old/newspins are given then ONLY mappings that maintain spin are considered.
     This means that a loop is needed to consider possible spin phase factors.
+
+    :param oldpos: list of list of array[3]
+    :param newpos: list of list of array[3], same layout as oldpos
+    :param oldspins: (optional) list of list of numbers/arrays
+    :param newspins: (optional) list of list of numbers/arrays
+    :return translation: array[3]
+    :return mapping: list of list of indices
     """
     # type-checking:
     if __debug__:
@@ -104,7 +105,7 @@ def maptranslation(oldpos, newpos, oldspins=None, newspins=None, threshold=1e-8)
             for rua, sp1 in zip(atomlist1, spinlist1):
                 for j, uj, sp0 in zip(itertools.count(), atomlist0, spinlist0):
                     if not np.allclose(sp0, sp1): continue  # only allow maps that have same spin
-                    if np.all(abs(inhalf(uj - rua - trans))<threshold):
+                    if np.all(abs(inhalf(uj - rua - trans)) < threshold):
                         maplist.append(j)
                         break
             if len(maplist) != len(atomlist0):
@@ -143,7 +144,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     def ident(cls, basis):
         """Return a group operation corresponding to identity for a given basis"""
         return cls(rot=np.eye(3, dtype=int), trans=np.zeros(3), cartrot=np.eye(3),
-                       indexmap=tuple(tuple(i for i in range(len(atomlist))) for atomlist in basis))
+                   indexmap=tuple(tuple(i for i in range(len(atomlist))) for atomlist in basis))
 
     def __str__(self):
         """Human-readable version of groupop"""
@@ -155,7 +156,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         for chemind, atoms in enumerate(self.indexmap):
             for origind, finalind in enumerate(atoms):
                 str_rep = str_rep + "\n  {chem}.{o} -> {chem}.{f}".format(chem=chemind,
-                                                                  o=origind, f=finalind)
+                                                                          o=origind, f=finalind)
         return str_rep
 
     def _asdict(self):
@@ -206,8 +207,8 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         return GroupOp(np.dot(self.rot, other.rot),
                        np.dot(self.rot, other.trans) + self.trans,
                        np.dot(self.cartrot, other.cartrot),
-                       tuple( tuple(atomlist0[i] for i in atomlist1)
-                         for atomlist0, atomlist1 in zip(self.indexmap, other.indexmap)))
+                       tuple(tuple(atomlist0[i] for i in atomlist1)
+                             for atomlist0, atomlist1 in zip(self.indexmap, other.indexmap)))
 
     def __sane__(self):
         """Return true if the cartrot and rot are consistent and 'sane'"""
@@ -217,8 +218,8 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         if np.int(np.round(self.cartrot.trace())) != tr: return False
         if np.int(np.round(np.linalg.det(self.cartrot))) != det: return False
         # sanity:
-        if abs(det) != 1 : return False
-        if det*tr < -1 or det*tr > 3 : return False
+        if abs(det) != 1: return False
+        if det * tr < -1 or det * tr > 3: return False
         return True
 
     def inv(self):
@@ -227,8 +228,8 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         return GroupOp(inverse,
                        -np.dot(inverse, self.trans),
                        self.cartrot.T,
-                       tuple( tuple( x for i,x in sorted([(y,j) for j,y in enumerate(atomlist)]))
-                         for atomlist in self.indexmap))
+                       tuple(tuple(x for i, x in sorted([(y, j) for j, y in enumerate(atomlist)]))
+                             for atomlist in self.indexmap))
 
     @staticmethod
     def optype(rot):
@@ -237,8 +238,9 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         2, 3, 4, 6 = n- fold rotation around an axis
         negative = rotation + mirror operation, perpendicular to axis
         "special cases": -1 = mirror, -2 = inversion
+
         :param rot: rotation matrix (can be the integer rot)
-        :return: type (integer)
+        :return type: integer
         """
         tr = np.int(rot.trace())
         if np.linalg.det(rot) > 0:
@@ -258,41 +260,41 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         coordinate system and where rotation around [0] is positive, and the positive imaginary
         eigenvector for the complex eigenvalue is [1] + i [2].
 
-        :return: type (integer)
-        :return: list of [ev0, ev1, ev2]
+        :return type: integer
+        :return eigenvectors: list of [ev0, ev1, ev2]
         """
         if __debug__:
             if not self.__sane__():
                 raise ValueError('Bad GroupOp:\n{}'.format(self))
         optype = self.optype(self.rot)
-        det = 1 if optype>0 else -1
+        det = 1 if optype > 0 else -1
         tr = np.int(self.rot.trace())
         # two trivial cases: identity, inversion:
         if optype == 1 or optype == -2:
             return optype, np.eye(3)
         # otherwise, there's an axis to find:
         vmat = np.eye(3)
-        vsum = np.zeros((3,3))
-        if det>0:
+        vsum = np.zeros((3, 3))
+        if det > 0:
             for n in range(optype):
                 vsum += vmat
                 vmat = np.dot(self.cartrot, vmat)
         else:
-            for n in range((0, 6, 4, 3, 2)[tr + 3]): #
+            for n in range((0, 6, 4, 3, 2)[tr + 3]):  #
                 vsum += vmat
                 vmat = -np.dot(self.cartrot, vmat)
         # vmat *should* equal identity if we didn't fail...
         if __debug__:
             if not np.allclose(vmat, np.eye(3)): raise ArithmeticError('eigenvalue analysis fail')
-        vsum *= 1./n
+        vsum *= 1. / n
         # now the columns of vsum should either be (a) our rotation / mirror axis, or (b) zero
-        eig0 = vsum[:,0]
+        eig0 = vsum[:, 0]
         magn0 = np.dot(eig0, eig0)
         if magn0 < 1e-2:
-            eig0 = vsum[:,1]
+            eig0 = vsum[:, 1]
             magn0 = np.dot(eig0, eig0)
             if magn0 < 1e-2:
-                eig0 = vsum[:,2]
+                eig0 = vsum[:, 2]
                 magn0 = np.dot(eig0, eig0)
         eig0 /= np.sqrt(magn0)
         # now, construct the other two directions:
@@ -329,13 +331,15 @@ def VectorBasis(rottype, eigenvect):
 
     :param rottype: output from eigen()
     :param eigenvect: eigenvectors
-    :return: (dim, vect) -- dimensionality (0..3), vector defining line direction (1) or plane normal (2)
+    :return dim: dimensionality, 0..3
+    :return vect: vector defining line direction (1) or plane normal (2)
     """
     # edge cases first:
-    if rottype == 1: return (3, np.zeros(3)) # sphere (identity)
-    if rottype == -2: return (0, np.zeros(3)) # point (inversion)
-    if rottype == -1: return (2, eigenvect[0]) # plane (pure mirror)
-    return (1, eigenvect[0]) # line (all others--there's a rotation axis involved
+    if rottype == 1: return (3, np.zeros(3))  # sphere (identity)
+    if rottype == -2: return (0, np.zeros(3))  # point (inversion)
+    if rottype == -1: return (2, eigenvect[0])  # plane (pure mirror)
+    return (1, eigenvect[0])  # line (all others--there's a rotation axis involved
+
 
 def SymmTensorBasis(rottype, eigenvect):
     """
@@ -344,28 +348,29 @@ def SymmTensorBasis(rottype, eigenvect):
 
     :param rottype: output from eigen()
     :param eigenvect: eigenvectors
-    :return: list of 2nd-rank symmetric tensors making up the basis
+    :return tensorbasis: list of 2nd-rank symmetric tensors making up the basis
     """
+
     def SymmTensor1(v1):
         """Make a normalized, symmetric tensor from two vectors"""
         return np.outer(v1, v1)
 
     def SymmTensor2(v1, v2):
         """Make a normalized, symmetric tensor from two vectors"""
-        return (np.outer(v1, v1) + np.outer(v2, v2))/np.sqrt(2)
+        return (np.outer(v1, v1) + np.outer(v2, v2)) / np.sqrt(2)
 
     def SymmTensorCross(v1, v2):
         """Make a normalized, symmetric tensor from two vectors"""
-        return (np.outer(v1, v2) + np.outer(v2, v1))/np.sqrt(2)
+        return (np.outer(v1, v2) + np.outer(v2, v1)) / np.sqrt(2)
 
     if rottype == 1 or rottype == -2:
         # identity / inversion: all symmetric tensors
-        return [SymmTensor1(np.array([1.,0.,0.])), # xx
-                SymmTensor1(np.array([0.,1.,0.])), # yy
-                SymmTensor1(np.array([0.,0.,1.])), # zz
-                SymmTensorCross(np.array([0.,1.,0.]), np.array([0.,0.,1.])), #yz
-                SymmTensorCross(np.array([1.,0.,0.]), np.array([0.,0.,1.])), #zx
-                SymmTensorCross(np.array([1.,0.,0.]), np.array([0.,1.,0.]))] #xy
+        return [SymmTensor1(np.array([1., 0., 0.])),  # xx
+                SymmTensor1(np.array([0., 1., 0.])),  # yy
+                SymmTensor1(np.array([0., 0., 1.])),  # zz
+                SymmTensorCross(np.array([0., 1., 0.]), np.array([0., 0., 1.])),  # yz
+                SymmTensorCross(np.array([1., 0., 0.]), np.array([0., 0., 1.])),  # zx
+                SymmTensorCross(np.array([1., 0., 0.]), np.array([0., 1., 0.]))]  # xy
     if rottype == -1 or rottype == 2:
         # mirror plane or 2-fold rotation:
         # 4 symmetric tensors: e0 x e0, e1 x e1, e2 x e2, e1 x e2
@@ -378,36 +383,39 @@ def SymmTensorBasis(rottype, eigenvect):
     return [SymmTensor1(eigenvect[0]),
             SymmTensor2(eigenvect[1], eigenvect[2])]
 
+
 def CombineVectorBasis(b1, b2):
     """
     Combines (intersects) two vector spaces into one.
 
     :param b1: (dim, vect) -- dimensionality (0..3), vector defining line direction (1) or plane normal (2)
     :param b2: (dim, vect)
-    :return: (dim, vect)
+    :return dim: dimensionality, 0..3
+    :return vect: vector defining line direction (1) or plane normal (2)
     """
     # edge cases first
-    if b1[0] == 3: return b2 # sphere with anything
+    if b1[0] == 3: return b2  # sphere with anything
     if b2[0] == 3: return b1
-    if b1[0] == 0: return b1 # point with anything
+    if b1[0] == 0: return b1  # point with anything
     if b2[0] == 0: return b2
     if b1[0] == b2[0]:
-        if abs(np.dot(b1[1], b2[1])) > (1.-1e-8): # parallel vectors
-            return b1 # equal bases
-        else: # vectors not equal...
-            if b1[0] == 1: # for a line, that's death:
+        if abs(np.dot(b1[1], b2[1])) > (1. - 1e-8):  # parallel vectors
+            return b1  # equal bases
+        else:  # vectors not equal...
+            if b1[0] == 1:  # for a line, that's death:
                 return (0, np.zeros(3))
-            else: # for a plane, need the mutual line:
+            else:  # for a plane, need the mutual line:
                 v = np.cross(b1[1], b2[1])
-                return (1, v/np.sqrt(np.dot(v,v)))
+                return (1, v / np.sqrt(np.dot(v, v)))
     # finally: one is a plane, other is a line:
-    if abs(np.dot(b1[1], b2[1])) > 1e-8: # if the vectors are not perpendicular, death:
+    if abs(np.dot(b1[1], b2[1])) > 1e-8:  # if the vectors are not perpendicular, death:
         return (0, np.zeros(3))
-    else: # return whichever is a line:
+    else:  # return whichever is a line:
         if b1[0] == 1:
             return b1
         else:
             return b2
+
 
 def CombineTensorBasis(b1, b2, symmetric=True):
     """
@@ -415,7 +423,7 @@ def CombineTensorBasis(b1, b2, symmetric=True):
 
     :param b1: list of tensors
     :param b2: list of tensors
-    :return: list of tensors
+    :return tensorbasis: list of 2nd-rank symmetric tensors making up the basis
     """
     # edge cases first (empty or full basis)
     if len(b1) == 0: return b1
@@ -428,11 +436,12 @@ def CombineTensorBasis(b1, b2, symmetric=True):
     # this is sneaky: the first is to pull out the size of the nullspace, the second slices
     # the part of b1 that we have to deal with, but then we have to *renormalize* these vectors
     # by multiplying by sqrt(2), since the slice in each vector space would be normalized.
-    nullspace = vh[sum(s>=1e-8):,0:len(b1)]*np.sqrt(2)
+    nullspace = vh[sum(s >= 1e-8):, 0:len(b1)] * np.sqrt(2)
     # now to reconstruct our normalized basis from those
     # list comprehension to run over the elements of our nullspace, and the
     # generator in the sum to construct the basis
-    return [ sum(b1[i]*alpha for i,alpha in enumerate(v)) for v in nullspace ]
+    return [sum(b1[i] * alpha for i, alpha in enumerate(v)) for v in nullspace]
+
 
 def ProjectTensorBasis(tensor, basis):
     """
@@ -440,11 +449,11 @@ def ProjectTensorBasis(tensor, basis):
 
     :param tensor: tensor
     :param basis: list consisting of an orthonormal basis
-    :return: tensor, projected
+    :return tensor: tensor, projected
     """
     if __debug__:
         if tensor.shape != basis[0].shape: raise TypeError("Tensor and basis not compatible")
-    return sum( b*np.sum(tensor*b) for b in basis )
+    return sum(b * np.sum(tensor * b) for b in basis)
 
 
 def Voigtstrain(e1, e2, e3, e4, e5, e6):
@@ -457,9 +466,9 @@ def Voigtstrain(e1, e2, e3, e4, e5, e6):
     :param e4: yz + zx
     :param e5: zx + xz
     :param e6: xy + yx
-    :return: symmetric strain tensor
+    :return strain: symmetric strain tensor
     """
-    return np.array([[e1,0.5*e6,0.5*e5],[0.5*e6,e2,0.5*e4],[0.5*e5,0.5*e4,e3]])
+    return np.array([[e1, 0.5 * e6, 0.5 * e5], [0.5 * e6, e2, 0.5 * e4], [0.5 * e5, 0.5 * e4, e3]])
 
 
 # TODO: Add the ability to explicitly specify "metastable" states that should be considered the same chemistry, but not subject to reduction
@@ -469,6 +478,9 @@ class Crystal(object):
     Now includes optional spins. These can be vectors or "scalar" spins, for which we need
     to consider a phase factor. In general, they can be complex. Ideally, they should have
     magnitude either 0 or 1.
+
+    Specified by a lattice (3 vectors), a basis (list of lists of positions in direct coordinates).
+    Can also name the elements (chemistry), and specify spin degrees of freedom.
     """
 
     def __init__(self, lattice, basis, chemistry=None, spins=None, NOSYM=False, noreduce=False):
@@ -524,25 +536,29 @@ class Crystal(object):
         self.invlatt = np.linalg.inv(self.lattice)
         # this lets us, in a flat list, enumerate over indices of atoms as needed
         self.atomindices = [(atomtype, atomindex)
-                            for atomtype,atomlist in enumerate(self.basis)
+                            for atomtype, atomlist in enumerate(self.basis)
                             for atomindex in range(len(atomlist))]
         self.N = len(self.atomindices)
         self.Nchem = len(self.basis)
-        if chemistry is None: self.chemistry = [i for i in range(self.Nchem)]
-        else: self.chemistry = chemistry.copy()
+        if chemistry is None:
+            self.chemistry = [i for i in range(self.Nchem)]
+        else:
+            self.chemistry = chemistry.copy()
         self.volume, self.metric = self.calcmetric()
-        self.reciplatt = 2.*np.pi*self.invlatt.T
+        self.reciplatt = 2. * np.pi * self.invlatt.T
         self.BZvol = abs(float(np.linalg.det(self.reciplatt)))
         self.BZG = self.genBZG()
         self.center()  # should do before gengroup so that inversion is centered at origin
-        if NOSYM: self.G = frozenset([GroupOp.ident(self.basis)])
-        else: self.G = self.gengroup()  # do before genpoint
+        if NOSYM:
+            self.G = frozenset([GroupOp.ident(self.basis)])
+        else:
+            self.G = self.gengroup()  # do before genpoint
         self.pointG = self.genpoint()
         self.Wyckoff = self.genWyckoffsets()
 
     def __repr__(self):
         """String representation of crystal (lattice + basis)"""
-        return 'Crystal(' + repr(self.lattice).replace('\n','').replace('\t','') + ',' + \
+        return 'Crystal(' + repr(self.lattice).replace('\n', '').replace('\t', '') + ',' + \
                repr(self.basis) + ', spins=' + repr(self.spins) + \
                ', chemistry=' + repr(self.chemistry) + ')'
 
@@ -552,39 +568,41 @@ class Crystal(object):
             self.lattice.T[0], self.lattice.T[1], self.lattice.T[2])
         for chemind, atoms in enumerate(self.basis):
             for atomind, pos in enumerate(atoms):
-                if self.spins is None: s=''
-                else: s=' sp={}'.format(self.spins[chemind][atomind])
+                if self.spins is None:
+                    s = ''
+                else:
+                    s = ' sp={}'.format(self.spins[chemind][atomind])
                 str_rep = str_rep + "\n  ({}) {}.{} = {}{}".format(self.chemistry[chemind],
-                                                               chemind, atomind, pos, s)
+                                                                   chemind, atomind, pos, s)
         return str_rep
 
     @classmethod
     def fromdict(cls, yamldict):
         """
-        Creates a Crystal object from a YAML-created dictionary
+        Creates a Crystal object from a *very simple* YAML-created dictionary
 
         :param yamldict: dictionary; must contain 'lattice' (using *row* vectors!) and 'basis';
-        can contain optional 'lattice_constant'
-        :return: Crystal(lattice.T, basis)
+            can contain optional 'lattice_constant'
+        :return Crystal(lattice.T, basis): new crystal object
         """
         if 'lattice' not in yamldict: raise IndexError('{} does not contain "lattice"'.format(yamldict))
         if 'basis' not in yamldict: raise IndexError('{} does not contain "basis"'.format(yamldict))
         lattice_constant = 1.
         if 'lattice_constant' in yamldict: lattice_constant = yamldict['lattice_constant']
-        spins=None
+        spins = None
         if 'spins' in yamldict: spins = yamldict['spins']
         chem = None
         if 'chemistry' in yamldict: chem = yamldict['chemistry']
-        return cls((lattice_constant*yamldict['lattice']).T, yamldict['basis'], chem, spins)
+        return cls((lattice_constant * yamldict['lattice']).T, yamldict['basis'], chem, spins)
 
     def simpleYAML(self, a0=1.0):
         """
         Creates a simplified YAML dump, in case we don't want to output the full symmetry analysis
 
-        :return: YAML dump
+        :return YAML: string dump
         """
         return yaml.dump({'lattice_constant': a0,
-                          'lattice': self.lattice.T/a0,
+                          'lattice': self.lattice.T / a0,
                           'basis': self.basis,
                           'spins': self.spins,
                           'chemistry': self.chemistry})
@@ -594,10 +612,12 @@ class Crystal(object):
         Return index corresponding to chemistry; None if not present.
 
         :param chemistry: value to check
-        :return: index corresponding to chemistry
+        :return index: corresponding to chemistry
         """
-        try: return self.chemistry.index(chemistry)
-        except: return None
+        try:
+            return self.chemistry.index(chemistry)
+        except:
+            return None
 
     # a few "convenient" lattices
     @classmethod
@@ -606,11 +626,13 @@ class Crystal(object):
         Create a face-centered cubic crystal with lattice constant a0
 
         :param a0: lattice constant
-        :return: FCC crystal
+        :return FCC crystal:
         """
-        if chemistry is None or isinstance(chemistry, (list,tuple)): chem = chemistry
-        else: chem = [chemistry]
-        return cls(np.array([[0.,0.5,0.5],[0.5,0.,0.5],[0.5,0.5,0.]])*a0, [np.zeros(3)], chem)
+        if chemistry is None or isinstance(chemistry, (list, tuple)):
+            chem = chemistry
+        else:
+            chem = [chemistry]
+        return cls(np.array([[0., 0.5, 0.5], [0.5, 0., 0.5], [0.5, 0.5, 0.]]) * a0, [np.zeros(3)], chem)
 
     @classmethod
     def BCC(cls, a0, chemistry=None):
@@ -618,33 +640,35 @@ class Crystal(object):
         Create a body-centered cubic crystal with lattice constant a0
 
         :param a0: lattice constant
-        :return: BCC crystal
+        :return BCC crystal:
         """
-        if chemistry is None or isinstance(chemistry, (list,tuple)): chem = chemistry
-        else: chem = [chemistry]
-        return cls(np.array([[-0.5,0.5,0.5],[0.5,-0.5,0.5],[0.5,0.5,-0.5]])*a0, [np.zeros(3)], chem)
+        if chemistry is None or isinstance(chemistry, (list, tuple)):
+            chem = chemistry
+        else:
+            chem = [chemistry]
+        return cls(np.array([[-0.5, 0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, -0.5]]) * a0, [np.zeros(3)], chem)
 
     @classmethod
-    def HCP(cls, a0, c_a=np.sqrt(8./3.), chemistry=None):
+    def HCP(cls, a0, c_a=np.sqrt(8. / 3.), chemistry=None):
         """
         Create a hexagonal closed packed crystal with lattice constant a0, c/a ratio c_a
 
         :param a0: lattice constant
-        :param c_a: c/a ratio
-        :return: HCP crystal
+        :param c_a: (optional) c/a ratio, default=ideal :math:`\sqrt{8/3}`
+        :return HCP crystal:
         """
-        if chemistry is None or isinstance(chemistry, (list,tuple)): chem = chemistry
-        else: chem = [chemistry]
-        return cls(np.array([[0.5,0.5,0.],
-                                 [-np.sqrt(0.75),np.sqrt(0.75),0.],
-                                 [0.,0.,c_a]])*a0,
-                                 [np.array([1./3.,2./3.,1./4.]),
-                                  np.array([2./3.,1./3.,3./4])], chem)
+        if chemistry is None or isinstance(chemistry, (list, tuple)):
+            chem = chemistry
+        else:
+            chem = [chemistry]
+        return cls(np.array([[0.5, 0.5, 0.],
+                             [-np.sqrt(0.75), np.sqrt(0.75), 0.],
+                             [0., 0., c_a]]) * a0,
+                   [np.array([1. / 3., 2. / 3., 1. / 4.]),
+                    np.array([2. / 3., 1. / 3., 3. / 4])], chem)
 
     def center(self):
-        """
-        Center the atoms in the cell if there is an inversion operation present.
-        """
+        """Center the atoms in the cell if there is an inversion operation present."""
         # trivial case:
         if self.N == 1:
             self.basis = [[np.array([0., 0., 0.])]]
@@ -667,9 +691,7 @@ class Crystal(object):
         self.basis = [[incell(atom + shift) for atom in atomlist] for atomlist in self.basis]
 
     def reduce(self, threshold=1e-8):
-        """
-        Reduces the lattice and basis, if needed. Works (tail) recursively.
-        """
+        """Reduces the lattice and basis, if needed. Works (tail) recursively."""
         # Work with the shortest possible list first
         maxlen = 0
         atomindex = 0
@@ -685,19 +707,19 @@ class Crystal(object):
         else:
             spins = self.spins
         # We need to first check against reducibility of atomic positions: try out non-trivial displacements
-        initpos,initsp = self.basis[atomindex][0], spins[atomindex][0]
+        initpos, initsp = self.basis[atomindex][0], spins[atomindex][0]
         trans = False
-        for newpos,newsp in zip(self.basis[atomindex], spins[atomindex]):
+        for newpos, newsp in zip(self.basis[atomindex], spins[atomindex]):
             t = newpos - initpos
             if np.allclose(t, 0): continue
-            if not np.allclose(initsp,newsp): continue
+            if not np.allclose(initsp, newsp): continue
             trans = True
             for atomlist, spinlist in zip(self.basis, spins):
                 for u, s in zip(atomlist, spinlist):
                     # edited to only check against translations with the same spin:
-                    if np.all([not np.all(abs(inhalf(u + t - v))<threshold)
-                               for v,vs in zip(atomlist,spinlist)
-                               if np.allclose(s,vs)]):
+                    if np.all([not np.all(abs(inhalf(u + t - v)) < threshold)
+                               for v, vs in zip(atomlist, spinlist)
+                               if np.allclose(s, vs)]):
                         trans = False
                         break
             if trans: break
@@ -710,17 +732,17 @@ class Crystal(object):
             supercell[:, d] = t[:]
             if not np.allclose(np.linalg.det(supercell), 0):
                 if np.linalg.det(supercell) < 0:
-                    supercell[:,d-1] = -supercell[:,d-1]
+                    supercell[:, d - 1] = -supercell[:, d - 1]
                 break
         invsuper = np.linalg.inv(supercell)
         self.lattice = np.dot(self.lattice, supercell)
         # 2. update the basis
         newbasis = []
         newspins = []
-        for atomlist,spinlist in zip(self.basis,spins):
+        for atomlist, spinlist in zip(self.basis, spins):
             newatomlist = []
             newspinlist = []
-            for u,s in zip(atomlist,spinlist):
+            for u, s in zip(atomlist, spinlist):
                 v = incell(np.dot(invsuper, u))
                 if np.all([not np.allclose(v, v1) for v1 in newatomlist]):
                     newatomlist.append(v)
@@ -737,7 +759,7 @@ class Crystal(object):
         Takes the basis definition, and using a supercell definition, returns a new basis
 
         :param supercell: integer array[3,3]
-        :return: atomic basis
+        :return atomic basis: list of list of positions
         """
         invsuper = np.linalg.inv(supercell)
         return [[incell(np.dot(invsuper, u)) for u in atomlist] for atomlist in self.basis]
@@ -748,7 +770,7 @@ class Crystal(object):
         is (a) length of each lattice vector is minimal; (b) the vectors are ordered from
         shortest to longest; (c) the vectors have minimal dot product; (d) the basis is right-handed.
 
-        Works recursively.
+        Works recursively, and in-place.
         """
         magnlist = sorted((np.dot(v, v), idx) for idx, v in enumerate(self.lattice.T))
         super = np.zeros((3, 3), dtype=int)
@@ -786,7 +808,8 @@ class Crystal(object):
         """
         Computes the volume of the cell and the metric tensor
 
-        :return: volume, metric tensor
+        :return volume: cell volume
+        :return metric tensor: 3x3
         """
         return abs(float(np.linalg.det(self.lattice))), np.dot(self.lattice.T, self.lattice)
 
@@ -797,7 +820,7 @@ class Crystal(object):
         :param vec: array [3], vector to be tested
         :param BGZ: array [:,3], optional (default = self.BZG), array of vectors that define the BZ
         :param threshold: double, optional, threshold to use for "equality"
-        :return: False if outside the BZ, True otherwise
+        :return inBZ: False if outside the BZ, True otherwise
         """
         if BZG is None: BZG = self.BZG
         # checks that vec.G < G^2 for all G (and throws out the option that vec == G, in case threshold == 0)
@@ -807,7 +830,7 @@ class Crystal(object):
         """
         Generates the reciprocal lattice G points that define the Brillouin zone.
 
-        :return: array of G vectors that define the BZ, in Cartesian coordinates
+        :return Garray: array of G vectors that define the BZ, in Cartesian coordinates
         """
         # Start with a list of possible vectors; add those that define the BZ...
         BZG = []
@@ -826,13 +849,14 @@ class Crystal(object):
         Generate all of the space group operations. Now handles spins! Doesn't store
         spin phase factors for each group operation, though.
 
-        :return: list of group operations
+        :return Gset: frozenset of group operations
         """
+
         def rootsofunity(optype):
             """Return an iterable of roots of unity to try for GroupOp type optype"""
             # always include negation
-            rot2, rot4, rot6 = (1,-1), (1,-1,1j,-1j), tuple(np.exp(n*np.pi*2j/6) for n in range(6))
-            return (rot2,rot2,rot6,rot4,None,rot6)[abs(optype)-1]  # (+-1, +-2, +-3, +-4, .., +-6)
+            rot2, rot4, rot6 = (1, -1), (1, -1, 1j, -1j), tuple(np.exp(n * np.pi * 2j / 6) for n in range(6))
+            return (rot2, rot2, rot6, rot4, None, rot6)[abs(optype) - 1]  # (+-1, +-2, +-3, +-4, .., +-6)
 
         groupops = []
         supercellvect = [np.array((n0, n1, n2))
@@ -849,22 +873,22 @@ class Crystal(object):
         else:
             spins = self.spins
         for supercell in (np.array((r0, r1, r2)).T
-                      for r0 in matchvect[0]
-                      for r1 in matchvect[1]
-                      for r2 in matchvect[2]
-                      if abs(np.inner(r0, np.cross(r1, r2))) == 1):
+                          for r0 in matchvect[0]
+                          for r1 in matchvect[1]
+                          for r2 in matchvect[2]
+                          if abs(np.inner(r0, np.cross(r1, r2))) == 1):
             if np.allclose(np.dot(supercell.T, np.dot(self.metric, supercell)), self.metric):
                 # possible operation--need to check the atomic positions with spin phase factors
                 optype = GroupOp.optype(supercell)
                 cartrot = np.dot(self.lattice, np.dot(supercell, self.invlatt))
-                detrot = 1 if optype>0 else -1
+                detrot = 1 if optype > 0 else -1
                 # apply cartesian rotation to spins... if they're vectors; else, do nothing
-                rotspins = [ [ detrot*s if isinstance(s,Number) else np.dot(cartrot,s)
-                               for s in spinlist]
-                             for spinlist in spins]
+                rotspins = [[detrot * s if isinstance(s, Number) else np.dot(cartrot, s)
+                             for s in spinlist]
+                            for spinlist in spins]
                 # if det * tr < -1 or det * tr > 3: return False
                 for phase in rootsofunity(optype):
-                    newspins = [ [phase*s for s in spinlist] for spinlist in rotspins]
+                    newspins = [[phase * s for s in spinlist] for spinlist in rotspins]
                     trans, indexmap = maptranslation(self.basis,
                                                      [[np.dot(supercell, u)
                                                        for u in atomlist]
@@ -882,10 +906,10 @@ class Crystal(object):
         Returns a new Crystal object that is a strained version of the current.
 
         :param eps: strain tensor
-        :return: new Crystal object, strained
+        :return Crystal: new crystal object, strained
         """
         if __debug__:
-            if type(eps) is not np.ndarray or eps.shape != (3,3):
+            if type(eps) is not np.ndarray or eps.shape != (3, 3):
                 raise TypeError('strain is not a 3x3 tensor')
         return Crystal(np.dot(np.eye(3) + eps, self.lattice), self.basis)
 
@@ -898,7 +922,7 @@ class Crystal(object):
         :param basis: list (or list of lists) of new sites
         :param chemistry: (optional) list of chemistry names
         :param spins: (optional) list of spins
-        :return: new Crystal object, with additional sites
+        :return Crystal: new crystal object, with additional sites
         """
         if type(basis) is not list: raise TypeError('basis needs to be a list or list of lists')
         if spins is not None and type(spins) is not list: raise TypeError('spins needs to be a list or list of lists')
@@ -912,13 +936,17 @@ class Crystal(object):
                 for u in elem:
                     if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, elem))
             newbasis = [[incell(u) for u in atombasis] for atombasis in basis]
-        if chemistry is None: newchemistry = self.chemistry + [i + self.Nchem for i in range(len(newbasis))]
-        else: newchemistry = self.chemistry + chemistry
+        if chemistry is None:
+            newchemistry = self.chemistry + [i + self.Nchem for i in range(len(newbasis))]
+        else:
+            newchemistry = self.chemistry + chemistry
         # a little complicated: need to deal with (1) no spin at all; (2) having no spin and adding;
         # (3) having spin and adding something without; (4) having spin and adding it.
         if spins is not None:
-            if type(spins[0]) is not list: sp = [spins]
-            else: sp = spins
+            if type(spins[0]) is not list:
+                sp = [spins]
+            else:
+                sp = spins
             if self.spins is None:
                 newspins = [[0 for u in atomlist] for atomlist in self.basis] + sp
             else:
@@ -936,7 +964,7 @@ class Crystal(object):
 
         :param lattvec: 3-vector (integer) lattice vector in direct coordinates
         :param ind: two-tuple index specifying the atom: (atomtype, atomindex)
-        :return: 3-vector (float) in Cartesian coordinates
+        :return v: 3-vector (float) in Cartesian coordinates
         """
         return np.dot(self.lattice, lattvec + self.basis[ind[0]][ind[1]])
 
@@ -947,7 +975,7 @@ class Crystal(object):
 
         :param lattvec: 3-vector (integer) lattice vector in direct coordinates
         :param uvec: 3-vector (float) unit cell vector in direct coordinates
-        :return: 3-vector (float) in Cartesian coordinates
+        :return v: 3-vector (float) in Cartesian coordinates
         """
         return np.dot(self.lattice, lattvec + uvec)
 
@@ -957,21 +985,20 @@ class Crystal(object):
         in cartesian coord.
 
         :param v: 3-vector (float) position in Cartesian coordinates
-        :return: 3-vector (integer) lattice vector in direct coordinates,
-         3-vector (float) inside unit cell
+        :return lattvec: 3-vector (integer) lattice vector in direct coordinates,
+        :return uvec: 3-vector (float) inside unit cell, in direct coordinates
         """
         u = np.dot(self.invlatt, v)
         ucell = incell(u)
-        return (u-ucell).astype(int), ucell
+        return (u - ucell).astype(int), ucell
 
     def cart2pos(self, v):
         """
         Return the lattvec and index corresponding to an atomic position in cartesian coord.
 
         :param v: 3-vector (float) position in Cartesian coordinates
-        :return: 3-vector (integer) lattice vector in direct coordinates, index tuple
-         of corresponding atom.
-         Returns None on tuple if no match
+        :return lattvec: 3-vector (integer) lattice vector in direct coordinates,
+        :return (c,i): tuple of matching basis atom; None if no match
         """
         latt, u = self.cart2unit(v)
         indlist = [ind for ind in self.atomindices
@@ -988,7 +1015,7 @@ class Crystal(object):
 
         :param g: group operation (GroupOp)
         :param direc: 3-vector direction
-        :return: 3-vector direction
+        :return gdirec: 3-vector direction
         """
         if __debug__:
             if type(g) is not GroupOp: raise TypeError
@@ -1002,12 +1029,12 @@ class Crystal(object):
 
         :param g: group operation (GroupOp)
         :param tensor: 2nd-rank tensor
-        :return: 2nd-rank tensor
+        :return gtensor: 2nd-rank tensor
         """
         if __debug__:
             if type(g) is not GroupOp: raise TypeError
             if type(tensor) is not np.ndarray: raise TypeError
-            if tensor.shape != (3,3): raise TypeError
+            if tensor.shape != (3, 3): raise TypeError
         return np.dot(g.cartrot, np.dot(tensor, g.cartrot.T))
 
     def g_pos(self, g, lattvec, ind):
@@ -1017,7 +1044,8 @@ class Crystal(object):
         :param g: group operation (GroupOp)
         :param lattvec: 3-vector (integer) lattice vector in direct coordinates
         :param ind: two-tuple index specifying the atom: (atomtype, atomindex)
-        :return: 3-vector (integer) lattice vector in direct coordinates, index
+        :return glatt: 3-vector (integer) lattice vector in direct coordinates
+        :return gindex: tuple of new basis atom
         """
         if __debug__:
             if type(g) is not GroupOp: raise TypeError
@@ -1037,8 +1065,8 @@ class Crystal(object):
         :param g:  group operation (GroupOp)
         :param lattvec: 3-vector (integer) lattice vector in direct coordinates
         :param uvec: 3-vector (float) vector in direct coordinates
-        :return: 3-vector (integer) lattice vector in direct coordinates, location in unit cell in
-         direct coordinates
+        :return glatt: 3-vector (integer) lattice vector in direct coordinates
+        :param guvec: 3-vector (float) vector in direct coordinates
         """
         if __debug__:
             if type(g) is not GroupOp: raise TypeError
@@ -1055,7 +1083,7 @@ class Crystal(object):
 
         :param g: group operation (GroupOp)
         :param x: 3-vector position in space
-        :return: 3-vector position in space (Cartesian coordinates)
+        :return gx: 3-vector position in space (Cartesian coordinates)
         """
         if __debug__:
             if type(g) is not GroupOp: raise TypeError
@@ -1069,8 +1097,7 @@ class Crystal(object):
         :param d1: direction one (array[3])
         :param d2: direction two (array[3])
         :param threshold: threshold for equality
-
-        :return: True if equivalent by a point group operation
+        :return equivalent: True if equivalent by a point group operation
         """
         return any(np.all(abs(d1 - self.g_direc(g, d2)) < threshold) for g in self.G)
 
@@ -1079,7 +1106,7 @@ class Crystal(object):
         Generate our point group indices. Done with crazy list comprehension due to the
         structure of our basis.
 
-        :return: list of sets of point group operations that leave a site unchanged
+        :return Gpointlists: list of lists of frozensets of point group operations that leave a site unchanged
         """
         if self.N == 1:
             return [[self.G]]
@@ -1094,26 +1121,26 @@ class Crystal(object):
         """
         Generate our Wykcoff sets.
 
-        :return: set of sets of tuples of positions that correspond to identical Wyckoff positions
+        :return Wyckoffsets: set of sets of tuples of positions that correspond to identical Wyckoff positions
         """
         if self.N == 1:
-            return frozenset([frozenset([(0,0)])])
+            return frozenset([frozenset([(0, 0)])])
         # this is a little suboptimal if our basis is huge--it leans heavily
         # on the construction of sets to make the checks easy.
-        return frozenset([ frozenset([ (ind[0], g.indexmap[ind[0]][ind[1]])
-                                       for g in self.G])
-                           for ind in self.atomindices])
+        return frozenset([frozenset([(ind[0], g.indexmap[ind[0]][ind[1]])
+                                     for g in self.G])
+                          for ind in self.atomindices])
 
     def Wyckoffpos(self, uvec):
         """
         Generates all the equivalent Wyckoff positions for a unit cell vector.
 
         :param uvec: 3-vector (float) vector in direct coordinates
-        :return: list of equivalent Wyckoff positions
+        :return Wyckofflist: list of equivalent Wyckoff positions
         """
         lis = []
         zero = np.zeros(3, dtype=int)
-        for u in ( self.g_vect(g, zero, uvec)[1] for g in self.G ):
+        for u in (self.g_vect(g, zero, uvec)[1] for g in self.G):
             if not np.any([np.allclose(u, u1) for u1 in lis]):
                 lis.append(u)
         return lis
@@ -1123,11 +1150,12 @@ class Crystal(object):
         Generates the vector basis corresponding to an atomic site
 
         :param ind: tuple index for atom
-        :return: (dim, vect) -- dimension of basis, vector = normal for plane, direction for line
+        :return dim: dimensionality, 0..3
+        :return vect: vector defining line direction (1) or plane normal (2)
         """
         # need to work with the point group operations for the site
         return reduce(CombineVectorBasis,
-                      [ VectorBasis(*g.eigen()) for g in self.pointG[ind[0]][ind[1]] ] )
+                      [VectorBasis(*g.eigen()) for g in self.pointG[ind[0]][ind[1]]])
         # , (3, np.zeros(3)) -- don't need initial value; if there's only one group op, it's identity
 
     # implemented as a static method as its a utility function
@@ -1136,30 +1164,35 @@ class Crystal(object):
         """Returns a list of orthonormal vectors corresponding to our vector basis.
 
         :param vb: (dim, v)
-        :return: list of vectors
+        :return vlist: list of vectors
         """
         if vb[0] == 0: return []
         if vb[0] == 1: return [vb[1]]
         if vb[0] == 2:
             # now, construct the other two directions:
             norm = vb[1]
-            if abs(norm[2]) < 0.75: v1 = np.array([norm[1], -norm[0], 0])
-            else: v1 = np.array([-norm[2], 0, norm[0]])
+            if abs(norm[2]) < 0.75:
+                v1 = np.array([norm[1], -norm[0], 0])
+            else:
+                v1 = np.array([-norm[2], 0, norm[0]])
             v1 /= np.sqrt(np.dot(v1, v1))
             v2 = np.cross(norm, v1)
             return [v1, v2]
-        if vb[0] == 3: return [ v for v in np.eye(3) ]
+        if vb[0] == 3: return [v for v in np.eye(3)]
 
     def FullVectorBasis(self, chem=None):
         """
         Generate our full vector basis, using the information from our crystal
 
         :param chem: (optional) chemical index to consider; otherwise return a list of such
-        :return: (list) of our unique vector basis lattice functions, normalized; each is an array
-        :return: (list) of ouf VV "outer" expansion
+        :return VBfunctions: (list) of our unique vector basis lattice functions, normalized; each is an array
+            (NVbasis x Nsites x 3)
+        :return VVouter: (list) of ouf VV "outer" expansion (NVbasis x NVbasis for each chemistry)
         """
-        if chem is None: chemlist = [c for c in range(len(self.basis))]
-        else: chemlist = [chem]
+        if chem is None:
+            chemlist = [c for c in range(len(self.basis))]
+        else:
+            chemlist = [chem]
         VBlist = []
         VVlist = []
         for c in chemlist:
@@ -1182,19 +1215,21 @@ class Crystal(object):
             VBlist.append(np.array(lis))
             VVlist.append(VV)
         # if we didn't specify which chemical element, return the lists; else, just the individual arrays
-        if chem is None: return VBlist, VVlist
-        else: return VBlist[0], VVlist[0]
+        if chem is None:
+            return VBlist, VVlist
+        else:
+            return VBlist[0], VVlist[0]
 
     def SymmTensorBasis(self, ind):
         """
         Generates the symmetric tensor basis corresponding to an atomic site
 
         :param ind: tuple index for atom
-        :return: (dim, vect) -- dimension of basis, vector = normal for plane, direction for line
+        :return tensorbasis: list of 2nd-rank symmetric tensors making up the basis
         """
         # need to work with the point group operations for the site
         return reduce(CombineTensorBasis,
-                      [ SymmTensorBasis(*g.eigen()) for g in self.pointG[ind[0]][ind[1]] ] )
+                      [SymmTensorBasis(*g.eigen()) for g in self.pointG[ind[0]][ind[1]]])
         # , (3, np.zeros(3)) -- don't need initial value; if there's only one group op, it's identity
 
     def nnlist(self, ind, cutoff):
@@ -1205,22 +1240,22 @@ class Crystal(object):
 
         :param ind: tuple index for atom
         :param cutoff:  distance cutoff
-        :return: list of nearest neighbor vectors
+        :return nnlist: list of nearest neighbor vectors
         """
-        r2 = cutoff*cutoff
-        nmax = [int(np.round(np.sqrt(self.metric[i,i])))+1
+        r2 = cutoff * cutoff
+        nmax = [int(np.round(np.sqrt(self.metric[i, i]))) + 1
                 for i in range(3)]
-        supervect = [ np.array([n0, n1, n2])
-                      for n0 in range(-nmax[0],nmax[0]+1)
-                      for n1 in range(-nmax[1],nmax[1]+1)
-                      for n2 in range(-nmax[2],nmax[2]+1) ]
+        supervect = [np.array([n0, n1, n2])
+                     for n0 in range(-nmax[0], nmax[0] + 1)
+                     for n1 in range(-nmax[1], nmax[1] + 1)
+                     for n2 in range(-nmax[2], nmax[2] + 1)]
         lis = []
         u0 = self.basis[ind[0]][ind[1]]
         for u1 in self.basis[ind[0]]:
-            du = u1-u0
+            du = u1 - u0
             for n in supervect:
                 dx = self.unit2cart(n, du)
-                if np.dot(dx, dx) > 0 and np.dot(dx,dx) < r2:
+                if np.dot(dx, dx) > 0 and np.dot(dx, dx) < r2:
                     lis.append(dx)
         return lis
 
@@ -1234,40 +1269,41 @@ class Crystal(object):
         :param chem: index corresponding to the chemistry to consider
         :param cutoff: distance cutoff
         :param closestdistance: closest distance allowed in transition (can be a list)
-        :return: list of symmetry-unique transitions; each is a list of tuples:
-          ((i,j), dx) corresponding to jump from i->j with vector dx
+        :return jumpnetwork: list of symmetry-unique transitions; each is a list of tuples:
+          `((i,j), dx)` corresponding to jump from :math:`i\to j` with vector :math:`\mathbf{\delta x}`
         """
+
         # should we consider changing the lists to tuples? Not sure if there's any efficiency gain
         def inlist(tup, dx, lis):
             """Determines if (i,j), dx is in our list"""
             # a little confusing: run through all transition tuples, see if we find our example
-            return any( tup == ij and np.allclose(dx, v) for translist in lis for ij, v in translist )
+            return any(tup == ij and np.allclose(dx, v) for translist in lis for ij, v in translist)
 
-        r2 = cutoff*cutoff
-        nmax = [int(np.round(np.sqrt(self.metric[i,i])))+1
+        r2 = cutoff * cutoff
+        nmax = [int(np.round(np.sqrt(self.metric[i, i]))) + 1
                 for i in range(3)]
-        supervect = [ np.array([n0, n1, n2])
-                      for n0 in range(-nmax[0],nmax[0]+1)
-                      for n1 in range(-nmax[1],nmax[1]+1)
-                      for n2 in range(-nmax[2],nmax[2]+1) ]
+        supervect = [np.array([n0, n1, n2])
+                     for n0 in range(-nmax[0], nmax[0] + 1)
+                     for n1 in range(-nmax[1], nmax[1] + 1)
+                     for n2 in range(-nmax[2], nmax[2] + 1)]
         lis = []
         center = np.zeros(3, dtype=int)
         for i, u0 in enumerate(self.basis[chem]):
             for j, u1 in enumerate(self.basis[chem]):
-                du = u1-u0
+                du = u1 - u0
                 for n in supervect:
                     dx = self.unit2cart(n, du)
-                    if np.dot(dx, dx) > 0 and np.dot(dx,dx) < r2:
+                    if np.dot(dx, dx) > 0 and np.dot(dx, dx) < r2:
                         # we have a valid transition; first check that we haven't already looked at it
-                        if not inlist((i,j), dx, lis):
+                        if not inlist((i, j), dx, lis):
                             trans = []
                             for g in self.G:
                                 # rotate through all combinations of i->j using space group symmetry
                                 R1, ind1 = self.g_pos(g, center, (chem, i))
                                 R2, ind2 = self.g_pos(g, n, (chem, j))
                                 tup = (ind1[1], ind2[1])
-                                dx = self.pos2cart(R2,ind2) - self.pos2cart(R1,ind1)
-                                if not any( tup == ij and np.allclose(dx, v) for ij, v in trans):
+                                dx = self.pos2cart(R2, ind2) - self.pos2cart(R1, ind1)
+                                if not any(tup == ij and np.allclose(dx, v) for ij, v in trans):
                                     trans.append((tup, dx))
                                     trans.append(((tup[1], tup[0]), -dx))
                             lis.append(trans)
@@ -1275,9 +1311,9 @@ class Crystal(object):
         if type(closestdistance) is list:
             # quick sanity check to make sure we don't include collision detection on
             # our interstitial site
-            closest2list = [ x**2 if c != chem else -1. for c,x in enumerate(closestdistance)]
+            closest2list = [x ** 2 if c != chem else -1. for c, x in enumerate(closestdistance)]
         else:
-            closest2list = [ closestdistance**2 if c != chem else -1. for c in range(self.Nchem)]
+            closest2list = [closestdistance ** 2 if c != chem else -1. for c in range(self.Nchem)]
         for c, mindist2 in enumerate(closest2list):
             if mindist2 < 0:
                 # skip the negative distances; we still check 0 because straight line paths
@@ -1289,18 +1325,18 @@ class Crystal(object):
                     # we will modify lis in place with remove's, and its dangerous to pull
                     # off as we iterate through:
                     for trans in list(lis):
-                        t = trans[0] # representative transition
+                        t = trans[0]  # representative transition
                         dx = t[1]
                         # take our starting point relative to the first item in the tuple
-                        xRa = self.unit2cart(n, u0-self.basis[chem][t[0][0]])
+                        xRa = self.unit2cart(n, u0 - self.basis[chem][t[0][0]])
                         xRa2 = np.dot(xRa, xRa)
                         xRa_dx = np.dot(xRa, dx)
                         dx2 = np.dot(dx, dx)
                         if 0 <= xRa_dx <= dx2:
-                            d2 = (xRa2*dx2 - xRa_dx*xRa_dx)/dx2
+                            d2 = (xRa2 * dx2 - xRa_dx * xRa_dx) / dx2
                             if np.isclose(d2, mindist2) or d2 < mindist2:
                                 lis.remove(trans)
-        lis.sort(key=lambda entry: min( i+j + 1e-3*np.dot(dx,dx) for (i,j), dx in entry))
+        lis.sort(key=lambda entry: min(i + j + 1e-3 * np.dot(dx, dx) for (i, j), dx in entry))
         return lis
 
     def jumpnetwork2lattice(self, chem, jumpnetwork):
@@ -1310,14 +1346,14 @@ class Crystal(object):
 
         :param chem: index corresponding to the chemistry to consider
         :param jumpnetwork: list of symmetry-unique transitions; each is a list of tuples:
-          ((i,j), dx) corresponding to jump from i->j with vector dx
-        :return: list of symmetry-unique transitions; each is a list of tuples:
-          ((i,j), R) corresponding to jump from i in unit cell 0 -> j in unit cell R
+          `((i,j), dx)` corresponding to jump from :math:`i\to j` with vector :math:`\mathbf{\delta x}`
+        :return jumplattice: list of symmetry-unique transitions; each is a list of tuples:
+          `((i,j), R)` corresponding to jump from i in unit cell 0 -> j in unit cell R
         """
-        return [ [ ((i,j),
-                    np.round(np.dot(self.invlatt, dx)+self.basis[chem][i]-self.basis[chem][j]).astype(int))
-                   for (i,j), dx in jumplist]
-                 for jumplist in jumpnetwork]
+        return [[((i, j),
+                  np.round(np.dot(self.invlatt, dx) + self.basis[chem][i] - self.basis[chem][j]).astype(int))
+                 for (i, j), dx in jumplist]
+                for jumplist in jumpnetwork]
 
     def sitelist(self, chem):
         """
@@ -1325,11 +1361,11 @@ class Crystal(object):
         Done with a single list comprehension--useful as input for diffusion calculation
 
         :param chem: index corresponding to chemistry to consider
-        :return: list of lists of indices that are equivalent by symmetry
+        :return symmequivsites: list of lists of indices that are equivalent by symmetry
         """
-        return sorted([ sorted(i for c,i in l)  # strips out the chemistry index; sorted for readability
-                 for l in [list(s) for s in self.Wyckoff]  # converts to list of lists
-                 if l[0][0] == chem ])  # select only those with correct chemistry
+        return sorted([sorted(i for c, i in l)  # strips out the chemistry index; sorted for readability
+                       for l in [list(s) for s in self.Wyckoff]  # converts to list of lists
+                       if l[0][0] == chem])  # select only those with correct chemistry
 
     def fullkptmesh(self, Nmesh):
         """
@@ -1337,7 +1373,6 @@ class Crystal(object):
         k-points inside the BZ. Does not return any *weights* as every point is equally weighted.
 
         :param Nmesh: mesh divisions Nmesh[0] x Nmesh[1] x Nmesh[2]
-
         :return kpt: array[Nkpt][3] of kpoints
         """
         Nkpt = np.product(Nmesh)
@@ -1364,7 +1399,6 @@ class Crystal(object):
 
         :param kptfull: array[Nkpt][3] of kpoints
         :param threshold: threshold for symmetry equality
-
         :return kptsymm: array[Nsymm][3] of kpoints
         :return weight: array[Nsymm] of weights (integrates to 1)
         """
@@ -1391,7 +1425,7 @@ class Crystal(object):
                 match = False
                 for i, symmcomp in enumerate(symmcomplist):
                     # if any(np.allclose(k, gk, rtol=0, atol=threshold) for gk in symmcomp):
-                    if any(np.all(abs(k-gk)<threshold) for gk in symmcomp):
+                    if any(np.all(abs(k - gk) < threshold) for gk in symmcomp):
                         # update weight, kick out
                         wtlist[i] += basewt
                         match = True
@@ -1404,7 +1438,7 @@ class Crystal(object):
             kptsym += complist
             wsym += wtlist
             kmin = kmax
-        return np.array(kptsym),np.array(wsym)
+        return np.array(kptsym), np.array(wsym)
 
 
 # YAML interfaces for types outside of this module
@@ -1412,10 +1446,12 @@ def ndarray_representer(dumper, data):
     """Output a numpy array"""
     return dumper.represent_sequence(NDARRAY_YAMLTAG, data.tolist())
 
+
 ### NOTE: deep=True is THE KEY here for reading
 ### hat-tip: https://stackoverflow.com/questions/19439765/is-there-a-way-to-construct-an-object-using-pyyaml-construct-mapping-after-all-n
 def ndarray_constructor(loader, node):
     return np.array(loader.construct_sequence(node, deep=True))
+
 
 # YAML registration:
 yaml.add_representer(np.ndarray, ndarray_representer)
@@ -1424,22 +1460,34 @@ yaml.add_constructor(NDARRAY_YAMLTAG, ndarray_constructor)
 yaml.add_representer(GroupOp, GroupOp.GroupOp_representer)
 yaml.add_constructor(GROUPOP_YAMLTAG, GroupOp.GroupOp_constructor)
 
+
 # representers for numpy types that trip up YAML
 # (from https://github.com/leifdenby/pycfd/blob/master/yaml_serialize.py)
 def bool_representer(dumper, data):
     return dumper.represent_bool(data)
+
+
 yaml.add_representer(np.bool_, bool_representer)
+
 
 def int_representer(dumper, data):
     return dumper.represent_int(data)
+
+
 yaml.add_representer(np.int32, int_representer)
 yaml.add_representer(np.dtype(np.int32), int_representer)
 
+
 def long_representer(dumper, data):
     return dumper.represent_long(data)
+
+
 yaml.add_representer(np.int64, int_representer)
+
 
 def float_representer(dumper, data):
     return dumper.represent_float(data)
+
+
 yaml.add_representer(np.float32, float_representer)
 yaml.add_representer(np.float64, float_representer)
