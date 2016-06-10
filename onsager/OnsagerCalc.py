@@ -149,13 +149,14 @@ class Interstitial(object):
         site energies and transitions (corresponding to the representatives).
 
         :param super_n: 3x3 integer matrix to define our supercell
-        :return superdict: dictionary of `states`, `transitions`, and `transmapping` that
+        :return superdict: dictionary of `states`, `transitions`, `transmapping`, and `indices` that
             correspond to dictionaries with tags.
             superdict['states'][i] = supercell of site;
             superdict['transitions'][n] = (supercell initial, supercell final);
             superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+            superdict['indices'][tag] = index of tag, where tag is either a state or transition tag.
         """
-        superdict = {'states': {}, 'transitions': {}, 'transmapping': {}}
+        superdict = {'states': {}, 'transitions': {}, 'transmapping': {}, 'indices': {}}
         basesupercell = supercell.Supercell(self.crys, super_n, interstitial=(self.chem,), Nsolute=0)
         basis = self.crys.basis[self.chem]
         # fill up the supercell with all the *other* atoms
@@ -189,6 +190,9 @@ class Interstitial(object):
                     if g is not None:
                         superdict['transmapping'][tag] += ((k, g, mapping),)
                         break
+        for d in (superdict['states'], superdict['transitions']):
+            for k in d.keys():
+                superdict['indices'][k] = self.tagdict[k]  # keep a local copy of the indices, for transformation later
         return superdict
 
     def generateSiteGroupOps(self):

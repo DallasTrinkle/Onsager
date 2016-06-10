@@ -584,9 +584,13 @@ class InterstitialTests(unittest.TestCase):
         for super_n, diffuser in ((np.array([[-2, 2, 2], [2, -2, 2], [2, 2, -2]]), self.Dfcc),
                                   (np.array([[3, 0, 0], [0, 3, 0], [0, 0, 2]]), self.Dhcp)):
             supercelldict = diffuser.makesupercells(super_n)
-            for key in ('states', 'transitions', 'transmapping'):
+            for key in ('states', 'transitions', 'transmapping', 'indices'):
                 self.assertIn(key, supercelldict)
                 self.assertGreaterEqual(len(supercelldict[key]), 1)
+            tagdict = supercelldict['indices']  # test by using it below...
+            for k, v in tagdict.items():
+                self.assertIn(k, diffuser.tagdict)
+                self.assertEqual(v, diffuser.tagdict[k])
             # check that *every* supercell only has one defect in it:
             for k, v in supercelldict['states'].items():
                 defectcontent = v.defectindices()
@@ -596,7 +600,7 @@ class InterstitialTests(unittest.TestCase):
                     for ind in indset: pass  # do this to get the single index in indset, assign to ind
                 # check that we've got a supercell with the correct; look at the position of the interstitial
                 basis = crystal.incell(np.dot(v.super, v.pos[ind]))
-                crysbasis = diffuser.crys.basis[diffuser.chem][diffuser.sitelist[diffuser.tagdict[k]][0]]
+                crysbasis = diffuser.crys.basis[diffuser.chem][diffuser.sitelist[tagdict[k]][0]]
                 self.assertTrue(np.allclose(basis, crysbasis), '{} has interstitial at {} not {}'.format(k, basis, crysbasis))
             for k, v in supercelldict['transitions'].items():
                 self.assertEqual(len(v), 2, msg='{} does not have two entries?'.format(k))
@@ -609,7 +613,7 @@ class InterstitialTests(unittest.TestCase):
                         self.assertEqual(len(indset), 1, msg='{} has multiple defects?'.format(k))
                         for ind in indset: indices += (ind,)  # append to our list
                 # check initial state, final state, and deltax
-                (i0,j0), dx0 = diffuser.jumpnetwork[diffuser.tagdict[k]][0]
+                (i0,j0), dx0 = diffuser.jumpnetwork[tagdict[k]][0]
                 basis = crystal.incell(np.dot(v[0].super, v[0].pos[indices[0]]))
                 crysbasis = diffuser.crys.basis[diffuser.chem][i0]
                 self.assertTrue(np.allclose(basis, crysbasis), '{} has interstitial at {} not {}'.format(k, basis, crysbasis))
