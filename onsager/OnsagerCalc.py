@@ -27,6 +27,19 @@ from functools import reduce
 from onsager import GFcalc
 from onsager import crystal
 from onsager import crystalStars as stars
+from onsager import supercell
+
+
+# database tags
+INTERSTITIAL_TAG = 'i'
+TRANSITION_TAG = '{state1}^{state2}'
+SOLUTE_TAG = 's'
+VACANCY_TAG = 'v'
+SINGLE_DEFECT_TAG = '{type}:{u[0]:+06.3f},{u[1]:+06.3f},{u[2]:+06.3f}'
+DOUBLE_DEFECT_TAG = '{state1}-{state2}'
+OM0_TAG = 'omega0:{vac1}^{vac2}'
+OM1_TAG = 'omega1:{solute}-{vac1}^{vac2}'
+OM2_TAG = 'omega2:{complex1}^{complex2}'
 
 
 class Interstitial(object):
@@ -81,6 +94,7 @@ class Interstitial(object):
         self.jumpgroupops = self.generateJumpGroupOps()  # list of group ops to take first rep. into whole list
         self.siteSymmTensorBasis = self.generateSiteSymmTensorBasis()  # projections for *first rep. only*
         self.jumpSymmTensorBasis = self.generateJumpSymmTensorBasis()  # projections for *first rep. only*
+        self.tags, self.tagdict, self.tagdicttype = self.generatetags()  # now with tags!
 
     @staticmethod
     def sitelistYAML(sitelist):
@@ -97,6 +111,72 @@ class Interstitial(object):
                                   'EnergyT': [0 for t in jumpnetwork],
                                   'PrefactorT': [1 for t in jumpnetwork],
                                   'jumpnetwork': jumpnetwork})
+
+    def generatetags(self):
+        """
+        Create tags for unique interstitial states, and transition states.
+
+        :return tags: dictionary of tags; each is a list-of-lists
+        :return tagdict: dictionary that maps tag into the index of the corresponding list.
+        :return tagdicttype: dictionary that maps tag into the key for the corresponding list.
+        """
+        tags, tagdict, tagdicttype = {}, {}, {}
+        basis = self.crys.basis[self.chem]  # shortcut
+
+        def single_state(u):
+            return SINGLE_DEFECT_TAG.format(type=INTERSTITIAL_TAG, u=u)
+
+        def transition(ui, dx):
+            return TRANSITION_TAG.format(state1=single_state(ui),
+                                         state2=single_state(ui + np.dot(self.crys.invlatt, dx)))
+
+        tags['states'] = [[single_state(basis[s]) for s in sites]
+                           for sites in self.sitelist]
+        tags['transitions'] = [[transition(i, dx) for ((i, j), dx) in jumplist]
+                               for jumplist in self.jumpnetwork]
+        # make the "tagdict" for quick indexing!
+        for tagtype, taglist in tags.items():
+            for i, tagset in enumerate(taglist):
+                for tag in tagset:
+                    if tag in tagdict:
+                        raise ValueError('Generated repeated tags? {} found twice.'.format(tag))
+                    else:
+                        tagdict[tag], tagdicttype[tag] = i, tagtype
+        return tags, tagdict, tagdicttype
+
+    def makesupercells(self, super_n):
+        """
+        Take in a supercell matrix, then generate all of the supercells needed to compute
+        site energies and transitions (corresponding to the representatives).
+
+        :param super_n: 3x3 integer matrix to define our supercell
+        :return superdict: dictionary of `states`, `transitions`, and `transmapping` that
+            correspond to dictionaries with tags.
+            superdict['states'][i] = supercell of site;
+            superdict['transitions'][n] = (supercell initial, supercell final);
+            superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+        """
+        superdict = {'states': {}, 'transitions': {}, 'transmapping': {}}
+        basesupercell = supercell.Supercell(self.crys, super_n, interstitial=(self.chem,), Nsolute=0)
+        # fill up the supercell with all the *other* atoms
+        for (c,i) in self.crys.atomindices:
+            if c==self.chem: continue
+            basesupercell.fillperiodic((c,i), Wyckoff=False)  # for efficiency
+        for sites in self.sitelist:
+            i=sites[0]
+            tag = SINGLE_DEFECT_TAG.format(type=INTERSTITIAL_TAG, u=self.crys.basis[self.chem][i])
+            super = basesupercell.copy()
+            # put an interstitial in that single state; the "first" one is fine:
+            n = super.indexatom[(self.chem, i)]
+            super[n] = self.chem
+            superdict['states'][tag] = super
+        for jumps in self.jumpnetwork:
+            (i0, j0), dx0 = jumps[0]
+            u0 = self.crys.basis[self.chem][i0]
+            u1 = u0 + np.dot(self.crys.invlatt, dx0)  # should correspond to the j0
+            tag = TRANSITION_TAG.format(state1=SINGLE_DEFECT_TAG.format(type=INTERSTITIAL_TAG, u=u0),
+                                        state2=SINGLE_DEFECT_TAG.format(type=INTERSTITIAL_TAG, u=u1))
+        return superdict
 
     def generateSiteGroupOps(self):
         """
@@ -504,16 +584,6 @@ def arrays2vTKdict(vTKarray, valarray, vTKsplits):
     return vTKdict
 
 
-# database tags
-SOLUTE_TAG = 's'
-VACANCY_TAG = 'v'
-SINGLE_DEFECT_TAG = '{type}:{u1:+06.3f},{u2:+06.3f},{u3:+06.3f}'
-DOUBLE_DEFECT_TAG = '{state1}-{state2}'
-OM0_TAG = 'omega0:{vac1}^{vac2}'
-OM1_TAG = 'omega1:{solute}-{vac1}^{vac2}'
-OM2_TAG = 'omega2:{complex1}^{complex2}'
-
-
 class VacancyMediated(object):
     """
     A class to compute vacancy-mediated solute transport coefficients, specifically
@@ -666,7 +736,7 @@ class VacancyMediated(object):
         basis = self.crys.basis[self.chem]  # shortcut
 
         def single_defect(DEFECT_TAG, u):
-            return SINGLE_DEFECT_TAG.format(type=DEFECT_TAG, u1=u[0], u2=u[1], u3=u[2])
+            return SINGLE_DEFECT_TAG.format(type=DEFECT_TAG, u=u)
 
         def double_defect(PS):
             return DOUBLE_DEFECT_TAG.format( \

@@ -532,6 +532,13 @@ class InterstitialTests(unittest.TestCase):
                 else:
                     self.assertAlmostEqual(rate, 10)  # tet->oct
 
+    def testSupercell(self):
+        """Can we construct proper supercells for our diffuser?"""
+        super_n = np.array([[-2,2,2], [2,-2,2], [2,2,-2]])
+        supercelldict = self.Dfcc.makesupercells(super_n)
+        for keys in ('states', 'transitions', 'mapping'):
+            self.assertIn(keys, supercelldict)
+
     def testDiffusivity(self):
         """Diffusivity"""
         # What we all came for...
