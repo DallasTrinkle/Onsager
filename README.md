@@ -20,8 +20,9 @@ The tests for the package are include in `test`; `tests.py` will run all of the 
 
 The code uses YAML files for input/output of diffusion data for the interstitial calculator. The vacancy-mediated calculator requires much more data, and uses HDF5 format to save/reload as needed. The vacancy-mediated calculator uses tags (unique human-readable-ish strings) to identify all (symmetry-unique) vacancy, solute, and complex states, and transitions between them.
 
-Release 0.9: Full release of Interstitial calculator, along with theory paper (see References below).
-Release 0.9.1: Added supercell class to aid in automated setup of calculation.
+Releases:
+0.9. Full release of Interstitial calculator, along with theory paper (see References below).
+0.9.1. Added spin degrees of freedom to `crystal` for symmetry purposes; added `supercell` class to aid in automated setup of calculation.
 
 References
 ==========
