@@ -242,7 +242,22 @@ class FCCSuperTests(unittest.TestCase):
         self.assertNotEqual(g, None, msg='Cannot map between permutation?')
         supercopy.reorder(mapping)
         self.assertOrderingSuperEqual(super, supercopy, msg='Improper map from random permutation')
-
+        # apply all of the group operations, and see how they perform:
+        for g in super.G:
+            gsuper = g*super
+            for ind in np.random.randint(super.size * super.N, size=Ntests):
+                c, gsuper[ind] = gsuper[ind], -1
+                gsuper[ind] = c
+            g0, mapping = supercopy.equivalencemap(gsuper)
+            if g!=g0:
+                msg='Group operations not equal?\n'
+                for line0, line1 in itertools.zip_longest(g.__str__().splitlines(),
+                                                          g0.__str__().splitlines(),
+                                                          fillvalue=' - '):
+                      msg += line0 + '\t' + line1 + '\n'
+                self.fail(msg=msg)
+            self.assertOrderingSuperEqual((g0*supercopy).reorder(mapping), gsuper,
+                                          msg='Group operation + mapping failure?')
 
 class HCPSuperTests(FCCSuperTests):
     """Tests to make sure we can make a supercell object: based on HCP"""

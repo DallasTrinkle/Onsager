@@ -342,6 +342,7 @@ class Supercell(object):
 
         :param ci: tuple of (chem, index) in crystal
         :param Wyckoff: (optional) if False, *only* occupy the specific tuple, but still periodically
+        :return self:
         """
         if __debug__:
             if ci not in self.indexatom: raise IndexError('Tuple {} not a corresponding atom index'.format(ci))
@@ -349,6 +350,7 @@ class Supercell(object):
         indlist = next((nset for nset in self.Wyckofflist if ind in nset), None) if Wyckoff else (ind,)
         for i in [n*self.N+i for n in range(self.size) for i in indlist]:
             self.setocc(i, ci[0])
+        return self
 
     def occposlist(self):
         """
@@ -432,6 +434,7 @@ class Supercell(object):
         for "presentation".
 
         :param mapping: list of maps; will make newchemorder[c][i] = chemorder[c][mapping[c][i]]
+        :return self:
 
         If mapping is not a proper permutation, raises ValueError.
         """
@@ -441,6 +444,7 @@ class Supercell(object):
         if not self.__sane__():
             self.chemorder = oldorder
             raise ValueError('Mapping {} is not a proper permutation'.format(mapping))
+        return self
 
     def equivalencemap(self, other):
         """
@@ -487,8 +491,6 @@ class Supercell(object):
                 mapping.append([gclist.index(index) for index in otherlist])
             break
 
-        # g = crystal.GroupOp.ident([self.pos])
-        # mapping = [[i for i in range(len(clist))] for clist in self.chemorder]
         if mapping is None: return None, mapping
         return g, mapping
 
