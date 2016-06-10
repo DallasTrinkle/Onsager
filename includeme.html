@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Onsager &mdash; Onsager 0.9 documentation</title>
+  <title>Onsager &mdash; Onsager 0.9.1 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="Onsager 0.9 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 0.9.1 documentation" href="index.html"/>
         <link rel="next" title="Crystal" href="crystal.html"/>
         <link rel="prev" title="Welcome to Onsager’s documentation!" href="index.html"/> 
 
@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="#support">Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crystal.html">Crystal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="supercell.html">Supercell</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
@@ -151,7 +152,8 @@
 <p>Many of the subpackages within Onsager are support for the main attraction, which is in OnsagerCalc. Interstitial calculation examples are avaliable in <cite>bin</cite>, including three YAML input files, as well as a interstitial diffuser. An example of vacancy-mediated diffusion is shown in <cite>bin/fivefreq.py</cite>, which computes the well-known five-frequency model for substitutional solute transport in an FCC lattice.</p>
 <p>The tests for the package are include in <cite>test</cite>; <cite>tests.py</cite> will run all of the tests in the directory with verbosity level 2. This can be time-consuming (on the order of several of minutes) to run all tests; coverage is currently &gt;90%.</p>
 <p>The code uses YAML files for input/output of diffusion data for the interstitial calculator. The vacancy-mediated calculator requires much more data, and uses HDF5 format to save/reload as needed. The vacancy-mediated calculator uses tags (unique human-readable-ish strings) to identify all (symmetry-unique) vacancy, solute, and complex states, and transitions between them.</p>
-<p>Release 0.9: Full release of Interstitial calculator, along with theory paper (see References below).</p>
+<p>Release 0.9: Full release of Interstitial calculator, along with theory paper (see References below).
+Release 0.9.1: Added supercell class to aid in automated setup of calculation.</p>
 </div>
 <div class="section" id="references">
 <h1>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h1>
@@ -220,7 +222,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.9',
+            VERSION:'0.9.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
