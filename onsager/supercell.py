@@ -1,12 +1,12 @@
 """
 Supercell class
 
-Class to store supercells of crystals: along with some analysis
+Class to store supercells of crystals. A supercell is a lattice model of a crystal, with
+periodically repeating unit cells. In that framework we can
+
 1. add/remove/substitute atoms
-2. output POSCAR format (possibly other formats?)
-3. find the transformation map between two different representations of the same supercell
-4. construct an NEB pathway between two supercells
-5. possibly input from CONTCAR? extract displacements?
+2. find the transformation map between two different representations of the same supercell
+3. output POSCAR format (possibly other formats?)
 """
 
 __author__ = 'Dallas R. Trinkle'
@@ -20,7 +20,10 @@ from functools import reduce
 
 class Supercell(object):
     """
-    A class that defines a Supercell of a crystal
+    A class that defines a Supercell of a crystal.
+
+    Takes in a crystal, a supercell (3x3 integer matrix). We can identify sites
+    as interstitial sites, and specify if we'll have solutes.
     """
 
     def __init__(self, crys, super, interstitial=(), Nsolute=0, empty=False, NOSYM=False):
