@@ -33,9 +33,9 @@ class GroupOperationTests(unittest.TestCase):
         self.cartrot = np.array([[0.,1.,0.],
                                  [1.,0.,0.],
                                  [0.,0.,1.]])
-        self.indexmap = [[0]]
+        self.indexmap = ((0,),)
         self.mirrorop = crystal.GroupOp(self.rot,self.trans,self.cartrot,self.indexmap)
-        self.ident = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), [[0]])
+        self.ident = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), ((0,),))
 
     def testEquality(self):
         """Can we check if two group operations are equal?"""
@@ -59,8 +59,8 @@ class GroupOperationTests(unittest.TestCase):
         v1 = np.array([1,0,0])
         trans = self.ident + v1
         self.assertEqual(trans*trans, self.ident + 2*v1)
-        rot3 = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), [[1,2,0]])
-        ident3 = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), [[0,1,2]])
+        rot3 = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), ((1,2,0),))
+        ident3 = crystal.GroupOp(np.eye(3, dtype=int), np.zeros(3), np.eye(3), ((0,1,2),))
         self.assertEqual(rot3*rot3*rot3, ident3)
 
     def testInversion(self):
@@ -70,7 +70,7 @@ class GroupOperationTests(unittest.TestCase):
         v1 = np.array([1,0,0])
         trans = self.ident + v1
         self.assertEqual(trans.inv(), self.ident - v1)
-        inversion = crystal.GroupOp(-np.eye(3,dtype=int), np.zeros(3), -np.eye(3), [[0]])
+        inversion = crystal.GroupOp(-np.eye(3,dtype=int), np.zeros(3), -np.eye(3), ((0,),))
         self.assertEqual(inversion.inv(), inversion)
         invtrans = inversion + v1
         self.assertEqual(invtrans.inv(), invtrans)
@@ -451,25 +451,25 @@ class CrystalClassTests(unittest.TestCase):
         basis = [[np.array([0,0,0])]]
         trans, indexmap = crystal.maptranslation(basis, basis)
         self.assertTrue(np.allclose(trans, np.array([0,0,0])))
-        self.assertEqual(indexmap, [[0]])
+        self.assertEqual(indexmap, ((0,),))
 
         oldbasis = [[np.array([0.2,0,0])]]
         newbasis = [[np.array([-0.2,0,0])]]
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
         self.assertTrue(np.allclose(trans, np.array([0.4,0,0])))
-        self.assertEqual(indexmap, [[0]])
+        self.assertEqual(indexmap, ((0,),))
 
         oldbasis = [[np.array([0.,0.,0.]), np.array([1./3.,2./3.,1./2.])]]
         newbasis = [[np.array([0.,0.,0.]), np.array([-1./3.,-2./3.,-1./2.])]]
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
         self.assertTrue(np.allclose(trans, np.array([1./3.,-1./3.,-1./2.])))
-        self.assertEqual(indexmap, [[1,0]])
+        self.assertEqual(indexmap, ((1,0),))
 
         oldbasis = [[np.array([0.,0.,0.])], [np.array([1./3.,2./3.,1./2.]), np.array([2./3.,1./3.,1./2.])]]
         newbasis = [[np.array([0.,0.,0.])], [np.array([2./3.,1./3.,1./2.]), np.array([1./3.,2./3.,1./2.])]]
         trans, indexmap = crystal.maptranslation(oldbasis, newbasis)
         self.assertTrue(np.allclose(trans, np.array([0.,0.,0.])))
-        self.assertEqual(indexmap, [[0],[1,0]])
+        self.assertEqual(indexmap, ((0,),(1,0)))
 
         oldbasis = [[np.array([0.,0.,0.]), np.array([1./3.,2./3.,1./2.])]]
         newbasis = [[np.array([0.,0.,0.]), np.array([-1./4.,-1./2.,-1./2.])]]
@@ -623,6 +623,80 @@ class CrystalClassTests(unittest.TestCase):
             self.assertTrue(np.isclose(np.dot(x,x), 0.5*self.a0*self.a0))
 
 
+class CrystalSpinTests(unittest.TestCase):
+    """Tests for crystal class when spins are involved"""
+    longMessage = False
+
+    def setUp(self):
+        self.a0 = 1.0
+        self.latt = self.a0*np.eye(3)
+        # RockSalt:
+        self.basis = [[np.array([0., 0., 0.]), np.array([0., 0.5, 0.5]),
+                       np.array([0.5, 0., 0.5]), np.array([0.5, 0.5, 0.])],
+                      [np.array([0., 0., 0.5]), np.array([0., 0.5, 0.]),
+                       np.array([0.5, 0., 0.]), np.array([0.5, 0.5, 0.5])] ]
+        self.spins = [[1, -1, -1, 1], [0, 0, 0, 0]]
+
+    def testUN(self):
+        """Uranium-Nitride structure"""
+        crys = crystal.Crystal(self.latt, self.basis, ['U', 'N'], self.spins)
+        # print(crys)
+        self.assertTrue(crys is not None)
+        self.assertEqual(len(crys.basis), 2)
+        self.assertEqual(len(crys.basis[0]), 2)
+        self.assertEqual(len(crys.basis[1]), 2)
+        self.assertEqual(len(crys.Wyckoff), 2,
+                         msg='Not matching Wyckoff?\n{}\n{}'.format(crys.Wyckoff,crys))
+        tetlatt = self.a0*np.array([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.01]])
+        tetcrys = crystal.Crystal(tetlatt, self.basis, ['U', 'N'])
+        # the tetragonal distortion has 1 U and 1 N (when there's no spin), so the group op list
+        # is twice as big, and includes translations for each
+        self.assertEqual(len(crys.G), 2*len(tetcrys.G))
+
+    def testmaptrans(self):
+        """Does our map translation operate correctly with spins?"""
+        basis = [[np.array([0,0,0])]]
+        spins = [[1]]
+        trans, indexmap = crystal.maptranslation(basis, basis, spins, spins)
+        self.assertTrue(np.allclose(trans, np.array([0,0,0])))
+        self.assertEqual(indexmap, ((0,),))
+
+        oldbasis = [[np.array([0.2,0,0])]]
+        newbasis = [[np.array([-0.2,0,0])]]
+        oldspins = [[1]]
+        newspins = [[-1]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis, oldspins, newspins)
+        self.assertEqual(indexmap, None)  # should NOT be able to do this mapping with spins!
+
+        oldbasis = [[np.array([0.,0.,0.]), np.array([0.,0.5,0.5]),
+                     np.array([0.5,0.,0.5]), np.array([0.5,0.5,0.])]]
+        newbasis = oldbasis
+        oldspins,newspins = [[2,-2,-1,1]], [[2,-2,-1,1]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis, oldspins, newspins)
+        self.assertTrue(np.allclose(trans, np.array([0.,0.,0.])))
+        self.assertEqual(indexmap, ((0,1,2,3),))
+
+        oldspins,newspins = [[2,-2,-1,1]], [[1,-1,-2,2]]
+        trans, indexmap = crystal.maptranslation(oldbasis, newbasis, oldspins, newspins)
+        self.assertTrue(np.allclose(np.abs(trans[0]), 0.5))
+        self.assertTrue(np.allclose(np.abs(trans[1]), 0.5))
+        self.assertTrue(np.allclose(np.abs(trans[2]), 0.))
+        self.assertEqual(indexmap, ((3,2,1,0),))
+
+    def testAddBasis(self):
+        """Uranium-Nitride, with addbasis"""
+        UNcrys = crystal.Crystal(self.latt, self.basis, ['U', 'N'], self.spins)
+        Ucrys =  crystal.Crystal(self.latt, self.basis[0], ['U'], self.spins[0])
+        UNnewcrys = Ucrys.addbasis(Ucrys.Wyckoffpos(Ucrys.cart2unit(np.array([0.,0.,0.5*self.a0]))[1]),
+                                                    ['N'], [0,0])
+        self.assertEqual(len(UNnewcrys.basis), 2,
+                         msg="Failed? {}\n+ basis:\n{}\ndoesn't match:\n{}".format(Ucrys,UNnewcrys,UNcrys))
+        self.assertEqual(len(UNnewcrys.basis[0]), 2,
+                         msg="Failed? {}\n+ basis:\n{}\ndoesn't match:\n{}".format(Ucrys,UNnewcrys,UNcrys))
+        self.assertEqual(len(UNnewcrys.basis[1]), 2,
+                         msg="Failed? {}\n+ basis:\n{}\ndoesn't match:\n{}".format(Ucrys,UNnewcrys,UNcrys))
+
+
 class YAMLTests(unittest.TestCase):
     """Tests to make sure we can use YAML to write and read our classes."""
     def testarrayYAML(self):
@@ -648,7 +722,7 @@ class YAMLTests(unittest.TestCase):
         g = crystal.GroupOp(np.eye(3,dtype=int),
                             np.array([0.,0.,0.]),
                             np.eye(3),
-                            [[0]])
+                            ((0,),))
         # crystal.yaml.add_representer(crystal.GroupOp, crystal.GroupOp_representer)
         gwrite = crystal.yaml.dump(g)
         gread = crystal.yaml.load(gwrite)

@@ -504,7 +504,6 @@ class Taylor3D(object):
                     c[(slice(0,None,None),) + keyt] = cv
             if not matched:
                 raise ValueError("Attempted to do setitem where the rhs contains terms not present in lhs")
-        return self
 
     def __str__(self):
         """
@@ -826,6 +825,8 @@ class Taylor3D(object):
         # a little pythonic magic to work with *either* a list, or an object with a coefflist
         acoeff = getattr(a, 'coefflist', a) # fallback to a if not there... which assumes it's a list
         bcoeff = getattr(b, 'coefflist', b) # fallback to b if not there... which assumes it's a list
+        if len(acoeff)==0: return acoeff  # 0*anything == 0
+        if len(bcoeff)==0: return bcoeff  # anything*0 == 0
         c = []
         ashape = acoeff[0][2].shape
         bshape = bcoeff[0][2].shape

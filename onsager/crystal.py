@@ -11,7 +11,8 @@ Class to store definition of a crystal, along with some analysis
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-import collections
+import collections, copy, itertools
+from numbers import Number
 import yaml ### use crystal.yaml to call--may need to change in the future
 from functools import reduce
 
@@ -41,18 +42,23 @@ def inhalf(vec):
     return vec - np.floor(vec + 0.5)
 
 
-def maptranslation(oldpos, newpos, threshold=1e-8):
+def maptranslation(oldpos, newpos, oldspins=None, newspins=None, threshold=1e-8):
     """
     Given a list of transformed positions, identify if there's a translation vector
     that maps from the current positions to the new position.
 
     :param oldpos: list of list of array[3]
     :param newpos: list of list of array[3], same layout as oldpos
+    :param oldspins: (optional) list of list of numbers/arrays
+    :param newspins: (optional) list of list of numbers/arrays
     :return: translation (array[3]), mapping (list of list of indices)
 
     The mapping specifies the index that the *translated* atom corresponds to in the
     original position set. If unable to construct a mapping, the mapping return is
     None; the translation vector will be meaningless.
+
+    If old/newspins are given then ONLY mapping thats maintain spin are considered.
+    This means that a loop is needed to consider possible spin phase factors.
     """
     # type-checking:
     if __debug__:
@@ -63,6 +69,21 @@ def maptranslation(oldpos, newpos, threshold=1e-8):
             if type(a) is not list: raise TypeError("element of oldpos {} is not a list".format(a))
             if type(b) is not list: raise TypeError("element of newpos {} is not a list".format(b))
             if len(a) != len(b): raise IndexError("{} and {} do not have the same length".format(a, b))
+        if (oldspins is None) != (newspins is None): raise TypeError('give both or neither spin arguments')
+        if oldspins is not None:
+            if type(oldspins) is not list: raise TypeError('oldspins is not a list')
+            if type(newspins) is not list: raise TypeError('newspins is not a list')
+            if len(oldspins) != len(newspins): raise IndexError(
+                "{} and {} do not have the same length".format(oldspins, newspins))
+            for a, b in zip(oldspins, newspins):
+                if type(a) is not list: raise TypeError("element of oldspins {} is not a list".format(a))
+                if type(b) is not list: raise TypeError("element of newspins {} is not a list".format(b))
+                if len(a) != len(b): raise IndexError("{} and {} do not have the same length".format(a, b))
+    if oldspins is None:
+        oldspins = [[0 for u in atomlist] for atomlist in oldpos]
+    if newspins is None:
+        newspins = oldspins
+
     # Work with the shortest possible list for identifying translations
     maxlen = 0
     atomindex = 0
@@ -76,22 +97,23 @@ def maptranslation(oldpos, newpos, threshold=1e-8):
         foundmap = True
         # now check against all the others, and construct the mapping
         indexmap = []
-        for atomlist0, atomlist1 in zip(oldpos, newpos):
+        for atomlist0, spinlist0, atomlist1, spinlist1 in zip(oldpos, oldspins, newpos, newspins):
             # work through the "new" positions
             if not foundmap: break
             maplist = []
-            for rua in atomlist1:
-                for j, uj in enumerate(atomlist0):
+            for rua, sp1 in zip(atomlist1, spinlist1):
+                for j, uj, sp0 in zip(itertools.count(), atomlist0, spinlist0):
+                    if not np.allclose(sp0, sp1): continue  # only allow maps that have same spin
                     if np.all(abs(inhalf(uj - rua - trans))<threshold):
                         maplist.append(j)
                         break
             if len(maplist) != len(atomlist0):
                 foundmap = False
             else:
-                indexmap.append(maplist)
+                indexmap.append(tuple(maplist))
         if foundmap: break
     if foundmap:
-        return trans, indexmap
+        return trans, tuple(indexmap)
     else:
         return None, None
 
@@ -106,7 +128,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     :param rot: np.array(3,3) integer idempotent matrix
     :param trans: np.array(3) real vector
     :param cartrot: np.array(3,3) real unitary matrix
-    :param indexmap: list of list, containing the atom mapping
+    :param indexmap: tuples of tuples, containing the atom mapping
     """
 
     def incell(self):
@@ -121,7 +143,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     def ident(cls, basis):
         """Return a group operation corresponding to identity for a given basis"""
         return cls(rot=np.eye(3, dtype=int), trans=np.zeros(3), cartrot=np.eye(3),
-                       indexmap=[[i for i in range(len(atomlist))] for atomlist in basis])
+                       indexmap=tuple(tuple(i for i in range(len(atomlist))) for atomlist in basis))
 
     def __str__(self):
         """Human-readable version of groupop"""
@@ -157,12 +179,13 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
 
     def __hash__(self):
         """Hash, so that we can make sets of group operations"""
-        ### we are a little conservative, and only use the rotation to define the hash. This means
-        ### we will get collisions for the same rotation but different translations. The reason is
+        ### we are a little conservative, and only use the rotation and indexmap to define the hash. This means
+        ### we will get collisions for the same rotation but different unit cell translations. The reason is
         ### that __eq__ uses "isclose" on our translations, and we don't have a good way to handle
         ### that in a hash function. We lose a little bit on efficiency if we construct a set that
         ### has a whole lot of translation operations, but that's not usually what we will do.
-        return hash(self.rot.data.tobytes())
+        # return hash(self.rot.data.tobytes())
+        return hash(self.rot.data.tobytes()) ^ hash(self.indexmap)
 
     def __add__(self, other):
         """Add a translation to our group operation"""
@@ -179,12 +202,12 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     def __mul__(self, other):
         """Multiply two group operations to produce a new group operation"""
         if __debug__:
-            if type(other) is not GroupOp: raise TypeError
+            if type(other) is not GroupOp: return NotImplemented
         return GroupOp(np.dot(self.rot, other.rot),
                        np.dot(self.rot, other.trans) + self.trans,
                        np.dot(self.cartrot, other.cartrot),
-                       [ [atomlist0[i] for i in atomlist1]
-                         for atomlist0, atomlist1 in zip(self.indexmap, other.indexmap)])
+                       tuple( tuple(atomlist0[i] for i in atomlist1)
+                         for atomlist0, atomlist1 in zip(self.indexmap, other.indexmap)))
 
     def __sane__(self):
         """Return true if the cartrot and rot are consistent and 'sane'"""
@@ -204,8 +227,24 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         return GroupOp(inverse,
                        -np.dot(inverse, self.trans),
                        self.cartrot.T,
-                       [ [ x for i,x in sorted([(y,j) for j,y in enumerate(atomlist)])]
-                         for atomlist in self.indexmap])
+                       tuple( tuple( x for i,x in sorted([(y,j) for j,y in enumerate(atomlist)]))
+                         for atomlist in self.indexmap))
+
+    @staticmethod
+    def optype(rot):
+        """Returns the type of group operation (single integer) and eigenvectors.
+        1 = identity
+        2, 3, 4, 6 = n- fold rotation around an axis
+        negative = rotation + mirror operation, perpendicular to axis
+        "special cases": -1 = mirror, -2 = inversion
+        :param rot: rotation matrix (can be the integer rot)
+        :return: type (integer)
+        """
+        tr = np.int(rot.trace())
+        if np.linalg.det(rot) > 0:
+            return (2, 3, 4, 6, 1)[tr + 1]  # trace determines the rotation type
+        else:
+            return (-2, -3, -4, -6, -1)[tr + 3]  # trace determines the rotation type
 
     def eigen(self):
         """Returns the type of group operation (single integer) and eigenvectors.
@@ -225,13 +264,9 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         if __debug__:
             if not self.__sane__():
                 raise ValueError('Bad GroupOp:\n{}'.format(self))
+        optype = self.optype(self.rot)
+        det = 1 if optype>0 else -1
         tr = np.int(self.rot.trace())
-        if np.linalg.det(self.rot) > 0:
-            det = 1
-            optype = (2, 3, 4, 6, 1)[tr + 1] # trace determines the rotation type
-        else:
-            det = -1
-            optype = (-2, -3, -4, -6, -1)[tr + 3] # trace determines the rotation type
         # two trivial cases: identity, inversion:
         if optype == 1 or optype == -2:
             return optype, np.eye(3)
@@ -428,13 +463,15 @@ def Voigtstrain(e1, e2, e3, e4, e5, e6):
 
 
 # TODO: Add the ability to explicitly specify "metastable" states that should be considered the same chemistry, but not subject to reduction
-# TODO: Symmetry analysis that includes magnetic ordering (e.g., ferro- and anti-ferromagnetic ordering)
 class Crystal(object):
     """
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.
+    Now includes optional spins. These can be vectors or "scalar" spins, for which we need
+    to consider a phase factor. In general, they can be complex. Ideally, they should have
+    magnitude either 0 or 1.
     """
 
-    def __init__(self, lattice, basis, chemistry=None, NOSYM=False, noreduce=False):
+    def __init__(self, lattice, basis, chemistry=None, spins=None, NOSYM=False, noreduce=False):
         """
         Initialization; starts off with the lattice vector definition and the
         basis vectors. While it does not explicitly store the specific chemical
@@ -443,11 +480,14 @@ class Crystal(object):
         :param lattice: array[3,3] or list of array[3]
             lattice vectors; if [3,3] array, then the vectors need to be in *column* format
             so that the first lattice vector is lattice[:,0]
-        :param basis : list of array[3] or list of list of array[3]
+        :param basis: list of array[3] or list of list of array[3]
             crystalline basis vectors, in unit cell coordinates. If a list of lists, then
             there are multiple chemical elements, with each list corresponding to a unique
             element
         :param chemistry: (optional) list of names of chemical elements
+        :param spins: (optional) list of numbers (complex) / vectors or list of list of same
+            spins for individual atoms; if not None, needs to match the basis. Can either be
+            scalars or vectors, corresponding to collinear or non-collinear magnetism
         :param NOSYM: turn off all symmetry finding (except identity)
         :param noreduce: do not attempt to reduce the atomic basis
         """
@@ -471,6 +511,14 @@ class Crystal(object):
                 for u in elem:
                     if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, elem))
             self.basis = [[incell(u) for u in atombasis] for atombasis in basis]
+        if spins is not None:
+            if type(spins) is not list: raise TypeError('spins needs to be a list or list of lists')
+            if type(spins[0]) is list:
+                self.spins = copy.deepcopy(spins)
+            else:
+                self.spins = [copy.deepcopy(spins)]
+        else:
+            self.spins = None
         if not noreduce: self.reduce()  # clean up basis as needed
         self.minlattice()  # clean up lattice vectors as needed
         self.invlatt = np.linalg.inv(self.lattice)
@@ -495,7 +543,8 @@ class Crystal(object):
     def __repr__(self):
         """String representation of crystal (lattice + basis)"""
         return 'Crystal(' + repr(self.lattice).replace('\n','').replace('\t','') + ',' + \
-               repr(self.basis) + ', chemistry=' + repr(self.chemistry) + ')'
+               repr(self.basis) + ', spins=' + repr(self.spins) + \
+               ', chemistry=' + repr(self.chemistry) + ')'
 
     def __str__(self):
         """Human-readable version of crystal (lattice + basis)"""
@@ -503,8 +552,10 @@ class Crystal(object):
             self.lattice.T[0], self.lattice.T[1], self.lattice.T[2])
         for chemind, atoms in enumerate(self.basis):
             for atomind, pos in enumerate(atoms):
-                str_rep = str_rep + "\n  ({}) {}.{} = {}".format(self.chemistry[chemind],
-                                                               chemind, atomind, pos)
+                if self.spins is None: s=''
+                else: s=' sp={}'.format(self.spins[chemind][atomind])
+                str_rep = str_rep + "\n  ({}) {}.{} = {}{}".format(self.chemistry[chemind],
+                                                               chemind, atomind, pos, s)
         return str_rep
 
     @classmethod
@@ -520,9 +571,11 @@ class Crystal(object):
         if 'basis' not in yamldict: raise IndexError('{} does not contain "basis"'.format(yamldict))
         lattice_constant = 1.
         if 'lattice_constant' in yamldict: lattice_constant = yamldict['lattice_constant']
+        spins=None
+        if 'spins' in yamldict: spins = yamldict['spins']
         chem = None
         if 'chemistry' in yamldict: chem = yamldict['chemistry']
-        return cls((lattice_constant*yamldict['lattice']).T, yamldict['basis'], chem)
+        return cls((lattice_constant*yamldict['lattice']).T, yamldict['basis'], chem, spins)
 
     def simpleYAML(self, a0=1.0):
         """
@@ -533,6 +586,7 @@ class Crystal(object):
         return yaml.dump({'lattice_constant': a0,
                           'lattice': self.lattice.T/a0,
                           'basis': self.basis,
+                          'spins': self.spins,
                           'chemistry': self.chemistry})
 
     def chemindex(self, chemistry):
@@ -625,16 +679,25 @@ class Crystal(object):
                 atomindex = i
         if maxlen == 1:
             return
+        # if we don't have spins, just make a big list of lists of 0, otherwise there's too many "if spins None..."
+        if self.spins is None:
+            spins = [[0 for u in atomlist] for atomlist in self.basis]
+        else:
+            spins = self.spins
         # We need to first check against reducibility of atomic positions: try out non-trivial displacements
-        initpos = self.basis[atomindex][0]
+        initpos,initsp = self.basis[atomindex][0], spins[atomindex][0]
         trans = False
-        for newpos in self.basis[atomindex]:
+        for newpos,newsp in zip(self.basis[atomindex], spins[atomindex]):
             t = newpos - initpos
             if np.allclose(t, 0): continue
+            if not np.allclose(initsp,newsp): continue
             trans = True
-            for atomlist in self.basis:
-                for u in atomlist:
-                    if np.all([not np.all(abs(inhalf(u + t - v))<threshold) for v in atomlist]):
+            for atomlist, spinlist in zip(self.basis, spins):
+                for u, s in zip(atomlist, spinlist):
+                    # edited to only check against translations with the same spin:
+                    if np.all([not np.all(abs(inhalf(u + t - v))<threshold)
+                               for v,vs in zip(atomlist,spinlist)
+                               if np.allclose(s,vs)]):
                         trans = False
                         break
             if trans: break
@@ -646,19 +709,26 @@ class Crystal(object):
             supercell = np.eye(3)
             supercell[:, d] = t[:]
             if not np.allclose(np.linalg.det(supercell), 0):
+                if np.linalg.det(supercell) < 0:
+                    supercell[:,d-1] = -supercell[:,d-1]
                 break
         invsuper = np.linalg.inv(supercell)
         self.lattice = np.dot(self.lattice, supercell)
         # 2. update the basis
         newbasis = []
-        for atomlist in self.basis:
+        newspins = []
+        for atomlist,spinlist in zip(self.basis,spins):
             newatomlist = []
-            for u in atomlist:
+            newspinlist = []
+            for u,s in zip(atomlist,spinlist):
                 v = incell(np.dot(invsuper, u))
                 if np.all([not np.allclose(v, v1) for v1 in newatomlist]):
                     newatomlist.append(v)
+                    newspinlist.append(s)
             newbasis.append(newatomlist)
+            newspins.append(newspinlist)
         self.basis = newbasis
+        if self.spins is not None: self.spins = newspins
         # 3. tail recursion:
         self.reduce()
 
@@ -753,10 +823,17 @@ class Crystal(object):
 
     def gengroup(self):
         """
-        Generate all of the space group operations.
+        Generate all of the space group operations. Now handles spins! Doesn't store
+        spin phase factors for each group operation, though.
 
         :return: list of group operations
         """
+        def rootsofunity(optype):
+            """Return an iterable of roots of unity to try for GroupOp type optype"""
+            # always include negation
+            rot2, rot4, rot6 = (1,-1), (1,-1,1j,-1j), tuple(np.exp(n*np.pi*2j/6) for n in range(6))
+            return (rot2,rot2,rot6,rot4,None,rot6)[abs(optype)-1]  # (+-1, +-2, +-3, +-4, .., +-6)
+
         groupops = []
         supercellvect = [np.array((n0, n1, n2))
                          for n0 in range(-1, 2)
@@ -766,22 +843,38 @@ class Crystal(object):
         matchvect = [[u for u in supercellvect
                       if np.isclose(np.dot(u, np.dot(self.metric, u)),
                                     self.metric[d, d])] for d in range(3)]
+        # if we don't have spins, just make a big list of lists of 0, otherwise there's too many "if spins None..."
+        if self.spins is None:
+            spins = [[0 for u in atomlist] for atomlist in self.basis]
+        else:
+            spins = self.spins
         for supercell in (np.array((r0, r1, r2)).T
                       for r0 in matchvect[0]
                       for r1 in matchvect[1]
                       for r2 in matchvect[2]
                       if abs(np.inner(r0, np.cross(r1, r2))) == 1):
             if np.allclose(np.dot(supercell.T, np.dot(self.metric, supercell)), self.metric):
-                # possible operation--need to check the atomic positions
-                trans, indexmap = maptranslation(self.basis,
-                                                 [[np.dot(supercell, u)
-                                                   for u in atomlist]
-                                                  for atomlist in self.basis])
-                if indexmap is not None:
-                    groupops.append(GroupOp(supercell,
-                                            trans,
-                                            np.dot(self.lattice, np.dot(supercell, self.invlatt)),
-                                            indexmap))
+                # possible operation--need to check the atomic positions with spin phase factors
+                optype = GroupOp.optype(supercell)
+                cartrot = np.dot(self.lattice, np.dot(supercell, self.invlatt))
+                detrot = 1 if optype>0 else -1
+                # apply cartesian rotation to spins... if they're vectors; else, do nothing
+                rotspins = [ [ detrot*s if isinstance(s,Number) else np.dot(cartrot,s)
+                               for s in spinlist]
+                             for spinlist in spins]
+                # if det * tr < -1 or det * tr > 3: return False
+                for phase in rootsofunity(optype):
+                    newspins = [ [phase*s for s in spinlist] for spinlist in rotspins]
+                    trans, indexmap = maptranslation(self.basis,
+                                                     [[np.dot(supercell, u)
+                                                       for u in atomlist]
+                                                      for atomlist in self.basis],
+                                                     spins, newspins)
+                    if indexmap is not None:
+                        groupops.append(GroupOp(supercell,
+                                                trans,
+                                                cartrot,
+                                                indexmap))
         return frozenset(groupops)
 
     def strain(self, eps):
@@ -796,17 +889,19 @@ class Crystal(object):
                 raise TypeError('strain is not a 3x3 tensor')
         return Crystal(np.dot(np.eye(3) + eps, self.lattice), self.basis)
 
-    def addbasis(self, basis, chemistry=None):
+    def addbasis(self, basis, chemistry=None, spins=None):
         """
         Returns a new Crystal object that contains additional sites (assumed to be new chemistry).
         This is intended to "add in" interstitial sites. Note: if the symmetry is to be
         maintained, should be the output from Wyckoffpos().
 
         :param basis: list (or list of lists) of new sites
-        :paran chemistry: (optional) list of chemistry names
+        :param chemistry: (optional) list of chemistry names
+        :param spins: (optional) list of spins
         :return: new Crystal object, with additional sites
         """
         if type(basis) is not list: raise TypeError('basis needs to be a list or list of lists')
+        if spins is not None and type(spins) is not list: raise TypeError('spins needs to be a list or list of lists')
         if type(basis[0]) == np.ndarray:
             for u in basis:
                 if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, basis))
@@ -817,9 +912,23 @@ class Crystal(object):
                 for u in elem:
                     if type(u) is not np.ndarray: raise TypeError("{} in {} is not an array".format(u, elem))
             newbasis = [[incell(u) for u in atombasis] for atombasis in basis]
-        if chemistry is None: newchemistry = self.chemistry + [i + self.Nchem for i in range(len(basis))]
+        if chemistry is None: newchemistry = self.chemistry + [i + self.Nchem for i in range(len(newbasis))]
         else: newchemistry = self.chemistry + chemistry
-        return Crystal(self.lattice, self.basis + newbasis, newchemistry)
+        # a little complicated: need to deal with (1) no spin at all; (2) having no spin and adding;
+        # (3) having spin and adding something without; (4) having spin and adding it.
+        if spins is not None:
+            if type(spins[0]) is not list: sp = [spins]
+            else: sp = spins
+            if self.spins is None:
+                newspins = [[0 for u in atomlist] for atomlist in self.basis] + sp
+            else:
+                newspins = self.spins + sp
+        else:
+            if self.spins is None:
+                newspins = None
+            else:
+                newspins = self.spins + [[0 for u in atomlist] for atomlist in newbasis]
+        return Crystal(self.lattice, self.basis + newbasis, newchemistry, newspins)
 
     def pos2cart(self, lattvec, ind):
         """

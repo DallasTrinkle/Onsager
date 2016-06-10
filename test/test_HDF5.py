@@ -147,7 +147,7 @@ class HDF5ParsingTests(unittest.TestCase):
         thermaldef.update(HCP_diffuser.maketracerpreene(**thermaldef))
         for L0, Lcopy in zip(HCP_diffuser.Lij(*HCP_diffuser.preene2betafree(1.0, **thermaldef)),
                              HCP_diffuser_copy.Lij(*HCP_diffuser_copy.preene2betafree(1.0, **thermaldef))):
-            self.assertTrue(np.all(L0 == Lcopy))
+            self.assertTrue(np.allclose(L0, Lcopy), msg='{}\n!=\n{}'.format(L0, Lcopy))
         # compare tags
         for k in HCP_diffuser.tags.keys():
             self.assertEqual(HCP_diffuser.tags[k], HCP_diffuser_copy.tags[k])
@@ -156,6 +156,6 @@ class HDF5ParsingTests(unittest.TestCase):
         HCP_diffuser_copy = OnsagerCalc.VacancyMediated.loadhdf5(self.f['new'])  # should be fully self-contained
         for L0, Lcopy in zip(HCP_diffuser.Lij(*HCP_diffuser.preene2betafree(1.0, **thermaldef)),
                              HCP_diffuser_copy.Lij(*HCP_diffuser_copy.preene2betafree(1.0, **thermaldef))):
-            self.assertTrue(np.all(L0 == Lcopy))
+            self.assertTrue(np.allclose(L0, Lcopy), msg='{}\n!=\n{}'.format(L0, Lcopy))
 
 
