@@ -140,6 +140,425 @@
 <h1>Supercell<a class="headerlink" href="#supercell" title="Permalink to this headline">¶</a></h1>
 <p>Supercell:</p>
 <p>The supercell module defines the <code class="docutils literal"><span class="pre">supercell</span></code> class for building supercells from <code class="docutils literal"><span class="pre">crystal.Crystal</span></code> classes.</p>
+<span class="target" id="module-supercell"></span><p>Supercell class</p>
+<p>Class to store supercells of crystals: along with some analysis
+1. add/remove/substitute atoms
+2. output POSCAR format (possibly other formats?)
+3. find the transformation map between two different representations of the same supercell
+4. construct an NEB pathway between two supercells
+5. possibly input from CONTCAR? extract displacements?</p>
+<dl class="class">
+<dt id="supercell.Supercell">
+<em class="property">class </em><code class="descclassname">supercell.</code><code class="descname">Supercell</code><span class="sig-paren">(</span><em>crys</em>, <em>super</em>, <em>interstitial=()</em>, <em>Nsolute=0</em>, <em>empty=False</em>, <em>NOSYM=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class that defines a Supercell of a crystal</p>
+<dl class="method">
+<dt id="supercell.Supercell.KrogerVink">
+<code class="descname">KrogerVink</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.KrogerVink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.KrogerVink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to make a &#8220;simple&#8221; string based on the defectindices, using Kroger-Vink notation.
+That is, we identify: vacancies, antisites, and interstitial sites, and return a string.
+NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return KV:</th><td class="field-body">string representation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.POSCAR">
+<code class="descname">POSCAR</code><span class="sig-paren">(</span><em>name=None</em>, <em>stoichiometry=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.POSCAR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.POSCAR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a VASP-style POSCAR, returned as a string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; (optional) name to use for first list</li>
+<li><strong>stoichiometry</strong> &#8211; (optional) if True, append stoichiometry to name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return POSCAR:</th><td class="field-body"><p class="first last">string</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.__eq__">
+<code class="descname">__eq__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__eq__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if two supercells are equal; this means they should have the same occupancy.
+<em>and</em> the same ordering</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; supercell for comparison</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if same crystal, supercell, occupancy, and ordering; False otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.__getitem__">
+<code class="descname">__getitem__</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__getitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Index into supercell</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> &#8211; index (either an int, a slice, or a position)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">chemical occupation at that point</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.__imul__">
+<code class="descname">__imul__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__imul__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__imul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply by a GroupOp, in place.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; must be a GroupOp (and <em>should</em> be a GroupOp of the supercell!)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>crys</em>, <em>super</em>, <em>interstitial=()</em>, <em>Nsolute=0</em>, <em>empty=False</em>, <em>NOSYM=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize our supercell to an empty supercell.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>crys</strong> &#8211; crystal object</li>
+<li><strong>super</strong> &#8211; 3x3 integer matrix</li>
+<li><strong>interstitial</strong> &#8211; (optional) list/tuple of indices that correspond to interstitial sites</li>
+<li><strong>Nsolute</strong> &#8211; (optional) number of substitutional solute elements to consider; default=0</li>
+<li><strong>empty</strong> &#8211; (optional) designed to allow &#8220;copy&#8221; to work&#8211;skips all derived info</li>
+<li><strong>NOSYM</strong> &#8211; (optional) does not do symmetry analysis (intended ONLY for testing purposes)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.__mul__">
+<code class="descname">__mul__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__mul__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply by a GroupOp; returns a new supercell (constructed via copy).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; must be a GroupOp (and <em>should</em> be a GroupOp of the supercell!)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">rotated supercell</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.__ne__">
+<code class="descname">__ne__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__ne__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__ne__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inequality == not __eq__</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.__rmul__">
+<code class="descname">__rmul__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__rmul__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__rmul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply by a GroupOp; returns a new supercell (constructed via copy).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; must be a GroupOp (and <em>should</em> be a GroupOp of the supercell!)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">rotated supercell</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.__sane__">
+<code class="descname">__sane__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__sane__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__sane__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if supercell occupation and chemorder are consistent</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.__setitem__">
+<code class="descname">__setitem__</code><span class="sig-paren">(</span><em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__setitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set specific composition for site; uses same indexing as __getitem__</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> &#8211; index (either an int, a slice, or a position)</li>
+<li><strong>value</strong> &#8211; chemical occupation at that point</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Human readable version of supercell</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="supercell.Supercell.__weakref__">
+<code class="descname">__weakref__</code><a class="headerlink" href="#supercell.Supercell.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a copy of the supercell; initializes, then copies over <cite>__copyattr__</cite> and <cite>__eqattr__</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">new supercell object, copy of the original</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.defectindices">
+<code class="descname">defectindices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.defectindices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.defectindices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary that corresponds to the &#8220;defect&#8221; content of the supercell.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return defects:</th><td class="field-body">dictionary, keyed by defect type, with a set of indices of corresponding defects</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.definesolute">
+<code class="descname">definesolute</code><span class="sig-paren">(</span><em>c</em>, <em>chemistry</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.definesolute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.definesolute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the name of the chemistry of chemical index c. Only works for substitutional solutes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>c</strong> &#8211; index</li>
+<li><strong>chemistry</strong> &#8211; string</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.equivalencemap">
+<code class="descname">equivalencemap</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.equivalencemap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.equivalencemap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the super <cite>other</cite> we want to find a group operation that transforms <cite>self</cite> into other.
+This is a GroupOp <em>along</em> with an index mapping of chemorder. The index mapping is to get
+the occposlist to match up: <cite>(g*self).occposlist()[c][mapping[c][i]] == other.occposlist()[c][i]</cite>
+(We can write a similar expression using chemorder, since chemorder indexes into pos).
+We&#8217;re going to return both g and mapping.
+<em>Remember:</em> <cite>g</cite> does not change the presentation ordering; <cite>mapping</cite> is necessary for full equivalence.
+If no such equivalence, return None,None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; Supercell</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return g:</th><td class="field-body">GroupOp to transform sites from <cite>self</cite> to <cite>other</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return mapping:</th><td class="field-body">list of maps, such that (g*self).chemorder[c][mapping[c][i]] == other.chemorder[c][i]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.fillperiodic">
+<code class="descname">fillperiodic</code><span class="sig-paren">(</span><em>ci</em>, <em>Wyckoff=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.fillperiodic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.fillperiodic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Occupies all of the (Wyckoff) sites corresponding to chemical index with the appropriate chemistry.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ci</strong> &#8211; tuple of (chem, index) in crystal</li>
+<li><strong>Wyckoff</strong> &#8211; (optional) if False, <em>only</em> occupy the specific tuple, but still periodically</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return self:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.gengroup">
+<code class="descname">gengroup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.gengroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.gengroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the group operations internal to the supercell</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return G:</th><td class="field-body">set of GroupOps</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>pos</em>, <em>threshold=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the index that corresponds to the position <em>closest</em> to pos in the supercell.
+Done in direct coordinates of the supercell, using periodic boundary conditions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pos</strong> &#8211; 3-vector</li>
+<li><strong>threshold</strong> &#8211; (optional) minimum squared &#8220;distance&#8221; in supercell for a match; default=1.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return index:</th><td class="field-body"><p class="first last">index of closest position</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.makesites">
+<code class="descname">makesites</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.makesites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.makesites" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the array corresponding to the sites; the indexing is based on the translations
+and the atomindices in crys. These may not all be filled when the supercell is finished.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return pos:</th><td class="field-body">array [N*size, 3] of supercell positions in direct coordinates</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="supercell.Supercell.maketrans">
+<em class="property">static </em><code class="descname">maketrans</code><span class="sig-paren">(</span><em>super</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.maketrans"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.maketrans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes in a supercell matrix, and returns a list of all translations of the unit cell that
+remain inside the supercell</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>super</strong> &#8211; 3x3 integer matrix</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return size:</th><td class="field-body">integer, corresponding to number of unit cells</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return invsuper:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">integer matrix inverse of supercell (needs to be divided by size)</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return translist:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of integer vectors (to be divided by <cite>size</cite>) corresponding to unit cell positions</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return transdict:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">dictionary of tuples and their corresponding index (inverse of trans)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.occposlist">
+<code class="descname">occposlist</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.occposlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.occposlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of lists of occupied positions, in (chem)order.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return occposlist:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of lists of supercell coord. positions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.reorder">
+<code class="descname">reorder</code><span class="sig-paren">(</span><em>mapping</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.reorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.reorder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reorder (in place) the occupied sites. Does not change the occupancies, only the ordering
+for &#8220;presentation&#8221;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mapping</strong> &#8211; list of maps; will make newchemorder[c][i] = chemorder[c][mapping[c][i]]</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return self:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<p>If mapping is not a proper permutation, raises ValueError.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.setocc">
+<code class="descname">setocc</code><span class="sig-paren">(</span><em>ind</em>, <em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.setocc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.setocc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the occupancy of position indexed by ind, to chemistry c. Used by all the other algorithms.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ind</strong> &#8211; integer index</li>
+<li><strong>c</strong> &#8211; chemistry index</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="supercell.Supercell.stoichiometry">
+<code class="descname">stoichiometry</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.stoichiometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.stoichiometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a string representing the current stoichiometry</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 

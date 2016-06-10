@@ -1,0 +1,692 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>supercell &mdash; Onsager 0.9 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Onsager 0.9 documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Onsager
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#support">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crystal.html">Crystal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supercell.html">Supercell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PowerExpansion.html">PowerExpansion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GFcalc.html">GFcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OnsagerCalc.html">OnsagerCalc</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Onsager</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      
+    <li>supercell</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for supercell</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Supercell class</span>
+
+<span class="sd">Class to store supercells of crystals: along with some analysis</span>
+<span class="sd">1. add/remove/substitute atoms</span>
+<span class="sd">2. output POSCAR format (possibly other formats?)</span>
+<span class="sd">3. find the transformation map between two different representations of the same supercell</span>
+<span class="sd">4. construct an NEB pathway between two supercells</span>
+<span class="sd">5. possibly input from CONTCAR? extract displacements?</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Dallas R. Trinkle&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">collections</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">itertools</span><span class="o">,</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Integral</span>
+<span class="kn">from</span> <span class="nn">onsager</span> <span class="kn">import</span> <span class="n">crystal</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
+
+
+<div class="viewcode-block" id="Supercell"><a class="viewcode-back" href="../supercell.html#supercell.Supercell">[docs]</a><span class="k">class</span> <span class="nc">Supercell</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class that defines a Supercell of a crystal</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Supercell.__init__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="nb">super</span><span class="p">,</span> <span class="n">interstitial</span><span class="o">=</span><span class="p">(),</span> <span class="n">Nsolute</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">empty</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">NOSYM</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize our supercell to an empty supercell.</span>
+
+<span class="sd">        :param crys: crystal object</span>
+<span class="sd">        :param super: 3x3 integer matrix</span>
+<span class="sd">        :param interstitial: (optional) list/tuple of indices that correspond to interstitial sites</span>
+<span class="sd">        :param Nsolute: (optional) number of substitutional solute elements to consider; default=0</span>
+<span class="sd">        :param empty: (optional) designed to allow &quot;copy&quot; to work--skips all derived info</span>
+<span class="sd">        :param NOSYM: (optional) does not do symmetry analysis (intended ONLY for testing purposes)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crys</span> <span class="o">=</span> <span class="n">crys</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">super</span> <span class="o">=</span> <span class="nb">super</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interstitial</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">interstitial</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nchem</span> <span class="o">=</span> <span class="n">crys</span><span class="o">.</span><span class="n">Nchem</span> <span class="o">+</span> <span class="n">Nsolute</span> <span class="k">if</span> <span class="n">Nsolute</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">crys</span><span class="o">.</span><span class="n">Nchem</span>
+        <span class="k">if</span> <span class="n">empty</span><span class="p">:</span> <span class="k">return</span>
+        <span class="c1"># everything else that follows is &quot;derived&quot; from those initial parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lattice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">super</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">N</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomindices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexatom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">atomindices</span><span class="p">,</span> \
+                                           <span class="p">{</span><span class="n">ci</span><span class="p">:</span> <span class="n">n</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">ci</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">atomindices</span><span class="p">)}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span> <span class="o">=</span> <span class="p">[</span><span class="n">crys</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">crys</span><span class="o">.</span><span class="n">Nchem</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nchem</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;v&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Wyckofflist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wyckoffchem</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomindices</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">wset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wyckofflist</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">wset</span><span class="p">:</span> <span class="k">break</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Wyckofflist</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">wset</span><span class="p">:</span>
+                <span class="c1"># grab the set of (c,i) of Wyckoff sets (next returns first that matches, None if none:</span>
+                <span class="n">indexset</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">iset</span> <span class="k">for</span> <span class="n">iset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">Wyckoff</span> <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="ow">in</span> <span class="n">iset</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Wyckofflist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">frozenset</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">indexatom</span><span class="p">[</span><span class="n">ci</span><span class="p">]</span> <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="n">indexset</span><span class="p">]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Wyckoffchem</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">invsuper</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">translist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">transdict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maketrans</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">super</span><span class="p">)</span>
+        <span class="c1"># self.transdict = {tuple(t):n for n,t in enumerate(self.translist)}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makesites</span><span class="p">(),</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nchem</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">NOSYM</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([</span><span class="n">crystal</span><span class="o">.</span><span class="n">GroupOp</span><span class="o">.</span><span class="n">ident</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">])])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gengroup</span><span class="p">()</span></div>
+
+    <span class="c1"># some attributes we want to do equate, others we want deepcopy. Equate should not be modified.</span>
+    <span class="n">__copyattr__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;lattice&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;chemistry&#39;</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">,</span> <span class="s1">&#39;invsuper&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Wyckofflist&#39;</span><span class="p">,</span> <span class="s1">&#39;Wyckoffchem&#39;</span><span class="p">,</span> <span class="s1">&#39;occ&#39;</span><span class="p">,</span> <span class="s1">&#39;chemorder&#39;</span><span class="p">)</span>
+    <span class="n">__eqattr__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;atomindices&#39;</span><span class="p">,</span> <span class="s1">&#39;indexatom&#39;</span><span class="p">,</span> <span class="s1">&#39;translist&#39;</span><span class="p">,</span> <span class="s1">&#39;transdict&#39;</span><span class="p">,</span> <span class="s1">&#39;pos&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Supercell.copy"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make a copy of the supercell; initializes, then copies over `__copyattr__` and `__eqattr__`.</span>
+
+<span class="sd">        :return: new supercell object, copy of the original</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">supercopy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">super</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">interstitial</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nchem</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">Nchem</span><span class="p">,</span>
+                                   <span class="n">empty</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__copyattr__</span><span class="p">:</span> <span class="nb">setattr</span><span class="p">(</span><span class="n">supercopy</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eqattr__</span><span class="p">:</span> <span class="nb">setattr</span><span class="p">(</span><span class="n">supercopy</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">supercopy</span></div>
+
+<div class="viewcode-block" id="Supercell.__eq__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__eq__">[docs]</a>    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if two supercells are equal; this means they should have the same occupancy.</span>
+<span class="sd">        *and* the same ordering</span>
+
+<span class="sd">        :param other: supercell for comparison</span>
+<span class="sd">        :return: True if same crystal, supercell, occupancy, and ordering; False otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">super</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">super</span><span class="p">)</span> <span class="ow">and</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">interstitial</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">interstitial</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span> <span class="ow">and</span> \
+               <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">occ</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">occ</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">chemorder</span></div>
+
+<div class="viewcode-block" id="Supercell.__ne__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__ne__">[docs]</a>    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Inequality == not __eq__&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Supercell.stoichiometry"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.stoichiometry">[docs]</a>    <span class="k">def</span> <span class="nf">stoichiometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a string representing the current stoichiometry&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span> <span class="o">+</span> <span class="s1">&#39;_i({})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">))</span>
+                         <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interstitial</span>
+                         <span class="k">else</span> <span class="n">c</span> <span class="o">+</span> <span class="s1">&#39;({})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">))</span>
+                         <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span><span class="p">)])</span></div>
+
+<div class="viewcode-block" id="Supercell.__str__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__str__">[docs]</a>    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Human readable version of supercell&quot;&quot;&quot;</span>
+        <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Supercell of crystal:</span><span class="se">\n</span><span class="s2">{crys}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">crys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="p">)</span>
+        <span class="nb">str</span> <span class="o">+=</span> <span class="s2">&quot;Supercell vectors:</span><span class="se">\n</span><span class="s2">{}</span><span class="se">\n</span><span class="s2">Chemistry: &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">super</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="nb">str</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stoichiometry</span><span class="p">()</span>
+        <span class="nb">str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Kroger-Vink: &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">KrogerVink</span><span class="p">()</span>
+        <span class="nb">str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Positions:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="nb">str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">u</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="n">o</span><span class="p">]</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">)])</span>
+        <span class="nb">str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Ordering:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="nb">str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">u</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">ulist</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">occposlist</span><span class="p">())</span>
+                          <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">ulist</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">str</span></div>
+
+<div class="viewcode-block" id="Supercell.__mul__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__mul__">[docs]</a>    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Multiply by a GroupOp; returns a new supercell (constructed via copy).</span>
+
+<span class="sd">        :param other: must be a GroupOp (and *should* be a GroupOp of the supercell!)</span>
+<span class="sd">        :return: rotated supercell</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">crystal</span><span class="o">.</span><span class="n">GroupOp</span><span class="p">):</span> <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="n">gsuper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">gsuper</span> <span class="o">*=</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="n">gsuper</span></div>
+
+<div class="viewcode-block" id="Supercell.__rmul__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__rmul__">[docs]</a>    <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Multiply by a GroupOp; returns a new supercell (constructed via copy).</span>
+
+<span class="sd">        :param other: must be a GroupOp (and *should* be a GroupOp of the supercell!)</span>
+<span class="sd">        :return: rotated supercell</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">crystal</span><span class="o">.</span><span class="n">GroupOp</span><span class="p">):</span> <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Supercell.__imul__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__imul__">[docs]</a>    <span class="k">def</span> <span class="nf">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Multiply by a GroupOp, in place.</span>
+
+<span class="sd">        :param other: must be a GroupOp (and *should* be a GroupOp of the supercell!)</span>
+<span class="sd">        :return: self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">crystal</span><span class="o">.</span><span class="n">GroupOp</span><span class="p">):</span> <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="c1"># This requires some careful manipulation: we need to modify (1) occ, and (2) chemorder</span>
+        <span class="n">indexmap</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">indexmap</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">gocc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">gind</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">indexmap</span><span class="p">):</span>
+            <span class="n">gocc</span><span class="p">[</span><span class="n">gind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">occ</span> <span class="o">=</span> <span class="n">gocc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span> <span class="o">=</span> <span class="p">[[</span><span class="n">indexmap</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">clist</span><span class="p">]</span> <span class="k">for</span> <span class="n">clist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Supercell.index"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1.</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the index that corresponds to the position *closest* to pos in the supercell.</span>
+<span class="sd">        Done in direct coordinates of the supercell, using periodic boundary conditions.</span>
+
+<span class="sd">        :param pos: 3-vector</span>
+<span class="sd">        :param threshold: (optional) minimum squared &quot;distance&quot; in supercell for a match; default=1.</span>
+<span class="sd">        :return index: index of closest position</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span><span class="p">,</span> <span class="n">dist2</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">threshold</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">):</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">inhalf</span><span class="p">(</span><span class="n">pos</span> <span class="o">-</span> <span class="n">u</span><span class="p">)</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">delta</span> <span class="o">*</span> <span class="n">delta</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">d2</span> <span class="o">&lt;</span> <span class="n">dist2</span><span class="p">:</span> <span class="n">index</span><span class="p">,</span> <span class="n">dist2</span> <span class="o">=</span> <span class="n">ind</span><span class="p">,</span> <span class="n">d2</span>
+        <span class="k">return</span> <span class="n">index</span></div>
+
+<div class="viewcode-block" id="Supercell.__getitem__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__getitem__">[docs]</a>    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Index into supercell</span>
+
+<span class="sd">        :param key: index (either an int, a slice, or a position)</span>
+<span class="sd">        :return: chemical occupation at that point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Integral</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Inappropriate key {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Supercell.__setitem__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__setitem__">[docs]</a>    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set specific composition for site; uses same indexing as __getitem__</span>
+
+<span class="sd">        :param key: index (either an int, a slice, or a position)</span>
+<span class="sd">        :param value: chemical occupation at that point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span> <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Integral</span><span class="p">):</span> <span class="n">index</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span> <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setocc</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Supercell.__sane__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__sane__">[docs]</a>    <span class="k">def</span> <span class="nf">__sane__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return True if supercell occupation and chemorder are consistent&quot;&quot;&quot;</span>
+        <span class="n">occset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">clist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">clist</span><span class="p">:</span>
+                <span class="c1"># check that occupancy (from chemorder) is correct:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">!=</span> <span class="n">c</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+                <span class="c1"># record as an occupied state</span>
+                <span class="n">occset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+        <span class="c1"># now make sure that every site *not* in occset is, in fact, vacant</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">ind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">occset</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Supercell.maketrans"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.maketrans">[docs]</a>    <span class="k">def</span> <span class="nf">maketrans</span><span class="p">(</span><span class="nb">super</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes in a supercell matrix, and returns a list of all translations of the unit cell that</span>
+<span class="sd">        remain inside the supercell</span>
+
+<span class="sd">        :param super: 3x3 integer matrix</span>
+<span class="sd">        :return size: integer, corresponding to number of unit cells</span>
+<span class="sd">        :return invsuper: integer matrix inverse of supercell (needs to be divided by size)</span>
+<span class="sd">        :return translist: list of integer vectors (to be divided by `size`) corresponding to unit cell positions</span>
+<span class="sd">        :return transdict: dictionary of tuples and their corresponding index (inverse of trans)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="nb">super</span><span class="p">))))</span>
+        <span class="n">invsuper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="nb">super</span><span class="p">)</span> <span class="o">*</span> <span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">maxN</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">super</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">translist</span><span class="p">,</span> <span class="n">transdict</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">nvect</span> <span class="ow">in</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">n0</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">))</span>
+                      <span class="k">for</span> <span class="n">n0</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">maxN</span><span class="p">,</span> <span class="n">maxN</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">n1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">maxN</span><span class="p">,</span> <span class="n">maxN</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">n2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">maxN</span><span class="p">,</span> <span class="n">maxN</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]:</span>
+            <span class="n">tv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">invsuper</span><span class="p">,</span> <span class="n">nvect</span><span class="p">)</span> <span class="o">%</span> <span class="n">size</span>
+            <span class="n">ttup</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tv</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ttup</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">transdict</span><span class="p">:</span>
+                <span class="n">transdict</span><span class="p">[</span><span class="n">ttup</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">translist</span><span class="p">)</span>
+                <span class="n">translist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tv</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">translist</span><span class="p">)</span> <span class="o">!=</span> <span class="n">size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ArithmeticError</span><span class="p">(</span>
+                <span class="s1">&#39;Somehow did not generate the correct number of translations? {}!={}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">translist</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">size</span><span class="p">,</span> <span class="n">invsuper</span><span class="p">,</span> <span class="n">translist</span><span class="p">,</span> <span class="n">transdict</span></div>
+
+<div class="viewcode-block" id="Supercell.makesites"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.makesites">[docs]</a>    <span class="k">def</span> <span class="nf">makesites</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate the array corresponding to the sites; the indexing is based on the translations</span>
+<span class="sd">        and the atomindices in crys. These may not all be filled when the supercell is finished.</span>
+
+<span class="sd">        :return pos: array [N*size, 3] of supercell positions in direct coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">invsize</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">basislist</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">invsuper</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomindices</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">crystal</span><span class="o">.</span><span class="n">incell</span><span class="p">((</span><span class="n">t</span> <span class="o">+</span> <span class="n">u</span><span class="p">)</span> <span class="o">*</span> <span class="n">invsize</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">translist</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">basislist</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Supercell.gengroup"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.gengroup">[docs]</a>    <span class="k">def</span> <span class="nf">gengroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate the group operations internal to the supercell</span>
+
+<span class="sd">        :return G: set of GroupOps</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Glist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">unittranslist</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">super</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">translist</span><span class="p">]</span>
+        <span class="n">invsize</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">for</span> <span class="n">g0</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">G</span><span class="p">:</span>
+            <span class="n">Rsuper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">invsuper</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">g0</span><span class="o">.</span><span class="n">rot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">super</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">Rsuper</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s1">&#39;Broken symmetry? GroupOp:</span><span class="se">\n</span><span class="s1">{}</span><span class="se">\n</span><span class="s1">not a symmetry operation of supercell?</span><span class="se">\n</span><span class="s1">Rsuper=</span><span class="se">\n</span><span class="s1">{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">g0</span><span class="p">,</span>
+                                                                                                                <span class="n">Rsuper</span><span class="p">),</span>
+                    <span class="ne">RuntimeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># divide out the size (in inverse super). Should still be an integer matrix (and hence, a symmetry)</span>
+                <span class="n">Rsuper</span> <span class="o">//=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span>
+            <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">unittranslist</span><span class="p">:</span>
+                <span class="c1"># first, make the corresponding group operation by adding the unit cell translation:</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="n">g0</span> <span class="o">+</span> <span class="n">u</span>
+                <span class="c1"># translation vector *in the supercell*; go ahead and keep it inside the supercell, too.</span>
+                <span class="n">tsuper</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">invsuper</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">trans</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="o">*</span> <span class="n">invsize</span>
+                <span class="c1"># finally: indexmap!!</span>
+                <span class="n">indexmap</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="n">unittranslist</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomindices</span><span class="p">:</span>
+                        <span class="n">Rp</span><span class="p">,</span> <span class="n">ci1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">g_pos</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">ci</span><span class="p">)</span>
+                        <span class="c1"># A little confusing, but:</span>
+                        <span class="c1"># [n]^-1*Rp -&gt; translation, but needs to be mod self.size</span>
+                        <span class="c1"># convert to a tuple, to the index into transdict</span>
+                        <span class="c1"># THEN multiply by self.N, and add the index of the new Wyckoff site. Whew!</span>
+                        <span class="n">indexmap</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">transdict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">invsuper</span><span class="p">,</span> <span class="n">Rp</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexatom</span><span class="p">[</span><span class="n">ci1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">indexmap</span><span class="p">))</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ArithmeticError</span><span class="p">(</span><span class="s1">&#39;Did not produce a correct index mapping for GroupOp:</span><span class="se">\n</span><span class="s1">{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">g</span><span class="p">))</span>
+                <span class="n">Glist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">crystal</span><span class="o">.</span><span class="n">GroupOp</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">Rsuper</span><span class="p">,</span> <span class="n">cartrot</span><span class="o">=</span><span class="n">g0</span><span class="o">.</span><span class="n">cartrot</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="n">tsuper</span><span class="p">,</span>
+                                             <span class="n">indexmap</span><span class="o">=</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">indexmap</span><span class="p">),)))</span>
+        <span class="k">return</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">Glist</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Supercell.definesolute"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.definesolute">[docs]</a>    <span class="k">def</span> <span class="nf">definesolute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">chemistry</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the name of the chemistry of chemical index c. Only works for substitutional solutes.</span>
+
+<span class="sd">        :param c: index</span>
+<span class="sd">        :param chemistry: string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">Nchem</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nchem</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;Trying to set the chemistry for a lattice atom / vacancy&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">chemistry</span></div>
+
+<div class="viewcode-block" id="Supercell.setocc"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.setocc">[docs]</a>    <span class="k">def</span> <span class="nf">setocc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the occupancy of position indexed by ind, to chemistry c. Used by all the other algorithms.</span>
+
+<span class="sd">        :param ind: integer index</span>
+<span class="sd">        :param c: chemistry index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">2</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">Nchem</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;Trying to occupy with a non-defined chemistry: {} out of range&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+        <span class="n">corig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">corig</span> <span class="o">!=</span> <span class="n">c</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">corig</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># remove from chemorder list (if not vacancy)</span>
+                <span class="n">co</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span><span class="p">[</span><span class="n">corig</span><span class="p">]</span>
+                <span class="n">co</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">co</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ind</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># add to chemorder list (if not vacancy)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+            <span class="c1"># finally: set the occupancy</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span></div>
+
+<div class="viewcode-block" id="Supercell.fillperiodic"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.fillperiodic">[docs]</a>    <span class="k">def</span> <span class="nf">fillperiodic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">Wyckoff</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Occupies all of the (Wyckoff) sites corresponding to chemical index with the appropriate chemistry.</span>
+
+<span class="sd">        :param ci: tuple of (chem, index) in crystal</span>
+<span class="sd">        :param Wyckoff: (optional) if False, *only* occupy the specific tuple, but still periodically</span>
+<span class="sd">        :return self:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ci</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexatom</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;Tuple {} not a corresponding atom index&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ci</span><span class="p">))</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexatom</span><span class="p">[</span><span class="n">ci</span><span class="p">]</span>
+        <span class="n">indlist</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">nset</span> <span class="k">for</span> <span class="n">nset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wyckofflist</span> <span class="k">if</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">nset</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">Wyckoff</span> <span class="k">else</span> <span class="p">(</span><span class="n">ind</span><span class="p">,)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="n">n</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">+</span> <span class="n">i</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indlist</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setocc</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">ci</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Supercell.occposlist"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.occposlist">[docs]</a>    <span class="k">def</span> <span class="nf">occposlist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of lists of occupied positions, in (chem)order.</span>
+
+<span class="sd">        :return occposlist: list of lists of supercell coord. positions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">clist</span><span class="p">]</span> <span class="k">for</span> <span class="n">clist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Supercell.POSCAR"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.POSCAR">[docs]</a>    <span class="k">def</span> <span class="nf">POSCAR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">stoichiometry</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a VASP-style POSCAR, returned as a string.</span>
+
+<span class="sd">        :param name: (optional) name to use for first list</span>
+<span class="sd">        :param stoichiometry: (optional) if True, append stoichiometry to name</span>
+<span class="sd">        :return POSCAR: string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">POSCAR</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">stoichiometry</span><span class="p">:</span> <span class="n">POSCAR</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">stoichiometry</span><span class="p">()</span>
+        <span class="n">POSCAR</span> <span class="o">+=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">1.0</span>
+<span class="s2">{a[0][0]:20.15f} {a[1][0]:20.15f} {a[2][0]:20.15f}</span>
+<span class="s2">{a[0][1]:20.15f} {a[1][1]:20.15f} {a[2][1]:20.15f}</span>
+<span class="s2">{a[0][2]:20.15f} {a[1][2]:20.15f} {a[2][2]:20.15f}</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">)</span>
+        <span class="n">POSCAR</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">clist</span><span class="p">))</span> <span class="k">for</span> <span class="n">clist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span><span class="p">])</span>
+        <span class="n">POSCAR</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Direct</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">POSCAR</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot; {u[0]:17.15f} {u[1]:17.15f} {u[2]:17.15f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
+                             <span class="k">for</span> <span class="n">clist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">occposlist</span><span class="p">()</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">clist</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">POSCAR</span></div>
+
+    <span class="n">__vacancyformat__</span> <span class="o">=</span> <span class="s2">&quot;v_{sitechem}&quot;</span>
+    <span class="n">__interstitialformat__</span> <span class="o">=</span> <span class="s2">&quot;{chem}_i&quot;</span>
+    <span class="n">__antisiteformat__</span> <span class="o">=</span> <span class="s2">&quot;{chem}_{sitechem}&quot;</span>
+
+<div class="viewcode-block" id="Supercell.defectindices"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.defectindices">[docs]</a>    <span class="k">def</span> <span class="nf">defectindices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a dictionary that corresponds to the &quot;defect&quot; content of the supercell.</span>
+
+<span class="sd">        :return defects: dictionary, keyed by defect type, with a set of indices of corresponding defects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">adddefect</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">defects</span><span class="p">:</span>
+                <span class="n">defects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">defects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">index</span><span class="p">])</span>
+
+        <span class="n">defects</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">sitechem</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomindices</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">wset</span><span class="p">,</span> <span class="n">chem</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Wyckofflist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wyckoffchem</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">wset</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomindices</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interstitial</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                        <span class="n">ind</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">+</span> <span class="n">i</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">adddefect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__interstitialformat__</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chem</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="n">c</span><span class="p">]),</span> <span class="n">ind</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sc</span> <span class="o">=</span> <span class="n">sitechem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                        <span class="n">ind</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">+</span> <span class="n">i</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">!=</span> <span class="n">sc</span><span class="p">:</span>
+                            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vacancyformat__</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sitechem</span><span class="o">=</span><span class="n">sitechem</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> \
+                                <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> \
+                                <span class="bp">self</span><span class="o">.</span><span class="n">__antisiteformat__</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chem</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">sitechem</span><span class="o">=</span><span class="n">sc</span><span class="p">)</span>
+                            <span class="n">adddefect</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">defects</span></div>
+
+<div class="viewcode-block" id="Supercell.KrogerVink"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.KrogerVink">[docs]</a>    <span class="k">def</span> <span class="nf">KrogerVink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Attempt to make a &quot;simple&quot; string based on the defectindices, using Kroger-Vink notation.</span>
+<span class="sd">        That is, we identify: vacancies, antisites, and interstitial sites, and return a string.</span>
+<span class="sd">        NOTE: there is no relative charges, so this is a pseudo-KV notation.</span>
+
+<span class="sd">        :return KV: string representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">defects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defectindices</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s1">&#39;+&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;{}{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">defects</span><span class="p">[</span><span class="n">name</span><span class="p">]),</span> <span class="n">name</span><span class="p">)</span>
+                         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">defects</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">name</span>
+                         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">defects</span><span class="o">.</span><span class="n">keys</span><span class="p">())])</span></div>
+
+<div class="viewcode-block" id="Supercell.reorder"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.reorder">[docs]</a>    <span class="k">def</span> <span class="nf">reorder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapping</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reorder (in place) the occupied sites. Does not change the occupancies, only the ordering</span>
+<span class="sd">        for &quot;presentation&quot;.</span>
+
+<span class="sd">        :param mapping: list of maps; will make newchemorder[c][i] = chemorder[c][mapping[c][i]]</span>
+<span class="sd">        :return self:</span>
+
+<span class="sd">        If mapping is not a proper permutation, raises ValueError.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">neworder</span> <span class="o">=</span> <span class="p">[[</span><span class="n">clist</span><span class="p">[</span><span class="n">cmap</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">clist</span><span class="p">))]</span>
+                    <span class="k">for</span> <span class="n">clist</span><span class="p">,</span> <span class="n">cmap</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span><span class="p">,</span> <span class="n">mapping</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span><span class="p">,</span> <span class="n">oldorder</span> <span class="o">=</span> <span class="n">neworder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sane__</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span> <span class="o">=</span> <span class="n">oldorder</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Mapping {} is not a proper permutation&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mapping</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Supercell.equivalencemap"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.equivalencemap">[docs]</a>    <span class="k">def</span> <span class="nf">equivalencemap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given the super `other` we want to find a group operation that transforms `self` into other.</span>
+<span class="sd">        This is a GroupOp *along* with an index mapping of chemorder. The index mapping is to get</span>
+<span class="sd">        the occposlist to match up: `(g*self).occposlist()[c][mapping[c][i]] == other.occposlist()[c][i]`</span>
+<span class="sd">        (We can write a similar expression using chemorder, since chemorder indexes into pos).</span>
+<span class="sd">        We&#39;re going to return both g and mapping.</span>
+<span class="sd">        *Remember:* `g` does not change the presentation ordering; `mapping` is necessary for full equivalence.</span>
+<span class="sd">        If no such equivalence, return None,None.</span>
+
+<span class="sd">        :param other: Supercell</span>
+<span class="sd">        :return g: GroupOp to transform sites from `self` to `other`</span>
+<span class="sd">        :return mapping: list of maps, such that (g*self).chemorder[c][mapping[c][i]] == other.chemorder[c][i]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 1. check that our defects even match up:</span>
+        <span class="n">selfdefects</span><span class="p">,</span> <span class="n">otherdefects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defectindices</span><span class="p">(),</span> <span class="n">other</span><span class="o">.</span><span class="n">defectindices</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">selfdefects</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">otherdefects</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">otherdefects</span><span class="p">[</span><span class="n">k</span><span class="p">]):</span> <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">otherdefects</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selfdefects</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">selfdefects</span><span class="p">[</span><span class="n">k</span><span class="p">]):</span> <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+
+        <span class="c1"># 2. identify the shortest common set of defects:</span>
+        <span class="n">defcount</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">selfdefects</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">deftype</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">defcount</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">defcount</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>  <span class="c1"># key to min value from dictionary</span>
+        <span class="n">shortset</span><span class="p">,</span> <span class="n">matchset</span> <span class="o">=</span> <span class="n">selfdefects</span><span class="p">[</span><span class="n">deftype</span><span class="p">],</span> <span class="n">otherdefects</span><span class="p">[</span><span class="n">deftype</span><span class="p">]</span>
+
+        <span class="n">mapping</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">gocc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="p">:</span>
+            <span class="c1"># 3. check against the shortest list of defects:</span>
+            <span class="n">indexmap</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">indexmap</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">indexmap</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">matchset</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">shortset</span><span class="p">):</span> <span class="k">continue</span>
+            <span class="c1"># 4. having checked that shortlist, check the full mapping:</span>
+            <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">gind</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">indexmap</span><span class="p">):</span>
+                <span class="n">gocc</span><span class="p">[</span><span class="n">gind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">gocc</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">occ</span><span class="p">):</span> <span class="k">continue</span>
+            <span class="c1"># 5. we have a winner. Now it&#39;s all up to getting the mapping; done with index()</span>
+            <span class="n">gorder</span> <span class="o">=</span> <span class="p">[[</span><span class="n">indexmap</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">clist</span><span class="p">]</span> <span class="k">for</span> <span class="n">clist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span><span class="p">]</span>
+            <span class="n">mapping</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">gclist</span><span class="p">,</span> <span class="n">otherlist</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">gorder</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">chemorder</span><span class="p">):</span>
+                <span class="n">mapping</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">gclist</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">otherlist</span><span class="p">])</span>
+            <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">mapping</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="n">mapping</span>
+        <span class="k">return</span> <span class="n">g</span><span class="p">,</span> <span class="n">mapping</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Dallas R. Trinkle.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.9',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
