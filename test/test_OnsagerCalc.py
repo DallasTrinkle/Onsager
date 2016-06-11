@@ -345,6 +345,14 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                                 msg='{} has final vacancy at {} not {}'.format(k, uv1, crysv1))
                 dx = np.dot(v[0].lattice, crystal.inhalf(v[1].pos[vind[1]] - v[0].pos[vind[0]]))
                 self.assertTrue(np.allclose(dx, dx0), '{} has vacancy moving {} not {}'.format(k, dx, dx0))
+                # check that we have proper NEB ordering: that is, only one *moving* atom.
+                for c, u0list, u1list in zip(itertools.count(), v[0].occposlist(), v[1].occposlist()):
+                    nmove = 0
+                    for u0, u1 in zip(u0list, u1list):
+                        if not np.allclose(u0, u1):
+                            nmove += 1
+                            self.assertEqual(nmove, 1,
+                                             msg='More than one moving atom? {} and {} do not match?'.format(u0, u1))
         # for k, v in supercelldict['transmapping'].items():
         #     self.assertEqual(len(v), 2, msg='{} does not have two entries?'.format(k))
         #     self.assertIn(k, supercelldict['transitions'])
