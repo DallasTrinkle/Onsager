@@ -803,15 +803,16 @@ class VacancyMediated(object):
         duplicates, as we construct these supercells on an as needed basis.
 
         :param super_n: 3x3 integer matrix to define our supercell
-        :return superdict: dictionary of `states`, `transitions`, and `transmapping` that
-            correspond to dictionaries with tags.
+        :return superdict: dictionary of `states`, `transitions`, `transmapping`, `indices` that
+            correspond to dictionaries with tags; the final tag `reference` is the basesupercell for
+            calculations without defects.
             superdict['states'][i] = supercell of state;
             superdict['transitions'][n] = (supercell initial, supercell final);
             superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
             superdict['indices'][tag] = (type, index) of tag, where tag is either a state or transition tag.
+            superdict['reference'] = supercell reference, no defects
         """
         ### NOTE: much of this will *need* to be reimplemented for metastable states.
-        superdict = {'states': {}, 'transitions': {}, 'transmapping': {}, 'indices': {}}
         vchem, schem = -1, self.crys.Nchem
         basis = self.crys.basis[self.chem]
         basesupercell = supercell.Supercell(self.crys, super_n, Nsolute=1)
@@ -822,6 +823,8 @@ class VacancyMediated(object):
         # fill up the supercell with all the *other* atoms
         for (c, i) in self.crys.atomindices:
             basesupercell.fillperiodic((c, i), Wyckoff=False)  # for efficiency
+        superdict = {'states': {}, 'transitions': {}, 'transmapping': {}, 'indices': {},
+                     'reference': basesupercell}
         for statetype, chem in (('vacancy', vchem), ('solute', schem)):
             for sites, tags in zip(self.sitelist, self.tags[statetype]):
                 i, tag = sites[0], tags[0]
