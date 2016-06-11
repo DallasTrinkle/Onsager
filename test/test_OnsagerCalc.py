@@ -284,7 +284,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         for n in range(1, 5):
             # everything up to a 5x5x3 cell is too small! Should provide a runtime warning
             with self.assertWarns(RuntimeWarning):
-                diffuser.makesupercells(n*np.eye(3, dtype=int))
+                diffuser.makesupercells(n * np.eye(3, dtype=int))
         super_n = np.array([[5, 0, 0], [0, 5, 0], [0, 0, 3]])
         supercelldict = diffuser.makesupercells(super_n)
         basis = self.crys.basis[diffuser.chem]
@@ -385,7 +385,8 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                 for d0, vi, si in ((PSi.dx, vind[0], sind[0]), (PSf.dx, vind[1], sind[1])):
                     dx = np.dot(v[0].lattice, crystal.inhalf(v[0].pos[vi] - v[0].pos[si]))
                     self.assertTrue(np.allclose(dx, d0),
-                                    msg='Transition state {} has vacancy-solute at {} not {}\n{}\n{}'.format(k, dx, d0, PSi, PSf))
+                                    msg='Transition state {} has vacancy-solute at {} not {}\n{}\n{}'.format(k, dx, d0,
+                                                                                                             PSi, PSf))
             self.assertTrue(np.allclose(uv0, crysv0),
                             msg='{} has initial vacancy at {} not {}'.format(k, uv0, crysv0))
             self.assertTrue(np.allclose(uv1, crysv1),
@@ -415,7 +416,8 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         for k, v in supercelldict['transmapping'].items():
             self.assertEqual(len(v), 2, msg='{} does not have two entries?'.format(k))
             self.assertIn(k, supercelldict['transitions'])
-            self.assertNotEqual(s, (None, None))  # cannot have a transition that doesn't connect to at least one known state
+            self.assertNotEqual(s, (
+            None, None))  # cannot have a transition that doesn't connect to at least one known state
             for s, st0 in zip(v, supercelldict['transitions'][k]):
                 if s is None:
                     self.assertEqual(diffuser.tagdicttype[k], 'omega1',

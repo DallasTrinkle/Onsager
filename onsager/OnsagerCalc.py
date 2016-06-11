@@ -838,12 +838,16 @@ class VacancyMediated(object):
         for PS in self.kinetic.states:
             dxmap = np.dot(basesupercell.lattice, crystal.inhalf(np.dot(invlatt, PS.dx)))
             if not np.allclose(PS.dx, dxmap):
-                if PS in self.thermo: failstate = 'thermodynamic range'
-                else: failstate = 'escape endpoint'
-                if np.allclose(np.dot(PS.dx, PS.dx), np.dot(dxmap, dxmap)): failtype = 'multiplicity issue'
-                else: failtype = 'mapping error'
+                if PS in self.thermo:
+                    failstate = 'thermodynamic range'
+                else:
+                    failstate = 'escape endpoint'
+                if np.allclose(np.dot(PS.dx, PS.dx), np.dot(dxmap, dxmap)):
+                    failtype = 'multiplicity issue'
+                else:
+                    failtype = 'mapping error'
                 warnings.warn('Supercell:\n{}\ntoo small: {} has {}'.format(super_n, failstate, failtype),
-                    RuntimeWarning, stacklevel=2)
+                              RuntimeWarning, stacklevel=2)
         # fill up the supercell with all the *other* atoms
         for (c, i) in self.crys.atomindices:
             basesupercell.fillperiodic((c, i), Wyckoff=False)  # for efficiency
@@ -925,7 +929,7 @@ class VacancyMediated(object):
         for d in (superdict['states'], superdict['transitions']):
             for k in d.keys():
                 superdict['indices'][k] = (
-                self.tagdicttype[k], self.tagdict[k])  # keep a local copy of the indices, for transformation later
+                    self.tagdicttype[k], self.tagdict[k])  # keep a local copy of the indices, for transformation later
         return superdict
 
     # this is part of our *class* definition: list of data that can be directly assigned / read
