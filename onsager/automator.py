@@ -101,6 +101,8 @@ def supercelltar(tarfile, superdict, filemode=0o664, directmode=0o775, timestamp
                               ('KPOINTS', KPOINTS)):
         addfile(filename, strdata)
     # now, go through the states:
+    if 'reference' in superdict:
+        addfile('POSCAR', superdict['reference'])
     for tag, super in superdict['states'].items():
         # directory first
         adddirectory(tag)
