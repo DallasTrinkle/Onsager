@@ -796,6 +796,12 @@ class VacancyMediated(object):
         Take in a supercell matrix, then generate all of the supercells needed to compute
         site energies and transitions (corresponding to the representatives).
 
+        Note: the states are lone vacancy, lone solute, solute-vacancy complexes in
+        our thermodynamic range *and* "escape" states. Escape states are endpoints of
+        some omega1 jumps. They are not relaxed, and have no pre-existing tag. They will
+        only be output as a single endpoint of an NEB run; there may be symmetry equivalent
+        duplicates, as we construct these supercells on an as needed basis.
+
         :param super_n: 3x3 integer matrix to define our supercell
         :return superdict: dictionary of `states`, `transitions`, and `transmapping` that
             correspond to dictionaries with tags.
