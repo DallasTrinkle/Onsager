@@ -416,7 +416,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                 self.assertIn(s[0], supercelldict['states'])
                 self.assertNotEqual(s[1], None)
                 self.assertNotEqual(s[2], None)
-                self.assertOrderingSuperEqual(s[1] * supercelldict['states'][s[0]], st0,
+                self.assertOrderingSuperEqual((s[1] * supercelldict['states'][s[0]]).reorder(s[2]), st0,
                                               msg='Transformation wrong?')
 
 
@@ -777,7 +777,7 @@ class InterstitialTests(unittest.TestCase):
                     self.assertIn(s[0], supercelldict['states'])
                     self.assertNotEqual(s[1], None)
                     self.assertNotEqual(s[2], None)
-                    self.assertOrderingSuperEqual(s[1] * supercelldict['states'][s[0]], st0,
+                    self.assertOrderingSuperEqual((s[1] * supercelldict['states'][s[0]]).reorder(s[2]), st0,
                                                   msg='Transformation wrong?')
 
     def testDiffusivity(self):
