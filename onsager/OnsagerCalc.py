@@ -802,8 +802,9 @@ class VacancyMediated(object):
             superdict['states'][i] = supercell of state;
             superdict['transitions'][n] = (supercell initial, supercell final);
             superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+            superdict['indices'][tag] = (type, index) of tag, where tag is either a state or transition tag.
         """
-        superdict = {'states': {}, 'transitions': {}, 'transmapping': {}}
+        superdict = {'states': {}, 'transitions': {}, 'transmapping': {}, 'indices': {}}
         basesupercell = supercell.Supercell(self.crys, super_n, Nsolute=1)
         basesupercell.definesolute(self.crys.Nchem, 'solute')
         basis = self.crys.basis[self.chem]
@@ -838,6 +839,9 @@ class VacancyMediated(object):
         #             if g is not None:
         #                 superdict['transmapping'][tag] += ((k, g, mapping),)
         #                 break
+        for d in (superdict['states'], superdict['transitions']):
+            for k in d.keys():
+                superdict['indices'][k] = (self.tagdicttype[k], self.tagdict[k])  # keep a local copy of the indices, for transformation later
         return superdict
 
     # this is part of our *class* definition: list of data that can be directly assigned / read
