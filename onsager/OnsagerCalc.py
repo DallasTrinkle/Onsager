@@ -804,41 +804,43 @@ class VacancyMediated(object):
             superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
             superdict['indices'][tag] = (type, index) of tag, where tag is either a state or transition tag.
         """
+        ### NOTE: much of this will *need* to be reimplemented for metastable states.
         superdict = {'states': {}, 'transitions': {}, 'transmapping': {}, 'indices': {}}
-        basesupercell = supercell.Supercell(self.crys, super_n, Nsolute=1)
-        basesupercell.definesolute(self.crys.Nchem, 'solute')
+        vchem, schem = -1, self.crys.Nchem
         basis = self.crys.basis[self.chem]
+        basesupercell = supercell.Supercell(self.crys, super_n, Nsolute=1)
+        basesupercell.definesolute(schem, 'solute')
         # fill up the supercell with all the *other* atoms
-        # for (c, i) in self.crys.atomindices:
-        #     if c == self.chem: continue
-        #     basesupercell.fillperiodic((c, i), Wyckoff=False)  # for efficiency
-        # for sites, tags in zip(self.sitelist, self.tags['states']):
-        #     i, tag = sites[0], tags[0]
-        #     u = basis[i]
-        #     super = basesupercell.copy()
-        #     ind = np.dot(super.invsuper, u) / super.size
-        #     # put an interstitial in that single state; the "first" one is fine:
-        #     super[ind] = self.chem
-        #     superdict['states'][tag] = super
-        # for jumps, tags in zip(self.jumpnetwork, self.tags['transitions']):
-        #     (i0, j0), dx0 = jumps[0]
-        #     tag = tags[0]
-        #     u0 = self.crys.basis[self.chem][i0]
-        #     u1 = u0 + np.dot(self.crys.invlatt, dx0)  # should correspond to the j0
-        #     super0, super1 = basesupercell.copy(), basesupercell.copy()
-        #     ind0, ind1 = np.dot(super0.invsuper, u0) / super.size, np.dot(super1.invsuper, u1) / super.size
-        #     # put interstitials at our corresponding sites
-        #     super0[ind0], super1[ind1] = self.chem, self.chem
-        #     superdict['transitions'][tag] = (super0, super1)
-        #     # determine the mappings:
-        #     superdict['transmapping'][tag] = tuple()
-        #     for s in (super0, super1):
-        #         for k, v in superdict['states'].items():
-        #             # attempt the mapping
-        #             g, mapping = v.equivalencemap(s)
-        #             if g is not None:
-        #                 superdict['transmapping'][tag] += ((k, g, mapping),)
-        #                 break
+        for (c, i) in self.crys.atomindices:
+            basesupercell.fillperiodic((c, i), Wyckoff=False)  # for efficiency
+        for statetype, chem in (('vacancy', vchem), ('solute', schem)):
+            for sites, tags in zip(self.sitelist, self.tags[statetype]):
+                i, tag = sites[0], tags[0]
+                u = basis[i]
+                super = basesupercell.copy()
+                ind = np.dot(super.invsuper, u) / super.size
+                # put a vacancy / solute in that single state; the "first" one is fine:
+                super[ind] = chem
+                superdict['states'][tag] = super
+        for jumps, tags in zip(self.om0_jn, self.tags['omega0']):
+            (i0, j0), dx0 = jumps[0]
+            tag = tags[0]
+            u0 = self.crys.basis[self.chem][i0]
+            u1 = u0 + np.dot(self.crys.invlatt, dx0)  # should correspond to the j0
+            super0, super1 = basesupercell.copy(), basesupercell.copy()
+            ind0, ind1 = np.dot(super0.invsuper, u0) / super.size, np.dot(super1.invsuper, u1) / super.size
+            # put interstitials at our corresponding sites
+            super0[ind0], super1[ind1] = vchem, vchem
+            superdict['transitions'][tag] = (super0, super1)
+            # determine the mappings:
+            superdict['transmapping'][tag] = tuple()
+            for s in (super0, super1):
+                for k, v in superdict['states'].items():
+                    # attempt the mapping
+                    g, mapping = v.equivalencemap(s)
+                    if g is not None:
+                        superdict['transmapping'][tag] += ((k, g, mapping),)
+                        break
         for d in (superdict['states'], superdict['transitions']):
             for k in d.keys():
                 superdict['indices'][k] = (self.tagdicttype[k], self.tagdict[k])  # keep a local copy of the indices, for transformation later
