@@ -282,7 +282,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
 
         self.crys.chemistry[self.chem] = 'M'  # metal matrix
         diffuser = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        super_n = np.array([[3, 0, 0], [0, 3, 0], [0, 0, 2]])
+        super_n = np.array([[6, 0, 0], [0, 6, 0], [0, 0, 4]])
         supercelldict = diffuser.makesupercells(super_n)
         basis = self.crys.basis[diffuser.chem]
         for key in ('states', 'transitions', 'transmapping', 'indices'):
@@ -382,7 +382,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                 for d0, vi, si in ((PSi.dx, vind[0], sind[0]), (PSf.dx, vind[1], sind[1])):
                     dx = np.dot(v[0].lattice, crystal.inhalf(v[0].pos[vi] - v[0].pos[si]))
                     self.assertTrue(np.allclose(dx, d0),
-                                    msg='Transition state has vacancy-solute at {} not {}'.format(dx, d0))
+                                    msg='Transition state {} has vacancy-solute at {} not {}\n{}\n{}'.format(k, dx, d0, PSi, PSf))
             self.assertTrue(np.allclose(uv0, crysv0),
                             msg='{} has initial vacancy at {} not {}'.format(k, uv0, crysv0))
             self.assertTrue(np.allclose(uv1, crysv1),
@@ -417,6 +417,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                 if s is None:
                     self.assertEqual(diffuser.tagdicttype[k], 'omega1',
                                      msg='{} has a non-thermo endpoint, but is not an omega1?'.format(k))
+                    continue
                 self.assertIn(s[0], supercelldict['states'])
                 self.assertNotEqual(s[1], None)
                 self.assertNotEqual(s[2], None)
