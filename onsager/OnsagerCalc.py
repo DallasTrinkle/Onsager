@@ -797,7 +797,7 @@ class VacancyMediated(object):
         site energies and transitions (corresponding to the representatives).
 
         Note: the states are lone vacancy, lone solute, solute-vacancy complexes in
-        our thermodynamic range *and* "escape" states. Escape states are endpoints of
+        our thermodynamic range. Note that there will be escape states are endpoints of
         some omega1 jumps. They are not relaxed, and have no pre-existing tag. They will
         only be output as a single endpoint of an NEB run; there may be symmetry equivalent
         duplicates, as we construct these supercells on an as needed basis.
@@ -816,6 +816,9 @@ class VacancyMediated(object):
         basis = self.crys.basis[self.chem]
         basesupercell = supercell.Supercell(self.crys, super_n, Nsolute=1)
         basesupercell.definesolute(schem, 'solute')
+        # check whether our cell is large enough to contain the full thermodynamic range;
+        # also check that our escape endpoint doesn't accidentally coincide with a "real" state.
+
         # fill up the supercell with all the *other* atoms
         for (c, i) in self.crys.atomindices:
             basesupercell.fillperiodic((c, i), Wyckoff=False)  # for efficiency
@@ -828,8 +831,8 @@ class VacancyMediated(object):
                 # put a vacancy / solute in that single state; the "first" one is fine:
                 super[ind] = chem
                 superdict['states'][tag] = super
-        for starlist, tags in zip(self.kinetic.stars, self.tags['solute-vacancy']):
-            PS, tag = self.kinetic.states[starlist[0]], tags[0]
+        for starlist, tags in zip(self.thermo.stars, self.tags['solute-vacancy']):
+            PS, tag = self.thermo.states[starlist[0]], tags[0]
             us, uv = basis[PS.i], basis[PS.j] + PS.R
             super = basesupercell.copy()
             inds, indv = np.dot(super.invsuper, us) / super.size, np.dot(super.invsuper, uv) / super.size

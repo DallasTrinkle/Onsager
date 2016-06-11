@@ -272,11 +272,10 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
             self.assertIn(k, diffuser.tagdict)
             self.assertEqual(v[0], diffuser.tagdicttype[k])
             self.assertEqual(v[1], diffuser.tagdict[k])
-        # NOTE: we have solute, vacancy, solute-vacancy *and* "ESCAPE" states that only appear
-        # for our escape jumps; these are identified with 'ESCAPE', and are not relaxed: used as
-        # endpoints in our NEB runs
-        self.assertGreaterEqual(len(supercelldict['states']),
-                                2*len(diffuser.sitelist) + diffuser.thermo.Nstars)
+        # NOTE: we have solute, vacancy, solute-vacancy states, but we don't count "escape"
+        # states that only appear for our escape jumps.
+        self.assertEqual(len(supercelldict['states']),
+                         2*len(diffuser.sitelist) + diffuser.thermo.Nstars)
         # self.assertEqual(len(supercelldict['transitions']),
         #                  len(diffuser.om0_jn) + len(diffuser.om1_jn) + len(diffuser.om2_jn))
         # check that *every* supercell only has one or two defects in it (one solute, one vacancy):
