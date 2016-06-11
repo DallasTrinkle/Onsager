@@ -22,7 +22,7 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 from scipy.linalg import pinv2, solve
-import copy, collections, itertools
+import copy, collections, itertools, warnings
 from functools import reduce
 from onsager import GFcalc
 from onsager import crystal
@@ -802,6 +802,17 @@ class VacancyMediated(object):
         only be output as a single endpoint of an NEB run; there may be symmetry equivalent
         duplicates, as we construct these supercells on an as needed basis.
 
+        We've got a few classes of warnings (from most egregious to least) that can issued
+        if the supercell is too small; the analysis will continue despite any warnings:
+
+        1. Thermodynamic shell states map to different states in supercell
+        2. Thermodynamic shell states are not unique in supercell (multiplicity)
+        3. Kinetic shell states map to different states in supercell
+        4. Kinetic shell states are not unique in supercell (multiplicity)
+
+        The lowest level can still be run reliably but runs the risk of errors in escape transition
+        barriers. Extreme caution should be used if any of the other warnings are raised.
+
         :param super_n: 3x3 integer matrix to define our supercell
         :return superdict: dictionary of `states`, `transitions`, `transmapping`, `indices` that
             correspond to dictionaries with tags; the final tag `reference` is the basesupercell for
@@ -819,7 +830,20 @@ class VacancyMediated(object):
         basesupercell.definesolute(schem, 'solute')
         # check whether our cell is large enough to contain the full thermodynamic range;
         # also check that our escape endpoint doesn't accidentally coincide with a "real" state.
-
+        # The check is simple: we map the dx vector for a PairState into the half cell of the supercell;
+        # it should match exactly. If it doesn't, there are two options: it has a different magnitude
+        # which indicates a *new* state (mapping error) or it has the same magnitude (multiplicity).
+        # We raise the warning accordingly. We do this with all the kinetic states, and check if it's in thermo.
+        invlatt = np.linalg.inv(basesupercell.lattice)
+        for PS in self.kinetic.states:
+            dxmap = np.dot(basesupercell.lattice, crystal.inhalf(np.dot(invlatt, PS.dx)))
+            if not np.allclose(PS.dx, dxmap):
+                if PS in self.thermo: failstate = 'thermodynamic range'
+                else: failstate = 'escape endpoint'
+                if np.allclose(np.dot(PS.dx, PS.dx), np.dot(dxmap, dxmap)): failtype = 'multiplicity issue'
+                else: failtype = 'mapping error'
+                warnings.warn('Supercell:\n{}\ntoo small: {} has {}'.format(super_n, failstate, failtype),
+                    RuntimeWarning, stacklevel=2)
         # fill up the supercell with all the *other* atoms
         for (c, i) in self.crys.atomindices:
             basesupercell.fillperiodic((c, i), Wyckoff=False)  # for efficiency

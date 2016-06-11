@@ -188,6 +188,7 @@ class StarTests(unittest.TestCase):
                 self.assertEqual(si, self.starset.starindex(self.starset.states[i]))
         self.assertEqual(None, self.starset.starindex(stars.PairState.zero()))
         self.assertEqual(None, self.starset.stateindex(stars.PairState.zero()))
+        self.assertNotIn(stars.PairState.zero(), self.starset)  # test __contains__ (PS in starset)
 
     def assertEqualStars(self, s1, s2):
         """Asserts that two star sets are equal."""

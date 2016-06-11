@@ -281,7 +281,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         self.crys.chemistry[self.chem] = 'M'  # metal matrix
         diffuser = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         # do we successfully raise a Warning about small cells?
-        for n in range(5):
+        for n in range(1, 5):
             # everything up to a 5x5x3 cell is too small! Should provide a runtime warning
             with self.assertWarns(RuntimeWarning):
                 diffuser.makesupercells(n*np.eye(3, dtype=int))

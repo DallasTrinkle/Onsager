@@ -546,6 +546,10 @@ class StarSet(object):
         self.Nstars = Nnew
         return self
 
+    def __contains__(self, PS):
+        """Return true if PS is in the star"""
+        return PS in self.indexdict
+
     # replaces pointindex:
     def stateindex(self, PS):
         """Return the index of pair state PS; None if not found"""
