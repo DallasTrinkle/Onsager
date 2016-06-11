@@ -296,8 +296,8 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         # states that only appear for our escape jumps.
         self.assertEqual(len(supercelldict['states']),
                          2 * len(diffuser.sitelist) + diffuser.thermo.Nstars)
-        # self.assertEqual(len(supercelldict['transitions']),
-        #                  len(diffuser.om0_jn) + len(diffuser.om1_jn) + len(diffuser.om2_jn))
+        self.assertEqual(len(supercelldict['transitions']),
+                         len(diffuser.om0_jn) + len(diffuser.om1_jn) + len(diffuser.om2_jn))
         # check that *every* supercell only has one or two defects in it (one solute, one vacancy):
         vacdef, soldef = 'v_{}'.format(self.crys.chemistry[self.chem]), \
                          'solute_{}'.format(self.crys.chemistry[self.chem])
@@ -374,11 +374,13 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                 PSi, PSf = diffuser.kinetic.states[i0], diffuser.kinetic.states[j0]
                 cryss0, cryss1 = basis[PSi.i], basis[PSf.i]
                 crysv0, crysv1 = basis[PSi.j], basis[PSf.j]
-                self.assertTrue(np.allclose(su, crysu),
-                                msg='{} has solute at {} not {}'.format(k, su, crysu))
+                self.assertTrue(np.allclose(us0, cryss0),
+                                msg='{} initial has solute at {} not {}'.format(k, us0, cryss0))
+                self.assertTrue(np.allclose(us1, cryss1),
+                                msg='{} final has solute at {} not {}'.format(k, us1, cryss1))
                 # next, vacancy; this is more simply done by checking the "dx" value
                 for d0, vi, si in ((PSi.dx, vind[0], sind[0]), (PSf.dx, vind[1], sind[1])):
-                    dx = np.dot(v[0].lattice, crystal.inhalf(v.pos[vi] - v.pos[si]))
+                    dx = np.dot(v[0].lattice, crystal.inhalf(v[0].pos[vi] - v[0].pos[si]))
                     self.assertTrue(np.allclose(dx, d0),
                                     msg='Transition state has vacancy-solute at {} not {}'.format(dx, d0))
             self.assertTrue(np.allclose(uv0, crysv0),

@@ -842,36 +842,66 @@ class VacancyMediated(object):
             # put a solute + vacancy in that single state; the "first" one is fine:
             super[inds], super[indv] = schem, vchem
             superdict['states'][tag] = super
-        for jumps, tags in zip(self.om0_jn, self.tags['omega0']):
-            (i0, j0), dx0 = jumps[0]
-            tag = tags[0]
-            u0 = self.crys.basis[self.chem][i0]
-            u1 = u0 + np.dot(self.crys.invlatt, dx0)  # should correspond to the j0
-            super0, super1 = basesupercell.copy(), basesupercell.copy()
-            ind0, ind1 = np.dot(super0.invsuper, u0) / super.size, np.dot(super1.invsuper, u1) / super.size
-            # put vacancies at our corresponding sites:
-            # we do this by *removing* two atoms in each, and then *placing* the atom back in.
-            # this ensures that we have correct NEB ordering
-            super0[ind0], super0[ind1] = vchem, vchem
-            super1[ind0], super1[ind1] = vchem, vchem
-            super0[ind1], super1[ind0] = self.chem, self.chem
-            superdict['transitions'][tag] = (super0, super1)
-            # determine the mappings:
-            superdict['transmapping'][tag] = tuple()
-            for s in (super0, super1):
-                nomap = True
-                for k, v in superdict['states'].items():
-                    # attempt the mapping
-                    g, mapping = v.equivalencemap(s)
-                    if g is not None:
-                        superdict['transmapping'][tag] += ((k, g, mapping),)
-                        nomap = False
-                        break
-                if nomap:
-                    superdict['transmapping'][tag] += (None,)
+        for jumptype, jumpnetwork in (('omega0', self.om0_jn),
+                                      ('omega1', self.om1_jn),
+                                      ('omega2', self.om2_jn)):
+            for jumps, tags in zip(jumpnetwork, self.tags[jumptype]):
+                (i0, j0), dx0 = jumps[0]
+                tag = tags[0]
+                super0, super1 = basesupercell.copy(), basesupercell.copy()
+                # the supercell building is a bit specific to each jump type
+                if jumptype == 'omega0':
+                    u0 = basis[i0]
+                    u1 = u0 + np.dot(self.crys.invlatt, dx0)  # should correspond to the j0
+                    ind0, ind1 = np.dot(super0.invsuper, u0) / super0.size, \
+                                 np.dot(super1.invsuper, u1) / super1.size
+                    # put vacancies at our corresponding sites:
+                    # we do this by *removing* two atoms in each, and then *placing* the atom back in.
+                    # this ensures that we have correct NEB ordering
+                    super0[ind0], super0[ind1] = vchem, vchem
+                    super1[ind0], super1[ind1] = vchem, vchem
+                    super0[ind1], super1[ind0] = self.chem, self.chem
+                else:
+                    PSi, PSf = self.kinetic.states[i0], self.kinetic.states[j0]
+                    if jumptype == 'omega1':
+                        # solute in first; same for each
+                        inds = np.dot(super0.invsuper, basis[PSi.i]) / super0.size
+                        super0[inds], super1[inds] = schem, schem
+                        # now get the initial and final vacancy locations
+                        ind0, ind1 = np.dot(super0.invsuper, basis[PSi.j] + PSi.R) / super0.size, \
+                                     np.dot(super1.invsuper, basis[PSf.j] + PSf.R) / super1.size
+                        # put vacancies at our corresponding sites:
+                        # we do this by *removing* two atoms in each, and then *placing* the atom back in.
+                        # this ensures that we have correct NEB ordering
+                        super0[ind0], super0[ind1] = vchem, vchem
+                        super1[ind0], super1[ind1] = vchem, vchem
+                        super0[ind1], super1[ind0] = self.chem, self.chem
+                    else:
+                        # omega2, we do it all using PSi: *assume* PSf is the reverse (exchange s + v)
+                        inds, indv = np.dot(super0.invsuper, basis[PSi.i]) / super0.size, \
+                                     np.dot(super0.invsuper, basis[PSi.j] + PSi.R) / super0.size
+                        # add the solutes:
+                        super0[inds], super1[indv] = schem, schem
+                        # and the vacancies:
+                        super0[indv], super1[inds] = vchem, vchem
+                superdict['transitions'][tag] = (super0, super1)
+                # determine the mappings:
+                superdict['transmapping'][tag] = tuple()
+                for s in (super0, super1):
+                    nomap = True
+                    for k, v in superdict['states'].items():
+                        # attempt the mapping
+                        g, mapping = v.equivalencemap(s)
+                        if g is not None:
+                            superdict['transmapping'][tag] += ((k, g, mapping),)
+                            nomap = False
+                            break
+                    if nomap:
+                        superdict['transmapping'][tag] += (None,)
         for d in (superdict['states'], superdict['transitions']):
             for k in d.keys():
-                superdict['indices'][k] = (self.tagdicttype[k], self.tagdict[k])  # keep a local copy of the indices, for transformation later
+                superdict['indices'][k] = (
+                self.tagdicttype[k], self.tagdict[k])  # keep a local copy of the indices, for transformation later
         return superdict
 
     # this is part of our *class* definition: list of data that can be directly assigned / read
