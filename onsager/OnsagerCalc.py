@@ -849,8 +849,12 @@ class VacancyMediated(object):
             u1 = u0 + np.dot(self.crys.invlatt, dx0)  # should correspond to the j0
             super0, super1 = basesupercell.copy(), basesupercell.copy()
             ind0, ind1 = np.dot(super0.invsuper, u0) / super.size, np.dot(super1.invsuper, u1) / super.size
-            # put interstitials at our corresponding sites
-            super0[ind0], super1[ind1] = vchem, vchem
+            # put vacancies at our corresponding sites:
+            # we do this by *removing* two atoms in each, and then *placing* the atom back in.
+            # this ensures that we have correct NEB ordering
+            super0[ind0], super0[ind1] = vchem, vchem
+            super1[ind0], super1[ind1] = vchem, vchem
+            super0[ind1], super1[ind0] = self.chem, self.chem
             superdict['transitions'][tag] = (super0, super1)
             # determine the mappings:
             superdict['transmapping'][tag] = tuple()

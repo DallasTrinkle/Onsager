@@ -350,13 +350,13 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                     nmove = 0
                     for u0, u1 in zip(u0list, u1list):
                         if not np.allclose(u0, u1):
-                            # is it moving the correct way?
+                            # is it moving the correct way? Remember: the atom moves *opposite* of the vacancy
                             dx = np.dot(v[0].lattice, crystal.inhalf(u1-u0))
                             nmove += 1
                             self.assertEqual(nmove, 1,
                                              msg='More than one moving atom? {} and {} do not match?'.format(u0, u1))
-                            self.assertTrue(np.allclose(dx, dx0),
-                                            msg='Displacement of moving atom does not match? {} != {}'.format(dx, dx0))
+                            self.assertTrue(np.allclose(-dx, dx0),
+                                            msg='Displacement of moving atom is not opposite of vacancy? {} != -{}'.format(dx, dx0))
 
         # for k, v in supercelldict['transmapping'].items():
         #     self.assertEqual(len(v), 2, msg='{} does not have two entries?'.format(k))
