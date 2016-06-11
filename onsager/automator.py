@@ -36,10 +36,10 @@ def map2string(map):
     """
     tag, groupop, mapping = map
     string_rep = tag + """
-{rot[0][0]:.15lf} {rot[0][1]:.15lf {rot[0][2]:.15lf}
-{rot[1][0]:.15lf} {rot[1][1]:.15lf {rot[1][2]:.15lf}
-{rot[2][0]:.15lf} {rot[2][1]:.15lf {rot[2][2]:.15lf}
-{trans[0]:.15lf} {trans[1]:.15lf {trans[2]:.15lf}""".format(rot=groupop.rot, trans=groupop.trans)
+{rot[0][0]:.15f} {rot[0][1]:.15f} {rot[0][2]:.15f}
+{rot[1][0]:.15f} {rot[1][1]:.15f} {rot[1][2]:.15f}
+{rot[2][0]:.15f} {rot[2][1]:.15f} {rot[2][2]:.15f}
+{trans[0]:.15f} {trans[1]:.15f} {trans[2]:.15f}""".format(rot=groupop.rot, trans=groupop.trans)
     # the index shift needs to be added for each subsequent chemistry
     indexshift = [0] + list(itertools.accumulate(len(remap) for remap in mapping))
     string_rep += ' '.join(['{}'.format(m + shift)
@@ -48,16 +48,16 @@ def map2string(map):
     return string_rep
 
 
-def supercelltar(tarfile, superdict, filemode=0o664, directmode=0o775, timestamp=None,
+def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=None,
                  INCARrelax="", INCARNEB="", KPOINTS=""):
     """
     Takes in a tarfile (needs to be open for reading) and a supercelldict (from a
     diffuser) and creates the full directory structure inside the tarfile. Best used in a form like
 
-        with tarfile.open('supercells.tar.gz', mode='w:gz') as tarfile:
-            automator.supercelltar(tarfile, supercelldict)
+        with tarfile.open('supercells.tar.gz', mode='w:gz') as tar:
+            automator.supercelltar(tar, supercelldict)
 
-    :param tarfile: tarfile open for writing; may contain other files in advance.
+    :param tar: tarfile open for writing; may contain other files in advance.
     :param superdict: dictionary of `states`, `transitions`, `transmapping`, `indices` that
         correspond to dictionaries with tags; the final tag `reference` is the basesupercell for
         calculations without defects.
@@ -80,20 +80,20 @@ def supercelltar(tarfile, superdict, filemode=0o664, directmode=0o775, timestamp
         info = tarfile.TarInfo(filename)
         info.mode, info.mtime = filemode, timestamp
         info.size = len(strdata.encode('ascii'))
-        tarfile.addfile(info, io.BytesIO(strdata.encode('ascii')))
+        tar.addfile(info, io.BytesIO(strdata.encode('ascii')))
 
     def adddirectory(dirname):
         info = tarfile.TarInfo(dirname)
         info.type = tarfile.DIRTYPE
         info.mode, info.mtime = directmode, timestamp
-        tarfile.addfile(info)
+        tar.addfile(info)
 
     def addsymlink(linkname, target):
         info = tarfile.TarInfo(linkname)
         info.type = tarfile.SYMTYPE
         info.mode, info.mtime = filemode, timestamp
         info.linkname = target
-        tarfile.addfile(info)
+        tar.addfile(info)
 
     # add the common VASP input files:
     for filename, strdata in (('INCAR.relax', INCARrelax),
@@ -102,7 +102,7 @@ def supercelltar(tarfile, superdict, filemode=0o664, directmode=0o775, timestamp
         addfile(filename, strdata)
     # now, go through the states:
     if 'reference' in superdict:
-        addfile('POSCAR', superdict['reference'])
+        addfile('POSCAR', superdict['reference'].POSCAR('Undefected reference'))
     for tag, super in superdict['states'].items():
         # directory first
         adddirectory(tag)
