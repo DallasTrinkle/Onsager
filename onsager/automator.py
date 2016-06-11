@@ -21,12 +21,43 @@ import collections, copy, itertools, warnings
 from onsager import crystal, supercell
 import tarfile, time, io
 
-def supercelltar(tarfile, superdict):
+
+def map2string(map):
+    """
+    Takes in a map (a tuple of tag, groupop, mapping) and constructs a string representation
+    to be dumped to a file.
+
+    :param map: tuple of tag, groupop, mapping
+        tag = string of initial state to rotate
+        groupop = see crystal.GroupOp; we use the rot and trans. This is in the supercell
+        mapping = in "chemorder" format; list by chemistry of lists of indices of position
+            in initial cell to use.
+    :return string_rep: string representation (to be used by an external script)
+    """
+    tag, groupop, mapping = map
+    string_rep = tag + """
+{rot[0][0]:.15lf} {rot[0][1]:.15lf {rot[0][2]:.15lf}
+{rot[1][0]:.15lf} {rot[1][1]:.15lf {rot[1][2]:.15lf}
+{rot[2][0]:.15lf} {rot[2][1]:.15lf {rot[2][2]:.15lf}
+{trans[0]:.15lf} {trans[1]:.15lf {trans[2]:.15lf}""".format(rot=groupop.rot, trans=groupop.trans)
+    # the index shift needs to be added for each subsequent chemistry
+    indexshift = [0] + list(itertools.accumulate(len(remap) for remap in mapping))
+    string_rep += ' '.join(['{}'.format(m + shift)
+                            for remap, shift in zip(mapping, indexshift)
+                            for m in remap])
+    return string_rep
+
+
+def supercelltar(tarfile, superdict, filemode=0o664, directmode=0o775, timestamp=None,
+                 INCARrelax="", INCARNEB="", KPOINTS=""):
     """
     Takes in a tarfile (needs to be open for reading) and a supercelldict (from a
-    diffuser) and creates the full directory structure inside the tarfile.
+    diffuser) and creates the full directory structure inside the tarfile. Best used in a form like
 
-    :param tarfile:
+        with tarfile.open('supercells.tar.gz', mode='w:gz') as tarfile:
+            automator.supercelltar(tarfile, supercelldict)
+
+    :param tarfile: tarfile open for writing; may contain other files in advance.
     :param superdict: dictionary of `states`, `transitions`, `transmapping`, `indices` that
         correspond to dictionaries with tags; the final tag `reference` is the basesupercell for
         calculations without defects.
@@ -36,4 +67,68 @@ def supercelltar(tarfile, superdict):
         superdict['indices'][tag] = (type, index) of tag, where tag is either a state or transition tag; or...
         superdict['indices'][tag] = index of tag, where tag is either a state or transition tag.
         superdict['reference'] = (optional) supercell reference, no defects
+    :param filemode: (optional) mode to use for files; default = 664
+    :param directmode: (optional) mode to use for directories; default = 775
+    :param timestamp: (optional) if None, use current time.
+    :param INCARrelax: (optional) contents of INCAR file to use for relaxation
+    :param INCARNEB: (optional) contents of INCAR file to use for relaxation
+    :param KPOINTS: (optional) contents of KPOINTS file
     """
+    if timestamp is None: timestamp = time.time()
+
+    def addfile(filename, strdata):
+        info = tarfile.TarInfo(filename)
+        info.mode, info.mtime = filemode, timestamp
+        info.size = len(strdata.encode('ascii'))
+        tarfile.addfile(info, io.BytesIO(strdata.encode('ascii')))
+
+    def adddirectory(dirname):
+        info = tarfile.TarInfo(dirname)
+        info.type = tarfile.DIRTYPE
+        info.mode, info.mtime = directmode, timestamp
+        tarfile.addfile(info)
+
+    def addsymlink(linkname, target):
+        info = tarfile.TarInfo(linkname)
+        info.type = tarfile.SYMTYPE
+        info.mode, info.mtime = filemode, timestamp
+        info.linkname = target
+        tarfile.addfile(info)
+
+    # add the common VASP input files:
+    for filename, strdata in (('INCAR.relax', INCARrelax),
+                              ('INCAR.NEB', INCARNEB),
+                              ('KPOINTS', KPOINTS)):
+        addfile(filename, strdata)
+    # now, go through the states:
+    for tag, super in superdict['states'].items():
+        # directory first
+        adddirectory(tag)
+        # POSCAR file next
+        addfile(tag + '/POSCAR', super.POSCAR(tag))
+        addsymlink(tag + '/INCAR', '../INCAR.relax')
+        addsymlink(tag + '/KPOINTS', '../KPOINTS')
+        addsymlink(tag + '/POTCAR', '../POTCAR')
+    # and the transitions:
+    for tag, (super0, super1) in superdict['transitions'].items():
+        # directory first
+        adddirectory(tag)
+        # POS/POSCAR files next
+        filename = tag + '/POSCAR.init' \
+            if superdict['transmapping'][tag][0] is None \
+            else tag + '/POS.init'
+        addfile(filename, super0.POSCAR('initial ' + tag))
+        filename = tag + '/POSCAR.final' \
+            if superdict['transmapping'][tag][0] is None \
+            else tag + '/POS.final'
+        addfile(filename, super1.POSCAR('final ' + tag))
+        addsymlink(tag + '/INCAR', '../INCAR.NEB')
+        addsymlink(tag + '/KPOINTS', '../KPOINTS')
+        addsymlink(tag + '/POTCAR', '../POTCAR')
+
+    # and the transition mappings:
+    for tag, (map0, map1) in superdict['transmapping'].items():
+        if map0 is not None:
+            addfile(tag + '/trans.init', map2string(map0))
+        if map1 is not None:
+            addfile(tag + '/trans.final', map2string(map1))
