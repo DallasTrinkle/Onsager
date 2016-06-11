@@ -272,7 +272,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
             self.assertIn(k, diffuser.tagdict)
             self.assertEqual(v[0], diffuser.tagdicttype[k])
             self.assertEqual(v[1], diffuser.tagdict[k])
-        self.assertEqual(len(supercelldict['states']), 2*len(diffuser.sitelist))
+        self.assertEqual(len(supercelldict['states']), 2*len(diffuser.sitelist) + diffuser.thermo.Nstars)
         # self.assertEqual(len(supercelldict['transitions']),
         #                  len(diffuser.om0_jn) + len(diffuser.om1_jn) + len(diffuser.om2_jn))
         # check that *every* supercell only has one or two defects in it (one solute, one vacancy):

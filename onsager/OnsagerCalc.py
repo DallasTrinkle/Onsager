@@ -822,6 +822,14 @@ class VacancyMediated(object):
                 # put a vacancy / solute in that single state; the "first" one is fine:
                 super[ind] = chem
                 superdict['states'][tag] = super
+        for starlist, tags in zip(self.kinetic.stars, self.tags['solute-vacancy']):
+            PS, tag = self.kinetic.states[starlist[0]], tags[0]
+            us, uv = basis[PS.i], basis[PS.j] + PS.R
+            super = basesupercell.copy()
+            inds, indv = np.dot(super.invsuper, us) / super.size, np.dot(super.invsuper, uv) / super.size
+            # put a solute + vacancy in that single state; the "first" one is fine:
+            super[inds], super[indv] = schem, vchem
+            superdict['states'][tag] = super
         for jumps, tags in zip(self.om0_jn, self.tags['omega0']):
             (i0, j0), dx0 = jumps[0]
             tag = tags[0]
