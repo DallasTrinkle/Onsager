@@ -39,7 +39,8 @@ def map2string(map):
 {rot[0][0]:.15f} {rot[0][1]:.15f} {rot[0][2]:.15f}
 {rot[1][0]:.15f} {rot[1][1]:.15f} {rot[1][2]:.15f}
 {rot[2][0]:.15f} {rot[2][1]:.15f} {rot[2][2]:.15f}
-{trans[0]:.15f} {trans[1]:.15f} {trans[2]:.15f}""".format(rot=groupop.rot, trans=groupop.trans)
+{trans[0]:.15f} {trans[1]:.15f} {trans[2]:.15f}
+""".format(rot=groupop.rot, trans=groupop.trans)
     # the index shift needs to be added for each subsequent chemistry
     indexshift = [0] + list(itertools.accumulate(len(remap) for remap in mapping))
     string_rep += ' '.join(['{}'.format(m + shift)
