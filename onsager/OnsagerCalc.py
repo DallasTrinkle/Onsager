@@ -859,12 +859,16 @@ class VacancyMediated(object):
             # determine the mappings:
             superdict['transmapping'][tag] = tuple()
             for s in (super0, super1):
+                nomap = True
                 for k, v in superdict['states'].items():
                     # attempt the mapping
                     g, mapping = v.equivalencemap(s)
                     if g is not None:
                         superdict['transmapping'][tag] += ((k, g, mapping),)
+                        nomap = False
                         break
+                if nomap:
+                    superdict['transmapping'][tag] += (None,)
         for d in (superdict['states'], superdict['transitions']):
             for k in d.keys():
                 superdict['indices'][k] = (self.tagdicttype[k], self.tagdict[k])  # keep a local copy of the indices, for transformation later

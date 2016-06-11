@@ -412,7 +412,9 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
             self.assertIn(k, supercelldict['transitions'])
             self.assertNotEqual(s, (None, None))  # cannot have a transition that doesn't connect to at least one known state
             for s, st0 in zip(v, supercelldict['transitions'][k]):
-                if s is None: continue
+                if s is None:
+                    self.assertEqual(diffuser.tagdicttype[k], 'omega1',
+                                     msg='{} has a non-thermo endpoint, but is not an omega1?'.format(k))
                 self.assertIn(s[0], supercelldict['states'])
                 self.assertNotEqual(s[1], None)
                 self.assertNotEqual(s[2], None)
