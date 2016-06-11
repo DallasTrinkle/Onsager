@@ -44,6 +44,15 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
         self.crystalname = 'Simple Cubic a0={}'.format(self.a0)
         self.correl = 0.653109  # 0.653
 
+    def assertOrderingSuperEqual(self, s0, s1, msg=""):
+        if s0 != s1:
+            failmsg = msg + '\n'
+            for line0, line1 in itertools.zip_longest(s0.__str__().splitlines(),
+                                                      s1.__str__().splitlines(),
+                                                      fillvalue=' - '):
+                failmsg += line0 + '\t' + line1 + '\n'
+            self.fail(msg=failmsg)
+
     def testtracer(self):
         """Test that arbitrary tracer works as expected"""
         # Make a calculator with one neighbor shell
@@ -223,6 +232,15 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         self.correlx = 0.78120489
         self.correlz = 0.78145142
 
+    def assertOrderingSuperEqual(self, s0, s1, msg=""):
+        if s0 != s1:
+            failmsg = msg + '\n'
+            for line0, line1 in itertools.zip_longest(s0.__str__().splitlines(),
+                                                      s1.__str__().splitlines(),
+                                                      fillvalue=' - '):
+                failmsg += line0 + '\t' + line1 + '\n'
+            self.fail(msg=failmsg)
+
     def testtracer(self):
         """Test that HCP tracer works as expected"""
         # Make a calculator with one neighbor shell
@@ -277,7 +295,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         # NOTE: we have solute, vacancy, solute-vacancy states, but we don't count "escape"
         # states that only appear for our escape jumps.
         self.assertEqual(len(supercelldict['states']),
-                         2*len(diffuser.sitelist) + diffuser.thermo.Nstars)
+                         2 * len(diffuser.sitelist) + diffuser.thermo.Nstars)
         # self.assertEqual(len(supercelldict['transitions']),
         #                  len(diffuser.om0_jn) + len(diffuser.om1_jn) + len(diffuser.om2_jn))
         # check that *every* supercell only has one or two defects in it (one solute, one vacancy):
@@ -292,9 +310,11 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                 self.assertIn(deftype, (vacdef, soldef), msg='{} not a vacancy or solute?'.format(deftype))
                 self.assertEqual(len(indset), 1, msg='{} has multiple defects?'.format(k))
                 for ind in indset:
-                    if deftype == vacdef: vind = ind
-                    else: sind = ind
-            # check that we've got a supercell with the correct; look at the position of the interstitial
+                    if deftype == vacdef:
+                        vind = ind
+                    else:
+                        sind = ind
+            # check that we've got a supercell with the correct; look at the position of the defects
             vu = crystal.incell(np.dot(v.super, v.pos[vind])) if vind is not None else None
             su = crystal.incell(np.dot(v.super, v.pos[sind])) if sind is not None else None
             if su is None or vu is None:
@@ -305,7 +325,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                                 msg='{} has solute/vacancy at {} not {}'.format(k, u, crysu))
             else:
                 # solute-vacancy; grab the corresponding PairState:
-                PS = diffuser.kinetic.states[diffuser.kinetic.stars[diffuser.tagdict[k]][0]]
+                PS = diffuser.thermo.states[diffuser.kinetic.stars[diffuser.tagdict[k]][0]]
                 # check the solute first:
                 crysu = basis[PS.i]
                 self.assertTrue(np.allclose(su, crysu),
@@ -332,39 +352,72 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                             sind += (ind,)
             self.assertEqual(len(vind), 2,
                              msg='transition endpoints that do not have vacancies? {}'.format(k))
-            # check initial state, final state, and deltax
-            if diffuser.tagdicttype[k] == 'omega0':
+            # check initial state, final state, and deltax; first, our vacancies
+            uv0, uv1 = crystal.incell(np.dot(v[0].super, v[0].pos[vind[0]])), \
+                       crystal.incell(np.dot(v[1].super, v[1].pos[vind[1]]))
+            # weird looking: the dictionary selects the correct jump network from jumptype, then the
+            # appropriate entry, and the first member as the representative
+            jumptype = diffuser.tagdicttype[k]
+            (i0, j0), dx0 = {'omega0': diffuser.om0_jn,
+                             'omega1': diffuser.om1_jn,
+                             'omega2': diffuser.om2_jn}[jumptype][diffuser.tagdict[k]][0]
+            if jumptype == 'omega0':
                 self.assertEqual(sind, tuple(), msg='omega0 transition with a solute? {}'.format(k))
-                (i0,j0), dx0 = diffuser.om0_jn[diffuser.tagdict[k]][0]
-                uv0, uv1 = crystal.incell(np.dot(v[0].super, v[0].pos[vind[0]])), \
-                           crystal.incell(np.dot(v[1].super, v[1].pos[vind[1]]))
                 crysv0, crysv1 = basis[i0], basis[j0]
-                self.assertTrue(np.allclose(uv0, crysv0),
-                                msg='{} has initial vacancy at {} not {}'.format(k, uv0, crysv0))
-                self.assertTrue(np.allclose(uv1, crysv1),
-                                msg='{} has final vacancy at {} not {}'.format(k, uv1, crysv1))
-                dx = np.dot(v[0].lattice, crystal.inhalf(v[1].pos[vind[1]] - v[0].pos[vind[0]]))
-                self.assertTrue(np.allclose(dx, dx0), msg='{} has vacancy moving {} not {}'.format(k, dx, dx0))
-                # check that we have proper NEB ordering: that is, only one *moving* atom.
-                for c, u0list, u1list in zip(itertools.count(), v[0].occposlist(), v[1].occposlist()):
-                    nmove = 0
-                    for u0, u1 in zip(u0list, u1list):
-                        if not np.allclose(u0, u1):
-                            # is it moving the correct way? Remember: the atom moves *opposite* of the vacancy
-                            dx = np.dot(v[0].lattice, crystal.inhalf(u1-u0))
-                            nmove += 1
-                            self.assertEqual(nmove, 1,
-                                             msg='More than one moving atom? {} and {} do not match?'.format(u0, u1))
-                            self.assertTrue(np.allclose(-dx, dx0),
-                                            msg='Displacement of moving atom is not opposite of vacancy? {} != -{}'.format(dx, dx0))
+            else:
+                # omega1 or omega2
+                if jumptype == 'omega1':
+                    self.assertEqual(sind[0], sind[1],
+                                     msg='Solute changed place in an omega1? {}!={}'.format(sind[0], sind[1]))
+                us0, us1 = crystal.incell(np.dot(v[0].super, v[0].pos[sind[0]])), \
+                           crystal.incell(np.dot(v[1].super, v[1].pos[sind[1]]))
+                PSi, PSf = diffuser.kinetic.states[i0], diffuser.kinetic.states[j0]
+                cryss0, cryss1 = basis[PSi.i], basis[PSf.i]
+                crysv0, crysv1 = basis[PSi.j], basis[PSf.j]
+                self.assertTrue(np.allclose(su, crysu),
+                                msg='{} has solute at {} not {}'.format(k, su, crysu))
+                # next, vacancy; this is more simply done by checking the "dx" value
+                for d0, vi, si in ((PSi.dx, vind[0], sind[0]), (PSf.dx, vind[1], sind[1])):
+                    dx = np.dot(v[0].lattice, crystal.inhalf(v.pos[vi] - v.pos[si]))
+                    self.assertTrue(np.allclose(dx, d0),
+                                    msg='Transition state has vacancy-solute at {} not {}'.format(dx, d0))
+            self.assertTrue(np.allclose(uv0, crysv0),
+                            msg='{} has initial vacancy at {} not {}'.format(k, uv0, crysv0))
+            self.assertTrue(np.allclose(uv1, crysv1),
+                            msg='{} has final vacancy at {} not {}'.format(k, uv1, crysv1))
+            if jumptype != 'omega0':
+                self.assertTrue(np.allclose(us0, cryss0),
+                                msg='{} has initial solute at {} not {}'.format(k, us0, cryss0))
+                self.assertTrue(np.allclose(us1, cryss1),
+                                msg='{} has final solute at {} not {}'.format(k, us1, cryss1))
+            # check that we have proper NEB ordering: that is, only one *moving* atom, and it goes
+            # in the opposite direction of the vacancy (dx).
+            dx = np.dot(v[0].lattice, crystal.inhalf(v[1].pos[vind[1]] - v[0].pos[vind[0]]))
+            self.assertTrue(np.allclose(dx, dx0), msg='{} has vacancy moving {} not {}'.format(k, dx, dx0))
+            for c, u0list, u1list in zip(itertools.count(), v[0].occposlist(), v[1].occposlist()):
+                nmove = 0
+                for u0, u1 in zip(u0list, u1list):
+                    if not np.allclose(u0, u1):
+                        # is it moving the correct way? Remember: the atom moves *opposite* of the vacancy
+                        dx = np.dot(v[0].lattice, crystal.inhalf(u1 - u0))
+                        nmove += 1
+                        self.assertEqual(nmove, 1,
+                                         msg='More than one moving atom? {} and {} do not match?'.format(u0, u1))
+                        self.assertTrue(np.allclose(-dx, dx0),
+                                        msg='Displacement of moving atom is not opposite of vacancy? {} != -{}'.format(
+                                            dx, dx0))
 
-        # for k, v in supercelldict['transmapping'].items():
-        #     self.assertEqual(len(v), 2, msg='{} does not have two entries?'.format(k))
-        #     self.assertIn(k, supercelldict['transitions'])
-        #     for s in v:
-        #         self.assertIn(s[0], supercelldict['states'])
-        #         self.assertNotEqual(s[1], None)
-        #         self.assertNotEqual(s[2], None)
+        for k, v in supercelldict['transmapping'].items():
+            self.assertEqual(len(v), 2, msg='{} does not have two entries?'.format(k))
+            self.assertIn(k, supercelldict['transitions'])
+            self.assertNotEqual(s, (None, None))  # cannot have a transition that doesn't connect to at least one known state
+            for s, st0 in zip(v, supercelldict['transitions'][k]):
+                if s is None: continue
+                self.assertIn(s[0], supercelldict['states'])
+                self.assertNotEqual(s[1], None)
+                self.assertNotEqual(s[2], None)
+                self.assertOrderingSuperEqual(s[1] * supercelldict['states'][s[0]], st0,
+                                              msg='Transformation wrong?')
 
 
 class CrystalOnsagerTestsB2(unittest.TestCase):
@@ -386,6 +439,15 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         self.crystalname2 = 'B2 a0={}'.format(self.a0)
 
         self.solutebinding = 3.
+
+    def assertOrderingSuperEqual(self, s0, s1, msg=""):
+        if s0 != s1:
+            failmsg = msg + '\n'
+            for line0, line1 in itertools.zip_longest(s0.__str__().splitlines(),
+                                                      s1.__str__().splitlines(),
+                                                      fillvalue=' - '):
+                failmsg += line0 + '\t' + line1 + '\n'
+            self.fail(msg=failmsg)
 
     def testtracer(self):
         """Test that BCC mapped onto B2 match exactly"""
@@ -496,6 +558,15 @@ class InterstitialTests(unittest.TestCase):
         self.FCC_jumpnetwork = self.FCC_intercrys.jumpnetwork(1, self.a0 * 0.48)
         self.FCC_sitelist = self.FCC_intercrys.sitelist(1)
         self.Dfcc = OnsagerCalc.Interstitial(self.FCC_intercrys, 1, self.FCC_sitelist, self.FCC_jumpnetwork)
+
+    def assertOrderingSuperEqual(self, s0, s1, msg=""):
+        if s0 != s1:
+            failmsg = msg + '\n'
+            for line0, line1 in itertools.zip_longest(s0.__str__().splitlines(),
+                                                      s1.__str__().splitlines(),
+                                                      fillvalue=' - '):
+                failmsg += line0 + '\t' + line1 + '\n'
+            self.fail(msg=failmsg)
 
     def testVectorBasis(self):
         """Do we correctly analyze our crystals regarding their symmetry?"""
@@ -677,7 +748,7 @@ class InterstitialTests(unittest.TestCase):
                         self.assertEqual(len(indset), 1, msg='{} has multiple defects?'.format(k))
                         for ind in indset: indices += (ind,)  # append to our list
                 # check initial state, final state, and deltax
-                (i0,j0), dx0 = diffuser.jumpnetwork[tagdict[k]][0]
+                (i0, j0), dx0 = diffuser.jumpnetwork[tagdict[k]][0]
                 basis = crystal.incell(np.dot(v[0].super, v[0].pos[indices[0]]))
                 crysbasis = diffuser.crys.basis[diffuser.chem][i0]
                 self.assertTrue(np.allclose(basis, crysbasis),
@@ -698,14 +769,16 @@ class InterstitialTests(unittest.TestCase):
                     else:
                         for u0, u1 in zip(u0list, u1list):
                             self.assertFalse(np.allclose(u0, u1),
-                                            msg='Moving atom is not moving? {} and {} match.'.format(u0, u1))
+                                             msg='Moving atom is not moving? {} and {} match.'.format(u0, u1))
             for k, v in supercelldict['transmapping'].items():
                 self.assertEqual(len(v), 2, msg='{} does not have two entries?'.format(k))
                 self.assertIn(k, supercelldict['transitions'])
-                for s in v:
+                for s, st0 in zip(v, supercelldict['transitions'][k]):
                     self.assertIn(s[0], supercelldict['states'])
                     self.assertNotEqual(s[1], None)
                     self.assertNotEqual(s[2], None)
+                    self.assertOrderingSuperEqual(s[1] * supercelldict['states'][s[0]], st0,
+                                                  msg='Transformation wrong?')
 
     def testDiffusivity(self):
         """Diffusivity"""
