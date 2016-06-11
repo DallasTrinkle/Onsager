@@ -278,11 +278,14 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
 
     def testSupercell(self):
         """Can we construct proper supercells for our diffuser?"""
-        # should add some warning tests to see that warnings are raised for "too small" supercells.
-
         self.crys.chemistry[self.chem] = 'M'  # metal matrix
         diffuser = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        super_n = np.array([[6, 0, 0], [0, 6, 0], [0, 0, 4]])
+        # do we successfully raise a Warning about small cells?
+        for n in range(5):
+            # everything up to a 5x5x3 cell is too small! Should provide a runtime warning
+            with self.assertWarns(RuntimeWarning):
+                diffuser.makesupercells(n*np.eye(3, dtype=int))
+        super_n = np.array([[5, 0, 0], [0, 5, 0], [0, 0, 3]])
         supercelldict = diffuser.makesupercells(super_n)
         basis = self.crys.basis[diffuser.chem]
         for key in ('states', 'transitions', 'transmapping', 'indices'):

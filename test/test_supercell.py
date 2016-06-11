@@ -39,6 +39,8 @@ class FCCSuperTests(unittest.TestCase):
         super = supercell.Supercell(self.crys, self.one, Nsolute=5)
         self.assertNotEqual(super, None)
         self.assertEqual(super.Nchem, self.crys.Nchem + 5)
+        with self.assertRaises(ZeroDivisionError):
+            supercell.Supercell(self.crys, np.zeros((3,3), dtype=int))
 
     def testEqualityCopy(self):
         """Can we copy a supercell, and is it equal to itself?"""
@@ -63,7 +65,10 @@ class FCCSuperTests(unittest.TestCase):
         # Try making a whole series of supercells; if they fail, will raise an Arithmetic exception:
         for n in range(100):
             randsuper = np.random.randint(-5, 6, size=(3, 3))
-            if np.allclose(np.linalg.det(randsuper), 0): continue
+            if np.allclose(np.linalg.det(randsuper), 0):
+                with self.assertRaises(ZeroDivisionError):
+                    supercell.Supercell.maketrans(randsuper)
+                continue
             size, invsup, tlist, tdict = supercell.Supercell.maketrans(randsuper)
             self.assertTrue(len(tlist) == size)
 
@@ -108,6 +113,10 @@ class FCCSuperTests(unittest.TestCase):
                         self.assertTrue(np.allclose(gu, super.pos[gi]),
                                         msg="{}\nProblem with GroupOp:\n{}\nIndexing: {} != {}".format(super, g, gu,
                                                                                                        super.pos[gi]))
+        # do we successfully raise a Warning about broken symmetry?
+        with self.assertWarns(RuntimeWarning):
+            brokensymmsuper = np.array([[3,-5,2], [-1,2,3], [4,-2,1]])
+            supercell.Supercell(self.crys, brokensymmsuper)
 
     def testSanity(self):
         """Does __sane__ operate as it should?"""

@@ -229,6 +229,7 @@ class Supercell(object):
         :return transdict: dictionary of tuples and their corresponding index (inverse of trans)
         """
         size = abs(int(np.round(np.linalg.det(super))))
+        if size==0: raise ZeroDivisionError('Tried to use a singular supercell.')
         invsuper = np.round(np.linalg.inv(super) * size).astype(int)
         maxN = abs(super).max()
         translist, transdict = [], {}
