@@ -7,7 +7,7 @@ __author__ = 'Dallas R. Trinkle'
 # TODO: additional tests using the 14 frequency model for FCC?
 
 import unittest
-import textwrap
+import textwrap, itertools
 import numpy as np
 import onsager.OnsagerCalc as OnsagerCalc
 import onsager.crystal as crystal
@@ -662,6 +662,16 @@ class InterstitialTests(unittest.TestCase):
                 dx = np.dot(v[0].lattice, crystal.inhalf(v[1].pos[indices[1]] - v[0].pos[indices[0]]))
                 self.assertTrue(np.allclose(dx, dx0),
                                 msg='{} has interstitial moving {} not {}'.format(k, dx, dx0))
+                # check that we have proper NEB ordering: that is, only one *moving* atom.
+                for c, u0list, u1list in zip(itertools.count(), v[0].occposlist(), v[1].occposlist()):
+                    if c != diffuser.chem:
+                        for u0, u1 in zip(u0list, u1list):
+                            self.assertTrue(np.allclose(u0, u1),
+                                            msg='Non-moving atoms {} and {} do not match?'.format(u0, u1))
+                    else:
+                        for u0, u1 in zip(u0list, u1list):
+                            self.assertFalse(np.allclose(u0, u1),
+                                            msg='Moving atom is not moving? {} and {} match.'.format(u0, u1))
             for k, v in supercelldict['transmapping'].items():
                 self.assertEqual(len(v), 2, msg='{} does not have two entries?'.format(k))
                 self.assertIn(k, supercelldict['transitions'])
