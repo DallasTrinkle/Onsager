@@ -5,7 +5,7 @@ Unit tests for supercell class
 __author__ = 'Dallas R. Trinkle'
 
 import unittest
-import itertools
+import itertools, copy
 import numpy as np
 import onsager.crystal as crystal
 import onsager.supercell as supercell
@@ -40,7 +40,7 @@ class FCCSuperTests(unittest.TestCase):
         self.assertNotEqual(super, None)
         self.assertEqual(super.Nchem, self.crys.Nchem + 5)
         with self.assertRaises(ZeroDivisionError):
-            supercell.Supercell(self.crys, np.zeros((3,3), dtype=int))
+            supercell.Supercell(self.crys, np.zeros((3, 3), dtype=int))
 
     def testEqualityCopy(self):
         """Can we copy a supercell, and is it equal to itself?"""
@@ -115,7 +115,7 @@ class FCCSuperTests(unittest.TestCase):
                                                                                                        super.pos[gi]))
         # do we successfully raise a Warning about broken symmetry?
         with self.assertWarns(RuntimeWarning):
-            brokensymmsuper = np.array([[3,-5,2], [-1,2,3], [4,-2,1]])
+            brokensymmsuper = np.array([[3, -5, 2], [-1, 2, 3], [4, -2, 1]])
             supercell.Supercell(self.crys, brokensymmsuper)
 
     def testSanity(self):
@@ -267,6 +267,19 @@ class FCCSuperTests(unittest.TestCase):
                 self.fail(msg=msg)
             self.assertOrderingSuperEqual((g0 * supercopy).reorder(mapping), gsuper,
                                           msg='Group operation + mapping failure?')
+            # do the testing with occposlist, since that's what this is really for...
+            rotoccposlist = [[crystal.incell(np.dot(g0.rot, pos) + g0.trans) for pos in poslist]
+                             for poslist in supercopy.occposlist()]
+            # now, reorder:
+            reorderoccposlist = copy.deepcopy(rotoccposlist)
+            for reposlist, poslist, remap in zip(reorderoccposlist, rotoccposlist, mapping):
+                for i, m in enumerate(remap):
+                    reposlist[i] = poslist[m]
+            for reposlist, gposlist in zip(reorderoccposlist, gsuper.occposlist()):
+                for repos, gpos in zip(reposlist, gposlist):
+                    self.assertTrue(np.allclose(repos, gpos),
+                                    msg='Reordering the unit cell position failed?')
+
         # now try something that *shouldn't* be equivalent:
         for ind in np.random.randint(super.size * super.N, size=Ntests):
             # a chemical "permutation":

@@ -19,4 +19,21 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 import collections, copy, itertools, warnings
 from onsager import crystal, supercell
+import tarfile, time, io
 
+def supercelltar(tarfile, superdict):
+    """
+    Takes in a tarfile (needs to be open for reading) and a supercelldict (from a
+    diffuser) and creates the full directory structure inside the tarfile.
+
+    :param tarfile:
+    :param superdict: dictionary of `states`, `transitions`, `transmapping`, `indices` that
+        correspond to dictionaries with tags; the final tag `reference` is the basesupercell for
+        calculations without defects.
+        superdict['states'][i] = supercell of state;
+        superdict['transitions'][n] = (supercell initial, supercell final);
+        superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+        superdict['indices'][tag] = (type, index) of tag, where tag is either a state or transition tag; or...
+        superdict['indices'][tag] = index of tag, where tag is either a state or transition tag.
+        superdict['reference'] = (optional) supercell reference, no defects
+    """
