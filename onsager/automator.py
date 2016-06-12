@@ -47,10 +47,55 @@ def map2string(tag, groupop, mapping):
     # needs a trailing newline
     return string_rep + '\n'
 
+### Some default input files to use for our runs, and a sed formatted script to recreate INCARs
+
+SEDstring = "s/{{system}}/{system}/\n"
+
+INCARrelax = """SYSTEM = {system}
+PREC = High
+ISIF = 2
+EDIFF = 1E-8
+EDIFFG = -10E-3
+IBRION = 2
+NSW = 50
+ISMEAR = 1
+SIGMA = 0.1
+LWAVE  = .FALSE.
+LCHARG = .FALSE.
+LREAL  = .FALSE.
+VOSKOWN = 1
+"""
+
+INCARNEB = INCARrelax + \
+"""IMAGES = 1
+SPRING = -5
+LCLIMB = .TRUE.
+NELMIN=4
+NFREE=10
+"""
+
+KPOINTSgammaonly = """Gamma
+1
+Reciprocal
+0. 0. 0. 1.
+"""
+
+KPOINTS_MP = """Monkhorst-Pack mesh {N1}x{N2}x{N3}
+0
+Monkhorst
+{N1} {N2} {N3}
+0. 0. 0.
+"""
+
+KPOINTS_Gamma = """Gamma-centered mesh {N1}x{N2}x{N3}
+0
+Gamma
+{N1} {N2} {N3}
+0. 0. 0.
+"""
 
 def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=None,
-                 INCARrelax="SYSTEM = {system}\n", INCARNEB="SYSTEM = {system}\n",
-                 KPOINTS="Gamma\n1\nReciprocal\n0. 0. 0. 1.\n", basedir="",
+                 INCARrelax=INCARrelax, INCARNEB=INCARNEB, KPOINTS=KPOINTSgammaonly, basedir="",
                  statename='relax.', transitionname='neb.', IDformat='{:02d}',
                  JSONdict='tags.json', YAMLdef='supercell.yaml'):
     """
@@ -74,10 +119,11 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
     :param directmode: mode to use for directories (default: 775)
     :param timestamp: UNIX time for files; if None, use current time (default)
     :param INCARrelax: contents of INCAR file to use for relaxation; must contain {system} to be replaced
-        by tag value (default: SYSTEM = {system})
+        by tag value (default: automator.INCARrelax)
     :param INCARNEB: contents of INCAR file to use for NEB; must contain {system} to be replaced
-        by tag value (default: SYSTEM = {system})
-    :param KPOINTS: contents of KPOINTS file (default: gamma-point only calculation)
+        by tag value (default: automator.INCARNEB)
+    :param KPOINTS: contents of KPOINTS file (default: gamma-point only calculation);
+        if None or empty, no KPOINTS file at all
     :param basedir: prepended to all files/directories (default: '')
     :param statename: prepended to all state names, before 2 digit number (default: relax.)
     :param transitionname: prepended to all transition names, before 2 digit number  (default: neb.)
@@ -88,6 +134,7 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
     """
     if timestamp is None: timestamp = time.time()
     if len(basedir) > 0 and basedir[-1] != '/': basedir += '/'
+    kpoints = not((KPOINTS is None) or (KPOINTS == ""))
 
     def addfile(filename, strdata):
         info = tarfile.TarInfo(basedir + filename)
@@ -118,10 +165,9 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
         dirmapping[k] = transitionname + IDformat.format(n)
     tagmapping = {v: k for k, v in dirmapping.items()}
 
-    # add the common VASP input files:
-    for filename, strdata in (('INCAR.relax', INCARrelax),
-                              ('INCAR.NEB', INCARNEB),
-                              ('KPOINTS', KPOINTS)):
+    # add the common VASP input files: (weird construction to check if kpoints is True)
+    for filename, strdata in (('INCAR.relax', INCARrelax), ('INCAR.NEB', INCARNEB)) + \
+            (('KPOINTS', KPOINTS) if kpoints else tuple()):
         addfile(filename, strdata)
     # now, go through the states:
     if 'reference' in superdict:
@@ -133,7 +179,8 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
         # POSCAR file next
         addfile(dirname + '/POSCAR', super.POSCAR(tag))
         addfile(dirname + '/INCAR', INCARrelax.format(system=tag))
-        addsymlink(dirname + '/KPOINTS', '../KPOINTS')
+        addfile(dirname + '/incar.sed', SEDstring.format(system=tag))
+        if kpoints: addsymlink(dirname + '/KPOINTS', '../KPOINTS')
         addsymlink(dirname + '/POTCAR', '../POTCAR')
     # and the transitions:
     for tag, (super0, super1) in transitions.items():
@@ -150,7 +197,8 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
             else dirname + '/POS.final'
         addfile(filename, super1.POSCAR('final ' + tag))
         addfile(dirname + '/INCAR', INCARNEB.format(system=tag))
-        addsymlink(dirname + '/KPOINTS', '../KPOINTS')
+        addfile(dirname + '/incar.sed', SEDstring.format(system=tag))
+        if kpoints: addsymlink(dirname + '/KPOINTS', '../KPOINTS')
         addsymlink(dirname + '/POTCAR', '../POTCAR')
 
     # and the transition mappings:
