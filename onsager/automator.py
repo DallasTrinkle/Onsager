@@ -44,11 +44,13 @@ def map2string(tag, groupop, mapping):
     string_rep += ' '.join(['{}'.format(m + shift)
                             for remap, shift in zip(mapping, indexshift)
                             for m in remap])
-    return string_rep
+    # needs a trailing newline
+    return string_rep + '\n'
 
 
 def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=None,
-                 INCARrelax="", INCARNEB="", KPOINTS="", basedir="",
+                 INCARrelax="SYSTEM = {system}\n", INCARNEB="SYSTEM = {system}\n",
+                 KPOINTS="Gamma\n1\nReciprocal\n0. 0. 0. 1.\n", basedir="",
                  statename='relax.', transitionname='neb.', IDformat='{:02d}',
                  JSONdict='tags.json', YAMLdef='supercell.yaml'):
     """
@@ -68,13 +70,15 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
         superdict['indices'][tag] = (type, index) of tag, where tag is either a state or transition tag; or...
         superdict['indices'][tag] = index of tag, where tag is either a state or transition tag.
         superdict['reference'] = (optional) supercell reference, no defects
-    :param filemode: (optional) mode to use for files; default = 664
-    :param directmode: (optional) mode to use for directories; default = 775
-    :param timestamp: (optional) if None, use current time.
-    :param INCARrelax: (optional) contents of INCAR file to use for relaxation
-    :param INCARNEB: (optional) contents of INCAR file to use for relaxation
-    :param KPOINTS: (optional) contents of KPOINTS file
-    :param basedir: prepended to all files/directories
+    :param filemode: mode to use for files (default: 664)
+    :param directmode: mode to use for directories (default: 775)
+    :param timestamp: UNIX time for files; if None, use current time (default)
+    :param INCARrelax: contents of INCAR file to use for relaxation; must contain {system} to be replaced
+        by tag value (default: SYSTEM = {system})
+    :param INCARNEB: contents of INCAR file to use for NEB; must contain {system} to be replaced
+        by tag value (default: SYSTEM = {system})
+    :param KPOINTS: contents of KPOINTS file (default: gamma-point only calculation)
+    :param basedir: prepended to all files/directories (default: '')
     :param statename: prepended to all state names, before 2 digit number (default: relax.)
     :param transitionname: prepended to all transition names, before 2 digit number  (default: neb.)
     :param IDformat: format for integer tags (default: {:02d})
@@ -106,7 +110,10 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
 
     # our tags make for troublesome directory names; construct a mapping:
     states, transitions, transmapping = superdict['states'], superdict['transitions'], superdict['transmapping']
-    dirmapping = {k: statename + IDformat.format(n) for n, k in enumerate(sorted(states.keys()))}
+    # we do a reverse sorting on state keys, so that vacancies and complexes are first; we use
+    # normal order for the transitions.
+    dirmapping = {k: statename + IDformat.format(n)
+                  for n, k in enumerate(sorted(states.keys(), reverse=True))}
     for n, k in enumerate(sorted(transitions.keys())):
         dirmapping[k] = transitionname + IDformat.format(n)
     tagmapping = {v: k for k, v in dirmapping.items()}
@@ -125,7 +132,7 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
         adddirectory(dirname)
         # POSCAR file next
         addfile(dirname + '/POSCAR', super.POSCAR(tag))
-        addsymlink(dirname + '/INCAR', '../INCAR.relax')
+        addfile(dirname + '/INCAR', INCARrelax.format(system=tag))
         addsymlink(dirname + '/KPOINTS', '../KPOINTS')
         addsymlink(dirname + '/POTCAR', '../POTCAR')
     # and the transitions:
@@ -139,10 +146,10 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
             else dirname + '/POS.init'
         addfile(filename, super0.POSCAR('initial ' + tag))
         filename = dirname + '/POSCAR.final' \
-            if superdict['transmapping'][tag][0] is None \
+            if superdict['transmapping'][tag][1] is None \
             else dirname + '/POS.final'
         addfile(filename, super1.POSCAR('final ' + tag))
-        addsymlink(dirname + '/INCAR', '../INCAR.NEB')
+        addfile(dirname + '/INCAR', INCARNEB.format(system=tag))
         addsymlink(dirname + '/KPOINTS', '../KPOINTS')
         addsymlink(dirname + '/POTCAR', '../POTCAR')
 
@@ -154,7 +161,7 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
         if map1 is not None:
             addfile(dirname + '/trans.final', map2string(dirmapping[map1[0]], map1[1], map1[2]))
 
-    # JSON dictionary connecting directories and tags:
-    addfile(JSONdict, json.dumps(tagmapping, indent=4, sort_keys=True))
+    # JSON dictionary connecting directories and tags: (needs a trailing newline?)
+    addfile(JSONdict, json.dumps(tagmapping, indent=4, sort_keys=True) + '\n')
     # YAML representation of supercell:
     if YAMLdef is not None: addfile(YAMLdef, crystal.yaml.dump(superdict))
