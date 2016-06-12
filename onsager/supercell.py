@@ -376,7 +376,8 @@ class Supercell(object):
         POSCAR += '\nDirect\n'
         POSCAR += '\n'.join([" {u[0]:17.15f} {u[1]:17.15f} {u[2]:17.15f}".format(u=u)
                              for clist in self.occposlist() for u in clist])
-        return POSCAR
+        # needs a trailing newline
+        return POSCAR + '\n'
 
     __vacancyformat__ = "v_{sitechem}"
     __interstitialformat__ = "{chem}_i"
