@@ -20,6 +20,7 @@ import numpy as np
 import collections, copy, itertools, warnings
 from onsager import crystal, supercell
 import tarfile, time, io, json
+import pkg_resources
 
 
 def map2string(tag, groupop, mapping):
@@ -34,10 +35,10 @@ def map2string(tag, groupop, mapping):
     :return string_rep: string representation (to be used by an external script)
     """
     string_rep = tag + """
-{rot[0][0]:.15f} {rot[0][1]:.15f} {rot[0][2]:.15f}
-{rot[1][0]:.15f} {rot[1][1]:.15f} {rot[1][2]:.15f}
-{rot[2][0]:.15f} {rot[2][1]:.15f} {rot[2][2]:.15f}
-{trans[0]:.15f} {trans[1]:.15f} {trans[2]:.15f}
+{rot[0][0]:3d} {rot[0][1]:3d} {rot[0][2]:3d}
+{rot[1][0]:3d} {rot[1][1]:3d} {rot[1][2]:3d}
+{rot[2][0]:3d} {rot[2][1]:3d} {rot[2][2]:3d}
+{trans[0]:.16f} {trans[1]:.16f} {trans[2]:.16f}
 """.format(rot=groupop.rot, trans=groupop.trans)
     # the index shift needs to be added for each subsequent chemistry
     indexshift = [0] + list(itertools.accumulate(len(remap) for remap in mapping))
@@ -46,6 +47,7 @@ def map2string(tag, groupop, mapping):
                             for m in remap])
     # needs a trailing newline
     return string_rep + '\n'
+
 
 ### Some default input files to use for our runs, and a sed formatted script to recreate INCARs
 
@@ -60,6 +62,14 @@ IBRION = 2
 NSW = 50
 ISMEAR = 1
 SIGMA = 0.1
+# ENCUT =
+# NGX =
+# NGY =
+# NGZ =
+# NGXF =
+# NGYF =
+# NGZF =
+# NPAR =
 LWAVE  = .FALSE.
 LCHARG = .FALSE.
 LREAL  = .FALSE.
@@ -70,8 +80,8 @@ INCARNEB = INCARrelax + \
 """IMAGES = 1
 SPRING = -5
 LCLIMB = .TRUE.
-NELMIN=4
-NFREE=10
+NELMIN = 4
+NFREE = 10
 """
 
 KPOINTSgammaonly = """Gamma
@@ -93,6 +103,7 @@ Gamma
 {N1} {N2} {N3}
 0. 0. 0.
 """
+
 
 def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=None,
                  INCARrelax=INCARrelax, INCARNEB=INCARNEB, KPOINTS=KPOINTSgammaonly, basedir="",
@@ -134,11 +145,12 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
     """
     if timestamp is None: timestamp = time.time()
     if len(basedir) > 0 and basedir[-1] != '/': basedir += '/'
-    kpoints = not((KPOINTS is None) or (KPOINTS == ""))
+    kpoints = not ((KPOINTS is None) or (KPOINTS == ""))
 
-    def addfile(filename, strdata):
+    def addfile(filename, strdata, executable=False):
         info = tarfile.TarInfo(basedir + filename)
         info.mode, info.mtime = filemode, timestamp
+        if executable: info.mode = directmode
         info.size = len(strdata.encode('ascii'))
         tar.addfile(info, io.BytesIO(strdata.encode('ascii')))
 
@@ -166,9 +178,13 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
     tagmapping = {v: k for k, v in dirmapping.items()}
 
     # add the common VASP input files: (weird construction to check if kpoints is True)
+    filelist = 1
+    if kpoints: filelist += 1
     for filename, strdata in (('INCAR.relax', INCARrelax), ('INCAR.NEB', INCARNEB)) + \
-            (('KPOINTS', KPOINTS) if kpoints else tuple()):
+            ((('KPOINTS', KPOINTS),) if kpoints else tuple()):
         addfile(filename, strdata)
+    # addfile('trans.pl', TRANSPL, executable=True)
+    addfile('trans.pl', str(pkg_resources.resource_string(__name__, 'trans.pl'), 'ascii'), executable=True)
     # now, go through the states:
     if 'reference' in superdict:
         addfile('POSCAR', superdict['reference'].POSCAR('Defect-free reference'))

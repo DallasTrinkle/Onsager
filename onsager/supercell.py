@@ -368,13 +368,13 @@ class Supercell(object):
         if stoichiometry: POSCAR += " " + self.stoichiometry()
         POSCAR += """
 1.0
-{a[0][0]:20.15f} {a[1][0]:20.15f} {a[2][0]:20.15f}
-{a[0][1]:20.15f} {a[1][1]:20.15f} {a[2][1]:20.15f}
-{a[0][2]:20.15f} {a[1][2]:20.15f} {a[2][2]:20.15f}
+{a[0][0]:21.16f} {a[1][0]:21.16f} {a[2][0]:21.16f}
+{a[0][1]:21.16f} {a[1][1]:21.16f} {a[2][1]:21.16f}
+{a[0][2]:21.16f} {a[1][2]:21.16f} {a[2][2]:21.16f}
 """.format(a=self.lattice)
         POSCAR += ' '.join(['{}'.format(len(clist)) for clist in self.chemorder])
         POSCAR += '\nDirect\n'
-        POSCAR += '\n'.join([" {u[0]:17.15f} {u[1]:17.15f} {u[2]:17.15f}".format(u=u)
+        POSCAR += '\n'.join([" {u[0]:19.16f} {u[1]:19.16f} {u[2]:19.16f}".format(u=u)
                              for clist in self.occposlist() for u in clist])
         # needs a trailing newline
         return POSCAR + '\n'
