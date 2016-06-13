@@ -13,6 +13,7 @@ Contents:
    PowerExpansion
    GFcalc
    OnsagerCalc
+   automator
 
 Indices and tables
 ==================

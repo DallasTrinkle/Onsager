@@ -5,8 +5,7 @@ Functions to convert from a supercell dictionary (output from a Diffuser) into a
 that contains all of the input files in an organized directory structure to run the
 atomic-scale transition state calculations. This includes:
 
-1. All positions in POSCAR format (POSCAR files for states to relax, POS as reference
-  for transition endpoints that need to be relaxed)
+1. All positions in POSCAR format (POSCAR files for states to relax, POS as reference for transition endpoints that need to be relaxed)
 2. Transformation information from relaxed states to initial states.
 3. INCAR files for relaxation and NEB runs; KPOINTS for each.
 4. perl script to transform CONTCAR output from a state relaxation to NEB endpoints.
