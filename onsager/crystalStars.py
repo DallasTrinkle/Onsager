@@ -250,7 +250,7 @@ class StarSet(object):
     object with which to operate, a specification of the chemical index for the atom moving
     (needs to be consistent with jumpnetwork and crys), and then the number of shells.
 
-    In this case, `shells` = number of successive "jumps" from a state. As an example,
+    In this case, ``shells`` = number of successive "jumps" from a state. As an example,
     in FCC, 1 shell = 1st neighbor, 2 shell = 1-4th neighbors.
     """
 
@@ -260,8 +260,8 @@ class StarSet(object):
         chemical index.
 
         :param jumpnetwork: list of symmetry unique jumps, as a list of list of tuples; either
-            `((i,j), dx)` for jump from i to j with displacement dx, or
-            `((i,j), R)` for jump from i in unit cell 0 -> j in unit cell R
+            ``((i,j), dx)`` for jump from i to j with displacement dx, or
+            ``((i,j), R)`` for jump from i in unit cell 0 -> j in unit cell R
         :param crys: crystal where jumps take place
         :param chem: chemical index of atom to consider jumps
         :param Nshells: number of shells to generate

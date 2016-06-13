@@ -47,8 +47,8 @@ class Interstitial(object):
     of the heavy lifting in terms of symmetry.
 
     Takes in a crystal that contains the interstitial as one of the chemical elements,
-    to be specified by `chem`, the sitelist (list of symmetry equivalent sites), and
-    jumpnetwork. Both of the latter can be computed automatically from `crys` methods,
+    to be specified by ``chem``, the sitelist (list of symmetry equivalent sites), and
+    jumpnetwork. Both of the latter can be computed automatically from ``crys`` methods,
     but as they are lists, can also be editted or constructed by hand.
     """
 
@@ -149,12 +149,13 @@ class Interstitial(object):
         site energies and transitions (corresponding to the representatives).
 
         :param super_n: 3x3 integer matrix to define our supercell
-        :return superdict: dictionary of `states`, `transitions`, `transmapping`, and `indices` that
-            correspond to dictionaries with tags.
-            superdict['states'][i] = supercell of site;
-            superdict['transitions'][n] = (supercell initial, supercell final);
-            superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
-            superdict['indices'][tag] = index of tag, where tag is either a state or transition tag.
+        :return superdict: dictionary of ``states``, ``transitions``, ``transmapping``,
+            and ``indices`` that correspond to dictionaries with tags.
+
+            * superdict['states'][i] = supercell of site;
+            * superdict['transitions'][n] = (supercell initial, supercell final);
+            * superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+            * superdict['indices'][tag] = index of tag, where tag is either a state or transition tag.
         """
         superdict = {'states': {}, 'transitions': {}, 'transmapping': {}, 'indices': {}}
         basesupercell = supercell.Supercell(self.crys, super_n, interstitial=(self.chem,), Nsolute=0)
@@ -612,7 +613,7 @@ class VacancyMediated(object):
 
     Requires a crystal, chemical identity of vacancy, list of symmetry-equivalent
     sites for that chemistry, and a jumpnetwork for the vacancy. The thermodynamic
-    range (number of "shells" -- see `crystalStars.StarSet` for precise definition).
+    range (number of "shells" -- see ``crystalStars.StarSet`` for precise definition).
     """
 
     def __init__(self, crys, chem, sitelist, jumpnetwork, Nthermo=0):
@@ -814,14 +815,15 @@ class VacancyMediated(object):
         barriers. Extreme caution should be used if any of the other warnings are raised.
 
         :param super_n: 3x3 integer matrix to define our supercell
-        :return superdict: dictionary of `states`, `transitions`, `transmapping`, `indices` that
-            correspond to dictionaries with tags; the final tag `reference` is the basesupercell for
-            calculations without defects.
-            superdict['states'][i] = supercell of state;
-            superdict['transitions'][n] = (supercell initial, supercell final);
-            superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
-            superdict['indices'][tag] = (type, index) of tag, where tag is either a state or transition tag.
-            superdict['reference'] = supercell reference, no defects
+        :return superdict: dictionary of ``states``, ``transitions``, ``transmapping``,
+            ``indices`` that correspond to dictionaries with tags; the final tag
+            ``reference`` is the basesupercell for calculations without defects.
+
+            * superdict['states'][i] = supercell of state;
+            * superdict['transitions'][n] = (supercell initial, supercell final);
+            * superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+            * superdict['indices'][tag] = (type, index) of tag, where tag is either a state or transition tag.
+            * superdict['reference'] = supercell reference, no defects
         """
         ### NOTE: much of this will *need* to be reimplemented for metastable states.
         vchem, schem = -1, self.crys.Nchem
@@ -1233,8 +1235,8 @@ class VacancyMediated(object):
         Read in a series of prefactors (:math:`\\exp(S/k_\\text{B})`) and energies, and return
         :math:`\\beta F` for energies and transition state energies. Used to provide scaled values
         to Lij() and _lij().
-        Can specify all of the entries using a dictionary; e.g., `preene2betafree(kT, **data_dict)`
-        and then send that output as input to Lij: `Lij(*preene2betafree(kT, **data_dict))`
+        Can specify all of the entries using a dictionary; e.g., ``preene2betafree(kT, **data_dict)``
+        and then send that output as input to Lij: ``Lij(*preene2betafree(kT, **data_dict))``
         (we ignore extra arguments so that a dictionary including additional entries can be passed)
 
         :param kT: temperature times Boltzmann's constant kB

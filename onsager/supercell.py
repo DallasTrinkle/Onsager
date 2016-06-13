@@ -74,7 +74,8 @@ class Supercell(object):
 
     def copy(self):
         """
-        Make a copy of the supercell; initializes, then copies over `__copyattr__` and `__eqattr__`.
+        Make a copy of the supercell; initializes, then copies over ``__copyattr__`` and
+        ``__eqattr__``.
 
         :return: new supercell object, copy of the original
         """
@@ -219,13 +220,14 @@ class Supercell(object):
     @staticmethod
     def maketrans(super):
         """
-        Takes in a supercell matrix, and returns a list of all translations of the unit cell that
-        remain inside the supercell
+        Takes in a supercell matrix, and returns a list of all translations of the unit
+        cell that remain inside the supercell
 
         :param super: 3x3 integer matrix
         :return size: integer, corresponding to number of unit cells
         :return invsuper: integer matrix inverse of supercell (needs to be divided by size)
-        :return translist: list of integer vectors (to be divided by `size`) corresponding to unit cell positions
+        :return translist: list of integer vectors (to be divided by ``size``) corresponding
+            to unit cell positions
         :return transdict: dictionary of tuples and their corresponding index (inverse of trans)
         """
         size = abs(int(np.round(np.linalg.det(super))))
@@ -450,16 +452,18 @@ class Supercell(object):
 
     def equivalencemap(self, other):
         """
-        Given the super `other` we want to find a group operation that transforms `self` into other.
-        This is a GroupOp *along* with an index mapping of chemorder. The index mapping is to get
-        the occposlist to match up: `(g*self).occposlist()[c][mapping[c][i]] == other.occposlist()[c][i]`
+        Given the super ``other`` we want to find a group operation that transforms ``self``
+        into other. This is a GroupOp *along* with an index mapping of chemorder. The index
+        mapping is to get the occposlist to match up:
+        ``(g*self).occposlist()[c][mapping[c][i]] == other.occposlist()[c][i]``
         (We can write a similar expression using chemorder, since chemorder indexes into pos).
         We're going to return both g and mapping.
-        *Remember:* `g` does not change the presentation ordering; `mapping` is necessary for full equivalence.
-        If no such equivalence, return None,None.
+
+        *Remember:* ``g`` does not change the presentation ordering; ``mapping`` is
+        necessary for full equivalence. If no such equivalence, return ``None,None``.
 
         :param other: Supercell
-        :return g: GroupOp to transform sites from `self` to `other`
+        :return g: GroupOp to transform sites from ``self`` to ``other``
         :return mapping: list of maps, such that (g*self).chemorder[c][mapping[c][i]] == other.chemorder[c][i]
         """
         # 1. check that our defects even match up:

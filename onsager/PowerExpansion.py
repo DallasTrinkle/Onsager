@@ -830,7 +830,7 @@ class Taylor3D(object):
             powexpansion is a numpy array that can multiplied. We assume that a and b
             have consistent shapes throughout--we *do not test this*; runtime will likely
             fail if not true. The entries in the list are *tuples* of n, lmax, pow
-        :return c: list((n, lmax, powexpansion)), product of `a` and `b`
+        :return c: list((n, lmax, powexpansion)), product of ``a`` and ``b``
         """
         # a little pythonic magic to work with *either* a list, or an object with a coefflist
         acoeff = getattr(a, 'coefflist', a)  # fallback to a if not there... which assumes it's a list

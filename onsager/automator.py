@@ -25,7 +25,7 @@ import pkg_resources
 def map2string(tag, groupop, mapping):
     """
     Takes in a map: tag, groupop, mapping and constructs a string representation
-    to be dumped to a file. If we want to call using the tuple, `map2string(*(map))` will suffice.
+    to be dumped to a file. If we want to call using the tuple, ``map2string(*(map))`` will suffice.
 
     :param tag: string of initial state to rotate
     :param groupop: see crystal.GroupOp; we use the rot and trans. This is in the supercell coord.
@@ -110,21 +110,26 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
                  JSONdict='tags.json', YAMLdef='supercell.yaml'):
     """
     Takes in a tarfile (needs to be open for reading) and a supercelldict (from a
-    diffuser) and creates the full directory structure inside the tarfile. Best used in a form like
+    diffuser) and creates the full directory structure inside the tarfile. Best used in
+    a form like
+
+    ::
 
         with tarfile.open('supercells.tar.gz', mode='w:gz') as tar:
             automator.supercelltar(tar, supercelldict)
 
     :param tar: tarfile open for writing; may contain other files in advance.
-    :param superdict: dictionary of `states`, `transitions`, `transmapping`, `indices` that
-        correspond to dictionaries with tags; the final tag `reference` is the basesupercell for
-        calculations without defects.
-        superdict['states'][i] = supercell of state;
-        superdict['transitions'][n] = (supercell initial, supercell final);
-        superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
-        superdict['indices'][tag] = (type, index) of tag, where tag is either a state or transition tag; or...
-        superdict['indices'][tag] = index of tag, where tag is either a state or transition tag.
-        superdict['reference'] = (optional) supercell reference, no defects
+    :param superdict: dictionary of ``states``, ``transitions``, ``transmapping``, ``indices`` that
+        correspond to dictionaries with tags; the final tag ``reference`` is the basesupercell
+        for calculations without defects.
+
+        * superdict['states'][i] = supercell of state;
+        * superdict['transitions'][n] = (supercell initial, supercell final);
+        * superdict['transmapping'][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+        * superdict['indices'][tag] = (type, index) of tag, where tag is either a state or transition tag; or...
+        * superdict['indices'][tag] = index of tag, where tag is either a state or transition tag.
+        * superdict['reference'] = (optional) supercell reference, no defects
+
     :param filemode: mode to use for files (default: 664)
     :param directmode: mode to use for directories (default: 775)
     :param timestamp: UNIX time for files; if None, use current time (default)
