@@ -969,7 +969,7 @@
 <span class="sd">            powexpansion is a numpy array that can multiplied. We assume that a and b</span>
 <span class="sd">            have consistent shapes throughout--we *do not test this*; runtime will likely</span>
 <span class="sd">            fail if not true. The entries in the list are *tuples* of n, lmax, pow</span>
-<span class="sd">        :return c: list((n, lmax, powexpansion)), product of `a` and `b`</span>
+<span class="sd">        :return c: list((n, lmax, powexpansion)), product of ``a`` and ``b``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># a little pythonic magic to work with *either* a list, or an object with a coefflist</span>
         <span class="n">acoeff</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s1">&#39;coefflist&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>  <span class="c1"># fallback to a if not there... which assumes it&#39;s a list</span>

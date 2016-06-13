@@ -186,8 +186,8 @@
 <span class="sd">    of the heavy lifting in terms of symmetry.</span>
 
 <span class="sd">    Takes in a crystal that contains the interstitial as one of the chemical elements,</span>
-<span class="sd">    to be specified by `chem`, the sitelist (list of symmetry equivalent sites), and</span>
-<span class="sd">    jumpnetwork. Both of the latter can be computed automatically from `crys` methods,</span>
+<span class="sd">    to be specified by ``chem``, the sitelist (list of symmetry equivalent sites), and</span>
+<span class="sd">    jumpnetwork. Both of the latter can be computed automatically from ``crys`` methods,</span>
 <span class="sd">    but as they are lists, can also be editted or constructed by hand.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -288,12 +288,13 @@
 <span class="sd">        site energies and transitions (corresponding to the representatives).</span>
 
 <span class="sd">        :param super_n: 3x3 integer matrix to define our supercell</span>
-<span class="sd">        :return superdict: dictionary of `states`, `transitions`, `transmapping`, and `indices` that</span>
-<span class="sd">            correspond to dictionaries with tags.</span>
-<span class="sd">            superdict[&#39;states&#39;][i] = supercell of site;</span>
-<span class="sd">            superdict[&#39;transitions&#39;][n] = (supercell initial, supercell final);</span>
-<span class="sd">            superdict[&#39;transmapping&#39;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</span>
-<span class="sd">            superdict[&#39;indices&#39;][tag] = index of tag, where tag is either a state or transition tag.</span>
+<span class="sd">        :return superdict: dictionary of ``states``, ``transitions``, ``transmapping``,</span>
+<span class="sd">            and ``indices`` that correspond to dictionaries with tags.</span>
+
+<span class="sd">            * superdict[&#39;states&#39;][i] = supercell of site;</span>
+<span class="sd">            * superdict[&#39;transitions&#39;][n] = (supercell initial, supercell final);</span>
+<span class="sd">            * superdict[&#39;transmapping&#39;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</span>
+<span class="sd">            * superdict[&#39;indices&#39;][tag] = index of tag, where tag is either a state or transition tag.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">superdict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;states&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s1">&#39;transitions&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s1">&#39;transmapping&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s1">&#39;indices&#39;</span><span class="p">:</span> <span class="p">{}}</span>
         <span class="n">basesupercell</span> <span class="o">=</span> <span class="n">supercell</span><span class="o">.</span><span class="n">Supercell</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="p">,</span> <span class="n">super_n</span><span class="p">,</span> <span class="n">interstitial</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chem</span><span class="p">,),</span> <span class="n">Nsolute</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -751,7 +752,7 @@
 
 <span class="sd">    Requires a crystal, chemical identity of vacancy, list of symmetry-equivalent</span>
 <span class="sd">    sites for that chemistry, and a jumpnetwork for the vacancy. The thermodynamic</span>
-<span class="sd">    range (number of &quot;shells&quot; -- see `crystalStars.StarSet` for precise definition).</span>
+<span class="sd">    range (number of &quot;shells&quot; -- see ``crystalStars.StarSet`` for precise definition).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="VacancyMediated.__init__"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.VacancyMediated.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">sitelist</span><span class="p">,</span> <span class="n">jumpnetwork</span><span class="p">,</span> <span class="n">Nthermo</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -953,14 +954,15 @@
 <span class="sd">        barriers. Extreme caution should be used if any of the other warnings are raised.</span>
 
 <span class="sd">        :param super_n: 3x3 integer matrix to define our supercell</span>
-<span class="sd">        :return superdict: dictionary of `states`, `transitions`, `transmapping`, `indices` that</span>
-<span class="sd">            correspond to dictionaries with tags; the final tag `reference` is the basesupercell for</span>
-<span class="sd">            calculations without defects.</span>
-<span class="sd">            superdict[&#39;states&#39;][i] = supercell of state;</span>
-<span class="sd">            superdict[&#39;transitions&#39;][n] = (supercell initial, supercell final);</span>
-<span class="sd">            superdict[&#39;transmapping&#39;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</span>
-<span class="sd">            superdict[&#39;indices&#39;][tag] = (type, index) of tag, where tag is either a state or transition tag.</span>
-<span class="sd">            superdict[&#39;reference&#39;] = supercell reference, no defects</span>
+<span class="sd">        :return superdict: dictionary of ``states``, ``transitions``, ``transmapping``,</span>
+<span class="sd">            ``indices`` that correspond to dictionaries with tags; the final tag</span>
+<span class="sd">            ``reference`` is the basesupercell for calculations without defects.</span>
+
+<span class="sd">            * superdict[&#39;states&#39;][i] = supercell of state;</span>
+<span class="sd">            * superdict[&#39;transitions&#39;][n] = (supercell initial, supercell final);</span>
+<span class="sd">            * superdict[&#39;transmapping&#39;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</span>
+<span class="sd">            * superdict[&#39;indices&#39;][tag] = (type, index) of tag, where tag is either a state or transition tag.</span>
+<span class="sd">            * superdict[&#39;reference&#39;] = supercell reference, no defects</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">### NOTE: much of this will *need* to be reimplemented for metastable states.</span>
         <span class="n">vchem</span><span class="p">,</span> <span class="n">schem</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">Nchem</span>
@@ -1372,8 +1374,8 @@
 <span class="sd">        Read in a series of prefactors (:math:`\\exp(S/k_\\text{B})`) and energies, and return</span>
 <span class="sd">        :math:`\\beta F` for energies and transition state energies. Used to provide scaled values</span>
 <span class="sd">        to Lij() and _lij().</span>
-<span class="sd">        Can specify all of the entries using a dictionary; e.g., `preene2betafree(kT, **data_dict)`</span>
-<span class="sd">        and then send that output as input to Lij: `Lij(*preene2betafree(kT, **data_dict))`</span>
+<span class="sd">        Can specify all of the entries using a dictionary; e.g., ``preene2betafree(kT, **data_dict)``</span>
+<span class="sd">        and then send that output as input to Lij: ``Lij(*preene2betafree(kT, **data_dict))``</span>
 <span class="sd">        (we ignore extra arguments so that a dictionary including additional entries can be passed)</span>
 
 <span class="sd">        :param kT: temperature times Boltzmann&#39;s constant kB</span>

@@ -213,7 +213,8 @@
 
 <div class="viewcode-block" id="Supercell.copy"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Make a copy of the supercell; initializes, then copies over `__copyattr__` and `__eqattr__`.</span>
+<span class="sd">        Make a copy of the supercell; initializes, then copies over ``__copyattr__`` and</span>
+<span class="sd">        ``__eqattr__``.</span>
 
 <span class="sd">        :return: new supercell object, copy of the original</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -358,13 +359,14 @@
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="Supercell.maketrans"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.maketrans">[docs]</a>    <span class="k">def</span> <span class="nf">maketrans</span><span class="p">(</span><span class="nb">super</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Takes in a supercell matrix, and returns a list of all translations of the unit cell that</span>
-<span class="sd">        remain inside the supercell</span>
+<span class="sd">        Takes in a supercell matrix, and returns a list of all translations of the unit</span>
+<span class="sd">        cell that remain inside the supercell</span>
 
 <span class="sd">        :param super: 3x3 integer matrix</span>
 <span class="sd">        :return size: integer, corresponding to number of unit cells</span>
 <span class="sd">        :return invsuper: integer matrix inverse of supercell (needs to be divided by size)</span>
-<span class="sd">        :return translist: list of integer vectors (to be divided by `size`) corresponding to unit cell positions</span>
+<span class="sd">        :return translist: list of integer vectors (to be divided by ``size``) corresponding</span>
+<span class="sd">            to unit cell positions</span>
 <span class="sd">        :return transdict: dictionary of tuples and their corresponding index (inverse of trans)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">size</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="nb">super</span><span class="p">))))</span>
@@ -589,16 +591,18 @@
 
 <div class="viewcode-block" id="Supercell.equivalencemap"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.equivalencemap">[docs]</a>    <span class="k">def</span> <span class="nf">equivalencemap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Given the super `other` we want to find a group operation that transforms `self` into other.</span>
-<span class="sd">        This is a GroupOp *along* with an index mapping of chemorder. The index mapping is to get</span>
-<span class="sd">        the occposlist to match up: `(g*self).occposlist()[c][mapping[c][i]] == other.occposlist()[c][i]`</span>
+<span class="sd">        Given the super ``other`` we want to find a group operation that transforms ``self``</span>
+<span class="sd">        into other. This is a GroupOp *along* with an index mapping of chemorder. The index</span>
+<span class="sd">        mapping is to get the occposlist to match up:</span>
+<span class="sd">        ``(g*self).occposlist()[c][mapping[c][i]] == other.occposlist()[c][i]``</span>
 <span class="sd">        (We can write a similar expression using chemorder, since chemorder indexes into pos).</span>
 <span class="sd">        We&#39;re going to return both g and mapping.</span>
-<span class="sd">        *Remember:* `g` does not change the presentation ordering; `mapping` is necessary for full equivalence.</span>
-<span class="sd">        If no such equivalence, return None,None.</span>
+
+<span class="sd">        *Remember:* ``g`` does not change the presentation ordering; ``mapping`` is</span>
+<span class="sd">        necessary for full equivalence. If no such equivalence, return ``None,None``.</span>
 
 <span class="sd">        :param other: Supercell</span>
-<span class="sd">        :return g: GroupOp to transform sites from `self` to `other`</span>
+<span class="sd">        :return g: GroupOp to transform sites from ``self`` to ``other``</span>
 <span class="sd">        :return mapping: list of maps, such that (g*self).chemorder[c][mapping[c][i]] == other.chemorder[c][i]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># 1. check that our defects even match up:</span>

@@ -160,8 +160,8 @@ computation of the GF is included in the GFcalc module.</p>
 <dd><p>A class to compute interstitial diffusivity; uses structure of crystal to do most
 of the heavy lifting in terms of symmetry.</p>
 <p>Takes in a crystal that contains the interstitial as one of the chemical elements,
-to be specified by <cite>chem</cite>, the sitelist (list of symmetry equivalent sites), and
-jumpnetwork. Both of the latter can be computed automatically from <cite>crys</cite> methods,
+to be specified by <code class="docutils literal"><span class="pre">chem</span></code>, the sitelist (list of symmetry equivalent sites), and
+jumpnetwork. Both of the latter can be computed automatically from <code class="docutils literal"><span class="pre">crys</span></code> methods,
 but as they are lists, can also be editted or constructed by hand.</p>
 <dl class="method">
 <dt id="OnsagerCalc.Interstitial.__init__">
@@ -369,15 +369,19 @@ site energies and transitions (corresponding to the representatives).</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>super_n</strong> &#8211; 3x3 integer matrix to define our supercell</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>super_n</strong> &#8211; 3x3 integer matrix to define our supercell</p>
+</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return superdict:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">dictionary of <cite>states</cite>, <cite>transitions</cite>, <cite>transmapping</cite>, and <cite>indices</cite> that
-correspond to dictionaries with tags.
-superdict[&#8216;states&#8217;][i] = supercell of site;
-superdict[&#8216;transitions&#8217;][n] = (supercell initial, supercell final);
-superdict[&#8216;transmapping&#8217;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
-superdict[&#8216;indices&#8217;][tag] = index of tag, where tag is either a state or transition tag.</td>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>,
+and <code class="docutils literal"><span class="pre">indices</span></code> that correspond to dictionaries with tags.</p>
+<ul class="last simple">
+<li>superdict[&#8216;states&#8217;][i] = supercell of site;</li>
+<li>superdict[&#8216;transitions&#8217;][n] = (supercell initial, supercell final);</li>
+<li>superdict[&#8216;transmapping&#8217;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</li>
+<li>superdict[&#8216;indices&#8217;][tag] = index of tag, where tag is either a state or transition tag.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -437,7 +441,7 @@ it determines <em>what</em> quantities are needed as inputs in order to perform 
 storage in HDF5 format.</p>
 <p>Requires a crystal, chemical identity of vacancy, list of symmetry-equivalent
 sites for that chemistry, and a jumpnetwork for the vacancy. The thermodynamic
-range (number of &#8220;shells&#8221; &#8211; see <cite>crystalStars.StarSet</cite> for precise definition).</p>
+range (number of &#8220;shells&#8221; &#8211; see <code class="docutils literal"><span class="pre">crystalStars.StarSet</span></code> for precise definition).</p>
 <dl class="method">
 <dt id="OnsagerCalc.VacancyMediated.Lij">
 <code class="descname">Lij</code><span class="sig-paren">(</span><em>bFV</em>, <em>bFS</em>, <em>bFSV</em>, <em>bFT0</em>, <em>bFT1</em>, <em>bFT2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.Lij"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.Lij" title="Permalink to this definition">¶</a></dt>
@@ -663,17 +667,21 @@ barriers. Extreme caution should be used if any of the other warnings are raised
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>super_n</strong> &#8211; 3x3 integer matrix to define our supercell</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>super_n</strong> &#8211; 3x3 integer matrix to define our supercell</p>
+</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return superdict:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">dictionary of <cite>states</cite>, <cite>transitions</cite>, <cite>transmapping</cite>, <cite>indices</cite> that
-correspond to dictionaries with tags; the final tag <cite>reference</cite> is the basesupercell for
-calculations without defects.
-superdict[&#8216;states&#8217;][i] = supercell of state;
-superdict[&#8216;transitions&#8217;][n] = (supercell initial, supercell final);
-superdict[&#8216;transmapping&#8217;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
-superdict[&#8216;indices&#8217;][tag] = (type, index) of tag, where tag is either a state or transition tag.
-superdict[&#8216;reference&#8217;] = supercell reference, no defects</td>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>,
+<code class="docutils literal"><span class="pre">indices</span></code> that correspond to dictionaries with tags; the final tag
+<code class="docutils literal"><span class="pre">reference</span></code> is the basesupercell for calculations without defects.</p>
+<ul class="last simple">
+<li>superdict[&#8216;states&#8217;][i] = supercell of state;</li>
+<li>superdict[&#8216;transitions&#8217;][n] = (supercell initial, supercell final);</li>
+<li>superdict[&#8216;transmapping&#8217;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</li>
+<li>superdict[&#8216;indices&#8217;][tag] = (type, index) of tag, where tag is either a state or transition tag.</li>
+<li>superdict[&#8216;reference&#8217;] = supercell reference, no defects</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -757,8 +765,8 @@ Solute at the origin, vacancy hopping between two sites. Defined by om1_jumpnetw
 <dd><p>Read in a series of prefactors (<span class="math">\(\exp(S/k_\text{B})\)</span>) and energies, and return
 <span class="math">\(\beta F\)</span> for energies and transition state energies. Used to provide scaled values
 to Lij() and _lij().
-Can specify all of the entries using a dictionary; e.g., <cite>preene2betafree(kT, **data_dict)</cite>
-and then send that output as input to Lij: <cite>Lij(*preene2betafree(kT, **data_dict))</cite>
+Can specify all of the entries using a dictionary; e.g., <code class="docutils literal"><span class="pre">preene2betafree(kT,</span> <span class="pre">**data_dict)</span></code>
+and then send that output as input to Lij: <code class="docutils literal"><span class="pre">Lij(*preene2betafree(kT,</span> <span class="pre">**data_dict))</span></code>
 (we ignore extra arguments so that a dictionary including additional entries can be passed)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

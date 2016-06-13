@@ -1409,7 +1409,7 @@
 <span class="sd">        :param cutoff: distance cutoff</span>
 <span class="sd">        :param closestdistance: closest distance allowed in transition (can be a list)</span>
 <span class="sd">        :return jumpnetwork: list of symmetry-unique transitions; each is a list of tuples:</span>
-<span class="sd">          `((i,j), dx)` corresponding to jump from :math:`i \\to j` with vector :math:`\mathbf{\delta x}`</span>
+<span class="sd">          ``((i,j), dx)`` corresponding to jump from :math:`i \\to j` with vector :math:`\mathbf{\delta x}`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># should we consider changing the lists to tuples? Not sure if there&#39;s any efficiency gain</span>
@@ -1485,9 +1485,9 @@
 
 <span class="sd">        :param chem: index corresponding to the chemistry to consider</span>
 <span class="sd">        :param jumpnetwork: list of symmetry-unique transitions; each is a list of tuples:</span>
-<span class="sd">          `((i,j), dx)` corresponding to jump from :math:`i \\to j` with vector :math:`\mathbf{\delta x}`</span>
+<span class="sd">          ``((i,j), dx)`` corresponding to jump from :math:`i \\to j` with vector :math:`\mathbf{\delta x}`</span>
 <span class="sd">        :return jumplattice: list of symmetry-unique transitions; each is a list of tuples:</span>
-<span class="sd">          `((i,j), R)` corresponding to jump from i in unit cell 0 -&gt; j in unit cell R</span>
+<span class="sd">          ``((i,j), R)`` corresponding to jump from i in unit cell 0 -&gt; j in unit cell R</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[[((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span>
                   <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">invlatt</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">chem</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">chem</span><span class="p">][</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>

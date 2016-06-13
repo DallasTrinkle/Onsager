@@ -389,7 +389,7 @@
 <span class="sd">    object with which to operate, a specification of the chemical index for the atom moving</span>
 <span class="sd">    (needs to be consistent with jumpnetwork and crys), and then the number of shells.</span>
 
-<span class="sd">    In this case, `shells` = number of successive &quot;jumps&quot; from a state. As an example,</span>
+<span class="sd">    In this case, ``shells`` = number of successive &quot;jumps&quot; from a state. As an example,</span>
 <span class="sd">    in FCC, 1 shell = 1st neighbor, 2 shell = 1-4th neighbors.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -399,8 +399,8 @@
 <span class="sd">        chemical index.</span>
 
 <span class="sd">        :param jumpnetwork: list of symmetry unique jumps, as a list of list of tuples; either</span>
-<span class="sd">            `((i,j), dx)` for jump from i to j with displacement dx, or</span>
-<span class="sd">            `((i,j), R)` for jump from i in unit cell 0 -&gt; j in unit cell R</span>
+<span class="sd">            ``((i,j), dx)`` for jump from i to j with displacement dx, or</span>
+<span class="sd">            ``((i,j), R)`` for jump from i in unit cell 0 -&gt; j in unit cell R</span>
 <span class="sd">        :param crys: crystal where jumps take place</span>
 <span class="sd">        :param chem: chemical index of atom to consider jumps</span>
 <span class="sd">        :param Nshells: number of shells to generate</span>

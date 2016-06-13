@@ -156,7 +156,7 @@ atomic-scale transition state calculations. This includes:</p>
 <dt id="automator.map2string">
 <code class="descclassname">automator.</code><code class="descname">map2string</code><span class="sig-paren">(</span><em>tag</em>, <em>groupop</em>, <em>mapping</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#map2string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.map2string" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes in a map: tag, groupop, mapping and constructs a string representation
-to be dumped to a file. If we want to call using the tuple, <cite>map2string(*(map))</cite> will suffice.</p>
+to be dumped to a file. If we want to call using the tuple, <code class="docutils literal"><span class="pre">map2string(*(map))</span></code> will suffice.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -181,28 +181,30 @@ in initial cell to use.</li>
 <dt id="automator.supercelltar">
 <code class="descclassname">automator.</code><code class="descname">supercelltar</code><span class="sig-paren">(</span><em>tar</em>, <em>superdict</em>, <em>filemode=436</em>, <em>directmode=509</em>, <em>timestamp=None</em>, <em>INCARrelax='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\n'</em>, <em>INCARNEB='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\nIMAGES = 1\nSPRING = -5\nLCLIMB = .TRUE.\nNELMIN = 4\nNFREE = 10\n'</em>, <em>KPOINTS='Gamma\n1\nReciprocal\n0. 0. 0. 1.\n'</em>, <em>basedir=''</em>, <em>statename='relax.'</em>, <em>transitionname='neb.'</em>, <em>IDformat='{:02d}'</em>, <em>JSONdict='tags.json'</em>, <em>YAMLdef='supercell.yaml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#supercelltar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.supercelltar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes in a tarfile (needs to be open for reading) and a supercelldict (from a
-diffuser) and creates the full directory structure inside the tarfile. Best used in a form like</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>with tarfile.open(&#8216;supercells.tar.gz&#8217;, mode=&#8217;w:gz&#8217;) as tar:</dt>
-<dd>automator.supercelltar(tar, supercelldict)</dd>
-</dl>
-</div></blockquote>
+diffuser) and creates the full directory structure inside the tarfile. Best used in
+a form like</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;supercells.tar.gz&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w:gz&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
+    <span class="n">automator</span><span class="o">.</span><span class="n">supercelltar</span><span class="p">(</span><span class="n">tar</span><span class="p">,</span> <span class="n">supercelldict</span><span class="p">)</span>
+</pre></div>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>tar</strong> &#8211; tarfile open for writing; may contain other files in advance.</li>
-<li><strong>superdict</strong> &#8211; dictionary of <cite>states</cite>, <cite>transitions</cite>, <cite>transmapping</cite>, <cite>indices</cite> that
-correspond to dictionaries with tags; the final tag <cite>reference</cite> is the basesupercell for
-calculations without defects.
-superdict[&#8216;states&#8217;][i] = supercell of state;
-superdict[&#8216;transitions&#8217;][n] = (supercell initial, supercell final);
-superdict[&#8216;transmapping&#8217;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
-superdict[&#8216;indices&#8217;][tag] = (type, index) of tag, where tag is either a state or transition tag; or...
-superdict[&#8216;indices&#8217;][tag] = index of tag, where tag is either a state or transition tag.
-superdict[&#8216;reference&#8217;] = (optional) supercell reference, no defects</li>
+<li><strong>superdict</strong> &#8211; <p>dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>, <code class="docutils literal"><span class="pre">indices</span></code> that
+correspond to dictionaries with tags; the final tag <code class="docutils literal"><span class="pre">reference</span></code> is the basesupercell
+for calculations without defects.</p>
+<ul>
+<li>superdict[&#8216;states&#8217;][i] = supercell of state;</li>
+<li>superdict[&#8216;transitions&#8217;][n] = (supercell initial, supercell final);</li>
+<li>superdict[&#8216;transmapping&#8217;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</li>
+<li>superdict[&#8216;indices&#8217;][tag] = (type, index) of tag, where tag is either a state or transition tag; or...</li>
+<li>superdict[&#8216;indices&#8217;][tag] = index of tag, where tag is either a state or transition tag.</li>
+<li>superdict[&#8216;reference&#8217;] = (optional) supercell reference, no defects</li>
+</ul>
+</li>
 <li><strong>filemode</strong> &#8211; mode to use for files (default: 664)</li>
 <li><strong>directmode</strong> &#8211; mode to use for directories (default: 775)</li>
 <li><strong>timestamp</strong> &#8211; UNIX time for files; if None, use current time (default)</li>

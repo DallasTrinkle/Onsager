@@ -332,7 +332,7 @@ Note: b + (a^b) = a but (a^b) + b is an error. a + (b^a) = b</p>
 <p>Takes in a jumpnetwork, which is used to construct the corresponding stars, a crystal
 object with which to operate, a specification of the chemical index for the atom moving
 (needs to be consistent with jumpnetwork and crys), and then the number of shells.</p>
-<p>In this case, <cite>shells</cite> = number of successive &#8220;jumps&#8221; from a state. As an example,
+<p>In this case, <code class="docutils literal"><span class="pre">shells</span></code> = number of successive &#8220;jumps&#8221; from a state. As an example,
 in FCC, 1 shell = 1st neighbor, 2 shell = 1-4th neighbors.</p>
 <dl class="method">
 <dt id="crystalStars.StarSet.__add__">
@@ -363,8 +363,8 @@ chemical index.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>jumpnetwork</strong> &#8211; list of symmetry unique jumps, as a list of list of tuples; either
-<cite>((i,j), dx)</cite> for jump from i to j with displacement dx, or
-<cite>((i,j), R)</cite> for jump from i in unit cell 0 -&gt; j in unit cell R</li>
+<code class="docutils literal"><span class="pre">((i,j),</span> <span class="pre">dx)</span></code> for jump from i to j with displacement dx, or
+<code class="docutils literal"><span class="pre">((i,j),</span> <span class="pre">R)</span></code> for jump from i in unit cell 0 -&gt; j in unit cell R</li>
 <li><strong>crys</strong> &#8211; crystal where jumps take place</li>
 <li><strong>chem</strong> &#8211; chemical index of atom to consider jumps</li>
 <li><strong>Nshells</strong> &#8211; number of shells to generate</li>

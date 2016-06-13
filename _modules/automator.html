@@ -164,7 +164,7 @@
 <div class="viewcode-block" id="map2string"><a class="viewcode-back" href="../automator.html#automator.map2string">[docs]</a><span class="k">def</span> <span class="nf">map2string</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">groupop</span><span class="p">,</span> <span class="n">mapping</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Takes in a map: tag, groupop, mapping and constructs a string representation</span>
-<span class="sd">    to be dumped to a file. If we want to call using the tuple, `map2string(*(map))` will suffice.</span>
+<span class="sd">    to be dumped to a file. If we want to call using the tuple, ``map2string(*(map))`` will suffice.</span>
 
 <span class="sd">    :param tag: string of initial state to rotate</span>
 <span class="sd">    :param groupop: see crystal.GroupOp; we use the rot and trans. This is in the supercell coord.</span>
@@ -249,21 +249,26 @@
                  <span class="n">JSONdict</span><span class="o">=</span><span class="s1">&#39;tags.json&#39;</span><span class="p">,</span> <span class="n">YAMLdef</span><span class="o">=</span><span class="s1">&#39;supercell.yaml&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Takes in a tarfile (needs to be open for reading) and a supercelldict (from a</span>
-<span class="sd">    diffuser) and creates the full directory structure inside the tarfile. Best used in a form like</span>
+<span class="sd">    diffuser) and creates the full directory structure inside the tarfile. Best used in</span>
+<span class="sd">    a form like</span>
+
+<span class="sd">    ::</span>
 
 <span class="sd">        with tarfile.open(&#39;supercells.tar.gz&#39;, mode=&#39;w:gz&#39;) as tar:</span>
 <span class="sd">            automator.supercelltar(tar, supercelldict)</span>
 
 <span class="sd">    :param tar: tarfile open for writing; may contain other files in advance.</span>
-<span class="sd">    :param superdict: dictionary of `states`, `transitions`, `transmapping`, `indices` that</span>
-<span class="sd">        correspond to dictionaries with tags; the final tag `reference` is the basesupercell for</span>
-<span class="sd">        calculations without defects.</span>
-<span class="sd">        superdict[&#39;states&#39;][i] = supercell of state;</span>
-<span class="sd">        superdict[&#39;transitions&#39;][n] = (supercell initial, supercell final);</span>
-<span class="sd">        superdict[&#39;transmapping&#39;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</span>
-<span class="sd">        superdict[&#39;indices&#39;][tag] = (type, index) of tag, where tag is either a state or transition tag; or...</span>
-<span class="sd">        superdict[&#39;indices&#39;][tag] = index of tag, where tag is either a state or transition tag.</span>
-<span class="sd">        superdict[&#39;reference&#39;] = (optional) supercell reference, no defects</span>
+<span class="sd">    :param superdict: dictionary of ``states``, ``transitions``, ``transmapping``, ``indices`` that</span>
+<span class="sd">        correspond to dictionaries with tags; the final tag ``reference`` is the basesupercell</span>
+<span class="sd">        for calculations without defects.</span>
+
+<span class="sd">        * superdict[&#39;states&#39;][i] = supercell of state;</span>
+<span class="sd">        * superdict[&#39;transitions&#39;][n] = (supercell initial, supercell final);</span>
+<span class="sd">        * superdict[&#39;transmapping&#39;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</span>
+<span class="sd">        * superdict[&#39;indices&#39;][tag] = (type, index) of tag, where tag is either a state or transition tag; or...</span>
+<span class="sd">        * superdict[&#39;indices&#39;][tag] = index of tag, where tag is either a state or transition tag.</span>
+<span class="sd">        * superdict[&#39;reference&#39;] = (optional) supercell reference, no defects</span>
+
 <span class="sd">    :param filemode: mode to use for files (default: 664)</span>
 <span class="sd">    :param directmode: mode to use for directories (default: 775)</span>
 <span class="sd">    :param timestamp: UNIX time for files; if None, use current time (default)</span>
