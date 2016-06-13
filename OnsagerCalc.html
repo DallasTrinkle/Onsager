@@ -316,6 +316,25 @@ in our site list.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="OnsagerCalc.Interstitial.generatetags">
+<code class="descname">generatetags</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.generatetags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.generatetags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create tags for unique interstitial states, and transition states.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return tags:</th><td class="field-body">dictionary of tags; each is a list-of-lists</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return tagdict:</th><td class="field-body">dictionary that maps tag into the index of the corresponding list.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Return tagdicttype:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">dictionary that maps tag into the key for the corresponding list.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="OnsagerCalc.Interstitial.jumpDipoles">
 <code class="descname">jumpDipoles</code><span class="sig-paren">(</span><em>dipoles</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.jumpDipoles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.jumpDipoles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of the elastic dipole for each transition, given the dipoles
@@ -337,6 +356,29 @@ for the representatives. (&#8220;populating&#8221; the full set of dipoles)</p>
 <dt id="OnsagerCalc.Interstitial.jumpnetworkYAML">
 <em class="property">static </em><code class="descname">jumpnetworkYAML</code><span class="sig-paren">(</span><em>jumpnetwork</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.jumpnetworkYAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.jumpnetworkYAML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dumps a &#8220;sample&#8221; YAML formatted version of the jumpnetwork with data to be entered</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.makesupercells">
+<code class="descname">makesupercells</code><span class="sig-paren">(</span><em>super_n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.makesupercells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.makesupercells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take in a supercell matrix, then generate all of the supercells needed to compute
+site energies and transitions (corresponding to the representatives).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>super_n</strong> &#8211; 3x3 integer matrix to define our supercell</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return superdict:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">dictionary of <cite>states</cite>, <cite>transitions</cite>, <cite>transmapping</cite>, and <cite>indices</cite> that
+correspond to dictionaries with tags.
+superdict[&#8216;states&#8217;][i] = supercell of site;
+superdict[&#8216;transitions&#8217;][n] = (supercell initial, supercell final);
+superdict[&#8216;transmapping&#8217;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+superdict[&#8216;indices&#8217;][tag] = index of tag, where tag is either a state or transition tag.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -596,6 +638,46 @@ to a vector between a solute atom and a vacancy. Defined by Stars.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.makesupercells">
+<code class="descname">makesupercells</code><span class="sig-paren">(</span><em>super_n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.makesupercells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.makesupercells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take in a supercell matrix, then generate all of the supercells needed to compute
+site energies and transitions (corresponding to the representatives).</p>
+<p>Note: the states are lone vacancy, lone solute, solute-vacancy complexes in
+our thermodynamic range. Note that there will be escape states are endpoints of
+some omega1 jumps. They are not relaxed, and have no pre-existing tag. They will
+only be output as a single endpoint of an NEB run; there may be symmetry equivalent
+duplicates, as we construct these supercells on an as needed basis.</p>
+<p>We&#8217;ve got a few classes of warnings (from most egregious to least) that can issued
+if the supercell is too small; the analysis will continue despite any warnings:</p>
+<ol class="arabic simple">
+<li>Thermodynamic shell states map to different states in supercell</li>
+<li>Thermodynamic shell states are not unique in supercell (multiplicity)</li>
+<li>Kinetic shell states map to different states in supercell</li>
+<li>Kinetic shell states are not unique in supercell (multiplicity)</li>
+</ol>
+<p>The lowest level can still be run reliably but runs the risk of errors in escape transition
+barriers. Extreme caution should be used if any of the other warnings are raised.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>super_n</strong> &#8211; 3x3 integer matrix to define our supercell</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return superdict:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">dictionary of <cite>states</cite>, <cite>transitions</cite>, <cite>transmapping</cite>, <cite>indices</cite> that
+correspond to dictionaries with tags; the final tag <cite>reference</cite> is the basesupercell for
+calculations without defects.
+superdict[&#8216;states&#8217;][i] = supercell of state;
+superdict[&#8216;transitions&#8217;][n] = (supercell initial, supercell final);
+superdict[&#8216;transmapping&#8217;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+superdict[&#8216;indices&#8217;][tag] = (type, index) of tag, where tag is either a state or transition tag.
+superdict[&#8216;reference&#8217;] = supercell reference, no defects</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="OnsagerCalc.VacancyMediated.maketracerpreene">
 <code class="descname">maketracerpreene</code><span class="sig-paren">(</span><em>preT0</em>, <em>eneT0</em>, <em>**ignoredextraarguments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.maketracerpreene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.maketracerpreene" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates corresponding energies / prefactors for an isotopic tracer. Returns a dictionary.
@@ -752,36 +834,6 @@ lists of lists of symmetry equivalent tags that are missing</p>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="OnsagerCalc.VacancyMediatedMeta">
-<em class="property">class </em><code class="descclassname">OnsagerCalc.</code><code class="descname">VacancyMediatedMeta</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nthermo=0</em>, <em>meta_tags=[]</em>, <em>jumpnetwork2=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediatedMeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediatedMeta" title="Permalink to this definition">¶</a></dt>
-<dd><p>Trying out metastable preening</p>
-<dl class="method">
-<dt id="OnsagerCalc.VacancyMediatedMeta.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nthermo=0</em>, <em>meta_tags=[]</em>, <em>jumpnetwork2=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediatedMeta.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediatedMeta.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>will fill it later</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="OnsagerCalc.VacancyMediatedMeta.generatekineticmeta">
-<code class="descname">generatekineticmeta</code><span class="sig-paren">(</span><em>Nthermo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediatedMeta.generatekineticmeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediatedMeta.generatekineticmeta" title="Permalink to this definition">¶</a></dt>
-<dd><p>no idea. will fill it later</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="OnsagerCalc.VacancyMediatedMeta.generatethermometa">
-<code class="descname">generatethermometa</code><span class="sig-paren">(</span><em>Nthermo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediatedMeta.generatethermometa"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediatedMeta.generatethermometa" title="Permalink to this definition">¶</a></dt>
-<dd><p>will fill it later</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="OnsagerCalc.VacancyMediatedMeta.gfconstruct">
-<code class="descname">gfconstruct</code><span class="sig-paren">(</span><em>Nthermo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediatedMeta.gfconstruct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediatedMeta.gfconstruct" title="Permalink to this definition">¶</a></dt>
-<dd><p>no idea. will fill it later</p>
 </dd></dl>
 
 </dd></dl>

@@ -340,6 +340,12 @@ in FCC, 1 shell = 1st neighbor, 2 shell = 1-4th neighbors.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="crystalStars.StarSet.__contains__">
+<code class="descname">__contains__</code><span class="sig-paren">(</span><em>PS</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__contains__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.__contains__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if PS is in the star</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="crystalStars.StarSet.__iadd__">
 <code class="descname">__iadd__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__iadd__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.__iadd__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add another StarSet to this one; very similar to generate()</p>
@@ -551,88 +557,6 @@ symmetry unique jump</td>
 <tr class="field-even field"><th class="field-name" colspan="2">Return symmjumplist:</th></tr>
 <tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of tuples of ((gi, gf), gdx) for every group op</p>
 </td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="crystalStars.StarSetMeta">
-<em class="property">class </em><code class="descclassname">crystalStars.</code><code class="descname">StarSetMeta</code><span class="sig-paren">(</span><em>jumpnetwork</em>, <em>crys</em>, <em>chem</em>, <em>Nshells=0</em>, <em>lattice=False</em>, <em>meta_tags=[]</em>, <em>jumpnetwork2=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSetMeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSetMeta" title="Permalink to this definition">¶</a></dt>
-<dd><p>Testing meta states with star set</p>
-<dl class="method">
-<dt id="crystalStars.StarSetMeta.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>jumpnetwork</em>, <em>crys</em>, <em>chem</em>, <em>Nshells=0</em>, <em>lattice=False</em>, <em>meta_tags=[]</em>, <em>jumpnetwork2=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSetMeta.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSetMeta.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initiates a star set generator for a given jumpnetwork, crystal, and specified
-chemical index.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>jumpnetwork</strong> &#8211; list of symmetry unique jumps, as a list of list of tuples; either
-((i,j), dx) for jump from i to j with displacement dx, or
-((i,j), R) for jump from i in unit cell 0 -&gt; j in unit cell R</li>
-<li><strong>crys</strong> &#8211; crystal where jumps take place</li>
-<li><strong>chem</strong> &#8211; chemical index of atom to consider jumps</li>
-<li><strong>Nshells</strong> &#8211; number of shells to generate</li>
-<li><strong>lattice</strong> &#8211; which form does the jumpnetwork take?</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="crystalStars.StarSetMeta.copy">
-<code class="descname">copy</code><span class="sig-paren">(</span><em>empty=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSetMeta.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSetMeta.copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a copy of the StarSet; done as efficiently as possible; empty means skip the shells, etc.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="crystalStars.StarSetMeta.generate">
-<code class="descname">generate</code><span class="sig-paren">(</span><em>Nshells</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSetMeta.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSetMeta.generate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Construct the points and the stars in the set. Now includes &#8220;origin states&#8221; by default; these
-are PairStates that iszero() is True; they are only included if they have a nonzero VectorBasis.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>Nshells</strong> &#8211; number of shells to generate; this is interpreted as subsequent
-&#8220;sums&#8221; of jumplist (as we need the solute to be connected to the vacancy by at least one jump)</li>
-<li><strong>threshold</strong> &#8211; threshold for determining equality with symmetry</li>
-<li><strong>originstates</strong> &#8211; include origin states in generate?</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="crystalStars.StarSetMeta.jumpnetwork_omega2">
-<code class="descname">jumpnetwork_omega2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSetMeta.jumpnetwork_omega2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSetMeta.jumpnetwork_omega2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a jumpnetwork corresponding to vacancy exchanging with a solute.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Return jumpnetwork:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of symmetry unique jumps; list of list of tuples (i,f), dx where
-i,f index into states for the initial and final states, and dx = displacement of vacancy
-in Cartesian coordinates. Note: if (i,f), dx is present, so is (f,i), -dx</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return jumptype:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of indices corresponding to the (original) jump type for each
-symmetry unique jump; useful for constructing a LIMB approximation</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">Return starpair:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of tuples of the star indices of the i and f states for each
-symmetry unique jump</td>
 </tr>
 </tbody>
 </table>

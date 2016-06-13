@@ -244,7 +244,7 @@
                          <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interstitial</span>
                          <span class="k">else</span> <span class="n">c</span> <span class="o">+</span> <span class="s1">&#39;({})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">))</span>
                          <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span>
-                                            <span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">,</span>
                                             <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span><span class="p">)])</span></div>
 
 <div class="viewcode-block" id="Supercell.__str__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__str__">[docs]</a>    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -367,6 +367,7 @@
 <span class="sd">        :return transdict: dictionary of tuples and their corresponding index (inverse of trans)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">size</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="nb">super</span><span class="p">))))</span>
+        <span class="k">if</span> <span class="n">size</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ZeroDivisionError</span><span class="p">(</span><span class="s1">&#39;Tried to use a singular supercell.&#39;</span><span class="p">)</span>
         <span class="n">invsuper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="nb">super</span><span class="p">)</span> <span class="o">*</span> <span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="n">maxN</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">super</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
         <span class="n">translist</span><span class="p">,</span> <span class="n">transdict</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">{}</span>
@@ -505,15 +506,16 @@
         <span class="k">if</span> <span class="n">stoichiometry</span><span class="p">:</span> <span class="n">POSCAR</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">stoichiometry</span><span class="p">()</span>
         <span class="n">POSCAR</span> <span class="o">+=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">1.0</span>
-<span class="s2">{a[0][0]:20.15f} {a[1][0]:20.15f} {a[2][0]:20.15f}</span>
-<span class="s2">{a[0][1]:20.15f} {a[1][1]:20.15f} {a[2][1]:20.15f}</span>
-<span class="s2">{a[0][2]:20.15f} {a[1][2]:20.15f} {a[2][2]:20.15f}</span>
+<span class="s2">{a[0][0]:21.16f} {a[1][0]:21.16f} {a[2][0]:21.16f}</span>
+<span class="s2">{a[0][1]:21.16f} {a[1][1]:21.16f} {a[2][1]:21.16f}</span>
+<span class="s2">{a[0][2]:21.16f} {a[1][2]:21.16f} {a[2][2]:21.16f}</span>
 <span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lattice</span><span class="p">)</span>
         <span class="n">POSCAR</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">clist</span><span class="p">))</span> <span class="k">for</span> <span class="n">clist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span><span class="p">])</span>
         <span class="n">POSCAR</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Direct</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="n">POSCAR</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot; {u[0]:17.15f} {u[1]:17.15f} {u[2]:17.15f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
+        <span class="n">POSCAR</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot; {u[0]:19.16f} {u[1]:19.16f} {u[2]:19.16f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
                              <span class="k">for</span> <span class="n">clist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">occposlist</span><span class="p">()</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">clist</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">POSCAR</span></div>
+        <span class="c1"># needs a trailing newline</span>
+        <span class="k">return</span> <span class="n">POSCAR</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span></div>
 
     <span class="n">__vacancyformat__</span> <span class="o">=</span> <span class="s2">&quot;v_{sitechem}&quot;</span>
     <span class="n">__interstitialformat__</span> <span class="o">=</span> <span class="s2">&quot;{chem}_i&quot;</span>
