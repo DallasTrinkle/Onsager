@@ -1319,13 +1319,12 @@ class VacancyMediated(object):
         return omega0, omega1, omega2, \
                omega0escape, omega1escape, omega2escape
 
-    def Lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
+    def Lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2, large_om2=1e8):
         """
         Calculates the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv from the scaled free energies.
         The Green function entries are calculated from the omega0 info. As this is the most
         time-consuming part of the calculation, we cache these values with a dictionary
         and hash function.
-        Used by Lij.
 
         :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
         :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
@@ -1333,6 +1332,7 @@ class VacancyMediated(object):
         :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
         :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
         :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
+        :param large_om2: threshold for changing treatment of omega2 contributions (default: 10^8)
         :return Lvv[3, 3]: vacancy-vacancy; needs to be multiplied by cv/kBT
         :return Lss[3, 3]: solute-solute; needs to be multiplied by cv*cs/kBT
         :return Lsv[3, 3]: solute-vacancy; needs to be multiplied by cv*cs/kBT
@@ -1392,14 +1392,14 @@ class VacancyMediated(object):
         biasSvec = np.zeros(self.vkinetic.Nvstars)
         biasVvec = np.zeros(self.vkinetic.Nvstars)
         om2 = np.dot(self.om2expansion, omega2)
-        delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) + \
-                   np.dot(self.om2expansion, omega2)  # - np.dot(self.om2_om0, omega0)
+        delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0)
+        delta_om2 = np.dot(self.om2expansion, omega2)  # - np.dot(self.om2_om0, omega0)
         for sv, starindex in enumerate(self.vstar2kin):
             svvacindex = self.kin2vacancy[starindex]  # vacancy
             delta_om[sv, sv] += np.dot(self.om1escape[sv, :], omega1escape[sv, :]) - \
-                                np.dot(self.om1_om0escape[sv, :], omega0escape[svvacindex, :]) + \
-                                np.dot(self.om2escape[sv, :], omega2escape[sv, :]) - \
-                                np.dot(self.om2_om0escape[sv, :], omega0escape[svvacindex, :])
+                                np.dot(self.om1_om0escape[sv, :], omega0escape[svvacindex, :])
+            delta_om2[sv, sv] += np.dot(self.om2escape[sv, :], omega2escape[sv, :]) - \
+                                 np.dot(self.om2_om0escape[sv, :], omega0escape[svvacindex, :])
             om2[sv, sv] += np.dot(self.om2escape[sv, :], omega2escape[sv, :])
             # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
@@ -1412,8 +1412,63 @@ class VacancyMediated(object):
         # 5. compute Green function:
         G0 = np.dot(self.GFexpansion, GF)
         if self.NVB == 0:
+            # Note: we first do this *just* with omega1, then ... with omega2, depending on how it behaves
             G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
+            # Now: to identify the omega2 contributions, we need to find all of the sv indices with a
+            # non-zero contribution to om2bias. That is, where np.any(self.om2bias[sv,:] != 0)
+            om2_sv_indices = [n for n in range(len(self.om2bias)) if not np.allclose(self.om2bias[n, :], 0)]
+            # looks weird, but this is how we slice:
+            G12 = G[om2_sv_indices, :][:, om2_sv_indices]
+            dom2 = delta_om2[om2_sv_indices, :][:, om2_sv_indices]
+            gdom2 = np.dot(G12, dom2)
+            if np.any(np.abs(gdom2) > large_om2):
+                # "large" omega2 terms:
+                gdom2_inv = np.linalg.inv(gdom2)
+                gd1 = np.linalg.inv(np.eye(len(om2_sv_indices)) + gdom2_inv)
+                dom2_inv = np.linalg.inv(dom2)
+                dgd = np.dot(gdom2_inv, dom2_inv)
+                G2 = -np.dot(gd1, dgd)
+                # G2 = -np.dot(gdom_inv, np.dot(gd1, dom2_inv))
+                # update with omega2, and then put in change due to omega2
+                G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, delta_om2)), G)
+                G2_bare = np.zeros_like(G)
+                for ni, i in enumerate(om2_sv_indices):
+                    for nj, j in enumerate(om2_sv_indices):
+                        G[i, j] = G2[ni, nj]
+                        G2_bare[i, j] = dom2_inv[ni, nj]
+                etaVvec, etaSvec = np.dot(G, biasVvec), np.dot(G, biasSvec)
+                outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer,
+                                                                                                etaSvec)
+                L0ss = np.dot(np.dot(self.vkinetic.outer, np.dot(G2_bare, biasSvec)), biasSvec)
+                # D0ss = np.zeros_like(D0ss)  # zero out bare solute-solute
+                D0ss += L0ss
+            else:
+                # update with omega2 ("small" omega2):
+                G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, delta_om2)), G)
+
+            # if not eigensolve:
+            #     # old school (direct) approach
+            #     G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
+            # else:
+            #     def dwg(dw, g):
+            #         if abs(dw*g) > 1e8: return 1./( (1./dw) + g)
+            #         else: return dw/(1.+dw*g)
+            #     # improved stability algorithm (to handle when, e.g., omega2 gets very high)
+            #     dwn, eign = np.linalg.eigh(delta_om)
+            #     print(delta_om)
+            #     print(dwn)
+            #     print(eign)
+            #     Grot = np.dot(eign.T, np.dot(G0, eign))
+            #     # sort the eigenvalues from smallest influence to largest
+            #     for n, garbage in sorted( ( ( n, np.abs(dwg(dw,Grot[n,n])) )
+            #                                 for n, dw in enumerate(dwn)),
+            #                              key=lambda t: t[1] ):
+            #         # Gin = Grot[n,:].copy()  # G[n,:] for outer product
+            #         Grot -= dwg(dwn[n], Grot[n,n])*np.outer(Grot[n], Grot[n])
+            #     # rotate back
+            #     G = np.dot(eign, np.dot(Grot, eign.T))
         else:
+            delta_om += delta_om2
             delta_omOS = -np.dot(self.om2_om0, omega0)
             G0OS = np.dot(self.GFOSexpansion, GF)
             G0OSOS = np.dot(self.GFOSOSexpansion, GF)

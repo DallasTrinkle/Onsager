@@ -100,6 +100,20 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         self.crystalname = 'Face-Centered Cubic a0={}'.format(self.a0)
         self.correl = 0.78145142
 
+    @staticmethod
+    def makethermodict(w0, w1, w2, w3, w4):
+        SVprob = w4 / w3
+        return {'v:+0.000,+0.000,+0.000': (1., 0.), 's:+0.000,+0.000,+0.000': (1., 0.),
+                's:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000': (SVprob, 0.),
+                'omega0:v:+0.000,+0.000,+0.000^v:+0.000,+0.000,+1.000': (w0, 0.),
+                'omega2:s:+0.000,+0.000,+0.000-v:+0.000,+0.000,-1.000^s:+0.000,+0.000,+0.000-v:+0.000,+0.000,+1.000': (
+                w2 * SVprob, 0.),
+                'omega1:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000^v:+0.000,-1.000,+1.000': (w1*SVprob , 0.),
+                'omega1:s:+0.000,+0.000,+0.000-v:-1.000,+0.000,+1.000^v:-1.000,+0.000,+2.000': (w4, 0.),
+                'omega1:s:+0.000,+0.000,+0.000-v:+0.000,+0.000,+1.000^v:+0.000,+0.000,+2.000': (w4, 0.),
+                'omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,+0.000^v:+1.000,-1.000,+1.000': (w4, 0.)
+                }
+
     def testFiveFreq(self):
         """Test whether we can reproduce the five frequency model"""
         verbose_print('Five-frequency model, Crystal: ' + self.crystalname)
@@ -161,6 +175,54 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
                                w4={}
                                Lss={}
                                Ds5={}""".format(w0, w1, w2, w3, w4, Lss[0, 0], Ds5freq)))
+
+    def testSpectralSolution(self):
+        """Test whether the large omega2 solution is (a) correct and (b) stable against five frequency model"""
+        verbose_print('Five-frequency model, Crystal: ' + self.crystalname)
+        kT = 1.
+        w0 = 1.0  # bare rate
+        w1 = w0  # "swing" rate (vacancy jump around solute)
+        w2 = 1e1 * w0  # "exchange" rate (vacancy-solute exchange)
+        w3 = w0  # dissociation jump (vacancy away from solute)
+        w4 = w0  # association jump (vacancy jump into solute)
+        SVprob = w4 / w3  # enhanced probability of solute-vacancy complex
+        verbose_print(textwrap.dedent("""
+                               w0={}
+                               w1={}
+                               w2={}
+                               w3={}
+                               w4={}
+                               prob={}""".format(w0, w1, w2, w3, w4, SVprob)))
+        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        # updated to use tagging to do our work for us:
+        thermaldef = Diffusivity.tags2preene(self.makethermodict(w0, w1, w2, w3, w4))
+        L0vv = np.zeros((3, 3))
+        om0 = thermaldef['preT0'][0] / thermaldef['preV'][0] * \
+              np.exp((thermaldef['eneV'][0] - thermaldef['eneT0'][0]) / kT)
+        for (i, j), dx in self.jumpnetwork[0]:
+            L0vv += 0.5 * np.outer(dx, dx) * om0
+        L0vv /= self.crys.N
+        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef), large_om2=1)
+
+        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
+            verbose_print(Lname)
+            verbose_print(locals()[Lname])
+        for L in [Lvv, Lss, Lsv, L1vv]:
+            self.assertTrue(np.allclose(L, L[0, 0] * np.eye(3)), msg='Diffusivity not isotropic?')
+        self.assertTrue(np.allclose(Lvv, L0vv))
+        Ds5freq = self.a0 ** 2 * fivefreq(w0, w1, w2, w3, w4)
+        self.assertAlmostEqual(Lss[0, 0], Ds5freq, delta=1e-5,
+                               msg=textwrap.dedent("""
+                               Did not match the 5-freq. model for
+                               w0={}
+                               w1={}
+                               w2={}
+                               w3={}
+                               w4={}
+                               Lss={}
+                               Ds5={}""".format(w0, w1, w2, w3, w4, Lss[0, 0], Ds5freq)))
+        self.assertTrue(False)
+
 
 
 class CrystalOnsagerTestsBCC(CrystalOnsagerTestsSC):
