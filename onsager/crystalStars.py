@@ -1025,10 +1025,10 @@ class VectorStarSet(object):
                                     rate0expansion[j, i, jt] += np.dot(VB[wi, :], vi)
 
         # symmetrize
-        for i in range(self.Nvstars):
-            for j in range(i+1, self.Nvstars):
-                rate0expansion[i, j, :] = rate0expansion[j, i, :]
-                rate1expansion[i, j, :] = rate1expansion[j, i, :]
+        # for i in range(self.Nvstars):
+        #     for j in range(i+1, self.Nvstars):
+        #         rate0expansion[i, j, :] = rate0expansion[j, i, :]
+        #         rate1expansion[i, j, :] = rate1expansion[j, i, :]
         # cleanup on return
         return zeroclean(rate0expansion), zeroclean(rate0escape), \
                zeroclean(rate1expansion), zeroclean(rate1escape)
