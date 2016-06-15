@@ -1393,12 +1393,10 @@ class VacancyMediated(object):
         biasVvec = np.zeros(self.vkinetic.Nvstars)
         om2 = np.dot(self.om2expansion, omega2)
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0)
-        delta_om2 = np.dot(self.om2expansion, omega2)  # - np.dot(self.om2_om0, omega0)
         for sv, starindex in enumerate(self.vstar2kin):
             svvacindex = self.kin2vacancy[starindex]  # vacancy
             delta_om[sv, sv] += np.dot(self.om1escape[sv, :], omega1escape[sv, :]) - \
-                                np.dot(self.om1_om0escape[sv, :], omega0escape[svvacindex, :])
-            delta_om2[sv, sv] += np.dot(self.om2escape[sv, :], omega2escape[sv, :]) - \
+                                np.dot(self.om1_om0escape[sv, :], omega0escape[svvacindex, :]) - \
                                  np.dot(self.om2_om0escape[sv, :], omega0escape[svvacindex, :])
             om2[sv, sv] += np.dot(self.om2escape[sv, :], omega2escape[sv, :])
             # note: our solute bias is negative of the contribution to the vacancy, and also the
@@ -1419,32 +1417,28 @@ class VacancyMediated(object):
             om2_sv_indices = [n for n in range(len(self.om2bias)) if not np.allclose(self.om2bias[n, :], 0)]
             # looks weird, but this is how we slice:
             G12 = G[om2_sv_indices, :][:, om2_sv_indices]
-            dom2 = delta_om2[om2_sv_indices, :][:, om2_sv_indices]
-            gdom2 = np.dot(G12, dom2)
+            om2_slice = om2[om2_sv_indices, :][:, om2_sv_indices]
+            gdom2 = np.dot(G12, om2_slice)
             if np.any(np.abs(gdom2) > large_om2):
                 # "large" omega2 terms:
                 gdom2_inv = np.linalg.inv(gdom2)
                 gd1 = np.linalg.inv(np.eye(len(om2_sv_indices)) + gdom2_inv)
-                dom2_inv = np.linalg.inv(dom2)
-                dgd = np.dot(gdom2_inv, dom2_inv)
+                om2_inv = np.linalg.inv(om2_slice)
+                dgd = np.dot(gdom2_inv, om2_inv)
                 G2 = -np.dot(gd1, dgd)
-                # G2 = -np.dot(gdom_inv, np.dot(gd1, dom2_inv))
                 # update with omega2, and then put in change due to omega2
-                G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, delta_om2)), G)
-                G2_bare = np.zeros_like(G)
+                G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
+                # G2_bare = np.zeros_like(G)
                 for ni, i in enumerate(om2_sv_indices):
                     for nj, j in enumerate(om2_sv_indices):
                         G[i, j] = G2[ni, nj]
-                        G2_bare[i, j] = dom2_inv[ni, nj]
-                etaVvec, etaSvec = np.dot(G, biasVvec), np.dot(G, biasSvec)
-                outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer,
-                                                                                                etaSvec)
-                L0ss = np.dot(np.dot(self.vkinetic.outer, np.dot(G2_bare, biasSvec)), biasSvec)
-                # D0ss = np.zeros_like(D0ss)  # zero out bare solute-solute
-                D0ss += L0ss
+                        # G2_bare[i, j] = om2_inv[ni, nj]
+                # L0ss = np.dot(np.dot(self.vkinetic.outer, np.dot(G2_bare, biasSvec)), biasSvec)
+                # D0ss += L0ss
+                D0ss = np.zeros_like(D0ss)
             else:
                 # update with omega2 ("small" omega2):
-                G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, delta_om2)), G)
+                G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
 
             # if not eigensolve:
             #     # old school (direct) approach
@@ -1468,7 +1462,7 @@ class VacancyMediated(object):
             #     # rotate back
             #     G = np.dot(eign, np.dot(Grot, eign.T))
         else:
-            delta_om += delta_om2
+            delta_om += om2
             delta_omOS = -np.dot(self.om2_om0, omega0)
             G0OS = np.dot(self.GFOSexpansion, GF)
             G0OSOS = np.dot(self.GFOSOSexpansion, GF)

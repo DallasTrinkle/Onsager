@@ -181,9 +181,9 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         verbose_print('Five-frequency model, Crystal: ' + self.crystalname)
         kT = 1.
         w0 = 1.0  # bare rate
-        w1 = w0  # "swing" rate (vacancy jump around solute)
-        w2 = 1e1 * w0  # "exchange" rate (vacancy-solute exchange)
-        w3 = w0  # dissociation jump (vacancy away from solute)
+        w1 = 2e8*w0  # "swing" rate (vacancy jump around solute)
+        w2 = 1e16 * w0  # "exchange" rate (vacancy-solute exchange)
+        w3 = 1e-8*w0  # dissociation jump (vacancy away from solute)
         w4 = w0  # association jump (vacancy jump into solute)
         SVprob = w4 / w3  # enhanced probability of solute-vacancy complex
         verbose_print(textwrap.dedent("""
@@ -211,7 +211,7 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
             self.assertTrue(np.allclose(L, L[0, 0] * np.eye(3)), msg='Diffusivity not isotropic?')
         self.assertTrue(np.allclose(Lvv, L0vv))
         Ds5freq = self.a0 ** 2 * fivefreq(w0, w1, w2, w3, w4)
-        self.assertAlmostEqual(Lss[0, 0], Ds5freq, delta=1e-5,
+        self.assertAlmostEqual(Lss[0, 0], Ds5freq, delta=1e-6*Ds5freq,
                                msg=textwrap.dedent("""
                                Did not match the 5-freq. model for
                                w0={}
@@ -221,8 +221,6 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
                                w4={}
                                Lss={}
                                Ds5={}""".format(w0, w1, w2, w3, w4, Lss[0, 0], Ds5freq)))
-        self.assertTrue(False)
-
 
 
 class CrystalOnsagerTestsBCC(CrystalOnsagerTestsSC):
