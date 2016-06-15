@@ -336,6 +336,26 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                         msg='Failure to match correlation ({}, {}), got {}, {}'.format(
                             self.correlx, self.correlz, -Lss[0, 0] / Lsv[0, 0], -Lss[2, 2] / Lsv[2, 2]))
 
+    def testHighOmega2(self):
+        """Test that HCP with very high omega2 still produces symmetric diffusivity"""
+        # Make a calculator with one neighbor shell
+        verbose_print('Crystal: ' + self.crystalname)
+        kT = 1.
+        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
+                      'preT0': np.array([1., 1.]), 'eneT0': np.array([0., 0.])}
+        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        thermaldef['preT2'] = 1e16*thermaldef['preT2']
+        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
+        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
+            verbose_print(Lname)
+            L = locals()[Lname]
+            verbose_print(L)
+            for i in range(3):
+                for j in range(i):
+                    self.assertAlmostEqual(L[i,j], L[j,i],
+                                           msg="{} not symmetric?\n{}".format(Lname, L))
+
     def testSupercell(self):
         """Can we construct proper supercells for our diffuser?"""
         self.crys.chemistry[self.chem] = 'M'  # metal matrix

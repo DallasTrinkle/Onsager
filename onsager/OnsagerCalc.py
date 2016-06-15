@@ -1426,6 +1426,9 @@ class VacancyMediated(object):
                 om2_inv = np.linalg.inv(om2_slice)
                 dgd = np.dot(gdom2_inv, om2_inv)
                 G2 = -np.dot(gd1, dgd)
+                print("om2_slice:\n{}".format(om2_slice))
+                print("om2_inv:\n{}".format(om2_inv))
+                print("G2:\n{}".format(G2))
                 # update with omega2, and then put in change due to omega2
                 G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G.copy(), om2)), G.copy())
                 # G2_bare = np.zeros_like(G)

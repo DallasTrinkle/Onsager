@@ -729,6 +729,13 @@ class StarSet(object):
                 self.indexdict[self.states[xi]] = (xi, si)
 
 
+def __zeroclean__(x, threshold=1e-8):
+    """Return 0 if x is below a threshold; useful for "symmetrizing" our expansions"""
+    return 0 if abs(x) < threshold else x
+
+zeroclean = np.vectorize(__zeroclean__, otypes=[np.float])
+
+
 class VectorStarSet(object):
     """
     A class to construct vector star sets, and be able to efficiently index.
@@ -954,10 +961,12 @@ class VectorStarSet(object):
         for i in range(self.Nvstars):
             for j in range(0, i):
                 GFexpansion[i, j, :] = GFexpansion[j, i, :]
+        # cleanup on return:
         if NVB > 0:
-            return GFexpansion, GFstarset, GFOSexpansion, GFOSOSexpansion
+            return zeroclean(GFexpansion), GFstarset, \
+                   zeroclean(GFOSexpansion), zeroclean(GFOSOSexpansion)
         else:
-            return GFexpansion, GFstarset
+            return zeroclean(GFexpansion), GFstarset
 
     def rateexpansions(self, jumpnetwork, jumptype, VectorBasis=()):
         """
@@ -1016,11 +1025,13 @@ class VectorStarSet(object):
                                     rate0expansion[j, i, jt] += np.dot(VB[wi, :], vi)
 
         # symmetrize
-        # for i in range(self.Nvstars):
-        #     for j in range(i+1, self.Nvstars):
-        #         rate0expansion[i, j, :] = rate0expansion[j, i, :]
-        #         rate1expansion[i, j, :] = rate1expansion[j, i, :]
-        return rate0expansion, rate0escape, rate1expansion, rate1escape
+        for i in range(self.Nvstars):
+            for j in range(i+1, self.Nvstars):
+                rate0expansion[i, j, :] = rate0expansion[j, i, :]
+                rate1expansion[i, j, :] = rate1expansion[j, i, :]
+        # cleanup on return
+        return zeroclean(rate0expansion), zeroclean(rate0escape), \
+               zeroclean(rate1expansion), zeroclean(rate1escape)
 
     def biasexpansions(self, jumpnetwork, jumptype):
         """
@@ -1058,7 +1069,8 @@ class VectorStarSet(object):
                         geom_bias = np.dot(svv[0], dx) * len(svR)
                         bias0expansion[i, jt] += geom_bias
                         bias1expansion[i, k] += geom_bias
-        return bias0expansion, bias1expansion
+        # cleanup on return
+        return zeroclean(bias0expansion), zeroclean(bias1expansion)
 
     # this is *almost* a static method--it only need to know how many omega0 type jumps there are
     # in the starset. We *could* make it static and use max(jumptype), but that may not be strictly safe
@@ -1092,7 +1104,8 @@ class VectorStarSet(object):
             d0 = np.sum(0.5 * np.outer(dx, dx) for ISFS, dx in jumplist)  # we don't need initial/final state
             D0expansion[:, :, jt] += d0
             D1expansion[:, :, k] += d0
-        return D0expansion, D1expansion
+        # cleanup on return
+        return zeroclean(D0expansion), zeroclean(D1expansion)
 
     def periodicvectorexpansion(self, elemtype='solute'):
         """
@@ -1112,7 +1125,8 @@ class VectorStarSet(object):
         for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
             for s, v in zip(svR, svv):
                 periodicexpansion[i, getattr(self.starset.states[s], attr), :] += v
-        return periodicexpansion
+        # cleanup on return
+        return zeroclean(periodicexpansion)
 
     def unitcellVectorBasisfolddown(self, VectorBasis, elemtype='solute'):
         """
@@ -1132,4 +1146,5 @@ class VectorStarSet(object):
                 ind = getattr(self.starset.states[s], attr)
                 for j, vb in enumerate(VectorBasis):
                     folddown[j, i] += np.dot(vb[ind, :], v)
-        return folddown
+        # cleanup on return
+        return zeroclean(folddown)
