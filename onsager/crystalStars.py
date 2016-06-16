@@ -731,7 +731,7 @@ class StarSet(object):
 
 def __zeroclean__(x, threshold=1e-8):
     """Return 0 if x is below a threshold; useful for "symmetrizing" our expansions"""
-    return 0 if abs(x) < threshold else x
+    return 0 if np.abs(x) < threshold else x
 
 zeroclean = np.vectorize(__zeroclean__, otypes=[np.float])
 
@@ -868,7 +868,7 @@ class VectorStarSet(object):
             for j, (sR1, sv1) in enumerate(zip(self.vecpos, self.vecvec)):
                 if sR0[0] == sR1[0]:
                     outer[:, :, i, j] = sum([np.outer(v0, v1) for v0, v1 in zip(sv0, sv1)])
-        return outer
+        return zeroclean(outer)
 
     def addhdf5(self, HDF5group):
         """

@@ -1426,9 +1426,6 @@ class VacancyMediated(object):
                 om2_inv = np.linalg.inv(om2_slice)
                 dgd = np.dot(gdom2_inv, om2_inv)
                 G2 = -np.dot(gd1, dgd)
-                print("om2_slice:\n{}".format(om2_slice))
-                print("om2_inv:\n{}".format(om2_inv))
-                print("G2:\n{}".format(G2))
                 # update with omega2, and then put in change due to omega2
                 G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G.copy(), om2)), G.copy())
                 # G2_bare = np.zeros_like(G)
@@ -1450,7 +1447,8 @@ class VacancyMediated(object):
             #     def dwg(dw, g):
             #         if abs(dw*g) > 1e8: return 1./( (1./dw) + g)
             #         else: return dw/(1.+dw*g)
-            #     # improved stability algorithm (to handle when, e.g., omega2 gets very high)
+            #     # improved stability algorithm? (to handle when domega gets very large)
+            #     # NOTE: this was not deemed to work.
             #     dwn, eign = np.linalg.eigh(delta_om)
             #     print(delta_om)
             #     print(dwn)

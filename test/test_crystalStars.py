@@ -86,6 +86,18 @@ class PairStateTests(unittest.TestCase):
     def setUp(self):
         self.hcp = crystal.Crystal.HCP(1.0)
 
+    def testZeroClean(self):
+        """Does the zero clean function work?"""
+        threshold = 1e-8
+        for s in (1, 10, (10,10), (10,10,10), (10,10,10,10)):
+            a = np.random.uniform(-0.99*threshold,0.99*threshold, s)
+            b = np.random.uniform(-10*threshold,10*threshold, s)
+            azero = stars.zeroclean(a, threshold=threshold)
+            self.assertTrue(np.all(azero == 0), msg='Failed for {} matrix?'.format(s))
+            bnonzero = stars.zeroclean(b, threshold=threshold)
+            if np.any(abs(b) > threshold):
+                self.assertTrue(np.any(bnonzero != 0), msg='Failed for {} matrix?'.format(s))
+
     def testZero(self):
         """Is zero consistent?"""
         zero = stars.PairState.zero()
