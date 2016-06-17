@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>crystalStars &mdash; Onsager 1.0 documentation</title>
+  <title>crystalStars &mdash; Onsager 1.1 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="Onsager 1.0 documentation" href="../index.html"/>
+    <link rel="top" title="Onsager 1.1 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -868,6 +868,13 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">indexdict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">xi</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">si</span><span class="p">)</span></div></div>
 
 
+<div class="viewcode-block" id="zeroclean"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.zeroclean">[docs]</a><span class="k">def</span> <span class="nf">zeroclean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Modify x in place, return 0 if x is below a threshold; useful for &quot;symmetrizing&quot; our expansions&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">nditer</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">op_flags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;readwrite&#39;</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
 <div class="viewcode-block" id="VectorStarSet"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.VectorStarSet">[docs]</a><span class="k">class</span> <span class="nc">VectorStarSet</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to construct vector star sets, and be able to efficiently index.</span>
@@ -1000,7 +1007,7 @@
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="p">(</span><span class="n">sR1</span><span class="p">,</span> <span class="n">sv1</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vecpos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vecvec</span><span class="p">)):</span>
                 <span class="k">if</span> <span class="n">sR0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">sR1</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
                     <span class="n">outer</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">v0</span><span class="p">,</span> <span class="n">v1</span><span class="p">)</span> <span class="k">for</span> <span class="n">v0</span><span class="p">,</span> <span class="n">v1</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sv0</span><span class="p">,</span> <span class="n">sv1</span><span class="p">)])</span>
-        <span class="k">return</span> <span class="n">outer</span></div>
+        <span class="k">return</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">outer</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VectorStarSet.addhdf5"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.VectorStarSet.addhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">addhdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1093,10 +1100,12 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nvstars</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
                 <span class="n">GFexpansion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">GFexpansion</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="c1"># cleanup on return:</span>
         <span class="k">if</span> <span class="n">NVB</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">GFexpansion</span><span class="p">,</span> <span class="n">GFstarset</span><span class="p">,</span> <span class="n">GFOSexpansion</span><span class="p">,</span> <span class="n">GFOSOSexpansion</span>
+            <span class="k">return</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">GFexpansion</span><span class="p">),</span> <span class="n">GFstarset</span><span class="p">,</span> \
+                   <span class="n">zeroclean</span><span class="p">(</span><span class="n">GFOSexpansion</span><span class="p">),</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">GFOSOSexpansion</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">GFexpansion</span><span class="p">,</span> <span class="n">GFstarset</span></div>
+            <span class="k">return</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">GFexpansion</span><span class="p">),</span> <span class="n">GFstarset</span></div>
 
 <div class="viewcode-block" id="VectorStarSet.rateexpansions"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.VectorStarSet.rateexpansions">[docs]</a>    <span class="k">def</span> <span class="nf">rateexpansions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jumpnetwork</span><span class="p">,</span> <span class="n">jumptype</span><span class="p">,</span> <span class="n">VectorBasis</span><span class="o">=</span><span class="p">()):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1159,7 +1168,9 @@
         <span class="c1">#     for j in range(i+1, self.Nvstars):</span>
         <span class="c1">#         rate0expansion[i, j, :] = rate0expansion[j, i, :]</span>
         <span class="c1">#         rate1expansion[i, j, :] = rate1expansion[j, i, :]</span>
-        <span class="k">return</span> <span class="n">rate0expansion</span><span class="p">,</span> <span class="n">rate0escape</span><span class="p">,</span> <span class="n">rate1expansion</span><span class="p">,</span> <span class="n">rate1escape</span></div>
+        <span class="c1"># cleanup on return</span>
+        <span class="k">return</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">rate0expansion</span><span class="p">),</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">rate0escape</span><span class="p">),</span> \
+               <span class="n">zeroclean</span><span class="p">(</span><span class="n">rate1expansion</span><span class="p">),</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">rate1escape</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VectorStarSet.biasexpansions"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.VectorStarSet.biasexpansions">[docs]</a>    <span class="k">def</span> <span class="nf">biasexpansions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jumpnetwork</span><span class="p">,</span> <span class="n">jumptype</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1197,7 +1208,8 @@
                         <span class="n">geom_bias</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">svv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dx</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">svR</span><span class="p">)</span>
                         <span class="n">bias0expansion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">jt</span><span class="p">]</span> <span class="o">+=</span> <span class="n">geom_bias</span>
                         <span class="n">bias1expansion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">geom_bias</span>
-        <span class="k">return</span> <span class="n">bias0expansion</span><span class="p">,</span> <span class="n">bias1expansion</span></div>
+        <span class="c1"># cleanup on return</span>
+        <span class="k">return</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">bias0expansion</span><span class="p">),</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">bias1expansion</span><span class="p">)</span></div>
 
     <span class="c1"># this is *almost* a static method--it only need to know how many omega0 type jumps there are</span>
     <span class="c1"># in the starset. We *could* make it static and use max(jumptype), but that may not be strictly safe</span>
@@ -1231,7 +1243,8 @@
             <span class="n">d0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span> <span class="k">for</span> <span class="n">ISFS</span><span class="p">,</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">jumplist</span><span class="p">)</span>  <span class="c1"># we don&#39;t need initial/final state</span>
             <span class="n">D0expansion</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">jt</span><span class="p">]</span> <span class="o">+=</span> <span class="n">d0</span>
             <span class="n">D1expansion</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">d0</span>
-        <span class="k">return</span> <span class="n">D0expansion</span><span class="p">,</span> <span class="n">D1expansion</span></div>
+        <span class="c1"># cleanup on return</span>
+        <span class="k">return</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">D0expansion</span><span class="p">),</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">D1expansion</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VectorStarSet.periodicvectorexpansion"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.VectorStarSet.periodicvectorexpansion">[docs]</a>    <span class="k">def</span> <span class="nf">periodicvectorexpansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elemtype</span><span class="o">=</span><span class="s1">&#39;solute&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1251,7 +1264,8 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">svR</span><span class="p">,</span> <span class="n">svv</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">vecpos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vecvec</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">svR</span><span class="p">,</span> <span class="n">svv</span><span class="p">):</span>
                 <span class="n">periodicexpansion</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">starset</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">attr</span><span class="p">),</span> <span class="p">:]</span> <span class="o">+=</span> <span class="n">v</span>
-        <span class="k">return</span> <span class="n">periodicexpansion</span></div>
+        <span class="c1"># cleanup on return</span>
+        <span class="k">return</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">periodicexpansion</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VectorStarSet.unitcellVectorBasisfolddown"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.VectorStarSet.unitcellVectorBasisfolddown">[docs]</a>    <span class="k">def</span> <span class="nf">unitcellVectorBasisfolddown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">VectorBasis</span><span class="p">,</span> <span class="n">elemtype</span><span class="o">=</span><span class="s1">&#39;solute&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1271,7 +1285,8 @@
                 <span class="n">ind</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">starset</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">attr</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">vb</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">VectorBasis</span><span class="p">):</span>
                     <span class="n">folddown</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vb</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="p">:],</span> <span class="n">v</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">folddown</span></div></div>
+        <span class="c1"># cleanup on return</span>
+        <span class="k">return</span> <span class="n">zeroclean</span><span class="p">(</span><span class="n">folddown</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
@@ -1305,7 +1320,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0',
+            VERSION:'1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

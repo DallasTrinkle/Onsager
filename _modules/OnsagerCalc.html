@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>OnsagerCalc &mdash; Onsager 1.0 documentation</title>
+  <title>OnsagerCalc &mdash; Onsager 1.1 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="Onsager 1.0 documentation" href="../index.html"/>
+    <link rel="top" title="Onsager 1.1 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -1458,13 +1458,12 @@
         <span class="k">return</span> <span class="n">omega0</span><span class="p">,</span> <span class="n">omega1</span><span class="p">,</span> <span class="n">omega2</span><span class="p">,</span> \
                <span class="n">omega0escape</span><span class="p">,</span> <span class="n">omega1escape</span><span class="p">,</span> <span class="n">omega2escape</span>
 
-<div class="viewcode-block" id="VacancyMediated.Lij"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.VacancyMediated.Lij">[docs]</a>    <span class="k">def</span> <span class="nf">Lij</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bFV</span><span class="p">,</span> <span class="n">bFS</span><span class="p">,</span> <span class="n">bFSV</span><span class="p">,</span> <span class="n">bFT0</span><span class="p">,</span> <span class="n">bFT1</span><span class="p">,</span> <span class="n">bFT2</span><span class="p">):</span>
+<div class="viewcode-block" id="VacancyMediated.Lij"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.VacancyMediated.Lij">[docs]</a>    <span class="k">def</span> <span class="nf">Lij</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bFV</span><span class="p">,</span> <span class="n">bFS</span><span class="p">,</span> <span class="n">bFSV</span><span class="p">,</span> <span class="n">bFT0</span><span class="p">,</span> <span class="n">bFT1</span><span class="p">,</span> <span class="n">bFT2</span><span class="p">,</span> <span class="n">large_om2</span><span class="o">=</span><span class="mf">1e8</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv from the scaled free energies.</span>
 <span class="sd">        The Green function entries are calculated from the omega0 info. As this is the most</span>
 <span class="sd">        time-consuming part of the calculation, we cache these values with a dictionary</span>
 <span class="sd">        and hash function.</span>
-<span class="sd">        Used by Lij.</span>
 
 <span class="sd">        :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)</span>
 <span class="sd">        :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)</span>
@@ -1472,6 +1471,7 @@
 <span class="sd">        :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)</span>
 <span class="sd">        :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)</span>
 <span class="sd">        :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)</span>
+<span class="sd">        :param large_om2: threshold for changing treatment of omega2 contributions (default: 10^8)</span>
 <span class="sd">        :return Lvv[3, 3]: vacancy-vacancy; needs to be multiplied by cv/kBT</span>
 <span class="sd">        :return Lss[3, 3]: solute-solute; needs to be multiplied by cv*cs/kBT</span>
 <span class="sd">        :return Lsv[3, 3]: solute-vacancy; needs to be multiplied by cv*cs/kBT</span>
@@ -1531,14 +1531,12 @@
         <span class="n">biasSvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vkinetic</span><span class="o">.</span><span class="n">Nvstars</span><span class="p">)</span>
         <span class="n">biasVvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vkinetic</span><span class="o">.</span><span class="n">Nvstars</span><span class="p">)</span>
         <span class="n">om2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om2expansion</span><span class="p">,</span> <span class="n">omega2</span><span class="p">)</span>
-        <span class="n">delta_om</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om1expansion</span><span class="p">,</span> <span class="n">omega1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om1_om0</span><span class="p">,</span> <span class="n">omega0</span><span class="p">)</span> <span class="o">+</span> \
-                   <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om2expansion</span><span class="p">,</span> <span class="n">omega2</span><span class="p">)</span>  <span class="c1"># - np.dot(self.om2_om0, omega0)</span>
+        <span class="n">delta_om</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om1expansion</span><span class="p">,</span> <span class="n">omega1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om1_om0</span><span class="p">,</span> <span class="n">omega0</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">sv</span><span class="p">,</span> <span class="n">starindex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vstar2kin</span><span class="p">):</span>
             <span class="n">svvacindex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kin2vacancy</span><span class="p">[</span><span class="n">starindex</span><span class="p">]</span>  <span class="c1"># vacancy</span>
             <span class="n">delta_om</span><span class="p">[</span><span class="n">sv</span><span class="p">,</span> <span class="n">sv</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om1escape</span><span class="p">[</span><span class="n">sv</span><span class="p">,</span> <span class="p">:],</span> <span class="n">omega1escape</span><span class="p">[</span><span class="n">sv</span><span class="p">,</span> <span class="p">:])</span> <span class="o">-</span> \
-                                <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om1_om0escape</span><span class="p">[</span><span class="n">sv</span><span class="p">,</span> <span class="p">:],</span> <span class="n">omega0escape</span><span class="p">[</span><span class="n">svvacindex</span><span class="p">,</span> <span class="p">:])</span> <span class="o">+</span> \
-                                <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om2escape</span><span class="p">[</span><span class="n">sv</span><span class="p">,</span> <span class="p">:],</span> <span class="n">omega2escape</span><span class="p">[</span><span class="n">sv</span><span class="p">,</span> <span class="p">:])</span> <span class="o">-</span> \
-                                <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om2_om0escape</span><span class="p">[</span><span class="n">sv</span><span class="p">,</span> <span class="p">:],</span> <span class="n">omega0escape</span><span class="p">[</span><span class="n">svvacindex</span><span class="p">,</span> <span class="p">:])</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om1_om0escape</span><span class="p">[</span><span class="n">sv</span><span class="p">,</span> <span class="p">:],</span> <span class="n">omega0escape</span><span class="p">[</span><span class="n">svvacindex</span><span class="p">,</span> <span class="p">:])</span> <span class="o">-</span> \
+                                 <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om2_om0escape</span><span class="p">[</span><span class="n">sv</span><span class="p">,</span> <span class="p">:],</span> <span class="n">omega0escape</span><span class="p">[</span><span class="n">svvacindex</span><span class="p">,</span> <span class="p">:])</span>
             <span class="n">om2</span><span class="p">[</span><span class="n">sv</span><span class="p">,</span> <span class="n">sv</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om2escape</span><span class="p">[</span><span class="n">sv</span><span class="p">,</span> <span class="p">:],</span> <span class="n">omega2escape</span><span class="p">[</span><span class="n">sv</span><span class="p">,</span> <span class="p">:])</span>
             <span class="c1"># note: our solute bias is negative of the contribution to the vacancy, and also the</span>
             <span class="c1"># reference value is 0</span>
@@ -1551,8 +1549,60 @@
         <span class="c1"># 5. compute Green function:</span>
         <span class="n">G0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GFexpansion</span><span class="p">,</span> <span class="n">GF</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">NVB</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Note: we first do this *just* with omega1, then ... with omega2, depending on how it behaves</span>
             <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vkinetic</span><span class="o">.</span><span class="n">Nvstars</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">G0</span><span class="p">,</span> <span class="n">delta_om</span><span class="p">)),</span> <span class="n">G0</span><span class="p">)</span>
+            <span class="c1"># Now: to identify the omega2 contributions, we need to find all of the sv indices with a</span>
+            <span class="c1"># non-zero contribution to om2bias. That is, where np.any(self.om2bias[sv,:] != 0)</span>
+            <span class="n">om2_sv_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om2bias</span><span class="p">))</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om2bias</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:],</span> <span class="mi">0</span><span class="p">)]</span>
+            <span class="c1"># looks weird, but this is how we slice:</span>
+            <span class="n">G12</span> <span class="o">=</span> <span class="n">G</span><span class="p">[</span><span class="n">om2_sv_indices</span><span class="p">,</span> <span class="p">:][:,</span> <span class="n">om2_sv_indices</span><span class="p">]</span>
+            <span class="n">om2_slice</span> <span class="o">=</span> <span class="n">om2</span><span class="p">[</span><span class="n">om2_sv_indices</span><span class="p">,</span> <span class="p">:][:,</span> <span class="n">om2_sv_indices</span><span class="p">]</span>
+            <span class="n">gdom2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">G12</span><span class="p">,</span> <span class="n">om2_slice</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">gdom2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">large_om2</span><span class="p">):</span>
+                <span class="c1"># &quot;large&quot; omega2 terms:</span>
+                <span class="n">gdom2_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">gdom2</span><span class="p">)</span>
+                <span class="n">gd1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">om2_sv_indices</span><span class="p">))</span> <span class="o">+</span> <span class="n">gdom2_inv</span><span class="p">)</span>
+                <span class="n">om2_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">om2_slice</span><span class="p">)</span>
+                <span class="n">dgd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">gdom2_inv</span><span class="p">,</span> <span class="n">om2_inv</span><span class="p">)</span>
+                <span class="n">G2</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">gd1</span><span class="p">,</span> <span class="n">dgd</span><span class="p">)</span>
+                <span class="c1"># update with omega2, and then put in change due to omega2</span>
+                <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vkinetic</span><span class="o">.</span><span class="n">Nvstars</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">om2</span><span class="p">)),</span> <span class="n">G</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+                <span class="c1"># G2_bare = np.zeros_like(G)</span>
+                <span class="k">for</span> <span class="n">ni</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">om2_sv_indices</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">nj</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">om2_sv_indices</span><span class="p">):</span>
+                        <span class="n">G</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">G2</span><span class="p">[</span><span class="n">ni</span><span class="p">,</span> <span class="n">nj</span><span class="p">]</span>
+                        <span class="c1"># G2_bare[i, j] = om2_inv[ni, nj]</span>
+                <span class="c1"># L0ss = np.dot(np.dot(self.vkinetic.outer, np.dot(G2_bare, biasSvec)), biasSvec)</span>
+                <span class="c1"># D0ss += L0ss</span>
+                <span class="n">D0ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">D0ss</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># update with omega2 (&quot;small&quot; omega2):</span>
+                <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vkinetic</span><span class="o">.</span><span class="n">Nvstars</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">om2</span><span class="p">)),</span> <span class="n">G</span><span class="p">)</span>
+
+            <span class="c1"># if not eigensolve:</span>
+            <span class="c1">#     # old school (direct) approach</span>
+            <span class="c1">#     G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     def dwg(dw, g):</span>
+            <span class="c1">#         if abs(dw*g) &gt; 1e8: return 1./( (1./dw) + g)</span>
+            <span class="c1">#         else: return dw/(1.+dw*g)</span>
+            <span class="c1">#     # improved stability algorithm? (to handle when domega gets very large)</span>
+            <span class="c1">#     # NOTE: this was not deemed to work.</span>
+            <span class="c1">#     dwn, eign = np.linalg.eigh(delta_om)</span>
+            <span class="c1">#     print(delta_om)</span>
+            <span class="c1">#     print(dwn)</span>
+            <span class="c1">#     print(eign)</span>
+            <span class="c1">#     Grot = np.dot(eign.T, np.dot(G0, eign))</span>
+            <span class="c1">#     # sort the eigenvalues from smallest influence to largest</span>
+            <span class="c1">#     for n, garbage in sorted( ( ( n, np.abs(dwg(dw,Grot[n,n])) )</span>
+            <span class="c1">#                                 for n, dw in enumerate(dwn)),</span>
+            <span class="c1">#                              key=lambda t: t[1] ):</span>
+            <span class="c1">#         # Gin = Grot[n,:].copy()  # G[n,:] for outer product</span>
+            <span class="c1">#         Grot -= dwg(dwn[n], Grot[n,n])*np.outer(Grot[n], Grot[n])</span>
+            <span class="c1">#     # rotate back</span>
+            <span class="c1">#     G = np.dot(eign, np.dot(Grot, eign.T))</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="n">delta_om</span> <span class="o">+=</span> <span class="n">om2</span>
             <span class="n">delta_omOS</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">om2_om0</span><span class="p">,</span> <span class="n">omega0</span><span class="p">)</span>
             <span class="n">G0OS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GFOSexpansion</span><span class="p">,</span> <span class="n">GF</span><span class="p">)</span>
             <span class="n">G0OSOS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GFOSOSexpansion</span><span class="p">,</span> <span class="n">GF</span><span class="p">)</span>
@@ -1631,7 +1681,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0',
+            VERSION:'1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

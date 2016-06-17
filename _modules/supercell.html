@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>supercell &mdash; Onsager 1.0 documentation</title>
+  <title>supercell &mdash; Onsager 1.1 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="Onsager 1.0 documentation" href="../index.html"/>
+    <link rel="top" title="Onsager 1.1 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -156,6 +156,8 @@
 <span class="kn">from</span> <span class="nn">onsager</span> <span class="kn">import</span> <span class="n">crystal</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
 
+<span class="c1"># TODO: add &quot;parser&quot;--read CONTCAR file, create Supercell</span>
+<span class="c1"># TODO: output PairState from Supercell</span>
 
 <div class="viewcode-block" id="Supercell"><a class="viewcode-back" href="../supercell.html#supercell.Supercell">[docs]</a><span class="k">class</span> <span class="nc">Supercell</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -193,7 +195,7 @@
             <span class="k">for</span> <span class="n">wset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Wyckofflist</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">wset</span><span class="p">:</span> <span class="k">break</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Wyckofflist</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">wset</span><span class="p">:</span>
-                <span class="c1"># grab the set of (c,i) of Wyckoff sets (next returns first that matches, None if none:</span>
+                <span class="c1"># grab the set of (c,i) of Wyckoff sets (next returns first that matches, None if none):</span>
                 <span class="n">indexset</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">iset</span> <span class="k">for</span> <span class="n">iset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">Wyckoff</span> <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="ow">in</span> <span class="n">iset</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">Wyckofflist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">frozenset</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">indexatom</span><span class="p">[</span><span class="n">ci</span><span class="p">]</span> <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="n">indexset</span><span class="p">]))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">Wyckoffchem</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
@@ -671,7 +673,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0',
+            VERSION:'1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

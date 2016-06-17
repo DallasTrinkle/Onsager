@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>OnsagerCalc &mdash; Onsager 1.0 documentation</title>
+  <title>OnsagerCalc &mdash; Onsager 1.1 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="Onsager 1.0 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 1.1 documentation" href="index.html"/>
         <link rel="next" title="Automator" href="automator.html"/>
         <link rel="prev" title="GFcalc" href="GFcalc.html"/> 
 
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -444,12 +444,11 @@ sites for that chemistry, and a jumpnetwork for the vacancy. The thermodynamic
 range (number of &#8220;shells&#8221; &#8211; see <code class="docutils literal"><span class="pre">crystalStars.StarSet</span></code> for precise definition).</p>
 <dl class="method">
 <dt id="OnsagerCalc.VacancyMediated.Lij">
-<code class="descname">Lij</code><span class="sig-paren">(</span><em>bFV</em>, <em>bFS</em>, <em>bFSV</em>, <em>bFT0</em>, <em>bFT1</em>, <em>bFT2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.Lij"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.Lij" title="Permalink to this definition">¶</a></dt>
+<code class="descname">Lij</code><span class="sig-paren">(</span><em>bFV</em>, <em>bFS</em>, <em>bFSV</em>, <em>bFT0</em>, <em>bFT1</em>, <em>bFT2</em>, <em>large_om2=100000000.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.Lij"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.Lij" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv from the scaled free energies.
 The Green function entries are calculated from the omega0 info. As this is the most
 time-consuming part of the calculation, we cache these values with a dictionary
-and hash function.
-Used by Lij.</p>
+and hash function.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -461,6 +460,7 @@ Used by Lij.</p>
 <li><strong>bFT0[Nomega0]</strong> &#8211; beta*eneT0 - ln(preT0) (relative to minimum value of bFV)</li>
 <li><strong>bFT1[Nomega1]</strong> &#8211; beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)</li>
 <li><strong>bFT2[Nomega2]</strong> &#8211; beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)</li>
+<li><strong>large_om2</strong> &#8211; threshold for changing treatment of omega2 contributions (default: 10^8)</li>
 </ul>
 </td>
 </tr>
@@ -970,7 +970,7 @@ and the splits to separate vTKarray back into vTK</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0',
+            VERSION:'1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

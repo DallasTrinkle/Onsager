@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Automator &mdash; Onsager 1.0 documentation</title>
+  <title>Automator &mdash; Onsager 1.1 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="Onsager 1.0 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 1.1 documentation" href="index.html"/>
         <link rel="prev" title="OnsagerCalc" href="OnsagerCalc.html"/> 
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -149,9 +149,10 @@ atomic-scale transition state calculations. This includes:</p>
 <li>Transformation information from relaxed states to initial states.</li>
 <li>INCAR files for relaxation and NEB runs; KPOINTS for each.</li>
 <li>perl script to transform CONTCAR output from a state relaxation to NEB endpoints.</li>
-<li>perl script to linearly interpolate between NEB endpoints.</li>
-<li>Makefile to run everything (representing the &#8220;directed graph&#8221; of calculations)</li>
+<li>perl script to linearly interpolate between NEB endpoints.*</li>
+<li>Makefile to run NEB construction.</li>
 </ol>
+<p><em>Note:</em> the NEB interpolator script (nebmake.pl) is part of the <a class="reference external" href="http://theory.cm.utexas.edu/vtsttools/scripts.html">VTST scripts</a>.</p>
 <dl class="function">
 <dt id="automator.map2string">
 <code class="descclassname">automator.</code><code class="descname">map2string</code><span class="sig-paren">(</span><em>tag</em>, <em>groupop</em>, <em>mapping</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#map2string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.map2string" title="Permalink to this definition">¶</a></dt>
@@ -180,7 +181,7 @@ in initial cell to use.</li>
 <dl class="function">
 <dt id="automator.supercelltar">
 <code class="descclassname">automator.</code><code class="descname">supercelltar</code><span class="sig-paren">(</span><em>tar</em>, <em>superdict</em>, <em>filemode=436</em>, <em>directmode=509</em>, <em>timestamp=None</em>, <em>INCARrelax='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\n'</em>, <em>INCARNEB='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\nIMAGES = 1\nSPRING = -5\nLCLIMB = .TRUE.\nNELMIN = 4\nNFREE = 10\n'</em>, <em>KPOINTS='Gamma\n1\nReciprocal\n0. 0. 0. 1.\n'</em>, <em>basedir=''</em>, <em>statename='relax.'</em>, <em>transitionname='neb.'</em>, <em>IDformat='{:02d}'</em>, <em>JSONdict='tags.json'</em>, <em>YAMLdef='supercell.yaml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#supercelltar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.supercelltar" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes in a tarfile (needs to be open for reading) and a supercelldict (from a
+<dd><p>Takes in a tarfile (needs to be open for writing) and a supercelldict (from a
 diffuser) and creates the full directory structure inside the tarfile. Best used in
 a form like</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;supercells.tar.gz&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w:gz&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
@@ -269,7 +270,7 @@ set to None to not output. <strong>may want to change this to None for the futur
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0',
+            VERSION:'1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
