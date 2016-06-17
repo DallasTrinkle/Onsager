@@ -221,8 +221,6 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
     tagmapping = {v: k for k, v in dirmapping.items()}
 
     # add the common VASP input files: (weird construction to check if kpoints is True)
-    filelist = 1
-    if kpoints: filelist += 1
     for filename, strdata in (('INCAR.relax', INCARrelax), ('INCAR.NEB', INCARNEB)) + \
             ((('KPOINTS', KPOINTS),) if kpoints else tuple()):
         addfile(filename, strdata)
