@@ -262,9 +262,9 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
     # and the transition mappings:
     Makefile = MAKEFILE
     relaxNEB = {}
-    for tag, (map0, map1) in transmapping.items():
+    for tag in sorted(transmapping.keys()):
         dirname = dirmapping[tag]
-        for m, t in ((map0, 'init'), (map1, 'final')):
+        for m, t in ((transmapping[tag][0], 'init'), (transmapping[tag][1], 'final')):
             if m is not None:
                 relax = dirmapping[m[0]]
                 addfile(dirname + '/trans.' + t, map2string(relax, m[1], m[2]))
