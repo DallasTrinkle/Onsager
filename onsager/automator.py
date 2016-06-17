@@ -9,8 +9,10 @@ atomic-scale transition state calculations. This includes:
 2. Transformation information from relaxed states to initial states.
 3. INCAR files for relaxation and NEB runs; KPOINTS for each.
 4. perl script to transform CONTCAR output from a state relaxation to NEB endpoints.
-5. perl script to linearly interpolate between NEB endpoints.
-6. Makefile to run everything (representing the "directed graph" of calculations)
+5. perl script to linearly interpolate between NEB endpoints.*
+6. Makefile to run NEB construction.
+
+*Note:* the NEB interpolator script (nebmake.pl) is part of the `VTST scripts <http://theory.cm.utexas.edu/vtsttools/scripts.html>`_.
 """
 
 __author__ = 'Dallas R. Trinkle'
@@ -103,6 +105,43 @@ Gamma
 0. 0. 0.
 """
 
+MAKEFILE = r"""# Makefile to construct NEB input from relaxation output
+# we set this so that the makefile doesn't use builtin implicit rules
+MAKEFLAGS = -rk
+
+makeneb := "./nebmake.pl"
+transform := "./trans.pl"
+
+Nimages ?= 1
+
+.PHONY: help
+
+target := $(foreach neb, $(wildcard neb.*), $(neb)/01/POSCAR)
+target: $(target)
+
+help:
+	@echo "# Creates input POSCAR for NEB runs, once relaxation runs are complete"
+	@echo "# Uses CONTCAR in relaxation directories to create initial run geometry"
+	@echo "# environment variable: Nimages (default: $(Nimages))"
+	@echo "# target files:"
+	@echo $(target) | sed 's/ /\n/g'
+	@echo "# default target: all"
+
+neb.%: neb.%/01/POSCAR neb.%/POSCAR.init neb.%/POSCAR.final
+
+neb.%/01/POSCAR: neb.%/POSCAR.init neb.%/POSCAR.final
+	@$(makeneb) $^ $(Nimages)
+
+neb.%/POSCAR.init:
+	@$(transform) $^ > $@
+
+neb.%/POSCAR.final:
+	@$(transform) $^ > $@
+
+###############################################################
+# structure of NEB runs:
+"""
+
 
 def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=None,
                  INCARrelax=INCARrelax, INCARNEB=INCARNEB, KPOINTS=KPOINTSgammaonly, basedir="",
@@ -187,8 +226,9 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
     for filename, strdata in (('INCAR.relax', INCARrelax), ('INCAR.NEB', INCARNEB)) + \
             ((('KPOINTS', KPOINTS),) if kpoints else tuple()):
         addfile(filename, strdata)
-    # addfile('trans.pl', TRANSPL, executable=True)
     addfile('trans.pl', str(pkg_resources.resource_string(__name__, 'trans.pl'), 'ascii'), executable=True)
+    addfile('nebmake.pl', str(pkg_resources.resource_string(__name__, 'nebmake.pl'), 'ascii'), executable=True)
+    addfile('Vasp.pm', str(pkg_resources.resource_string(__name__, 'Vasp.pm'), 'ascii'))
     # now, go through the states:
     if 'reference' in superdict:
         addfile('POSCAR', superdict['reference'].POSCAR('Defect-free reference'))
@@ -222,12 +262,22 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
         addsymlink(dirname + '/POTCAR', '../POTCAR')
 
     # and the transition mappings:
+    Makefile = MAKEFILE
+    relaxNEB = {}
     for tag, (map0, map1) in transmapping.items():
         dirname = dirmapping[tag]
-        if map0 is not None:
-            addfile(dirname + '/trans.init', map2string(dirmapping[map0[0]], map0[1], map0[2]))
-        if map1 is not None:
-            addfile(dirname + '/trans.final', map2string(dirmapping[map1[0]], map1[1], map1[2]))
+        for m, t in ((map0, 'init'), (map1, 'final')):
+            if m is not None:
+                relax = dirmapping[m[0]]
+                addfile(dirname + '/trans.' + t, map2string(relax, m[1], m[2]))
+                Makefile += \
+                    "{neb}/POSCAR.{type}: {neb}/trans.{type} {relax}/CONTCAR\n".format(neb=dirname,
+                                                                                       type=t, relax=relax)
+                if relax not in relaxNEB: relaxNEB[relax] = {dirname}
+                else: relaxNEB[relax].add(dirname)
+    addfile('Makefile', Makefile)
+    for relax, NEBset in relaxNEB.items():
+        addfile(relax + '/NEBlist', '\n'.join(k for k in sorted(NEBset)) + '\n')
 
     # JSON dictionary connecting directories and tags: (needs a trailing newline?)
     addfile(JSONdict, json.dumps(tagmapping, indent=4, sort_keys=True) + '\n')

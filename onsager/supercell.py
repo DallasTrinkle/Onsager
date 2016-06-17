@@ -17,6 +17,8 @@ from numbers import Integral
 from onsager import crystal
 from functools import reduce
 
+# TODO: add "parser"--read CONTCAR file, create Supercell
+# TODO: output PairState from Supercell
 
 class Supercell(object):
     """
@@ -54,7 +56,7 @@ class Supercell(object):
             for wset in self.Wyckofflist:
                 if n in wset: break
             if len(self.Wyckofflist) == 0 or n not in wset:
-                # grab the set of (c,i) of Wyckoff sets (next returns first that matches, None if none:
+                # grab the set of (c,i) of Wyckoff sets (next returns first that matches, None if none):
                 indexset = next((iset for iset in self.crys.Wyckoff if (c, i) in iset), None)
                 self.Wyckofflist.append(frozenset([self.indexatom[ci] for ci in indexset]))
                 self.Wyckoffchem.append(self.crys.chemistry[c])
