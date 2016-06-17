@@ -148,7 +148,7 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
                  statename='relax.', transitionname='neb.', IDformat='{:02d}',
                  JSONdict='tags.json', YAMLdef='supercell.yaml'):
     """
-    Takes in a tarfile (needs to be open for reading) and a supercelldict (from a
+    Takes in a tarfile (needs to be open for writing) and a supercelldict (from a
     diffuser) and creates the full directory structure inside the tarfile. Best used in
     a form like
 
