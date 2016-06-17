@@ -729,11 +729,11 @@ class StarSet(object):
                 self.indexdict[self.states[xi]] = (xi, si)
 
 
-def __zeroclean__(x, threshold=1e-8):
-    """Return 0 if x is below a threshold; useful for "symmetrizing" our expansions"""
-    return 0 if np.abs(x) < threshold else x
-
-zeroclean = np.vectorize(__zeroclean__, otypes=[np.float])
+def zeroclean(x, threshold=1e-8):
+    """Modify x in place, return 0 if x is below a threshold; useful for "symmetrizing" our expansions"""
+    for v in np.nditer(x, op_flags=['readwrite']):
+        if abs(v) < threshold: v[...] = 0
+    return x
 
 
 class VectorStarSet(object):

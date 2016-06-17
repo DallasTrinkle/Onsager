@@ -25,6 +25,7 @@ Releases:
 * 0.9. Full release of Interstitial calculator, along with theory paper (see References below).
 * 0.9.1. Added spin degrees of freedom to `crystal` for symmetry purposes; added `supercell` class to aid in automated setup of calculation.
 * 1.0 Now including automator for supercell calculations.
+* 1.1 Automator update with Makefile; corrections for possible overflow error when omega2 gets very large.
 
 References
 ==========

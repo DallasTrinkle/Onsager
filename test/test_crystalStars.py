@@ -89,14 +89,26 @@ class PairStateTests(unittest.TestCase):
     def testZeroClean(self):
         """Does the zero clean function work?"""
         threshold = 1e-8
-        for s in (1, 10, (10,10), (10,10,10), (10,10,10,10)):
+        for s in (1, 3, (3,3), (3,3,3), (3,3,3,3)):
             a = np.random.uniform(-0.99*threshold,0.99*threshold, s)
             b = np.random.uniform(-10*threshold,10*threshold, s)
             azero = stars.zeroclean(a, threshold=threshold)
-            self.assertTrue(np.all(azero == 0), msg='Failed for {} matrix?'.format(s))
+            it = np.nditer(a, flags=['multi_index'])
+            while not it.finished:
+                self.assertEqual(azero[it.multi_index], 0,
+                                 msg='Failed on {} for small {} matrix?'.format(it.multi_index, s))
+                it.iternext()
+            # self.assertTrue(np.all(azero == 0), msg='Failed for {} matrix?'.format(s))
             bnonzero = stars.zeroclean(b, threshold=threshold)
-            if np.any(abs(b) > threshold):
-                self.assertTrue(np.any(bnonzero != 0), msg='Failed for {} matrix?'.format(s))
+            it = np.nditer(b, flags=['multi_index'])
+            while not it.finished:
+                if abs(b[it.multi_index]) > threshold:
+                    self.assertEqual(b[it.multi_index], bnonzero[it.multi_index],
+                                     msg='Failed on nonzero {} for large {} matrix?'.format(it.multi_index, s))
+                else:
+                    self.assertEqual(bnonzero[it.multi_index], 0,
+                                     msg='Failed on zero {} for large {} matrix?'.format(it.multi_index, s))
+                it.iternext()
 
     def testZero(self):
         """Is zero consistent?"""
