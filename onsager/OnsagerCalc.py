@@ -665,16 +665,17 @@ class VacancyMediated(object):
         self.kinetic.generate(Nthermo+1, originstates=True)  # now include origin states (for removal)
         self.vkinetic.generate(self.kinetic)
         # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
-        self.VectorBasis, self.VV = self.crys.FullVectorBasis(self.chem)
-        self.NVB = len(self.VectorBasis)
-        if self.NVB > 0:
-            self.GFexpansion, self.GFstarset, self.GFOSexpansion, self.GFOSOSexpansion = \
-                self.vkinetic.GFexpansion(self.VectorBasis)
-        else:
-            self.VectorBasis.shape = (0, self.N, 3)
-            self.VV.shape = (3, 3, 0, 0)
-            self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
-            self.GFOSexpansion, self.GFOSOSexpansion = np.array([]), np.array([])
+        # self.VectorBasis, self.VV = self.crys.FullVectorBasis(self.chem)
+        # self.NVB = len(self.VectorBasis)
+        # if self.NVB > 0:
+        #     self.GFexpansion, self.GFstarset, self.GFOSexpansion, self.GFOSOSexpansion = \
+        #         self.vkinetic.GFexpansion(self.VectorBasis)
+        # else:
+        #     self.VectorBasis.shape = (0, self.N, 3)
+        #     self.VV.shape = (3, 3, 0, 0)
+        self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
+        # self.GFOSexpansion, self.GFOSOSexpansion = np.array([]), np.array([])
+
         # some indexing helpers:
         # thermo2kin maps star index in thermo to kinetic (should just be range(n), but we use this for safety)
         # kin2vacancy maps star index in kinetic to non-solute configuration from sitelist
@@ -710,18 +711,14 @@ class VacancyMediated(object):
         self.Dom2_om0, self.Dom2 = self.vkinetic.bareexpansions(self.om2_jn, self.om2_jt)
         self.om1_om0, self.om1_om0escape, self.om1expansion, self.om1escape = \
             self.vkinetic.rateexpansions(self.om1_jn, self.om1_jt)
-        if self.NVB > 0:
-            self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
-                self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt, self.VectorBasis)
-        else:
-            self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
-                self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt)
+        self.om2_om0, self.om2_om0escape, self.om2expansion, self.om2escape = \
+            self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt, omega2=True)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
-        self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt)
+        self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt, omega2=True)
         # self.etaSperiodic = self.vkinetic.periodicvectorexpansion('solute')
         # self.etaVperiodic = self.vkinetic.periodicvectorexpansion('vacancy')
-        self.etaV2VB = self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'vacancy')
-        self.etaS2VB = self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'solute')
+        # self.etaV2VB = self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'vacancy')
+        # self.etaS2VB = self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'solute')
 
         # more indexing helpers:
         # kineticsvWyckoff: Wyckoff position of solute and vacancy for kinetic stars
@@ -1394,7 +1391,8 @@ class VacancyMediated(object):
         biasSvec = np.zeros(self.vkinetic.Nvstars)
         biasVvec = np.zeros(self.vkinetic.Nvstars)
         om2 = np.dot(self.om2expansion, omega2)
-        delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0)
+        delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) \
+                   - np.dot(self.om2_om0, omega0)
         for sv, starindex in enumerate(self.vstar2kin):
             svvacindex = self.kin2vacancy[starindex]  # vacancy
             delta_om[sv, sv] += np.dot(self.om1escape[sv, :], omega1escape[sv, :]) - \
@@ -1411,36 +1409,37 @@ class VacancyMediated(object):
 
         # 5. compute Green function:
         G0 = np.dot(self.GFexpansion, GF)
-        if self.NVB == 0:
-            # Note: we first do this *just* with omega1, then ... with omega2, depending on how it behaves
-            G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
-            # Now: to identify the omega2 contributions, we need to find all of the sv indices with a
-            # non-zero contribution to om2bias. That is, where np.any(self.om2bias[sv,:] != 0)
-            om2_sv_indices = [n for n in range(len(self.om2bias)) if not np.allclose(self.om2bias[n, :], 0)]
-            # looks weird, but this is how we slice:
-            G12 = G[om2_sv_indices, :][:, om2_sv_indices]
-            om2_slice = om2[om2_sv_indices, :][:, om2_sv_indices]
-            gdom2 = np.dot(G12, om2_slice)
-            if np.any(np.abs(gdom2) > large_om2):
-                # "large" omega2 terms:
-                gdom2_inv = np.linalg.inv(gdom2)
-                gd1 = np.linalg.inv(np.eye(len(om2_sv_indices)) + gdom2_inv)
-                om2_inv = np.linalg.inv(om2_slice)
-                dgd = np.dot(gdom2_inv, om2_inv)
-                G2 = -np.dot(gd1, dgd)
-                # update with omega2, and then put in change due to omega2
-                G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G.copy(), om2)), G.copy())
-                # G2_bare = np.zeros_like(G)
-                for ni, i in enumerate(om2_sv_indices):
-                    for nj, j in enumerate(om2_sv_indices):
-                        G[i, j] = G2[ni, nj]
-                        # G2_bare[i, j] = om2_inv[ni, nj]
-                # L0ss = np.dot(np.dot(self.vkinetic.outer, np.dot(G2_bare, biasSvec)), biasSvec)
-                # D0ss += L0ss
-                D0ss = np.zeros_like(D0ss)
-            else:
-                # update with omega2 ("small" omega2):
-                G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
+        # if self.NVB == 0:
+
+        # Note: we first do this *just* with omega1, then ... with omega2, depending on how it behaves
+        G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
+        # Now: to identify the omega2 contributions, we need to find all of the sv indices with a
+        # non-zero contribution to om2bias. That is, where np.any(self.om2bias[sv,:] != 0)
+        om2_sv_indices = [n for n in range(len(self.om2bias)) if not np.allclose(self.om2bias[n, :], 0)]
+        # looks weird, but this is how we slice:
+        G12 = G[om2_sv_indices, :][:, om2_sv_indices]
+        om2_slice = om2[om2_sv_indices, :][:, om2_sv_indices]
+        gdom2 = np.dot(G12, om2_slice)
+        if np.any(np.abs(gdom2) > large_om2):
+            # "large" omega2 terms:
+            gdom2_inv = np.linalg.inv(gdom2)
+            gd1 = np.linalg.inv(np.eye(len(om2_sv_indices)) + gdom2_inv)
+            om2_inv = np.linalg.inv(om2_slice)
+            dgd = np.dot(gdom2_inv, om2_inv)
+            G2 = -np.dot(gd1, dgd)
+            # update with omega2, and then put in change due to omega2
+            G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G.copy(), om2)), G.copy())
+            # G2_bare = np.zeros_like(G)
+            for ni, i in enumerate(om2_sv_indices):
+                for nj, j in enumerate(om2_sv_indices):
+                    G[i, j] = G2[ni, nj]
+                    # G2_bare[i, j] = om2_inv[ni, nj]
+            # L0ss = np.dot(np.dot(self.vkinetic.outer, np.dot(G2_bare, biasSvec)), biasSvec)
+            # D0ss += L0ss
+            D0ss = np.zeros_like(D0ss)
+        else:
+            # update with omega2 ("small" omega2):
+            G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
 
             # if not eigensolve:
             #     # old school (direct) approach
@@ -1464,33 +1463,33 @@ class VacancyMediated(object):
             #         Grot -= dwg(dwn[n], Grot[n,n])*np.outer(Grot[n], Grot[n])
             #     # rotate back
             #     G = np.dot(eign, np.dot(Grot, eign.T))
-        else:
-            delta_om += om2
-            delta_omOS = -np.dot(self.om2_om0, omega0)
-            G0OS = np.dot(self.GFOSexpansion, GF)
-            G0OSOS = np.dot(self.GFOSOSexpansion, GF)
-            Dinv = np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om) +
-                                 np.dot(G0OS.T, delta_omOS))
-            A = np.eye(len(self.VectorBasis)) + np.dot(G0OS, delta_omOS.T)
-            B = np.dot(G0OS, delta_om) + np.dot(G0OSOS, delta_omOS)
-            C = np.dot(G0, delta_omOS.T)
-            SDinv = np.linalg.inv(A - np.dot(B, np.dot(Dinv, C)))
-            G = np.dot(Dinv, G0 + np.dot(C, np.dot(SDinv, np.dot(B, np.dot(Dinv, G0)) - G0OS)))
-
-            biasSbar = np.dot(self.etaS2VB, biasSvec)  # folddown to VB
-            om2bar = np.dot(self.etaS2VB, np.dot(om2, self.etaS2VB.T))  # VB x VB
-            etaSbar = np.dot(pinv2(om2bar), biasSbar)  # VB only...
-            D0ss += np.dot(np.dot(self.VV, etaSbar), biasSbar) / self.N
-
-            dbiasS = np.dot(np.dot(om2, self.etaS2VB.T), etaSbar)  # expand back out to sites
-            biasSvec -= dbiasS
-
-            # terms for vv:
-            delta_om_bar = np.dot(self.etaV2VB, delta_omOS.T + np.dot(delta_om, self.etaV2VB.T))  # [NVB, NVB]
-            # delta_om_bar = np.dot(self.etaV2VB, np.dot(delta_om, self.etaV2VB.T))  # [NVB, NVB]
-            delta_om_G0 = np.dot(delta_omOS, G0) + \
-                          np.dot(self.etaV2VB, np.dot(delta_omOS.T, G0OS) + np.dot(delta_om, G0))  # [NVB, NVS]
-            # delta_om_G0 = np.dot(self.etaV2VB, np.dot(delta_om, G0))  # [NVB, NVS]
+        # else:
+        #     delta_om += om2
+        #     delta_omOS = -np.dot(self.om2_om0, omega0)
+        #     G0OS = np.dot(self.GFOSexpansion, GF)
+        #     G0OSOS = np.dot(self.GFOSOSexpansion, GF)
+        #     Dinv = np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om) +
+        #                          np.dot(G0OS.T, delta_omOS))
+        #     A = np.eye(len(self.VectorBasis)) + np.dot(G0OS, delta_omOS.T)
+        #     B = np.dot(G0OS, delta_om) + np.dot(G0OSOS, delta_omOS)
+        #     C = np.dot(G0, delta_omOS.T)
+        #     SDinv = np.linalg.inv(A - np.dot(B, np.dot(Dinv, C)))
+        #     G = np.dot(Dinv, G0 + np.dot(C, np.dot(SDinv, np.dot(B, np.dot(Dinv, G0)) - G0OS)))
+        #
+        #     biasSbar = np.dot(self.etaS2VB, biasSvec)  # folddown to VB
+        #     om2bar = np.dot(self.etaS2VB, np.dot(om2, self.etaS2VB.T))  # VB x VB
+        #     etaSbar = np.dot(pinv2(om2bar), biasSbar)  # VB only...
+        #     D0ss += np.dot(np.dot(self.VV, etaSbar), biasSbar) / self.N
+        #
+        #     dbiasS = np.dot(np.dot(om2, self.etaS2VB.T), etaSbar)  # expand back out to sites
+        #     biasSvec -= dbiasS
+        #
+        #     # terms for vv:
+        #     delta_om_bar = np.dot(self.etaV2VB, delta_omOS.T + np.dot(delta_om, self.etaV2VB.T))  # [NVB, NVB]
+        #     # delta_om_bar = np.dot(self.etaV2VB, np.dot(delta_om, self.etaV2VB.T))  # [NVB, NVB]
+        #     delta_om_G0 = np.dot(delta_omOS, G0) + \
+        #                   np.dot(self.etaV2VB, np.dot(delta_omOS.T, G0OS) + np.dot(delta_om, G0))  # [NVB, NVS]
+        #     # delta_om_G0 = np.dot(self.etaV2VB, np.dot(delta_om, G0))  # [NVB, NVS]
 
         # 6. Compute bias contributions to Onsager coefficients
         etaVvec, etaSvec = np.dot(G, biasVvec), np.dot(G, biasSvec)
@@ -1499,12 +1498,12 @@ class VacancyMediated(object):
         L1ss = np.dot(outer_etaSvec, biasSvec) / self.N
         L1sv = np.dot(outer_etaSvec, biasVvec) / self.N
         L1vv = np.dot(outer_etaVvec, biasVvec) / self.N
-        if self.NVB > 0:
-            etaV0 = np.tensordot(self.VectorBasis, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
-            outer_etaV0 = np.dot(self.VV, etaV0)
-            L1vv += np.dot(outer_etaV0,
-                           2 * np.dot(self.etaV2VB - delta_om_G0, biasVvec)
-                           - np.dot(delta_om_bar, etaV0)) / self.N
+        # if self.NVB > 0:
+        #     etaV0 = np.tensordot(self.VectorBasis, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
+        #     outer_etaV0 = np.dot(self.VV, etaV0)
+        #     L1vv += np.dot(outer_etaV0,
+        #                    2 * np.dot(self.etaV2VB - delta_om_G0, biasVvec)
+        #                    - np.dot(delta_om_bar, etaV0)) / self.N
 
         return L0vv, D0ss + L1ss, -D0ss + L1sv, D0vv + L1vv
 

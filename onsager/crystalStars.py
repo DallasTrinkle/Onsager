@@ -907,30 +907,20 @@ class VectorStarSet(object):
         VSSet.outer = HDF5group['outer'].value
         return VSSet
 
-    def GFexpansion(self, VectorBasis=()):
+    def GFexpansion(self):
         """
         Construct the GF matrix expansion in terms of the star vectors, and indexed
-        to GFstarset. Now takes in a VectorBasis; if not an empty set, returns the
-        expansion of the vector stars to the "origin states" as represented by the VB.
+        to GFstarset.
 
-        :param VectorBasis: (optional) list of [Nsites, 3]
-            the vector basis in the unit cell for the solute states
         :return GFexpansion: array[Nsv, Nsv, NGFstars]
             the GF matrix[i, j] = sum(GFexpansion[i, j, k] * GF(starGF[k]))
         :return GFstarset: starSet corresponding to the GF
-        :return GFOSexpansion: array[NVB, Nsv, NGFstars]
-            the GF matrix[os, i] = sum(GFOSexpansion[os, i, k] * GF(starGF[k]))
         """
         if self.Nvstars == 0:
             return None
         GFstarset = self.starset.copy(empty=True)
         GFstarset.diffgenerate(self.starset, self.starset)
         GFexpansion = np.zeros((self.Nvstars, self.Nvstars, GFstarset.Nstars))
-        NVB = len(VectorBasis)
-        if NVB > 0:
-            GFOSexpansion = np.zeros((NVB, self.Nvstars, GFstarset.Nstars))
-            GFOSOSexpansion = np.zeros((NVB, NVB, GFstarset.Nstars))
-            zeroPS = [PairState.zero(n) for n in range(VectorBasis[0].shape[0])]  # number of sites
         for i in range(self.Nvstars):
             for si, vi in zip(self.vecpos[i], self.vecvec[i]):
                 for j in range(i, self.Nvstars):
@@ -942,33 +932,12 @@ class VectorStarSet(object):
                         k = GFstarset.starindex(ds)
                         if k is None: raise ArithmeticError('GF star not large enough to include {}?'.format(ds))
                         GFexpansion[i, j, k] += np.dot(vi, vj)
-                if NVB > 0:
-                    for j, VB in enumerate(VectorBasis):
-                        for n, fs in enumerate(zeroPS):
-                            try:
-                                ds = fs ^ self.starset.states[si]
-                            except:
-                                continue
-                            k = GFstarset.starindex(ds)
-                            if k is None: raise ArithmeticError('GF star not large enough to include {}?'.format(ds))
-                            GFOSexpansion[j, i, k] += np.dot(VB[n, :], vi)
-        if NVB > 0:
-            OSindex = [GFstarset.starindex(zPS) for zPS in zeroPS]
-            for j, VB in enumerate(VectorBasis):
-                for n, k in enumerate(OSindex):
-                    v2 = np.dot(VB[n, :], VB[n, :])
-                    GFOSOSexpansion[j, j, k] += v2
-
         # symmetrize
         for i in range(self.Nvstars):
             for j in range(0, i):
                 GFexpansion[i, j, :] = GFexpansion[j, i, :]
         # cleanup on return:
-        if NVB > 0:
-            return zeroclean(GFexpansion), GFstarset, \
-                   zeroclean(GFOSexpansion), zeroclean(GFOSOSexpansion)
-        else:
-            return zeroclean(GFexpansion), GFstarset
+        return zeroclean(GFexpansion), GFstarset
 
     def rateexpansions(self, jumpnetwork, jumptype, omega2=False):
         """
@@ -993,11 +962,11 @@ class VectorStarSet(object):
             we "hijack" this and use it for [NVB, Nsv, Njump_omega0], as we're doing an omega2
             calc and rate0expansion won't be used *anyway*.
         :return rate0escape: array[Nsv, Njump_omega0]
-            the escape contributions: omega0[i,i] += sum(rate0escape[i,k]*omega0[k]*probfactor(PS[k]))
+            the escape contributions: omega0[i,i] += sum(rate0escape[i,k]*omega0[k]*probfactor0(PS[k]))
         :return rate1expansion: array[Nsv, Nsv, Njump_omega1]
             the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])
         :return rate1escape: array[Nsv, Njump_omega1]
-            the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega0[k]*probfactor(PS[k]))
+            the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega1[k]*probfactor(PS[k]))
         """
         if self.Nvstars == 0: return None
         rate0expansion = np.zeros((self.Nvstars, self.Nvstars, len(self.starset.jumpnetwork_index)))
@@ -1026,6 +995,7 @@ class VectorStarSet(object):
                                             if Rj == OSindex:
                                                 rate0expansion[i, j, jt] += np.dot(vi, vj)
                                                 rate0expansion[j, i, jt] += np.dot(vi, vj)
+                                                rate0escape[j, jt] -= np.dot(vj, vj)
         # cleanup on return
         return zeroclean(rate0expansion), zeroclean(rate0escape), \
                zeroclean(rate1expansion), zeroclean(rate1escape)
@@ -1075,7 +1045,9 @@ class VectorStarSet(object):
                         for j in range(self.Nvstars):
                             for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                 if Rj == OSindex:
-                                    bias0expansion[j, jt] += np.dot(vj, dx)
+                                    geom_bias = -np.dot(vj, dx)
+                                    bias1expansion[j, k] += geom_bias  # do we need this??
+                                    bias0expansion[j, jt] += geom_bias
 
         # cleanup on return
         return zeroclean(bias0expansion), zeroclean(bias1expansion)
