@@ -662,10 +662,9 @@ class VacancyMediated(object):
 
         self.thermo.generate(Nthermo, originstates=False)
         # self.kinetic = self.thermo + self.NNstar
-        self.kinetic.generate(Nthermo+1, originstates=True)
+        self.kinetic.generate(Nthermo+1, originstates=True)  # now include origin states (for removal)
         self.vkinetic.generate(self.kinetic)
         # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
-        # Vector star set, generates a LOT of our calculation:
         self.VectorBasis, self.VV = self.crys.FullVectorBasis(self.chem)
         self.NVB = len(self.VectorBasis)
         if self.NVB > 0:

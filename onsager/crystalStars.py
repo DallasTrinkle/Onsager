@@ -305,8 +305,8 @@ class StarSet(object):
 
     def generate(self, Nshells, threshold=1e-8, originstates=False):
         """
-        Construct the points and the stars in the set. Now includes "origin states" by default; these
-        are PairStates that iszero() is True; they are only included if they have a nonzero VectorBasis.
+        Construct the points and the stars in the set. Does not include "origin states" by default; these
+        are PairStates that iszero() is True; they are only needed if crystal has a nonzero VectorBasis.
 
         :param Nshells: number of shells to generate; this is interpreted as subsequent
           "sums" of jumplist (as we need the solute to be connected to the vacancy by at least one jump)
@@ -578,7 +578,8 @@ class StarSet(object):
             i,f index into states for the initial and final states, and dx = displacement of vacancy
             in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
         :return jumptype: list of indices corresponding to the (original) jump type for each
-            symmetry unique jump; useful for constructing a LIMB approximation
+            symmetry unique jump; useful for constructing a LIMB approximation, and needed to
+            construct delta_omega
         :return starpair: list of tuples of the star indices of the i and f states for each
             symmetry unique jump
         """
@@ -614,7 +615,8 @@ class StarSet(object):
             i,f index into states for the initial and final states, and dx = displacement of vacancy
             in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx
         :return jumptype: list of indices corresponding to the (original) jump type for each
-            symmetry unique jump; useful for constructing a LIMB approximation
+            symmetry unique jump; useful for constructing a LIMB approximation, and needed to
+            construct delta_omega
         :return starpair: list of tuples of the star indices of the i and f states for each
             symmetry unique jump
         """
@@ -665,7 +667,7 @@ class StarSet(object):
 
     def diffgenerate(self, S1, S2, threshold=1e-8):
         """
-        Construct a starSet using endpoint subtraction from starset S1 to starset S2. Can (will)
+        Construct a starSet using endpoint subtraction from starset S1 to starset S2. Will
         include zero. Points from vacancy states of S1 to vacancy states of S2.
 
         :param S1: starSet for start
