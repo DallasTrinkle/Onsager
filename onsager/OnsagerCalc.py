@@ -639,7 +639,9 @@ class VacancyMediated(object):
         self.om0_jn = copy.deepcopy(jumpnetwork)
         self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4)  # Nmax?
         # do some initial setup:
-        self.thermo = stars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
+        # self.thermo = stars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
+        self.thermo = stars.StarSet(self.jumpnetwork, self.crys, self.chem) # just create; call generate later
+        self.kinetic = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
         self.NNstar = stars.StarSet(self.jumpnetwork, self.crys, self.chem, 1)
         # self.kinetic = self.thermo + self.NNstar
         self.vkinetic = stars.VectorStarSet()
@@ -658,8 +660,9 @@ class VacancyMediated(object):
         if Nthermo == getattr(self, 'Nthermo', 0): return
         self.Nthermo = Nthermo
 
-        self.thermo.generate(Nthermo)
-        self.kinetic = self.thermo + self.NNstar
+        self.thermo.generate(Nthermo, originstates=False)
+        # self.kinetic = self.thermo + self.NNstar
+        self.kinetic.generate(Nthermo+1, originstates=True)
         self.vkinetic.generate(self.kinetic)
         # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
         # Vector star set, generates a LOT of our calculation:

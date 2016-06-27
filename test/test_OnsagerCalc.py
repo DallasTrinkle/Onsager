@@ -408,7 +408,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                                 msg='{} has solute/vacancy at {} not {}'.format(k, u, crysu))
             else:
                 # solute-vacancy; grab the corresponding PairState:
-                PS = diffuser.thermo.states[diffuser.kinetic.stars[diffuser.tagdict[k]][0]]
+                PS = diffuser.thermo.states[diffuser.thermo.stars[diffuser.tagdict[k]][0]]
                 # check the solute first:
                 crysu = basis[PS.i]
                 self.assertTrue(np.allclose(su, crysu),
