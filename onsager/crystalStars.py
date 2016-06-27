@@ -1066,8 +1066,17 @@ class VectorStarSet(object):
                 for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
                     if svR[0] == IS:
                         geom_bias = np.dot(svv[0], dx) * len(svR)
-                        bias0expansion[i, jt] += geom_bias
                         bias1expansion[i, k] += geom_bias
+                        bias0expansion[i, jt] += geom_bias
+                if omega2:
+                    # find the "origin state" corresponding to the solute; incorporate the change in bias
+                    OSindex = self.starset.stateindex(PairState.zero(self.starset.states[IS].i))
+                    if OSindex is not None:
+                        for j in range(self.Nvstars):
+                            for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
+                                if Rj == OSindex:
+                                    bias0expansion[j, jt] += np.dot(vj, dx)
+
         # cleanup on return
         return zeroclean(bias0expansion), zeroclean(bias1expansion)
 
