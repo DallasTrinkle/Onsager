@@ -970,7 +970,7 @@ class VectorStarSet(object):
         else:
             return zeroclean(GFexpansion), GFstarset
 
-    def rateexpansions(self, jumpnetwork, jumptype, VectorBasis=()):
+    def rateexpansions(self, jumpnetwork, jumptype, omega2=False):
         """
         Construct the omega0 and omega1 matrix expansions in terms of the jumpnetwork;
         includes the escape terms separately. The escape terms are tricky because they have
@@ -986,8 +986,8 @@ class VectorStarSet(object):
             corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
             are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
-        :param VectorBasis: (optional) list of [Nsites, 3]
-            the vector basis in the unit cell for the solute states
+        :param omega2: (optional) are we dealing with the omega2 list, so we need to remove
+            origin states? (default=False)
         :return rate0expansion: array[Nsv, Nsv, Njump_omega0]
             the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k]); *IF* NVB>0
             we "hijack" this and use it for [NVB, Nsv, Njump_omega0], as we're doing an omega2
@@ -1004,9 +1004,6 @@ class VectorStarSet(object):
         rate1expansion = np.zeros((self.Nvstars, self.Nvstars, len(jumpnetwork)))
         rate0escape = np.zeros((self.Nvstars, len(self.starset.jumpnetwork_index)))
         rate1escape = np.zeros((self.Nvstars, len(jumpnetwork)))
-        NVB = len(VectorBasis)
-        if NVB > 0:
-            rate0expansion = np.zeros((NVB, self.Nvstars, len(self.starset.jumpnetwork_index)))
         for k, jumplist, jt in zip(itertools.count(), jumpnetwork, jumptype):
             for (IS, FS), dx in jumplist:
                 for i in range(self.Nvstars):
@@ -1018,24 +1015,22 @@ class VectorStarSet(object):
                             for j in range(self.Nvstars):
                                 for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
                                     if Rj == FS:
-                                        if NVB == 0: rate0expansion[i, j, jt] += np.dot(vi, vj)
+                                        if not omega2: rate0expansion[i, j, jt] += np.dot(vi, vj)
                                         rate1expansion[i, j, k] += np.dot(vi, vj)
-                            if NVB > 0:
-                                # work through the VB, and dot into the "origin state" given by the solute
-                                wi = self.starset.states[IS].i
-                                for j, VB in enumerate(VectorBasis):
-                                    rate0expansion[j, i, jt] += np.dot(VB[wi, :], vi)
-
-        # symmetrize
-        # for i in range(self.Nvstars):
-        #     for j in range(i+1, self.Nvstars):
-        #         rate0expansion[i, j, :] = rate0expansion[j, i, :]
-        #         rate1expansion[i, j, :] = rate1expansion[j, i, :]
+                            if omega2:
+                                # find the "origin state" corresponding to the solute; "remove" those rates
+                                OSindex = self.starset.stateindex(PairState.zero(self.starset.states[IS].i))
+                                if OSindex is not None:
+                                    for j in range(self.Nvstars):
+                                        for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
+                                            if Rj == OSindex:
+                                                rate0expansion[i, j, jt] += np.dot(vi, vj)
+                                                rate0expansion[j, i, jt] += np.dot(vi, vj)
         # cleanup on return
         return zeroclean(rate0expansion), zeroclean(rate0escape), \
                zeroclean(rate1expansion), zeroclean(rate1escape)
 
-    def biasexpansions(self, jumpnetwork, jumptype):
+    def biasexpansions(self, jumpnetwork, jumptype, omega2=False):
         """
         Construct the bias1 and bias0 vector expansion in terms of the jumpnetwork.
         We return the bias0 contribution so that the db = bias1 - bias0 can be determined.
@@ -1054,6 +1049,8 @@ class VectorStarSet(object):
             corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
             are indices corresponding to states in our starset.
         :param jumptype: specific omega0 jump type that the jump corresponds to
+        :param omega2: (optional) are we dealing with the omega2 list, so we need to remove
+            origin states? (default=False)
         :return bias0expansion: array[Nsv, Njump_omega0]
             the gen0 vector[i] = sum(bias0expasion[i, k] * sqrt(probfactor0[PS[k]]) * omega0[k])
         :return bias1expansion: array[Nsv, Njump_omega1]
