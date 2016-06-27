@@ -1234,7 +1234,7 @@ class VacancyMediated(object):
         """
         Read in a series of prefactors (:math:`\\exp(S/k_\\text{B})`) and energies, and return
         :math:`\\beta F` for energies and transition state energies. Used to provide scaled values
-        to Lij() and _lij().
+        to Lij().
         Can specify all of the entries using a dictionary; e.g., ``preene2betafree(kT, **data_dict)``
         and then send that output as input to Lij: ``Lij(*preene2betafree(kT, **data_dict))``
         (we ignore extra arguments so that a dictionary including additional entries can be passed)
@@ -1321,7 +1321,7 @@ class VacancyMediated(object):
 
     def Lij(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2, large_om2=1e8):
         """
-        Calculates the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv from the scaled free energies.
+        Calculates the transport coefficients: L0vv, Lss, Lsv, L1vv from the scaled free energies.
         The Green function entries are calculated from the omega0 info. As this is the most
         time-consuming part of the calculation, we cache these values with a dictionary
         and hash function.
