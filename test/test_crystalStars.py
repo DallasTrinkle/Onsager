@@ -354,7 +354,7 @@ class JumpNetworkTests(unittest.TestCase):
         """Check that the counts in the jumpnetwork make sense for FCC, with Nshells = 1, 2"""
         # each of the 12 <110> pairs to 101, 10-1, 011, 01-1 = 4, so should be 48 pairs
         # (which includes "double counting": i->j and j->i)
-        # but *all* of those 48 are all equivalent to each other by symmetry: one double-star.
+        # but *all* of those 48 are all equivalent to each other by symmetry: one jump network.
         self.starset.generate(1)
         jumpnetwork, jt, sp = self.starset.jumpnetwork_omega1()
         self.assertEqual(len(jumpnetwork), 1)
@@ -739,7 +739,7 @@ class VectorStarOmega0Tests(unittest.TestCase):
         # NOTE: now we only take omega0 *here* to be those equivalent to omega1 jumps; the exchange
         # terms are handled in omega2; the jumps outside the kinetic shell simply contributed onsite escape
         # terms that get subtracted away, since the outer kinetic shell *has* to have zero energy
-        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have jump networks to worry about...
         jumpnetwork_omega1, jt, sp = self.starset.jumpnetwork_omega1()
         self.vecstarset = stars.VectorStarSet(self.starset)
         rate0expand, rate0escape, rate1expand, rate1escape = self.vecstarset.rateexpansions(jumpnetwork_omega1, jt)
@@ -830,7 +830,7 @@ class VectorStarOmegalinearTests(unittest.TestCase):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testConstructOmega1(self):
-        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have jump networks to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         jumpnetwork_omega1, jt, sp = self.starset.jumpnetwork_omega1()
         rate0expand, rate0escape, rate1expand, rate1escape = self.vecstarset.rateexpansions(jumpnetwork_omega1, jt)
@@ -915,7 +915,7 @@ class VectorStarOmega2linearTests(unittest.TestCase):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testConstructOmega2(self):
-        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have jump networks to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         jumpnetwork_omega2, jt, sp = self.starset.jumpnetwork_omega2()
         rate0expand, rate0escape, rate2expand, rate2escape = self.vecstarset.rateexpansions(jumpnetwork_omega2, jt)
@@ -999,7 +999,7 @@ class VectorStarBias2linearTests(unittest.TestCase):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testConstructBias2(self):
-        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have jump networks to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         jumpnetwork_omega2, jt, sp = self.starset.jumpnetwork_omega2()
         bias0expand, bias2expand = self.vecstarset.biasexpansions(jumpnetwork_omega2, jt)
@@ -1090,7 +1090,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testConstructBias1(self):
-        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have jump networks to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         jumpnetwork_omega1, jt, sp = self.starset.jumpnetwork_omega1()
         bias0expand, bias1expand = self.vecstarset.biasexpansions(jumpnetwork_omega1, jt)
@@ -1123,7 +1123,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
         vectorbasislist = OnsagerCalc.Interstitial(self.crys, self.chem, self.sitelist, self.jumpnetwork).VectorBasis
         # we *should* have some projection if there's a vectorbasis, so only continue if this is empty
         if len(vectorbasislist) != 0: return
-        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
+        self.starset.generate(2)  # we need at least 2nd nn to even have jump networks to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         for type in ('solute', 'vacancy'):
             self.assertTrue(np.allclose(self.vecstarset.periodicvectorexpansion(type), 0))
@@ -1184,24 +1184,59 @@ class VectorStarPeriodicBias(unittest.TestCase):
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
-    def testPeriodicBias(self):
-        self.starset.generate(2)  # we need at least 2nd nn to even have double-stars to worry about...
+    # def testPeriodicBias(self):
+    #     """Do our periodic expansions work correctly?"""
+    #     self.starset.generate(2)  # we need at least 2nd nn to even have jump networks to worry about...
+    #     self.vecstarset = stars.VectorStarSet(self.starset)
+    #     vectorbasislist = self.crys.FullVectorBasis(self.chem)[0]
+    #     NVB = len(vectorbasislist)
+    #     for elemtype, attr in zip(['vacancy', 'solute'], ['j', 'i']):
+    #         periodicexpansion = self.vecstarset.periodicvectorexpansion(elemtype)
+    #         VBexpansion = self.vecstarset.unitcellVectorBasisfolddown(vectorbasislist, elemtype)
+    #         for n in range(self.vecstarset.Nvstars):
+    #             for i in range(NVB):
+    #                 self.assertTrue(np.allclose(np.tensordot(vectorbasislist[i, :, :],
+    #                                                          periodicexpansion[n, :, :],
+    #                                                          axes=((0, 1), (0, 1))), VBexpansion[i, n]))
+    #         vb = sum((2. * u - 1) * vect for u, vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist))
+    #         svexp = np.tensordot(periodicexpansion, vb, axes=((1, 2), (0, 1)))
+    #         vbdirect = np.array([vb[getattr(PS, attr)] for PS in self.starset.states])
+    #         vbexp = np.zeros((self.starset.Nstates, 3))
+    #         for i, svR, svv in zip(stars.itertools.count(), self.vecstarset.vecpos, self.vecstarset.vecvec):
+    #             for s, v in zip(svR, svv):
+    #                 vbexp[s, :] += v * svexp[i]
+    #         self.assertTrue(np.allclose(vbdirect, vbexp))
+
+    def testOriginStates(self):
+        """Does our origin state treatment work correctly to produce the vector bases?"""
+        self.starset.generate(2, originstates=True)  # we need at least 2nd nn to even have jump networks to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         vectorbasislist = self.crys.FullVectorBasis(self.chem)[0]
         NVB = len(vectorbasislist)
         for elemtype, attr in zip(['vacancy', 'solute'], ['j', 'i']):
-            periodicexpansion = self.vecstarset.periodicvectorexpansion(elemtype)
-            VBexpansion = self.vecstarset.unitcellVectorBasisfolddown(vectorbasislist, elemtype)
-            for n in range(self.vecstarset.Nvstars):
-                for i in range(NVB):
-                    self.assertTrue(np.allclose(np.tensordot(vectorbasislist[i, :, :],
-                                                             periodicexpansion[n, :, :],
-                                                             axes=((0, 1), (0, 1))), VBexpansion[i, n]))
-            vb = sum((2. * u - 1) * vect for u, vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist))
-            svexp = np.tensordot(periodicexpansion, vb, axes=((1, 2), (0, 1)))
-            vbdirect = np.array([vb[getattr(PS, attr)] for PS in self.starset.states])
-            vbexp = np.zeros((self.starset.Nstates, 3))
-            for i, svR, svv in zip(stars.itertools.count(), self.vecstarset.vecpos, self.vecstarset.vecvec):
-                for s, v in zip(svR, svv):
-                    vbexp[s, :] += v * svexp[i]
-            self.assertTrue(np.allclose(vbdirect, vbexp))
+            OSindices, folddown, OS_VB = self.vecstarset.originstateVectorBasisfolddown(elemtype)
+            NOS = len(OSindices)
+            self.assertEqual(NOS, NVB)
+            self.assertEqual(folddown.shape, (NOS, self.vecstarset.Nvstars))
+            self.assertEqual(OS_VB.shape, (NOS,) + vectorbasislist[0].shape)
+            for n, svR in enumerate(self.vecstarset.vecpos):
+                if n in OSindices:
+                    for i in svR:
+                        self.assertTrue(self.starset.states[i].iszero())
+                else:
+                    for i in svR:
+                        self.assertFalse(self.starset.states[i].iszero())
+            for n in range(10):
+                # test that our OS in our VectorStar make a proper basis according to our VB:
+                vb = sum((2. * u - 1) * vect for u, vect in zip(np.random.random(len(vectorbasislist)), vectorbasislist))
+                vb_proj = np.tensordot(OS_VB, np.tensordot(OS_VB, vb, axes=((1, 2), (0, 1))), axes=(0, 0))
+                self.assertTrue(np.allclose(vb, vb_proj))
+                # expand out to all sites:
+                svexp = np.dot(folddown.T, np.tensordot(OS_VB, vb, axes=((1, 2), (0, 1))))
+                vbdirect = np.array([vb[getattr(PS, attr)] for PS in self.starset.states])
+                vbexp = np.zeros((self.starset.Nstates, 3))
+                for svcoeff, svR, svv in zip(svexp, self.vecstarset.vecpos, self.vecstarset.vecvec):
+                    for s, v in zip(svR, svv):
+                        vbexp[s, :] += v * svcoeff
+                self.assertTrue(np.allclose(vbdirect, vbexp))
+

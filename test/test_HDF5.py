@@ -157,5 +157,16 @@ class HDF5ParsingTests(unittest.TestCase):
         for L0, Lcopy in zip(HCP_diffuser.Lij(*HCP_diffuser.preene2betafree(1.0, **thermaldef)),
                              HCP_diffuser_copy.Lij(*HCP_diffuser_copy.preene2betafree(1.0, **thermaldef))):
             self.assertTrue(np.allclose(L0, Lcopy), msg='{}\n!=\n{}'.format(L0, Lcopy))
-
+        # Test with B2 (there are additional terms that get used when we have origin states)
+        B2 = crystal.Crystal(np.eye(3), [np.zeros(3), np.array([0.45, 0.45, 0.45])])
+        B2diffuser = OnsagerCalc.VacancyMediated(B2, 0, B2.sitelist(0), B2.jumpnetwork(0, 0.99), 1)
+        B2diffuser.addhdf5(self.f.create_group('B2'))
+        B2diffuser_copy = OnsagerCalc.VacancyMediated.loadhdf5(self.f['B2'])
+        Nsites, Njumps = len(B2diffuser.sitelist), len(B2diffuser.om0_jn)
+        tdef = {'preV': np.ones(Nsites), 'eneV': np.zeros(Njumps),
+                'preT0': np.ones(Njumps), 'eneT0': np.zeros(Njumps)}
+        tdef.update(B2diffuser.maketracerpreene(**tdef))
+        for L0, Lcopy in zip(B2diffuser.Lij(*B2diffuser.preene2betafree(1.0, **tdef)),
+                             B2diffuser_copy.Lij(*B2diffuser_copy.preene2betafree(1.0, **tdef))):
+            self.assertTrue(np.allclose(L0, Lcopy), msg='{}\n!=\n{}'.format(L0, Lcopy))
 

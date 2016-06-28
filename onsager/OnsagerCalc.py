@@ -661,20 +661,10 @@ class VacancyMediated(object):
         self.Nthermo = Nthermo
 
         self.thermo.generate(Nthermo, originstates=False)
-        # self.kinetic = self.thermo + self.NNstar
         self.kinetic.generate(Nthermo + 1, originstates=True)  # now include origin states (for removal)
         self.vkinetic.generate(self.kinetic)
         # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
-        # self.VectorBasis, self.VV = self.crys.FullVectorBasis(self.chem)
-        # self.NVB = len(self.VectorBasis)
-        # if self.NVB > 0:
-        #     self.GFexpansion, self.GFstarset, self.GFOSexpansion, self.GFOSOSexpansion = \
-        #         self.vkinetic.GFexpansion(self.VectorBasis)
-        # else:
-        #     self.VectorBasis.shape = (0, self.N, 3)
-        #     self.VV.shape = (3, 3, 0, 0)
         self.GFexpansion, self.GFstarset = self.vkinetic.GFexpansion()
-        # self.GFOSexpansion, self.GFOSOSexpansion = np.array([]), np.array([])
 
         # some indexing helpers:
         # thermo2kin maps star index in thermo to kinetic (should just be range(n), but we use this for safety)
@@ -715,10 +705,6 @@ class VacancyMediated(object):
             self.vkinetic.rateexpansions(self.om2_jn, self.om2_jt, omega2=True)
         self.om1_b0, self.om1bias = self.vkinetic.biasexpansions(self.om1_jn, self.om1_jt)
         self.om2_b0, self.om2bias = self.vkinetic.biasexpansions(self.om2_jn, self.om2_jt, omega2=True)
-        # self.etaSperiodic = self.vkinetic.periodicvectorexpansion('solute')
-        # self.etaVperiodic = self.vkinetic.periodicvectorexpansion('vacancy')
-        # self.etaV2VB = self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'vacancy')
-        # self.etaS2VB = self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'solute')
         self.OSindices, self.OSfolddown, self.OS_VB = self.vkinetic.originstateVectorBasisfolddown('solute')
         self.OSVfolddown = self.vkinetic.originstateVectorBasisfolddown('vacancy')[1]  # only need the folddown
 
@@ -1410,28 +1396,23 @@ class VacancyMediated(object):
                            biasSvec[sv] - \
                            np.dot(self.om2_b0[sv, :], omega0escape[svvacindex, :]) * np.sqrt(probV[svvacindex])
 
-        # 4c. origin state corrections for solute:
+        # 4c. origin state corrections for solute: (corrections for vacancy appear below)
         if len(self.OSindices) > 0:
             biasSbar = np.dot(self.OSfolddown, biasSvec)
             om2bar = np.dot(self.OSfolddown, np.dot(om2, self.OSfolddown.T))  # OS x OS
             etaSbar = np.dot(pinv2(om2bar), biasSbar)
-            delD = np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
-                                 etaSbar), biasSbar) / self.N
-            D0ss += delD
-            # D0vv += delD
+            D0ss += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
+                                  etaSbar), biasSbar) / self.N
             biasSvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)  # expand back out to sites
-            # biasVvec += np.dot(np.dot(om2, self.OSVfolddown.T), etaSbar)  # expand back out to sites
 
         # 5. compute Green function:
         G0 = np.dot(self.GFexpansion, GF)
-        # if self.NVB == 0:
-
         # Note: we first do this *just* with omega1, then ... with omega2, depending on how it behaves
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         # Now: to identify the omega2 contributions, we need to find all of the sv indices with a
         # non-zero contribution to om2bias. That is, where np.any(self.om2bias[sv,:] != 0)
         om2_sv_indices = [n for n in range(len(self.om2bias)) if not np.allclose(self.om2bias[n, :], 0)]
-        # looks weird, but this is how we slice:
+        # looks weird, but this is how we pull out a block in G corresponding to the indices in our list:
         G12 = G[om2_sv_indices, :][:, om2_sv_indices]
         om2_slice = om2[om2_sv_indices, :][:, om2_sv_indices]
         gdom2 = np.dot(G12, om2_slice)
@@ -1451,56 +1432,6 @@ class VacancyMediated(object):
         else:
             # update with omega2 ("small" omega2):
             G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
-
-            # if not eigensolve:
-            #     # old school (direct) approach
-            #     G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
-            # else:
-            #     def dwg(dw, g):
-            #         if abs(dw*g) > 1e8: return 1./( (1./dw) + g)
-            #         else: return dw/(1.+dw*g)
-            #     # improved stability algorithm? (to handle when domega gets very large)
-            #     # NOTE: this was not deemed to work.
-            #     dwn, eign = np.linalg.eigh(delta_om)
-            #     print(delta_om)
-            #     print(dwn)
-            #     print(eign)
-            #     Grot = np.dot(eign.T, np.dot(G0, eign))
-            #     # sort the eigenvalues from smallest influence to largest
-            #     for n, garbage in sorted( ( ( n, np.abs(dwg(dw,Grot[n,n])) )
-            #                                 for n, dw in enumerate(dwn)),
-            #                              key=lambda t: t[1] ):
-            #         # Gin = Grot[n,:].copy()  # G[n,:] for outer product
-            #         Grot -= dwg(dwn[n], Grot[n,n])*np.outer(Grot[n], Grot[n])
-            #     # rotate back
-            #     G = np.dot(eign, np.dot(Grot, eign.T))
-        # else:
-        #     delta_om += om2
-        #     delta_omOS = -np.dot(self.om2_om0, omega0)
-        #     G0OS = np.dot(self.GFOSexpansion, GF)
-        #     G0OSOS = np.dot(self.GFOSOSexpansion, GF)
-        #     Dinv = np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om) +
-        #                          np.dot(G0OS.T, delta_omOS))
-        #     A = np.eye(len(self.VectorBasis)) + np.dot(G0OS, delta_omOS.T)
-        #     B = np.dot(G0OS, delta_om) + np.dot(G0OSOS, delta_omOS)
-        #     C = np.dot(G0, delta_omOS.T)
-        #     SDinv = np.linalg.inv(A - np.dot(B, np.dot(Dinv, C)))
-        #     G = np.dot(Dinv, G0 + np.dot(C, np.dot(SDinv, np.dot(B, np.dot(Dinv, G0)) - G0OS)))
-        #
-        #     biasSbar = np.dot(self.etaS2VB, biasSvec)  # folddown to VB
-        #     om2bar = np.dot(self.etaS2VB, np.dot(om2, self.etaS2VB.T))  # VB x VB
-        #     etaSbar = np.dot(pinv2(om2bar), biasSbar)  # VB only...
-        #     D0ss += np.dot(np.dot(self.VV, etaSbar), biasSbar) / self.N
-        #
-        #     dbiasS = np.dot(np.dot(om2, self.etaS2VB.T), etaSbar)  # expand back out to sites
-        #     biasSvec -= dbiasS
-        #
-        #     # terms for vv:
-        #     delta_om_bar = np.dot(self.etaV2VB, delta_omOS.T + np.dot(delta_om, self.etaV2VB.T))  # [NVB, NVB]
-        #     # delta_om_bar = np.dot(self.etaV2VB, np.dot(delta_om, self.etaV2VB.T))  # [NVB, NVB]
-        #     delta_om_G0 = np.dot(delta_omOS, G0) + \
-        #                   np.dot(self.etaV2VB, np.dot(delta_omOS.T, G0OS) + np.dot(delta_om, G0))  # [NVB, NVS]
-        #     # delta_om_G0 = np.dot(self.etaV2VB, np.dot(delta_om, G0))  # [NVB, NVS]
 
         # 6. Compute bias contributions to Onsager coefficients
         etaVvec, etaSvec = np.dot(G, biasVvec), np.dot(G, biasSvec)
