@@ -935,14 +935,15 @@ class VacancyMediated(object):
         return superdict
 
     # this is part of our *class* definition: list of data that can be directly assigned / read
-    __HDF5list__ = ('chem', 'N', 'invmap', 'VectorBasis', 'VV', 'NVB',
+    __HDF5list__ = ('chem', 'N', 'invmap',
                     'thermo2kin', 'kin2vacancy', 'outerkin', 'vstar2kin',
                     'om1_jt', 'om1_SP', 'om2_jt', 'om2_SP',
-                    'GFexpansion', 'GFOSexpansion', 'GFOSOSexpansion',
+                    'GFexpansion',
                     'Dom1_om0', 'Dom1', 'Dom2_om0', 'Dom2',
                     'om1_om0', 'om1_om0escape', 'om1expansion', 'om1escape',
                     'om2_om0', 'om2_om0escape', 'om2expansion', 'om2escape',
-                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias', 'etaV2VB', 'etaS2VB',
+                    'om1_b0', 'om1bias', 'om2_b0', 'om2bias',
+                    'OSindices', 'OSfolddown',
                     'kineticsvWyckoff', 'omega0vacancyWyckoff', 'omega1svsvWyckoff',
                     'omega2svsvWyckoff')
     __taglist__ = ('vacancy', 'solute', 'solute-vacancy', 'omega0', 'omega1', 'omega2')
