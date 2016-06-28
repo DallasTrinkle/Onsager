@@ -1140,6 +1140,8 @@ class VectorStarSet(object):
         if attr is None: raise ValueError('elemtype needs to be "solute" or "vacancy" not {}'.format(elemtype))
         OSindices = [n for n in range(self.Nvstars) if self.starset.states[self.vecpos[n][0]].iszero()]
         folddown = np.zeros((len(OSindices), self.Nvstars))
+        if len(OSindices)==0:
+            return OSindices, folddown
         for i, ni in enumerate(OSindices):
             for OS, OSv in zip(self.vecpos[ni], self.vecvec[ni]):
                 index = getattr(self.starset.states[OS], attr)

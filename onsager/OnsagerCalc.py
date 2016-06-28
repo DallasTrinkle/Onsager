@@ -664,8 +664,6 @@ class VacancyMediated(object):
         # self.kinetic = self.thermo + self.NNstar
         self.kinetic.generate(Nthermo+1, originstates=True)  # now include origin states (for removal)
         self.vkinetic.generate(self.kinetic)
-        self.originstatelist = [n for n in range(self.vkinetic.Nvstars)
-                                if self.kinetic.states[self.vkinetic.vecpos[n][0]].iszero()]
         # TODO: check the GF calculator against the range in GFstarset to make sure its adequate
         # self.VectorBasis, self.VV = self.crys.FullVectorBasis(self.chem)
         # self.NVB = len(self.VectorBasis)
@@ -721,6 +719,7 @@ class VacancyMediated(object):
         # self.etaVperiodic = self.vkinetic.periodicvectorexpansion('vacancy')
         # self.etaV2VB = self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'vacancy')
         # self.etaS2VB = self.vkinetic.unitcellVectorBasisfolddown(self.VectorBasis, 'solute')
+        self.OSindices, self.OSfolddown = self.vkinetic.originstateVectorBasisfolddown('solute')
 
         # more indexing helpers:
         # kineticsvWyckoff: Wyckoff position of solute and vacancy for kinetic stars
@@ -1492,6 +1491,16 @@ class VacancyMediated(object):
         #     delta_om_G0 = np.dot(delta_omOS, G0) + \
         #                   np.dot(self.etaV2VB, np.dot(delta_omOS.T, G0OS) + np.dot(delta_om, G0))  # [NVB, NVS]
         #     # delta_om_G0 = np.dot(self.etaV2VB, np.dot(delta_om, G0))  # [NVB, NVS]
+
+        if len(self.OSindices)>0:
+            biasSbar = np.dot(self.OSfolddown, biasSvec)
+            om2bar = np.dot(self.OSfolddown, np.dot(om2, self.OSfolddown.T))  # OS x OS
+            etaSbar = np.dot(pinv2(om2bar), biasSbar)
+            D0ss += np.dot(np.dot(self.vkinetic.outer[:,:,self.OSindices,:,][:,:,:,self.OSindices],
+                                  etaSbar),
+                           biasSbar) / self.N
+            dbiasS = np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)  # expand back out to sites
+            biasSvec -= dbiasS
 
         # 6. Compute bias contributions to Onsager coefficients
         etaVvec, etaSvec = np.dot(G, biasVvec), np.dot(G, biasSvec)
