@@ -1135,19 +1135,23 @@ class VectorStarSet(object):
         :param elemtype: 'solute' of 'vacancy', depending on which site we need to reduce
         :return OSindices: list of indices corresponding to origin states
         :return folddown: [NOS, Nvstars] to map vector stars to origin states
+        :return OS_VB: [NOS, Nsites, 3] mapping of origin state to a vector basis
         """
         attr = {'solute': 'i', 'vacancy': 'j'}.get(elemtype)
         if attr is None: raise ValueError('elemtype needs to be "solute" or "vacancy" not {}'.format(elemtype))
         OSindices = [n for n in range(self.Nvstars) if self.starset.states[self.vecpos[n][0]].iszero()]
-        folddown = np.zeros((len(OSindices), self.Nvstars))
-        if len(OSindices)==0:
-            return OSindices, folddown
+        NOS, Nsites = len(OSindices), len(self.starset.crys.basis[self.starset.chem])
+        folddown = np.zeros((NOS, self.Nvstars))
+        OS_VB = np.zeros((NOS, Nsites, 3))
+        if NOS==0:
+            return OSindices, folddown, OS_VB
         for i, ni in enumerate(OSindices):
             for OS, OSv in zip(self.vecpos[ni], self.vecvec[ni]):
                 index = getattr(self.starset.states[OS], attr)
+                OS_VB[i, index, :] = OSv[:]
                 for j, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
                     for s, v in zip(svR, svv):
                         if getattr(self.starset.states[s], attr) == index:
                             folddown[i, j] += np.dot(OSv, v)
         # cleanup on return
-        return OSindices, zeroclean(folddown)
+        return OSindices, zeroclean(folddown), zeroclean(OS_VB)
