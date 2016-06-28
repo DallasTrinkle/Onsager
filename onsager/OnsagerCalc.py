@@ -1418,7 +1418,7 @@ class VacancyMediated(object):
             delD = np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
                                  etaSbar), biasSbar) / self.N
             D0ss += delD
-            D0vv += delD
+            # D0vv += delD
             biasSvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)  # expand back out to sites
             # biasVvec += np.dot(np.dot(om2, self.OSVfolddown.T), etaSbar)  # expand back out to sites
 
@@ -1509,24 +1509,20 @@ class VacancyMediated(object):
         L1ss = np.dot(outer_etaSvec, biasSvec) / self.N
         L1sv = np.dot(outer_etaSvec, biasVvec) / self.N
         L1vv = np.dot(outer_etaVvec, biasVvec) / self.N
-        if len(self.OSindices) > 0: # and not True:  # and not True added to skip this...
+        if len(self.OSindices) > 0:
             etaV0 = -np.tensordot(self.OS_VB, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
             outer_etaV0 = np.dot(self.vkinetic.outer[:, :, self.OSindices, :][:, :, :, self.OSindices], etaV0)
             dom = delta_om + om2  # sum of the terms
             dgd = -dom + np.dot(dom, np.dot(G, dom))  # delta_g = g0*dgd*g0
             G0db = np.dot(G0, biasVvec)  # G0*db
             # 2 eta0*db + 2 eta0*dgd*G0*db + eta0*dgd*eta0  (domega = delta_om + om2)
+            # - etaV0*biasV0 (correction due to removing states)
             L1vv += np.dot(outer_etaV0,
                            2 * np.dot(self.OSVfolddown, biasVvec)
                            + 2 * np.dot(self.OSVfolddown, np.dot(dgd, G0db))
                            + np.dot(np.dot(self.OSVfolddown, np.dot(dgd, self.OSVfolddown.T)), etaV0)
+                           - biasVvec[self.OSindices]
                            ) / self.N
-        # if self.NVB > 0:
-        #     etaV0 = np.tensordot(self.VectorBasis, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
-        #     outer_etaV0 = np.dot(self.VV, etaV0)
-        #     L1vv += np.dot(outer_etaV0,
-        #                    2 * np.dot(self.etaV2VB - delta_om_G0, biasVvec)
-        #                    - np.dot(delta_om_bar, etaV0)) / self.N
 
         return L0vv, D0ss + L1ss, -D0ss + L1sv, D0vv + L1vv
 

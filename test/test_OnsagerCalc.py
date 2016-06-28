@@ -592,8 +592,8 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
             verbose_print(Lname)
             verbose_print(locals()[Lname])
         # For now, remove the test on the v-v correction, since that term is NOT CORRECT:
-        # for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
-        for L, Lp in zip([Lvv, Lss, Lsv], [Lvv2, Lss2, Lsv2]):
+        for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
+        # for L, Lp in zip([Lvv, Lss, Lsv], [Lvv2, Lss2, Lsv2]):
             self.assertTrue(np.allclose(L, Lp, atol=1e-7),
                             msg="Diffusivity doesn't match?\n{} !=\n{}".format(L, Lp))
 
