@@ -1110,7 +1110,7 @@ class VectorStarSet(object):
 
     def unitcellVectorBasisfolddown(self, VectorBasis, elemtype='solute'):
         """
-        Construct the expansion to "fold down" from starvector to a VectorBasis in the
+        Construct the expansion to "fold down" from vector stars to a VectorBasis in the
         unit cell
         :param VectorBasis: list of (N,3) matrices, corresponding to (normalized) vectors
         :param elemtype: 'solute' of 'vacancy', depending on which site we need to reduce
@@ -1128,3 +1128,24 @@ class VectorStarSet(object):
                     folddown[j, i] += np.dot(vb[ind, :], v)
         # cleanup on return
         return zeroclean(folddown)
+
+    def originstateVectorBasisfolddown(self, elemtype='solute'):
+        """
+        Construct the expansion to "fold down" from vector stars to origin states.
+        :param elemtype: 'solute' of 'vacancy', depending on which site we need to reduce
+        :return OSindices: list of indices corresponding to origin states
+        :return folddown: [NOS, Nvstars] to map vector stars to origin states
+        """
+        attr = {'solute': 'i', 'vacancy': 'j'}.get(elemtype)
+        if attr is None: raise ValueError('elemtype needs to be "solute" or "vacancy" not {}'.format(elemtype))
+        OSindices = [n for n in range(self.Nvstars) if self.starset.states[self.vecpos[n][0]].iszero()]
+        folddown = np.zeros((len(OSindices), self.Nvstars))
+        for i, ni in enumerate(OSindices):
+            for OS, OSv in zip(self.vecpos[ni], self.vecvec[ni]):
+                index = getattr(self.starset.states[OS], attr)
+                for j, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
+                    for s, v in zip(svR, svv):
+                        if getattr(self.starset.states[s], attr) == index:
+                            folddown[i, j] += np.dot(OSv, v)
+        # cleanup on return
+        return OSindices, zeroclean(folddown)
