@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-# coding: utf-8
-
-import numpy as np
 from onsager import crystal, OnsagerCalc
 import h5py, json
 
