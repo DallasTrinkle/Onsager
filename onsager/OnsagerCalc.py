@@ -1415,12 +1415,12 @@ class VacancyMediated(object):
             biasSbar = np.dot(self.OSfolddown, biasSvec)
             om2bar = np.dot(self.OSfolddown, np.dot(om2, self.OSfolddown.T))  # OS x OS
             etaSbar = np.dot(pinv2(om2bar), biasSbar)
-            D0ss += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
-                                  etaSbar),
-                           biasSbar) / self.N
-            dbiasS = np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)  # expand back out to sites
-            biasSvec -= dbiasS
-            # biasVvec += dbiasS
+            delD = np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
+                                 etaSbar), biasSbar) / self.N
+            D0ss += delD
+            D0vv += delD
+            biasSvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)  # expand back out to sites
+            # biasVvec += np.dot(np.dot(om2, self.OSVfolddown.T), etaSbar)  # expand back out to sites
 
         # 5. compute Green function:
         G0 = np.dot(self.GFexpansion, GF)
@@ -1509,15 +1509,17 @@ class VacancyMediated(object):
         L1ss = np.dot(outer_etaSvec, biasSvec) / self.N
         L1sv = np.dot(outer_etaSvec, biasVvec) / self.N
         L1vv = np.dot(outer_etaVvec, biasVvec) / self.N
-        if len(self.OSindices) > 0:
-            etaV0 = np.tensordot(self.OS_VB, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
+        if len(self.OSindices) > 0: # and not True:  # and not True added to skip this...
+            etaV0 = -np.tensordot(self.OS_VB, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
             outer_etaV0 = np.dot(self.vkinetic.outer[:, :, self.OSindices, :][:, :, :, self.OSindices], etaV0)
-            # 2 eta0*db - 2 eta0*domega*G0*db - eta0*delta_om*eta0
+            dom = delta_om + om2  # sum of the terms
+            dgd = -dom + np.dot(dom, np.dot(G, dom))  # delta_g = g0*dgd*g0
+            G0db = np.dot(G0, biasVvec)  # G0*db
+            # 2 eta0*db + 2 eta0*dgd*G0*db + eta0*dgd*eta0  (domega = delta_om + om2)
             L1vv += np.dot(outer_etaV0,
-                           2 * np.dot(self.OSVfolddown,
-                                      np.dot(np.eye(self.vkinetic.Nvstars) - np.dot(delta_om, G0),
-                                             biasVvec))
-                           - np.dot(np.dot(self.OSVfolddown, np.dot(delta_om, self.OSVfolddown.T)), etaV0)
+                           2 * np.dot(self.OSVfolddown, biasVvec)
+                           + 2 * np.dot(self.OSVfolddown, np.dot(dgd, G0db))
+                           + np.dot(np.dot(self.OSVfolddown, np.dot(dgd, self.OSVfolddown.T)), etaV0)
                            ) / self.N
         # if self.NVB > 0:
         #     etaV0 = np.tensordot(self.VectorBasis, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
