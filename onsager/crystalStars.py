@@ -1089,51 +1089,10 @@ class VectorStarSet(object):
         # cleanup on return
         return zeroclean(D0expansion), zeroclean(D1expansion)
 
-    # def periodicvectorexpansion(self, elemtype='solute'):
-    #     """
-    #     Construct the expansion from vectors on sites in the cell that are periodic to
-    #     our vectorstar basis. This is used to map from the rate-bias correction vectors into
-    #     the vectorstar basis, to correct for situations where the vacancy jumps themselves
-    #     have bias.
-    #
-    #     :param elemtype: 'solute' or 'vacancy', depending on which site we need to check.
-    #     :return periodicexpansion: [Nvstars, Nsites, 3], to map Nsites,3 into Nvstars
-    #     """
-    #     if self.Nvstars == 0: return None
-    #     attr = {'solute': 'i', 'vacancy': 'j'}.get(elemtype)
-    #     if attr is None: raise ValueError('elemtype needs to be "solute" or "vacancy" not {}'.format(elemtype))
-    #     periodicexpansion = np.zeros((self.Nvstars,
-    #                                   len(self.starset.crys.basis[self.starset.chem]), 3))
-    #     for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
-    #         for s, v in zip(svR, svv):
-    #             periodicexpansion[i, getattr(self.starset.states[s], attr), :] += v
-    #     # cleanup on return
-    #     return zeroclean(periodicexpansion)
-    #
-    # def unitcellVectorBasisfolddown(self, VectorBasis, elemtype='solute'):
-    #     """
-    #     Construct the expansion to "fold down" from vector stars to a VectorBasis in the
-    #     unit cell
-    #     :param VectorBasis: list of (N,3) matrices, corresponding to (normalized) vectors
-    #     :param elemtype: 'solute' of 'vacancy', depending on which site we need to reduce
-    #     :return: folddown: [NV, Nvstars] to map vstars to VectorBasis
-    #     """
-    #     if self.Nvstars == 0: return None
-    #     attr = {'solute': 'i', 'vacancy': 'j'}.get(elemtype)
-    #     if attr is None: raise ValueError('elemtype needs to be "solute" or "vacancy" not {}'.format(elemtype))
-    #     folddown = np.zeros((len(VectorBasis), self.Nvstars))
-    #     if len(VectorBasis) == 0: return folddown
-    #     for i, svR, svv in zip(itertools.count(), self.vecpos, self.vecvec):
-    #         for s, v in zip(svR, svv):
-    #             ind = getattr(self.starset.states[s], attr)
-    #             for j, vb in enumerate(VectorBasis):
-    #                 folddown[j, i] += np.dot(vb[ind, :], v)
-    #     # cleanup on return
-    #     return zeroclean(folddown)
-
     def originstateVectorBasisfolddown(self, elemtype='solute'):
         """
         Construct the expansion to "fold down" from vector stars to origin states.
+
         :param elemtype: 'solute' of 'vacancy', depending on which site we need to reduce
         :return OSindices: list of indices corresponding to origin states
         :return folddown: [NOS, Nvstars] to map vector stars to origin states
