@@ -445,7 +445,7 @@ range (number of &#8220;shells&#8221; &#8211; see <code class="docutils literal"
 <dl class="method">
 <dt id="OnsagerCalc.VacancyMediated.Lij">
 <code class="descname">Lij</code><span class="sig-paren">(</span><em>bFV</em>, <em>bFS</em>, <em>bFSV</em>, <em>bFT0</em>, <em>bFT1</em>, <em>bFT2</em>, <em>large_om2=100000000.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.Lij"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.Lij" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the transport coefficients: Lvv, L0ss, L2ss, L1sv, L1vv from the scaled free energies.
+<dd><p>Calculates the transport coefficients: L0vv, Lss, Lsv, L1vv from the scaled free energies.
 The Green function entries are calculated from the omega0 info. As this is the most
 time-consuming part of the calculation, we cache these values with a dictionary
 and hash function.</p>
@@ -503,6 +503,12 @@ jumpnetwork (for the vacancy) and thermodynamic shell.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Human readable version of diffuser</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -764,7 +770,7 @@ Solute at the origin, vacancy hopping between two sites. Defined by om1_jumpnetw
 <em class="property">static </em><code class="descname">preene2betafree</code><span class="sig-paren">(</span><em>kT</em>, <em>preV</em>, <em>eneV</em>, <em>preS</em>, <em>eneS</em>, <em>preSV</em>, <em>eneSV</em>, <em>preT0</em>, <em>eneT0</em>, <em>preT1</em>, <em>eneT1</em>, <em>preT2</em>, <em>eneT2</em>, <em>**ignoredextraarguments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.preene2betafree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.preene2betafree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read in a series of prefactors (<span class="math">\(\exp(S/k_\text{B})\)</span>) and energies, and return
 <span class="math">\(\beta F\)</span> for energies and transition state energies. Used to provide scaled values
-to Lij() and _lij().
+to Lij().
 Can specify all of the entries using a dictionary; e.g., <code class="docutils literal"><span class="pre">preene2betafree(kT,</span> <span class="pre">**data_dict)</span></code>
 and then send that output as input to Lij: <code class="docutils literal"><span class="pre">Lij(*preene2betafree(kT,</span> <span class="pre">**data_dict))</span></code>
 (we ignore extra arguments so that a dictionary including additional entries can be passed)</p>
