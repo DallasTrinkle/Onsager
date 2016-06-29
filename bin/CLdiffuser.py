@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from onsager import OnsagerCalc
-import h5py, json, csv
+import h5py, json
 
 # Tags we can use to identify components; first part specifies which Onsager matrix element while
 # last part specifies Cartesian components
