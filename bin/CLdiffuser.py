@@ -6,17 +6,19 @@ import h5py, json, csv
 # Tags we can use to identify components; first part specifies which Onsager matrix element while
 # last part specifies Cartesian components
 __diffusion_types__ = {'vv': 'L0vv', 'vv1': 'L1vv', 'ss': 'Lss', 'sv': 'Lsv', 'vs': 'Lsv'}
-__cartesian_components__ = {'x': 0, 'y':1, 'z': 2}
+__cartesian_components__ = {'x': 0, 'y': 1, 'z': 2}
 # string maps to (localname, (i,j)) for Cartesian components i,j
-__fullcomponents__ = {t+c1+c2: (loc, (i1, i2))
+__fullcomponents__ = {t + c1 + c2: (loc, (i1, i2))
                       for t, loc in __diffusion_types__.items()
-                      for c1,i1 in __cartesian_components__.items()
-                      for c2,i2 in __cartesian_components__.items()}
+                      for c1, i1 in __cartesian_components__.items()
+                      for c2, i2 in __cartesian_components__.items()}
+
 
 def cleanup(strlist):
     # translate: first list into second, and delete the third
     transtable = str.maketrans('SVXYZ', 'svxyz', 'DdLl-_ \t')
     return [s.translate(transtable) for s in strlist]
+
 
 def OnsagerComponents(diff, preene, kT, components):
     """
@@ -38,7 +40,8 @@ def OnsagerComponents(diff, preene, kT, components):
 
 if __name__ == '__main__':
     import argparse
-    parser=argparse.ArgumentParser(
+
+    parser = argparse.ArgumentParser(
         description='Compute diffusivity using HDF5 diffuser and a JSON file of thermodynamic data',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""output: T Labij ...
@@ -82,12 +85,14 @@ Cartesian components = xx, yy, zz, xy, yx, xz, zx, yz, zy
         kB = 1.
     else:
         from scipy.constants import physical_constants
+
         kB = physical_constants['Boltzmann constant in eV/K'][0]
 
     import fileinput
+
     # print("#T #Lss_xx #Lss_zz #Lsv_xx #Lsv_zz")
     for line in fileinput.input(extra):
         components = line.split()
         T = float(components.pop(0))  # get the first entry, and also remove it...
-        Lcomponents = OnsagerComponents(diffuser, preene, kB*T, cleanup(components))
+        Lcomponents = OnsagerComponents(diffuser, preene, kB * T, cleanup(components))
         print("{} ".format(T) + ' '.join(['{:.12g}'.format(c) for c in Lcomponents]))
