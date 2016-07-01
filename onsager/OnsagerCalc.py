@@ -167,18 +167,18 @@ class Interstitial(object):
         for sites, tags in zip(self.sitelist, self.tags['states']):
             i, tag = sites[0], tags[0]
             u = basis[i]
-            super = basesupercell.copy()
-            ind = np.dot(super.invsuper, u) / super.size
+            super0 = basesupercell.copy()
+            ind = np.dot(super0.invsuper, u) / super0.size
             # put an interstitial in that single state; the "first" one is fine:
-            super[ind] = self.chem
-            superdict['states'][tag] = super
+            super0[ind] = self.chem
+            superdict['states'][tag] = super0
         for jumps, tags in zip(self.jumpnetwork, self.tags['transitions']):
             (i0, j0), dx0 = jumps[0]
             tag = tags[0]
             u0 = self.crys.basis[self.chem][i0]
             u1 = u0 + np.dot(self.crys.invlatt, dx0)  # should correspond to the j0
             super0, super1 = basesupercell.copy(), basesupercell.copy()
-            ind0, ind1 = np.dot(super0.invsuper, u0) / super.size, np.dot(super1.invsuper, u1) / super.size
+            ind0, ind1 = np.dot(super0.invsuper, u0) / super0.size, np.dot(super1.invsuper, u1) / super0.size
             # put interstitials at our corresponding sites
             super0[ind0], super1[ind1] = self.chem, self.chem
             superdict['transitions'][tag] = (super0, super1)
@@ -858,19 +858,19 @@ class VacancyMediated(object):
             for sites, tags in zip(self.sitelist, self.tags[statetype]):
                 i, tag = sites[0], tags[0]
                 u = basis[i]
-                super = basesupercell.copy()
-                ind = np.dot(super.invsuper, u) / super.size
+                super0 = basesupercell.copy()
+                ind = np.dot(super0.invsuper, u) / super0.size
                 # put a vacancy / solute in that single state; the "first" one is fine:
-                super[ind] = chem
-                superdict['states'][tag] = super
+                super0[ind] = chem
+                superdict['states'][tag] = super0
         for starlist, tags in zip(self.thermo.stars, self.tags['solute-vacancy']):
             PS, tag = self.thermo.states[starlist[0]], tags[0]
             us, uv = basis[PS.i], basis[PS.j] + PS.R
-            super = basesupercell.copy()
-            inds, indv = np.dot(super.invsuper, us) / super.size, np.dot(super.invsuper, uv) / super.size
+            super0 = basesupercell.copy()
+            inds, indv = np.dot(super0.invsuper, us) / super0.size, np.dot(super0.invsuper, uv) / super0.size
             # put a solute + vacancy in that single state; the "first" one is fine:
-            super[inds], super[indv] = schem, vchem
-            superdict['states'][tag] = super
+            super0[inds], super0[indv] = schem, vchem
+            superdict['states'][tag] = super0
         for jumptype, jumpnetwork in (('omega0', self.om0_jn),
                                       ('omega1', self.om1_jn),
                                       ('omega2', self.om2_jn)):
@@ -1415,7 +1415,7 @@ class VacancyMediated(object):
             etaSbar = np.dot(pinv2(om2bar), biasSbar)
             D0ss += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
                                   etaSbar), biasSbar) / self.N
-            biasSvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)  # expand back out to sites
+            # biasSvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)  # expand back out to sites
 
         # 5. compute Green function:
         G0 = np.dot(self.GFexpansion, GF)
@@ -1430,9 +1430,9 @@ class VacancyMediated(object):
         gdom2 = np.dot(G12, om2_slice)
         if np.any(np.abs(gdom2) > large_om2):
             # "large" omega2 terms:
-            gdom2_inv = np.linalg.inv(gdom2)
+            gdom2_inv = np.linalg.pinv(gdom2)
             gd1 = np.linalg.inv(np.eye(len(om2_sv_indices)) + gdom2_inv)
-            om2_inv = np.linalg.inv(om2_slice)
+            om2_inv = np.linalg.pinv(om2_slice)
             dgd = np.dot(gdom2_inv, om2_inv)
             G2 = -np.dot(gd1, dgd)
             # update with omega2, and then put in change due to omega2
@@ -1453,6 +1453,10 @@ class VacancyMediated(object):
         L1sv = np.dot(outer_etaSvec, biasVvec) / self.N
         L1vv = np.dot(outer_etaVvec, biasVvec) / self.N
         if len(self.OSindices) > 0:
+            # D0ss += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
+            #                       etaSbar), biasSbar) / self.N
+            outer_etaS0 = np.dot(self.vkinetic.outer, np.dot(self.OSfolddown.T, etaSbar))
+            L1ss -= 2.*np.dot(outer_etaS0, biasSvec) / self.N
             etaV0 = -np.tensordot(self.OS_VB, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
             outer_etaV0 = np.dot(self.vkinetic.outer[:, :, self.OSindices, :][:, :, :, self.OSindices], etaV0)
             dom = delta_om + om2  # sum of the terms

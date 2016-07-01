@@ -555,13 +555,22 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         thermaldef2.update(Diffusivity2.maketracerpreene(**thermaldef2))
 
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
-        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
+        # Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
+        # for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
+        #     verbose_print(Lname)
+        #     verbose_print(locals()[Lname])
+        # for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
+        #     self.assertTrue(np.allclose(L, Lp, atol=1e-7),
+        #                     msg="Diffusivity doesn't match?\n{} !=\n{}".format(L, Lp))
+        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2),
+                                                   large_om2=0)
         for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
             verbose_print(Lname)
             verbose_print(locals()[Lname])
         for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
             self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-                            msg="Diffusivity doesn't match?\n{} !=\n{}".format(L, Lp))
+                            msg="Large omega2 Diffusivity doesn't match?\n{} !=\n{}".format(L, Lp))
+
 
     def testsolute(self):
         """Test that BCC mapped onto B2 match exactly"""
