@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-from onsager import OnsagerCalc
+import sys
+sys.path.append('./')  # if we want to run from the bin directory
+sys.path.append('../')  # if we want to run from the bin directory
+import onsager.OnsagerCalc as onsager
 import h5py, json
 
 # Tags we can use to identify components; first part specifies which Onsager matrix element while
@@ -68,7 +71,7 @@ Cartesian components = xx, yy, zz, xy, yx, xz, zx, yz, zy
     args, extra = parser.parse_known_args()
 
     with h5py.File(args.HDF5_input, 'r') as f:
-        diffuser = OnsagerCalc.VacancyMediated.loadhdf5(f)
+        diffuser = onsager.VacancyMediated.loadhdf5(f)
 
     if args.verbose:
         print(diffuser)

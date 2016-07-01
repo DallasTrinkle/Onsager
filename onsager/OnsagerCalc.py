@@ -143,6 +143,15 @@ class Interstitial(object):
                         tagdict[tag], tagdicttype[tag] = i, tagtype
         return tags, tagdict, tagdicttype
 
+    def __str__(self):
+        """Human readable version of diffuser"""
+        s = "Diffuser for atom {} ({})\n".format(self.chem, self.crys.chemistry[self.chem])
+        s += self.crys.__str__() + '\n'
+        for t in ('states', 'transitions'):
+            s += t + ':\n'
+            s += '\n'.join([taglist[0] for taglist in self.tags[t]]) + '\n'
+        return s
+
     def makesupercells(self, super_n):
         """
         Take in a supercell matrix, then generate all of the supercells needed to compute
