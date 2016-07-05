@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+# Added nbsphinx to include our jupyter notebooks in examples
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
@@ -41,7 +42,13 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'nbsphinx',
 ]
+
+# nbsphinx: if there is an output cell present, the default is not to evaluate
+# and include as-is. The other options are 'always' and 'never' which do what
+# you'd expect.
+npsphinx_execute = 'auto'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -94,7 +101,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = []
+exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.

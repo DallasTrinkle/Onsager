@@ -16,6 +16,7 @@ Contents:
    GFcalc
    OnsagerCalc
    automator
+   notebooks
 
 Indices and tables
 ==================
