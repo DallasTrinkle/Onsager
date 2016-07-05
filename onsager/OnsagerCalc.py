@@ -1415,15 +1415,16 @@ class VacancyMediated(object):
             etaSbar = np.dot(pinv2(om2bar), biasSbar)
             D0ss += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
                                   etaSbar), biasSbar) / self.N
-            # biasSvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)  # expand back out to sites
+            biasSvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)  # expand back out to sites
 
         # 5. compute Green function:
         G0 = np.dot(self.GFexpansion, GF)
         # Note: we first do this *just* with omega1, then ... with omega2, depending on how it behaves
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         # Now: to identify the omega2 contributions, we need to find all of the sv indices with a
-        # non-zero contribution to om2bias. That is, where np.any(self.om2bias[sv,:] != 0)
-        om2_sv_indices = [n for n in range(len(self.om2bias)) if not np.allclose(self.om2bias[n, :], 0)]
+        # non-zero contribution to om2bias. Hand been, where np.any(self.om2bias[sv,:] != 0)
+        # Now, where np.any(self.om2expansion[sv,:,:] != 0)  --should we put into generatematrices?
+        om2_sv_indices = [n for n in range(len(self.om2expansion)) if not np.allclose(self.om2expansion[n], 0)]
         # looks weird, but this is how we pull out a block in G corresponding to the indices in our list:
         G12 = G[om2_sv_indices, :][:, om2_sv_indices]
         om2_slice = om2[om2_sv_indices, :][:, om2_sv_indices]

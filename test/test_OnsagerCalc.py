@@ -69,7 +69,8 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
         for (i, j), dx in self.jumpnetwork[0]:
             L0vv += 0.5 * np.outer(dx, dx) * om0
         L0vv /= len(self.crys.basis[self.chem])
-        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
+        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef),
+                                              large_om2=0)
 
         for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
             verbose_print(Lname)
@@ -567,9 +568,11 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
             verbose_print(Lname)
             verbose_print(locals()[Lname])
-        for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
+        for L, Lp, Lname in zip([Lvv, Lss, Lsv, L1vv],
+                                [Lvv2, Lss2, Lsv2, L1vv2],
+                                ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
             self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-                            msg="Large omega2 Diffusivity doesn't match?\n{} !=\n{}".format(L, Lp))
+                            msg="Large omega2 {} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
 
 
     def testsolute(self):
@@ -601,10 +604,12 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
             verbose_print(Lname)
             verbose_print(locals()[Lname])
         # For now, remove the test on the v-v correction, since that term is NOT CORRECT:
-        for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
         # for L, Lp in zip([Lvv, Lss, Lsv], [Lvv2, Lss2, Lsv2]):
+        for L, Lp, Lname in zip([Lvv, Lss, Lsv, L1vv],
+                                [Lvv2, Lss2, Lsv2, L1vv2],
+                                ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
             self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-                            msg="Diffusivity doesn't match?\n{} !=\n{}".format(L, Lp))
+                            msg="{} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
 
 
 class CrystalOnsagerTestsL12(CrystalOnsagerTestsB2):
