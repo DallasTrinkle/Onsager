@@ -1409,14 +1409,18 @@ class VacancyMediated(object):
                            np.dot(self.om1_b0[sv, :], omega0escape[svvacindex, :]) * np.sqrt(probV[svvacindex]) - \
                            np.dot(self.om2_b0[sv, :], omega0escape[svvacindex, :]) * np.sqrt(probV[svvacindex])
                            # - biasSvec[sv]
+        biasVvec_om2 = -biasSvec
 
         # 4c. origin state corrections for solute: (corrections for vacancy appear below)
+        # these corrections are due to the null space for the vacancy without
         if len(self.OSindices) > 0:
             biasSbar = np.dot(self.OSfolddown, biasSvec)
             om2bar = np.dot(self.OSfolddown, np.dot(om2, self.OSfolddown.T))  # OS x OS
             etaSbar = np.dot(pinv2(om2bar), biasSbar)
-            D0ss += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
-                                  etaSbar), biasSbar) / self.N
+            dDss = np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
+                                 etaSbar), biasSbar) / self.N
+            D0ss += dDss
+            D0sv -= dDss
             biasSvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)  # expand back out to sites
 
         # 5. compute Green function:
@@ -1452,18 +1456,24 @@ class VacancyMediated(object):
             G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
 
         # 6. Compute bias contributions to Onsager coefficients
-        biasVvec -= biasSvec  # now put in the om2 contribution
+        # 6a. add in the om2 contribution to biasVvec:
+        biasVvec += biasVvec_om2
+
+        # 6b. GF pieces:
         etaVvec, etaSvec = np.dot(G, biasVvec), np.dot(G, biasSvec)
         outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer, etaSvec)
 
         L1ss = np.dot(outer_etaSvec, biasSvec) / self.N
         L1sv = np.dot(outer_etaSvec, biasVvec) / self.N
         L1vv = np.dot(outer_etaVvec, biasVvec) / self.N
+
+        # 6c. origin state corrections for vacancy:
         if len(self.OSindices) > 0:
             # D0ss += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
             #                       etaSbar), biasSbar) / self.N
-            outer_etaS0 = np.dot(self.vkinetic.outer, np.dot(self.OSfolddown.T, etaSbar))
-            L1ss -= 2.*np.dot(outer_etaS0, biasSvec) / self.N
+            ### commented these two lines out:
+            # outer_etaS0 = np.dot(self.vkinetic.outer, np.dot(self.OSfolddown.T, etaSbar))
+            # L1ss -= 2.*np.dot(outer_etaS0, biasSvec) / self.N
             etaV0 = -np.tensordot(self.OS_VB, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
             outer_etaV0 = np.dot(self.vkinetic.outer[:, :, self.OSindices, :][:, :, :, self.OSindices], etaV0)
             dom = delta_om + om2  # sum of the terms

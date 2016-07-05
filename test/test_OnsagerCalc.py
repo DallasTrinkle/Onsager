@@ -83,8 +83,8 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
         self.assertTrue(np.allclose(-Lsv, L0vv))
         self.assertTrue(np.allclose(L1vv, 0.))
         self.assertTrue(np.allclose(-Lss, self.correl * Lsv, rtol=1e-6),
-                        msg='Failure to match correlation ({}), got {}'.format(
-                            self.correl, -Lss[0, 0] / Lsv[0, 0]))
+                        msg='Failure to match correlation ({}), got {} from {}/{}'.format(
+                            self.correl, -Lss[0, 0] / Lsv[0, 0], Lss[0,0], -Lsv[0,0]))
 
 
 class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
