@@ -1386,8 +1386,9 @@ class VacancyMediated(object):
         symmprobSV2 = np.array([np.sqrt(prob[sp[0]] * prob[sp[1]]) for sp in self.om2_SP])
         D0ss = np.dot(self.Dom2, omega2 * symmprobSV2) / self.N
         D0sv = -D0ss
-        D0vv = D0ss + (np.dot(self.Dom1, omega1 * symmprobSV1) -
-                       np.dot(self.Dom1_om0 + self.Dom2_om0, omega0 * symmprobV0)) / self.N
+        D0vv = (np.dot(self.Dom1, omega1 * symmprobSV1) -
+                np.dot(self.Dom1_om0 + self.Dom2_om0, omega0 * symmprobV0)) / self.N
+        D2vv = D0ss.copy()
 
         # 4b. Bias vectors (before correction) and rate matrices
         biasSvec = np.zeros(self.vkinetic.Nvstars)
@@ -1443,7 +1444,9 @@ class VacancyMediated(object):
             dgd = np.dot(gdom2_inv, om2_inv)
             G2 = -np.dot(gd1, dgd)
             # update with omega2, and then put in change due to omega2
-            G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G.copy(), om2)), G.copy())
+            # G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G.copy(), om2)), G.copy())
+            G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
+            Gfull = G.copy()
             for ni, i in enumerate(om2_sv_indices):
                 for nj, j in enumerate(om2_sv_indices):
                     G[i, j] = G2[ni, nj]
@@ -1451,9 +1454,11 @@ class VacancyMediated(object):
             bV, bS = biasVvec[om2_sv_indices], biasSvec[om2_sv_indices]
             om2_outer = self.vkinetic.outer[:, :, om2_sv_indices, :][:, :, :, om2_sv_indices]
             D0sv = np.dot(np.dot(om2_outer, bV), np.dot(om2_inv, bS))/self.N
+            D2vv = np.dot(np.dot(om2_outer, bV), np.dot(om2_inv, bV))/self.N - 2.*D0sv
         else:
             # update with omega2 ("small" omega2):
             G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
+            Gfull = G
 
         # 6. Compute bias contributions to Onsager coefficients
         # 6a. add in the om2 contribution to biasVvec:
@@ -1477,7 +1482,8 @@ class VacancyMediated(object):
             etaV0 = -np.tensordot(self.OS_VB, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
             outer_etaV0 = np.dot(self.vkinetic.outer[:, :, self.OSindices, :][:, :, :, self.OSindices], etaV0)
             dom = delta_om + om2  # sum of the terms
-            dgd = -dom + np.dot(dom, np.dot(G, dom))  # delta_g = g0*dgd*g0
+            # dgd = -dom + np.dot(dom, np.dot(G, dom))  # delta_g = g0*dgd*g0
+            dgd = -dom + np.dot(dom, np.dot(Gfull, dom))  # delta_g = g0*dgd*g0
             G0db = np.dot(G0, biasVvec)  # G0*db
             # 2 eta0*db + 2 eta0*dgd*G0*db + eta0*dgd*eta0  (domega = delta_om + om2)
             # - etaV0*biasV0 (correction due to removing states)
@@ -1488,7 +1494,7 @@ class VacancyMediated(object):
                            - biasVvec[self.OSindices]
                            ) / self.N
 
-        return L0vv, D0ss + L1ss, D0sv + L1sv, D0vv + L1vv
+        return L0vv, D0ss + L1ss, D0sv + L1sv, D0vv + D2vv + L1vv
 
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
