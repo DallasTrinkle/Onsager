@@ -1437,6 +1437,14 @@ class VacancyMediated(object):
         om2_slice = om2[om2_sv_indices, :][:, om2_sv_indices]
         gdom2 = np.dot(G1, om2_slice)
         if np.any(np.abs(gdom2) > large_om2):
+            om2eig, om2vec = np.linalg.eigh(om2_slice)
+            om2min = 1e-8*np.max(np.abs(om2eig))
+            Pnull = np.dot(om2vec,
+                           np.dot(np.diag([ 1 if np.abs(val)<om2min
+                                            else 0
+                                            for val in om2eig]),
+                                  om2vec.T))
+            Pbar = np.eye(len(om2_sv_indices))-Pnull
             # "large" omega2 terms:
             gdom2_inv = np.linalg.pinv(gdom2)
             gd1 = np.linalg.inv(np.eye(len(om2_sv_indices)) + gdom2_inv)
@@ -1446,13 +1454,15 @@ class VacancyMediated(object):
             # update with omega2, and then put in change due to omega2
             # G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G.copy(), om2)), G.copy())
             G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
+            Greplace = np.dot(Pnull, np.dot(G[om2_sv_indices,:][:,om2_sv_indices], Pnull)) + \
+                       np.dot(Pbar, np.dot(G2, Pbar))
             Gfull = G.copy()
             matchfail = []
             for ni, i in enumerate(om2_sv_indices):
                 for nj, j in enumerate(om2_sv_indices):
-                    G[i, j] = G2[ni, nj]
+                    G[i, j] = Greplace[ni, nj]
                     # testing:
-                    if not np.isclose(om2_inv[ni, nj] + G2[ni, nj], Gfull[i, j],
+                    if not np.isclose(om2_inv[ni, nj] + Greplace[ni, nj], Gfull[i, j],
                                       rtol=1e-12, atol=1e-12 * large_om2):
                         matchfail.append((ni, nj))
             if len(matchfail) > 0:
@@ -1461,11 +1471,14 @@ class VacancyMediated(object):
                 print(matchfail)
                 traceback.print_stack(file=sys.stdout, limit=2)
                 if len(matchfail)<50:
+                    print('Pnull:\n', Pnull)
+                    print('Pbar:\n', Pbar)
                     print('Gfull:\n', Gfull[om2_sv_indices,:][:,om2_sv_indices])
                     print('om2:\n', om2_slice)
                     print('om2_inv:\n', om2_inv)
                     print('G2:\n', G2)
-                    print('diff:\n', Gfull[om2_sv_indices,:][:, om2_sv_indices] - om2_inv - G2)
+                    print('Greplace:\n', Greplace)
+                    print('diff:\n', Gfull[om2_sv_indices,:][:, om2_sv_indices] - om2_inv - Greplace)
 
             bV, bV2, bS, = biasVvec[om2_sv_indices], biasVvec_om2[om2_sv_indices], biasSvec[om2_sv_indices]
             om2_outer = self.vkinetic.outer[:, :, om2_sv_indices, :][:, :, :, om2_sv_indices]
