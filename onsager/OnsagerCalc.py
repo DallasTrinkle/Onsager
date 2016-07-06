@@ -1450,9 +1450,10 @@ class VacancyMediated(object):
             for ni, i in enumerate(om2_sv_indices):
                 for nj, j in enumerate(om2_sv_indices):
                     G[i, j] = G2[ni, nj]
-            D0ss = np.zeros_like(D0ss)  # exact cancellation of bare term
             bV, bS = biasVvec[om2_sv_indices], biasSvec[om2_sv_indices]
             om2_outer = self.vkinetic.outer[:, :, om2_sv_indices, :][:, :, :, om2_sv_indices]
+            D0ss = np.zeros_like(D0ss)  # exact cancellation of bare term
+            # D0ss += np.dot(np.dot(om2_outer, bS), np.dot(om2_inv, bS))/self.N
             D0sv = np.dot(np.dot(om2_outer, bV), np.dot(om2_inv, bS))/self.N
             D2vv = np.dot(np.dot(om2_outer, bV), np.dot(om2_inv, bV))/self.N - 2.*D0sv
         else:
