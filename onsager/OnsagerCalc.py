@@ -1449,6 +1449,13 @@ class VacancyMediated(object):
             Gfull = G.copy()
             for ni, i in enumerate(om2_sv_indices):
                 for nj, j in enumerate(om2_sv_indices):
+                    # testing:
+                    if not np.isclose(om2_inv[ni,nj]+G2[ni,nj], G[i,j], rtol=1e-12, atol=1e-12*large_om2):
+                        print('Failure of dG {} / {}?\nG={}\nom2^-1={}\nG2={}\nsum={}'.format((i,j), (ni,nj),
+                                                                                              G[i,j],
+                                                                                              om2_inv[ni,nj],
+                                                                                              G2[ni,nj],
+                                                                                              om2_inv[ni,nj]+G2[ni,nj]))
                     G[i, j] = G2[ni, nj]
             bV, bS = biasVvec[om2_sv_indices], biasSvec[om2_sv_indices]
             om2_outer = self.vkinetic.outer[:, :, om2_sv_indices, :][:, :, :, om2_sv_indices]
