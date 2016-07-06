@@ -1433,12 +1433,12 @@ class VacancyMediated(object):
         # Now, where np.any(self.om2expansion[sv,:,:] != 0)  --should we put into generatematrices?
         om2_sv_indices = [n for n in range(len(self.om2expansion)) if not np.allclose(self.om2expansion[n], 0)]
         # looks weird, but this is how we pull out a block in G corresponding to the indices in our list:
-        G12 = G[om2_sv_indices, :][:, om2_sv_indices]
+        G1 = G[om2_sv_indices, :][:, om2_sv_indices]
         om2_slice = om2[om2_sv_indices, :][:, om2_sv_indices]
-        gdom2 = np.dot(G12, om2_slice)
+        gdom2 = np.dot(G1, om2_slice)
         if np.any(np.abs(gdom2) > large_om2):
             # "large" omega2 terms:
-            gdom2_inv = np.linalg.pinv(gdom2)
+            gdom2_inv = np.linalg.inv(gdom2)
             gd1 = np.linalg.inv(np.eye(len(om2_sv_indices)) + gdom2_inv)
             om2_inv = np.linalg.pinv(om2_slice)
             dgd = np.dot(gdom2_inv, om2_inv)
@@ -1450,7 +1450,7 @@ class VacancyMediated(object):
             for ni, i in enumerate(om2_sv_indices):
                 for nj, j in enumerate(om2_sv_indices):
                     # testing:
-                    if not np.isclose(om2_inv[ni,nj]+G2[ni,nj], G[i,j], rtol=1e-12, atol=1e-12*large_om2):
+                    if not np.isclose(om2_inv[ni,nj]+G2[ni,nj], G[i,j], rtol=1e-14, atol=1e-14*large_om2):
                         print('Failure of dG {} / {}?\nG={}\nom2^-1={}\nG2={}\nsum={}'.format((i,j), (ni,nj),
                                                                                               G[i,j],
                                                                                               om2_inv[ni,nj],
