@@ -1409,7 +1409,7 @@ class VacancyMediated(object):
             biasVvec[sv] = np.dot(self.om1bias[sv, :], omega1escape[sv, :]) * np.sqrt(prob[starindex]) - \
                            np.dot(self.om1_b0[sv, :], omega0escape[svvacindex, :]) * np.sqrt(probV[svvacindex]) - \
                            np.dot(self.om2_b0[sv, :], omega0escape[svvacindex, :]) * np.sqrt(probV[svvacindex])
-                           # - biasSvec[sv]
+            # - biasSvec[sv]
         biasVvec_om2 = -biasSvec
 
         # 4c. origin state corrections for solute: (corrections for vacancy appear below)
@@ -1437,25 +1437,24 @@ class VacancyMediated(object):
         om2_slice = om2[om2_sv_indices, :][:, om2_sv_indices]
         gdom2 = np.dot(G1, om2_slice)
         if np.any(np.abs(gdom2) > large_om2):
+            nom2 = len(om2_sv_indices)
             om2eig, om2vec = np.linalg.eigh(om2_slice)
-            om2min = 1e-8*np.max(np.abs(om2eig))
-            Pnull = np.dot(om2vec,
-                           np.dot(np.diag([ 1 if np.abs(val)<om2min
-                                            else 0
-                                            for val in om2eig]),
-                                  om2vec.T))
-            Pbar = np.eye(len(om2_sv_indices))-Pnull
-            # "large" omega2 terms:
-            gdom2_inv = np.linalg.pinv(gdom2)
-            gd1 = np.linalg.inv(np.eye(len(om2_sv_indices)) + gdom2_inv)
-            om2_inv = np.linalg.pinv(om2_slice)
-            dgd = np.dot(gdom2_inv, om2_inv)
-            G2 = -np.dot(gd1, dgd)
+            G1rot = np.dot(om2vec.T, np.dot(G1, om2vec))  # rotated matrix
+            # eigenvalues are sorted in ascending order, and omega2 is negative definite
+            # om2min = -np.min(omega2escape)  # this is the smallest that any nonzero eigenvalue can be
+            om2min = -0.5*min(om for omlist in omega2escape for om in omlist if om>0)
+            nnull = next((n for n in range(nom2) if om2eig[n] > om2min), nom2)  # 0:nnull == not in nullspace
+            # general update (g^-1 + w)^-1:
+            G2rot = np.dot(np.linalg.inv(np.eye(nom2) + np.dot(G1rot, np.diag(om2eig))), G1rot)
+            om2rot = np.diag(om2eig[0:nnull])
+            # in the non-null subspace, replace with (g^-1+w)^-1-w^-1 = -(w+wgw)^-1:
+            G2rot[0:nnull, 0:nnull] = -np.linalg.inv(om2rot + np.dot(om2rot,
+                                                                     np.dot(G1rot[0:nnull,0:nnull],
+                                                                            om2rot)))
+            Greplace = np.dot(om2vec, np.dot(G2rot, om2vec.T))  # transform back
+            om2_inv = np.linalg.pinv(om2_slice)  # only used here for testing purposes...
             # update with omega2, and then put in change due to omega2
-            # G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G.copy(), om2)), G.copy())
             G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
-            Greplace = np.dot(Pnull, np.dot(G[om2_sv_indices,:][:,om2_sv_indices], Pnull)) + \
-                       np.dot(Pbar, np.dot(G2, Pbar))
             Gfull = G.copy()
             matchfail = []
             for ni, i in enumerate(om2_sv_indices):
@@ -1470,30 +1469,27 @@ class VacancyMediated(object):
                 print('Failure in {} values for G'.format(len(matchfail)))
                 print(matchfail)
                 traceback.print_stack(file=sys.stdout, limit=2)
-                if len(matchfail)<50:
-                    print('Pnull:\n', Pnull)
-                    print('Pbar:\n', Pbar)
-                    print('Gfull:\n', Gfull[om2_sv_indices,:][:,om2_sv_indices])
+                if len(matchfail) < 50:
+                    print('Gfull:\n', Gfull[om2_sv_indices, :][:, om2_sv_indices])
                     print('om2:\n', om2_slice)
                     print('om2_inv:\n', om2_inv)
-                    print('G2:\n', G2)
                     print('Greplace:\n', Greplace)
-                    print('diff:\n', Gfull[om2_sv_indices,:][:, om2_sv_indices] - om2_inv - Greplace)
+                    print('diff:\n', Gfull[om2_sv_indices, :][:, om2_sv_indices] - om2_inv - Greplace)
 
             bV, bV2, bS, = biasVvec[om2_sv_indices], biasVvec_om2[om2_sv_indices], biasSvec[om2_sv_indices]
             om2_outer = self.vkinetic.outer[:, :, om2_sv_indices, :][:, :, :, om2_sv_indices]
-            D0ss_correct = np.dot(np.dot(om2_outer, bS), np.dot(om2_inv, bS))/self.N
-            if not np.allclose(D0ss, -D0ss_correct ,rtol=1e-12, atol=1e-12):
+            D0ss_correct = np.dot(np.dot(om2_outer, bS), np.dot(om2_inv, bS)) / self.N
+            if not np.allclose(D0ss, -D0ss_correct, rtol=1e-12, atol=1e-12):
                 import sys, traceback
                 print('Failure in values for Dss')
                 traceback.print_stack(file=sys.stdout, limit=2)
                 print(D0ss)
                 print(D0ss_correct)
-                print(D0ss+D0ss_correct)
+                print(D0ss + D0ss_correct)
             D0ss = np.zeros_like(D0ss)  # exact cancellation of bare term
-            D0sv = np.dot(np.dot(om2_outer, bV), np.dot(om2_inv, bS))/self.N
+            D0sv = np.dot(np.dot(om2_outer, bV), np.dot(om2_inv, bS)) / self.N
             D2vv = (np.dot(np.dot(om2_outer, bV), np.dot(om2_inv, bV)) +
-                    2*np.dot(np.dot(om2_outer, bV2), np.dot(om2_inv, bV)))/self.N
+                    2 * np.dot(np.dot(om2_outer, bV2), np.dot(om2_inv, bV))) / self.N
         else:
             # update with omega2 ("small" omega2):
             G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
