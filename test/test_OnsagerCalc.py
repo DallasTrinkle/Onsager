@@ -660,31 +660,27 @@ class CrystalOnsagerTestsRumpledOmega(unittest.TestCase):
         self.sitelist2 = self.crys2.sitelist(self.chem)
         self.crystalname2 = 'Rumpled omega a0={}'.format(self.a0)
 
-        self.solutebinding = 3.
+        # vacancy probability, and solute binding
+        self.vacancyprob, self.solutebinding = 4., 3.
 
     def testtracer(self):
-        """Test that BCC mapped onto B2 match exactly"""
+        """Test that Omega and rumpled Omega match exactly"""
         # Make a calculator with one neighbor shell
         verbose_print('Crystal: ' + self.crystalname)
         verbose_print('Crystal2: ' + self.crystalname2)
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
-        thermaldef = {'preV': np.ones(len(self.sitelist)), 'eneV': np.zeros(len(self.sitelist)),
+        thermaldef = {'preV': np.array([self.vacancyprob if indices==[0] else 1. for indices in self.sitelist]),
+                      'eneV': np.zeros(len(self.sitelist)),
                       'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
         thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
-        thermaldef2 = {'preV': np.ones(len(self.sitelist2)), 'eneV': np.zeros(len(self.sitelist2)),
+        thermaldef2 = {'preV': np.array([self.vacancyprob if indices == [0] else 1. for indices in self.sitelist2]),
+                       'eneV': np.zeros(len(self.sitelist2)),
                        'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
         thermaldef2.update(Diffusivity2.maketracerpreene(**thermaldef2))
 
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
-        # Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
-        # for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
-        #     verbose_print(Lname)
-        #     verbose_print(locals()[Lname])
-        # for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
-        #     self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-        #                     msg="Diffusivity doesn't match?\n{} !=\n{}".format(L, Lp))
         Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2),
                                                    large_om2=0)
         for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
@@ -695,7 +691,6 @@ class CrystalOnsagerTestsRumpledOmega(unittest.TestCase):
                                 ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
             self.assertTrue(np.allclose(L, Lp, atol=1e-7),
                             msg="Large omega2 {} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
-
 
 
 class InterstitialTests(unittest.TestCase):
