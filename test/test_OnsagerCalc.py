@@ -186,7 +186,7 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
                                Lss={}
                                Ds5={}""".format(w0, w1, w2, w3, w4, Lss[0, 0], Ds5freq)))
 
-    def testSpectralSolution(self):
+    def testLargeOmega2(self):
         """Test whether the large omega2 solution is (a) correct and (b) stable against five frequency model"""
         verbose_print('Five-frequency model, Crystal: ' + self.crystalname)
         kT = 1.
@@ -556,24 +556,22 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         thermaldef2.update(Diffusivity2.maketracerpreene(**thermaldef2))
 
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
-        # Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
-        # for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
-        #     verbose_print(Lname)
-        #     verbose_print(locals()[Lname])
-        # for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
-        #     self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-        #                     msg="Diffusivity doesn't match?\n{} !=\n{}".format(L, Lp))
-        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2),
+        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
+        Lvv3, Lss3, Lsv3, L1vv3 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2),
                                                    large_om2=0)
-        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
+        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv',
+                      'Lvv2', 'Lss2', 'Lsv2', 'L1vv2',
+                      'Lvv3', 'Lss3', 'Lsv3', 'L1vv3'):
             verbose_print(Lname)
             verbose_print(locals()[Lname])
-        for L, Lp, Lname in zip([Lvv, Lss, Lsv, L1vv],
-                                [Lvv2, Lss2, Lsv2, L1vv2],
-                                ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
+        for L, Lp, Lpp, Lname in zip([Lvv, Lss, Lsv, L1vv],
+                                     [Lvv2, Lss2, Lsv2, L1vv2],
+                                     [Lvv3, Lss3, Lsv3, L1vv3],
+                                     ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
             self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-                            msg="Large omega2 {} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
-
+                            msg="Diffusivity {} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
+            self.assertTrue(np.allclose(L, Lpp, atol=1e-7),
+                            msg="Large omega2 diffusivity {} doesn't match?\n{} !=\n{}".format(Lname, L, Lpp))
 
     def testsolute(self):
         """Test that BCC mapped onto B2 match exactly"""
@@ -599,18 +597,22 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         thermaldef2.update(Diffusivity2.makeLIMBpreene(**thermaldef2))
 
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
-        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2),
+        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
+        Lvv3, Lss3, Lsv3, L1vv3 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2),
                                                    large_om2=0)
-        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
+        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv',
+                      'Lvv2', 'Lss2', 'Lsv2', 'L1vv2',
+                      'Lvv3', 'Lss3', 'Lsv3', 'L1vv3'):
             verbose_print(Lname)
             verbose_print(locals()[Lname])
-        # For now, remove the test on the v-v correction, since that term is NOT CORRECT:
-        # for L, Lp in zip([Lvv, Lss, Lsv], [Lvv2, Lss2, Lsv2]):
-        for L, Lp, Lname in zip([Lvv, Lss, Lsv, L1vv],
-                                [Lvv2, Lss2, Lsv2, L1vv2],
-                                ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
+        for L, Lp, Lpp, Lname in zip([Lvv, Lss, Lsv, L1vv],
+                                     [Lvv2, Lss2, Lsv2, L1vv2],
+                                     [Lvv3, Lss3, Lsv3, L1vv3],
+                                     ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
             self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-                            msg="{} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
+                            msg="Diffusivity {} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
+            self.assertTrue(np.allclose(L, Lpp, atol=1e-7),
+                            msg="Large omega2 diffusivity {} doesn't match?\n{} !=\n{}".format(Lname, L, Lpp))
 
 
 class CrystalOnsagerTestsL12(CrystalOnsagerTestsB2):
@@ -681,16 +683,17 @@ class CrystalOnsagerTestsRumpledOmega(unittest.TestCase):
         thermaldef2.update(Diffusivity2.maketracerpreene(**thermaldef2))
 
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
-        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2),
+        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
+        Lvv3, Lss3, Lsv3, L1vv3 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2),
                                                    large_om2=0)
-        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
-            verbose_print(Lname)
-            verbose_print(locals()[Lname])
-        for L, Lp, Lname in zip([Lvv, Lss, Lsv, L1vv],
-                                [Lvv2, Lss2, Lsv2, L1vv2],
-                                ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
+        for L, Lp, Lpp, Lname in zip([Lvv, Lss, Lsv, L1vv],
+                                     [Lvv2, Lss2, Lsv2, L1vv2],
+                                     [Lvv3, Lss3, Lsv3, L1vv3],
+                                     ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
             self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-                            msg="Large omega2 {} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
+                            msg="Diffusivity {} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
+            self.assertTrue(np.allclose(L, Lpp, atol=1e-7),
+                            msg="Large omega2 diffusivity {} doesn't match?\n{} !=\n{}".format(Lname, L, Lpp))
 
 
 class InterstitialTests(unittest.TestCase):
