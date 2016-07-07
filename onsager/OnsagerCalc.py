@@ -1462,7 +1462,7 @@ class VacancyMediated(object):
                     G[i, j] = Greplace[ni, nj]
                     # testing:
                     if not np.isclose(om2_inv[ni, nj] + Greplace[ni, nj], Gfull[i, j],
-                                      rtol=1e-12, atol=1e-12 * large_om2):
+                                      rtol=1e-8, atol=1e-8 * large_om2):
                         matchfail.append((ni, nj))
             if len(matchfail) > 0:
                 import sys, traceback

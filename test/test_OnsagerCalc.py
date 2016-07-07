@@ -69,9 +69,7 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
         for (i, j), dx in self.jumpnetwork[0]:
             L0vv += 0.5 * np.outer(dx, dx) * om0
         L0vv /= len(self.crys.basis[self.chem])
-        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef),
-                                              large_om2=0)
-
+        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
         for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
             verbose_print(Lname)
             verbose_print(locals()[Lname])
@@ -85,6 +83,17 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
         self.assertTrue(np.allclose(-Lss, self.correl * Lsv, rtol=1e-6),
                         msg='Failure to match correlation ({}), got {} from {}/{}'.format(
                             self.correl, -Lss[0, 0] / Lsv[0, 0], Lss[0,0], -Lsv[0,0]))
+        # test large_om2 version:
+        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef),
+                                                  large_om2=0)
+        for Lname in ('Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
+            verbose_print(Lname)
+            verbose_print(locals()[Lname])
+        for L, Lp, Lname in zip([Lvv, Lss, Lsv, L1vv],
+                                [Lvv2, Lss2, Lsv2, L1vv2],
+                                ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
+            self.assertTrue(np.allclose(L, Lp, atol=1e-7),
+                    msg="Large omega2 {} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
 
 
 class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
@@ -203,7 +212,7 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         for (i, j), dx in self.jumpnetwork[0]:
             L0vv += 0.5 * np.outer(dx, dx) * om0
         L0vv /= self.crys.N
-        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef), large_om2=1)
+        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef), large_om2=0)
 
         for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
             verbose_print(Lname)
@@ -530,15 +539,6 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         self.crystalname2 = 'B2 a0={}'.format(self.a0)
 
         self.solutebinding = 3.
-
-    def assertOrderingSuperEqual(self, s0, s1, msg=""):
-        if s0 != s1:
-            failmsg = msg + '\n'
-            for line0, line1 in itertools.zip_longest(s0.__str__().splitlines(),
-                                                      s1.__str__().splitlines(),
-                                                      fillvalue=' - '):
-                failmsg += line0 + '\t' + line1 + '\n'
-            self.fail(msg=failmsg)
 
     def testtracer(self):
         """Test that BCC mapped onto B2 match exactly"""
