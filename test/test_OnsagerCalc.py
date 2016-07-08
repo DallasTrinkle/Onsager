@@ -7,7 +7,7 @@ __author__ = 'Dallas R. Trinkle'
 # TODO: additional tests using the 14 frequency model for FCC?
 
 import unittest
-import textwrap, itertools
+import textwrap, itertools, types
 import numpy as np
 import onsager.OnsagerCalc as OnsagerCalc
 import onsager.crystal as crystal
@@ -29,8 +29,61 @@ def fivefreq(w0, w1, w2, w3, w4):
     p = w4 / w3
     return p * w2 * (2. * w1 + w3 * F7) / (2. * w2 + 2. * w1 + w3 * F7)
 
+class DiffusionTestCase(unittest.TestCase):
+    """Base class to define some diffusion-based assertions--contains no tests"""
 
-class CrystalOnsagerTestsSC(unittest.TestCase):
+    longMessage = False
+
+    def makeunitythermodict(self, diffuser, solutebinding=1.):
+        """Return a thermo dictionary with probability 1 for everything--or a solutebinding factor"""
+        tdict = {'preV': np.ones(len(diffuser.sitelist)), 'eneV': np.zeros(len(diffuser.sitelist)),
+                 'preS': np.ones(len(diffuser.sitelist)), 'eneS': np.zeros(len(diffuser.sitelist)),
+                 'preT0': np.ones(len(diffuser.om0_jn)), 'eneT0': np.zeros(len(diffuser.om0_jn)),
+                 'preSV': solutebinding * np.ones(len(diffuser.interactlist())),
+                 'eneSV': np.zeros(len(diffuser.interactlist()))}
+        tdict.update(diffuser.makeLIMBpreene(**tdict))
+        return tdict
+
+    def assertOrderingSuperEqual(self, s0, s1, msg=""):
+        if s0 != s1:
+            failmsg = msg + '\n'
+            for line0, line1 in itertools.zip_longest(s0.__str__().splitlines(),
+                                                      s1.__str__().splitlines(),
+                                                      fillvalue=' - '):
+                failmsg += line0 + '\t' + line1 + '\n'
+            self.fail(msg=failmsg)
+
+    def assertEqualDiffusivity(self, diffuser1, tdict1, diffuser2, tdict2, msg="", kTlist=(1.,),
+                               diffuserargs1=types.MappingProxyType({}),
+                               diffuserargs2=types.MappingProxyType({})):
+        """Assert that two diffusers give equal values over the same kT set"""
+        for kT in kTlist:
+            Lvv1, Lss1, Lsv1, L1vv1 = diffuser1.Lij(*diffuser1.preene2betafree(kT, **tdict1), **diffuserargs1)
+            Lvv2, Lss2, Lsv2, L1vv2 = diffuser2.Lij(*diffuser2.preene2betafree(kT, **tdict2), **diffuserargs2)
+            verbose_print('kT={}'.format(kT))
+            verbose_print(diffuser1)
+            verbose_print(diffuserargs1)
+            for Lname in ('Lvv1', 'Lss1', 'Lsv1', 'L1vv1'):
+                verbose_print(locals()[Lname])
+            verbose_print(diffuser2)
+            verbose_print(diffuserargs2)
+            for Lname in ('Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
+                verbose_print(locals()[Lname])
+            failmsg = ''
+            for L, Lp, Lname in zip([Lvv1, Lss1, Lsv1, L1vv1],
+                                    [Lvv2, Lss2, Lsv2, L1vv2],
+                                    ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
+                if not np.allclose(L, Lp, atol=1e-7):
+                    failmsg += 'Diffusivity {} does not match?\n{}\n!=\n{}\n'.format(Lname, L, Lp)
+            if failmsg != '':
+                self.fail(msg=msg+
+                              '\nFailure at kT={}\nD1args={}, D2args={}'.format(kT,
+                                                                                diffuserargs1,
+                                                                                diffuserargs2)+
+                              failmsg)
+
+
+class CrystalOnsagerTestsSC(DiffusionTestCase):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
 
     longMessage = False
@@ -59,9 +112,7 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
         verbose_print('Crystal: ' + self.crystalname)
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
-                      'preT0': np.array([1.]), 'eneT0': np.array([0.])}
-        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        thermaldef = self.makeunitythermodict(Diffusivity)
 
         L0vv = np.zeros((3, 3))
         om0 = thermaldef['preT0'][0] / thermaldef['preV'][0] * \
@@ -84,16 +135,8 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
                         msg='Failure to match correlation ({}), got {} from {}/{}'.format(
                             self.correl, -Lss[0, 0] / Lsv[0, 0], Lss[0,0], -Lsv[0,0]))
         # test large_om2 version:
-        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef),
-                                                  large_om2=0)
-        for Lname in ('Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
-            verbose_print(Lname)
-            verbose_print(locals()[Lname])
-        for L, Lp, Lname in zip([Lvv, Lss, Lsv, L1vv],
-                                [Lvv2, Lss2, Lsv2, L1vv2],
-                                ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
-            self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-                    msg="Large omega2 {} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
+        self.assertEqualDiffusivity(Diffusivity, thermaldef, Diffusivity, thermaldef,
+                                    diffuserargs2={'large_om2': 0}, msg='large omega test fail')
 
 
 class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
@@ -283,7 +326,7 @@ class CrystalOnsagerTestsNbO(CrystalOnsagerTestsSC):
         self.correl = 0.688916  # doi://10.1080/01418618308234882  (Koiwa & Ishioka paper)
 
 
-class CrystalOnsagerTestsHCP(unittest.TestCase):
+class CrystalOnsagerTestsHCP(DiffusionTestCase):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
 
     longMessage = False
@@ -302,24 +345,13 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         self.correlx = 0.78120489
         self.correlz = 0.78145142
 
-    def assertOrderingSuperEqual(self, s0, s1, msg=""):
-        if s0 != s1:
-            failmsg = msg + '\n'
-            for line0, line1 in itertools.zip_longest(s0.__str__().splitlines(),
-                                                      s1.__str__().splitlines(),
-                                                      fillvalue=' - '):
-                failmsg += line0 + '\t' + line1 + '\n'
-            self.fail(msg=failmsg)
-
     def testtracer(self):
         """Test that HCP tracer works as expected"""
         # Make a calculator with one neighbor shell
         verbose_print('Crystal: ' + self.crystalname)
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
-                      'preT0': np.array([1., 1.]), 'eneT0': np.array([0., 0.])}
-        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        thermaldef = self.makeunitythermodict(Diffusivity)
         L0vv = np.zeros((3, 3))
         om0 = thermaldef['preT0'][0] / thermaldef['preV'][0] * \
               np.exp((thermaldef['eneV'][0] - thermaldef['eneT0'][0]) / kT)
@@ -345,6 +377,9 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         self.assertTrue(np.allclose(-Lss, np.dot(correlmat, Lsv), rtol=1e-7),
                         msg='Failure to match correlation ({}, {}), got {}, {}'.format(
                             self.correlx, self.correlz, -Lss[0, 0] / Lsv[0, 0], -Lss[2, 2] / Lsv[2, 2]))
+        # test large_om2 version:
+        self.assertEqualDiffusivity(Diffusivity, thermaldef, Diffusivity, thermaldef,
+                                    diffuserargs2={'large_om2': 0}, msg='large omega test fail')
 
     def testHighOmega2(self):
         """Test that HCP with very high omega2 still produces symmetric diffusivity"""
@@ -352,9 +387,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         verbose_print('Crystal: ' + self.crystalname)
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
-                      'preT0': np.array([1., 1.]), 'eneT0': np.array([0., 0.])}
-        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        thermaldef = self.makeunitythermodict(Diffusivity)
         thermaldef['preT2'] = 1e16*thermaldef['preT2']
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
         for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
@@ -520,7 +553,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                                               msg='Transformation wrong?')
 
 
-class CrystalOnsagerTestsB2(unittest.TestCase):
+class CrystalOnsagerTestsB2(DiffusionTestCase):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
 
     longMessage = False
@@ -545,33 +578,15 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         # Make a calculator with one neighbor shell
         verbose_print('Crystal: ' + self.crystalname)
         verbose_print('Crystal2: ' + self.crystalname2)
-        kT = 1.
-        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity1 = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
-        thermaldef = {'preV': np.ones(len(self.sitelist)), 'eneV': np.zeros(len(self.sitelist)),
-                      'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
-        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
-        thermaldef2 = {'preV': np.ones(len(self.sitelist2)), 'eneV': np.zeros(len(self.sitelist2)),
-                       'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
-        thermaldef2.update(Diffusivity2.maketracerpreene(**thermaldef2))
-
-        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
-        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
-        Lvv3, Lss3, Lsv3, L1vv3 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2),
-                                                   large_om2=0)
-        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv',
-                      'Lvv2', 'Lss2', 'Lsv2', 'L1vv2',
-                      'Lvv3', 'Lss3', 'Lsv3', 'L1vv3'):
-            verbose_print(Lname)
-            verbose_print(locals()[Lname])
-        for L, Lp, Lpp, Lname in zip([Lvv, Lss, Lsv, L1vv],
-                                     [Lvv2, Lss2, Lsv2, L1vv2],
-                                     [Lvv3, Lss3, Lsv3, L1vv3],
-                                     ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
-            self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-                            msg="Diffusivity {} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
-            self.assertTrue(np.allclose(L, Lpp, atol=1e-7),
-                            msg="Large omega2 diffusivity {} doesn't match?\n{} !=\n{}".format(Lname, L, Lpp))
+        thermaldef1 = self.makeunitythermodict(Diffusivity1)
+        thermaldef2 = self.makeunitythermodict(Diffusivity2)
+        # BCC vs. B2
+        self.assertEqualDiffusivity(Diffusivity1, thermaldef1, Diffusivity2, thermaldef2,
+                                    msg='broken symmetry fail')
+        self.assertEqualDiffusivity(Diffusivity2, thermaldef2, Diffusivity2, thermaldef2,
+                                    diffuserargs2={'large_om2': 0}, msg='large omega test fail')
 
     def testsolute(self):
         """Test that BCC mapped onto B2 match exactly"""
@@ -579,40 +594,16 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
         verbose_print('Crystal: ' + self.crystalname)
         verbose_print('Crystal2: ' + self.crystalname2)
         verbose_print('  Solute test: SV binding = {}'.format(self.solutebinding))
-        kT = 1.
-        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity1 = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
-        # we will make this test using LIMB; add in the solute-vacancy interaction
-        thermaldef = {'preV': np.ones(len(self.sitelist)), 'eneV': np.zeros(len(self.sitelist)),
-                      'preS': np.ones(len(self.sitelist)), 'eneS': np.zeros(len(self.sitelist)),
-                      'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork)),
-                      'preSV': self.solutebinding * np.ones(len(Diffusivity.interactlist())),
-                      'eneSV': np.zeros(len(Diffusivity.interactlist()))}
-        thermaldef.update(Diffusivity.makeLIMBpreene(**thermaldef))
-        thermaldef2 = {'preV': np.ones(len(self.sitelist2)), 'eneV': np.zeros(len(self.sitelist2)),
-                       'preS': np.ones(len(self.sitelist2)), 'eneS': np.zeros(len(self.sitelist2)),
-                       'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2)),
-                       'preSV': self.solutebinding * np.ones(len(Diffusivity2.interactlist())),
-                       'eneSV': np.zeros(len(Diffusivity2.interactlist()))}
-        thermaldef2.update(Diffusivity2.makeLIMBpreene(**thermaldef2))
+        thermaldef1 = self.makeunitythermodict(Diffusivity1, solutebinding=self.solutebinding)
+        thermaldef2 = self.makeunitythermodict(Diffusivity2, solutebinding=self.solutebinding)
+        # BCC vs. B2
+        self.assertEqualDiffusivity(Diffusivity1, thermaldef1, Diffusivity2, thermaldef2,
+                                    msg='broken symmetry fail')
+        self.assertEqualDiffusivity(Diffusivity2, thermaldef2, Diffusivity2, thermaldef2,
+                                    diffuserargs2={'large_om2': 0}, msg='large omega test fail')
 
-        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
-        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
-        Lvv3, Lss3, Lsv3, L1vv3 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2),
-                                                   large_om2=0)
-        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv',
-                      'Lvv2', 'Lss2', 'Lsv2', 'L1vv2',
-                      'Lvv3', 'Lss3', 'Lsv3', 'L1vv3'):
-            verbose_print(Lname)
-            verbose_print(locals()[Lname])
-        for L, Lp, Lpp, Lname in zip([Lvv, Lss, Lsv, L1vv],
-                                     [Lvv2, Lss2, Lsv2, L1vv2],
-                                     [Lvv3, Lss3, Lsv3, L1vv3],
-                                     ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
-            self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-                            msg="Diffusivity {} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
-            self.assertTrue(np.allclose(L, Lpp, atol=1e-7),
-                            msg="Large omega2 diffusivity {} doesn't match?\n{} !=\n{}".format(Lname, L, Lpp))
 
 
 class CrystalOnsagerTestsL12(CrystalOnsagerTestsB2):
@@ -637,7 +628,7 @@ class CrystalOnsagerTestsL12(CrystalOnsagerTestsB2):
         self.solutebinding = 3.
 
 
-class CrystalOnsagerTestsRumpledOmega(unittest.TestCase):
+class CrystalOnsagerTestsRumpledOmega(DiffusionTestCase):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
 
     longMessage = False
@@ -670,30 +661,20 @@ class CrystalOnsagerTestsRumpledOmega(unittest.TestCase):
         # Make a calculator with one neighbor shell
         verbose_print('Crystal: ' + self.crystalname)
         verbose_print('Crystal2: ' + self.crystalname2)
-        kT = 1.
-        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity1 = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
-        thermaldef = {'preV': np.array([self.vacancyprob if indices==[0] else 1. for indices in self.sitelist]),
-                      'eneV': np.zeros(len(self.sitelist)),
-                      'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
-        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        thermaldef1 = {'preV': np.array([self.vacancyprob if indices==[0] else 1. for indices in self.sitelist]),
+                        'eneV': np.zeros(len(self.sitelist)),
+                        'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
+        thermaldef1.update(Diffusivity1.maketracerpreene(**thermaldef1))
         thermaldef2 = {'preV': np.array([self.vacancyprob if indices == [0] else 1. for indices in self.sitelist2]),
                        'eneV': np.zeros(len(self.sitelist2)),
                        'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
         thermaldef2.update(Diffusivity2.maketracerpreene(**thermaldef2))
-
-        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
-        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
-        Lvv3, Lss3, Lsv3, L1vv3 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2),
-                                                   large_om2=0)
-        for L, Lp, Lpp, Lname in zip([Lvv, Lss, Lsv, L1vv],
-                                     [Lvv2, Lss2, Lsv2, L1vv2],
-                                     [Lvv3, Lss3, Lsv3, L1vv3],
-                                     ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
-            self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-                            msg="Diffusivity {} doesn't match?\n{} !=\n{}".format(Lname, L, Lp))
-            self.assertTrue(np.allclose(L, Lpp, atol=1e-7),
-                            msg="Large omega2 diffusivity {} doesn't match?\n{} !=\n{}".format(Lname, L, Lpp))
+        self.assertEqualDiffusivity(Diffusivity1, thermaldef1, Diffusivity2, thermaldef2,
+                                    msg='broken symmetry fail')
+        self.assertEqualDiffusivity(Diffusivity2, thermaldef2, Diffusivity2, thermaldef2,
+                                diffuserargs2={'large_om2': 0}, msg='large omega test fail')
 
 
 class InterstitialTests(unittest.TestCase):
