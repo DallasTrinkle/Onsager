@@ -642,7 +642,7 @@ class CrystalOnsagerTestsRumpledOmega(DiffusionTestCase):
         self.crystalname2 = 'Rumpled omega a0={}'.format(self.a0)
 
         # vacancy probability, and solute binding
-        self.vacancyprob, self.solutebinding = 1., 3.
+        self.vacancyprob, self.solutebinding = 4., 3.
 
     def testtracer(self):
         """Test that Omega and rumpled Omega match exactly"""

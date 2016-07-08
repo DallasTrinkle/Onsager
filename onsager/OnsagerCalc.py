@@ -1367,10 +1367,11 @@ class VacancyMediated(object):
         prob = np.array([probS[s] * probV[v] for (s, v) in self.kineticsvWyckoff])
         for tindex, kindex in enumerate(self.thermo2kin):
             bFSVkin[kindex] += bFSV[tindex]
-            if self.kinetic.states[self.kinetic.stars[kindex][0]].iszero():
+            prob[kindex] *= np.exp(-bFSV[tindex])
+        # zero out probability of any origin states... not clear this is really needed
+        for kindex, s in enumerate(self.kinetic.stars):
+            if self.kinetic.states[s[0]].iszero():
                 prob[kindex] = 0
-            else:
-                prob[kindex] *= np.exp(-bFSV[tindex])
 
         # 3. set up symmetric rates: omega0, omega1, omega2
         #    and escape rates omega0escape, omega1escape, omega2escape
@@ -1425,7 +1426,7 @@ class VacancyMediated(object):
                                  etaSbar), biasSbar) / self.N
             D0ss += dDss
             D0sv -= dDss
-            biasSvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)*probVsqrt  # expand back out to sites
+            biasSvec -= np.dot(om2, np.dot(self.OSfolddown.T, etaSbar)*probVsqrt)  # expand back out to sites
             # biasVbar = np.dot(self.OSfolddown, (biasVvec_om2)*probVsqrt)
             # etaVbar = np.dot(pinv2(om2bar), biasVbar)
             # D0vv += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
