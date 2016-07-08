@@ -1510,6 +1510,9 @@ class VacancyMediated(object):
 
         # 6b. GF pieces:
         etaVvec, etaSvec = np.dot(G, biasVvec), np.dot(G, biasSvec)
+        # zero out eta for our origin states:
+        # etaVvec[self.OSindices] = 0
+        # etaSvec[self.OSindices] = 0
         outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer, etaSvec)
 
         L1ss = np.dot(outer_etaSvec, biasSvec) / self.N
