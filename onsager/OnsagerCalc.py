@@ -1383,9 +1383,9 @@ class VacancyMediated(object):
         # are treated below--they only need to be considered *if* there is broken symmetry, such
         # that we have a non-empty VectorBasis in our *unit cell* (NVB > 0)
         # 4a. Bare diffusivities
-        symmprobV0 = np.array([np.sqrt(probV[sp[0]] * probV[sp[1]]) for sp in self.omega0vacancyWyckoff])
-        symmprobSV1 = np.array([np.sqrt(prob[sp[0]] * prob[sp[1]]) for sp in self.om1_SP])
-        symmprobSV2 = np.array([np.sqrt(prob[sp[0]] * prob[sp[1]]) for sp in self.om2_SP])
+        symmprobV0 = np.array([np.sqrt(probV[i] * probV[f]) for i,f in self.omega0vacancyWyckoff])
+        symmprobSV1 = np.array([np.sqrt(prob[i] * prob[f]) for i,f in self.om1_SP])
+        symmprobSV2 = np.array([np.sqrt(prob[i] * prob[f]) for i,f in self.om2_SP])
         D0ss = np.dot(self.Dom2, omega2 * symmprobSV2) / self.N
         D0sv = -D0ss
         D0vv = (np.dot(self.Dom1, omega1 * symmprobSV1) -

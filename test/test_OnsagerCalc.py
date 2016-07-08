@@ -12,7 +12,7 @@ import numpy as np
 import onsager.OnsagerCalc as OnsagerCalc
 import onsager.crystal as crystal
 
-VERBOSE_TESTING = False
+VERBOSE_TESTING = True
 
 
 def verbose_print(s):
@@ -75,12 +75,17 @@ class DiffusionTestCase(unittest.TestCase):
                                     [Lvv2, Lss2, Lsv2, L1vv2],
                                     ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
                 if not np.allclose(L, Lp, atol=1e-7):
-                    failmsg += 'Diffusivity {} does not match?\n{}\n!=\n{}\n'.format(Lname, L, Lp)
-            if failmsg != '':
-                self.fail(msg=textwrap.dedent("""\
-                {} at kT={}
-                D1args={}, D2args={}
-                {}""").format(msg, kT, diffuserargs1, diffuserargs2, failmsg))
+                    failmsg += textwrap.dedent("""\
+                    Diffusivity {} does not match at kT={}?
+                    {}
+                    !=
+                    {}
+                    """).format(Lname, kT, L, Lp)
+        if failmsg != '':
+            self.fail(msg=textwrap.dedent("""\
+            {}
+            D1args={}, D2args={}
+            {}""").format(msg, diffuserargs1, diffuserargs2, failmsg))
 
 
 class CrystalOnsagerTestsSC(DiffusionTestCase):
@@ -637,7 +642,7 @@ class CrystalOnsagerTestsRumpledOmega(DiffusionTestCase):
         self.crystalname2 = 'Rumpled omega a0={}'.format(self.a0)
 
         # vacancy probability, and solute binding
-        self.vacancyprob, self.solutebinding = 4., 3.
+        self.vacancyprob, self.solutebinding = 1., 3.
 
     def testtracer(self):
         """Test that Omega and rumpled Omega match exactly"""
