@@ -1419,18 +1419,18 @@ class VacancyMediated(object):
         if len(self.OSindices) > 0:
             # need to multiply by sqrt(probV) first
             biasSbar = np.dot(self.OSfolddown, biasSvec*probVsqrt)
-            biasVbar = np.dot(self.OSVfolddown, (biasVvec+biasVvec_om2)*probVsqrt)
             om2bar = np.dot(self.OSfolddown, np.dot(om2, self.OSfolddown.T))  # OS x OS
             etaSbar = np.dot(pinv2(om2bar), biasSbar)
-            etaVbar = np.dot(pinv2(om2bar), biasVbar)
             dDss = np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
                                  etaSbar), biasSbar) / self.N
             D0ss += dDss
             D0sv -= dDss
-            D0vv += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
-                                 etaVbar), biasVbar) / self.N
-            biasSvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaSbar*probVsqrt)  # expand back out to sites
-            biasVvec -= np.dot(np.dot(om2, self.OSVfolddown.T), etaSbar*probVsqrt)  # expand back out to sites
+            biasSvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)*probVsqrt  # expand back out to sites
+            # biasVbar = np.dot(self.OSfolddown, (biasVvec_om2)*probVsqrt)
+            # etaVbar = np.dot(pinv2(om2bar), biasVbar)
+            # D0vv += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
+            #                      etaVbar), biasVbar) / self.N
+            # biasVvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaVbar)*probVsqrt  # expand back out to sites
 
         # 5. compute Green function:
         G0 = np.dot(self.GFexpansion, GF)
