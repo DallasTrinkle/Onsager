@@ -657,7 +657,7 @@ class CrystalOnsagerTestsRumpledOmega(unittest.TestCase):
         self.crys2 = crystal.Crystal(self.a0 * np.array([[1 / 2, 1 / 2, 0.],
                                                          [-np.sqrt(3 / 4), np.sqrt(3 / 4), 0.],
                                                          [0., 0., self.ca]]),
-                                     [np.zeros(3), np.array([1 / 3, 2 / 3, 0.51]), np.array([2 / 3, 1 / 3, 0.49])])
+                                     [np.zeros(3), np.array([1 / 3, 2 / 3, 0.55]), np.array([2 / 3, 1 / 3, 0.45])])
         self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.7 * self.a0)
         self.sitelist2 = self.crys2.sitelist(self.chem)
         self.crystalname2 = 'Rumpled omega a0={}'.format(self.a0)

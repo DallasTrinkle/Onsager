@@ -1359,6 +1359,8 @@ class VacancyMediated(object):
         # 2. set up probabilities for solute-vacancy configurations
         probV = np.array([np.exp(min(bFV) - bFV[wi]) for wi in self.invmap])
         probV *= self.N / np.sum(probV)  # normalize
+        probVsqrt = np.array([np.sqrt(probV[self.kin2vacancy[starindex]])
+                              for starindex in self.vstar2kin])
         probS = np.array([np.exp(min(bFS) - bFS[wi]) for wi in self.invmap])
         probS *= self.N / np.sum(probS)  # normalize
         bFSVkin = np.array([bFS[s] + bFV[v] for (s, v) in self.kineticsvWyckoff])
@@ -1407,15 +1409,16 @@ class VacancyMediated(object):
             biasSvec[sv] = -np.dot(self.om2bias[sv, :], omega2escape[sv, :]) * np.sqrt(prob[starindex])
             # removed the om2 contribution--will be added back in later. Separation necessary for large_om2 case
             biasVvec[sv] = np.dot(self.om1bias[sv, :], omega1escape[sv, :]) * np.sqrt(prob[starindex]) - \
-                           np.dot(self.om1_b0[sv, :], omega0escape[svvacindex, :]) * np.sqrt(probV[svvacindex]) - \
-                           np.dot(self.om2_b0[sv, :], omega0escape[svvacindex, :]) * np.sqrt(probV[svvacindex])
+                           np.dot(self.om1_b0[sv, :], omega0escape[svvacindex, :]) * probVsqrt[sv] - \
+                           np.dot(self.om2_b0[sv, :], omega0escape[svvacindex, :]) * probVsqrt[sv]
             # - biasSvec[sv]
         biasVvec_om2 = -biasSvec
 
         # 4c. origin state corrections for solute: (corrections for vacancy appear below)
         # these corrections are due to the null space for the vacancy without
         if len(self.OSindices) > 0:
-            biasSbar = np.dot(self.OSfolddown, biasSvec)
+            # need to multiply by sqrt(probV) first
+            biasSbar = np.dot(self.OSfolddown, biasSvec*probVsqrt)
             om2bar = np.dot(self.OSfolddown, np.dot(om2, self.OSfolddown.T))  # OS x OS
             etaSbar = np.dot(pinv2(om2bar), biasSbar)
             dDss = np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
