@@ -53,6 +53,7 @@ class DiffusionTestCase(unittest.TestCase):
                 failmsg += line0 + '\t' + line1 + '\n'
             self.fail(msg=failmsg)
 
+    # we use MappingProxyType to make a frozen dictionary:
     def assertEqualDiffusivity(self, diffuser1, tdict1, diffuser2, tdict2, msg="", kTlist=(1.,),
                                diffuserargs1=types.MappingProxyType({}),
                                diffuserargs2=types.MappingProxyType({})):
@@ -76,11 +77,10 @@ class DiffusionTestCase(unittest.TestCase):
                 if not np.allclose(L, Lp, atol=1e-7):
                     failmsg += 'Diffusivity {} does not match?\n{}\n!=\n{}\n'.format(Lname, L, Lp)
             if failmsg != '':
-                self.fail(msg=msg+
-                              '\nFailure at kT={}\nD1args={}, D2args={}'.format(kT,
-                                                                                diffuserargs1,
-                                                                                diffuserargs2)+
-                              failmsg)
+                self.fail(msg=textwrap.dedent("""\
+                {} at kT={}
+                D1args={}, D2args={}
+                {}""").format(msg, kT, diffuserargs1, diffuserargs2, failmsg))
 
 
 class CrystalOnsagerTestsSC(DiffusionTestCase):
@@ -177,32 +177,15 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         w3 = 0.5 * w0  # dissociation jump (vacancy away from solute)
         w4 = 1.5 * w0  # association jump (vacancy jump into solute)
         SVprob = w4 / w3  # enhanced probability of solute-vacancy complex
-        verbose_print(textwrap.dedent("""
+        verbose_print(textwrap.dedent("""\
                                w0={}
                                w1={}
                                w2={}
                                w3={}
                                w4={}
-                               prob={}""".format(w0, w1, w2, w3, w4, SVprob)))
+                               prob={}""").format(w0, w1, w2, w3, w4, SVprob))
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        # input the solute/vacancy binding (w4/w3), and use LIMB to take a first stab at the rates
-        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
-                      'preS': np.array([1.]), 'eneS': np.array([0.]),
-                      'preT0': np.array([w0]), 'eneT0': np.array([0.]),
-                      'preSV': np.array([SVprob]), 'eneSV': np.array([0.])}
-        thermaldef.update(Diffusivity.makeLIMBpreene(**thermaldef))
-        # now, we need to get w1, w3, and w4 in there. w3 = dissociation, w4 = association, so:
-        # the transition state for the association/dissociation jump is w4 as the outer prob = 1,
-        # and the bound probability = w4/w3. The transition state for the "swing" jumps is
-        # w1*(w4/w3), where the w4/w3 takes care of the probability factor. Finally, the
-        # exchange jump is also w2*(w4/w3).
-        thermaldef['preT2'][0] = w2 * SVprob
-        for j, (PS1, PS2) in enumerate(Diffusivity.omegalist(1)[0]):
-            # check to see if the two endpoints of the transition have the solute-vacancy at same distance:
-            if np.isclose(np.dot(PS1.dx, PS1.dx), np.dot(PS2.dx, PS2.dx)):
-                thermaldef['preT1'][j] = w1 * SVprob
-            else:
-                thermaldef['preT1'][j] = w4
+        thermaldef = Diffusivity.tags2preene(self.makethermodict(w0, w1, w2, w3, w4))
         L0vv = np.zeros((3, 3))
         om0 = thermaldef['preT0'][0] / thermaldef['preV'][0] * \
               np.exp((thermaldef['eneV'][0] - thermaldef['eneT0'][0]) / kT)
@@ -219,7 +202,7 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         self.assertTrue(np.allclose(Lvv, L0vv))
         Ds5freq = self.a0 ** 2 * fivefreq(w0, w1, w2, w3, w4)
         self.assertAlmostEqual(Lss[0, 0], Ds5freq, delta=1e-3,
-                               msg=textwrap.dedent("""
+                               msg=textwrap.dedent("""\
                                Did not match the 5-freq. model for
                                w0={}
                                w1={}
@@ -227,7 +210,7 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
                                w3={}
                                w4={}
                                Lss={}
-                               Ds5={}""".format(w0, w1, w2, w3, w4, Lss[0, 0], Ds5freq)))
+                               Ds5={}""").format(w0, w1, w2, w3, w4, Lss[0, 0], Ds5freq))
 
     def testLargeOmega2(self):
         """Test whether the large omega2 solution is (a) correct and (b) stable against five frequency model"""
@@ -239,13 +222,13 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         w3 = 1e-8*w0  # dissociation jump (vacancy away from solute)
         w4 = w0  # association jump (vacancy jump into solute)
         SVprob = w4 / w3  # enhanced probability of solute-vacancy complex
-        verbose_print(textwrap.dedent("""
+        verbose_print(textwrap.dedent("""\
                                w0={}
                                w1={}
                                w2={}
                                w3={}
                                w4={}
-                               prob={}""".format(w0, w1, w2, w3, w4, SVprob)))
+                               prob={}""").format(w0, w1, w2, w3, w4, SVprob))
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         # updated to use tagging to do our work for us:
         thermaldef = Diffusivity.tags2preene(self.makethermodict(w0, w1, w2, w3, w4))
@@ -265,7 +248,7 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         self.assertTrue(np.allclose(Lvv, L0vv))
         Ds5freq = self.a0 ** 2 * fivefreq(w0, w1, w2, w3, w4)
         self.assertAlmostEqual(Lss[0, 0], Ds5freq, delta=1e-6*Ds5freq,
-                               msg=textwrap.dedent("""
+                               msg=textwrap.dedent("""\
                                Did not match the 5-freq. model for
                                w0={}
                                w1={}
@@ -273,7 +256,7 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
                                w3={}
                                w4={}
                                Lss={}
-                               Ds5={}""".format(w0, w1, w2, w3, w4, Lss[0, 0], Ds5freq)))
+                               Ds5={}""").format(w0, w1, w2, w3, w4, Lss[0, 0], Ds5freq))
 
 
 class CrystalOnsagerTestsBCC(CrystalOnsagerTestsSC):
