@@ -1419,14 +1419,15 @@ class VacancyMediated(object):
         # these corrections are due to the null space for the vacancy without
         if len(self.OSindices) > 0:
             # need to multiply by sqrt(probV) first
-            biasSbar = np.dot(self.OSfolddown, biasSvec*probVsqrt)
-            om2bar = np.dot(self.OSfolddown, np.dot(om2, self.OSfolddown.T))  # OS x OS
+            OSprobV = self.OSfolddown*probVsqrt  # proper nullspace projection
+            biasSbar = np.dot(OSprobV, biasSvec)
+            om2bar = np.dot(OSprobV, np.dot(om2, OSprobV.T))  # OS x OS
             etaSbar = np.dot(pinv2(om2bar), biasSbar)
             dDss = np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
                                  etaSbar), biasSbar) / self.N
             D0ss += dDss
             D0sv -= dDss
-            biasSvec -= np.dot(om2, np.dot(self.OSfolddown.T, etaSbar)*probVsqrt)  # expand back out to sites
+            biasSvec -= np.dot(om2, np.dot(OSprobV.T, etaSbar))  # expand back out to sites *probVsqrt
             # biasVbar = np.dot(self.OSfolddown, (biasVvec_om2)*probVsqrt)
             # etaVbar = np.dot(pinv2(om2bar), biasVbar)
             # D0vv += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
