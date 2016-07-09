@@ -13,9 +13,8 @@ import numpy as np
 import onsager.OnsagerCalc as OnsagerCalc
 import onsager.crystal as crystal
 
-def verbose_print(s, logger):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug(s)
+# uncomment for verbosity:
+# logging.basicConfig(level=logging.DEBUG)  # VERBOSE
 
 
 def fivefreq(w0, w1, w2, w3, w4):
@@ -61,14 +60,12 @@ class DiffusionTestCase(unittest.TestCase):
             Lvv2, Lss2, Lsv2, L1vv2 = diffuser2.Lij(*diffuser2.preene2betafree(kT, **tdict2), **diffuserargs2)
             if hasattr(self, 'logger') and self.logger.isEnabledFor(logging.DEBUG):
                 self.logger.debug('kT={}'.format(kT))
-                self.logger.debug(diffuser1)
-                self.logger.debug(diffuserargs1)
+                self.logger.debug('\n{}\n{}'.format(diffuser1, diffuserargs1))
                 for Lname in ('Lvv1', 'Lss1', 'Lsv1', 'L1vv1'):
-                    self.logger.debug(locals()[Lname])
-                self.logger.debug(diffuser2)
-                self.logger.debug(diffuserargs2)
+                    self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
+                self.logger.debug('\n{}\n{}'.format(diffuser2, diffuserargs2))
                 for Lname in ('Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
-                    self.logger.debug(locals()[Lname])
+                    self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
             failmsg = ''
             for L, Lp, Lname in zip([Lvv1, Lss1, Lsv1, L1vv1],
                                     [Lvv2, Lss2, Lsv2, L1vv2],
@@ -129,11 +126,9 @@ class CrystalOnsagerTestsSC(DiffusionTestCase):
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
 
         if self.logger.isEnabledFor(logging.DEBUG):
-            self.logger.debug('Crystal: ' + self.crystalname)
-            self.logger.debug(Diffusivity)
+            self.logger.debug('Crystal: {}\n{}'.format(self.crystalname,Diffusivity))
             for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
-                self.logger.debug(Lname)
-                self.logger.debug(locals()[Lname])
+                self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
         for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0, 0] * np.eye(3)), msg='Diffusivity not isotropic?')
         # No solute drag, so Lsv = -Lvv; Lvv = normal vacancy diffusion
@@ -199,8 +194,8 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         L0vv /= self.crys.N
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
         if self.logger.isEnabledFor(logging.DEBUG):
-            self.logger.debug('Five-frequency model, Crystal: ' + self.crystalname)
-            self.logger.debug(textwrap.dedent("""\
+            self.logger.debug('Five-frequency model, Crystal: {}\n'.format(self.crystalname) +
+                              textwrap.dedent("""\
                                w0={}
                                w1={}
                                w2={}
@@ -208,8 +203,7 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
                                w4={}
                                prob={}""").format(w0, w1, w2, w3, w4, SVprob))
             for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
-                self.logger.debug(Lname)
-                self.logger.debug(locals()[Lname])
+                self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
         for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0, 0] * np.eye(3)), msg='Diffusivity not isotropic?')
         self.assertTrue(np.allclose(Lvv, L0vv))
@@ -249,8 +243,8 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef), large_om2=0)
 
         if self.logger.isEnabledFor(logging.DEBUG):
-            self.logger.debug('Five-frequency model, Crystal: ' + self.crystalname)
-            self.logger.debug(textwrap.dedent("""\
+            self.logger.debug('Five-frequency model, Crystal: {}\n'.format(self.crystalname) +
+                              textwrap.dedent("""\
                                w0={}
                                w1={}
                                w2={}
@@ -258,8 +252,7 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
                                w4={}
                                prob={}""").format(w0, w1, w2, w3, w4, SVprob))
             for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
-                self.logger.debug(Lname)
-                self.logger.debug(locals()[Lname])
+                self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
         for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0, 0] * np.eye(3)), msg='Diffusivity not isotropic?')
         self.assertTrue(np.allclose(Lvv, L0vv))
@@ -364,11 +357,9 @@ class CrystalOnsagerTestsHCP(DiffusionTestCase):
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
 
         if self.logger.isEnabledFor(logging.DEBUG):
-            self.logger.debug('Crystal: ' + self.crystalname)
-            self.logger.debug(Diffusivity)
+            self.logger.debug('Crystal: {}\n{}'.format(self.crystalname, Diffusivity))
             for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
-                self.logger.debug(Lname)
-                self.logger.debug(locals()[Lname])
+                self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
         # we leave out Lss since it is not, in fact, isotropic!
         for L in [Lvv, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0, 0] * np.eye(3), atol=1e-8),
@@ -398,13 +389,13 @@ class CrystalOnsagerTestsHCP(DiffusionTestCase):
         thermaldef['preT2'] = 1e16*thermaldef['preT2']
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
         if self.logger.isEnabledFor(logging.DEBUG):
-            self.logger.debug('Crystal: ' + self.crystalname)
-            self.logger.debug(Diffusivity)
+            self.logger.debug('Crystal: {}\n{}'.format(self.crystalname, Diffusivity))
+            for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
+                self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
         for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
             L = locals()[Lname]
             if self.logger.isEnabledFor(logging.DEBUG):
-                self.logger.debug(Lname)
-                self.logger.debug(L)
+                self.logger.debug('{}:\n{}'.format(Lname, L))
             for i in range(3):
                 for j in range(i):
                     self.assertAlmostEqual(L[i,j], L[j,i],
