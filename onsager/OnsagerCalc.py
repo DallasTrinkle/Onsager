@@ -1357,12 +1357,14 @@ class VacancyMediated(object):
             self.etavvalues[vTK] = etav
 
         # 2. set up probabilities for solute-vacancy configurations
-        probV = np.array([np.exp(min(bFV) - bFV[wi]) for wi in self.invmap])
-        probV *= self.N / np.sum(probV)  # normalize
+        probVsites = np.array([np.exp(min(bFV) - bFV[wi]) for wi in self.invmap])
+        probVsites *= self.N / np.sum(probVsites)  # normalize
+        probV = np.array([probVsites[sites[0]] for sites in self.sitelist])  # Wyckoff positions
         probVsqrt = np.array([np.sqrt(probV[self.kin2vacancy[starindex]])
                               for starindex in self.vstar2kin])
-        probS = np.array([np.exp(min(bFS) - bFS[wi]) for wi in self.invmap])
-        probS *= self.N / np.sum(probS)  # normalize
+        probSsites = np.array([np.exp(min(bFS) - bFS[wi]) for wi in self.invmap])
+        probSsites *= self.N / np.sum(probSsites)  # normalize
+        probS = np.array([probSsites[sites[0]] for sites in self.sitelist])  # Wyckoff positions
         bFSVkin = np.array([bFS[s] + bFV[v] for (s, v) in self.kineticsvWyckoff])
         prob = np.array([probS[s] * probV[v] for (s, v) in self.kineticsvWyckoff])
         for tindex, kindex in enumerate(self.thermo2kin):
