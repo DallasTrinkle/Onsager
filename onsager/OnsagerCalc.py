@@ -176,18 +176,18 @@ class Interstitial(object):
         for sites, tags in zip(self.sitelist, self.tags['states']):
             i, tag = sites[0], tags[0]
             u = basis[i]
-            super = basesupercell.copy()
-            ind = np.dot(super.invsuper, u) / super.size
+            super0 = basesupercell.copy()
+            ind = np.dot(super0.invsuper, u) / super0.size
             # put an interstitial in that single state; the "first" one is fine:
-            super[ind] = self.chem
-            superdict['states'][tag] = super
+            super0[ind] = self.chem
+            superdict['states'][tag] = super0
         for jumps, tags in zip(self.jumpnetwork, self.tags['transitions']):
             (i0, j0), dx0 = jumps[0]
             tag = tags[0]
             u0 = self.crys.basis[self.chem][i0]
             u1 = u0 + np.dot(self.crys.invlatt, dx0)  # should correspond to the j0
             super0, super1 = basesupercell.copy(), basesupercell.copy()
-            ind0, ind1 = np.dot(super0.invsuper, u0) / super.size, np.dot(super1.invsuper, u1) / super.size
+            ind0, ind1 = np.dot(super0.invsuper, u0) / super0.size, np.dot(super1.invsuper, u1) / super0.size
             # put interstitials at our corresponding sites
             super0[ind0], super1[ind1] = self.chem, self.chem
             superdict['transitions'][tag] = (super0, super1)
@@ -720,22 +720,10 @@ class VacancyMediated(object):
         # more indexing helpers:
         # kineticsvWyckoff: Wyckoff position of solute and vacancy for kinetic stars
         # omega0vacancyWyckoff: Wyckoff positions of initial and final position in omega0 jumps
-        # omega1svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega1
-        # omega2svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega2
         self.kineticsvWyckoff = [(self.invmap[PS.i], self.invmap[PS.j]) for PS in
                                  [self.kinetic.states[si[0]] for si in self.kinetic.stars]]
         self.omega0vacancyWyckoff = [(self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
                                      for jumplist in self.om0_jn]
-        self.omega1svsvWyckoff = [(self.invmap[self.kinetic.states[jumplist[0][0][0]].i],
-                                   self.invmap[self.kinetic.states[jumplist[0][0][0]].j],
-                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
-                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
-                                  for jumplist in self.om1_jn]
-        self.omega2svsvWyckoff = [(self.invmap[self.kinetic.states[jumplist[0][0][0]].i],
-                                   self.invmap[self.kinetic.states[jumplist[0][0][0]].j],
-                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
-                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
-                                  for jumplist in self.om2_jn]
 
     def generatetags(self):
         """
@@ -867,19 +855,19 @@ class VacancyMediated(object):
             for sites, tags in zip(self.sitelist, self.tags[statetype]):
                 i, tag = sites[0], tags[0]
                 u = basis[i]
-                super = basesupercell.copy()
-                ind = np.dot(super.invsuper, u) / super.size
+                super0 = basesupercell.copy()
+                ind = np.dot(super0.invsuper, u) / super0.size
                 # put a vacancy / solute in that single state; the "first" one is fine:
-                super[ind] = chem
-                superdict['states'][tag] = super
+                super0[ind] = chem
+                superdict['states'][tag] = super0
         for starlist, tags in zip(self.thermo.stars, self.tags['solute-vacancy']):
             PS, tag = self.thermo.states[starlist[0]], tags[0]
             us, uv = basis[PS.i], basis[PS.j] + PS.R
-            super = basesupercell.copy()
-            inds, indv = np.dot(super.invsuper, us) / super.size, np.dot(super.invsuper, uv) / super.size
+            super0 = basesupercell.copy()
+            inds, indv = np.dot(super0.invsuper, us) / super0.size, np.dot(super0.invsuper, uv) / super0.size
             # put a solute + vacancy in that single state; the "first" one is fine:
-            super[inds], super[indv] = schem, vchem
-            superdict['states'][tag] = super
+            super0[inds], super0[indv] = schem, vchem
+            superdict['states'][tag] = super0
         for jumptype, jumpnetwork in (('omega0', self.om0_jn),
                                       ('omega1', self.om1_jn),
                                       ('omega2', self.om2_jn)):
@@ -952,8 +940,7 @@ class VacancyMediated(object):
                     'om2_om0', 'om2_om0escape', 'om2expansion', 'om2escape',
                     'om1_b0', 'om1bias', 'om2_b0', 'om2bias',
                     'OSindices', 'OSfolddown', 'OS_VB', 'OSVfolddown',
-                    'kineticsvWyckoff', 'omega0vacancyWyckoff', 'omega1svsvWyckoff',
-                    'omega2svsvWyckoff')
+                    'kineticsvWyckoff', 'omega0vacancyWyckoff')
     __taglist__ = ('vacancy', 'solute', 'solute-vacancy', 'omega0', 'omega1', 'omega2')
 
     def addhdf5(self, HDF5group):
@@ -1286,13 +1273,12 @@ class VacancyMediated(object):
         bFT2 -= bFVmin + bFSmin
         return bFV, bFS, bFSV, bFT0, bFT1, bFT2
 
-    def _symmetricandescaperates(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
+    def _symmetricandescaperates(self, bFV, bFSVkinetic, bFT0, bFT1, bFT2):
         """
         Compute the symmetric, escape, and escape reference rates. Used by _lij().
 
         :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
-        :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
-        :param bFSV[Nthermo]: beta*eneSV - ln(preSV) (excess)
+        :param bFSVkinetic[Nkinetic]: beta*eneSV - ln(preSV) (TOTAL for solute-vacancy complex)
         :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
         :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
         :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
@@ -1311,17 +1297,15 @@ class VacancyMediated(object):
             omega0[j] = np.sqrt(omega0escape[v1, j] * omega0escape[v2, j])
         omega1 = np.zeros(len(self.om1_jn))
         omega1escape = np.zeros((self.vkinetic.Nvstars, len(self.om1_jn)))
-        for j, (s1, v1, s2, v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega1svsvWyckoff,
-                                                                  self.om1_jt, self.om1_SP, bFT1):
-            omF, omB = np.exp(-bFT + bFS[s1] + bFV[v1] + bFSV[st1]), np.exp(-bFT + bFS[s2] + bFV[v2] + bFSV[st2])
+        for j, (st1, st2), bFT in zip(itertools.count(), self.om1_SP, bFT1):
+            omF, omB = np.exp(-bFT + bFSVkinetic[st1]), np.exp(-bFT + bFSVkinetic[st2])
             omega1[j] = np.sqrt(omF * omB)
             for vst1 in self.kin2vstar[st1]: omega1escape[vst1, j] = omF
             for vst2 in self.kin2vstar[st2]: omega1escape[vst2, j] = omB
         omega2 = np.zeros(len(self.om2_jn))
         omega2escape = np.zeros((self.vkinetic.Nvstars, len(self.om2_jn)))
-        for j, (s1, v1, s2, v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega2svsvWyckoff,
-                                                                  self.om2_jt, self.om2_SP, bFT2):
-            omF, omB = np.exp(-bFT + bFS[s1] + bFV[v1] + bFSV[st1]), np.exp(-bFT + bFS[s2] + bFV[v2] + bFSV[st2])
+        for j, (st1, st2), bFT in zip(itertools.count(), self.om2_SP, bFT2):
+            omF, omB = np.exp(-bFT + bFSVkinetic[st1]), np.exp(-bFT + bFSVkinetic[st2])
             omega2[j] = np.sqrt(omF * omB)
             for vst1 in self.kin2vstar[st1]: omega2escape[vst1, j] = omF
             for vst2 in self.kin2vstar[st2]: omega2escape[vst2, j] = omB
@@ -1366,23 +1350,28 @@ class VacancyMediated(object):
             self.etavvalues[vTK] = etav
 
         # 2. set up probabilities for solute-vacancy configurations
-        probV = np.array([np.exp(min(bFV) - bFV[wi]) for wi in self.invmap])
-        probV *= self.N / np.sum(probV)  # normalize
-        probS = np.array([np.exp(min(bFS) - bFS[wi]) for wi in self.invmap])
-        probS *= self.N / np.sum(probS)  # normalize
-        bFSVkin = np.array([bFS[s] + bFV[v] for (s, v) in self.kineticsvWyckoff])
+        probVsites = np.array([np.exp(min(bFV) - bFV[wi]) for wi in self.invmap])
+        probVsites *= self.N / np.sum(probVsites)  # normalize
+        probV = np.array([probVsites[sites[0]] for sites in self.sitelist])  # Wyckoff positions
+        probVsqrt = np.array([np.sqrt(probV[self.kin2vacancy[starindex]])
+                              for starindex in self.vstar2kin])
+        probSsites = np.array([np.exp(min(bFS) - bFS[wi]) for wi in self.invmap])
+        probSsites *= self.N / np.sum(probSsites)  # normalize
+        probS = np.array([probSsites[sites[0]] for sites in self.sitelist])  # Wyckoff positions
+        bFSVkin = np.array([bFS[s] + bFV[v] for (s, v) in self.kineticsvWyckoff])  # NOT EXCESS: total
         prob = np.array([probS[s] * probV[v] for (s, v) in self.kineticsvWyckoff])
         for tindex, kindex in enumerate(self.thermo2kin):
             bFSVkin[kindex] += bFSV[tindex]
-            if self.kinetic.states[self.kinetic.stars[kindex][0]].iszero():
+            prob[kindex] *= np.exp(-bFSV[tindex])
+        # zero out probability of any origin states... not clear this is really needed
+        for kindex, s in enumerate(self.kinetic.stars):
+            if self.kinetic.states[s[0]].iszero():
                 prob[kindex] = 0
-            else:
-                prob[kindex] *= np.exp(-bFSV[tindex])
 
         # 3. set up symmetric rates: omega0, omega1, omega2
         #    and escape rates omega0escape, omega1escape, omega2escape
         omega0, omega1, omega2, omega0escape, omega1escape, omega2escape = \
-            self._symmetricandescaperates(bFV, bFS, bFSVkin, bFT0, bFT1, bFT2)
+            self._symmetricandescaperates(bFV, bFSVkin, bFT0, bFT1, bFT2)
 
         # 4. expand out: D0ss, D0vv, domega1, domega2, bias1, bias2
         # Note: we handle the equivalent of om1_om0 for omega2 (om2_om0) differently. Those
@@ -1390,16 +1379,18 @@ class VacancyMediated(object):
         # are treated below--they only need to be considered *if* there is broken symmetry, such
         # that we have a non-empty VectorBasis in our *unit cell* (NVB > 0)
         # 4a. Bare diffusivities
-        symmprobV0 = np.array([np.sqrt(probV[sp[0]] * probV[sp[1]]) for sp in self.omega0vacancyWyckoff])
-        symmprobSV1 = np.array([np.sqrt(prob[sp[0]] * prob[sp[1]]) for sp in self.om1_SP])
-        symmprobSV2 = np.array([np.sqrt(prob[sp[0]] * prob[sp[1]]) for sp in self.om2_SP])
+        symmprobV0 = np.array([np.sqrt(probV[i] * probV[f]) for i,f in self.omega0vacancyWyckoff])
+        symmprobSV1 = np.array([np.sqrt(prob[i] * prob[f]) for i,f in self.om1_SP])
+        symmprobSV2 = np.array([np.sqrt(prob[i] * prob[f]) for i,f in self.om2_SP])
         D0ss = np.dot(self.Dom2, omega2 * symmprobSV2) / self.N
-        D0vv = D0ss + (np.dot(self.Dom1, omega1 * symmprobSV1) -
-                       np.dot(self.Dom1_om0 + self.Dom2_om0, omega0 * symmprobV0)) / self.N
+        D0sv = -D0ss
+        D0vv = (np.dot(self.Dom1, omega1 * symmprobSV1) -
+                np.dot(self.Dom1_om0 + self.Dom2_om0, omega0 * symmprobV0)) / self.N
+        D2vv = D0ss.copy()
 
         # 4b. Bias vectors (before correction) and rate matrices
         biasSvec = np.zeros(self.vkinetic.Nvstars)
-        biasVvec = np.zeros(self.vkinetic.Nvstars)
+        biasVvec = np.zeros(self.vkinetic.Nvstars)  # now, does *not* include -biasSvec
         om2 = np.dot(self.om2expansion, omega2)
         delta_om = np.dot(self.om1expansion, omega1) - np.dot(self.om1_om0, omega0) \
                    - np.dot(self.om2_om0, omega0)
@@ -1412,60 +1403,94 @@ class VacancyMediated(object):
             # note: our solute bias is negative of the contribution to the vacancy, and also the
             # reference value is 0
             biasSvec[sv] = -np.dot(self.om2bias[sv, :], omega2escape[sv, :]) * np.sqrt(prob[starindex])
+            # removed the om2 contribution--will be added back in later. Separation necessary for large_om2 case
             biasVvec[sv] = np.dot(self.om1bias[sv, :], omega1escape[sv, :]) * np.sqrt(prob[starindex]) - \
-                           np.dot(self.om1_b0[sv, :], omega0escape[svvacindex, :]) * np.sqrt(probV[svvacindex]) - \
-                           biasSvec[sv] - \
-                           np.dot(self.om2_b0[sv, :], omega0escape[svvacindex, :]) * np.sqrt(probV[svvacindex])
+                           np.dot(self.om1_b0[sv, :], omega0escape[svvacindex, :]) * probVsqrt[sv] - \
+                           np.dot(self.om2_b0[sv, :], omega0escape[svvacindex, :]) * probVsqrt[sv]
+            # - biasSvec[sv]
+        biasVvec_om2 = -biasSvec
 
         # 4c. origin state corrections for solute: (corrections for vacancy appear below)
+        # these corrections are due to the null space for the vacancy without solute
         if len(self.OSindices) > 0:
-            biasSbar = np.dot(self.OSfolddown, biasSvec)
-            om2bar = np.dot(self.OSfolddown, np.dot(om2, self.OSfolddown.T))  # OS x OS
+            # need to multiply by sqrt(probV) first
+            OSprobV = self.OSfolddown*probVsqrt  # proper null space projection
+            biasSbar = np.dot(OSprobV, biasSvec)
+            om2bar = np.dot(OSprobV, np.dot(om2, OSprobV.T))  # OS x OS
             etaSbar = np.dot(pinv2(om2bar), biasSbar)
-            D0ss += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
-                                  etaSbar), biasSbar) / self.N
-            biasSvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaSbar)  # expand back out to sites
+            dDss = np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
+                                 etaSbar), biasSbar) / self.N
+            D0ss += dDss
+            D0sv -= dDss
+            biasSvec -= np.dot(om2, np.dot(OSprobV.T, etaSbar))
 
         # 5. compute Green function:
         G0 = np.dot(self.GFexpansion, GF)
         # Note: we first do this *just* with omega1, then ... with omega2, depending on how it behaves
         G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G0, delta_om)), G0)
         # Now: to identify the omega2 contributions, we need to find all of the sv indices with a
-        # non-zero contribution to om2bias. That is, where np.any(self.om2bias[sv,:] != 0)
-        om2_sv_indices = [n for n in range(len(self.om2bias)) if not np.allclose(self.om2bias[n, :], 0)]
+        # non-zero contribution to om2bias. Hand been, where np.any(self.om2bias[sv,:] != 0)
+        # Now, where np.any(self.om2expansion[sv,:,:] != 0)  --should we put into generatematrices?
+        om2_sv_indices = [n for n in range(len(self.om2expansion)) if not np.allclose(self.om2expansion[n], 0)]
         # looks weird, but this is how we pull out a block in G corresponding to the indices in our list:
-        G12 = G[om2_sv_indices, :][:, om2_sv_indices]
+        G1 = G[om2_sv_indices, :][:, om2_sv_indices]
         om2_slice = om2[om2_sv_indices, :][:, om2_sv_indices]
-        gdom2 = np.dot(G12, om2_slice)
+        gdom2 = np.dot(G1, om2_slice)
         if np.any(np.abs(gdom2) > large_om2):
-            # "large" omega2 terms:
-            gdom2_inv = np.linalg.inv(gdom2)
-            gd1 = np.linalg.inv(np.eye(len(om2_sv_indices)) + gdom2_inv)
-            om2_inv = np.linalg.inv(om2_slice)
-            dgd = np.dot(gdom2_inv, om2_inv)
-            G2 = -np.dot(gd1, dgd)
+            nom2 = len(om2_sv_indices)
+            om2eig, om2vec = np.linalg.eigh(om2_slice)
+            G1rot = np.dot(om2vec.T, np.dot(G1, om2vec))  # rotated matrix
+            # eigenvalues are sorted in ascending order, and omega2 is negative definite
+            # om2min = -np.min(omega2escape)  # this is the smallest that any nonzero eigenvalue can be
+            om2min = -0.5*min(om for omlist in omega2escape for om in omlist if om>0)
+            nnull = next((n for n in range(nom2) if om2eig[n] > om2min), nom2)  # 0:nnull == not in nullspace
+            # general update (g^-1 + w)^-1:
+            G2rot = np.dot(np.linalg.inv(np.eye(nom2) + np.dot(G1rot, np.diag(om2eig))), G1rot)
+            om2rot = np.diag(om2eig[0:nnull])
+            # in the non-null subspace, replace with (g^-1+w)^-1-w^-1 = -(w+wgw)^-1:
+            G2rot[0:nnull, 0:nnull] = -np.linalg.inv(om2rot + np.dot(om2rot,
+                                                                     np.dot(G1rot[0:nnull,0:nnull],
+                                                                            om2rot)))
+            Greplace = np.dot(om2vec, np.dot(G2rot, om2vec.T))  # transform back
+            om2_inv = np.linalg.pinv(om2_slice)  # only used here for testing purposes...
             # update with omega2, and then put in change due to omega2
-            G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G.copy(), om2)), G.copy())
+            G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
+            Gfull = G.copy()
             for ni, i in enumerate(om2_sv_indices):
                 for nj, j in enumerate(om2_sv_indices):
-                    G[i, j] = G2[ni, nj]
+                    G[i, j] = Greplace[ni, nj]
+
+            bV, bV2, bS, = biasVvec[om2_sv_indices], biasVvec_om2[om2_sv_indices], biasSvec[om2_sv_indices]
+            om2_outer = self.vkinetic.outer[:, :, om2_sv_indices, :][:, :, :, om2_sv_indices]
+            D0ss_correct = np.dot(np.dot(om2_outer, bS), np.dot(om2_inv, bS)) / self.N
             D0ss = np.zeros_like(D0ss)  # exact cancellation of bare term
+            D0sv = np.dot(np.dot(om2_outer, bV), np.dot(om2_inv, bS)) / self.N
+            D2vv = (np.dot(np.dot(om2_outer, bV), np.dot(om2_inv, bV)) +
+                    2 * np.dot(np.dot(om2_outer, bV2), np.dot(om2_inv, bV))) / self.N
         else:
             # update with omega2 ("small" omega2):
             G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
+            Gfull = G
 
         # 6. Compute bias contributions to Onsager coefficients
+        # 6a. add in the om2 contribution to biasVvec:
+        biasVvec += biasVvec_om2
+
+        # 6b. GF pieces:
         etaVvec, etaSvec = np.dot(G, biasVvec), np.dot(G, biasSvec)
         outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer, etaSvec)
 
         L1ss = np.dot(outer_etaSvec, biasSvec) / self.N
         L1sv = np.dot(outer_etaSvec, biasVvec) / self.N
         L1vv = np.dot(outer_etaVvec, biasVvec) / self.N
+
+        # 6c. origin state corrections for vacancy:
         if len(self.OSindices) > 0:
             etaV0 = -np.tensordot(self.OS_VB, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
             outer_etaV0 = np.dot(self.vkinetic.outer[:, :, self.OSindices, :][:, :, :, self.OSindices], etaV0)
             dom = delta_om + om2  # sum of the terms
-            dgd = -dom + np.dot(dom, np.dot(G, dom))  # delta_g = g0*dgd*g0
+            # dgd = -dom + np.dot(dom, np.dot(G, dom))  # delta_g = g0*dgd*g0
+            dgd = -dom + np.dot(dom, np.dot(Gfull, dom))  # delta_g = g0*dgd*g0
             G0db = np.dot(G0, biasVvec)  # G0*db
             # 2 eta0*db + 2 eta0*dgd*G0*db + eta0*dgd*eta0  (domega = delta_om + om2)
             # - etaV0*biasV0 (correction due to removing states)
@@ -1476,7 +1501,7 @@ class VacancyMediated(object):
                            - biasVvec[self.OSindices]
                            ) / self.N
 
-        return L0vv, D0ss + L1ss, -D0ss + L1sv, D0vv + L1vv
+        return L0vv, D0ss + L1ss, D0sv + L1sv, D0vv + D2vv + L1vv
 
 
 crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)

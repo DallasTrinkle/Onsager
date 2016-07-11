@@ -7,17 +7,14 @@ __author__ = 'Dallas R. Trinkle'
 # TODO: additional tests using the 14 frequency model for FCC?
 
 import unittest
-import textwrap, itertools
+import textwrap, itertools, types
+import logging, inspect
 import numpy as np
 import onsager.OnsagerCalc as OnsagerCalc
 import onsager.crystal as crystal
 
-VERBOSE_TESTING = False
-
-
-def verbose_print(s):
-    if VERBOSE_TESTING:
-        print(s)
+# uncomment for verbosity:
+# logging.basicConfig(level=logging.DEBUG)  # VERBOSE
 
 
 def fivefreq(w0, w1, w2, w3, w4):
@@ -29,8 +26,65 @@ def fivefreq(w0, w1, w2, w3, w4):
     p = w4 / w3
     return p * w2 * (2. * w1 + w3 * F7) / (2. * w2 + 2. * w1 + w3 * F7)
 
+class DiffusionTestCase(unittest.TestCase):
+    """Base class to define some diffusion-based assertions--contains no tests"""
 
-class CrystalOnsagerTestsSC(unittest.TestCase):
+    longMessage = False
+
+    def makeunitythermodict(self, diffuser, solutebinding=1.):
+        """Return a thermo dictionary with probability 1 for everything--or a solutebinding factor"""
+        tdict = {'preV': np.ones(len(diffuser.sitelist)), 'eneV': np.zeros(len(diffuser.sitelist)),
+                 'preS': np.ones(len(diffuser.sitelist)), 'eneS': np.zeros(len(diffuser.sitelist)),
+                 'preT0': np.ones(len(diffuser.om0_jn)), 'eneT0': np.zeros(len(diffuser.om0_jn)),
+                 'preSV': solutebinding * np.ones(len(diffuser.interactlist())),
+                 'eneSV': np.zeros(len(diffuser.interactlist()))}
+        tdict.update(diffuser.makeLIMBpreene(**tdict))
+        return tdict
+
+    def assertOrderingSuperEqual(self, s0, s1, msg=""):
+        if s0 != s1:
+            failmsg = msg + '\n'
+            for line0, line1 in itertools.zip_longest(s0.__str__().splitlines(),
+                                                      s1.__str__().splitlines(),
+                                                      fillvalue=' - '):
+                failmsg += line0 + '\t' + line1 + '\n'
+            self.fail(msg=failmsg)
+
+    # we use MappingProxyType to make a frozen dictionary:
+    def assertEqualDiffusivity(self, diffuser1, tdict1, diffuser2, tdict2, msg="", kTlist=(1.,),
+                               diffuserargs1=types.MappingProxyType({}),
+                               diffuserargs2=types.MappingProxyType({})):
+        """Assert that two diffusers give equal values over the same kT set"""
+        for kT in kTlist:
+            Lvv1, Lss1, Lsv1, L1vv1 = diffuser1.Lij(*diffuser1.preene2betafree(kT, **tdict1), **diffuserargs1)
+            Lvv2, Lss2, Lsv2, L1vv2 = diffuser2.Lij(*diffuser2.preene2betafree(kT, **tdict2), **diffuserargs2)
+            if hasattr(self, 'logger') and self.logger.isEnabledFor(logging.DEBUG):
+                self.logger.debug('kT={}'.format(kT))
+                self.logger.debug('\n{}\n{}'.format(diffuser1, diffuserargs1))
+                for Lname in ('Lvv1', 'Lss1', 'Lsv1', 'L1vv1'):
+                    self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
+                self.logger.debug('\n{}\n{}'.format(diffuser2, diffuserargs2))
+                for Lname in ('Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
+                    self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
+            failmsg = ''
+            for L, Lp, Lname in zip([Lvv1, Lss1, Lsv1, L1vv1],
+                                    [Lvv2, Lss2, Lsv2, L1vv2],
+                                    ['Lvv', 'Lss', 'Lsv', 'L1vv2']):
+                if not np.allclose(L, Lp, atol=1e-7):
+                    failmsg += textwrap.dedent("""\
+                    Diffusivity {} does not match at kT={}?
+                    {}
+                    !=
+                    {}
+                    """).format(Lname, kT, L, Lp)
+        if failmsg != '':
+            self.fail(msg=textwrap.dedent("""\
+            {}
+            D1args={}, D2args={}
+            {}""").format(msg, diffuserargs1, diffuserargs2, failmsg))
+
+
+class CrystalOnsagerTestsSC(DiffusionTestCase):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
 
     longMessage = False
@@ -56,12 +110,12 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
     def testtracer(self):
         """Test that arbitrary tracer works as expected"""
         # Make a calculator with one neighbor shell
-        verbose_print('Crystal: ' + self.crystalname)
+        self.logger = logging.getLogger(__name__ + '.' +
+                                        self.__class__.__name__ + '.' +
+                                        inspect.currentframe().f_code.co_name)
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
-                      'preT0': np.array([1.]), 'eneT0': np.array([0.])}
-        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        thermaldef = self.makeunitythermodict(Diffusivity)
 
         L0vv = np.zeros((3, 3))
         om0 = thermaldef['preT0'][0] / thermaldef['preV'][0] * \
@@ -71,9 +125,10 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
         L0vv /= len(self.crys.basis[self.chem])
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
 
-        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
-            verbose_print(Lname)
-            verbose_print(locals()[Lname])
+        if self.logger.isEnabledFor(logging.DEBUG):
+            self.logger.debug('Crystal: {}\n{}'.format(self.crystalname,Diffusivity))
+            for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
+                self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
         for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0, 0] * np.eye(3)), msg='Diffusivity not isotropic?')
         # No solute drag, so Lsv = -Lvv; Lvv = normal vacancy diffusion
@@ -82,8 +137,11 @@ class CrystalOnsagerTestsSC(unittest.TestCase):
         self.assertTrue(np.allclose(-Lsv, L0vv))
         self.assertTrue(np.allclose(L1vv, 0.))
         self.assertTrue(np.allclose(-Lss, self.correl * Lsv, rtol=1e-6),
-                        msg='Failure to match correlation ({}), got {}'.format(
-                            self.correl, -Lss[0, 0] / Lsv[0, 0]))
+                        msg='Failure to match correlation ({}), got {} from {}/{}'.format(
+                            self.correl, -Lss[0, 0] / Lsv[0, 0], Lss[0,0], -Lsv[0,0]))
+        # test large_om2 version:
+        self.assertEqualDiffusivity(Diffusivity, thermaldef, Diffusivity, thermaldef,
+                                    diffuserargs2={'large_om2': 0}, msg='large omega test fail')
 
 
 class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
@@ -116,7 +174,9 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
 
     def testFiveFreq(self):
         """Test whether we can reproduce the five frequency model"""
-        verbose_print('Five-frequency model, Crystal: ' + self.crystalname)
+        self.logger = logging.getLogger(__name__ + '.' +
+                                        self.__class__.__name__ + '.' +
+                                        inspect.currentframe().f_code.co_name)
         kT = 1.
         w0 = 1.0  # bare rate
         w1 = 0.8 * w0  # "swing" rate (vacancy jump around solute)
@@ -124,32 +184,8 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         w3 = 0.5 * w0  # dissociation jump (vacancy away from solute)
         w4 = 1.5 * w0  # association jump (vacancy jump into solute)
         SVprob = w4 / w3  # enhanced probability of solute-vacancy complex
-        verbose_print(textwrap.dedent("""
-                               w0={}
-                               w1={}
-                               w2={}
-                               w3={}
-                               w4={}
-                               prob={}""".format(w0, w1, w2, w3, w4, SVprob)))
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        # input the solute/vacancy binding (w4/w3), and use LIMB to take a first stab at the rates
-        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
-                      'preS': np.array([1.]), 'eneS': np.array([0.]),
-                      'preT0': np.array([w0]), 'eneT0': np.array([0.]),
-                      'preSV': np.array([SVprob]), 'eneSV': np.array([0.])}
-        thermaldef.update(Diffusivity.makeLIMBpreene(**thermaldef))
-        # now, we need to get w1, w3, and w4 in there. w3 = dissociation, w4 = association, so:
-        # the transition state for the association/dissociation jump is w4 as the outer prob = 1,
-        # and the bound probability = w4/w3. The transition state for the "swing" jumps is
-        # w1*(w4/w3), where the w4/w3 takes care of the probability factor. Finally, the
-        # exchange jump is also w2*(w4/w3).
-        thermaldef['preT2'][0] = w2 * SVprob
-        for j, (PS1, PS2) in enumerate(Diffusivity.omegalist(1)[0]):
-            # check to see if the two endpoints of the transition have the solute-vacancy at same distance:
-            if np.isclose(np.dot(PS1.dx, PS1.dx), np.dot(PS2.dx, PS2.dx)):
-                thermaldef['preT1'][j] = w1 * SVprob
-            else:
-                thermaldef['preT1'][j] = w4
+        thermaldef = Diffusivity.tags2preene(self.makethermodict(w0, w1, w2, w3, w4))
         L0vv = np.zeros((3, 3))
         om0 = thermaldef['preT0'][0] / thermaldef['preV'][0] * \
               np.exp((thermaldef['eneV'][0] - thermaldef['eneT0'][0]) / kT)
@@ -157,16 +193,23 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
             L0vv += 0.5 * np.outer(dx, dx) * om0
         L0vv /= self.crys.N
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
-
-        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
-            verbose_print(Lname)
-            verbose_print(locals()[Lname])
+        if self.logger.isEnabledFor(logging.DEBUG):
+            self.logger.debug('Five-frequency model, Crystal: {}\n'.format(self.crystalname) +
+                              textwrap.dedent("""\
+                               w0={}
+                               w1={}
+                               w2={}
+                               w3={}
+                               w4={}
+                               prob={}""").format(w0, w1, w2, w3, w4, SVprob))
+            for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
+                self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
         for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0, 0] * np.eye(3)), msg='Diffusivity not isotropic?')
         self.assertTrue(np.allclose(Lvv, L0vv))
         Ds5freq = self.a0 ** 2 * fivefreq(w0, w1, w2, w3, w4)
         self.assertAlmostEqual(Lss[0, 0], Ds5freq, delta=1e-3,
-                               msg=textwrap.dedent("""
+                               msg=textwrap.dedent("""\
                                Did not match the 5-freq. model for
                                w0={}
                                w1={}
@@ -174,11 +217,13 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
                                w3={}
                                w4={}
                                Lss={}
-                               Ds5={}""".format(w0, w1, w2, w3, w4, Lss[0, 0], Ds5freq)))
+                               Ds5={}""").format(w0, w1, w2, w3, w4, Lss[0, 0], Ds5freq))
 
-    def testSpectralSolution(self):
+    def testLargeOmega2(self):
         """Test whether the large omega2 solution is (a) correct and (b) stable against five frequency model"""
-        verbose_print('Five-frequency model, Crystal: ' + self.crystalname)
+        self.logger = logging.getLogger(__name__ + '.' +
+                                        self.__class__.__name__ + '.' +
+                                        inspect.currentframe().f_code.co_name)
         kT = 1.
         w0 = 1.0  # bare rate
         w1 = 2e8*w0  # "swing" rate (vacancy jump around solute)
@@ -186,13 +231,6 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         w3 = 1e-8*w0  # dissociation jump (vacancy away from solute)
         w4 = w0  # association jump (vacancy jump into solute)
         SVprob = w4 / w3  # enhanced probability of solute-vacancy complex
-        verbose_print(textwrap.dedent("""
-                               w0={}
-                               w1={}
-                               w2={}
-                               w3={}
-                               w4={}
-                               prob={}""".format(w0, w1, w2, w3, w4, SVprob)))
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         # updated to use tagging to do our work for us:
         thermaldef = Diffusivity.tags2preene(self.makethermodict(w0, w1, w2, w3, w4))
@@ -202,17 +240,25 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         for (i, j), dx in self.jumpnetwork[0]:
             L0vv += 0.5 * np.outer(dx, dx) * om0
         L0vv /= self.crys.N
-        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef), large_om2=1)
+        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef), large_om2=0)
 
-        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
-            verbose_print(Lname)
-            verbose_print(locals()[Lname])
+        if self.logger.isEnabledFor(logging.DEBUG):
+            self.logger.debug('Five-frequency model, Crystal: {}\n'.format(self.crystalname) +
+                              textwrap.dedent("""\
+                               w0={}
+                               w1={}
+                               w2={}
+                               w3={}
+                               w4={}
+                               prob={}""").format(w0, w1, w2, w3, w4, SVprob))
+            for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
+                self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
         for L in [Lvv, Lss, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0, 0] * np.eye(3)), msg='Diffusivity not isotropic?')
         self.assertTrue(np.allclose(Lvv, L0vv))
         Ds5freq = self.a0 ** 2 * fivefreq(w0, w1, w2, w3, w4)
         self.assertAlmostEqual(Lss[0, 0], Ds5freq, delta=1e-6*Ds5freq,
-                               msg=textwrap.dedent("""
+                               msg=textwrap.dedent("""\
                                Did not match the 5-freq. model for
                                w0={}
                                w1={}
@@ -220,7 +266,7 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
                                w3={}
                                w4={}
                                Lss={}
-                               Ds5={}""".format(w0, w1, w2, w3, w4, Lss[0, 0], Ds5freq)))
+                               Ds5={}""").format(w0, w1, w2, w3, w4, Lss[0, 0], Ds5freq))
 
 
 class CrystalOnsagerTestsBCC(CrystalOnsagerTestsSC):
@@ -273,7 +319,7 @@ class CrystalOnsagerTestsNbO(CrystalOnsagerTestsSC):
         self.correl = 0.688916  # doi://10.1080/01418618308234882  (Koiwa & Ishioka paper)
 
 
-class CrystalOnsagerTestsHCP(unittest.TestCase):
+class CrystalOnsagerTestsHCP(DiffusionTestCase):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
 
     longMessage = False
@@ -292,24 +338,15 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         self.correlx = 0.78120489
         self.correlz = 0.78145142
 
-    def assertOrderingSuperEqual(self, s0, s1, msg=""):
-        if s0 != s1:
-            failmsg = msg + '\n'
-            for line0, line1 in itertools.zip_longest(s0.__str__().splitlines(),
-                                                      s1.__str__().splitlines(),
-                                                      fillvalue=' - '):
-                failmsg += line0 + '\t' + line1 + '\n'
-            self.fail(msg=failmsg)
-
     def testtracer(self):
         """Test that HCP tracer works as expected"""
+        self.logger = logging.getLogger(__name__ + '.' +
+                                        self.__class__.__name__ + '.' +
+                                        inspect.currentframe().f_code.co_name)
         # Make a calculator with one neighbor shell
-        verbose_print('Crystal: ' + self.crystalname)
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
-                      'preT0': np.array([1., 1.]), 'eneT0': np.array([0., 0.])}
-        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        thermaldef = self.makeunitythermodict(Diffusivity)
         L0vv = np.zeros((3, 3))
         om0 = thermaldef['preT0'][0] / thermaldef['preV'][0] * \
               np.exp((thermaldef['eneV'][0] - thermaldef['eneT0'][0]) / kT)
@@ -319,9 +356,10 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         L0vv /= self.crys.N
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
 
-        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
-            verbose_print(Lname)
-            verbose_print(locals()[Lname])
+        if self.logger.isEnabledFor(logging.DEBUG):
+            self.logger.debug('Crystal: {}\n{}'.format(self.crystalname, Diffusivity))
+            for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
+                self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
         # we leave out Lss since it is not, in fact, isotropic!
         for L in [Lvv, Lsv, L1vv]:
             self.assertTrue(np.allclose(L, L[0, 0] * np.eye(3), atol=1e-8),
@@ -335,22 +373,29 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
         self.assertTrue(np.allclose(-Lss, np.dot(correlmat, Lsv), rtol=1e-7),
                         msg='Failure to match correlation ({}, {}), got {}, {}'.format(
                             self.correlx, self.correlz, -Lss[0, 0] / Lsv[0, 0], -Lss[2, 2] / Lsv[2, 2]))
+        # test large_om2 version:
+        self.assertEqualDiffusivity(Diffusivity, thermaldef, Diffusivity, thermaldef,
+                                    diffuserargs2={'large_om2': 0}, msg='large omega test fail')
 
     def testHighOmega2(self):
         """Test that HCP with very high omega2 still produces symmetric diffusivity"""
+        self.logger = logging.getLogger(__name__ + '.' +
+                                        self.__class__.__name__ + '.' +
+                                        inspect.currentframe().f_code.co_name)
         # Make a calculator with one neighbor shell
-        verbose_print('Crystal: ' + self.crystalname)
         kT = 1.
         Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
-        thermaldef = {'preV': np.array([1.]), 'eneV': np.array([0.]),
-                      'preT0': np.array([1., 1.]), 'eneT0': np.array([0., 0.])}
-        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
+        thermaldef = self.makeunitythermodict(Diffusivity)
         thermaldef['preT2'] = 1e16*thermaldef['preT2']
         Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
+        if self.logger.isEnabledFor(logging.DEBUG):
+            self.logger.debug('Crystal: {}\n{}'.format(self.crystalname, Diffusivity))
+            for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
+                self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
         for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
-            verbose_print(Lname)
             L = locals()[Lname]
-            verbose_print(L)
+            if self.logger.isEnabledFor(logging.DEBUG):
+                self.logger.debug('{}:\n{}'.format(Lname, L))
             for i in range(3):
                 for j in range(i):
                     self.assertAlmostEqual(L[i,j], L[j,i],
@@ -510,7 +555,7 @@ class CrystalOnsagerTestsHCP(unittest.TestCase):
                                               msg='Transformation wrong?')
 
 
-class CrystalOnsagerTestsB2(unittest.TestCase):
+class CrystalOnsagerTestsB2(DiffusionTestCase):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
 
     longMessage = False
@@ -530,72 +575,43 @@ class CrystalOnsagerTestsB2(unittest.TestCase):
 
         self.solutebinding = 3.
 
-    def assertOrderingSuperEqual(self, s0, s1, msg=""):
-        if s0 != s1:
-            failmsg = msg + '\n'
-            for line0, line1 in itertools.zip_longest(s0.__str__().splitlines(),
-                                                      s1.__str__().splitlines(),
-                                                      fillvalue=' - '):
-                failmsg += line0 + '\t' + line1 + '\n'
-            self.fail(msg=failmsg)
-
     def testtracer(self):
         """Test that BCC mapped onto B2 match exactly"""
+        self.logger = logging.getLogger(__name__ + '.' +
+                                        self.__class__.__name__ + '.' +
+                                        inspect.currentframe().f_code.co_name)
+        self.logger.debug('Crystal: ' + self.crystalname)
+        self.logger.debug('Crystal2: ' + self.crystalname2)
         # Make a calculator with one neighbor shell
-        verbose_print('Crystal: ' + self.crystalname)
-        verbose_print('Crystal2: ' + self.crystalname2)
-        kT = 1.
-        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity1 = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
-        thermaldef = {'preV': np.ones(len(self.sitelist)), 'eneV': np.zeros(len(self.sitelist)),
-                      'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
-        thermaldef.update(Diffusivity.maketracerpreene(**thermaldef))
-        thermaldef2 = {'preV': np.ones(len(self.sitelist2)), 'eneV': np.zeros(len(self.sitelist2)),
-                       'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
-        thermaldef2.update(Diffusivity2.maketracerpreene(**thermaldef2))
-
-        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
-        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
-        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
-            verbose_print(Lname)
-            verbose_print(locals()[Lname])
-        for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
-            self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-                            msg="Diffusivity doesn't match?\n{} !=\n{}".format(L, Lp))
+        thermaldef1 = self.makeunitythermodict(Diffusivity1)
+        thermaldef2 = self.makeunitythermodict(Diffusivity2)
+        # BCC vs. B2
+        self.assertEqualDiffusivity(Diffusivity1, thermaldef1, Diffusivity2, thermaldef2,
+                                    msg='broken symmetry fail')
+        self.assertEqualDiffusivity(Diffusivity2, thermaldef2, Diffusivity2, thermaldef2,
+                                    diffuserargs2={'large_om2': 0}, msg='large omega test fail')
 
     def testsolute(self):
         """Test that BCC mapped onto B2 match exactly"""
+        self.logger = logging.getLogger(__name__ + '.' +
+                                        self.__class__.__name__ + '.' +
+                                        inspect.currentframe().f_code.co_name)
+        self.logger.debug('Crystal: ' + self.crystalname)
+        self.logger.debug('Crystal2: ' + self.crystalname2)
+        self.logger.debug('  Solute test: SV binding = {}'.format(self.solutebinding))
         # Make a calculator with one neighbor shell
-        verbose_print('Crystal: ' + self.crystalname)
-        verbose_print('Crystal2: ' + self.crystalname2)
-        verbose_print('  Solute test: SV binding = {}'.format(self.solutebinding))
-        kT = 1.
-        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity1 = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
-        # we will make this test using LIMB; add in the solute-vacancy interaction
-        thermaldef = {'preV': np.ones(len(self.sitelist)), 'eneV': np.zeros(len(self.sitelist)),
-                      'preS': np.ones(len(self.sitelist)), 'eneS': np.zeros(len(self.sitelist)),
-                      'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork)),
-                      'preSV': self.solutebinding * np.ones(len(Diffusivity.interactlist())),
-                      'eneSV': np.zeros(len(Diffusivity.interactlist()))}
-        thermaldef.update(Diffusivity.makeLIMBpreene(**thermaldef))
-        thermaldef2 = {'preV': np.ones(len(self.sitelist2)), 'eneV': np.zeros(len(self.sitelist2)),
-                       'preS': np.ones(len(self.sitelist2)), 'eneS': np.zeros(len(self.sitelist2)),
-                       'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2)),
-                       'preSV': self.solutebinding * np.ones(len(Diffusivity2.interactlist())),
-                       'eneSV': np.zeros(len(Diffusivity2.interactlist()))}
-        thermaldef2.update(Diffusivity2.makeLIMBpreene(**thermaldef2))
+        thermaldef1 = self.makeunitythermodict(Diffusivity1, solutebinding=self.solutebinding)
+        thermaldef2 = self.makeunitythermodict(Diffusivity2, solutebinding=self.solutebinding)
+        # BCC vs. B2
+        self.assertEqualDiffusivity(Diffusivity1, thermaldef1, Diffusivity2, thermaldef2,
+                                    msg='broken symmetry fail')
+        self.assertEqualDiffusivity(Diffusivity2, thermaldef2, Diffusivity2, thermaldef2,
+                                    diffuserargs2={'large_om2': 0}, msg='large omega test fail')
 
-        Lvv, Lss, Lsv, L1vv = Diffusivity.Lij(*Diffusivity.preene2betafree(kT, **thermaldef))
-        Lvv2, Lss2, Lsv2, L1vv2 = Diffusivity2.Lij(*Diffusivity.preene2betafree(kT, **thermaldef2))
-        for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv', 'Lvv2', 'Lss2', 'Lsv2', 'L1vv2'):
-            verbose_print(Lname)
-            verbose_print(locals()[Lname])
-        # For now, remove the test on the v-v correction, since that term is NOT CORRECT:
-        for L, Lp in zip([Lvv, Lss, Lsv, L1vv], [Lvv2, Lss2, Lsv2, L1vv2]):
-        # for L, Lp in zip([Lvv, Lss, Lsv], [Lvv2, Lss2, Lsv2]):
-            self.assertTrue(np.allclose(L, Lp, atol=1e-7),
-                            msg="Diffusivity doesn't match?\n{} !=\n{}".format(L, Lp))
 
 
 class CrystalOnsagerTestsL12(CrystalOnsagerTestsB2):
@@ -618,6 +634,89 @@ class CrystalOnsagerTestsL12(CrystalOnsagerTestsB2):
         self.crystalname2 = 'L1_2 a0={}'.format(self.a0)
 
         self.solutebinding = 3.
+
+
+class CrystalOnsagerTestsRumpledOmega(DiffusionTestCase):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+
+    def setUp(self):
+        self.a0, self.ca = 1., np.sqrt(3/8)
+        # remember: the [a] matrix are column vectors:
+        self.crys = crystal.Crystal(self.a0*np.array([[1/2, 1/2,0.],
+                                                      [-np.sqrt(3/4), np.sqrt(3/4), 0.],
+                                                      [0., 0., self.ca]]),
+                                    [np.zeros(3), np.array([1/3,2/3,1/2]), np.array([2/3,1/3,1/2])])
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.7 * self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Omega a0={}'.format(self.a0)
+
+        self.crys2 = crystal.Crystal(self.a0 * np.array([[1 / 2, 1 / 2, 0.],
+                                                         [-np.sqrt(3 / 4), np.sqrt(3 / 4), 0.],
+                                                         [0., 0., self.ca]]),
+                                     [np.zeros(3), np.array([1 / 3, 2 / 3, 0.55]), np.array([2 / 3, 1 / 3, 0.45])])
+        self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.7 * self.a0)
+        self.sitelist2 = self.crys2.sitelist(self.chem)
+        self.crystalname2 = 'Rumpled omega a0={}'.format(self.a0)
+
+        # vacancy probability, and solute binding
+        self.vacancyprob, self.solutebinding = 4., 3.
+
+    def testtracer(self):
+        """Test that Omega and rumpled Omega match exactly"""
+        # Make a calculator with one neighbor shell
+        self.logger = logging.getLogger(__name__ + '.' +
+                                        self.__class__.__name__ + '.' +
+                                        inspect.currentframe().f_code.co_name)
+        self.logger.debug('Crystal: ' + self.crystalname)
+        self.logger.debug('Crystal2: ' + self.crystalname2)
+        Diffusivity1 = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
+        thermaldef1 = {'preV': np.array([self.vacancyprob if indices==[0] else 1. for indices in self.sitelist]),
+                       'eneV': np.zeros(len(self.sitelist)),
+                       'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
+        thermaldef1.update(Diffusivity1.maketracerpreene(**thermaldef1))
+        thermaldef2 = {'preV': np.array([self.vacancyprob if indices == [0] else 1. for indices in self.sitelist2]),
+                       'eneV': np.zeros(len(self.sitelist2)),
+                       'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
+        thermaldef2.update(Diffusivity2.maketracerpreene(**thermaldef2))
+        self.assertEqualDiffusivity(Diffusivity1, thermaldef1, Diffusivity2, thermaldef2,
+                                    msg='broken symmetry fail')
+        self.assertEqualDiffusivity(Diffusivity2, thermaldef2, Diffusivity2, thermaldef2,
+                                diffuserargs2={'large_om2': 0}, msg='large omega test fail')
+
+    def testsolute(self):
+        """Test that Omega and rumpled Omega match exactly (using solute interaction)"""
+        # Make a calculator with one neighbor shell
+        self.logger = logging.getLogger(__name__ + '.' +
+                                        self.__class__.__name__ + '.' +
+                                        inspect.currentframe().f_code.co_name)
+        self.logger.debug('Crystal: ' + self.crystalname)
+        self.logger.debug('Crystal2: ' + self.crystalname2)
+        self.logger.debug('  Solute test: SV binding = {}'.format(self.solutebinding))
+        Diffusivity1 = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
+        thermaldef1 = {'preV': np.array([self.vacancyprob if indices==[0] else 1. for indices in self.sitelist]),
+                       'eneV': np.zeros(len(self.sitelist)),
+                       'preS': np.ones(len(self.sitelist)), 'eneS': np.zeros(len(self.sitelist)),
+                       'preSV': self.solutebinding * np.ones(len(Diffusivity1.interactlist())),
+                       'eneSV': np.zeros(len(Diffusivity1.interactlist())),
+                       'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
+        thermaldef1.update(Diffusivity1.makeLIMBpreene(**thermaldef1))
+        thermaldef2 = {'preV': np.array([self.vacancyprob if indices == [0] else 1. for indices in self.sitelist2]),
+                       'eneV': np.zeros(len(self.sitelist2)),
+                       'preS': np.ones(len(self.sitelist2)), 'eneS': np.zeros(len(self.sitelist2)),
+                       'preSV': self.solutebinding*np.ones(len(Diffusivity2.interactlist())),
+                       'eneSV': np.zeros(len(Diffusivity2.interactlist())),
+                       'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
+        thermaldef2.update(Diffusivity2.makeLIMBpreene(**thermaldef2))
+        self.assertEqualDiffusivity(Diffusivity1, thermaldef1, Diffusivity2, thermaldef2,
+                                    msg='broken symmetry fail')
+        self.assertEqualDiffusivity(Diffusivity2, thermaldef2, Diffusivity2, thermaldef2,
+                                diffuserargs2={'large_om2': 0}, msg='large omega test fail')
+
 
 
 class InterstitialTests(unittest.TestCase):
@@ -1296,3 +1395,12 @@ finite difference:
 elastodiffusion:
 {}""".format(strainmat, D0, Deps, Deps0)
             self.assertTrue(np.allclose(Deps, Deps0, rtol=2 * eps, atol=2 * eps), msg=failmsg)
+
+if __name__ == '__main__':
+    # check our command line options for "verbose" to set the logging level higher
+    import sys
+    if '-v' in sys.argv or '--verbose' in sys.argv:
+        logging.basicConfig(level=logging.DEBUG)  # VERBOSE
+    else:
+        logging.basicConfig(level=logging.INFO)
+    unittest.main()
