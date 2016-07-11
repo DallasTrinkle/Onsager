@@ -14,7 +14,7 @@ import onsager.OnsagerCalc as OnsagerCalc
 import onsager.crystal as crystal
 
 # uncomment for verbosity:
-logging.basicConfig(level=logging.DEBUG)  # VERBOSE
+# logging.basicConfig(level=logging.DEBUG)  # VERBOSE
 
 
 def fivefreq(w0, w1, w2, w3, w4):

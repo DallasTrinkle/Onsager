@@ -711,22 +711,10 @@ class VacancyMediated(object):
         # more indexing helpers:
         # kineticsvWyckoff: Wyckoff position of solute and vacancy for kinetic stars
         # omega0vacancyWyckoff: Wyckoff positions of initial and final position in omega0 jumps
-        # omega1svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega1
-        # omega2svsvWyckoff: Wyckoff positions of solute+vacancy(initial), solute+vacancy(final) for omega2
         self.kineticsvWyckoff = [(self.invmap[PS.i], self.invmap[PS.j]) for PS in
                                  [self.kinetic.states[si[0]] for si in self.kinetic.stars]]
         self.omega0vacancyWyckoff = [(self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
                                      for jumplist in self.om0_jn]
-        self.omega1svsvWyckoff = [(self.invmap[self.kinetic.states[jumplist[0][0][0]].i],
-                                   self.invmap[self.kinetic.states[jumplist[0][0][0]].j],
-                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
-                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
-                                  for jumplist in self.om1_jn]
-        self.omega2svsvWyckoff = [(self.invmap[self.kinetic.states[jumplist[0][0][0]].i],
-                                   self.invmap[self.kinetic.states[jumplist[0][0][0]].j],
-                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].i],
-                                   self.invmap[self.kinetic.states[jumplist[0][0][1]].j])
-                                  for jumplist in self.om2_jn]
 
     def generatetags(self):
         """
@@ -943,8 +931,7 @@ class VacancyMediated(object):
                     'om2_om0', 'om2_om0escape', 'om2expansion', 'om2escape',
                     'om1_b0', 'om1bias', 'om2_b0', 'om2bias',
                     'OSindices', 'OSfolddown', 'OS_VB', 'OSVfolddown',
-                    'kineticsvWyckoff', 'omega0vacancyWyckoff', 'omega1svsvWyckoff',
-                    'omega2svsvWyckoff')
+                    'kineticsvWyckoff', 'omega0vacancyWyckoff')
     __taglist__ = ('vacancy', 'solute', 'solute-vacancy', 'omega0', 'omega1', 'omega2')
 
     def addhdf5(self, HDF5group):
@@ -1277,13 +1264,12 @@ class VacancyMediated(object):
         bFT2 -= bFVmin + bFSmin
         return bFV, bFS, bFSV, bFT0, bFT1, bFT2
 
-    def _symmetricandescaperates(self, bFV, bFS, bFSV, bFT0, bFT1, bFT2):
+    def _symmetricandescaperates(self, bFV, bFSVkinetic, bFT0, bFT1, bFT2):
         """
         Compute the symmetric, escape, and escape reference rates. Used by _lij().
 
         :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
-        :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
-        :param bFSV[Nthermo]: beta*eneSV - ln(preSV) (TOTAL for solute-vacancy complex)
+        :param bFSVkinetic[Nkinetic]: beta*eneSV - ln(preSV) (TOTAL for solute-vacancy complex)
         :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
         :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
         :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
@@ -1303,14 +1289,14 @@ class VacancyMediated(object):
         omega1 = np.zeros(len(self.om1_jn))
         omega1escape = np.zeros((self.vkinetic.Nvstars, len(self.om1_jn)))
         for j, (st1, st2), bFT in zip(itertools.count(), self.om1_SP, bFT1):
-            omF, omB = np.exp(-bFT + bFSV[st1]), np.exp(-bFT + bFSV[st2])
+            omF, omB = np.exp(-bFT + bFSVkinetic[st1]), np.exp(-bFT + bFSVkinetic[st2])
             omega1[j] = np.sqrt(omF * omB)
             for vst1 in self.kin2vstar[st1]: omega1escape[vst1, j] = omF
             for vst2 in self.kin2vstar[st2]: omega1escape[vst2, j] = omB
         omega2 = np.zeros(len(self.om2_jn))
         omega2escape = np.zeros((self.vkinetic.Nvstars, len(self.om2_jn)))
         for j, (st1, st2), bFT in zip(itertools.count(), self.om2_SP, bFT2):
-            omF, omB = np.exp(-bFT + bFSV[st1]), np.exp(-bFT + bFSV[st2])
+            omF, omB = np.exp(-bFT + bFSVkinetic[st1]), np.exp(-bFT + bFSVkinetic[st2])
             omega2[j] = np.sqrt(omF * omB)
             for vst1 in self.kin2vstar[st1]: omega2escape[vst1, j] = omF
             for vst2 in self.kin2vstar[st2]: omega2escape[vst2, j] = omB
@@ -1376,7 +1362,7 @@ class VacancyMediated(object):
         # 3. set up symmetric rates: omega0, omega1, omega2
         #    and escape rates omega0escape, omega1escape, omega2escape
         omega0, omega1, omega2, omega0escape, omega1escape, omega2escape = \
-            self._symmetricandescaperates(bFV, bFS, bFSVkin, bFT0, bFT1, bFT2)
+            self._symmetricandescaperates(bFV, bFSVkin, bFT0, bFT1, bFT2)
 
         # 4. expand out: D0ss, D0vv, domega1, domega2, bias1, bias2
         # Note: we handle the equivalent of om1_om0 for omega2 (om2_om0) differently. Those
@@ -1416,10 +1402,10 @@ class VacancyMediated(object):
         biasVvec_om2 = -biasSvec
 
         # 4c. origin state corrections for solute: (corrections for vacancy appear below)
-        # these corrections are due to the null space for the vacancy without
+        # these corrections are due to the null space for the vacancy without solute
         if len(self.OSindices) > 0:
             # need to multiply by sqrt(probV) first
-            OSprobV = self.OSfolddown*probVsqrt  # proper nullspace projection
+            OSprobV = self.OSfolddown*probVsqrt  # proper null space projection
             biasSbar = np.dot(OSprobV, biasSvec)
             om2bar = np.dot(OSprobV, np.dot(om2, OSprobV.T))  # OS x OS
             etaSbar = np.dot(pinv2(om2bar), biasSbar)
@@ -1427,12 +1413,7 @@ class VacancyMediated(object):
                                  etaSbar), biasSbar) / self.N
             D0ss += dDss
             D0sv -= dDss
-            biasSvec -= np.dot(om2, np.dot(OSprobV.T, etaSbar))  # expand back out to sites *probVsqrt
-            # biasVbar = np.dot(self.OSfolddown, (biasVvec_om2)*probVsqrt)
-            # etaVbar = np.dot(pinv2(om2bar), biasVbar)
-            # D0vv += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
-            #                      etaVbar), biasVbar) / self.N
-            # biasVvec -= np.dot(np.dot(om2, self.OSfolddown.T), etaVbar)*probVsqrt  # expand back out to sites
+            biasSvec -= np.dot(om2, np.dot(OSprobV.T, etaSbar))
 
         # 5. compute Green function:
         G0 = np.dot(self.GFexpansion, GF)
@@ -1466,36 +1447,13 @@ class VacancyMediated(object):
             # update with omega2, and then put in change due to omega2
             G = np.dot(np.linalg.inv(np.eye(self.vkinetic.Nvstars) + np.dot(G, om2)), G)
             Gfull = G.copy()
-            matchfail = []
             for ni, i in enumerate(om2_sv_indices):
                 for nj, j in enumerate(om2_sv_indices):
                     G[i, j] = Greplace[ni, nj]
-                    # testing:
-                    if not np.isclose(om2_inv[ni, nj] + Greplace[ni, nj], Gfull[i, j],
-                                      rtol=1e-8, atol=1e-8 * large_om2):
-                        matchfail.append((ni, nj))
-            if len(matchfail) > 0:
-                import sys, traceback
-                print('Failure in {} values for G'.format(len(matchfail)))
-                print(matchfail)
-                traceback.print_stack(file=sys.stdout, limit=2)
-                if len(matchfail) < 50:
-                    print('Gfull:\n', Gfull[om2_sv_indices, :][:, om2_sv_indices])
-                    print('om2:\n', om2_slice)
-                    print('om2_inv:\n', om2_inv)
-                    print('Greplace:\n', Greplace)
-                    print('diff:\n', Gfull[om2_sv_indices, :][:, om2_sv_indices] - om2_inv - Greplace)
 
             bV, bV2, bS, = biasVvec[om2_sv_indices], biasVvec_om2[om2_sv_indices], biasSvec[om2_sv_indices]
             om2_outer = self.vkinetic.outer[:, :, om2_sv_indices, :][:, :, :, om2_sv_indices]
             D0ss_correct = np.dot(np.dot(om2_outer, bS), np.dot(om2_inv, bS)) / self.N
-            if not np.allclose(D0ss, -D0ss_correct, rtol=1e-12, atol=1e-12):
-                import sys, traceback
-                print('Failure in values for Dss')
-                traceback.print_stack(file=sys.stdout, limit=4)
-                print(D0ss)
-                print(D0ss_correct)
-                print(D0ss + D0ss_correct)
             D0ss = np.zeros_like(D0ss)  # exact cancellation of bare term
             D0sv = np.dot(np.dot(om2_outer, bV), np.dot(om2_inv, bS)) / self.N
             D2vv = (np.dot(np.dot(om2_outer, bV), np.dot(om2_inv, bV)) +
@@ -1511,9 +1469,6 @@ class VacancyMediated(object):
 
         # 6b. GF pieces:
         etaVvec, etaSvec = np.dot(G, biasVvec), np.dot(G, biasSvec)
-        # zero out eta for our origin states:
-        # etaVvec[self.OSindices] = 0
-        # etaSvec[self.OSindices] = 0
         outer_etaVvec, outer_etaSvec = np.dot(self.vkinetic.outer, etaVvec), np.dot(self.vkinetic.outer, etaSvec)
 
         L1ss = np.dot(outer_etaSvec, biasSvec) / self.N
@@ -1522,11 +1477,6 @@ class VacancyMediated(object):
 
         # 6c. origin state corrections for vacancy:
         if len(self.OSindices) > 0:
-            # D0ss += np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
-            #                       etaSbar), biasSbar) / self.N
-            ### commented these two lines out:
-            # outer_etaS0 = np.dot(self.vkinetic.outer, np.dot(self.OSfolddown.T, etaSbar))
-            # L1ss -= 2.*np.dot(outer_etaS0, biasSvec) / self.N
             etaV0 = -np.tensordot(self.OS_VB, etav, axes=((1, 2), (0, 1))) * np.sqrt(self.N)
             outer_etaV0 = np.dot(self.vkinetic.outer[:, :, self.OSindices, :][:, :, :, self.OSindices], etaV0)
             dom = delta_om + om2  # sum of the terms
