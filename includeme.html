@@ -32,7 +32,7 @@
   
     <link rel="top" title="Onsager 1.1 documentation" href="index.html"/>
         <link rel="next" title="Crystal" href="crystal.html"/>
-        <link rel="prev" title="Welcome to Onsager’s documentation!" href="index.html"/> 
+        <link rel="prev" title="Onsager: Automated diffusion calculation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -93,6 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="automator.html">Automator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Notebooks</a></li>
 </ul>
 
             
@@ -137,7 +138,41 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="onsager">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="onsager">
 <h1>Onsager<a class="headerlink" href="#onsager" title="Permalink to this headline">¶</a></h1>
 <p>Documentation now available at the [Onsager github page](<a class="reference external" href="http://dallastrinkle.github.io/Onsager/">http://dallastrinkle.github.io/Onsager/</a>). Please cite as [![DOI](<a class="reference external" href="https://zenodo.org/badge/14172/DallasTrinkle/Onsager.svg)](https://zenodo.org/badge/latestdoi/14172/DallasTrinkle/Onsager">https://zenodo.org/badge/14172/DallasTrinkle/Onsager.svg)](https://zenodo.org/badge/latestdoi/14172/DallasTrinkle/Onsager</a>) or see <a class="reference external" href="https://github.com/DallasTrinkle/Onsager">Onsager github</a> for current version doi information.</p>
 <p>The Onsager package provides routines for the general calculation of transport coefficients in vacancy-mediated diffusion and interstitial diffusion. It does this using a Green function approach, combined with point group symmetry reduction for maximum efficiency.</p>
@@ -159,6 +194,7 @@
 <li>0.9.1. Added spin degrees of freedom to <cite>crystal</cite> for symmetry purposes; added <cite>supercell</cite> class to aid in automated setup of calculation.</li>
 <li>1.0 Now including automator for supercell calculations.</li>
 <li>1.1 Automator update with Makefile; corrections for possible overflow error when omega2 gets very large.</li>
+<li>1.2 Combined &#8220;large omega2&#8221; and &#8220;non-zero bias&#8221; algorithms; notebook for Fe-C added to documentation; cleanup of code and improved testing.</li>
 </ul>
 </div>
 <div class="section" id="references">
@@ -197,7 +233,7 @@
         <a href="crystal.html" class="btn btn-neutral float-right" title="Crystal" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Welcome to Onsager’s documentation!" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="Onsager: Automated diffusion calculation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

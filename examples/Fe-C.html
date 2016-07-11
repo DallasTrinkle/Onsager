@@ -1,0 +1,794 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Fe-C diffusion and elastodiffusivity &mdash; Onsager 1.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Onsager 1.1 documentation" href="../index.html"/>
+        <link rel="up" title="Notebooks" href="../notebooks.html"/>
+        <link rel="prev" title="Notebooks" href="../notebooks.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Onsager
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#support">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crystal.html">Crystal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supercell.html">Supercell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PowerExpansion.html">PowerExpansion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GFcalc.html">GFcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OnsagerCalc.html">OnsagerCalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../automator.html">Automator</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../notebooks.html">Notebooks</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Fe-C diffusion and elastodiffusivity</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Onsager</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../notebooks.html">Notebooks</a> &raquo;</li>
+      
+    <li>Fe-C diffusion and elastodiffusivity</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/examples/Fe-C.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput > div,
+div.nbinput div[class^=highlight],
+div.nbinput div[class^=highlight] pre,
+div.nboutput,
+div.nboutput > div,
+div.nboutput div[class^=highlight],
+div.nboutput div[class^=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class^=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput > :first-child pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput > :first-child pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput > :first-child[class^=highlight],
+div.nboutput > :first-child[class^=highlight],
+div.nboutput > :first-child {
+    min-width: 11ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+
+/* input/output area */
+div.nbinput > :nth-child(2)[class^=highlight],
+div.nboutput > :nth-child(2),
+div.nboutput > :nth-child(2)[class^=highlight] {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+
+/* input area */
+div.nbinput > :nth-child(2)[class^=highlight] {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput  > :nth-child(2).stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-bold { font-weight: bold; }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="Fe-C-diffusion-and-elastodiffusivity">
+<h1>Fe-C diffusion and elastodiffusivity<a class="headerlink" href="#Fe-C-diffusion-and-elastodiffusivity" title="Permalink to this headline">¶</a></h1>
+<p>Taking data from R.G.A. Veiga, M. Perez, C. Becquart, E. Clouet and C.
+Domain, Acta mater. <strong>59</strong> (2011) p. 6963
+<a class="reference external" href="http://dx.doi.org/10.1016/j.actamat.2011.07.048">doi:10.1016/j.actamat.2011.07.048</a></p>
+<p>Fe in the body-centered cubic phase, <span class="math">\(a_0 = 0.28553\text{ nm}\)</span>; C
+sit at octahedral sites, where the transition states between octahedral
+sites are represented by tetrahedral sites. The data is obtained from an
+EAM potential, where <span class="math">\(C_{11} = 243\text{ GPa}\)</span>,
+<span class="math">\(C_{12}=145\text{ GPa}\)</span>, and <span class="math">\(C_{44} = 116\text{ GPa}\)</span>. The
+tetrahedral transition state is 0.816 eV above the octahedral site, and
+the attempt frequency is taken as 10 THz (<span class="math">\(10^{13}\text{ Hz}\)</span>).</p>
+<p>The dipole tensors can be separated into <em>parallel</em> and <em>perpendicular</em>
+components; the parallel direction points towards the closest Fe atoms
+for the C, while the perpendicular components lie in the interstitial
+plane. For the octahedral, the parallel component is 8.03 eV, and the
+perpendicular is 3.40 eV; for the tetrahedral transition state, the
+parallel component is 4.87 eV, and the perpendicular is 6.66 eV.</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>import sys
+sys.path.extend([&#39;../&#39;, &#39;../../../&#39;])
+import numpy as np
+import matplotlib.pyplot as plt
+plt.style.use(&#39;seaborn-whitegrid&#39;)
+%matplotlib inline
+import onsager.crystal as crystal
+import onsager.OnsagerCalc as onsager
+from scipy.constants import physical_constants
+kB = physical_constants[&#39;Boltzmann constant in eV/K&#39;][0]
+</pre></div>
+</div>
+</div>
+<p>Create BCC lattice (lattice constant in nm).</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>a0 = 0.28553
+Fe = crystal.Crystal.BCC(a0, &quot;Fe&quot;)
+print(Fe)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+#Lattice:
+  a1 = [-0.142765  0.142765  0.142765]
+  a2 = [ 0.142765 -0.142765  0.142765]
+  a3 = [ 0.142765  0.142765 -0.142765]
+#Basis:
+  (Fe) 0.0 = [ 0.  0.  0.]
+</pre></div></div>
+</div>
+<p>Elastic constants converted from GPa (<span class="math">\(10^9\)</span> J/m<span class="math">\(^3\)</span>) to
+eV/(atomic volume).</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>stressconv = 1e9*1e-27*Fe.volume/physical_constants[&#39;electron volt&#39;][0]
+c11, c12, c44 = 243*stressconv, 145*stressconv, 116*stressconv
+s11, s12, s44 = (c11+c12)/((c11-c12)*(c11+2*c12)), -c12/((c11-c12)*(c11+2*c12)), 1/c44
+print(&#39;S11 = {:.4f} S12 = {:.4f} S44 = {:.4f}&#39;.format(s11, s12, s44))
+stensor = np.zeros((3,3,3,3))
+for a in range(3):
+    for b in range(3):
+        for c in range(3):
+            for d in range(3):
+                if a==b and b==c and c==d: stensor[a,b,c,d] = s11
+                elif a==b and c==d: stensor[a,b,c,d] = s12
+                elif (a==d and b==c) or (a==c and b==d): stensor[a,b,c,d] = s44/4
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+S11 = 0.1023 S12 = -0.0382 S44 = 0.1187
+</pre></div></div>
+</div>
+<p>Add carbon interstitial sites at octahedral sites in the lattice. This
+code (1) gets the set of symmetric Wyckoff positions corresponding to
+the single site <span class="math">\([00\frac12]\)</span> (first translated into unit cell
+coordinates), and then adds that new basis to our Fe crystal to generate
+a <em>new</em> crystal structure, that we name &#8220;FeC&#8221;.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>uoct = np.dot(Fe.invlatt, np.array([0, 0, 0.5*a0]))
+FeC = Fe.addbasis(Fe.Wyckoffpos(uoct), [&quot;C&quot;])
+print(FeC)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+#Lattice:
+  a1 = [-0.142765  0.142765  0.142765]
+  a2 = [ 0.142765 -0.142765  0.142765]
+  a3 = [ 0.142765  0.142765 -0.142765]
+#Basis:
+  (Fe) 0.0 = [ 0.  0.  0.]
+  (C) 1.0 = [ 0.   0.5  0.5]
+  (C) 1.1 = [ 0.5  0.5  0. ]
+  (C) 1.2 = [ 0.5  0.   0.5]
+</pre></div></div>
+</div>
+<p>Next, we construct a <em>diffuser</em> based on our interstitial. We need to
+create a <code class="docutils literal"><span class="pre">sitelist</span></code> (which will be the Wyckoff positions) and a
+<code class="docutils literal"><span class="pre">jumpnetwork</span></code> for the transitions between the sites. There are tags
+that correspond to the unique states and transitions in the diffuser.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>chem = 1  # 1 is the index corresponding to our C atom in the crystal
+sitelist = FeC.sitelist(chem)
+jumpnetwork = FeC.jumpnetwork(chem, 0.6*a0)  # 0.6*a0 is the cutoff distance for finding jumps
+FeCdiffuser = onsager.Interstitial(FeC, chem, sitelist, jumpnetwork)
+print(FeCdiffuser)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+Diffuser for atom 1 (C)
+#Lattice:
+  a1 = [-0.142765  0.142765  0.142765]
+  a2 = [ 0.142765 -0.142765  0.142765]
+  a3 = [ 0.142765  0.142765 -0.142765]
+#Basis:
+  (Fe) 0.0 = [ 0.  0.  0.]
+  (C) 1.0 = [ 0.   0.5  0.5]
+  (C) 1.1 = [ 0.5  0.5  0. ]
+  (C) 1.2 = [ 0.5  0.   0.5]
+states:
+i:+0.000,+0.500,+0.500
+transitions:
+i:+0.500,+0.000,+0.500^i:+0.000,-0.500,+0.500
+
+</pre></div></div>
+</div>
+<p>Next, we assemble our data: the energies, prefactors, and dipoles for
+the C atom in Fe, matched to the <em>representative</em> states: these are the
+first states in the lists, which are also identified by the tags above.</p>
+<p><em>A note about units:</em> If <span class="math">\(\nu_0\)</span> is in THz, and <span class="math">\(a_0\)</span> is in
+nm, then <span class="math">\(a_0^2\nu_0 = 10^{-2}\text{ cm}^2/\text{s}\)</span>. Thus, we
+multiply by <code class="docutils literal"><span class="pre">Dconv</span></code> = <span class="math">\(10^{-2}\)</span> so that our diffusivity is
+output in cm2/s.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>Dconv = 1e-2
+vu0 = 10*Dconv
+Etrans = 0.816
+dipoledict = {&#39;Poctpara&#39;: 8.03, &#39;Poctperp&#39;: 3.40,
+              &#39;Ptetpara&#39;: 4.87, &#39;Ptetperp&#39;: 6.66}
+FeCthermodict = {&#39;pre&#39;: np.ones(len(sitelist)), &#39;ene&#39;: np.zeros(len(sitelist)),
+                 &#39;preT&#39;: vu0*np.ones(len(jumpnetwork)),
+                 &#39;eneT&#39;: Etrans*np.ones(len(jumpnetwork))}
+# now to construct the site and transition dipole tensors; we use a &quot;direction&quot;--either
+# the site position or the jump direction--to determine the parallel and perpendicular
+# directions.
+for dipname, Pname, direction in zip((&#39;dipole&#39;, &#39;dipoleT&#39;), (&#39;Poct&#39;, &#39;Ptet&#39;),
+                                     (np.dot(FeC.lattice, FeC.basis[chem][sitelist[0][0]]),
+                                      jumpnetwork[0][0][1])):
+    # identify the non-zero index in our direction:
+    paraindex = [n for n in range(3) if not np.isclose(direction[n], 0)][0]
+    Ppara, Pperp = dipoledict[Pname + &#39;para&#39;], dipoledict[Pname + &#39;perp&#39;]
+    FeCthermodict[dipname] = np.diag([Ppara if i==paraindex else Pperp
+                                      for i in range(3)])
+for k,v in FeCthermodict.items():
+    print(&#39;{}: {}&#39;.format(k, v))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+ene: [ 0.]
+pre: [ 1.]
+preT: [ 0.1]
+dipoleT: [[ 6.66  0.    0.  ]
+ [ 0.    6.66  0.  ]
+ [ 0.    0.    4.87]]
+dipole: [[ 8.03  0.    0.  ]
+ [ 0.    3.4   0.  ]
+ [ 0.    0.    3.4 ]]
+eneT: [ 0.816]
+</pre></div></div>
+</div>
+<p>We look at the diffusivity <span class="math">\(D\)</span>, the elastodiffusivity <span class="math">\(d\)</span>,
+and the activation volume tensor <span class="math">\(V\)</span> over a range of temperatures
+from 300K to 1200K.</p>
+<p>First, we calculate all of the pieces, including the diffusivity
+prefactor and activation barrier. As we only <em>have</em> one barrier, we
+compute the barrier at <span class="math">\(k_\text{B}T = 1\)</span>.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>Trange = np.linspace(300, 1200, 91)
+Tlabels = Trange[0::30]
+Dlist, dDlist, Vlist = [], [], []
+for T in Trange:
+    beta = 1./(kB*T)
+    D, dD = FeCdiffuser.elastodiffusion(FeCthermodict[&#39;pre&#39;],
+                                        beta*FeCthermodict[&#39;ene&#39;],
+                                        [beta*FeCthermodict[&#39;dipole&#39;]],
+                                        FeCthermodict[&#39;preT&#39;],
+                                        beta*FeCthermodict[&#39;eneT&#39;],
+                                        [beta*FeCthermodict[&#39;dipoleT&#39;]])
+    Dlist.append(D[0,0])
+    dDlist.append([dD[0,0,0,0], dD[0,0,1,1], dD[0,1,0,1]])
+    Vtensor = (kB*T/(D[0,0]))*np.tensordot(dD, stensor, axes=((2,3),(0,1)))
+    Vlist.append([np.trace(np.trace(Vtensor))/3,
+                  Vtensor[0,0,0,0], Vtensor[0,0,1,1], Vtensor[0,1,0,1]])
+D0 = FeCdiffuser.diffusivity(FeCthermodict[&#39;pre&#39;],
+                             np.zeros_like(FeCthermodict[&#39;ene&#39;]),
+                             FeCthermodict[&#39;preT&#39;],
+                             np.zeros_like(FeCthermodict[&#39;eneT&#39;]))
+D, dbeta = FeCdiffuser.diffusivity(FeCthermodict[&#39;pre&#39;],
+                                   FeCthermodict[&#39;ene&#39;],
+                                   FeCthermodict[&#39;preT&#39;],
+                                   FeCthermodict[&#39;eneT&#39;],
+                                   CalcDeriv=True)
+print(&#39;D0: {:.4e} cm^2/s\nEact: {:.3f} eV&#39;.format(D0[0,0], dbeta[0,0]/D[0,0]))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+D0: 1.3588e-03 cm^2/s
+Eact: 0.816 eV
+</pre></div></div>
+</div>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>D, dD = np.array(Dlist), np.array(dDlist)
+d11_T = np.vstack((Trange, dD[:,0])).T
+d11pos = np.array([(T,d) for T,d in d11_T if d&gt;=0])
+d11neg = np.array([(T,d) for T,d in d11_T if d&lt;0])
+fig, ax1 = plt.subplots()
+ax1.plot(1./Trange, D, &#39;k&#39;, label=&#39;$D$&#39;)
+# ax1.plot(1./Trange, dD[:,0], &#39;b&#39;, label=&#39;$d_{11}$&#39;)
+ax1.plot(1./d11pos[:,0], d11pos[:,1], &#39;b&#39;, label=&#39;$d_{11}$&#39;)
+ax1.plot(1./d11neg[:,0], -d11neg[:,1], &#39;b--&#39;)
+ax1.plot(1./Trange, dD[:,1], &#39;r&#39;, label=&#39;$d_{12}$&#39;)
+ax1.plot(1./Trange, dD[:,2], &#39;g-.&#39;, label=&#39;$d_{44} = D$&#39;)
+ax1.set_yscale(&#39;log&#39;)
+ax1.set_ylabel(&#39;$D$ [cm$^2$/s]&#39;, fontsize=&#39;x-large&#39;)
+ax1.set_xlabel(&#39;$T^{-1}$ [K$^{-1}$]&#39;, fontsize=&#39;x-large&#39;)
+ax1.legend(bbox_to_anchor=(0.15,0.15,0.2,0.4), ncol=1,
+           shadow=True, frameon=True, fontsize=&#39;x-large&#39;)
+ax2 = ax1.twiny()
+ax2.set_xlim(ax1.get_xlim())
+ax2.set_xticks([1./t for t in Tlabels])
+ax2.set_xticklabels([&quot;{:.0f}K&quot;.format(t) for t in Tlabels])
+ax2.set_xlabel(&#39;$T$ [K]&#39;, fontsize=&#39;x-large&#39;)
+ax2.grid(False)
+ax2.tick_params(axis=&#39;x&#39;, top=&#39;on&#39;, direction=&#39;in&#39;, length=6)
+plt.show()
+# plt.savefig(&#39;Fe-C-diffusivity.pdf&#39;, transparent=True, format=&#39;pdf&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="../_images/examples_Fe-C_14_0.png" src="../_images/examples_Fe-C_14_0.png" />
+</div>
+</div>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>d11pos[0,0], d11neg[-1,0]
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>Out[9]:
+</pre></div>
+</div>
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>(430.0, 420.0)
+</pre></div>
+</div>
+</div>
+<p>Activation volume. We plot the isotropic value (change in diffusivity
+with respect to pressure), but also the <span class="math">\(V_{xxxx}\)</span>,
+<span class="math">\(V_{xxyy}\)</span>, and <span class="math">\(V_{xyxy}\)</span> terms. Interestingly, the
+<span class="math">\(V_{xxxx}\)</span> term is negative&#8212;which indicates that diffusivity
+along the <span class="math">\([100]\)</span> direction <em>increases</em> with compressive stress in
+the <span class="math">\([100]\)</span> direction.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>V = np.array(Vlist)
+fig, ax1 = plt.subplots()
+ax1.plot(1./Trange, V[:,0], &#39;k&#39;, label=&#39;$V_{\\rm{total}}$&#39;)
+ax1.plot(1./Trange, V[:,1], &#39;b&#39;, label=&#39;$V_{11}$&#39;)
+ax1.plot(1./Trange, V[:,2], &#39;r&#39;, label=&#39;$V_{12}$&#39;)
+ax1.plot(1./Trange, 2*V[:,3], &#39;g&#39;, label=&#39;$V_{44}$&#39;)
+ax1.set_yscale(&#39;linear&#39;)
+ax1.set_ylabel(&#39;$V$ [atomic volume]&#39;, fontsize=&#39;x-large&#39;)
+ax1.set_xlabel(&#39;$T^{-1}$ [K$^{-1}$]&#39;, fontsize=&#39;x-large&#39;)
+ax1.legend(bbox_to_anchor=(0.3,0.3,0.5,0.2), ncol=2,
+           shadow=True, frameon=True, fontsize=&#39;x-large&#39;)
+ax2 = ax1.twiny()
+ax2.set_xlim(ax1.get_xlim())
+ax2.set_xticks([1./t for t in Tlabels])
+ax2.set_xticklabels([&quot;{:.0f}K&quot;.format(t) for t in Tlabels])
+ax2.set_xlabel(&#39;$T$ [K]&#39;, fontsize=&#39;x-large&#39;)
+ax2.grid(False)
+ax2.tick_params(axis=&#39;x&#39;, top=&#39;on&#39;, direction=&#39;in&#39;, length=6)
+plt.show()
+# plt.savefig(&#39;Fe-C-activation-volume.pdf&#39;, transparent=True, format=&#39;pdf&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="../_images/examples_Fe-C_17_0.png" src="../_images/examples_Fe-C_17_0.png" />
+</div>
+</div>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>print(&#39;Total volume: {v[0]:.4f}, {V[0]:.4f}A^3\nV_xxxx: {v[1]:.4f}, {V[1]:.4f}A^3\nV_xxyy: {v[2]:.4f}, {V[2]:.4f}A^3\nV_xyxy: {v[3]:.4f}, {V[3]:.4f}A^3&#39;.format(v=V[-1,:], V=V[-1,:]*1e3*Fe.volume))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+Total volume: 0.0921, 1.0722A^3
+V_xxxx: -0.1175, -1.3681A^3
+V_xxyy: 0.1048, 1.2202A^3
+V_xyxy: 0.0061, 0.0714A^3
+</pre></div></div>
+</div>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>Vsph = 0.2*(3*V[-1,1] + 2*V[-1,2] + 4*V[-1,3])  # (3V11 + 2V12 + 2V44)/5
+print(&#39;Spherical average uniaxial activation volume: {:.4f} {:.4f}A^3&#39;.format(Vsph, Vsph*1e3*Fe.volume))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+Spherical average uniaxial activation volume: -0.0237 -0.2757A^3
+</pre></div></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../notebooks.html" class="btn btn-neutral" title="Notebooks" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Dallas R. Trinkle.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

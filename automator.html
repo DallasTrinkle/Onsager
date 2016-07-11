@@ -31,6 +31,7 @@
 
   
     <link rel="top" title="Onsager 1.1 documentation" href="index.html"/>
+        <link rel="next" title="Notebooks" href="notebooks.html"/>
         <link rel="prev" title="OnsagerCalc" href="OnsagerCalc.html"/> 
 
   
@@ -92,6 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Automator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Notebooks</a></li>
 </ul>
 
             
@@ -136,7 +138,41 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="automator">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="automator">
 <h1>Automator<a class="headerlink" href="#automator" title="Permalink to this headline">¶</a></h1>
 <p>Automator:</p>
 <p>The automator module defines functions that create a tarball from a supercell dictionary.</p>
@@ -237,6 +273,8 @@ set to None to not output. <strong>may want to change this to None for the futur
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="notebooks.html" class="btn btn-neutral float-right" title="Notebooks" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="OnsagerCalc.html" class="btn btn-neutral" title="OnsagerCalc" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

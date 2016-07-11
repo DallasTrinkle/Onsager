@@ -92,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="automator.html">Automator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Notebooks</a></li>
 </ul>
 
             
@@ -136,7 +137,41 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="onsager-automated-diffusion-calculation">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="onsager-automated-diffusion-calculation">
 <h1>Onsager: Automated diffusion calculation<a class="headerlink" href="#onsager-automated-diffusion-calculation" title="Permalink to this headline">¶</a></h1>
 <p>Documentation for <code class="docutils literal"><span class="pre">Onsager</span></code> python module for automated computation of diffusivity for interstitial and vacancy mediated diffusion.</p>
 <p>Contents:</p>
@@ -153,6 +188,10 @@
 <li class="toctree-l1"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="automator.html">Automator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Notebooks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/Fe-C.html">Fe-C diffusion and elastodiffusivity</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
