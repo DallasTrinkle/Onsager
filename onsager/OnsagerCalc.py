@@ -1283,7 +1283,7 @@ class VacancyMediated(object):
 
         :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
         :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
-        :param bFSV[Nthermo]: beta*eneSV - ln(preSV) (excess)
+        :param bFSV[Nthermo]: beta*eneSV - ln(preSV) (TOTAL for solute-vacancy complex)
         :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
         :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
         :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
@@ -1302,17 +1302,15 @@ class VacancyMediated(object):
             omega0[j] = np.sqrt(omega0escape[v1, j] * omega0escape[v2, j])
         omega1 = np.zeros(len(self.om1_jn))
         omega1escape = np.zeros((self.vkinetic.Nvstars, len(self.om1_jn)))
-        for j, (s1, v1, s2, v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega1svsvWyckoff,
-                                                                  self.om1_jt, self.om1_SP, bFT1):
-            omF, omB = np.exp(-bFT + bFS[s1] + bFV[v1] + bFSV[st1]), np.exp(-bFT + bFS[s2] + bFV[v2] + bFSV[st2])
+        for j, (st1, st2), bFT in zip(itertools.count(), self.om1_SP, bFT1):
+            omF, omB = np.exp(-bFT + bFSV[st1]), np.exp(-bFT + bFSV[st2])
             omega1[j] = np.sqrt(omF * omB)
             for vst1 in self.kin2vstar[st1]: omega1escape[vst1, j] = omF
             for vst2 in self.kin2vstar[st2]: omega1escape[vst2, j] = omB
         omega2 = np.zeros(len(self.om2_jn))
         omega2escape = np.zeros((self.vkinetic.Nvstars, len(self.om2_jn)))
-        for j, (s1, v1, s2, v2), jumptype, (st1, st2), bFT in zip(itertools.count(), self.omega2svsvWyckoff,
-                                                                  self.om2_jt, self.om2_SP, bFT2):
-            omF, omB = np.exp(-bFT + bFS[s1] + bFV[v1] + bFSV[st1]), np.exp(-bFT + bFS[s2] + bFV[v2] + bFSV[st2])
+        for j, (st1, st2), bFT in zip(itertools.count(), self.om2_SP, bFT2):
+            omF, omB = np.exp(-bFT + bFSV[st1]), np.exp(-bFT + bFSV[st2])
             omega2[j] = np.sqrt(omF * omB)
             for vst1 in self.kin2vstar[st1]: omega2escape[vst1, j] = omF
             for vst2 in self.kin2vstar[st2]: omega2escape[vst2, j] = omB
@@ -1365,7 +1363,7 @@ class VacancyMediated(object):
         probSsites = np.array([np.exp(min(bFS) - bFS[wi]) for wi in self.invmap])
         probSsites *= self.N / np.sum(probSsites)  # normalize
         probS = np.array([probSsites[sites[0]] for sites in self.sitelist])  # Wyckoff positions
-        bFSVkin = np.array([bFS[s] + bFV[v] for (s, v) in self.kineticsvWyckoff])
+        bFSVkin = np.array([bFS[s] + bFV[v] for (s, v) in self.kineticsvWyckoff])  # NOT EXCESS: total
         prob = np.array([probS[s] * probV[v] for (s, v) in self.kineticsvWyckoff])
         for tindex, kindex in enumerate(self.thermo2kin):
             bFSVkin[kindex] += bFSV[tindex]
@@ -1494,7 +1492,7 @@ class VacancyMediated(object):
             if not np.allclose(D0ss, -D0ss_correct, rtol=1e-12, atol=1e-12):
                 import sys, traceback
                 print('Failure in values for Dss')
-                traceback.print_stack(file=sys.stdout, limit=2)
+                traceback.print_stack(file=sys.stdout, limit=4)
                 print(D0ss)
                 print(D0ss_correct)
                 print(D0ss + D0ss_correct)
