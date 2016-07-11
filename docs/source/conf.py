@@ -81,7 +81,7 @@ author = 'Dallas R. Trinkle'
 # built documents.
 #
 # The short X.Y version.
-version = '1.1'
+version = '1.2'
 # The full version, including alpha/beta/rc tags.
 release = '1.1'
 
