@@ -675,6 +675,34 @@ class CrystalOnsagerTestsRumpledOmega(DiffusionTestCase):
         Diffusivity1 = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
         Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
         thermaldef1 = {'preV': np.array([self.vacancyprob if indices==[0] else 1. for indices in self.sitelist]),
+                       'eneV': np.zeros(len(self.sitelist)),
+                       'preSV': self.solutebinding*np.ones(len(Diffusivity1.interactlist())),
+                       'eneSV': np.zeros(len(Diffusivity1.interactlist())),
+                       'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
+        thermaldef1.update(Diffusivity1.makeLIMBpreene(**thermaldef1))
+        thermaldef2 = {'preV': np.array([self.vacancyprob if indices == [0] else 1. for indices in self.sitelist2]),
+                       'eneV': np.zeros(len(self.sitelist2)),
+                       'preSV': self.solutebinding*np.ones(len(Diffusivity1.interactlist())),
+                       'eneSV': np.zeros(len(Diffusivity1.interactlist())),
+                       'preT0': np.ones(len(self.jumpnetwork2)), 'eneT0': np.zeros(len(self.jumpnetwork2))}
+        thermaldef2.update(Diffusivity2.makeLIMBpreene(**thermaldef2))
+        self.assertEqualDiffusivity(Diffusivity1, thermaldef1, Diffusivity2, thermaldef2,
+                                    msg='broken symmetry fail')
+        self.assertEqualDiffusivity(Diffusivity2, thermaldef2, Diffusivity2, thermaldef2,
+                                diffuserargs2={'large_om2': 0}, msg='large omega test fail')
+
+    def testsolute(self):
+        """Test that Omega and rumpled Omega match exactly (using solute interaction)"""
+        # Make a calculator with one neighbor shell
+        self.logger = logging.getLogger(__name__ + '.' +
+                                        self.__class__.__name__ + '.' +
+                                        inspect.currentframe().f_code.co_name)
+        self.logger.debug('Crystal: ' + self.crystalname)
+        self.logger.debug('Crystal2: ' + self.crystalname2)
+        self.logger.debug('  Solute test: SV binding = {}'.format(self.solutebinding))
+        Diffusivity1 = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        Diffusivity2 = OnsagerCalc.VacancyMediated(self.crys2, self.chem, self.sitelist2, self.jumpnetwork2, 1)
+        thermaldef1 = {'preV': np.array([self.vacancyprob if indices==[0] else 1. for indices in self.sitelist]),
                         'eneV': np.zeros(len(self.sitelist)),
                         'preT0': np.ones(len(self.jumpnetwork)), 'eneT0': np.zeros(len(self.jumpnetwork))}
         thermaldef1.update(Diffusivity1.maketracerpreene(**thermaldef1))
@@ -686,6 +714,7 @@ class CrystalOnsagerTestsRumpledOmega(DiffusionTestCase):
                                     msg='broken symmetry fail')
         self.assertEqualDiffusivity(Diffusivity2, thermaldef2, Diffusivity2, thermaldef2,
                                 diffuserargs2={'large_om2': 0}, msg='large omega test fail')
+
 
 
 class InterstitialTests(unittest.TestCase):
