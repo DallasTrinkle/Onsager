@@ -90,6 +90,9 @@ class GFCrystalcalc(object):
         # self.N = sum(1 for w in sitelist for i in w)
         # self.invmap = [0 for w in sitelist for i in w]
         self.N = sum(len(w) for w in sitelist)
+        self.Ndiff = self.networkcount(jumpnetwork)
+        if self.Ndiff>1:
+            raise NotImplementedError('Cannot currently have {} disconnected networks'.format(self.Ndiff))
         self.invmap = np.zeros(self.N, dtype=int)
         for ind, w in enumerate(sitelist):
             for i in w:
@@ -117,8 +120,34 @@ class GFCrystalcalc(object):
                                for jumplist in jumpnetwork)
         self.D, self.eta = 0, 0  # we don't yet know the diffusivity
 
+    def networkcount(self, jumpnetwork):
+        """Return a count of how many separate connected networks there are"""
+        jngraph = np.zeros((self.N, self.N), dtype=bool)
+        for jlist in jumpnetwork:
+            for (i, j), dx in jlist:
+                jngraph[i,j] = True
+        connectivity = 0  # had been a list... if we want to return the list of sets
+        disconnected = {i for i in range(self.N)}
+        while len(disconnected)>0:
+            # take the "first" element out, and find everything it's connected to:
+            i = min(disconnected)
+            cset = {i}
+            disconnected.remove(i)
+            while True:
+                clen = len(cset)
+                for n in cset.copy():
+                    for m in disconnected.copy():
+                        if jngraph[n,m]:
+                            cset.add(m)
+                            disconnected.remove(m)
+                # check if we've stopped adding new members:
+                if clen == len(cset): break
+            connectivity += 1
+            # connectivity.append(cset)  # if we want to keep lists of connectivity sets
+        return connectivity
+
     # this is part of our *class* definition:
-    __HDF5list__ = ('N', 'invmap', 'NG', 'grouparray', 'indexpair', 'kptgrid',
+    __HDF5list__ = ('N', 'Ndiff', 'invmap', 'NG', 'grouparray', 'indexpair', 'kptgrid',
                     'kpts', 'wts', 'Nkpt', 'FTjumps', 'SEjumps')
 
     def __str__(self):
