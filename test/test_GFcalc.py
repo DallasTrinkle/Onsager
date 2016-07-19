@@ -36,6 +36,8 @@ def poleFT(di, u, pm, erfupm=-1):
 class GreenFuncCrystalTests(unittest.TestCase):
     """Test new implementation of GF calculator, based on Crystal class"""
 
+    longMessage = False
+
     def setUp(self):
         pass
 
@@ -137,6 +139,7 @@ class GreenFuncCrystalTests(unittest.TestCase):
         a0 = 1.
         chem = 0
         cutoff = 0.31*a0
+        cutoff2 = 0.49*a0
         alatt = a0 * np.array([[-0.5, 0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, -0.5]])
         invlatt = np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]])
         uMg = ((1 / 8, 0, 1 / 4), (3 / 8, 0, 3 / 4), (1 / 4, 1 / 8, 0), (3 / 4, 3 / 8, 0),
@@ -147,11 +150,25 @@ class GreenFuncCrystalTests(unittest.TestCase):
         pyropeMg = crystal.Crystal(alatt, [[vec(w) for w in uMg for vec in (tovec,)]], ['Mg'])
         sitelist = pyropeMg.sitelist(chem)
         jumpnetwork = pyropeMg.jumpnetwork(chem, cutoff)
+        jumpnetwork2 = pyropeMg.jumpnetwork(chem, cutoff2)
+        self.assertEqual(len(jumpnetwork), 1)
+        self.assertEqual(len(jumpnetwork2), 2)
         GF = GFcalc.GFCrystalcalc(pyropeMg, chem, sitelist, jumpnetwork)
+        GF2 = GFcalc.GFCrystalcalc(pyropeMg, chem, sitelist, jumpnetwork2)
         GF.SetRates(np.ones(1), np.zeros(1), np.ones(1), np.zeros(1))  # simple tracer
+        GF2.SetRates(np.ones(1), np.zeros(1), np.array([1., 1e-4]), np.zeros(2))  # simple tracer
         D0 = 0.0625*np.eye(3)
-        D = GF.D
-        self.assertTrue(np.allclose(D0, D),
-                        msg='Diffusivity does not match?\n{}\n!=\n{}'.format(D0,D))
+        for D in (GF.D,):
+            self.assertTrue(np.allclose(D0, D),
+                            msg='Diffusivity does not match?\n{}\n!=\n{}'.format(D0,D))
+        basis = pyropeMg.basis[chem]
+        # order of testing: 000, 211
+        for i, j, Gref in zip((0,0), (0,2), (2.30796022, 1.30807261)):
+            dx = np.dot(alatt, basis[j]-basis[i])
+            g, g2 = GF(i,j,dx), GF2(i,j,dx)
+            self.assertAlmostEqual(g, g2, places=2,
+                                 msg='Disconnected GF does not match barely connected GF ({},{},{}) {} != {}?\n'.format(i,j,dx,g,g2))
+            self.assertAlmostEqual(g, -0.25*Gref, places=3,
+                                   msg='Does not match Carlson and Wilson value? {} != {}'.format(g, Gref))
         self.assertTrue(False)
 
