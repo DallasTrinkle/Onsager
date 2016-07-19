@@ -91,8 +91,8 @@ class GFCrystalcalc(object):
         # self.invmap = [0 for w in sitelist for i in w]
         self.N = sum(len(w) for w in sitelist)
         self.Ndiff = self.networkcount(jumpnetwork)
-        if self.Ndiff>1:
-            raise NotImplementedError('Cannot currently have {} disconnected networks'.format(self.Ndiff))
+        # if self.Ndiff>1:
+        #     raise NotImplementedError('Cannot currently have {} disconnected networks'.format(self.Ndiff))
         self.invmap = np.zeros(self.N, dtype=int)
         for ind, w in enumerate(sitelist):
             for i in w:
@@ -293,7 +293,8 @@ class GFCrystalcalc(object):
 
         # 1. Diagonalize gamma point value; use to rotate to diffusive / relaxive, and reduce
         self.r, self.vr = self.DiagGamma()
-        if not np.isclose(self.r[0], 0): raise ArithmeticError("No equilibrium solution to rates?")
+        if not np.allclose(self.r[:self.Ndiff], 0):
+            raise ArithmeticError("Did not find {} equilibrium solution to rates?".format(self.Ndiff))
         self.omega_Taylor_rotate = (self.omega_Taylor.ldot(self.vr.T)).rdot(self.vr)
         oT_dd, oT_dr, oT_rd, oT_rr, oT_D, etav = self.BlockRotateOmegaTaylor(self.omega_Taylor_rotate)
         # 2. Calculate D and eta
@@ -411,16 +412,17 @@ class GFCrystalcalc(object):
         D = np.zeros((3, 3))
         for (n, l, c) in omega_Taylor_D.coefflist:
             if n < 2: raise ValueError("Reduced Taylor expansion for D doesn't begin with n==2")
+            DTr = np.trace(c.real, axis1=1, axis2=2)
             if n == 2:
                 # first up: constant term (if present)
-                D += np.eye(3) * c[0, 0, 0].real
+                D += np.eye(3) * DTr[0]
                 # next: l == 2 contributions
                 if l >= 2:
                     # done in this way so that we get the 1/2 for the off-diagonal, and the 1 for diagonal
                     for t in ((i, j) for i in range(3) for j in range(i, 3)):
                         ind = T3D.pow2ind[t.count(0), t.count(1), t.count(2)]  # count the powers
-                        D[t] += 0.5 * c[ind, 0, 0].real
-                        D[t[1], t[0]] += 0.5 * c[ind, 0, 0].real
+                        D[t] += 0.5 * DTr[ind]
+                        D[t[1], t[0]] += 0.5 * DTr[ind]
         # note: the "D" constructed this way will be negative! (as it is -q.D.q)
         return -D * self.maxrate
 
