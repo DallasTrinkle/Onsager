@@ -155,20 +155,23 @@ class GreenFuncCrystalTests(unittest.TestCase):
         self.assertEqual(len(jumpnetwork2), 2)
         GF = GFcalc.GFCrystalcalc(pyropeMg, chem, sitelist, jumpnetwork)
         GF2 = GFcalc.GFCrystalcalc(pyropeMg, chem, sitelist, jumpnetwork2)
-        GF.SetRates(np.ones(1), np.zeros(1), np.ones(1), np.zeros(1))  # simple tracer
-        GF2.SetRates(np.ones(1), np.zeros(1), np.array([1., 1e-4]), np.zeros(2))  # simple tracer
-        D0 = 0.0625*np.eye(3)
+        GF.SetRates(np.ones(1), np.zeros(1), 0.25*np.ones(1), np.zeros(1))  # simple tracer
+        GF2.SetRates(np.ones(1), np.zeros(1), 0.25*np.array([1., 1.e-6]), np.zeros(2))  # simple tracer
+        D0 = np.eye(3)*(1/64)
         for D in (GF.D,):
             self.assertTrue(np.allclose(D0, D),
                             msg='Diffusivity does not match?\n{}\n!=\n{}'.format(D0,D))
         basis = pyropeMg.basis[chem]
         # order of testing: 000, 211
-        for i, j, Gref in zip((0,0), (0,2), (2.30796022, 1.30807261)):
-            dx = np.dot(alatt, basis[j]-basis[i])
-            g, g2 = GF(i,j,dx), GF2(i,j,dx)
-            self.assertAlmostEqual(g, g2, places=2,
-                                 msg='Disconnected GF does not match barely connected GF ({},{},{}) {} != {}?\n'.format(i,j,dx,g,g2))
-            self.assertAlmostEqual(g, -0.25*Gref, places=3,
-                                   msg='Does not match Carlson and Wilson value? {} != {}'.format(g, Gref))
-        self.assertTrue(False)
+        ijlist = ((0,0), (0,2))
+        dxlist = [np.dot(alatt, basis[j]-basis[i]) for (i,j) in ijlist]
+        glist = np.array([GF(i,j,dx) for (i,j), dx in zip(ijlist, dxlist)])
+        g2list = np.array([GF2(i,j,dx) for (i,j), dx in zip(ijlist, dxlist)])
+        Gref = np.array([2.30796022, 1.30807261])
+        self.assertTrue(np.allclose(glist, -Gref, rtol=1e-4),
+                        msg='Does not match Carlson and Wilson values?\n{} !=\n{}'.format(glist, Gref))
+        # with the nearly disconnected, the rate anisotropy makes comparison of differences
+        # much more stable
+        self.assertTrue(np.allclose(glist[1:]-glist[0], g2list[1:]-g2list[0], rtol=1e-5),
+                        msg='Does not match nearly disconnected GF values?\n{} !=\n{}'.format(glist, g2list))
 

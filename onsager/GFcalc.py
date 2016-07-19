@@ -328,7 +328,9 @@ class GFCrystalcalc(object):
         for qind, q in enumerate(self.kpts):
             if np.allclose(q, 0):
                 # gamma point... need to treat separately
-                gsc_qij[qind] = (-1 / self.pmax ** 2) * np.outer(self.vr[:, 0], self.vr[:, 0])
+                gsc_qij[qind] = (-1 / self.pmax ** 2) * \
+                                sum(np.outer(self.vr[:, n], self.vr[:, n])
+                                    for n in range(self.Ndiff))
             else:
                 # invert, subtract off Taylor expansion to leave semicontinuum piece
                 gsc_qij[qind] = np.linalg.inv(self.omega_qij[qind, :, :]) \
@@ -443,7 +445,8 @@ class GFCrystalcalc(object):
                     for d, ind in ((0, T3D.pow2ind[1, 0, 0]),
                                    (1, T3D.pow2ind[0, 1, 0]),
                                    (2, T3D.pow2ind[0, 0, 1])):
-                        eta[:, d] += np.dot(self.vr[:, 1:], c[ind, :])[:, 0].imag
+                        eta[:, d] += sum(np.dot(self.vr[:, self.Ndiff:], c[ind, :])[:, n].imag
+                                         for n in range(self.Ndiff))/self.Ndiff
         return eta
 
     def BlockRotateOmegaTaylor(self, omega_Taylor_rotate):

@@ -301,6 +301,28 @@ class CrystalOnsagerTestsDiamond(CrystalOnsagerTestsSC):
         self.correl = 0.5
 
 
+class CrystalOnsagerTestsGarnet(CrystalOnsagerTestsSC):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+
+    def setUp(self):
+        self.a0 = 1.
+        alatt = self.a0 * np.array([[-0.5, 0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, -0.5]])
+        invlatt = np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]])
+        uMg = ((1 / 8, 0, 1 / 4), (3 / 8, 0, 3 / 4), (1 / 4, 1 / 8, 0), (3 / 4, 3 / 8, 0),
+               (0, 1 / 4, 1 / 8), (0, 3 / 4, 3 / 8), (7 / 8, 0, 3 / 4), (5 / 8, 0, 1 / 4),
+               (3 / 4, 7 / 8, 0), (1 / 4, 5 / 8, 0), (0, 3 / 4, 7 / 8), (0, 1 / 4, 5 / 8))
+        tovec = lambda x: np.dot(invlatt, x)
+        # this is a reduced version of pyrope: just the Mg (24c sites in 230)
+        self.crys = crystal.Crystal(alatt, [[vec(w) for w in uMg for vec in (tovec,)]], ['Mg'])
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.31 * self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Garnet (24c site only) a0={}'.format(self.a0)
+        self.correl = 0.375
+
+
 class CrystalOnsagerTestsNbO(CrystalOnsagerTestsSC):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
 
