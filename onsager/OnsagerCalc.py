@@ -625,7 +625,7 @@ class VacancyMediated(object):
     range (number of "shells" -- see ``crystalStars.StarSet`` for precise definition).
     """
 
-    def __init__(self, crys, chem, sitelist, jumpnetwork, Nthermo=0):
+    def __init__(self, crys, chem, sitelist, jumpnetwork, Nthermo=0, NGFmax=4):
         """
         Create our diffusion calculator for a given crystal structure, chemical identity,
         jumpnetwork (for the vacancy) and thermodynamic shell.
@@ -634,6 +634,8 @@ class VacancyMediated(object):
         :param chem: index identifying the diffusing species
         :param sitelist: list, grouped into Wyckoff common positions, of unique sites
         :param jumpnetwork: list of unique transitions as lists of ((i,j), dx)
+        :param Nthermo: range of thermodynamic interaction (in successive jumpnetworks)
+        :param NGFmax: parameter controlling k-point density of GF calculator; 4 seems reasonably accurate
         """
         if all(x is None for x in (crys, chem, sitelist, jumpnetwork)): return  # blank object
         self.crys = crys
@@ -646,7 +648,7 @@ class VacancyMediated(object):
             for i in w:
                 self.invmap[i] = ind
         self.om0_jn = copy.deepcopy(jumpnetwork)
-        self.GFcalc = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, 4)  # Nmax?
+        self.GFcalc = self.GFcalculator(NGFmax)
         # do some initial setup:
         # self.thermo = stars.StarSet(self.jumpnetwork, self.crys, self.chem, Nthermo)
         self.thermo = stars.StarSet(self.jumpnetwork, self.crys, self.chem)  # just create; call generate later
@@ -658,6 +660,20 @@ class VacancyMediated(object):
         self.generatematrices()
         # dict: vacancy, solute, solute-vacancy; omega0, omega1, omega2 (see __taglist__)
         self.tags, self.tagdict, self.tagdicttype = self.generatetags()
+
+    def GFcalculator(self, NGFmax=0):
+        """Return the GF calculator; create a new one if NGFmax is being changed"""
+        # if not being set (no parameter passed) or same as what we already use, return calculator
+        if NGFmax == getattr(self, 'NGFmax', 0): return self.GFcalc
+        if NGFmax < 0: raise ValueError('NGFmax ({}) must be >0'.format(NGFmax))
+        self.NGFmax= NGFmax
+        # empty dictionaries to store GF values: necessary if we're changing NGFmax
+        self.clearcache()
+        return GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.om0_jn, NGFmax)
+
+    def clearcache(self):
+        """Clear out the GF cache values"""
+        self.GFvalues, self.Lvvvalues, self.etavvalues = {}, {}, {}
 
     def generate(self, Nthermo):
         """
@@ -697,7 +713,7 @@ class VacancyMediated(object):
             if SP[0] in self.outerkin and SP[1] in self.outerkin:
                 self.om1_jn.pop(i), self.om1_jt.pop(i), self.om1_SP.pop(i)
         # empty dictionaries to store GF values
-        self.GFvalues, self.Lvvvalues, self.etavvalues = {}, {}, {}
+        self.clearcache()
 
     def generatematrices(self):
         """
@@ -778,7 +794,9 @@ class VacancyMediated(object):
 
     def __str__(self):
         """Human readable version of diffuser"""
-        s = "Diffuser for atom {} ({})\n".format(self.chem, self.crys.chemistry[self.chem])
+        s = "Diffuser for atom {} ({}), Nthermo={}\n".format(self.chem,
+                                                             self.crys.chemistry[self.chem],
+                                                             self.Nthermo)
         s += self.crys.__str__() + '\n'
         for t in ('vacancy', 'solute', 'solute-vacancy'):
             s += t + ' configurations:\n'
@@ -931,7 +949,7 @@ class VacancyMediated(object):
         return superdict
 
     # this is part of our *class* definition: list of data that can be directly assigned / read
-    __HDF5list__ = ('chem', 'N', 'invmap',
+    __HDF5list__ = ('chem', 'N', 'Nthermo', 'NGFmax', 'invmap',
                     'thermo2kin', 'kin2vacancy', 'outerkin', 'vstar2kin',
                     'om1_jt', 'om1_SP', 'om2_jt', 'om2_SP',
                     'GFexpansion',
