@@ -114,7 +114,9 @@ class CrystalOnsagerTestsSC(DiffusionTestCase):
                                         self.__class__.__name__ + '.' +
                                         inspect.currentframe().f_code.co_name)
         kT = 1.
-        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork, 1)
+        NGFmax = getattr(self, 'NGFmax', 4)
+        Diffusivity = OnsagerCalc.VacancyMediated(self.crys, self.chem, self.sitelist, self.jumpnetwork,
+                                                  1, NGFmax)
         thermaldef = self.makeunitythermodict(Diffusivity)
 
         L0vv = np.zeros((3, 3))
@@ -320,7 +322,8 @@ class CrystalOnsagerTestsGarnet(CrystalOnsagerTestsSC):
         self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.31 * self.a0)
         self.sitelist = self.crys.sitelist(self.chem)
         self.crystalname = 'Garnet (24c site only) a0={}'.format(self.a0)
-        self.correl = 0.375
+        self.correl = 0.374973  # not quite 0.375
+        self.NGFmax = 4  # can override with, e.g., 6, but changes value by ~1e-8
 
 
 class CrystalOnsagerTestsNbO(CrystalOnsagerTestsSC):
