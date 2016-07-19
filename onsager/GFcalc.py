@@ -412,7 +412,7 @@ class GFCrystalcalc(object):
         D = np.zeros((3, 3))
         for (n, l, c) in omega_Taylor_D.coefflist:
             if n < 2: raise ValueError("Reduced Taylor expansion for D doesn't begin with n==2")
-            DTr = np.trace(c.real, axis1=1, axis2=2)
+            DTr = np.trace(c.real, axis1=1, axis2=2)/self.Ndiff
             if n == 2:
                 # first up: constant term (if present)
                 D += np.eye(3) * DTr[0]
@@ -457,12 +457,13 @@ class GFCrystalcalc(object):
         :param rr: relaxive/relaxive block (lower right)
         :param D: :math:`dd - dr (rr)^{-1} rd` (diffusion)
         """
-        dd = omega_Taylor_rotate[0:1, 0:1].copy()
-        dr = omega_Taylor_rotate[0:1, 1:].copy()
-        rd = omega_Taylor_rotate[1:, 0:1].copy()
-        rr = omega_Taylor_rotate[1:, 1:].copy()
+        ND = self.Ndiff  # previously had been 1.
+        dd = omega_Taylor_rotate[0:ND, 0:ND].copy()
+        dr = omega_Taylor_rotate[0:ND, ND:].copy()
+        rd = omega_Taylor_rotate[ND:, 0:ND].copy()
+        rr = omega_Taylor_rotate[ND:, ND:].copy()
         for t in [dd, dr, rd, rr]: t.reduce()
-        if self.N > 1:
+        if self.N > ND:
             D = dd - dr * rr.inv() * rd
             etav = rr.inv() * rd
             etav.truncate(1, inplace=True)
@@ -485,12 +486,13 @@ class GFCrystalcalc(object):
         :param D: :math:`dd - dr (rr)^{-1} rd` (diffusion)
         :return gT: Taylor expansion of g in block form, and reduced (collected terms)
         """
+        ND = self.Ndiff  # previously had been 1.
         gT = T3D.zeros(-2, 0, (self.N, self.N))  # where we'll place our Taylor expansion
         D_inv = D.inv()
-        gT[0:1, 0:1] = D_inv.truncate(0)
-        if self.N > 1:
+        gT[0:ND, 0:ND] = D_inv.truncate(0)
+        if self.N > ND:
             rr_inv = rr.inv()
-            gT[0:1, 1:] = -(D_inv * dr * rr_inv).truncate(0)
-            gT[1:, 0:1] = -(rr_inv * rd * D_inv).truncate(0)
-            gT[1:, 1:] = (rr_inv + rr_inv * rd * D_inv * dr * rr_inv).truncate(0)
+            gT[0:ND, ND:] = -(D_inv * dr * rr_inv).truncate(0)
+            gT[ND:, 0:ND] = -(rr_inv * rd * D_inv).truncate(0)
+            gT[ND:, ND:] = (rr_inv + rr_inv * rd * D_inv * dr * rr_inv).truncate(0)
         return gT.reduce()
