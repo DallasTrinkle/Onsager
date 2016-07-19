@@ -131,3 +131,27 @@ class GreenFuncCrystalTests(unittest.TestCase):
                 BCCdx = (0.5 * a0) * np.round(dx / (0.5 * a0))
                 # print('({},{}), {} / {}: '.format(i,j,dx,BCCdx) + '{} vs {}'.format(B2_GF(i,j,dx), BCC_GF(0,0,BCCdx)))
                 self.assertAlmostEqual(BCC_GF(0, 0, BCCdx), B2_GF(i, j, dx), places=5)
+
+    def testPyrope(self):
+        """Test using the pyrope structure: two disconnected symmetry-related networks"""
+        a0 = 1.
+        chem = 0
+        cutoff = 0.31*a0
+        alatt = a0 * np.array([[-0.5, 0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, -0.5]])
+        invlatt = np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]])
+        uMg = ((1 / 8, 0, 1 / 4), (3 / 8, 0, 3 / 4), (1 / 4, 1 / 8, 0), (3 / 4, 3 / 8, 0),
+               (0, 1 / 4, 1 / 8), (0, 3 / 4, 3 / 8), (7 / 8, 0, 3 / 4), (5 / 8, 0, 1 / 4),
+               (3 / 4, 7 / 8, 0), (1 / 4, 5 / 8, 0), (0, 3 / 4, 7 / 8), (0, 1 / 4, 5 / 8))
+        tovec = lambda x: np.dot(invlatt, x)
+        # this is a reduced version of pyrope: just the Mg (24c sites in 230)
+        pyropeMg = crystal.Crystal(alatt, [[vec(w) for w in uMg for vec in (tovec,)]], ['Mg'])
+        sitelist = pyropeMg.sitelist(chem)
+        jumpnetwork = pyropeMg.jumpnetwork(chem, cutoff)
+        GF = GFcalc.GFCrystalcalc(pyropeMg, chem, sitelist, jumpnetwork)
+        GF.SetRates(np.ones(1), np.zeros(1), np.ones(1), np.zeros(1))  # simple tracer
+        D0 = 0.0625*np.eye(3)
+        D = GF.D
+        self.assertTrue(np.allclose(D0, D),
+                        msg='Diffusivity does not match?\n{}\n!=\n{}'.format(D0,D))
+        self.assertTrue(False)
+
