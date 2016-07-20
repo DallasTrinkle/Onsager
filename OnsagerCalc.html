@@ -474,7 +474,7 @@ for the representatives. (&#8220;populating&#8221; the full set of dipoles)</p>
 
 <dl class="class">
 <dt id="OnsagerCalc.VacancyMediated">
-<em class="property">class </em><code class="descclassname">OnsagerCalc.</code><code class="descname">VacancyMediated</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nthermo=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">OnsagerCalc.</code><code class="descname">VacancyMediated</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nthermo=0</em>, <em>NGFmax=4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class to compute vacancy-mediated solute transport coefficients, specifically
 L_vv (vacancy diffusion), L_ss (solute), and L_sv (off-diagonal). As part of that,
 it determines <em>what</em> quantities are needed as inputs in order to perform this calculation.</p>
@@ -483,6 +483,12 @@ storage in HDF5 format.</p>
 <p>Requires a crystal, chemical identity of vacancy, list of symmetry-equivalent
 sites for that chemistry, and a jumpnetwork for the vacancy. The thermodynamic
 range (number of &#8220;shells&#8221; &#8211; see <code class="docutils literal"><span class="pre">crystalStars.StarSet</span></code> for precise definition).</p>
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.GFcalculator">
+<code class="descname">GFcalculator</code><span class="sig-paren">(</span><em>NGFmax=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.GFcalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.GFcalculator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the GF calculator; create a new one if NGFmax is being changed</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="OnsagerCalc.VacancyMediated.Lij">
 <code class="descname">Lij</code><span class="sig-paren">(</span><em>bFV</em>, <em>bFS</em>, <em>bFSV</em>, <em>bFT0</em>, <em>bFT1</em>, <em>bFT2</em>, <em>large_om2=100000000.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.Lij"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.Lij" title="Permalink to this definition">¶</a></dt>
@@ -527,7 +533,7 @@ and hash function.</p>
 
 <dl class="method">
 <dt id="OnsagerCalc.VacancyMediated.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nthermo=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nthermo=0</em>, <em>NGFmax=4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create our diffusion calculator for a given crystal structure, chemical identity,
 jumpnetwork (for the vacancy) and thermodynamic shell.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -539,6 +545,8 @@ jumpnetwork (for the vacancy) and thermodynamic shell.</p>
 <li><strong>chem</strong> &#8211; index identifying the diffusing species</li>
 <li><strong>sitelist</strong> &#8211; list, grouped into Wyckoff common positions, of unique sites</li>
 <li><strong>jumpnetwork</strong> &#8211; list of unique transitions as lists of ((i,j), dx)</li>
+<li><strong>Nthermo</strong> &#8211; range of thermodynamic interaction (in successive jumpnetworks)</li>
+<li><strong>NGFmax</strong> &#8211; parameter controlling k-point density of GF calculator; 4 seems reasonably accurate</li>
 </ul>
 </td>
 </tr>
@@ -572,6 +580,12 @@ jumpnetwork (for the vacancy) and thermodynamic shell.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.VacancyMediated.clearcache">
+<code class="descname">clearcache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.clearcache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.clearcache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear out the GF cache values</p>
 </dd></dl>
 
 <dl class="method">

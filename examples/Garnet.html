@@ -1,0 +1,878 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Garnet correlation coefficients &mdash; Onsager 1.2 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Onsager 1.2 documentation" href="../index.html"/>
+        <link rel="up" title="Notebooks" href="../notebooks.html"/>
+        <link rel="prev" title="Fe-C diffusion and elastodiffusivity" href="Fe-C.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Onsager
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#support">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crystal.html">Crystal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supercell.html">Supercell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PowerExpansion.html">PowerExpansion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GFcalc.html">GFcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OnsagerCalc.html">OnsagerCalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../automator.html">Automator</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../notebooks.html">Notebooks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Fe-C.html">Fe-C diffusion and elastodiffusivity</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Garnet correlation coefficients</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Onsager</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../notebooks.html">Notebooks</a> &raquo;</li>
+      
+    <li>Garnet correlation coefficients</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/examples/Garnet.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput > div,
+div.nbinput div[class^=highlight],
+div.nbinput div[class^=highlight] pre,
+div.nboutput,
+div.nboutput > div,
+div.nboutput div[class^=highlight],
+div.nboutput div[class^=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class^=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput > :first-child pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput > :first-child pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput > :first-child[class^=highlight],
+div.nboutput > :first-child[class^=highlight],
+div.nboutput > :first-child {
+    min-width: 11ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+
+/* input/output area */
+div.nbinput > :nth-child(2)[class^=highlight],
+div.nboutput > :nth-child(2),
+div.nboutput > :nth-child(2)[class^=highlight] {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+
+/* input area */
+div.nbinput > :nth-child(2)[class^=highlight] {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput  > :nth-child(2).stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-bold { font-weight: bold; }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="Garnet-correlation-coefficients">
+<h1>Garnet correlation coefficients<a class="headerlink" href="#Garnet-correlation-coefficients" title="Permalink to this headline">¶</a></h1>
+<p>Comparing to correlation coefficients from William D. Carlson and Clark
+R. Wilson, Phys Chem Minerals <strong>43</strong>, 363-369 (2016)
+<a class="reference external" href="http://dx.doi.org/10.1007/s00269-016-0800-2">doi:10.1007/s00269-016-0800-2</a></p>
+<p>Garnet structure includes pyrope, which we use as our example structure,
+with space group 230 (Ia3d) with stoichiometry Mg3Al2Si3O12. The
+occupied <a class="reference external" href="http://www.cryst.ehu.es/cgi-bin/cryst/programs/nph-wp-list?gnum=230">Wyckoff
+positions</a>
+for this are (lattice constant <span class="math">\(a_0\)</span>=1.1459 nm):</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="25%" />
+<col width="45%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Wykcoff site</th>
+<th class="head">chemistry</th>
+<th class="head">position</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>24c</td>
+<td>Mg</td>
+<td>1/8 0 1/4</td>
+</tr>
+<tr class="row-odd"><td>16a</td>
+<td>Al</td>
+<td>0 0 0</td>
+</tr>
+<tr class="row-even"><td>24d</td>
+<td>Si</td>
+<td>3/8 0 1/4</td>
+</tr>
+<tr class="row-odd"><td>96h</td>
+<td>O</td>
+<td>.03284 .05014 .65330</td>
+</tr>
+</tbody>
+</table>
+<p>Data from G. V. Gibbs and J. V. Smith, &#8220;Refinement of the crystal
+structure of synthetic pyrope.&#8221; American Mineralogist <strong>50</strong> 2023-2039
+(1965), <a class="reference external" href="http://rruff.info/doclib/am/vol50/AM50_2023.pdf">PDF</a>.</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>import sys
+sys.path.extend([&#39;../&#39;])
+import numpy as np
+import onsager.crystal as crystal
+import onsager.OnsagerCalc as onsager
+</pre></div>
+</div>
+</div>
+<p>Create garnet crystal (lattice constant in nm). Wyckoff positions cut
+and pasted from Bilbao crystallographic server.</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span># a0 = 1.1459
+# alatt = a0*np.eye(3)
+a0 = 1.
+alatt = a0*np.array([[-0.5,0.5,0.5],[0.5,-0.5,0.5],[0.5,0.5,-0.5]])
+invlatt = np.array([[0,1,1],[1,0,1],[1,1,0]])
+x,y,z = (.03284,.05014,.65330)
+uMg = ((1/8,0,1/4),(3/8,0,3/4),(1/4,1/8,0),(3/4,3/8,0),
+       (0,1/4,1/8),(0,3/4,3/8),(7/8,0,3/4),(5/8,0,1/4),
+       (3/4,7/8,0),(1/4,5/8,0),(0,3/4,7/8),(0,1/4,5/8))
+uAl = ((0,0,0),(1/2,0,1/2),(0,1/2,1/2),(1/2,1/2,0),
+       (3/4,1/4,1/4),(3/4,3/4,3/4),(1/4,1/4,3/4),(1/4,3/4,1/4))
+uSi = ((3/8,0,1/4),(1/8,0,3/4),(1/4,3/8,0),(3/4,1/8,0),
+       (0,1/4,3/8),(0,3/4,1/8),(3/4,5/8,0),(3/4,3/8,1/2),
+       (1/8,1/2,1/4),(7/8,0,1/4),(0,1/4,7/8),(1/2,1/4,1/8))
+uO = ((x,y,z),(-x+1/2,-y,z+1/2),(-x,y+1/2,-z+1/2),(x+1/2,-y+1/2,-z),
+      (z,x,y),(z+1/2,-x+1/2,-y),(-z+1/2,-x,y+1/2),(-z,x+1/2,-y+1/2),
+      (y,z,x),(-y,z+1/2,-x+1/2),(y+1/2,-z+1/2,-x),(-y+1/2,-z,x+1/2),
+      (y+3/4,x+1/4,-z+1/4),(-y+3/4,-x+3/4,-z+3/4),(y+1/4,-x+1/4,z+3/4),(-y+1/4,x+3/4,z+1/4),
+      (x+3/4,z+1/4,-y+1/4),(-x+1/4,z+3/4,y+1/4),(-x+3/4,-z+3/4,-y+3/4),(x+1/4,-z+1/4,y+3/4),
+      (z+3/4,y+1/4,-x+1/4),(z+1/4,-y+1/4,x+3/4),(-z+1/4,y+3/4,x+1/4),(-z+3/4,-y+3/4,-x+3/4),
+      (-x,-y,-z),(x+1/2,y,-z+1/2),(x,-y+1/2,z+1/2),(-x+1/2,y+1/2,z),
+      (-z,-x,-y),(-z+1/2,x+1/2,y),(z+1/2,x,-y+1/2),(z,-x+1/2,y+1/2),
+      (-y,-z,-x),(y,-z+1/2,x+1/2),(-y+1/2,z+1/2,x),(y+1/2,z,-x+1/2),
+      (-y+1/4,-x+3/4,z+3/4),(y+1/4,x+1/4,z+1/4),(-y+3/4,x+3/4,-z+1/4),(y+3/4,-x+1/4,-z+3/4),
+      (-x+1/4,-z+3/4,y+3/4),(x+3/4,-z+1/4,-y+3/4),(x+1/4,z+1/4,y+1/4),(-x+3/4,z+3/4,-y+1/4),
+      (-z+1/4,-y+3/4,x+3/4),(-z+3/4,y+3/4,-x+1/4),(z+3/4,-y+1/4,-x+3/4),(z+1/4,y+1/4,x+1/4))
+# tovec = lambda x: np.array(x)
+# tovec2 = lambda x: np.array((x[0]+1/2,x[1]+1/2,x[2]+1/2))
+tovec = lambda x: np.dot(invlatt, x)
+pyrope = crystal.Crystal(alatt, [[vec(w) for w in ulist for vec in (tovec,)]
+                                 for ulist in (uMg, uAl, uSi, uO)],
+                         [&#39;Mg&#39;,&#39;Al&#39;,&#39;Si&#39;,&#39;O&#39;])
+# print(pyrope)
+</pre></div>
+</div>
+</div>
+<p>Next, we construct a <em>diffuser</em> based on vacancies for our Mg ion. We
+need to create a <code class="docutils literal"><span class="pre">sitelist</span></code> (which will be the Wyckoff positions) and
+a <code class="docutils literal"><span class="pre">jumpnetwork</span></code> for the transitions between the sites. There are tags
+that correspond to the unique states and transitions in the diffuser.
+The first cutoff is <span class="math">\(\sim 0.31a_0\)</span>, but that connects half of the
+Mg cation sites to each other; increasing the cutoff to
+<span class="math">\(\sim 0.51a_0\)</span> introduces a second network that completes the
+connections.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>chem = 0  # 0 is the index corresponding to our Mg atom in the crystal
+cutoff = 0.31*a0  # had been 0.51*a0
+sitelist = pyrope.sitelist(chem)
+jumpnetwork = pyrope.jumpnetwork(chem, cutoff)
+Mgdiffuser = onsager.VacancyMediated(pyrope, chem, sitelist, jumpnetwork, 1)
+print(Mgdiffuser)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+Diffuser for atom 0 (Mg), Nthermo=1
+#Lattice:
+  a1 = [-0.5  0.5  0.5]
+  a2 = [ 0.5 -0.5  0.5]
+  a3 = [ 0.5  0.5 -0.5]
+#Basis:
+  (Mg) 0.0 = [ 0.25   0.375  0.125]
+  (Mg) 0.1 = [ 0.75   0.125  0.375]
+  (Mg) 0.2 = [ 0.125  0.25   0.375]
+  (Mg) 0.3 = [ 0.375  0.75   0.125]
+  (Mg) 0.4 = [ 0.375  0.125  0.25 ]
+  (Mg) 0.5 = [ 0.125  0.375  0.75 ]
+  (Mg) 0.6 = [ 0.75   0.625  0.875]
+  (Mg) 0.7 = [ 0.25   0.875  0.625]
+  (Mg) 0.8 = [ 0.875  0.75   0.625]
+  (Mg) 0.9 = [ 0.625  0.25   0.875]
+  (Mg) 0.10 = [ 0.625  0.875  0.75 ]
+  (Mg) 0.11 = [ 0.875  0.625  0.25 ]
+  (Al) 1.0 = [ 0.  0.  0.]
+  (Al) 1.1 = [ 0.5  0.   0.5]
+  (Al) 1.2 = [ 0.   0.5  0.5]
+  (Al) 1.3 = [ 0.5  0.5  0. ]
+  (Al) 1.4 = [ 0.5  0.   0. ]
+  (Al) 1.5 = [ 0.5  0.5  0.5]
+  (Al) 1.6 = [ 0.   0.   0.5]
+  (Al) 1.7 = [ 0.   0.5  0. ]
+  (Si) 2.0 = [ 0.25   0.625  0.375]
+  (Si) 2.1 = [ 0.75   0.875  0.125]
+  (Si) 2.2 = [ 0.375  0.25   0.625]
+  (Si) 2.3 = [ 0.125  0.75   0.875]
+  (Si) 2.4 = [ 0.625  0.375  0.25 ]
+  (Si) 2.5 = [ 0.875  0.125  0.75 ]
+  (Si) 2.6 = [ 0.625  0.75   0.375]
+  (Si) 2.7 = [ 0.875  0.25   0.125]
+  (Si) 2.8 = [ 0.75   0.375  0.625]
+  (Si) 2.9 = [ 0.25   0.125  0.875]
+  (Si) 2.10 = [ 0.125  0.875  0.25 ]
+  (Si) 2.11 = [ 0.375  0.625  0.75 ]
+  (O) 3.0 = [ 0.70344  0.68614  0.08298]
+  (O) 3.1 = [ 0.10316  0.62046  0.41702]
+  (O) 3.2 = [ 0.39684  0.81386  0.5173 ]
+  (O) 3.3 = [ 0.79656  0.87954  0.9827 ]
+  (O) 3.4 = [ 0.08298  0.70344  0.68614]
+  (O) 3.5 = [ 0.41702  0.10316  0.62046]
+  (O) 3.6 = [ 0.5173   0.39684  0.81386]
+  (O) 3.7 = [ 0.9827   0.79656  0.87954]
+  (O) 3.8 = [ 0.68614  0.08298  0.70344]
+  (O) 3.9 = [ 0.62046  0.41702  0.10316]
+  (O) 3.10 = [ 0.81386  0.5173   0.39684]
+  (O) 3.11 = [ 0.87954  0.9827   0.79656]
+  (O) 3.12 = [ 0.87954  0.39684  0.08298]
+  (O) 3.13 = [ 0.81386  0.79656  0.41702]
+  (O) 3.14 = [ 0.62046  0.70344  0.5173 ]
+  (O) 3.15 = [ 0.68614  0.10316  0.9827 ]
+  (O) 3.16 = [ 0.10316  0.9827   0.68614]
+  (O) 3.17 = [ 0.70344  0.5173   0.62046]
+  (O) 3.18 = [ 0.79656  0.41702  0.81386]
+  (O) 3.19 = [ 0.39684  0.08298  0.87954]
+  (O) 3.20 = [ 0.5173   0.62046  0.70344]
+  (O) 3.21 = [ 0.9827   0.68614  0.10316]
+  (O) 3.22 = [ 0.08298  0.87954  0.39684]
+  (O) 3.23 = [ 0.41702  0.81386  0.79656]
+  (O) 3.24 = [ 0.29656  0.31386  0.91702]
+  (O) 3.25 = [ 0.89684  0.37954  0.58298]
+  (O) 3.26 = [ 0.60316  0.18614  0.4827 ]
+  (O) 3.27 = [ 0.20344  0.12046  0.0173 ]
+  (O) 3.28 = [ 0.91702  0.29656  0.31386]
+  (O) 3.29 = [ 0.58298  0.89684  0.37954]
+  (O) 3.30 = [ 0.4827   0.60316  0.18614]
+  (O) 3.31 = [ 0.0173   0.20344  0.12046]
+  (O) 3.32 = [ 0.31386  0.91702  0.29656]
+  (O) 3.33 = [ 0.37954  0.58298  0.89684]
+  (O) 3.34 = [ 0.18614  0.4827   0.60316]
+  (O) 3.35 = [ 0.12046  0.0173   0.20344]
+  (O) 3.36 = [ 0.12046  0.60316  0.91702]
+  (O) 3.37 = [ 0.18614  0.20344  0.58298]
+  (O) 3.38 = [ 0.37954  0.29656  0.4827 ]
+  (O) 3.39 = [ 0.31386  0.89684  0.0173 ]
+  (O) 3.40 = [ 0.89684  0.0173   0.31386]
+  (O) 3.41 = [ 0.29656  0.4827   0.37954]
+  (O) 3.42 = [ 0.20344  0.58298  0.18614]
+  (O) 3.43 = [ 0.60316  0.91702  0.12046]
+  (O) 3.44 = [ 0.4827   0.37954  0.29656]
+  (O) 3.45 = [ 0.0173   0.31386  0.89684]
+  (O) 3.46 = [ 0.91702  0.12046  0.60316]
+  (O) 3.47 = [ 0.58298  0.18614  0.20344]
+vacancy configurations:
+v:+0.250,+0.375,+0.125
+solute configurations:
+s:+0.250,+0.375,+0.125
+solute-vacancy configurations:
+s:+0.375,+0.125,+0.250-v:+0.750,+0.125,+0.375
+omega0 jumps:
+omega0:v:+0.625,+0.250,+0.875^v:+0.250,-0.125,+0.625
+omega1 jumps:
+omega1:s:+0.875,+0.625,+0.250-v:+0.625,+0.250,-0.125^v:+0.250,-0.125,-0.375
+omega1:s:+0.750,+0.625,+0.875-v:+0.625,+0.250,+0.875^v:+0.250,-0.125,+0.625
+omega1:s:+0.625,+0.875,+0.750-v:+0.625,+1.250,+0.875^v:+0.250,+0.875,+0.625
+omega2 jumps:
+omega2:s:+0.250,+0.875,+0.625-v:+0.625,+1.250,+0.875^s:+0.625,+0.250,+0.875-v:+0.250,-0.125,+0.625
+
+</pre></div></div>
+</div>
+<p>Quick analysis on our jump network:</p>
+<ol class="arabic simple">
+<li>What is the connectivity, <span class="math">\(Z\)</span>?</li>
+<li>What is the individual contribution to
+<span class="math">\(\mathbf{\delta x}\otimes\mathbf{\delta x}\)</span>? And 1/3 Tr (which
+will be the symmetrized contribution)?</li>
+<li>What is the squared magnitude <span class="math">\(\delta x^2\)</span>?</li>
+</ol>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>for jlist in jumpnetwork:
+    Z = 0
+    dx2 = np.zeros((3,3))
+    for (i,j), dx in jlist:
+        if i==0:
+            Z += 1
+            dx2 += np.outer(dx,dx)
+    print(&quot;coordination number:&quot;, Z)
+    print(dx2)
+    print(&quot;1/3 Tr dx dx:&quot;, dx2.trace()/3)
+    print(&quot;dx^2:&quot;, np.dot(dx,dx))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+coordination number: 4
+[[ 0.0625   0.       0.     ]
+ [ 0.       0.15625 -0.125  ]
+ [ 0.      -0.125    0.15625]]
+1/3 Tr dx dx: 0.125
+dx^2: 0.09375
+</pre></div></div>
+</div>
+<p>Next, we assemble our data: the energies and prefactors, for a VMg in
+pyrope for our <em>representative</em> states and transitions: these are the
+first states in the lists, which are also identified by the tags above.
+As we are computing a tracer, we make the choice to set
+<span class="math">\(\nu_0 = 1/Z\)</span> where <span class="math">\(Z=4\)</span> is the coordination number.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>nu0 = 0.25
+Etrans = 0.
+# we don&#39;t need to use the tags, since there&#39;s only one site and jump type, and
+# we want to build a tracer.
+Mgthermodict = {&#39;preV&#39;: np.ones(len(sitelist)),
+                &#39;eneV&#39;: np.zeros(len(sitelist)),
+                &#39;preT0&#39;: nu0*np.ones(len(jumpnetwork)),
+                &#39;eneT0&#39;: Etrans*np.ones(len(jumpnetwork))}
+Mgthermodict.update(Mgdiffuser.maketracerpreene(**Mgthermodict))
+for k,v in Mgthermodict.items():
+    print(&#39;{}: {}&#39;.format(k, v))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+eneSV: [ 0.]
+eneT0: [ 0.]
+preS: [ 1.]
+preT1: [ 0.25  0.25  0.25]
+preSV: [ 1.]
+preT0: [ 0.25]
+eneV: [ 0.]
+eneT2: [ 0.]
+eneS: [ 0.]
+preV: [ 1.]
+eneT1: [ 0.  0.  0.]
+preT2: [ 0.25]
+</pre></div></div>
+</div>
+<p>We compute the Onsager matrices, and look at
+<span class="math">\(-L_\text{ss}/L_\text{sv}\)</span> to get our correlation coefficient.</p>
+<p><em>Note:</em> we can define <span class="math">\(f\)</span> (for our tracer) as the ratio of
+<span class="math">\(L_\text{ss}\)</span> to
+<span class="math">\(Z (\delta x)^2 w_2 c_\text{v}c_\text{s}/6 = \frac{1}{16}\nu_0 a_0^2\)</span>
+in this case, the same as what we get for <span class="math">\(L_\text{vv}\)</span> and
+<span class="math">\(-L_\text{sv}\)</span>.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>Lvv, Lss, Lsv, L1vv = Mgdiffuser.Lij(*Mgdiffuser.preene2betafree(1, **Mgthermodict))
+print(Lvv)
+print(Lss)
+print(Lsv)
+print(L1vv)
+print(&quot;Correlation coefficient:&quot;, -Lss[0,0]/Lsv[0,0])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+[[ 0.015625 -0.       -0.      ]
+ [-0.        0.015625 -0.      ]
+ [-0.       -0.        0.015625]]
+[[ 0.00585895  0.          0.        ]
+ [ 0.          0.00585895  0.        ]
+ [ 0.          0.          0.00585895]]
+[[-0.015625  0.        0.      ]
+ [ 0.       -0.015625  0.      ]
+ [ 0.        0.       -0.015625]]
+[[ -1.17108470e-34   0.00000000e+00   0.00000000e+00]
+ [  0.00000000e+00  -1.17108470e-34   0.00000000e+00]
+ [  0.00000000e+00   0.00000000e+00  -1.17108470e-34]]
+Correlation coefficient: 0.374972670783
+</pre></div></div>
+</div>
+<p>Compare with tabulated GF data from Carlson and Wilson paper. They use
+the notation <span class="math">\((l,m,n)\)</span> for a <span class="math">\(\mathbf{\delta x}\)</span> vector that
+is <span class="math">\(a_0(l\hat x+m\hat y+n\hat z)/8\)</span>. We will need to find a
+corresponding site that lands at that displacement from our origin site.</p>
+<p>Unfortunately, it looks like in two cases ((800), (444)) there are two
+distinct sites that are mapped in that displacement vector, which have
+different GF values; the CW reported values appear to be the averaged
+values. In two other cases, ((640), (420)) the reported values are half
+of what the computed values are here.</p>
+<p>As Carlson and Wilson used a stochastic approach to compute their GF
+values, all of their other data has errors <span class="math">\(\sim 10^{-4}\)</span>.</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span># tabulated data from paper
+CarlsonWilsonGFdata = \
+{(0,0,0): 2.30796022, (2,1,1): 1.30807261, (3,3,2): 0.80669536,
+ (4,2,0): 0.40469085, (4,4,4): 0.50242046, (5,3,2): 0.56195744,
+ (6,1,1): 0.56071092, (6,4,0): 0.22460654, (6,5,3): 0.42028488,
+ (6,5,5): 0.40137897, (7,2,1): 0.44437878, (8,0,0): 0.41938675}
+</pre></div>
+</div>
+</div>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>print(&#39;CW index\tdx match\tGF (FT eval)\tGF(CW stoch.)\terror&#39;)
+GF = Mgdiffuser.GFcalc  # get our GF calculator; should already have rates set
+basis = pyrope.basis[chem]
+x0 = np.dot(alatt, basis[0])
+for vec,gCW in CarlsonWilsonGFdata.items():
+    dx0 = np.array(vec,dtype=float)/8
+    nmatch, Gave, Gmatch = 0, 0, {}
+    for g in pyrope.G:
+        dx = np.dot(g.cartrot, dx0)
+        j = pyrope.cart2pos(x0+dx)[1]
+        if j is not None and j[0]==chem and j[1]&lt;6:
+            G = GF(0, j[1], dx)
+            Gmatch[tuple((8*dx).astype(int))] = G
+            nmatch += 1
+            Gave += G
+    Gave /= nmatch
+    for t,G in Gmatch.items():
+        print(&#39;{}\t{}\t{:.12f}\t{:.8f}\t{:.4e}&#39;.format(vec, t, -G, gCW, abs(G+gCW)))
+    print(&#39;{}\taverage value\t{:.12f}\t{:.8f}\t{:.4e}&#39;.format(vec, -Gave, gCW, abs(Gave+gCW)))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+CW index        dx match        GF (FT eval)    GF(CW stoch.)   error
+(8, 0, 0)       (0, 0, -8)      0.427361034009  0.41938675      7.9743e-03
+(8, 0, 0)       (8, 0, 0)       0.403566247455  0.41938675      1.5821e-02
+(8, 0, 0)       (0, 8, 0)       0.427361034009  0.41938675      7.9743e-03
+(8, 0, 0)       (-8, 0, 0)      0.403566247455  0.41938675      1.5821e-02
+(8, 0, 0)       (0, -8, 0)      0.427361034009  0.41938675      7.9743e-03
+(8, 0, 0)       (0, 0, 8)       0.427361034009  0.41938675      7.9743e-03
+(8, 0, 0)       average value   0.419429438491  0.41938675      4.2688e-05
+(6, 1, 1)       (-1, 6, 1)      0.560766700022  0.56071092      5.5780e-05
+(6, 1, 1)       (-1, -6, -1)    0.560766700022  0.56071092      5.5780e-05
+(6, 1, 1)       (1, 1, 6)       0.560766700022  0.56071092      5.5780e-05
+(6, 1, 1)       (1, -1, -6)     0.560766700022  0.56071092      5.5780e-05
+(6, 1, 1)       average value   0.560766700022  0.56071092      5.5780e-05
+(3, 3, 2)       (-3, 3, -2)     0.806767995595  0.80669536      7.2636e-05
+(3, 3, 2)       (3, -2, 3)      0.806767995595  0.80669536      7.2636e-05
+(3, 3, 2)       (3, 2, -3)      0.806767995595  0.80669536      7.2636e-05
+(3, 3, 2)       (-3, -3, 2)     0.806767995595  0.80669536      7.2636e-05
+(3, 3, 2)       average value   0.806767995595  0.80669536      7.2636e-05
+(2, 1, 1)       (-1, -2, 1)     1.308081132926  1.30807261      8.5229e-06
+(2, 1, 1)       (-1, 2, -1)     1.308081132926  1.30807261      8.5229e-06
+(2, 1, 1)       (1, 1, -2)      1.308081132926  1.30807261      8.5229e-06
+(2, 1, 1)       (1, -1, 2)      1.308081132926  1.30807261      8.5229e-06
+(2, 1, 1)       average value   1.308081132926  1.30807261      8.5229e-06
+(6, 5, 3)       (3, -6, 5)      0.420386782427  0.42028488      1.0190e-04
+(6, 5, 3)       (-3, -5, 6)     0.420386782427  0.42028488      1.0190e-04
+(6, 5, 3)       (5, -3, -6)     0.420386782427  0.42028488      1.0190e-04
+(6, 5, 3)       (-3, 5, -6)     0.420386782427  0.42028488      1.0190e-04
+(6, 5, 3)       (-5, -6, -3)    0.420386782427  0.42028488      1.0190e-04
+(6, 5, 3)       (-5, 6, 3)      0.420386782427  0.42028488      1.0190e-04
+(6, 5, 3)       (5, 3, 6)       0.420386782427  0.42028488      1.0190e-04
+(6, 5, 3)       (3, 6, -5)      0.420386782427  0.42028488      1.0190e-04
+(6, 5, 3)       average value   0.420386782427  0.42028488      1.0190e-04
+(6, 4, 0)       (-6, 0, 4)      0.449091350780  0.22460654      2.2448e-01
+(6, 4, 0)       (6, 4, 0)       0.449091350780  0.22460654      2.2448e-01
+(6, 4, 0)       (6, -4, 0)      0.449091350780  0.22460654      2.2448e-01
+(6, 4, 0)       (-6, 0, -4)     0.449091350780  0.22460654      2.2448e-01
+(6, 4, 0)       average value   0.449091350780  0.22460654      2.2448e-01
+(0, 0, 0)       (0, 0, 0)       2.308081141615  2.30796022      1.2092e-04
+(0, 0, 0)       average value   2.308081141615  2.30796022      1.2092e-04
+(4, 2, 0)       (2, 0, -4)      0.809394258097  0.40469085      4.0470e-01
+(4, 2, 0)       (-2, -4, 0)     0.809394258097  0.40469085      4.0470e-01
+(4, 2, 0)       (-2, 4, 0)      0.809394258097  0.40469085      4.0470e-01
+(4, 2, 0)       (2, 0, 4)       0.809394258097  0.40469085      4.0470e-01
+(4, 2, 0)       average value   0.809394258097  0.40469085      4.0470e-01
+(5, 3, 2)       (-5, 2, -3)     0.561961239416  0.56195744      3.7994e-06
+(5, 3, 2)       (3, 2, 5)       0.561961239416  0.56195744      3.7994e-06
+(5, 3, 2)       (3, -2, -5)     0.561961239416  0.56195744      3.7994e-06
+(5, 3, 2)       (-5, -2, 3)     0.561961239416  0.56195744      3.7994e-06
+(5, 3, 2)       (5, 3, -2)      0.561961239416  0.56195744      3.7994e-06
+(5, 3, 2)       (5, -3, 2)      0.561961239416  0.56195744      3.7994e-06
+(5, 3, 2)       (-3, -5, -2)    0.561961239416  0.56195744      3.7994e-06
+(5, 3, 2)       (-3, 5, 2)      0.561961239416  0.56195744      3.7994e-06
+(5, 3, 2)       average value   0.561961239416  0.56195744      3.7994e-06
+(7, 2, 1)       (-1, -2, -7)    0.444350262895  0.44437878      2.8517e-05
+(7, 2, 1)       (1, 7, 2)       0.444350262895  0.44437878      2.8517e-05
+(7, 2, 1)       (7, 2, -1)      0.444350262895  0.44437878      2.8517e-05
+(7, 2, 1)       (-7, 1, -2)     0.444350262895  0.44437878      2.8517e-05
+(7, 2, 1)       (-7, -1, 2)     0.444350262895  0.44437878      2.8517e-05
+(7, 2, 1)       (7, -2, 1)      0.444350262895  0.44437878      2.8517e-05
+(7, 2, 1)       (-1, 2, 7)      0.444350262895  0.44437878      2.8517e-05
+(7, 2, 1)       (1, -7, -2)     0.444350262895  0.44437878      2.8517e-05
+(7, 2, 1)       average value   0.444350262895  0.44437878      2.8517e-05
+(4, 4, 4)       (-4, 4, 4)      0.457297218361  0.50242046      4.5123e-02
+(4, 4, 4)       (-4, 4, -4)     0.547635344309  0.50242046      4.5215e-02
+(4, 4, 4)       (-4, -4, -4)    0.457297218361  0.50242046      4.5123e-02
+(4, 4, 4)       (4, 4, -4)      0.547635344309  0.50242046      4.5215e-02
+(4, 4, 4)       (-4, -4, 4)     0.547635344309  0.50242046      4.5215e-02
+(4, 4, 4)       (4, -4, -4)     0.457297218361  0.50242046      4.5123e-02
+(4, 4, 4)       (4, -4, 4)      0.547635344309  0.50242046      4.5215e-02
+(4, 4, 4)       (4, 4, 4)       0.457297218361  0.50242046      4.5123e-02
+(4, 4, 4)       average value   0.502466281335  0.50242046      4.5821e-05
+(6, 5, 5)       (-5, 6, -5)     0.401425331863  0.40137897      4.6362e-05
+(6, 5, 5)       (-5, -6, 5)     0.401425331863  0.40137897      4.6362e-05
+(6, 5, 5)       (5, -5, 6)      0.401425331863  0.40137897      4.6362e-05
+(6, 5, 5)       (5, 5, -6)      0.401425331863  0.40137897      4.6362e-05
+(6, 5, 5)       average value   0.401425331863  0.40137897      4.6362e-05
+</pre></div></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="Fe-C.html" class="btn btn-neutral" title="Fe-C diffusion and elastodiffusivity" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Dallas R. Trinkle.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

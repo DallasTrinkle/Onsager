@@ -1,0 +1,518 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Garnet correlation coefficients\n",
+    "Comparing to correlation coefficients from William D. Carlson and Clark R. Wilson, Phys Chem Minerals **43**, 363-369 (2016)\n",
+    "[doi:10.1007/s00269-016-0800-2](http://dx.doi.org/10.1007/s00269-016-0800-2)\n",
+    "\n",
+    "Garnet structure includes pyrope, which we use as our example structure, with space group 230 (Ia3d) with stoichiometry Mg<sub>3</sub>Al<sub>2</sub>Si<sub>3</sub>O<sub>12</sub>. The occupied [Wyckoff positions](http://www.cryst.ehu.es/cgi-bin/cryst/programs/nph-wp-list?gnum=230) for this are (lattice constant $a_0$=1.1459 nm):\n",
+    "\n",
+    "| Wykcoff site | chemistry | position |\n",
+    "|--------------|-----------|----------|\n",
+    "|24c           |Mg         |1/8 0 1/4 |\n",
+    "|16a           |Al         |0 0 0     |\n",
+    "|24d           |Si         |3/8 0 1/4 |\n",
+    "|96h           |O          |.03284 .05014 .65330|\n",
+    "\n",
+    "Data from G. V. Gibbs and J. V. Smith, \"Refinement of the crystal structure of synthetic pyrope.\" American Mineralogist **50** 2023-2039 (1965), [PDF](http://rruff.info/doclib/am/vol50/AM50_2023.pdf)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "import sys\n",
+    "sys.path.extend(['../'])\n",
+    "import numpy as np\n",
+    "import onsager.crystal as crystal\n",
+    "import onsager.OnsagerCalc as onsager"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Create garnet crystal (lattice constant in nm). Wyckoff positions cut and pasted from Bilbao crystallographic server."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "# a0 = 1.1459\n",
+    "# alatt = a0*np.eye(3)\n",
+    "a0 = 1.\n",
+    "alatt = a0*np.array([[-0.5,0.5,0.5],[0.5,-0.5,0.5],[0.5,0.5,-0.5]])\n",
+    "invlatt = np.array([[0,1,1],[1,0,1],[1,1,0]])\n",
+    "x,y,z = (.03284,.05014,.65330)\n",
+    "uMg = ((1/8,0,1/4),(3/8,0,3/4),(1/4,1/8,0),(3/4,3/8,0),\n",
+    "       (0,1/4,1/8),(0,3/4,3/8),(7/8,0,3/4),(5/8,0,1/4),\n",
+    "       (3/4,7/8,0),(1/4,5/8,0),(0,3/4,7/8),(0,1/4,5/8))\n",
+    "uAl = ((0,0,0),(1/2,0,1/2),(0,1/2,1/2),(1/2,1/2,0),\n",
+    "       (3/4,1/4,1/4),(3/4,3/4,3/4),(1/4,1/4,3/4),(1/4,3/4,1/4))\n",
+    "uSi = ((3/8,0,1/4),(1/8,0,3/4),(1/4,3/8,0),(3/4,1/8,0),\n",
+    "       (0,1/4,3/8),(0,3/4,1/8),(3/4,5/8,0),(3/4,3/8,1/2),\n",
+    "       (1/8,1/2,1/4),(7/8,0,1/4),(0,1/4,7/8),(1/2,1/4,1/8))\n",
+    "uO = ((x,y,z),(-x+1/2,-y,z+1/2),(-x,y+1/2,-z+1/2),(x+1/2,-y+1/2,-z),\n",
+    "      (z,x,y),(z+1/2,-x+1/2,-y),(-z+1/2,-x,y+1/2),(-z,x+1/2,-y+1/2),\n",
+    "      (y,z,x),(-y,z+1/2,-x+1/2),(y+1/2,-z+1/2,-x),(-y+1/2,-z,x+1/2),\n",
+    "      (y+3/4,x+1/4,-z+1/4),(-y+3/4,-x+3/4,-z+3/4),(y+1/4,-x+1/4,z+3/4),(-y+1/4,x+3/4,z+1/4),\n",
+    "      (x+3/4,z+1/4,-y+1/4),(-x+1/4,z+3/4,y+1/4),(-x+3/4,-z+3/4,-y+3/4),(x+1/4,-z+1/4,y+3/4),\n",
+    "      (z+3/4,y+1/4,-x+1/4),(z+1/4,-y+1/4,x+3/4),(-z+1/4,y+3/4,x+1/4),(-z+3/4,-y+3/4,-x+3/4),\n",
+    "      (-x,-y,-z),(x+1/2,y,-z+1/2),(x,-y+1/2,z+1/2),(-x+1/2,y+1/2,z),\n",
+    "      (-z,-x,-y),(-z+1/2,x+1/2,y),(z+1/2,x,-y+1/2),(z,-x+1/2,y+1/2),\n",
+    "      (-y,-z,-x),(y,-z+1/2,x+1/2),(-y+1/2,z+1/2,x),(y+1/2,z,-x+1/2),\n",
+    "      (-y+1/4,-x+3/4,z+3/4),(y+1/4,x+1/4,z+1/4),(-y+3/4,x+3/4,-z+1/4),(y+3/4,-x+1/4,-z+3/4),\n",
+    "      (-x+1/4,-z+3/4,y+3/4),(x+3/4,-z+1/4,-y+3/4),(x+1/4,z+1/4,y+1/4),(-x+3/4,z+3/4,-y+1/4),\n",
+    "      (-z+1/4,-y+3/4,x+3/4),(-z+3/4,y+3/4,-x+1/4),(z+3/4,-y+1/4,-x+3/4),(z+1/4,y+1/4,x+1/4))\n",
+    "# tovec = lambda x: np.array(x)\n",
+    "# tovec2 = lambda x: np.array((x[0]+1/2,x[1]+1/2,x[2]+1/2))\n",
+    "tovec = lambda x: np.dot(invlatt, x)\n",
+    "pyrope = crystal.Crystal(alatt, [[vec(w) for w in ulist for vec in (tovec,)] \n",
+    "                                 for ulist in (uMg, uAl, uSi, uO)], \n",
+    "                         ['Mg','Al','Si','O'])\n",
+    "# print(pyrope)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Next, we construct a *diffuser* based on vacancies for our Mg ion. We need to create a `sitelist` (which will be the Wyckoff positions) and a `jumpnetwork` for the transitions between the sites. There are tags that correspond to the unique states and transitions in the diffuser. The first cutoff is $\\sim 0.31a_0$, but that connects half of the Mg cation sites to each other; increasing the cutoff to $\\sim 0.51a_0$ introduces a second network that completes the connections."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Diffuser for atom 0 (Mg), Nthermo=1\n",
+      "#Lattice:\n",
+      "  a1 = [-0.5  0.5  0.5]\n",
+      "  a2 = [ 0.5 -0.5  0.5]\n",
+      "  a3 = [ 0.5  0.5 -0.5]\n",
+      "#Basis:\n",
+      "  (Mg) 0.0 = [ 0.25   0.375  0.125]\n",
+      "  (Mg) 0.1 = [ 0.75   0.125  0.375]\n",
+      "  (Mg) 0.2 = [ 0.125  0.25   0.375]\n",
+      "  (Mg) 0.3 = [ 0.375  0.75   0.125]\n",
+      "  (Mg) 0.4 = [ 0.375  0.125  0.25 ]\n",
+      "  (Mg) 0.5 = [ 0.125  0.375  0.75 ]\n",
+      "  (Mg) 0.6 = [ 0.75   0.625  0.875]\n",
+      "  (Mg) 0.7 = [ 0.25   0.875  0.625]\n",
+      "  (Mg) 0.8 = [ 0.875  0.75   0.625]\n",
+      "  (Mg) 0.9 = [ 0.625  0.25   0.875]\n",
+      "  (Mg) 0.10 = [ 0.625  0.875  0.75 ]\n",
+      "  (Mg) 0.11 = [ 0.875  0.625  0.25 ]\n",
+      "  (Al) 1.0 = [ 0.  0.  0.]\n",
+      "  (Al) 1.1 = [ 0.5  0.   0.5]\n",
+      "  (Al) 1.2 = [ 0.   0.5  0.5]\n",
+      "  (Al) 1.3 = [ 0.5  0.5  0. ]\n",
+      "  (Al) 1.4 = [ 0.5  0.   0. ]\n",
+      "  (Al) 1.5 = [ 0.5  0.5  0.5]\n",
+      "  (Al) 1.6 = [ 0.   0.   0.5]\n",
+      "  (Al) 1.7 = [ 0.   0.5  0. ]\n",
+      "  (Si) 2.0 = [ 0.25   0.625  0.375]\n",
+      "  (Si) 2.1 = [ 0.75   0.875  0.125]\n",
+      "  (Si) 2.2 = [ 0.375  0.25   0.625]\n",
+      "  (Si) 2.3 = [ 0.125  0.75   0.875]\n",
+      "  (Si) 2.4 = [ 0.625  0.375  0.25 ]\n",
+      "  (Si) 2.5 = [ 0.875  0.125  0.75 ]\n",
+      "  (Si) 2.6 = [ 0.625  0.75   0.375]\n",
+      "  (Si) 2.7 = [ 0.875  0.25   0.125]\n",
+      "  (Si) 2.8 = [ 0.75   0.375  0.625]\n",
+      "  (Si) 2.9 = [ 0.25   0.125  0.875]\n",
+      "  (Si) 2.10 = [ 0.125  0.875  0.25 ]\n",
+      "  (Si) 2.11 = [ 0.375  0.625  0.75 ]\n",
+      "  (O) 3.0 = [ 0.70344  0.68614  0.08298]\n",
+      "  (O) 3.1 = [ 0.10316  0.62046  0.41702]\n",
+      "  (O) 3.2 = [ 0.39684  0.81386  0.5173 ]\n",
+      "  (O) 3.3 = [ 0.79656  0.87954  0.9827 ]\n",
+      "  (O) 3.4 = [ 0.08298  0.70344  0.68614]\n",
+      "  (O) 3.5 = [ 0.41702  0.10316  0.62046]\n",
+      "  (O) 3.6 = [ 0.5173   0.39684  0.81386]\n",
+      "  (O) 3.7 = [ 0.9827   0.79656  0.87954]\n",
+      "  (O) 3.8 = [ 0.68614  0.08298  0.70344]\n",
+      "  (O) 3.9 = [ 0.62046  0.41702  0.10316]\n",
+      "  (O) 3.10 = [ 0.81386  0.5173   0.39684]\n",
+      "  (O) 3.11 = [ 0.87954  0.9827   0.79656]\n",
+      "  (O) 3.12 = [ 0.87954  0.39684  0.08298]\n",
+      "  (O) 3.13 = [ 0.81386  0.79656  0.41702]\n",
+      "  (O) 3.14 = [ 0.62046  0.70344  0.5173 ]\n",
+      "  (O) 3.15 = [ 0.68614  0.10316  0.9827 ]\n",
+      "  (O) 3.16 = [ 0.10316  0.9827   0.68614]\n",
+      "  (O) 3.17 = [ 0.70344  0.5173   0.62046]\n",
+      "  (O) 3.18 = [ 0.79656  0.41702  0.81386]\n",
+      "  (O) 3.19 = [ 0.39684  0.08298  0.87954]\n",
+      "  (O) 3.20 = [ 0.5173   0.62046  0.70344]\n",
+      "  (O) 3.21 = [ 0.9827   0.68614  0.10316]\n",
+      "  (O) 3.22 = [ 0.08298  0.87954  0.39684]\n",
+      "  (O) 3.23 = [ 0.41702  0.81386  0.79656]\n",
+      "  (O) 3.24 = [ 0.29656  0.31386  0.91702]\n",
+      "  (O) 3.25 = [ 0.89684  0.37954  0.58298]\n",
+      "  (O) 3.26 = [ 0.60316  0.18614  0.4827 ]\n",
+      "  (O) 3.27 = [ 0.20344  0.12046  0.0173 ]\n",
+      "  (O) 3.28 = [ 0.91702  0.29656  0.31386]\n",
+      "  (O) 3.29 = [ 0.58298  0.89684  0.37954]\n",
+      "  (O) 3.30 = [ 0.4827   0.60316  0.18614]\n",
+      "  (O) 3.31 = [ 0.0173   0.20344  0.12046]\n",
+      "  (O) 3.32 = [ 0.31386  0.91702  0.29656]\n",
+      "  (O) 3.33 = [ 0.37954  0.58298  0.89684]\n",
+      "  (O) 3.34 = [ 0.18614  0.4827   0.60316]\n",
+      "  (O) 3.35 = [ 0.12046  0.0173   0.20344]\n",
+      "  (O) 3.36 = [ 0.12046  0.60316  0.91702]\n",
+      "  (O) 3.37 = [ 0.18614  0.20344  0.58298]\n",
+      "  (O) 3.38 = [ 0.37954  0.29656  0.4827 ]\n",
+      "  (O) 3.39 = [ 0.31386  0.89684  0.0173 ]\n",
+      "  (O) 3.40 = [ 0.89684  0.0173   0.31386]\n",
+      "  (O) 3.41 = [ 0.29656  0.4827   0.37954]\n",
+      "  (O) 3.42 = [ 0.20344  0.58298  0.18614]\n",
+      "  (O) 3.43 = [ 0.60316  0.91702  0.12046]\n",
+      "  (O) 3.44 = [ 0.4827   0.37954  0.29656]\n",
+      "  (O) 3.45 = [ 0.0173   0.31386  0.89684]\n",
+      "  (O) 3.46 = [ 0.91702  0.12046  0.60316]\n",
+      "  (O) 3.47 = [ 0.58298  0.18614  0.20344]\n",
+      "vacancy configurations:\n",
+      "v:+0.250,+0.375,+0.125\n",
+      "solute configurations:\n",
+      "s:+0.250,+0.375,+0.125\n",
+      "solute-vacancy configurations:\n",
+      "s:+0.375,+0.125,+0.250-v:+0.750,+0.125,+0.375\n",
+      "omega0 jumps:\n",
+      "omega0:v:+0.625,+0.250,+0.875^v:+0.250,-0.125,+0.625\n",
+      "omega1 jumps:\n",
+      "omega1:s:+0.875,+0.625,+0.250-v:+0.625,+0.250,-0.125^v:+0.250,-0.125,-0.375\n",
+      "omega1:s:+0.750,+0.625,+0.875-v:+0.625,+0.250,+0.875^v:+0.250,-0.125,+0.625\n",
+      "omega1:s:+0.625,+0.875,+0.750-v:+0.625,+1.250,+0.875^v:+0.250,+0.875,+0.625\n",
+      "omega2 jumps:\n",
+      "omega2:s:+0.250,+0.875,+0.625-v:+0.625,+1.250,+0.875^s:+0.625,+0.250,+0.875-v:+0.250,-0.125,+0.625\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "chem = 0  # 0 is the index corresponding to our Mg atom in the crystal\n",
+    "cutoff = 0.31*a0  # had been 0.51*a0\n",
+    "sitelist = pyrope.sitelist(chem)\n",
+    "jumpnetwork = pyrope.jumpnetwork(chem, cutoff)\n",
+    "Mgdiffuser = onsager.VacancyMediated(pyrope, chem, sitelist, jumpnetwork, 1)\n",
+    "print(Mgdiffuser)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Quick analysis on our jump network:\n",
+    "\n",
+    "1. What is the connectivity, $Z$?\n",
+    "2. What is the individual contribution to $\\mathbf{\\delta x}\\otimes\\mathbf{\\delta x}$? And 1/3 Tr (which will be the symmetrized contribution)?\n",
+    "3. What is the squared magnitude $\\delta x^2$?"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "coordination number: 4\n",
+      "[[ 0.0625   0.       0.     ]\n",
+      " [ 0.       0.15625 -0.125  ]\n",
+      " [ 0.      -0.125    0.15625]]\n",
+      "1/3 Tr dx dx: 0.125\n",
+      "dx^2: 0.09375\n"
+     ]
+    }
+   ],
+   "source": [
+    "for jlist in jumpnetwork:\n",
+    "    Z = 0\n",
+    "    dx2 = np.zeros((3,3))\n",
+    "    for (i,j), dx in jlist:\n",
+    "        if i==0:\n",
+    "            Z += 1\n",
+    "            dx2 += np.outer(dx,dx)\n",
+    "    print(\"coordination number:\", Z)\n",
+    "    print(dx2)\n",
+    "    print(\"1/3 Tr dx dx:\", dx2.trace()/3)\n",
+    "    print(\"dx^2:\", np.dot(dx,dx))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Next, we assemble our data: the energies and prefactors, for a V<sub>Mg</sub> in pyrope for our *representative* states and transitions: these are the first states in the lists, which are also identified by the tags above. As we are computing a tracer, we make the choice to set $\\nu_0 = 1/Z$ where $Z=4$ is the coordination number."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "eneSV: [ 0.]\n",
+      "eneT0: [ 0.]\n",
+      "preS: [ 1.]\n",
+      "preT1: [ 0.25  0.25  0.25]\n",
+      "preSV: [ 1.]\n",
+      "preT0: [ 0.25]\n",
+      "eneV: [ 0.]\n",
+      "eneT2: [ 0.]\n",
+      "eneS: [ 0.]\n",
+      "preV: [ 1.]\n",
+      "eneT1: [ 0.  0.  0.]\n",
+      "preT2: [ 0.25]\n"
+     ]
+    }
+   ],
+   "source": [
+    "nu0 = 0.25\n",
+    "Etrans = 0.\n",
+    "# we don't need to use the tags, since there's only one site and jump type, and\n",
+    "# we want to build a tracer.\n",
+    "Mgthermodict = {'preV': np.ones(len(sitelist)), \n",
+    "                'eneV': np.zeros(len(sitelist)), \n",
+    "                'preT0': nu0*np.ones(len(jumpnetwork)),\n",
+    "                'eneT0': Etrans*np.ones(len(jumpnetwork))}\n",
+    "Mgthermodict.update(Mgdiffuser.maketracerpreene(**Mgthermodict))\n",
+    "for k,v in Mgthermodict.items():\n",
+    "    print('{}: {}'.format(k, v))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We compute the Onsager matrices, and look at $-L_\\text{ss}/L_\\text{sv}$ to get our correlation coefficient.\n",
+    "\n",
+    "*Note:* we can define $f$ (for our tracer) as the ratio of $L_\\text{ss}$ to $Z (\\delta x)^2 w_2 c_\\text{v}c_\\text{s}/6 = \\frac{1}{16}\\nu_0 a_0^2$ in this case, the same as what we get for $L_\\text{vv}$ and $-L_\\text{sv}$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[[ 0.015625 -0.       -0.      ]\n",
+      " [-0.        0.015625 -0.      ]\n",
+      " [-0.       -0.        0.015625]]\n",
+      "[[ 0.00585895  0.          0.        ]\n",
+      " [ 0.          0.00585895  0.        ]\n",
+      " [ 0.          0.          0.00585895]]\n",
+      "[[-0.015625  0.        0.      ]\n",
+      " [ 0.       -0.015625  0.      ]\n",
+      " [ 0.        0.       -0.015625]]\n",
+      "[[ -1.17108470e-34   0.00000000e+00   0.00000000e+00]\n",
+      " [  0.00000000e+00  -1.17108470e-34   0.00000000e+00]\n",
+      " [  0.00000000e+00   0.00000000e+00  -1.17108470e-34]]\n",
+      "Correlation coefficient: 0.374972670783\n"
+     ]
+    }
+   ],
+   "source": [
+    "Lvv, Lss, Lsv, L1vv = Mgdiffuser.Lij(*Mgdiffuser.preene2betafree(1, **Mgthermodict))\n",
+    "print(Lvv)\n",
+    "print(Lss)\n",
+    "print(Lsv)\n",
+    "print(L1vv)\n",
+    "print(\"Correlation coefficient:\", -Lss[0,0]/Lsv[0,0])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Compare with tabulated GF data from Carlson and Wilson paper. They use the notation $(l,m,n)$ for a $\\mathbf{\\delta x}$ vector that is $a_0(l\\hat x+m\\hat y+n\\hat z)/8$. We will need to find a corresponding site that lands at that displacement from our origin site.\n",
+    "\n",
+    "Unfortunately, it looks like in two cases ((800), (444)) there are two distinct sites that are mapped in that displacement vector, which have different GF values; the CW reported values appear to be the averaged values. In two other cases, ((640), (420)) the reported values are half of what the computed values are here.\n",
+    "\n",
+    "As Carlson and Wilson used a stochastic approach to compute their GF values, all of their other data has errors $\\sim 10^{-4}$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "# tabulated data from paper\n",
+    "CarlsonWilsonGFdata = \\\n",
+    "{(0,0,0): 2.30796022, (2,1,1): 1.30807261, (3,3,2): 0.80669536, \n",
+    " (4,2,0): 0.40469085, (4,4,4): 0.50242046, (5,3,2): 0.56195744, \n",
+    " (6,1,1): 0.56071092, (6,4,0): 0.22460654, (6,5,3): 0.42028488, \n",
+    " (6,5,5): 0.40137897, (7,2,1): 0.44437878, (8,0,0): 0.41938675}"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "CW index\tdx match\tGF (FT eval)\tGF(CW stoch.)\terror\n",
+      "(8, 0, 0)\t(0, 0, -8)\t0.427361034009\t0.41938675\t7.9743e-03\n",
+      "(8, 0, 0)\t(8, 0, 0)\t0.403566247455\t0.41938675\t1.5821e-02\n",
+      "(8, 0, 0)\t(0, 8, 0)\t0.427361034009\t0.41938675\t7.9743e-03\n",
+      "(8, 0, 0)\t(-8, 0, 0)\t0.403566247455\t0.41938675\t1.5821e-02\n",
+      "(8, 0, 0)\t(0, -8, 0)\t0.427361034009\t0.41938675\t7.9743e-03\n",
+      "(8, 0, 0)\t(0, 0, 8)\t0.427361034009\t0.41938675\t7.9743e-03\n",
+      "(8, 0, 0)\taverage value\t0.419429438491\t0.41938675\t4.2688e-05\n",
+      "(6, 1, 1)\t(-1, 6, 1)\t0.560766700022\t0.56071092\t5.5780e-05\n",
+      "(6, 1, 1)\t(-1, -6, -1)\t0.560766700022\t0.56071092\t5.5780e-05\n",
+      "(6, 1, 1)\t(1, 1, 6)\t0.560766700022\t0.56071092\t5.5780e-05\n",
+      "(6, 1, 1)\t(1, -1, -6)\t0.560766700022\t0.56071092\t5.5780e-05\n",
+      "(6, 1, 1)\taverage value\t0.560766700022\t0.56071092\t5.5780e-05\n",
+      "(3, 3, 2)\t(-3, 3, -2)\t0.806767995595\t0.80669536\t7.2636e-05\n",
+      "(3, 3, 2)\t(3, -2, 3)\t0.806767995595\t0.80669536\t7.2636e-05\n",
+      "(3, 3, 2)\t(3, 2, -3)\t0.806767995595\t0.80669536\t7.2636e-05\n",
+      "(3, 3, 2)\t(-3, -3, 2)\t0.806767995595\t0.80669536\t7.2636e-05\n",
+      "(3, 3, 2)\taverage value\t0.806767995595\t0.80669536\t7.2636e-05\n",
+      "(2, 1, 1)\t(-1, -2, 1)\t1.308081132926\t1.30807261\t8.5229e-06\n",
+      "(2, 1, 1)\t(-1, 2, -1)\t1.308081132926\t1.30807261\t8.5229e-06\n",
+      "(2, 1, 1)\t(1, 1, -2)\t1.308081132926\t1.30807261\t8.5229e-06\n",
+      "(2, 1, 1)\t(1, -1, 2)\t1.308081132926\t1.30807261\t8.5229e-06\n",
+      "(2, 1, 1)\taverage value\t1.308081132926\t1.30807261\t8.5229e-06\n",
+      "(6, 5, 3)\t(3, -6, 5)\t0.420386782427\t0.42028488\t1.0190e-04\n",
+      "(6, 5, 3)\t(-3, -5, 6)\t0.420386782427\t0.42028488\t1.0190e-04\n",
+      "(6, 5, 3)\t(5, -3, -6)\t0.420386782427\t0.42028488\t1.0190e-04\n",
+      "(6, 5, 3)\t(-3, 5, -6)\t0.420386782427\t0.42028488\t1.0190e-04\n",
+      "(6, 5, 3)\t(-5, -6, -3)\t0.420386782427\t0.42028488\t1.0190e-04\n",
+      "(6, 5, 3)\t(-5, 6, 3)\t0.420386782427\t0.42028488\t1.0190e-04\n",
+      "(6, 5, 3)\t(5, 3, 6)\t0.420386782427\t0.42028488\t1.0190e-04\n",
+      "(6, 5, 3)\t(3, 6, -5)\t0.420386782427\t0.42028488\t1.0190e-04\n",
+      "(6, 5, 3)\taverage value\t0.420386782427\t0.42028488\t1.0190e-04\n",
+      "(6, 4, 0)\t(-6, 0, 4)\t0.449091350780\t0.22460654\t2.2448e-01\n",
+      "(6, 4, 0)\t(6, 4, 0)\t0.449091350780\t0.22460654\t2.2448e-01\n",
+      "(6, 4, 0)\t(6, -4, 0)\t0.449091350780\t0.22460654\t2.2448e-01\n",
+      "(6, 4, 0)\t(-6, 0, -4)\t0.449091350780\t0.22460654\t2.2448e-01\n",
+      "(6, 4, 0)\taverage value\t0.449091350780\t0.22460654\t2.2448e-01\n",
+      "(0, 0, 0)\t(0, 0, 0)\t2.308081141615\t2.30796022\t1.2092e-04\n",
+      "(0, 0, 0)\taverage value\t2.308081141615\t2.30796022\t1.2092e-04\n",
+      "(4, 2, 0)\t(2, 0, -4)\t0.809394258097\t0.40469085\t4.0470e-01\n",
+      "(4, 2, 0)\t(-2, -4, 0)\t0.809394258097\t0.40469085\t4.0470e-01\n",
+      "(4, 2, 0)\t(-2, 4, 0)\t0.809394258097\t0.40469085\t4.0470e-01\n",
+      "(4, 2, 0)\t(2, 0, 4)\t0.809394258097\t0.40469085\t4.0470e-01\n",
+      "(4, 2, 0)\taverage value\t0.809394258097\t0.40469085\t4.0470e-01\n",
+      "(5, 3, 2)\t(-5, 2, -3)\t0.561961239416\t0.56195744\t3.7994e-06\n",
+      "(5, 3, 2)\t(3, 2, 5)\t0.561961239416\t0.56195744\t3.7994e-06\n",
+      "(5, 3, 2)\t(3, -2, -5)\t0.561961239416\t0.56195744\t3.7994e-06\n",
+      "(5, 3, 2)\t(-5, -2, 3)\t0.561961239416\t0.56195744\t3.7994e-06\n",
+      "(5, 3, 2)\t(5, 3, -2)\t0.561961239416\t0.56195744\t3.7994e-06\n",
+      "(5, 3, 2)\t(5, -3, 2)\t0.561961239416\t0.56195744\t3.7994e-06\n",
+      "(5, 3, 2)\t(-3, -5, -2)\t0.561961239416\t0.56195744\t3.7994e-06\n",
+      "(5, 3, 2)\t(-3, 5, 2)\t0.561961239416\t0.56195744\t3.7994e-06\n",
+      "(5, 3, 2)\taverage value\t0.561961239416\t0.56195744\t3.7994e-06\n",
+      "(7, 2, 1)\t(-1, -2, -7)\t0.444350262895\t0.44437878\t2.8517e-05\n",
+      "(7, 2, 1)\t(1, 7, 2)\t0.444350262895\t0.44437878\t2.8517e-05\n",
+      "(7, 2, 1)\t(7, 2, -1)\t0.444350262895\t0.44437878\t2.8517e-05\n",
+      "(7, 2, 1)\t(-7, 1, -2)\t0.444350262895\t0.44437878\t2.8517e-05\n",
+      "(7, 2, 1)\t(-7, -1, 2)\t0.444350262895\t0.44437878\t2.8517e-05\n",
+      "(7, 2, 1)\t(7, -2, 1)\t0.444350262895\t0.44437878\t2.8517e-05\n",
+      "(7, 2, 1)\t(-1, 2, 7)\t0.444350262895\t0.44437878\t2.8517e-05\n",
+      "(7, 2, 1)\t(1, -7, -2)\t0.444350262895\t0.44437878\t2.8517e-05\n",
+      "(7, 2, 1)\taverage value\t0.444350262895\t0.44437878\t2.8517e-05\n",
+      "(4, 4, 4)\t(-4, 4, 4)\t0.457297218361\t0.50242046\t4.5123e-02\n",
+      "(4, 4, 4)\t(-4, 4, -4)\t0.547635344309\t0.50242046\t4.5215e-02\n",
+      "(4, 4, 4)\t(-4, -4, -4)\t0.457297218361\t0.50242046\t4.5123e-02\n",
+      "(4, 4, 4)\t(4, 4, -4)\t0.547635344309\t0.50242046\t4.5215e-02\n",
+      "(4, 4, 4)\t(-4, -4, 4)\t0.547635344309\t0.50242046\t4.5215e-02\n",
+      "(4, 4, 4)\t(4, -4, -4)\t0.457297218361\t0.50242046\t4.5123e-02\n",
+      "(4, 4, 4)\t(4, -4, 4)\t0.547635344309\t0.50242046\t4.5215e-02\n",
+      "(4, 4, 4)\t(4, 4, 4)\t0.457297218361\t0.50242046\t4.5123e-02\n",
+      "(4, 4, 4)\taverage value\t0.502466281335\t0.50242046\t4.5821e-05\n",
+      "(6, 5, 5)\t(-5, 6, -5)\t0.401425331863\t0.40137897\t4.6362e-05\n",
+      "(6, 5, 5)\t(-5, -6, 5)\t0.401425331863\t0.40137897\t4.6362e-05\n",
+      "(6, 5, 5)\t(5, -5, 6)\t0.401425331863\t0.40137897\t4.6362e-05\n",
+      "(6, 5, 5)\t(5, 5, -6)\t0.401425331863\t0.40137897\t4.6362e-05\n",
+      "(6, 5, 5)\taverage value\t0.401425331863\t0.40137897\t4.6362e-05\n"
+     ]
+    }
+   ],
+   "source": [
+    "print('CW index\\tdx match\\tGF (FT eval)\\tGF(CW stoch.)\\terror')\n",
+    "GF = Mgdiffuser.GFcalc  # get our GF calculator; should already have rates set\n",
+    "basis = pyrope.basis[chem]\n",
+    "x0 = np.dot(alatt, basis[0])\n",
+    "for vec,gCW in CarlsonWilsonGFdata.items():\n",
+    "    dx0 = np.array(vec,dtype=float)/8\n",
+    "    nmatch, Gave, Gmatch = 0, 0, {}\n",
+    "    for g in pyrope.G:\n",
+    "        dx = np.dot(g.cartrot, dx0)\n",
+    "        j = pyrope.cart2pos(x0+dx)[1]\n",
+    "        if j is not None and j[0]==chem and j[1]<6:\n",
+    "            G = GF(0, j[1], dx)\n",
+    "            Gmatch[tuple((8*dx).astype(int))] = G\n",
+    "            nmatch += 1\n",
+    "            Gave += G\n",
+    "    Gave /= nmatch\n",
+    "    for t,G in Gmatch.items():\n",
+    "        print('{}\\t{}\\t{:.12f}\\t{:.8f}\\t{:.4e}'.format(vec, t, -G, gCW, abs(G+gCW)))\n",
+    "    print('{}\\taverage value\\t{:.12f}\\t{:.8f}\\t{:.4e}'.format(vec, -Gave, gCW, abs(Gave+gCW)))"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.4.4"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}
