@@ -9,3 +9,4 @@ Below are several jupyter notebooks with example input and output from ``onsager
    :maxdepth: 2
 
    examples/Fe-C.ipynb
+   examples/Garnet.ipynb
