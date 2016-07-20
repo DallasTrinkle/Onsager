@@ -30,7 +30,7 @@ Releases:
 
 References
 ==========
-* Dallas R. Trinkle, "Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors." [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)
+* Dallas R. Trinkle, "Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors." Philos. Mag. (2016) [doi:10.1080/14786435.2016.1212175](http://dx.doi.org/10.1080/14786435.2016.1212175) [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)
 
 Contributors
 ============
