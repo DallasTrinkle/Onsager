@@ -139,7 +139,6 @@ class GreenFuncCrystalTests(unittest.TestCase):
         a0 = 1.
         chem = 0
         cutoff = 0.31*a0
-        cutoff2 = 0.49*a0
         alatt = a0 * np.array([[-0.5, 0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, -0.5]])
         invlatt = np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]])
         uMg = ((1 / 8, 0, 1 / 4), (3 / 8, 0, 3 / 4), (1 / 4, 1 / 8, 0), (3 / 4, 3 / 8, 0),
@@ -147,18 +146,21 @@ class GreenFuncCrystalTests(unittest.TestCase):
                (3 / 4, 7 / 8, 0), (1 / 4, 5 / 8, 0), (0, 3 / 4, 7 / 8), (0, 1 / 4, 5 / 8))
         tovec = lambda x: np.dot(invlatt, x)
         # this is a reduced version of pyrope: just the Mg (24c sites in 230)
+        # pyrope2 = half of the sites; makes for a single, connected network
         pyropeMg = crystal.Crystal(alatt, [[vec(w) for w in uMg for vec in (tovec,)]], ['Mg'])
+        pyropeMg2 = crystal.Crystal(alatt, [[vec(w) for w in uMg[:6] for vec in (tovec,)]], ['Mg'])
         sitelist = pyropeMg.sitelist(chem)
+        sitelist2 = pyropeMg2.sitelist(chem)
         jumpnetwork = pyropeMg.jumpnetwork(chem, cutoff)
-        jumpnetwork2 = pyropeMg.jumpnetwork(chem, cutoff2)
+        jumpnetwork2 = pyropeMg2.jumpnetwork(chem, cutoff)
         self.assertEqual(len(jumpnetwork), 1)
-        self.assertEqual(len(jumpnetwork2), 2)
+        self.assertEqual(len(jumpnetwork2), 1)
         GF = GFcalc.GFCrystalcalc(pyropeMg, chem, sitelist, jumpnetwork)
-        GF2 = GFcalc.GFCrystalcalc(pyropeMg, chem, sitelist, jumpnetwork2)
+        GF2 = GFcalc.GFCrystalcalc(pyropeMg2, chem, sitelist2, jumpnetwork2)
         GF.SetRates(np.ones(1), np.zeros(1), 0.25*np.ones(1), np.zeros(1))  # simple tracer
-        GF2.SetRates(np.ones(1), np.zeros(1), 0.25*np.array([1., 1.e-6]), np.zeros(2))  # simple tracer
+        GF2.SetRates(np.ones(1), np.zeros(1), 0.25*np.ones(1), np.zeros(1))  # simple tracer
         D0 = np.eye(3)*(1/64)
-        for D in (GF.D,):
+        for D in (GF.D,GF2.D):
             self.assertTrue(np.allclose(D0, D),
                             msg='Diffusivity does not match?\n{}\n!=\n{}'.format(D0,D))
         basis = pyropeMg.basis[chem]
@@ -172,6 +174,16 @@ class GreenFuncCrystalTests(unittest.TestCase):
                         msg='Does not match Carlson and Wilson values?\n{} !=\n{}'.format(glist, Gref))
         # with the nearly disconnected, the rate anisotropy makes comparison of differences
         # much more stable
-        self.assertTrue(np.allclose(glist[1:]-glist[0], g2list[1:]-g2list[0], rtol=1e-5),
-                        msg='Does not match nearly disconnected GF values?\n{} !=\n{}'.format(glist, g2list))
-
+        self.assertTrue(np.allclose(glist, g2list, rtol=1e-12),
+                        msg='Does not match single network GF values?\n{} !=\n{}'.format(glist, g2list))
+        for i in range(12):
+            for j in range(12):
+                dx = np.dot(alatt, basis[j]-basis[i])
+                if i//6 != j//6:
+                    self.assertAlmostEqual(GF(i,j,dx), 0,
+                                           msg='Does not give disconnected networks? {},{}'.format(i,j))
+                else:
+                    if i>=6: dxmap = -dx  # inversion
+                    else: dxmap = dx
+                    self.assertAlmostEqual(GF(i,j,dx), GF2(i%6,j%6,dxmap),
+                                           msg='Does not match single network? {},{}'.format(i,j))
