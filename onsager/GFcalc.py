@@ -268,7 +268,7 @@ class GFCrystalcalc(object):
         return np.array([pT * np.exp(0.5 * betaene[w0] + 0.5 * betaene[w1] - beT) / np.sqrt(pre[w0] * pre[w1])
                          for (w0, w1), pT, beT in zip(self.jumppairs, preT, betaeneT)])
 
-    def SetRates(self, pre, betaene, preT, betaeneT, pmaxerror=1.e-7):
+    def SetRates(self, pre, betaene, preT, betaeneT, pmaxerror=1.e-8):
         """
         (Re)sets the rates, given the prefactors and Arrhenius factors for the sites and
         transitions, using the ordering according to sitelist and jumpnetwork. Initiates all of
