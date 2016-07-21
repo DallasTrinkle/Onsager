@@ -268,7 +268,7 @@ class GFCrystalcalc(object):
         return np.array([pT * np.exp(0.5 * betaene[w0] + 0.5 * betaene[w1] - beT) / np.sqrt(pre[w0] * pre[w1])
                          for (w0, w1), pT, beT in zip(self.jumppairs, preT, betaeneT)])
 
-    def SetRates(self, pre, betaene, preT, betaeneT):
+    def SetRates(self, pre, betaene, preT, betaeneT, pmaxerror=1.e-7):
         """
         (Re)sets the rates, given the prefactors and Arrhenius factors for the sites and
         transitions, using the ordering according to sitelist and jumpnetwork. Initiates all of
@@ -278,6 +278,7 @@ class GFCrystalcalc(object):
         :param betaene: list of beta*E (energy/kB T) for each site
         :param preT: list of prefactors for transition states
         :param betaeneT: list of beta*ET (energy/kB T) for each transition state
+        :param pmaxerror: parameter controlling error from pmax value. Should be same order as integration error.
         """
         self.symmrate = self.SymmRates(pre, betaene, preT, betaeneT)
         self.maxrate = self.symmrate.max()
@@ -303,7 +304,7 @@ class GFCrystalcalc(object):
         # 3. Spatially rotate the Taylor expansion
         self.d, self.e = LA.eigh(self.D / self.maxrate)
         # had been 1e-11; changed to 1e-7 to reflect likely integration accuracy of k-point grids
-        self.pmax = np.sqrt(min([np.dot(G, np.dot(G, self.D / self.maxrate)) for G in self.crys.BZG]) / -np.log(1e-7))
+        self.pmax = np.sqrt(min([np.dot(G, np.dot(G, self.D / self.maxrate)) for G in self.crys.BZG]) / -np.log(pmaxerror))
         self.qptrans = self.e.copy()
         self.pqtrans = self.e.T.copy()
         self.uxtrans = self.e.T.copy()
