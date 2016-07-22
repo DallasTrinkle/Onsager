@@ -1,0 +1,715 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Convergence of Green function calculation &mdash; Onsager 1.2 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Onsager 1.2 documentation" href="../index.html"/>
+        <link rel="up" title="Notebooks" href="../notebooks.html"/>
+        <link rel="prev" title="Garnet correlation coefficients" href="Garnet.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Onsager
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#support">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crystal.html">Crystal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supercell.html">Supercell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PowerExpansion.html">PowerExpansion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GFcalc.html">GFcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OnsagerCalc.html">OnsagerCalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../automator.html">Automator</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../notebooks.html">Notebooks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Fe-C.html">Fe-C diffusion and elastodiffusivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Convergence of Green function calculation</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Onsager</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../notebooks.html">Notebooks</a> &raquo;</li>
+      
+    <li>Convergence of Green function calculation</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/examples/GF-convergence.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput > div,
+div.nbinput div[class^=highlight],
+div.nbinput div[class^=highlight] pre,
+div.nboutput,
+div.nboutput > div,
+div.nboutput div[class^=highlight],
+div.nboutput div[class^=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class^=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput > :first-child pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput > :first-child pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput > :first-child[class^=highlight],
+div.nboutput > :first-child[class^=highlight],
+div.nboutput > :first-child {
+    min-width: 11ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+
+/* input/output area */
+div.nbinput > :nth-child(2)[class^=highlight],
+div.nboutput > :nth-child(2),
+div.nboutput > :nth-child(2)[class^=highlight] {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+
+/* input area */
+div.nbinput > :nth-child(2)[class^=highlight] {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput  > :nth-child(2).stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-bold { font-weight: bold; }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="Convergence-of-Green-function-calculation">
+<h1>Convergence of Green function calculation<a class="headerlink" href="#Convergence-of-Green-function-calculation" title="Permalink to this headline">¶</a></h1>
+<p>We check the convergence with <span class="math">\(N_\text{kpt}\)</span> for the calculation
+of the vacancy Green function for FCC and HCP structures. In particular,
+we will look at: 1. The <span class="math">\(\mathbf{R}=0\)</span> value, 2. The largest
+<span class="math">\(\mathbf{R}\)</span> value in the calculation of a first neighbor
+thermodynamic interaction range, 3. The difference of the Green function
+value for (1) and (2),</p>
+<p>with increasing k-point density.</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>import sys
+sys.path.extend([&#39;../&#39;])
+import numpy as np
+import matplotlib.pyplot as plt
+plt.style.use(&#39;seaborn-whitegrid&#39;)
+%matplotlib inline
+import onsager.crystal as crystal
+import onsager.GFcalc as GFcalc
+</pre></div>
+</div>
+</div>
+<p>Create an FCC and HCP lattice.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>a0 = 1.
+FCC, HCP = crystal.Crystal.FCC(a0, &quot;fcc&quot;), crystal.Crystal.HCP(a0, chemistry=&quot;hcp&quot;)
+print(FCC)
+print(HCP)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+#Lattice:
+  a1 = [ 0.   0.5  0.5]
+  a2 = [ 0.5  0.   0.5]
+  a3 = [ 0.5  0.5  0. ]
+#Basis:
+  (fcc) 0.0 = [ 0.  0.  0.]
+#Lattice:
+  a1 = [ 0.5       -0.8660254  0.       ]
+  a2 = [ 0.5        0.8660254  0.       ]
+  a3 = [ 0.          0.          1.63299316]
+#Basis:
+  (hcp) 0.0 = [ 0.33333333  0.66666667  0.25      ]
+  (hcp) 0.1 = [ 0.66666667  0.33333333  0.75      ]
+</pre></div></div>
+</div>
+<p>We will put together our vectors for consideration: * Maximum
+<span class="math">\(\mathbf{R}\)</span> for FCC = (400), or
+<span class="math">\(\mathbf{x}=2\hat j+2\hat k\)</span>. * Maximum <span class="math">\(\mathbf{R}\)</span> for
+HCP = (440), or <span class="math">\(\mathbf{x}=4\hat i\)</span>, and (222), or
+<span class="math">\(\mathbf{x}=2\hat i + 2\sqrt{8/3}\hat k\)</span>.</p>
+<p>and our sitelists and jumpnetworks.</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>FCCR = np.array([0,2.,2.])
+HCPR1, HCPR2 = np.array([4.,0.,0.]), np.array([2.,0.,2*np.sqrt(8/3)])
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>FCCsite, FCCjn = FCC.sitelist(0), FCC.jumpnetwork(0, 0.75)
+HCPsite, HCPjn = HCP.sitelist(0), HCP.jumpnetwork(0, 1.01)
+</pre></div>
+</div>
+</div>
+<p>We use <span class="math">\(N_\text{max}\)</span> parameter, which controls the automated
+generation of k-points to iterate through successively denser k-point
+meshes.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>FCCdata = {pmaxerror:[] for pmaxerror in range(-16,0)}
+print(&#39;kpt\tNkpt\tG(0)\tG(R)\tG diff&#39;)
+for Nmax in range(1,9):
+    GFFCC = GFcalc.GFCrystalcalc(FCC, 0, FCCsite, FCCjn, Nmax=Nmax)
+    Nreduce, Nkpt, kpt = GFFCC.Nkpt, np.prod(GFFCC.kptgrid), GFFCC.kptgrid
+    for pmax in sorted(FCCdata.keys(), reverse=True):
+        GFFCC.SetRates(np.ones(1), np.zeros(1), np.ones(1)/12, np.zeros(1), 10**(pmax))
+        g0,gR = GFFCC(0,0,np.zeros(3)), GFFCC(0,0,FCCR)
+        FCCdata[pmax].append((Nkpt, g0, gR))
+    Nkpt,g0,gR = FCCdata[-8][-1]  # print the 10^-8 values
+    print(&quot;{k[0]}x{k[1]}x{k[2]}\t&quot;.format(k=kpt) +
+          &quot; {:5d} ({})\t{:.12f}\t{:.12f}\t{:.12f}&quot;.format(Nkpt, Nreduce,
+                                                               g0, gR,g0-gR))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+kpt     Nkpt    G(0)    G(R)    G diff
+6x6x6      216 (16)     -1.344901582401 -0.119888361621 -1.225013220779
+10x10x10          1000 (48)     -1.344674624975 -0.084566077531 -1.260108547444
+14x14x14          2744 (106)    -1.344663672542 -0.084541308263 -1.260122364278
+18x18x18          5832 (201)    -1.344661890661 -0.084539383601 -1.260122507061
+22x22x22         10648 (341)    -1.344661442403 -0.084538941208 -1.260122501195
+26x26x26         17576 (528)    -1.344661295590 -0.084538798573 -1.260122497018
+30x30x30         27000 (777)    -1.344661238153 -0.084538742761 -1.260122495392
+34x34x34         39304 (1094)   -1.344661212587 -0.084538717850 -1.260122494737
+</pre></div></div>
+</div>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>HCPdata = []
+print(&#39;kpt\tNkpt\tG(0)\tG(R1)\tG(R2)\tG(R1)-G(0)\tG(R2)-G0&#39;)
+for Nmax in range(1,13):
+    GFHCP = GFcalc.GFCrystalcalc(HCP, 0, HCPsite, HCPjn, Nmax=Nmax)
+    GFHCP.SetRates(np.ones(1), np.zeros(1), np.ones(2)/12, np.zeros(2), 1e-8)
+    g0,gR1,gR2 = GFHCP(0,0,np.zeros(3)), GFHCP(0,0,HCPR1), GFHCP(0,0,HCPR2)
+    Nreduce, Nkpt, kpt = GFHCP.Nkpt, np.prod(GFHCP.kptgrid), GFHCP.kptgrid
+    HCPdata.append((Nkpt, g0, gR1, gR2))
+    print(&quot;{k[0]}x{k[1]}x{k[2]}\t&quot;.format(k=kpt) +
+          &quot;{:5d} ({})\t{:.12f}\t{:.12f}\t{:.12f}\t{:.12f}\t{:.12f}&quot;.format(Nkpt, Nreduce,
+                                                                                  g0, gR1, gR2,
+                                                                                  g0-gR1, g0-gR2))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+kpt     Nkpt    G(0)    G(R1)   G(R2)   G(R1)-G(0)      G(R2)-G0
+6x6x4     144 (21)      -1.367909503563 -0.192892722514 -0.131552967388 -1.175016781049 -1.236356536175
+10x10x6   600 (56)      -1.345034474341 -0.087913619020 -0.089866654871 -1.257120855321 -1.255167819470
+16x16x8  2048 (150)     -1.344668575390 -0.084546609595 -0.088212957806 -1.260121965795 -1.256455617584
+20x20x12         4800 (308)     -1.344662392185 -0.084539941251 -0.088166498574 -1.260122450934 -1.256495893611
+26x26x14         9464 (560)     -1.344661615456 -0.084539088966 -0.088165768509 -1.260122526490 -1.256495846946
+30x30x16        14400 (819)     -1.344661401027 -0.084538892419 -0.088165529659 -1.260122508608 -1.256495871368
+36x36x20        25920 (1397)    -1.344661260564 -0.084538764009 -0.088165374312 -1.260122496555 -1.256495886252
+40x40x22        35200 (1848)    -1.344661230214 -0.084538734661 -0.088165342770 -1.260122495553 -1.256495887444
+46x46x24        50784 (2600)    -1.344661210808 -0.084538715598 -0.088165322977 -1.260122495211 -1.256495887832
+50x50x28        70000 (3510)    -1.344661197817 -0.084538703416 -0.088165309065 -1.260122494400 -1.256495888752
+56x56x30        94080 (4640)    -1.344661192649 -0.084538698279 -0.088165303871 -1.260122494370 -1.256495888778
+60x60x32        115200 (5627)   -1.344661189980 -0.084538695678 -0.088165301128 -1.260122494302 -1.256495888852
+</pre></div></div>
+</div>
+<p>First, look at the behavior of the error with
+<span class="math">\(p_\text{max}\)</span>(error) parameter. The k-point integration error
+scales as <span class="math">\(N_\text{kpt}^{5/3}\)</span>, and we see the
+<span class="math">\(p_\text{max}\)</span> error is approximately <span class="math">\(10^{-8}\)</span>.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>print(&#39;pmax\tGinf\talpha (Nkpt^-5/3 prefactor)&#39;)
+Ginflist=[]
+for pmax in sorted(FCCdata.keys(), reverse=True):
+    data = FCCdata[pmax]
+    Nk53 = np.array([N**(5/3) for (N,g0,gR) in data])
+    gval = np.array([g0 for (N,g0,gR) in data])
+    N10,N5 = np.average(Nk53*Nk53),np.average(Nk53)
+    g10,g5 = np.average(gval*Nk53*Nk53),np.average(gval*Nk53)
+    denom = N10-N5**2
+    Ginf,alpha = (g10-g5*N5)/denom, (g10*N5-g5*N10)/denom
+    Ginflist.append(Ginf)
+    print(&#39;{}\t{}\t{}&#39;.format(pmax, Ginf, alpha))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+pmax    Ginf    alpha (Nkpt^-5/3 prefactor)
+-1      -1.3622427175259535     97.33736063400187
+-2      -1.3452258841127263     10.81605490974658
+-3      -1.3446884377046706     1.8034923770880174
+-4      -1.3446627924161267     1.024022503859532
+-5      -1.3446612904747748     1.0408654954249383
+-6      -1.3446611905399624     1.141034765892711
+-7      -1.344661182590861      1.2676609439543145
+-8      -1.3446611798588655     1.4411596922064953
+-9      -1.3446611749706365     1.6992741011542978
+-10     -1.3446611661040997     2.0846851474386896
+-11     -1.344661151936757      2.6380532367086693
+-12     -1.3446611313776882     3.3938198836995825
+-13     -1.344661103589501      4.378495907854502
+-14     -1.3446610679820363     5.610776772035542
+-15     -1.3446610241750612     7.102718730176203
+-16     -1.3446609719473415     8.861351881915382
+</pre></div></div>
+</div>
+<p>Plot the error in the Green function for FCC (at 0, maximum R, and
+difference between those GF). We extract the infinite value by fitting
+the error to <span class="math">\(N_{\mathrm{kpt}}^{-5/3}\)</span>, which empirically matches
+the numerical error.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span># plot the errors from pmax = 10^-8
+data = FCCdata[-8]
+Nk = np.array([N for (N,g0,gR) in data])
+g0val = np.array([g0 for (N,g0,gR) in data])
+gRval = np.array([gR for (N,g0,gR) in data])
+
+gplot = []
+Nk53 = np.array([N**(5/3) for (N,g0,gR) in data])
+for gdata, start in zip((g0val, gRval, g0val-gRval), (0,1,2)):
+    N10,N5 = np.average(Nk53[start:]*Nk53[start:]),np.average(Nk53[start:])
+    denom = N10-N5**2
+    g10 = np.average(gdata[start:]*Nk53[start:]*Nk53[start:])
+    g5 = np.average(gdata[start:]*Nk53[start:])
+    Ginf,alpha = (g10-g5*N5)/denom, (g10*N5-g5*N10)/denom
+    gplot.append(np.abs(gdata-Ginf))
+
+fig, ax1 = plt.subplots()
+ax1.plot(Nk, gplot[0], &#39;k&#39;, label=&#39;$G(\mathbf{0})$ error $\sim N_{\mathrm{kpt}}^{-5/3}$&#39;)
+ax1.plot(Nk, gplot[1], &#39;r&#39;, label=&#39;$G(\mathbf{R})$ error $\sim N_{\mathrm{kpt}}^{-5/3}$&#39;)
+ax1.plot(Nk, gplot[2], &#39;b&#39;, label=&#39;$G(\mathbf{0})-G(\mathbf{R})$ error&#39;)
+ax1.set_xscale(&#39;log&#39;)
+ax1.set_yscale(&#39;log&#39;)
+ax1.set_xlabel(&#39;$N_{\mathrm{kpt}}$&#39;, fontsize=&#39;x-large&#39;)
+ax1.set_ylabel(&#39;integration error $G-G^\infty$&#39;, fontsize=&#39;x-large&#39;)
+ax1.legend(bbox_to_anchor=(0.6,0.6,0.4,0.4), ncol=1,
+           shadow=True, frameon=True, fontsize=&#39;x-large&#39;)
+ax2 = ax1.twiny()
+ax2.set_xscale(&#39;log&#39;)
+ax2.set_xlim(ax1.get_xlim())
+ax2.set_xticks([n for n in Nk])
+ax2.set_xticklabels([&quot;${:.0f}^3$&quot;.format(n**(1/3)) for n in Nk])
+ax2.set_xlabel(&#39;k-point grid&#39;, fontsize=&#39;x-large&#39;)
+ax2.grid(False)
+ax2.tick_params(axis=&#39;x&#39;, top=&#39;on&#39;, direction=&#39;in&#39;, length=6)
+plt.show()
+# plt.savefig(&#39;FCC-GFerror.pdf&#39;, transparent=True, format=&#39;pdf&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="../_images/examples_GF-convergence_13_0.png" src="../_images/examples_GF-convergence_13_0.png" />
+</div>
+</div>
+<p>Plot the error in Green function for HCP.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span># plot the errors from pmax = 10^-8
+data = HCPdata
+Nk = np.array([N for (N,g0,gR1,gR2) in data])
+g0val = np.array([g0 for (N,g0,gR1,gR2) in data])
+gR1val = np.array([gR1 for (N,g0,gR1,gR2) in data])
+gR2val = np.array([gR2 for (N,g0,gR1,gR2) in data])
+
+gplot = []
+Nk53 = np.array([N**(5/3) for (N,g0,gR1,gR2) in data])
+for gdata, start in zip((g0val, gR1val, gR2val, g0val-gR1val, g0val-gR2val), (3,3,3,3,3)):
+    N10,N5 = np.average(Nk53[start:]*Nk53[start:]),np.average(Nk53[start:])
+    denom = N10-N5**2
+    g10 = np.average(gdata[start:]*Nk53[start:]*Nk53[start:])
+    g5 = np.average(gdata[start:]*Nk53[start:])
+    Ginf,alpha = (g10-g5*N5)/denom, (g10*N5-g5*N10)/denom
+    gplot.append(np.abs(gdata-Ginf))
+
+fig, ax1 = plt.subplots()
+ax1.plot(Nk, gplot[0], &#39;k&#39;, label=&#39;$G(\mathbf{0})$ error&#39;)
+ax1.plot(Nk, gplot[1], &#39;r&#39;, label=&#39;$G(\mathbf{R}_1)$ error&#39;)
+ax1.plot(Nk, gplot[2], &#39;r--&#39;, label=&#39;$G(\mathbf{R}_2)$ error&#39;)
+ax1.plot(Nk, gplot[3], &#39;b&#39;, label=&#39;$G(\mathbf{0})-G(\mathbf{R}_1)$ error&#39;)
+ax1.plot(Nk, gplot[4], &#39;b--&#39;, label=&#39;$G(\mathbf{0})-G(\mathbf{R}_2)$ error&#39;)
+ax1.set_xlim((1e2,2e5))
+ax1.set_xscale(&#39;log&#39;)
+ax1.set_yscale(&#39;log&#39;)
+ax1.set_xlabel(&#39;$N_{\mathrm{kpt}}$&#39;, fontsize=&#39;x-large&#39;)
+ax1.set_ylabel(&#39;integration error $G-G^\infty$&#39;, fontsize=&#39;x-large&#39;)
+ax1.legend(bbox_to_anchor=(0.1,0.05,0.3,0.5), ncol=1,
+           shadow=True, frameon=True, fontsize=&#39;medium&#39;)
+ax2 = ax1.twiny()
+ax2.set_xscale(&#39;log&#39;)
+ax2.set_xlim(ax1.get_xlim())
+ax2.set_xticks([n for n in Nk])
+# ax2.set_xticklabels([&quot;${:.0f}$&quot;.format((n*1.875)**(1/3)) for n in Nk])
+ax2.set_xticklabels([&#39;6&#39;,&#39;10&#39;,&#39;16&#39;,&#39;20&#39;,&#39;26&#39;,&#39;30&#39;,&#39;36&#39;,&#39;40&#39;,&#39;46&#39;,&#39;50&#39;,&#39;56&#39;,&#39;60&#39;])
+ax2.set_xlabel(&#39;k-point divisions (basal)&#39;, fontsize=&#39;x-large&#39;)
+ax2.grid(False)
+ax2.tick_params(axis=&#39;x&#39;, top=&#39;on&#39;, direction=&#39;in&#39;, length=6)
+plt.show()
+# plt.savefig(&#39;HCP-GFerror.pdf&#39;, transparent=True, format=&#39;pdf&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="../_images/examples_GF-convergence_15_0.png" src="../_images/examples_GF-convergence_15_0.png" />
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="Garnet.html" class="btn btn-neutral" title="Garnet correlation coefficients" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Dallas R. Trinkle.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

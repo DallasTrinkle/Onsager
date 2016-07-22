@@ -10,3 +10,4 @@ Below are several jupyter notebooks with example input and output from ``onsager
 
    examples/Fe-C.ipynb
    examples/Garnet.ipynb
+   examples/GF-convergence.ipynb

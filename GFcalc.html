@@ -310,7 +310,7 @@ to compute with maximum efficiency.</p>
 
 <dl class="method">
 <dt id="GFcalc.GFCrystalcalc.SetRates">
-<code class="descname">SetRates</code><span class="sig-paren">(</span><em>pre</em>, <em>betaene</em>, <em>preT</em>, <em>betaeneT</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.SetRates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.SetRates" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SetRates</code><span class="sig-paren">(</span><em>pre</em>, <em>betaene</em>, <em>preT</em>, <em>betaeneT</em>, <em>pmaxerror=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.SetRates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.SetRates" title="Permalink to this definition">¶</a></dt>
 <dd><p>(Re)sets the rates, given the prefactors and Arrhenius factors for the sites and
 transitions, using the ordering according to sitelist and jumpnetwork. Initiates all of
 the calculations so that GF calculation is (fairly) efficient for each input.</p>
@@ -323,6 +323,7 @@ the calculations so that GF calculation is (fairly) efficient for each input.</p
 <li><strong>betaene</strong> &#8211; list of beta*E (energy/kB T) for each site</li>
 <li><strong>preT</strong> &#8211; list of prefactors for transition states</li>
 <li><strong>betaeneT</strong> &#8211; list of beta*ET (energy/kB T) for each transition state</li>
+<li><strong>pmaxerror</strong> &#8211; parameter controlling error from pmax value. Should be same order as integration error.</li>
 </ul>
 </td>
 </tr>
