@@ -1324,7 +1324,9 @@ class Crystal(object):
                     # check each transition in the list (we need to do list(lis) because
                     # we will modify lis in place with remove's, and its dangerous to pull
                     # off as we iterate through:
-                    for trans in list(lis):
+                    # for trans in lis.copy():
+                    for ntrans in range(len(lis)-1,-1,-1):
+                        trans = lis[ntrans]
                         t = trans[0]  # representative transition
                         dx = t[1]
                         # take our starting point relative to the first item in the tuple
@@ -1335,7 +1337,8 @@ class Crystal(object):
                         if 0 <= xRa_dx <= dx2:
                             d2 = (xRa2 * dx2 - xRa_dx * xRa_dx) / dx2
                             if np.isclose(d2, mindist2) or d2 < mindist2:
-                                lis.remove(trans)
+                                # lis.remove(trans)
+                                lis.pop(ntrans)
         lis.sort(key=lambda entry: min(i + j + 1e-3 * np.dot(dx, dx) for (i, j), dx in entry))
         return lis
 
