@@ -1,0 +1,392 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Tracer correlation coefficients\n",
+    "We want (for testing purposes) to compute correlation coefficients for tracers for several different crystal structures:\n",
+    "\n",
+    "* Simple cubic\n",
+    "* Body-centered cubic\n",
+    "* Face-centered cubic\n",
+    "* Diamond\n",
+    "* Wurtzite\n",
+    "* Hexagonal closed-packed\n",
+    "* NbO\n",
+    "* omega\n",
+    "* octahedral-tetrahedral network in HCP\n",
+    "\n",
+    "Some are well-known (previously published) others are new."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "import sys\n",
+    "sys.path.extend(['../'])\n",
+    "import numpy as np\n",
+    "from onsager import crystal, OnsagerCalc"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Create all of our lattices, with lattice constant a0."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "a0 = 1.\n",
+    "SC = crystal.Crystal(a0*np.eye(3), [np.array([0.,0.,0.])], [\"SC\"])\n",
+    "BCC = crystal.Crystal.BCC(a0, [\"BCC\"])\n",
+    "FCC = crystal.Crystal.FCC(a0, [\"FCC\"])\n",
+    "diamond = crystal.Crystal(a0*np.array([[0,1/2,1/2],[1/2,0,1/2],[1/2,1/2,0]]), \n",
+    "                          [np.array([1/8,1/8,1/8]), np.array([-1/8,-1/8,-1/8])], \n",
+    "                          [\"diamond\"])\n",
+    "wurtzite = crystal.Crystal(a0*np.array([[1/2,1/2,0],\n",
+    "                                        [-np.sqrt(3/4),np.sqrt(3/4),0.],\n",
+    "                                        [0.,0.,np.sqrt(8/3)]]), \n",
+    "                           [np.array([1/3,2/3,1/4-3/16]), np.array([1/3,2/3,1/4+3/16]), \n",
+    "                            np.array([2/3,1/3,3/4-3/16]), np.array([2/3,1/3,3/4+3/16])], \n",
+    "                           [\"wurtzite\"])\n",
+    "HCP = crystal.Crystal.HCP(a0, np.sqrt(8/3), [\"HCP\"])\n",
+    "NbO = crystal.Crystal(a0*np.eye(3),\n",
+    "                      [[np.array([0,1/2,1/2]), np.array([1/2,0,1/2]),np.array([1/2,1/2,0])],\n",
+    "                       [np.array([1/2,0,0]), np.array([0,1/2,0]), np.array([0,0,1/2])]],\n",
+    "                      ['Nb', 'O'])\n",
+    "omega = crystal.Crystal(a0*np.array([[1/2,1/2,0],\n",
+    "                                     [-np.sqrt(3/4),np.sqrt(3/4),0.],\n",
+    "                                     [0.,0.,np.sqrt(3/8)]]), \n",
+    "                           [np.array([0.,0.,0.]),\n",
+    "                            np.array([1/3,2/3,1/2]), np.array([2/3,1/3,1/2])], \n",
+    "                           [\"omega\"])\n",
+    "octtet = crystal.Crystal(a0*np.array([[1/2,1/2,0],\n",
+    "                                      [-np.sqrt(3/4),np.sqrt(3/4),0.],\n",
+    "                                      [0.,0.,np.sqrt(8/3)]]), \n",
+    "                           [[np.array([0.,0.,0.]), np.array([0.,0.,0.5]), \n",
+    "                             np.array([1/3,2/3,5/8]), np.array([1/3,2/3,7/8]), \n",
+    "                             np.array([2/3,1/3,3/8]), np.array([2/3,1/3,1/8])],\n",
+    "                            [np.array([1/3,2/3,1/4]), np.array([2/3,1/3,3/4])]], \n",
+    "                           [\"O\", \"Ti\"])\n",
+    "crystallist = [SC, BCC, FCC, diamond, wurtzite, HCP, NbO, omega, octtet]\n",
+    "crystalnames = [\"simple cubic\", \"body-centered cubic\", \"face-centered cubic\", \"diamond\", \n",
+    "                \"wurtzite\", \"hexagonal closed-packed\", \"NbO\", \"hexagonal omega\", \n",
+    "                \"HCP octahedral-tetrahedral\"]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "simple cubic\n",
+      "#Lattice:\n",
+      "  a1 = [ 1.  0.  0.]\n",
+      "  a2 = [ 0.  1.  0.]\n",
+      "  a3 = [ 0.  0.  1.]\n",
+      "#Basis:\n",
+      "  (SC) 0.0 = [ 0.  0.  0.]\n",
+      "\n",
+      "body-centered cubic\n",
+      "#Lattice:\n",
+      "  a1 = [-0.5  0.5  0.5]\n",
+      "  a2 = [ 0.5 -0.5  0.5]\n",
+      "  a3 = [ 0.5  0.5 -0.5]\n",
+      "#Basis:\n",
+      "  (BCC) 0.0 = [ 0.  0.  0.]\n",
+      "\n",
+      "face-centered cubic\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.   0.5  0.5]\n",
+      "  a2 = [ 0.5  0.   0.5]\n",
+      "  a3 = [ 0.5  0.5  0. ]\n",
+      "#Basis:\n",
+      "  (FCC) 0.0 = [ 0.  0.  0.]\n",
+      "\n",
+      "diamond\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.   0.5  0.5]\n",
+      "  a2 = [ 0.5  0.   0.5]\n",
+      "  a3 = [ 0.5  0.5  0. ]\n",
+      "#Basis:\n",
+      "  (diamond) 0.0 = [ 0.625  0.625  0.625]\n",
+      "  (diamond) 0.1 = [ 0.375  0.375  0.375]\n",
+      "\n",
+      "wurtzite\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.5       -0.8660254  0.       ]\n",
+      "  a2 = [ 0.5        0.8660254  0.       ]\n",
+      "  a3 = [ 0.          0.          1.63299316]\n",
+      "#Basis:\n",
+      "  (wurtzite) 0.0 = [ 0.33333333  0.66666667  0.0625    ]\n",
+      "  (wurtzite) 0.1 = [ 0.33333333  0.66666667  0.4375    ]\n",
+      "  (wurtzite) 0.2 = [ 0.66666667  0.33333333  0.5625    ]\n",
+      "  (wurtzite) 0.3 = [ 0.66666667  0.33333333  0.9375    ]\n",
+      "\n",
+      "hexagonal closed-packed\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.5       -0.8660254  0.       ]\n",
+      "  a2 = [ 0.5        0.8660254  0.       ]\n",
+      "  a3 = [ 0.          0.          1.63299316]\n",
+      "#Basis:\n",
+      "  (HCP) 0.0 = [ 0.33333333  0.66666667  0.25      ]\n",
+      "  (HCP) 0.1 = [ 0.66666667  0.33333333  0.75      ]\n",
+      "\n",
+      "NbO\n",
+      "#Lattice:\n",
+      "  a1 = [ 1.  0.  0.]\n",
+      "  a2 = [ 0.  1.  0.]\n",
+      "  a3 = [ 0.  0.  1.]\n",
+      "#Basis:\n",
+      "  (Nb) 0.0 = [ 0.   0.5  0.5]\n",
+      "  (Nb) 0.1 = [ 0.5  0.   0.5]\n",
+      "  (Nb) 0.2 = [ 0.5  0.5  0. ]\n",
+      "  (O) 1.0 = [ 0.5  0.   0. ]\n",
+      "  (O) 1.1 = [ 0.   0.5  0. ]\n",
+      "  (O) 1.2 = [ 0.   0.   0.5]\n",
+      "\n",
+      "hexagonal omega\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.          0.          0.61237244]\n",
+      "  a2 = [ 0.5       -0.8660254  0.       ]\n",
+      "  a3 = [ 0.5        0.8660254  0.       ]\n",
+      "#Basis:\n",
+      "  (omega) 0.0 = [ 0.  0.  0.]\n",
+      "  (omega) 0.1 = [ 0.5         0.33333333  0.66666667]\n",
+      "  (omega) 0.2 = [ 0.5         0.66666667  0.33333333]\n",
+      "\n",
+      "HCP octahedral-tetrahedral\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.5       -0.8660254  0.       ]\n",
+      "  a2 = [ 0.5        0.8660254  0.       ]\n",
+      "  a3 = [ 0.          0.          1.63299316]\n",
+      "#Basis:\n",
+      "  (O) 0.0 = [ 0.  0.  0.]\n",
+      "  (O) 0.1 = [ 0.   0.   0.5]\n",
+      "  (O) 0.2 = [ 0.33333333  0.66666667  0.625     ]\n",
+      "  (O) 0.3 = [ 0.33333333  0.66666667  0.875     ]\n",
+      "  (O) 0.4 = [ 0.66666667  0.33333333  0.375     ]\n",
+      "  (O) 0.5 = [ 0.66666667  0.33333333  0.125     ]\n",
+      "  (Ti) 1.0 = [ 0.33333333  0.66666667  0.25      ]\n",
+      "  (Ti) 1.1 = [ 0.66666667  0.33333333  0.75      ]\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "for name, crys in zip(crystalnames, crystallist):\n",
+    "    print(name)\n",
+    "    print(crys)\n",
+    "    print()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now we generate diffusers for *every crystal*. This is fairly automated, where the main input is the cutoff distance. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "simple cubic\n",
+      " Unique jumps: 1\n",
+      "  connectivity: 6\n",
+      "body-centered cubic\n",
+      " Unique jumps: 1\n",
+      "  connectivity: 8\n",
+      "face-centered cubic\n",
+      " Unique jumps: 1\n",
+      "  connectivity: 12\n",
+      "diamond\n",
+      " Unique jumps: 1\n",
+      "  connectivity: 4\n",
+      "wurtzite\n",
+      " Unique jumps: 2\n",
+      "  connectivity: 1\n",
+      "  connectivity: 3\n",
+      "hexagonal closed-packed\n",
+      " Unique jumps: 2\n",
+      "  connectivity: 6\n",
+      "  connectivity: 6\n",
+      "NbO\n",
+      " Unique jumps: 1\n",
+      "  connectivity: 8\n",
+      "hexagonal omega\n",
+      " Unique jumps: 4\n",
+      "  connectivity: 2\n",
+      "  connectivity: 12\n",
+      "  connectivity: 2\n",
+      "  connectivity: 3\n",
+      "HCP octahedral-tetrahedral\n",
+      " Unique jumps: 3\n",
+      "  connectivity: 6\n",
+      "  connectivity: 1\n",
+      "  connectivity: 3\n"
+     ]
+    }
+   ],
+   "source": [
+    "cutoffs = [1.01*a0, 0.9*a0, 0.75*a0, 0.45*a0, 0.62*a0, 1.01*a0, 0.8*a0, 0.66*a0, 0.71*a0]\n",
+    "diffusers = []\n",
+    "for name, crys, cut in zip(crystalnames, crystallist, cutoffs):\n",
+    "    jn = crys.jumpnetwork(0, cut, 0.01)\n",
+    "    print(name)\n",
+    "    print(' Unique jumps:', len(jn))\n",
+    "    for jlist in jn:\n",
+    "        print('  connectivity:', len([i for (i,j), dx in jlist if i==jlist[0][0][0]]))\n",
+    "    diffusers.append(OnsagerCalc.VacancyMediated(crys, 0, crys.sitelist(0), jn, 1, 6))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now run through each, creating the \"tracer\" and compute the correlation coefficient. We do this by giving all of the vacancy positions the same energy (may not apply for true omega and octahedral-tetrahedral networks, for example), and then assigning the same energy for all transitions (again, may not apply for cases where there is more than one unique jump). We compute the full Onsager matrix, then look at the diagonal of $f=-L_{\\mathrm{ss}}/L_{\\mathrm{sv}}$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "crystal\tf_xx f_yy f_zz\n",
+      "simple cubic\t0.65310884 0.65310884 0.65310884\n",
+      "body-centered cubic\t0.72719414 0.72719414 0.72719414\n",
+      "face-centered cubic\t0.78145142 0.78145142 0.78145142\n",
+      "diamond\t0.50000000 0.50000000 0.50000000\n",
+      "wurtzite\t0.50000000 0.50000000 0.50000000\n",
+      "hexagonal closed-packed\t0.78120488 0.78120488 0.78145142\n",
+      "NbO\t0.68891612 0.68891612 0.68891612\n",
+      "hexagonal omega\t0.78122649 0.78122649 0.78157339\n",
+      "HCP octahedral-tetrahedral\t0.63052307 0.63052307 0.65230273\n"
+     ]
+    }
+   ],
+   "source": [
+    "print('crystal\\tf_xx f_yy f_zz')\n",
+    "for name, diff in zip(crystalnames, diffusers):\n",
+    "    nsites, njumps = len(diff.sitelist), len(diff.om0_jn)\n",
+    "    tdict = {'preV': np.ones(nsites), 'eneV': np.zeros(nsites), \n",
+    "             'preT0': np.ones(njumps), 'eneT0': np.zeros(njumps)}\n",
+    "    # make a tracer out of it:\n",
+    "    tdict.update(diff.maketracerpreene(**tdict))\n",
+    "    Lss, Lsv = diff.Lij(*diff.preene2betafree(1, **tdict))[1:3]  # just pull out ss and sv\n",
+    "    f = np.diag(-np.dot(Lss, np.linalg.inv(Lsv)))\n",
+    "    print('{name}\\t{f[0]:.8f} {f[1]:.8f} {f[2]:.8f}'.format(name=name, f=f))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Look at variation in correlation coefficient for wurtzite structure by varying the ratio of the two rates."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "w(c)/w(basal)\tf_xx f_yy f_zz\n",
+      "10^-2.00\t0.34028415 0.34028415 0.97703525\n",
+      "10^-1.75\t0.34436809 0.34436809 0.96308802\n",
+      "10^-1.50\t0.35071960 0.35071960 0.94102894\n",
+      "10^-1.25\t0.36039193 0.36039193 0.90707895\n",
+      "10^-1.00\t0.37474153 0.37474153 0.85697089\n",
+      "10^-0.75\t0.39527477 0.39527477 0.78719268\n",
+      "10^-0.50\t0.42323211 0.42323211 0.69772423\n",
+      "10^-0.25\t0.45877839 0.45877839 0.59612281\n",
+      "10^+0.00\t0.50000000 0.50000000 0.50000000\n",
+      "10^+0.25\t0.54260548 0.54260548 0.43237601\n",
+      "10^+0.50\t0.58129067 0.58129067 0.40813890\n",
+      "10^+0.75\t0.61218108 0.61218108 0.42268531\n",
+      "10^+1.00\t0.63424155 0.63424155 0.45691154\n",
+      "10^+1.25\t0.64870094 0.64870094 0.49255065\n",
+      "10^+1.50\t0.65763077 0.65763077 0.52060064\n",
+      "10^+1.75\t0.66293871 0.66293871 0.53970328\n",
+      "10^+2.00\t0.66602090 0.66602090 0.55182811\n"
+     ]
+    }
+   ],
+   "source": [
+    "print('w(c)/w(basal)\\tf_xx f_yy f_zz')\n",
+    "crysindex = crystalnames.index('wurtzite')\n",
+    "diff = diffusers[crysindex]\n",
+    "nsites, njumps = len(diff.sitelist), len(diff.om0_jn)\n",
+    "for w0_w1 in np.linspace(-2,2,num=17):\n",
+    "    w0 = 10**(w0_w1)\n",
+    "    w1 = 1\n",
+    "    tdict = {'preV': np.ones(nsites), 'eneV': np.zeros(nsites), \n",
+    "             'preT0': np.array([w0,w1]), 'eneT0': np.zeros(njumps)}\n",
+    "    # make a tracer out of it:\n",
+    "    tdict.update(diff.maketracerpreene(**tdict))\n",
+    "    Lss, Lsv = diff.Lij(*diff.preene2betafree(1, **tdict))[1:3]  # just pull out ss and sv\n",
+    "    f = np.diag(-np.dot(Lss, np.linalg.inv(Lsv)))\n",
+    "    print('10^{w0_w1:+.2f}\\t{f[0]:.8f} {f[1]:.8f} {f[2]:.8f}'.format(w0_w1=w0_w1, f=f))    "
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.4.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}

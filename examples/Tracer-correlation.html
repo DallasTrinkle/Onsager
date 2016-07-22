@@ -1,0 +1,723 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tracer correlation coefficients &mdash; Onsager 1.2 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Onsager 1.2 documentation" href="../index.html"/>
+        <link rel="up" title="Notebooks" href="../notebooks.html"/>
+        <link rel="prev" title="Convergence of Green function calculation" href="GF-convergence.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Onsager
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#support">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crystal.html">Crystal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supercell.html">Supercell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PowerExpansion.html">PowerExpansion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GFcalc.html">GFcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OnsagerCalc.html">OnsagerCalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../automator.html">Automator</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../notebooks.html">Notebooks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Fe-C.html">Fe-C diffusion and elastodiffusivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GF-convergence.html">Convergence of Green function calculation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tracer correlation coefficients</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Onsager</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../notebooks.html">Notebooks</a> &raquo;</li>
+      
+    <li>Tracer correlation coefficients</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/examples/Tracer-correlation.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput > div,
+div.nbinput div[class^=highlight],
+div.nbinput div[class^=highlight] pre,
+div.nboutput,
+div.nboutput > div,
+div.nboutput div[class^=highlight],
+div.nboutput div[class^=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class^=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput > :first-child pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput > :first-child pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput > :first-child[class^=highlight],
+div.nboutput > :first-child[class^=highlight],
+div.nboutput > :first-child {
+    min-width: 11ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+
+/* input/output area */
+div.nbinput > :nth-child(2)[class^=highlight],
+div.nboutput > :nth-child(2),
+div.nboutput > :nth-child(2)[class^=highlight] {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+
+/* input area */
+div.nbinput > :nth-child(2)[class^=highlight] {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput  > :nth-child(2).stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-bold { font-weight: bold; }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="Tracer-correlation-coefficients">
+<h1>Tracer correlation coefficients<a class="headerlink" href="#Tracer-correlation-coefficients" title="Permalink to this headline">¶</a></h1>
+<p>We want (for testing purposes) to compute correlation coefficients for
+tracers for several different crystal structures:</p>
+<ul class="simple">
+<li>Simple cubic</li>
+<li>Body-centered cubic</li>
+<li>Face-centered cubic</li>
+<li>Diamond</li>
+<li>Wurtzite</li>
+<li>Hexagonal closed-packed</li>
+<li>NbO</li>
+<li>omega</li>
+<li>octahedral-tetrahedral network in HCP</li>
+</ul>
+<p>Some are well-known (previously published) others are new.</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>import sys
+sys.path.extend([&#39;../&#39;])
+import numpy as np
+from onsager import crystal, OnsagerCalc
+</pre></div>
+</div>
+</div>
+<p>Create all of our lattices, with lattice constant a0.</p>
+<div class="nbinput nblast container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>a0 = 1.
+SC = crystal.Crystal(a0*np.eye(3), [np.array([0.,0.,0.])], [&quot;SC&quot;])
+BCC = crystal.Crystal.BCC(a0, [&quot;BCC&quot;])
+FCC = crystal.Crystal.FCC(a0, [&quot;FCC&quot;])
+diamond = crystal.Crystal(a0*np.array([[0,1/2,1/2],[1/2,0,1/2],[1/2,1/2,0]]),
+                          [np.array([1/8,1/8,1/8]), np.array([-1/8,-1/8,-1/8])],
+                          [&quot;diamond&quot;])
+wurtzite = crystal.Crystal(a0*np.array([[1/2,1/2,0],
+                                        [-np.sqrt(3/4),np.sqrt(3/4),0.],
+                                        [0.,0.,np.sqrt(8/3)]]),
+                           [np.array([1/3,2/3,1/4-3/16]), np.array([1/3,2/3,1/4+3/16]),
+                            np.array([2/3,1/3,3/4-3/16]), np.array([2/3,1/3,3/4+3/16])],
+                           [&quot;wurtzite&quot;])
+HCP = crystal.Crystal.HCP(a0, np.sqrt(8/3), [&quot;HCP&quot;])
+NbO = crystal.Crystal(a0*np.eye(3),
+                      [[np.array([0,1/2,1/2]), np.array([1/2,0,1/2]),np.array([1/2,1/2,0])],
+                       [np.array([1/2,0,0]), np.array([0,1/2,0]), np.array([0,0,1/2])]],
+                      [&#39;Nb&#39;, &#39;O&#39;])
+omega = crystal.Crystal(a0*np.array([[1/2,1/2,0],
+                                     [-np.sqrt(3/4),np.sqrt(3/4),0.],
+                                     [0.,0.,np.sqrt(3/8)]]),
+                           [np.array([0.,0.,0.]),
+                            np.array([1/3,2/3,1/2]), np.array([2/3,1/3,1/2])],
+                           [&quot;omega&quot;])
+octtet = crystal.Crystal(a0*np.array([[1/2,1/2,0],
+                                      [-np.sqrt(3/4),np.sqrt(3/4),0.],
+                                      [0.,0.,np.sqrt(8/3)]]),
+                           [[np.array([0.,0.,0.]), np.array([0.,0.,0.5]),
+                             np.array([1/3,2/3,5/8]), np.array([1/3,2/3,7/8]),
+                             np.array([2/3,1/3,3/8]), np.array([2/3,1/3,1/8])],
+                            [np.array([1/3,2/3,1/4]), np.array([2/3,1/3,3/4])]],
+                           [&quot;O&quot;, &quot;Ti&quot;])
+crystallist = [SC, BCC, FCC, diamond, wurtzite, HCP, NbO, omega, octtet]
+crystalnames = [&quot;simple cubic&quot;, &quot;body-centered cubic&quot;, &quot;face-centered cubic&quot;, &quot;diamond&quot;,
+                &quot;wurtzite&quot;, &quot;hexagonal closed-packed&quot;, &quot;NbO&quot;, &quot;hexagonal omega&quot;,
+                &quot;HCP octahedral-tetrahedral&quot;]
+</pre></div>
+</div>
+</div>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>for name, crys in zip(crystalnames, crystallist):
+    print(name)
+    print(crys)
+    print()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+simple cubic
+#Lattice:
+  a1 = [ 1.  0.  0.]
+  a2 = [ 0.  1.  0.]
+  a3 = [ 0.  0.  1.]
+#Basis:
+  (SC) 0.0 = [ 0.  0.  0.]
+
+body-centered cubic
+#Lattice:
+  a1 = [-0.5  0.5  0.5]
+  a2 = [ 0.5 -0.5  0.5]
+  a3 = [ 0.5  0.5 -0.5]
+#Basis:
+  (BCC) 0.0 = [ 0.  0.  0.]
+
+face-centered cubic
+#Lattice:
+  a1 = [ 0.   0.5  0.5]
+  a2 = [ 0.5  0.   0.5]
+  a3 = [ 0.5  0.5  0. ]
+#Basis:
+  (FCC) 0.0 = [ 0.  0.  0.]
+
+diamond
+#Lattice:
+  a1 = [ 0.   0.5  0.5]
+  a2 = [ 0.5  0.   0.5]
+  a3 = [ 0.5  0.5  0. ]
+#Basis:
+  (diamond) 0.0 = [ 0.625  0.625  0.625]
+  (diamond) 0.1 = [ 0.375  0.375  0.375]
+
+wurtzite
+#Lattice:
+  a1 = [ 0.5       -0.8660254  0.       ]
+  a2 = [ 0.5        0.8660254  0.       ]
+  a3 = [ 0.          0.          1.63299316]
+#Basis:
+  (wurtzite) 0.0 = [ 0.33333333  0.66666667  0.0625    ]
+  (wurtzite) 0.1 = [ 0.33333333  0.66666667  0.4375    ]
+  (wurtzite) 0.2 = [ 0.66666667  0.33333333  0.5625    ]
+  (wurtzite) 0.3 = [ 0.66666667  0.33333333  0.9375    ]
+
+hexagonal closed-packed
+#Lattice:
+  a1 = [ 0.5       -0.8660254  0.       ]
+  a2 = [ 0.5        0.8660254  0.       ]
+  a3 = [ 0.          0.          1.63299316]
+#Basis:
+  (HCP) 0.0 = [ 0.33333333  0.66666667  0.25      ]
+  (HCP) 0.1 = [ 0.66666667  0.33333333  0.75      ]
+
+NbO
+#Lattice:
+  a1 = [ 1.  0.  0.]
+  a2 = [ 0.  1.  0.]
+  a3 = [ 0.  0.  1.]
+#Basis:
+  (Nb) 0.0 = [ 0.   0.5  0.5]
+  (Nb) 0.1 = [ 0.5  0.   0.5]
+  (Nb) 0.2 = [ 0.5  0.5  0. ]
+  (O) 1.0 = [ 0.5  0.   0. ]
+  (O) 1.1 = [ 0.   0.5  0. ]
+  (O) 1.2 = [ 0.   0.   0.5]
+
+hexagonal omega
+#Lattice:
+  a1 = [ 0.          0.          0.61237244]
+  a2 = [ 0.5       -0.8660254  0.       ]
+  a3 = [ 0.5        0.8660254  0.       ]
+#Basis:
+  (omega) 0.0 = [ 0.  0.  0.]
+  (omega) 0.1 = [ 0.5         0.33333333  0.66666667]
+  (omega) 0.2 = [ 0.5         0.66666667  0.33333333]
+
+HCP octahedral-tetrahedral
+#Lattice:
+  a1 = [ 0.5       -0.8660254  0.       ]
+  a2 = [ 0.5        0.8660254  0.       ]
+  a3 = [ 0.          0.          1.63299316]
+#Basis:
+  (O) 0.0 = [ 0.  0.  0.]
+  (O) 0.1 = [ 0.   0.   0.5]
+  (O) 0.2 = [ 0.33333333  0.66666667  0.625     ]
+  (O) 0.3 = [ 0.33333333  0.66666667  0.875     ]
+  (O) 0.4 = [ 0.66666667  0.33333333  0.375     ]
+  (O) 0.5 = [ 0.66666667  0.33333333  0.125     ]
+  (Ti) 1.0 = [ 0.33333333  0.66666667  0.25      ]
+  (Ti) 1.1 = [ 0.66666667  0.33333333  0.75      ]
+
+</pre></div></div>
+</div>
+<p>Now we generate diffusers for <em>every crystal</em>. This is fairly automated,
+where the main input is the cutoff distance.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>cutoffs = [1.01*a0, 0.9*a0, 0.75*a0, 0.45*a0, 0.62*a0, 1.01*a0, 0.8*a0, 0.66*a0, 0.71*a0]
+diffusers = []
+for name, crys, cut in zip(crystalnames, crystallist, cutoffs):
+    jn = crys.jumpnetwork(0, cut, 0.01)
+    print(name)
+    print(&#39; Unique jumps:&#39;, len(jn))
+    for jlist in jn:
+        print(&#39;  connectivity:&#39;, len([i for (i,j), dx in jlist if i==jlist[0][0][0]]))
+    diffusers.append(OnsagerCalc.VacancyMediated(crys, 0, crys.sitelist(0), jn, 1, 6))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+simple cubic
+ Unique jumps: 1
+  connectivity: 6
+body-centered cubic
+ Unique jumps: 1
+  connectivity: 8
+face-centered cubic
+ Unique jumps: 1
+  connectivity: 12
+diamond
+ Unique jumps: 1
+  connectivity: 4
+wurtzite
+ Unique jumps: 2
+  connectivity: 1
+  connectivity: 3
+hexagonal closed-packed
+ Unique jumps: 2
+  connectivity: 6
+  connectivity: 6
+NbO
+ Unique jumps: 1
+  connectivity: 8
+hexagonal omega
+ Unique jumps: 4
+  connectivity: 2
+  connectivity: 12
+  connectivity: 2
+  connectivity: 3
+HCP octahedral-tetrahedral
+ Unique jumps: 3
+  connectivity: 6
+  connectivity: 1
+  connectivity: 3
+</pre></div></div>
+</div>
+<p>Now run through each, creating the &#8220;tracer&#8221; and compute the correlation
+coefficient. We do this by giving all of the vacancy positions the same
+energy (may not apply for true omega and octahedral-tetrahedral
+networks, for example), and then assigning the same energy for all
+transitions (again, may not apply for cases where there is more than one
+unique jump). We compute the full Onsager matrix, then look at the
+diagonal of <span class="math">\(f=-L_{\mathrm{ss}}/L_{\mathrm{sv}}\)</span>.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>print(&#39;crystal\tf_xx f_yy f_zz&#39;)
+for name, diff in zip(crystalnames, diffusers):
+    nsites, njumps = len(diff.sitelist), len(diff.om0_jn)
+    tdict = {&#39;preV&#39;: np.ones(nsites), &#39;eneV&#39;: np.zeros(nsites),
+             &#39;preT0&#39;: np.ones(njumps), &#39;eneT0&#39;: np.zeros(njumps)}
+    # make a tracer out of it:
+    tdict.update(diff.maketracerpreene(**tdict))
+    Lss, Lsv = diff.Lij(*diff.preene2betafree(1, **tdict))[1:3]  # just pull out ss and sv
+    f = np.diag(-np.dot(Lss, np.linalg.inv(Lsv)))
+    print(&#39;{name}\t{f[0]:.8f} {f[1]:.8f} {f[2]:.8f}&#39;.format(name=name, f=f))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+crystal f_xx f_yy f_zz
+simple cubic    0.65310884 0.65310884 0.65310884
+body-centered cubic     0.72719414 0.72719414 0.72719414
+face-centered cubic     0.78145142 0.78145142 0.78145142
+diamond 0.50000000 0.50000000 0.50000000
+wurtzite        0.50000000 0.50000000 0.50000000
+hexagonal closed-packed 0.78120488 0.78120488 0.78145142
+NbO     0.68891612 0.68891612 0.68891612
+hexagonal omega 0.78122649 0.78122649 0.78157339
+HCP octahedral-tetrahedral      0.63052307 0.63052307 0.65230273
+</pre></div></div>
+</div>
+<p>Look at variation in correlation coefficient for wurtzite structure by
+varying the ratio of the two rates.</p>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>print(&#39;w(c)/w(basal)\tf_xx f_yy f_zz&#39;)
+crysindex = crystalnames.index(&#39;wurtzite&#39;)
+diff = diffusers[crysindex]
+nsites, njumps = len(diff.sitelist), len(diff.om0_jn)
+for w0_w1 in np.linspace(-2,2,num=17):
+    w0 = 10**(w0_w1)
+    w1 = 1
+    tdict = {&#39;preV&#39;: np.ones(nsites), &#39;eneV&#39;: np.zeros(nsites),
+             &#39;preT0&#39;: np.array([w0,w1]), &#39;eneT0&#39;: np.zeros(njumps)}
+    # make a tracer out of it:
+    tdict.update(diff.maketracerpreene(**tdict))
+    Lss, Lsv = diff.Lij(*diff.preene2betafree(1, **tdict))[1:3]  # just pull out ss and sv
+    f = np.diag(-np.dot(Lss, np.linalg.inv(Lsv)))
+    print(&#39;10^{w0_w1:+.2f}\t{f[0]:.8f} {f[1]:.8f} {f[2]:.8f}&#39;.format(w0_w1=w0_w1, f=f))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<div class="highlight"><pre>
+w(c)/w(basal)   f_xx f_yy f_zz
+10^-2.00        0.34028415 0.34028415 0.97703525
+10^-1.75        0.34436809 0.34436809 0.96308802
+10^-1.50        0.35071960 0.35071960 0.94102894
+10^-1.25        0.36039193 0.36039193 0.90707895
+10^-1.00        0.37474153 0.37474153 0.85697089
+10^-0.75        0.39527477 0.39527477 0.78719268
+10^-0.50        0.42323211 0.42323211 0.69772423
+10^-0.25        0.45877839 0.45877839 0.59612281
+10^+0.00        0.50000000 0.50000000 0.50000000
+10^+0.25        0.54260548 0.54260548 0.43237601
+10^+0.50        0.58129067 0.58129067 0.40813890
+10^+0.75        0.61218108 0.61218108 0.42268531
+10^+1.00        0.63424155 0.63424155 0.45691154
+10^+1.25        0.64870094 0.64870094 0.49255065
+10^+1.50        0.65763077 0.65763077 0.52060064
+10^+1.75        0.66293871 0.66293871 0.53970328
+10^+2.00        0.66602090 0.66602090 0.55182811
+</pre></div></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="GF-convergence.html" class="btn btn-neutral" title="Convergence of Green function calculation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Dallas R. Trinkle.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

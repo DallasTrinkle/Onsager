@@ -32,6 +32,7 @@
   
     <link rel="top" title="Onsager 1.2 documentation" href="../index.html"/>
         <link rel="up" title="Notebooks" href="../notebooks.html"/>
+        <link rel="next" title="Tracer correlation coefficients" href="Tracer-correlation.html"/>
         <link rel="prev" title="Garnet correlation coefficients" href="Garnet.html"/> 
 
   
@@ -97,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Fe-C.html">Fe-C diffusion and elastodiffusivity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Convergence of Green function calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tracer-correlation.html">Tracer correlation coefficients</a></li>
 </ul>
 </li>
 </ul>
@@ -314,10 +316,13 @@ div.nboutput  > :nth-child(2).stderr {
 <h1>Convergence of Green function calculation<a class="headerlink" href="#Convergence-of-Green-function-calculation" title="Permalink to this headline">¶</a></h1>
 <p>We check the convergence with <span class="math">\(N_\text{kpt}\)</span> for the calculation
 of the vacancy Green function for FCC and HCP structures. In particular,
-we will look at: 1. The <span class="math">\(\mathbf{R}=0\)</span> value, 2. The largest
-<span class="math">\(\mathbf{R}\)</span> value in the calculation of a first neighbor
-thermodynamic interaction range, 3. The difference of the Green function
-value for (1) and (2),</p>
+we will look at:</p>
+<ol class="arabic simple">
+<li>The <span class="math">\(\mathbf{R}=0\)</span> value,</li>
+<li>The largest <span class="math">\(\mathbf{R}\)</span> value in the calculation of a first
+neighbor thermodynamic interaction range,</li>
+<li>The difference of the Green function value for (1) and (2),</li>
+</ol>
 <p>with increasing k-point density.</p>
 <div class="nbinput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
@@ -432,11 +437,11 @@ kpt     Nkpt    G(0)    G(R)    G diff
 6x6x6      216 (16)     -1.344901582401 -0.119888361621 -1.225013220779
 10x10x10          1000 (48)     -1.344674624975 -0.084566077531 -1.260108547444
 14x14x14          2744 (106)    -1.344663672542 -0.084541308263 -1.260122364278
-18x18x18          5832 (201)    -1.344661890661 -0.084539383601 -1.260122507061
-22x22x22         10648 (341)    -1.344661442403 -0.084538941208 -1.260122501195
-26x26x26         17576 (528)    -1.344661295590 -0.084538798573 -1.260122497018
-30x30x30         27000 (777)    -1.344661238153 -0.084538742761 -1.260122495392
-34x34x34         39304 (1094)   -1.344661212587 -0.084538717850 -1.260122494737
+18x18x18          5832 (200)    -1.344661890661 -0.084539383601 -1.260122507060
+22x22x22         10648 (337)    -1.344661442418 -0.084538941204 -1.260122501213
+26x26x26         17576 (528)    -1.344661295591 -0.084538798573 -1.260122497018
+30x30x30         27000 (778)    -1.344661238153 -0.084538742761 -1.260122495392
+34x34x34         39304 (1095)   -1.344661212587 -0.084538717850 -1.260122494737
 </pre></div></div>
 </div>
 <div class="nbinput container">
@@ -511,22 +516,22 @@ for pmax in sorted(FCCdata.keys(), reverse=True):
 <div class="container">
 <div class="highlight"><pre>
 pmax    Ginf    alpha (Nkpt^-5/3 prefactor)
--1      -1.3622427175259535     97.33736063400187
--2      -1.3452258841127263     10.81605490974658
--3      -1.3446884377046706     1.8034923770880174
--4      -1.3446627924161267     1.024022503859532
--5      -1.3446612904747748     1.0408654954249383
--6      -1.3446611905399624     1.141034765892711
--7      -1.344661182590861      1.2676609439543145
--8      -1.3446611798588655     1.4411596922064953
--9      -1.3446611749706365     1.6992741011542978
--10     -1.3446611661040997     2.0846851474386896
--11     -1.344661151936757      2.6380532367086693
--12     -1.3446611313776882     3.3938198836995825
+-1      -1.3622431228203618     107.68032003382153
+-2      -1.3452258994701751     12.629186631942448
+-3      -1.3446884353187338     2.082017161988394
+-4      -1.3446627918154508     1.0633204684019726
+-5      -1.344661290378736      1.0462291512843422
+-6      -1.3446611905262338     1.141759242474714
+-7      -1.3446611825889647     1.2677586299509196
+-8      -1.344661179858607      1.4411728790136409
+-9      -1.3446611749706006     1.6992758893513724
+-10     -1.3446611661040953     2.084685390450087
+-11     -1.3446611519367564     2.6380532642193937
+-12     -1.3446611313776884     3.3938198836995825
 -13     -1.344661103589501      4.378495907854502
--14     -1.3446610679820363     5.610776772035542
+-14     -1.3446610679820363     5.610776776620662
 -15     -1.3446610241750612     7.102718730176203
--16     -1.3446609719473415     8.861351881915382
+-16     -1.3446609719473421     8.861351881915382
 </pre></div></div>
 </div>
 <p>Plot the error in the Green function for FCC (at 0, maximum R, and
@@ -651,6 +656,8 @@ plt.show()
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Tracer-correlation.html" class="btn btn-neutral float-right" title="Tracer correlation coefficients" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="Garnet.html" class="btn btn-neutral" title="Garnet correlation coefficients" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
