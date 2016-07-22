@@ -32,6 +32,7 @@
   
     <link rel="top" title="Onsager 1.2 documentation" href="../index.html"/>
         <link rel="up" title="Notebooks" href="../notebooks.html"/>
+        <link rel="next" title="Garnet correlation coefficients" href="Garnet.html"/>
         <link rel="prev" title="Convergence of Green function calculation" href="GF-convergence.html"/> 
 
   
@@ -95,9 +96,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../automator.html">Automator</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../notebooks.html">Notebooks</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Fe-C.html">Fe-C diffusion and elastodiffusivity</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
 <li class="toctree-l2"><a class="reference internal" href="GF-convergence.html">Convergence of Green function calculation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Tracer correlation coefficients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LargeOmega2.html">Large <span class="math">\(\omega^2\)</span> correction</a></li>
 </ul>
 </li>
 </ul>
@@ -336,6 +338,9 @@ tracers for several different crystal structures:</p>
 <span></span>import sys
 sys.path.extend([&#39;../&#39;])
 import numpy as np
+import matplotlib.pyplot as plt
+plt.style.use(&#39;seaborn-whitegrid&#39;)
+%matplotlib inline
 from onsager import crystal, OnsagerCalc
 </pre></div>
 </div>
@@ -571,7 +576,7 @@ diagonal of <span class="math">\(f=-L_{\mathrm{ss}}/L_{\mathrm{sv}}\)</span>.</p
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span>print(&#39;crystal\tf_xx f_yy f_zz&#39;)
+<span></span>print(&#39;crystal\tf_xx\tf_zz&#39;)
 for name, diff in zip(crystalnames, diffusers):
     nsites, njumps = len(diff.sitelist), len(diff.om0_jn)
     tdict = {&#39;preV&#39;: np.ones(nsites), &#39;eneV&#39;: np.zeros(nsites),
@@ -580,7 +585,7 @@ for name, diff in zip(crystalnames, diffusers):
     tdict.update(diff.maketracerpreene(**tdict))
     Lss, Lsv = diff.Lij(*diff.preene2betafree(1, **tdict))[1:3]  # just pull out ss and sv
     f = np.diag(-np.dot(Lss, np.linalg.inv(Lsv)))
-    print(&#39;{name}\t{f[0]:.8f} {f[1]:.8f} {f[2]:.8f}&#39;.format(name=name, f=f))
+    print(&#39;{name}\t{f[0]:.8f}\t{f[2]:.8f}&#39;.format(name=name, f=f))
 </pre></div>
 </div>
 </div>
@@ -589,16 +594,16 @@ for name, diff in zip(crystalnames, diffusers):
 </div>
 <div class="container">
 <div class="highlight"><pre>
-crystal f_xx f_yy f_zz
-simple cubic    0.65310884 0.65310884 0.65310884
-body-centered cubic     0.72719414 0.72719414 0.72719414
-face-centered cubic     0.78145142 0.78145142 0.78145142
-diamond 0.50000000 0.50000000 0.50000000
-wurtzite        0.50000000 0.50000000 0.50000000
-hexagonal closed-packed 0.78120488 0.78120488 0.78145142
-NbO     0.68891612 0.68891612 0.68891612
-hexagonal omega 0.78122649 0.78122649 0.78157339
-HCP octahedral-tetrahedral      0.63052307 0.63052307 0.65230273
+crystal f_xx    f_zz
+simple cubic    0.65310884      0.65310884
+body-centered cubic     0.72719414      0.72719414
+face-centered cubic     0.78145142      0.78145142
+diamond 0.50000000      0.50000000
+wurtzite        0.50000000      0.50000000
+hexagonal closed-packed 0.78120488      0.78145142
+NbO     0.68891612      0.68891612
+hexagonal omega 0.78122649      0.78157339
+HCP octahedral-tetrahedral      0.63052307      0.65230273
 </pre></div></div>
 </div>
 <p>Look at variation in correlation coefficient for wurtzite structure by
@@ -609,11 +614,12 @@ varying the ratio of the two rates.</p>
 </pre></div>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
-<span></span>print(&#39;w(c)/w(basal)\tf_xx f_yy f_zz&#39;)
+<span></span>print(&#39;w(c)/w(basal)\tf_xx\tf_zz&#39;)
 crysindex = crystalnames.index(&#39;wurtzite&#39;)
 diff = diffusers[crysindex]
 nsites, njumps = len(diff.sitelist), len(diff.om0_jn)
-for w0_w1 in np.linspace(-2,2,num=17):
+freq_list, correl_xx_list, correl_zz_list = [], [], []
+for i, w0_w1 in enumerate(np.linspace(-2,2,num=33)):
     w0 = 10**(w0_w1)
     w1 = 1
     tdict = {&#39;preV&#39;: np.ones(nsites), &#39;eneV&#39;: np.zeros(nsites),
@@ -622,7 +628,11 @@ for w0_w1 in np.linspace(-2,2,num=17):
     tdict.update(diff.maketracerpreene(**tdict))
     Lss, Lsv = diff.Lij(*diff.preene2betafree(1, **tdict))[1:3]  # just pull out ss and sv
     f = np.diag(-np.dot(Lss, np.linalg.inv(Lsv)))
-    print(&#39;10^{w0_w1:+.2f}\t{f[0]:.8f} {f[1]:.8f} {f[2]:.8f}&#39;.format(w0_w1=w0_w1, f=f))
+    freq_list.append(w0)
+    correl_xx_list.append(f[0])
+    correl_zz_list.append(f[2])
+    if i%4==0:
+        print(&#39;10^{w0_w1:+.2f}\t{f[0]:.8f}\t{f[2]:.8f}&#39;.format(w0_w1=w0_w1, f=f))
 </pre></div>
 </div>
 </div>
@@ -631,25 +641,46 @@ for w0_w1 in np.linspace(-2,2,num=17):
 </div>
 <div class="container">
 <div class="highlight"><pre>
-w(c)/w(basal)   f_xx f_yy f_zz
-10^-2.00        0.34028415 0.34028415 0.97703525
-10^-1.75        0.34436809 0.34436809 0.96308802
-10^-1.50        0.35071960 0.35071960 0.94102894
-10^-1.25        0.36039193 0.36039193 0.90707895
-10^-1.00        0.37474153 0.37474153 0.85697089
-10^-0.75        0.39527477 0.39527477 0.78719268
-10^-0.50        0.42323211 0.42323211 0.69772423
-10^-0.25        0.45877839 0.45877839 0.59612281
-10^+0.00        0.50000000 0.50000000 0.50000000
-10^+0.25        0.54260548 0.54260548 0.43237601
-10^+0.50        0.58129067 0.58129067 0.40813890
-10^+0.75        0.61218108 0.61218108 0.42268531
-10^+1.00        0.63424155 0.63424155 0.45691154
-10^+1.25        0.64870094 0.64870094 0.49255065
-10^+1.50        0.65763077 0.65763077 0.52060064
-10^+1.75        0.66293871 0.66293871 0.53970328
-10^+2.00        0.66602090 0.66602090 0.55182811
+w(c)/w(basal)   f_xx    f_zz
+10^-2.00        0.34028415      0.97703525
+10^-1.50        0.35071960      0.94102894
+10^-1.00        0.37474153      0.85697089
+10^-0.50        0.42323211      0.69772423
+10^+0.00        0.50000000      0.50000000
+10^+0.50        0.58129067      0.40813890
+10^+1.00        0.63424155      0.45691154
+10^+1.50        0.65763077      0.52060064
+10^+2.00        0.66602090      0.55182811
 </pre></div></div>
+</div>
+<div class="nbinput container">
+<div class="highlight-none"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="highlight-ipython3"><div class="highlight"><pre>
+<span></span>freq, correl_xx, correl_zz = np.array(freq_list), np.array(correl_xx_list), np.array(correl_zz_list)
+fig, ax1 = plt.subplots()
+ax1.plot(freq, correl_xx, &#39;k&#39;, label=&#39;$f_{xx}$&#39;)
+ax1.plot(freq, correl_zz, &#39;r&#39;, label=&#39;$f_{zz}$&#39;)
+ax1.set_xscale(&#39;log&#39;)
+ax1.set_ylabel(&#39;$f$&#39;, fontsize=&#39;x-large&#39;)
+ax1.set_xlabel(&#39;$\omega_{c}/\omega_{\mathrm{basal}}$&#39;, fontsize=&#39;x-large&#39;)
+ax1.set_ylim((0,1))
+ax1.set_yticks(np.linspace(0,1,11))
+ax1.legend(bbox_to_anchor=(0.4,0.1,0.2,0.3), ncol=1,
+           shadow=True, frameon=True, fontsize=&#39;x-large&#39;)
+plt.show()
+# plt.savefig(&#39;wurtzite-correlation.pdf&#39;, transparent=True, format=&#39;pdf&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast container">
+<div class="container">
+</div>
+<div class="container">
+<img alt="../_images/examples_Tracer-correlation_11_0.png" src="../_images/examples_Tracer-correlation_11_0.png" />
+</div>
 </div>
 </div>
 
@@ -659,6 +690,8 @@ w(c)/w(basal)   f_xx f_yy f_zz
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Garnet.html" class="btn btn-neutral float-right" title="Garnet correlation coefficients" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="GF-convergence.html" class="btn btn-neutral" title="Convergence of Green function calculation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
