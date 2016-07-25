@@ -1,5 +1,8 @@
 include *.md
 include *.txt
+include manual.pdf
+recursive-include onsager *.pl
 recursive-include docs *.md
 recursive-include docs *.txt
 recursive-include docs *.tex
+recursive-include examples *.ipynb

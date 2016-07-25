@@ -9,7 +9,7 @@ def my_test_suite():
 setup(
     name = 'onsager',
     packages = ['onsager'], 
-    version = '1.2',
+    version = 'v1.2',
     description = 'A package to compute Onsager coefficients for vacancy-mediated diffusion and interstitial elastodiffusion tensors',
     author = 'Dallas R. Trinkle',
     author_email = 'dtrinkle@illinois.edu',
