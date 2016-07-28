@@ -33,7 +33,7 @@
     <link rel="top" title="Onsager 1.2 documentation" href="../index.html"/>
         <link rel="up" title="Notebooks" href="../notebooks.html"/>
         <link rel="next" title="Tracer correlation coefficients" href="Tracer-correlation.html"/>
-        <link rel="prev" title="Garnet correlation coefficients" href="Garnet.html"/> 
+        <link rel="prev" title="Fe-C diffusion and elastodiffusivity" href="Fe-C.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -96,9 +96,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../automator.html">Automator</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../notebooks.html">Notebooks</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Fe-C.html">Fe-C diffusion and elastodiffusivity</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Convergence of Green function calculation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tracer-correlation.html">Tracer correlation coefficients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LargeOmega2.html">Large <span class="math">\(\omega^2\)</span> correction</a></li>
 </ul>
 </li>
 </ul>
@@ -375,11 +376,14 @@ print(HCP)
   (hcp) 0.1 = [ 0.66666667  0.33333333  0.75      ]
 </pre></div></div>
 </div>
-<p>We will put together our vectors for consideration: * Maximum
-<span class="math">\(\mathbf{R}\)</span> for FCC = (400), or
-<span class="math">\(\mathbf{x}=2\hat j+2\hat k\)</span>. * Maximum <span class="math">\(\mathbf{R}\)</span> for
-HCP = (440), or <span class="math">\(\mathbf{x}=4\hat i\)</span>, and (222), or
-<span class="math">\(\mathbf{x}=2\hat i + 2\sqrt{8/3}\hat k\)</span>.</p>
+<p>We will put together our vectors for consideration:</p>
+<ul class="simple">
+<li>Maximum <span class="math">\(\mathbf{R}\)</span> for FCC = (400), or
+<span class="math">\(\mathbf{x}=2\hat j+2\hat k\)</span>.</li>
+<li>Maximum <span class="math">\(\mathbf{R}\)</span> for HCP = (440), or
+<span class="math">\(\mathbf{x}=4\hat i\)</span>, and (222), or
+<span class="math">\(\mathbf{x}=2\hat i + 2\sqrt{8/3}\hat k\)</span>.</li>
+</ul>
 <p>and our sitelists and jumpnetworks.</p>
 <div class="nbinput nblast container">
 <div class="highlight-none"><div class="highlight"><pre>
@@ -522,15 +526,15 @@ pmax    Ginf    alpha (Nkpt^-5/3 prefactor)
 -4      -1.3446627918154508     1.0633204684019726
 -5      -1.344661290378736      1.0462291512843422
 -6      -1.3446611905262338     1.141759242474714
--7      -1.3446611825889647     1.2677586299509196
--8      -1.344661179858607      1.4411728790136409
--9      -1.3446611749706006     1.6992758893513724
+-7      -1.3446611825889647     1.2677586253657989
+-8      -1.344661179858607      1.4411728744285202
+-9      -1.3446611749706008     1.6992758893513724
 -10     -1.3446611661040953     2.084685390450087
--11     -1.3446611519367564     2.6380532642193937
+-11     -1.344661151936757      2.6380532642193937
 -12     -1.3446611313776884     3.3938198836995825
 -13     -1.344661103589501      4.378495907854502
--14     -1.3446610679820363     5.610776776620662
--15     -1.3446610241750612     7.102718730176203
+-14     -1.3446610679820363     5.610776772035542
+-15     -1.3446610241750612     7.102718725591083
 -16     -1.3446609719473421     8.861351881915382
 </pre></div></div>
 </div>
@@ -660,7 +664,7 @@ plt.show()
         <a href="Tracer-correlation.html" class="btn btn-neutral float-right" title="Tracer correlation coefficients" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Garnet.html" class="btn btn-neutral" title="Garnet correlation coefficients" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Fe-C.html" class="btn btn-neutral" title="Fe-C diffusion and elastodiffusivity" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
