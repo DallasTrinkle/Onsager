@@ -32,7 +32,7 @@
   
     <link rel="top" title="Onsager 1.2 documentation" href="../index.html"/>
         <link rel="up" title="Notebooks" href="../notebooks.html"/>
-        <link rel="next" title="Garnet correlation coefficients" href="Garnet.html"/>
+        <link rel="next" title="Convergence of Green function calculation" href="GF-convergence.html"/>
         <link rel="prev" title="Notebooks" href="../notebooks.html"/> 
 
   
@@ -96,8 +96,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../automator.html">Automator</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../notebooks.html">Notebooks</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Fe-C diffusion and elastodiffusivity</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
 <li class="toctree-l2"><a class="reference internal" href="GF-convergence.html">Convergence of Green function calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tracer-correlation.html">Tracer correlation coefficients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LargeOmega2.html">Large <span class="math">\(\omega^2\)</span> correction</a></li>
 </ul>
 </li>
 </ul>
@@ -336,7 +338,7 @@ parallel component is 4.87 eV, and the perpendicular is 6.66 eV.</p>
 </div>
 <div class="highlight-ipython3"><div class="highlight"><pre>
 <span></span>import sys
-sys.path.extend([&#39;../&#39;, &#39;../../../&#39;])
+sys.path.extend([&#39;../&#39;])
 import numpy as np
 import matplotlib.pyplot as plt
 plt.style.use(&#39;seaborn-whitegrid&#39;)
@@ -433,9 +435,9 @@ print(FeC)
   a3 = [ 0.142765  0.142765 -0.142765]
 #Basis:
   (Fe) 0.0 = [ 0.  0.  0.]
-  (C) 1.0 = [ 0.   0.5  0.5]
+  (C) 1.0 = [ 0.5  0.   0.5]
   (C) 1.1 = [ 0.5  0.5  0. ]
-  (C) 1.2 = [ 0.5  0.   0.5]
+  (C) 1.2 = [ 0.   0.5  0.5]
 </pre></div></div>
 </div>
 <p>Next, we construct a <em>diffuser</em> based on our interstitial. We need to
@@ -468,11 +470,11 @@ Diffuser for atom 1 (C)
   a3 = [ 0.142765  0.142765 -0.142765]
 #Basis:
   (Fe) 0.0 = [ 0.  0.  0.]
-  (C) 1.0 = [ 0.   0.5  0.5]
+  (C) 1.0 = [ 0.5  0.   0.5]
   (C) 1.1 = [ 0.5  0.5  0. ]
-  (C) 1.2 = [ 0.5  0.   0.5]
+  (C) 1.2 = [ 0.   0.5  0.5]
 states:
-i:+0.000,+0.500,+0.500
+i:+0.500,+0.000,+0.500
 transitions:
 i:+0.500,+0.000,+0.500^i:+0.000,-0.500,+0.500
 
@@ -520,15 +522,15 @@ for k,v in FeCthermodict.items():
 </div>
 <div class="container">
 <div class="highlight"><pre>
-ene: [ 0.]
+dipole: [[ 3.4   0.    0.  ]
+ [ 0.    8.03  0.  ]
+ [ 0.    0.    3.4 ]]
 pre: [ 1.]
-preT: [ 0.1]
 dipoleT: [[ 6.66  0.    0.  ]
  [ 0.    6.66  0.  ]
  [ 0.    0.    4.87]]
-dipole: [[ 8.03  0.    0.  ]
- [ 0.    3.4   0.  ]
- [ 0.    0.    3.4 ]]
+ene: [ 0.]
+preT: [ 0.1]
 eneT: [ 0.816]
 </pre></div></div>
 </div>
@@ -734,7 +736,7 @@ Spherical average uniaxial activation volume: -0.0237 -0.2757A^3
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Garnet.html" class="btn btn-neutral float-right" title="Garnet correlation coefficients" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="GF-convergence.html" class="btn btn-neutral float-right" title="Convergence of Green function calculation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../notebooks.html" class="btn btn-neutral" title="Notebooks" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
