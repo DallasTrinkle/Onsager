@@ -90,7 +90,7 @@ class GFCrystalcalc(object):
         # self.N = sum(1 for w in sitelist for i in w)
         # self.invmap = [0 for w in sitelist for i in w]
         self.N = sum(len(w) for w in sitelist)
-        self.Ndiff = self.networkcount(jumpnetwork)
+        self.Ndiff = self.networkcount(jumpnetwork, self.N)
         # if self.Ndiff>1:
         #     raise NotImplementedError('Cannot currently have {} disconnected networks'.format(self.Ndiff))
         self.invmap = np.zeros(self.N, dtype=int)
@@ -120,14 +120,15 @@ class GFCrystalcalc(object):
                                for jumplist in jumpnetwork)
         self.D, self.eta = 0, 0  # we don't yet know the diffusivity
 
-    def networkcount(self, jumpnetwork):
+    @staticmethod
+    def networkcount(jumpnetwork, N):
         """Return a count of how many separate connected networks there are"""
-        jngraph = np.zeros((self.N, self.N), dtype=bool)
+        jngraph = np.zeros((N, N), dtype=bool)
         for jlist in jumpnetwork:
             for (i, j), dx in jlist:
                 jngraph[i,j] = True
         connectivity = 0  # had been a list... if we want to return the list of sets
-        disconnected = {i for i in range(self.N)}
+        disconnected = {i for i in range(N)}
         while len(disconnected)>0:
             # take the "first" element out, and find everything it's connected to:
             i = min(disconnected)
