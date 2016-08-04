@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Onsager &mdash; Onsager 1.2 documentation</title>
+  <title>Onsager &mdash; Onsager 1.2.1 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="Onsager 1.2 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 1.2.1 documentation" href="index.html"/>
         <link rel="next" title="Crystal" href="crystal.html"/>
         <link rel="prev" title="Onsager: Automated diffusion calculation" href="index.html"/> 
 
@@ -176,7 +176,7 @@
 <h1>Onsager<a class="headerlink" href="#onsager" title="Permalink to this headline">¶</a></h1>
 <p>Documentation now available at the [Onsager github page](<a class="reference external" href="http://dallastrinkle.github.io/Onsager/">http://dallastrinkle.github.io/Onsager/</a>). Please cite as [![DOI](<a class="reference external" href="https://zenodo.org/badge/14172/DallasTrinkle/Onsager.svg)](https://zenodo.org/badge/latestdoi/14172/DallasTrinkle/Onsager">https://zenodo.org/badge/14172/DallasTrinkle/Onsager.svg)](https://zenodo.org/badge/latestdoi/14172/DallasTrinkle/Onsager</a>) or see <a class="reference external" href="https://github.com/DallasTrinkle/Onsager">Onsager github</a> for current version doi information.</p>
 <p>The Onsager package provides routines for the general calculation of transport coefficients in vacancy-mediated diffusion and interstitial diffusion. It does this using a Green function approach, combined with point group symmetry reduction for maximum efficiency.</p>
-<p>Typical usage looks like:</p>
+<p>Typical usage can be seen in the ipython notebooks in <cite>examples</cite>; the usual import will be:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
 
     <span class="kn">from</span> <span class="nn">onsager</span> <span class="k">import</span> <span class="n">crystal</span>
@@ -185,9 +185,10 @@
 <span class="o">...</span>
 </pre></div>
 </div>
-<p>Many of the subpackages within Onsager are support for the main attraction, which is in OnsagerCalc. Interstitial calculation examples are avaliable in <cite>bin</cite>, including three YAML input files, as well as a interstitial diffuser. An example of vacancy-mediated diffusion is shown in <cite>bin/fivefreq.py</cite>, which computes the well-known five-frequency model for substitutional solute transport in an FCC lattice.</p>
+<p>Many of the subpackages within Onsager are support for the main attraction, which is in OnsagerCalc. Interstitial calculation examples are available in <cite>bin</cite>, including three YAML input files, as well as a interstitial diffuser. An example of vacancy-mediated diffusion is shown in <cite>bin/fivefreq.py</cite>, which computes the well-known five-frequency model for substitutional solute transport in an FCC lattice. The script <cite>CLdiffuser</cite> is a command-line diffuser calculator that is designed to read in an HDF5 file of a diffuser, along with a JSON file that includes the thermal/kinetic data, and computes diffusivity components for different temperatures.</p>
 <p>The tests for the package are include in <cite>test</cite>; <cite>tests.py</cite> will run all of the tests in the directory with verbosity level 2. This can be time-consuming (on the order of several of minutes) to run all tests; coverage is currently &gt;90%.</p>
-<p>The code uses YAML files for input/output of diffusion data for the interstitial calculator. The vacancy-mediated calculator requires much more data, and uses HDF5 format to save/reload as needed. The vacancy-mediated calculator uses tags (unique human-readable-ish strings) to identify all (symmetry-unique) vacancy, solute, and complex states, and transitions between them.</p>
+<p>The code uses YAML format for input/output of crystal structures, and diffusion data for the interstitial calculator. The vacancy-mediated calculator requires much more data, and uses HDF5 format to save/reload as needed. The vacancy-mediated calculator uses tags (unique human-readable-ish strings) to identify all (symmetry-unique) vacancy, solute, and complex states, and transitions between them.
+The vacancy-mediated diffuser can be stored as an HDF5 file (which internally stores the crystal structure in YAML format). The thermal/kinetic data is most easily serialized as JSON, but any dictionary-compatible format will do, by making use of tags.</p>
 <p>Releases:</p>
 <ul class="simple">
 <li>0.9. Full release of Interstitial calculator, along with theory paper (see References below).</li>
@@ -195,12 +196,14 @@
 <li>1.0 Now including automator for supercell calculations.</li>
 <li>1.1 Automator update with Makefile; corrections for possible overflow error when omega2 gets very large.</li>
 <li>1.2 Combined &#8220;large omega2&#8221; and &#8220;non-zero bias&#8221; algorithms; notebook for Fe-C added to documentation; cleanup of code and improved testing.</li>
+<li>1.2.1 Additional notebooks added for vacancy-mediated diffuser.</li>
 </ul>
 </div>
 <div class="section" id="references">
 <h1>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li>Dallas R. Trinkle, &#8220;Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors.&#8221; Philos. Mag. (2016) [doi:10.1080/14786435.2016.1212175](http://dx.doi.org/10.1080/14786435.2016.1212175) [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)</li>
+<li>Dallas R. Trinkle, &#8220;Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors.&#8221; Philos. Mag. (2016) [doi:10.1080/14786435.2016.1212175](http://dx.doi.org/10.1080/14786435.2016.1212175); [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)</li>
+<li>Dallas R. Trinkle, &#8220;Automatic numerical evaluation of vacancy-mediated transport for arbitrary crystals: Onsager coefficients in the dilute limit using a Green function approach.&#8221; [arXiv:1608.01252](http://arxiv.org/abs/1608.01252)</li>
 </ul>
 </div>
 <div class="section" id="contributors">
@@ -264,7 +267,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2',
+            VERSION:'1.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
