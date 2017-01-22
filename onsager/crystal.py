@@ -13,6 +13,7 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 import collections, copy, itertools
 from numbers import Number
+from fractions import gcd
 import yaml  ### use crystal.yaml to call--may need to change in the future
 from functools import reduce
 
@@ -20,6 +21,11 @@ from functools import reduce
 # interfaces are either at the bottom, or staticmethods in the corresponding object
 NDARRAY_YAMLTAG = '!numpy.ndarray'
 GROUPOP_YAMLTAG = '!GroupOp'
+
+
+def gcdlist(lis):
+    """Returns the GCD of a list of integers"""
+    return reduce(gcd, lis)
 
 
 def incell(vec):
@@ -691,7 +697,23 @@ class Crystal(object):
         self.basis = [[incell(atom + shift) for atom in atomlist] for atomlist in self.basis]
 
     def reduce(self, threshold=1e-8):
-        """Reduces the lattice and basis, if needed. Works (tail) recursively."""
+        """
+        Reduces the lattice and basis, if needed. Works (tail) recursively.
+
+        Algorithm is slightly complicated: we attempt to identify if there is a internal
+        translation symmetry in the crystal (called `t`) that applies to all sites. Once identified,
+        we transform the lattice vectors and basis into the "reduced" form of the cell. We use
+        tail recursion to continue until no further reduction is possible. Will usually require
+        some "polishing" on the unit cell after the fact.
+
+        We try to do this efficiently: we check the GCD of the site counts (called `M`); if it's 1,
+        we kick out. We check translations against the smallest site set first.
+
+        We try to do this carefully: We make sure that our translation can be expressed rationally
+        with `M` as the denominator; this helps protect against roundoff error. When we reduce the
+        atomic basis, we *average* the values that match. Finally, as we reduce, we also change the
+        `self.threshold` value accordingly so that recursion uses the same "effective" threshold.
+        """
         # Work with the shortest possible list first
         maxlen = 0
         atomindex = 0
