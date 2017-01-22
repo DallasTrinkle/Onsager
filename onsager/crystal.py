@@ -489,7 +489,8 @@ class Crystal(object):
     Can also name the elements (chemistry), and specify spin degrees of freedom.
     """
 
-    def __init__(self, lattice, basis, chemistry=None, spins=None, NOSYM=False, noreduce=False):
+    def __init__(self, lattice, basis, chemistry=None, spins=None,
+                 NOSYM=False, noreduce=False, threshold=1e-8):
         """
         Initialization; starts off with the lattice vector definition and the
         basis vectors. While it does not explicitly store the specific chemical
@@ -508,6 +509,7 @@ class Crystal(object):
             scalars or vectors, corresponding to collinear or non-collinear magnetism
         :param NOSYM: turn off all symmetry finding (except identity)
         :param noreduce: do not attempt to reduce the atomic basis
+        :param threshold: threshold for symmetry equivalence (stored in the class)
         """
         # Do some basic type checking and "formatting"
         self.lattice = None
@@ -537,6 +539,7 @@ class Crystal(object):
                 self.spins = [copy.deepcopy(spins)]
         else:
             self.spins = None
+        self.threshold = threshold
         if not noreduce: self.reduce()  # clean up basis as needed
         self.minlattice()  # clean up lattice vectors as needed
         self.invlatt = np.linalg.inv(self.lattice)
@@ -696,9 +699,11 @@ class Crystal(object):
                 shift[d] = 0.5
         self.basis = [[incell(atom + shift) for atom in atomlist] for atomlist in self.basis]
 
-    def reduce(self, threshold=1e-8):
+    def reduce(self, threshold=None):
         """
         Reduces the lattice and basis, if needed. Works (tail) recursively.
+
+        :param threshold: threshold for symmetry comparison; default = self.threshold
 
         Algorithm is slightly complicated: we attempt to identify if there is a internal
         translation symmetry in the crystal (called `t`) that applies to all sites. Once identified,
@@ -714,15 +719,11 @@ class Crystal(object):
         atomic basis, we *average* the values that match. Finally, as we reduce, we also change the
         `self.threshold` value accordingly so that recursion uses the same "effective" threshold.
         """
-        # Work with the shortest possible list first
-        maxlen = 0
-        atomindex = 0
-        for i, ulist in enumerate(self.basis):
-            if len(ulist) > maxlen:
-                maxlen = len(ulist)
-                atomindex = i
-        if maxlen == 1:
-            return
+        eps = self.threshold if threshold is None else threshold
+        sitecount = [len(ulist) for ulist in self.basis]
+        M = gcdlist(sitecount)
+        if M==1: return
+        atomindex = min(range(len(sitecount)), key=sitecount.__getitem__) # index of shortest sitecount
         # if we don't have spins, just make a big list of lists of 0, otherwise there's too many "if spins None..."
         if self.spins is None:
             spins = [[0 for u in atomlist] for atomlist in self.basis]
@@ -734,14 +735,18 @@ class Crystal(object):
         for newpos, newsp in zip(self.basis[atomindex], spins[atomindex]):
             t = newpos - initpos
             if np.allclose(t, 0): continue
-            if not np.allclose(initsp, newsp): continue
+            if not np.allclose(initsp, newsp, atol=eps): continue
+            # reconstruct `t` as a rational vector; if fail, kick out
+            T = np.around(M*t).astype(int)
+            if not np.allclose(t, T/M, atol=eps): continue
+            t = T/M
             trans = True
             for atomlist, spinlist in zip(self.basis, spins):
                 for u, s in zip(atomlist, spinlist):
                     # edited to only check against translations with the same spin:
-                    if np.all([not np.all(abs(inhalf(u + t - v)) < threshold)
+                    if np.all([not np.all(abs(inhalf(u + t - v)) < eps)
                                for v, vs in zip(atomlist, spinlist)
-                               if np.allclose(s, vs)]):
+                               if np.allclose(s, vs, atol=eps)]):
                         trans = False
                         break
             if trans: break
