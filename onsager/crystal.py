@@ -110,8 +110,8 @@ def maptranslation(oldpos, newpos, oldspins=None, newspins=None, threshold=1e-8)
             maplist = []
             for rua, sp1 in zip(atomlist1, spinlist1):
                 for j, uj, sp0 in zip(itertools.count(), atomlist0, spinlist0):
-                    if not np.allclose(sp0, sp1): continue  # only allow maps that have same spin
-                    if np.all(abs(inhalf(uj - rua - trans)) < threshold):
+                    if not np.allclose(sp0, sp1, atol=threshold): continue  # only allow maps that have same spin
+                    if np.allclose(inhalf(uj - rua - trans), 0, atol=threshold):
                         maplist.append(j)
                         break
             if len(maplist) != len(atomlist0):
@@ -676,6 +676,12 @@ class Crystal(object):
                    [np.array([1. / 3., 2. / 3., 1. / 4.]),
                     np.array([2. / 3., 1. / 3., 3. / 4])], chem)
 
+    def __iszero__(self, v):
+        return np.allclose(v, 0, atol=self.threshold)
+
+    def __isclose__(self, a, b):
+        return np.allclose(a, b, atol=self.threshold)
+
     def center(self):
         """Center the atoms in the cell if there is an inversion operation present."""
         # trivial case:
@@ -691,9 +697,11 @@ class Crystal(object):
         # now, check for "aesthetics" of our basis choice
         shift = np.zeros(3)
         for d in range(3):
-            if np.any([np.isclose(u[d], 0) for atomlist in self.basis for u in atomlist]):
+            if np.any([np.isclose(u[d], 0, atol=self.threshold)
+                       for atomlist in self.basis for u in atomlist]):
                 shift[d] = 0
-            elif np.any([np.isclose(u[d], 0.5) for atomlist in self.basis for u in atomlist]):
+            elif np.any([np.isclose(u[d], 0.5, atol=self.threshold)
+                         for atomlist in self.basis for u in atomlist]):
                 shift[d] = 0.5
             elif sum([1 for atomlist in self.basis for u in atomlist if u[d] < 0.25 or u[d] > 0.75]) > self.N / 2:
                 shift[d] = 0.5
@@ -719,7 +727,8 @@ class Crystal(object):
         atomic basis, we *average* the values that match. Finally, as we reduce, we also change the
         `self.threshold` value accordingly so that recursion uses the same "effective" threshold.
         """
-        eps = self.threshold if threshold is None else threshold
+        if threshold is not None:
+            self.threshold = threshold
         sitecount = [len(ulist) for ulist in self.basis]
         M = gcdlist(sitecount)
         if M==1: return
@@ -735,18 +744,18 @@ class Crystal(object):
         for newpos, newsp in zip(self.basis[atomindex], spins[atomindex]):
             t = newpos - initpos
             if np.allclose(t, 0): continue
-            if not np.allclose(initsp, newsp, atol=eps): continue
+            if not self.__isclose__(initsp, newsp): continue
             # reconstruct `t` as a rational vector; if fail, kick out
             T = np.around(M*t).astype(int)
-            if not np.allclose(t, T/M, atol=eps): continue
+            if not self.__isclose__(t, T/M): continue
             t = T/M
             trans = True
             for atomlist, spinlist in zip(self.basis, spins):
                 for u, s in zip(atomlist, spinlist):
                     # edited to only check against translations with the same spin:
-                    if np.all([not np.all(abs(inhalf(u + t - v)) < eps)
+                    if np.all([not self.__iszero__(inhalf(u + t - v))
                                for v, vs in zip(atomlist, spinlist)
-                               if np.allclose(s, vs, atol=eps)]):
+                               if self.__isclose__(s, vs)]):
                         trans = False
                         break
             if trans: break
@@ -754,31 +763,53 @@ class Crystal(object):
         if not trans: return
         # reduce that lattice and basis
         # 1. determine what the new lattice needs to look like.
-        for d in range(3):
-            supercell = np.eye(3)
-            supercell[:, d] = t[:]
-            if not np.allclose(np.linalg.det(supercell), 0):
-                if np.linalg.det(supercell) < 0:
-                    supercell[:, d - 1] = -supercell[:, d - 1]
-                break
-        invsuper = np.linalg.inv(supercell)
-        self.lattice = np.dot(self.lattice, supercell)
+        # m = index of smallest non-zero value in T:
+        m = min([i for (i, v) in enumerate(T) if v != 0], key=lambda n: abs(T[n]))
+        # i, j = other indices, ordered so that T, e_i, e_j == right-handed coordinate system
+        if T[m] > 0:
+            i, j = (m+1)%3, (m+2)%3
+        else:
+            i, j = (m+2)%3, (m+1)%3
+        # new lattice: A0 = [a]*t, A1 = a_i, A2 = a_j
+        self.lattice = np.array([np.dot(self.lattice, t),
+                                 self.lattice[:, i],
+                                 self.lattice[:, j]]).T
+        reduction = abs(T[m]/M)
+        mult = np.array([M/T[m], T[i]/T[m], T[j]/T[m]])
         # 2. update the basis
         newbasis = []
         newspins = []
         for atomlist, spinlist in zip(self.basis, spins):
             newatomlist = []
+            avedisplist = []
             newspinlist = []
             for u, s in zip(atomlist, spinlist):
-                v = incell(np.dot(invsuper, u))
-                if np.all([not np.allclose(v, v1) for v1 in newatomlist]):
+                v = incell(np.array([u[m]*mult[0],
+                                     u[i] - u[m]*mult[1],
+                                     u[j] - u[m]*mult[2]]))
+                ind = 0
+                for v1 in newatomlist:
+                    # dv = relative displacement of site
+                    dv = inhalf(v-v1)
+                    if self.__iszero__(dv): break
+                    ind += 1
+                if ind<len(newatomlist):
+                    # matched position: accumulate displacement and spin
+                    avedisplist[ind] += dv
+                    newspinlist[ind] += s
+                else:
+                    # unmatched position!
                     newatomlist.append(v)
+                    avedisplist.append(np.zeros(3))
                     newspinlist.append(s)
-            newbasis.append(newatomlist)
-            newspins.append(newspinlist)
+            if len(newatomlist)*(M//abs(T[m])) != len(atomlist):
+                raise ArithmeticError('Reduction did not produce correct reduced basis: {} != {}'.format(len(newatomlist), atomlist))
+            newbasis.append([incell(v+reduction*dv) for v, dv in zip(newatomlist, avedisplist)])
+            newspins.append([reduction*s for s in newspinlist])
         self.basis = newbasis
         if self.spins is not None: self.spins = newspins
         # 3. tail recursion:
+        self.threshold *= abs(mult[0])
         self.reduce()
 
     def remapbasis(self, supercell):
@@ -892,8 +923,8 @@ class Crystal(object):
                          for n2 in range(-1, 2)
                          if (n0, n1, n2) != (0, 0, 0)]
         matchvect = [[u for u in supercellvect
-                      if np.isclose(np.dot(u, np.dot(self.metric, u)),
-                                    self.metric[d, d])] for d in range(3)]
+                      if self.__isclose__(np.dot(u, np.dot(self.metric, u)),
+                                          self.metric[d, d])] for d in range(3)]
         # if we don't have spins, just make a big list of lists of 0, otherwise there's too many "if spins None..."
         if self.spins is None:
             spins = [[0 for u in atomlist] for atomlist in self.basis]
@@ -904,7 +935,7 @@ class Crystal(object):
                           for r1 in matchvect[1]
                           for r2 in matchvect[2]
                           if abs(np.inner(r0, np.cross(r1, r2))) == 1):
-            if np.allclose(np.dot(supercell.T, np.dot(self.metric, supercell)), self.metric):
+            if self.__isclose__(np.dot(supercell.T, np.dot(self.metric, supercell)), self.metric):
                 # possible operation--need to check the atomic positions with spin phase factors
                 optype = GroupOp.optype(supercell)
                 cartrot = np.dot(self.lattice, np.dot(supercell, self.invlatt))
@@ -920,7 +951,7 @@ class Crystal(object):
                                                      [[np.dot(supercell, u)
                                                        for u in atomlist]
                                                       for atomlist in self.basis],
-                                                     spins, newspins)
+                                                     spins, newspins, threshold=self.threshold)
                     if indexmap is not None:
                         groupops.append(GroupOp(supercell,
                                                 trans,
@@ -1029,7 +1060,7 @@ class Crystal(object):
         """
         latt, u = self.cart2unit(v)
         indlist = [ind for ind in self.atomindices
-                   if np.allclose(u, self.basis[ind[0]][ind[1]])]
+                   if self.__isclose__(u, self.basis[ind[0]][ind[1]])]
         if len(indlist) != 1:
             return latt, None
         else:
@@ -1168,7 +1199,7 @@ class Crystal(object):
         lis = []
         zero = np.zeros(3, dtype=int)
         for u in (self.g_vect(g, zero, uvec)[1] for g in self.G):
-            if not np.any([np.allclose(u, u1) for u1 in lis]):
+            if not np.any([self.__isclose__(u, u1) for u1 in lis]):
                 lis.append(u)
         return lis
 
@@ -1304,7 +1335,7 @@ class Crystal(object):
         def inlist(tup, dx, lis):
             """Determines if (i,j), dx is in our list"""
             # a little confusing: run through all transition tuples, see if we find our example
-            return any(tup == ij and np.allclose(dx, v) for translist in lis for ij, v in translist)
+            return any(tup == ij and self.__isclose__(dx, v) for translist in lis for ij, v in translist)
 
         r2 = cutoff * cutoff
         nmax = [int(np.round(np.sqrt(self.metric[i, i]))) + 1
@@ -1330,7 +1361,7 @@ class Crystal(object):
                                 R2, ind2 = self.g_pos(g, n, (chem, j))
                                 tup = (ind1[1], ind2[1])
                                 dx = self.pos2cart(R2, ind2) - self.pos2cart(R1, ind1)
-                                if not any(tup == ij and np.allclose(dx, v) for ij, v in trans):
+                                if not any(tup == ij and self.__isclose__(dx, v) for ij, v in trans):
                                     trans.append((tup, dx))
                                     trans.append(((tup[1], tup[0]), -dx))
                             lis.append(trans)
@@ -1432,6 +1463,7 @@ class Crystal(object):
         :return kptsymm: array[Nsymm][3] of kpoints
         :return weight: array[Nsymm] of weights (integrates to 1)
         """
+        eps = self.threshold if threshold is None else threshold
         kptlist = list(kptfull)
         Nkpt = len(kptlist)
         kptlist.sort(key=lambda k: np.vdot(k, k))
@@ -1455,7 +1487,7 @@ class Crystal(object):
                 match = False
                 for i, symmcomp in enumerate(symmcomplist):
                     # if any(np.allclose(k, gk, rtol=0, atol=threshold) for gk in symmcomp):
-                    if any(np.all(abs(k - gk) < threshold) for gk in symmcomp):
+                    if any(np.all(abs(k - gk) < eps) for gk in symmcomp):
                         # update weight, kick out
                         wtlist[i] += basewt
                         match = True
