@@ -777,6 +777,7 @@ class Crystal(object):
         reduction = abs(T[m]/M)
         mult = np.array([M/T[m], T[i]/T[m], T[j]/T[m]])
         # 2. update the basis
+        self.threshold *= abs(mult[0]) # need to update *before* doing matching below:
         newbasis = []
         newspins = []
         for atomlist, spinlist in zip(self.basis, spins):
@@ -803,13 +804,12 @@ class Crystal(object):
                     avedisplist.append(np.zeros(3))
                     newspinlist.append(s)
             if len(newatomlist)*(M//abs(T[m])) != len(atomlist):
-                raise ArithmeticError('Reduction did not produce correct reduced basis: {} != {}'.format(len(newatomlist), atomlist))
+                raise ArithmeticError('Reduction did not produce correct reduced basis: {}*{} != {}'.format(len(newatomlist), M//abs(T[m]), len(atomlist)))
             newbasis.append([incell(v+reduction*dv) for v, dv in zip(newatomlist, avedisplist)])
             newspins.append([reduction*s for s in newspinlist])
         self.basis = newbasis
         if self.spins is not None: self.spins = newspins
         # 3. tail recursion:
-        self.threshold *= abs(mult[0])
         self.reduce()
 
     def remapbasis(self, supercell):
