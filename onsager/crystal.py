@@ -1473,7 +1473,7 @@ class Crystal(object):
         k2_indices = []
         k2old = np.vdot(kptlist[0], kptlist[0])
         for i, k2 in enumerate([np.vdot(k, k) for k in kptlist]):
-            if k2 > (k2old + threshold):
+            if k2 > (k2old + eps):
                 k2_indices.append(i)
                 k2old = k2
         k2_indices.append(Nkpt)

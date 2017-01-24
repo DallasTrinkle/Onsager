@@ -402,6 +402,65 @@ class CrystalClassTests(unittest.TestCase):
         self.assertEqual(len(crys.pointG[0][0]), 12)
         self.assertEqual(len(crys.pointG[0][1]), 12)
 
+    def testLaGaO3(self):
+        """Can we properly reduce down an LaGaO3 structure with errors in positions?"""
+        # this uses "real" DFT relaxation data to test the reduction capabilities
+        LaGa03latt = [np.array([  7.88040734e+00,   5.87657472e-05,  -1.95441808e-02]),
+                      np.array([ -7.59206882e-05,   7.87786508e+00,   8.28811636e-05]),
+                      np.array([ -1.95315626e-02,  -5.74109318e-05,   7.88041614e+00])]
+        LaGaO3basis = [[np.array([  2.02290790e-02,   2.32539034e-04,   9.91922251e-01]),
+                        np.array([  1.26313454e-02,   2.30601523e-04,   4.84327798e-01]),
+                        np.array([ 0.97941805,  0.50023385,  0.01754055]),
+                        np.array([ 0.98701667,  0.50023207,  0.52514002]),
+                        np.array([  5.12632654e-01,   2.30909936e-04,   9.84337122e-01]),
+                        np.array([  5.20224990e-01,   2.32577464e-04,   4.91932968e-01]),
+                        np.array([ 0.48701525,  0.50023187,  0.02514135]),
+                        np.array([ 0.47942077,  0.5002339 ,  0.51754884])],
+                       [np.array([ 0.24982273,  0.25023308,  0.25473045]),
+                        np.array([ 0.24982282,  0.25023333,  0.75473148]),
+                        np.array([ 0.249823  ,  0.75023368,  0.25472946]),
+                        np.array([ 0.24982247,  0.75023396,  0.75473027]),
+                        np.array([ 0.74982257,  0.2502339 ,  0.25473326]),
+                        np.array([ 0.74982307,  0.25023197,  0.75473186]),
+                        np.array([ 0.74982204,  0.75023295,  0.25473187]),
+                        np.array([ 0.74982322,  0.75023469,  0.75473098])],
+                       [np.array([ 0.28414742,  0.20916336,  0.00430709]),
+                        np.array([ 0.0002463 ,  0.20916015,  0.22041692]),
+                        np.array([  2.80317156e-01,   2.28151610e-04,   3.00655890e-01]),
+                        np.array([ 0.21550181,  0.29129973,  0.50516544]),
+                        np.array([ 0.99940227,  0.29128777,  0.78906602]),
+                        np.array([  2.03918412e-01,   2.36510236e-04,   7.24241274e-01]),
+                        np.array([ 0.2841317 ,  0.791303  ,  0.00431445]),
+                        np.array([  2.54313708e-04,   7.91306290e-01,   2.20429168e-01]),
+                        np.array([ 0.21933007,  0.50023581,  0.2088184 ]),
+                        np.array([ 0.21551645,  0.70916116,  0.50515561]),
+                        np.array([ 0.99939381,  0.7091728 ,  0.78904879]),
+                        np.array([ 0.29572872,  0.50022831,  0.78523308]),
+                        np.array([ 0.71550064,  0.29129386,  0.00516782]),
+                        np.array([ 0.4994013 ,  0.29130198,  0.28906235]),
+                        np.array([  7.03903980e-01,   2.36323588e-04,   2.24257240e-01]),
+                        np.array([ 0.78414767,  0.20916926,  0.50430849]),
+                        np.array([ 0.50024549,  0.20917445,  0.72041481]),
+                        np.array([  7.80305988e-01,   2.27988377e-04,   8.00654063e-01]),
+                        np.array([ 0.71551543,  0.7091663 ,  0.0051578 ]),
+                        np.array([ 0.49939281,  0.70915813,  0.28904503]),
+                        np.array([ 0.79574297,  0.50022792,  0.28522595]),
+                        np.array([ 0.78413198,  0.79129631,  0.50431609]),
+                        np.array([ 0.50025359,  0.79129237,  0.72042732]),
+                        np.array([ 0.71934128,  0.50023592,  0.70882833])]]
+        LaGaO3strict = crystal.Crystal(LaGa03latt, LaGaO3basis, ['La', 'Ga', 'O'],
+                                       threshold=1e-8)
+        LaGaO3toler = crystal.Crystal(LaGa03latt, LaGaO3basis, ['La', 'Ga', 'O'],
+                                      threshold=2e-5)
+        self.assertEqual(len(LaGaO3strict.G), 1)
+        self.assertEqual(len(LaGaO3toler.G), 2)
+        self.assertEqual([len(ulist) for ulist in LaGaO3strict.basis],
+                         [len(ulist) for ulist in LaGaO3basis])
+        self.assertEqual([2*len(ulist) for ulist in LaGaO3toler.basis],
+                         [len(ulist) for ulist in LaGaO3basis])
+        self.assertAlmostEqual(LaGaO3strict.volume, 2*LaGaO3toler.volume)
+
+
     def testscgroupops(self):
         """Do we have 48 space group operations?"""
         crys = crystal.Crystal(self.sclatt, self.basis)
