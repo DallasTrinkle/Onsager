@@ -598,11 +598,10 @@ class Crystal(object):
         if 'basis' not in yamldict: raise IndexError('{} does not contain "basis"'.format(yamldict))
         lattice_constant = 1.
         if 'lattice_constant' in yamldict: lattice_constant = yamldict['lattice_constant']
-        spins = None
-        if 'spins' in yamldict: spins = yamldict['spins']
-        chem = None
-        if 'chemistry' in yamldict: chem = yamldict['chemistry']
-        return cls((lattice_constant * yamldict['lattice']).T, yamldict['basis'], chem, spins)
+        return cls((lattice_constant * yamldict['lattice']).T, yamldict['basis'],
+                   chemistry=(yamldict['chemistry'] if 'chemistry' in yamldict else None),
+                   spins=(yamldict['spins'] if 'spins' in yamldict else None),
+                   threshold=(yamldict['threshold'] if 'threshold' in yamldict else 1e-8))
 
     def simpleYAML(self, a0=1.0):
         """
@@ -614,7 +613,8 @@ class Crystal(object):
                           'lattice': self.lattice.T / a0,
                           'basis': self.basis,
                           'spins': self.spins,
-                          'chemistry': self.chemistry})
+                          'chemistry': self.chemistry,
+                          'threshold': self.threshold})
 
     def chemindex(self, chemistry):
         """
