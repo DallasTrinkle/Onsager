@@ -969,7 +969,8 @@ class Crystal(object):
         if __debug__:
             if type(eps) is not np.ndarray or eps.shape != (3, 3):
                 raise TypeError('strain is not a 3x3 tensor')
-        return Crystal(np.dot(np.eye(3) + eps, self.lattice), self.basis)
+        return Crystal(np.dot(np.eye(3) + eps, self.lattice), self.basis,
+                       chemistry=self.chemistry, spins=self.spins, threshold=self.threshold)
 
     def addbasis(self, basis, chemistry=None, spins=None):
         """
@@ -1014,7 +1015,9 @@ class Crystal(object):
                 newspins = None
             else:
                 newspins = self.spins + [[0 for u in atomlist] for atomlist in newbasis]
-        return Crystal(self.lattice, self.basis + newbasis, newchemistry, newspins)
+        return Crystal(self.lattice, self.basis + newbasis,
+                       chemistry=newchemistry, spins=newspins,
+                       threshold=self.threshold)
 
     def pos2cart(self, lattvec, ind):
         """
@@ -1453,7 +1456,7 @@ class Crystal(object):
                         k -= 2. * G
         return kptfull
 
-    def reducekptmesh(self, kptfull, threshold=1e-8):
+    def reducekptmesh(self, kptfull, threshold=None):
         """
         Takes a fully expanded mesh, and reduces it by symmetry. Assumes every point is
         equally weighted. We would need a different (more complicated) algorithm if not true...
