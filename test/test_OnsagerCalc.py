@@ -1421,6 +1421,29 @@ elastodiffusion:
 {}""".format(strainmat, D0, Deps, Deps0)
             self.assertTrue(np.allclose(Deps, Deps0, rtol=2 * eps, atol=2 * eps), msg=failmsg)
 
+
+class InternalFrictionTests(unittest.TestCase):
+    """Tests for our internal friction, using the Interstitial calculator"""
+
+    def setUp(self):
+        # Setup BCC with with octahedral and tetrahedral sites
+        self.a0 = 1
+        self.bcclatt = self.a0 * np.array([[-0.5, 0.5, 0.5],
+                                           [0.5, -0.5, 0.5],
+                                           [0.5, 0.5, -0.5]])
+        self.bccbasis = [[np.zeros(3)], [np.array([0., 0.5, 0.5]),
+                                         np.array([0.5, 0., 0.5]),
+                                         np.array([0.5, 0.5, 0.])]]
+        self.BCC_intercrys = crystal.Crystal(self.bcclatt, self.bccbasis, chemistry=['Fe', 'C'])
+        self.chem = 1
+        self.BCC_jumpnetwork = self.BCC_intercrys.jumpnetwork(self.chem, self.a0 * 0.6)
+        self.BCC_sitelist = self.BCC_intercrys.sitelist(self.chem)
+        self.Dbcc = OnsagerCalc.Interstitial(self.BCC_intercrys, self.chem, self.BCC_sitelist, self.BCC_jumpnetwork)
+
+    def testBCCinternalfriction(self):
+        """Check that BCC internal friction calculator works"""
+        self.assertTrue(False)
+
 if __name__ == '__main__':
     # check our command line options for "verbose" to set the logging level higher
     import sys
