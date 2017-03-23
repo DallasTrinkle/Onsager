@@ -572,7 +572,6 @@ class Interstitial(object):
         lamb, phi = np.linalg.eigh(omega_ij)
         averate = abs(omega_ij.trace()/self.N)
         lambdaL = []
-        print(lamb, phi)
         # work through the eigenvalues / vectors individually:
         # NOTE: we should have a negative definite matrix, so negate those eigenvalues...
         for l, p in zip(-lamb, phi.T):

@@ -1459,10 +1459,25 @@ class InternalFrictionTests(unittest.TestCase):
                                         [beta*self.thermodict['dipole']],
                                         self.thermodict['preT'], beta*self.thermodict['eneT'])
         self.assertEqual(len(lambdaL), 1)  # should only have one unique eigenmode
-        for lambL in lambdaL:
-            self.assertEqual(lambL[1].shape, (3,3,3,3))  # fourth-rank tensor
-        print(lambdaL[0][0])
-        print(lambdaL[0][1])
+        for (lamb, L) in lambdaL:
+            self.assertEqual(L.shape, (3,3,3,3))  # fourth-rank tensor
+            for a,b,c,d in ((a,b,c,d) for a in range(3) for b in range(3) for c in range(3) for d in range(3)):
+                # symmetric tensor:
+                self.assertEqual(L[b,a,c,d], L[a,b,c,d])
+                self.assertEqual(L[a,b,d,c], L[a,b,c,d])
+                self.assertEqual(L[c,d,a,b], L[a,b,c,d])
+                # specific to BCC case:
+                if a!=b: self.assertAlmostEqual(L[a,b,c,d], 0)
+                if c!=d: self.assertAlmostEqual(L[a,b,c,d], 0)
+            self.assertAlmostEqual(L[0,0,0,0], L[1,1,1,1])
+            self.assertAlmostEqual(L[1,1,1,1], L[2,2,2,2])
+            self.assertAlmostEqual(L[2,2,2,2], L[0,0,0,0])
+            self.assertAlmostEqual(L[0,0,1,1], L[1,1,2,2])
+            self.assertAlmostEqual(L[1,1,2,2], L[2,2,0,0])
+            self.assertAlmostEqual(L[2,2,0,0], L[0,0,1,1])
+            Lave = (L[0,0,0,0]+2*L[0,0,1,1])/3
+            self.assertAlmostEqual(Lave, 0)
+
         self.assertTrue(False)
 
 if __name__ == '__main__':
