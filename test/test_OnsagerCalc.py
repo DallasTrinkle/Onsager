@@ -1458,9 +1458,11 @@ class InternalFrictionTests(unittest.TestCase):
         lambdaL = self.Dbcc.losstensors(self.thermodict['pre'], beta*self.thermodict['ene'],
                                         [beta*self.thermodict['dipole']],
                                         self.thermodict['preT'], beta*self.thermodict['eneT'])
-        self.assertEqual(len(lambdaL), len(self.BCC_intercrys.basis[self.chem])-1)  # two eigenmodes
+        self.assertEqual(len(lambdaL), 1)  # should only have one unique eigenmode
         for lambL in lambdaL:
             self.assertEqual(lambL[1].shape, (3,3,3,3))  # fourth-rank tensor
+        print(lambdaL[0][0])
+        print(lambdaL[0][1])
         self.assertTrue(False)
 
 if __name__ == '__main__':

@@ -532,6 +532,7 @@ class Interstitial(object):
         :param preT: list of prefactors for transition states
         :param betaeneT: list of transition state energies divided by kB T
         :return lambdaL: list of tuples of (eigenmode, L-tensor) where L-tensor is a 3x3x3x3 loss tensor
+            L-tensor needs to be multiplied by kB T to have proper units of energy.
         """
 
         def tensor_square(a):
@@ -569,11 +570,27 @@ class Interstitial(object):
         # lamb: eigenvalues, in ascending order, with eigenvalues phi
         # then, the *largest* should be lamb = 0
         lamb, phi = np.linalg.eigh(omega_ij)
+        averate = abs(omega_ij.trace()/self.N)
         lambdaL = []
+        print(lamb, phi)
         # work through the eigenvalues / vectors individually:
-        for l, p in zip(lamb, phi.T):
+        # NOTE: we should have a negative definite matrix, so negate those eigenvalues...
+        for l, p in zip(-lamb, phi.T):
             # need to check if lamb is (approximately) 0. Can also check if p is close to sqrtrho
-        return None
+            if abs(l) < 1e-8*averate: continue
+            if np.isclose(np.dot(p, sqrtrho), 1): continue
+            F = np.tensordot(p*sqrtrho, sitedipoles, axes=1)
+            L = tensor_square(F)
+            # determine if we have a new mode or not
+            found = False
+            for (lamb0, L0) in lambdaL:
+                if np.isclose(lamb0, l):
+                    L0 += L
+                    found = True
+            if not found:
+                lambdaL.append((l, L))
+        # pass back list
+        return lambdaL
 
 
 # YAML tags
