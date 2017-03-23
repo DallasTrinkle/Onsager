@@ -1439,9 +1439,21 @@ class InternalFrictionTests(unittest.TestCase):
         self.BCC_jumpnetwork = self.BCC_intercrys.jumpnetwork(self.chem, self.a0 * 0.6)
         self.BCC_sitelist = self.BCC_intercrys.sitelist(self.chem)
         self.Dbcc = OnsagerCalc.Interstitial(self.BCC_intercrys, self.chem, self.BCC_sitelist, self.BCC_jumpnetwork)
+        self.thermodict = {'pre': np.ones(len(self.BCC_sitelist)),
+                           'ene': np.zeros(len(self.BCC_sitelist)),
+                           'preT': np.ones(len(self.BCC_jumpnetwork)),
+                           'eneT': np.zeros(len(self.BCC_jumpnetwork))}
 
     def testBCCinternalfriction(self):
         """Check that BCC internal friction calculator works"""
+        # parallel and perpendicular components of site dipoles
+        Ppara = 1.0
+        Pperp = 0.0
+        # goofy little bit of code to determine the "direction" of the site, for setting up the dipole
+        direction = np.dot(self.bcclatt, self.BCC_intercrys.basis[self.chem][self.BCC_sitelist[0][0]])
+        paraindex = [n for n in range(3) if not np.isclose(direction[n], 0)][0]
+        self.thermodict['dipole'] = np.diag([Ppara if i==paraindex else Pperp
+                                             for i in range(3)])
         self.assertTrue(False)
 
 if __name__ == '__main__':
