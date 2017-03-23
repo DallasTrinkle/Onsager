@@ -566,7 +566,13 @@ class Interstitial(object):
                 omega_ij[i, j] += symmrate
                 omega_ij[i, i] -= rate
         # next, diagonalize:
-
+        # lamb: eigenvalues, in ascending order, with eigenvalues phi
+        # then, the *largest* should be lamb = 0
+        lamb, phi = np.linalg.eigh(omega_ij)
+        lambdaL = []
+        # work through the eigenvalues / vectors individually:
+        for l, p in zip(lamb, phi.T):
+            # need to check if lamb is (approximately) 0. Can also check if p is close to sqrtrho
         return None
 
 
