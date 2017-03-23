@@ -1454,6 +1454,13 @@ class InternalFrictionTests(unittest.TestCase):
         paraindex = [n for n in range(3) if not np.isclose(direction[n], 0)][0]
         self.thermodict['dipole'] = np.diag([Ppara if i==paraindex else Pperp
                                              for i in range(3)])
+        beta = 1.
+        lambdaL = self.Dbcc.losstensors(self.thermodict['pre'], beta*self.thermodict['ene'],
+                                        [beta*self.thermodict['dipole']],
+                                        self.thermodict['preT'], beta*self.thermodict['eneT'])
+        self.assertEqual(len(lambdaL), len(self.BCC_intercrys.basis[self.chem])-1)  # two eigenmodes
+        for lambL in lambdaL:
+            self.assertEqual(lambL[1].shape, (3,3,3,3))  # fourth-rank tensor
         self.assertTrue(False)
 
 if __name__ == '__main__':

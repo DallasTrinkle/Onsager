@@ -520,6 +520,55 @@ class Interstitial(object):
                 Dp[a, b, c, d] += 0.5 * D0[a, c]
         return D0, Dp
 
+    def losstensors(self, pre, betaene, dipole, preT, betaeneT):
+        """
+        Computes the internal friction loss tensors for our element given prefactors, energies/kB T,
+        and elastic dipoles/kB T
+        The input list order corresponds to the sitelist and jumpnetwork
+
+        :param pre: list of prefactors for unique sites
+        :param betaene: list of site energies divided by kB T
+        :param dipole: list of elastic dipoles divided by kB T
+        :param preT: list of prefactors for transition states
+        :param betaeneT: list of transition state energies divided by kB T
+        :return lambdaL: list of tuples of (eigenmode, L-tensor) where L-tensor is a 3x3x3x3 loss tensor
+        """
+
+        def tensor_square(a):
+            """Construct the outer product of a with itself"""
+            aa = np.zeros((3, 3, 3, 3))
+            for i, j, k, l in ((i, j, k, l) for i in range(3) for j in range(3) for k in range(3) for l in range(3)):
+                aa[i, j, k, l] = a[i, j] * a[k, l]
+            return aa
+
+        if __debug__:
+            if len(pre) != len(self.sitelist): raise IndexError(
+                "length of prefactor {} doesn't match sitelist".format(pre))
+            if len(betaene) != len(self.sitelist): raise IndexError(
+                "length of energies {} doesn't match sitelist".format(betaene))
+            if len(dipole) != len(self.sitelist): raise IndexError(
+                "length of dipoles {} doesn't match sitelist".format(dipole))
+            if len(preT) != len(self.jumpnetwork): raise IndexError(
+                "length of prefactor {} doesn't match jump network".format(preT))
+            if len(betaeneT) != len(self.jumpnetwork): raise IndexError(
+                "length of energies {} doesn't match jump network".format(betaeneT))
+        rho = self.siteprob(pre, betaene)
+        sqrtrho = np.sqrt(rho)
+        ratelist = self.ratelist(pre, betaene, preT, betaeneT)
+        symmratelist = self.symmratelist(pre, betaene, preT, betaeneT)
+        omega_ij = np.zeros((self.N, self.N))
+        sitedipoles = self.siteDipoles(dipole)
+
+        # populate our symmetrized transition matrix:
+        for transitionset, rates, symmrates in zip(self.jumpnetwork, ratelist, symmratelist):
+            for ((i, j), dx), rate, symmrate in zip(transitionset, rates, symmrates):
+                # symmrate = sqrtrho[i]*invsqrtrho[j]*rate
+                omega_ij[i, j] += symmrate
+                omega_ij[i, i] -= rate
+        # next, diagonalize:
+
+        return None
+
 
 # YAML tags
 VACANCYTHERMOKINETICS_YAMLTAG = '!VacancyThermoKinetics'
