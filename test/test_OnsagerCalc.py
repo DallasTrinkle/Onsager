@@ -1446,39 +1446,41 @@ class InternalFrictionTests(unittest.TestCase):
 
     def testBCCinternalfriction(self):
         """Check that BCC internal friction calculator works"""
-        # parallel and perpendicular components of site dipoles
-        Ppara = 1.0
-        Pperp = 0.0
+        beta = 1.
         # goofy little bit of code to determine the "direction" of the site, for setting up the dipole
         direction = np.dot(self.bcclatt, self.BCC_intercrys.basis[self.chem][self.BCC_sitelist[0][0]])
         paraindex = [n for n in range(3) if not np.isclose(direction[n], 0)][0]
-        self.thermodict['dipole'] = np.diag([Ppara if i==paraindex else Pperp
-                                             for i in range(3)])
-        beta = 1.
-        lambdaL = self.Dbcc.losstensors(self.thermodict['pre'], beta*self.thermodict['ene'],
-                                        [beta*self.thermodict['dipole']],
-                                        self.thermodict['preT'], beta*self.thermodict['eneT'])
-        self.assertEqual(len(lambdaL), 1)  # should only have one unique eigenmode
-        for (lamb, L) in lambdaL:
-            self.assertEqual(L.shape, (3,3,3,3))  # fourth-rank tensor
-            for a,b,c,d in ((a,b,c,d) for a in range(3) for b in range(3) for c in range(3) for d in range(3)):
-                # symmetric tensor:
-                self.assertEqual(L[b,a,c,d], L[a,b,c,d])
-                self.assertEqual(L[a,b,d,c], L[a,b,c,d])
-                self.assertEqual(L[c,d,a,b], L[a,b,c,d])
-                # specific to BCC case:
-                if a!=b: self.assertAlmostEqual(L[a,b,c,d], 0)
-                if c!=d: self.assertAlmostEqual(L[a,b,c,d], 0)
-            self.assertAlmostEqual(L[0,0,0,0], L[1,1,1,1])
-            self.assertAlmostEqual(L[1,1,1,1], L[2,2,2,2])
-            self.assertAlmostEqual(L[2,2,2,2], L[0,0,0,0])
-            self.assertAlmostEqual(L[0,0,1,1], L[1,1,2,2])
-            self.assertAlmostEqual(L[1,1,2,2], L[2,2,0,0])
-            self.assertAlmostEqual(L[2,2,0,0], L[0,0,1,1])
-            Lave = (L[0,0,0,0]+2*L[0,0,1,1])/3
-            self.assertAlmostEqual(Lave, 0)
-
-        self.assertTrue(False)
+        # parallel and perpendicular components of site dipoles: run through multiple combinations.
+        for Ppara, Pperp in ((1., 0.), (0., 1.), (-1.3, 0.4), (2.5, 2.5), (-2.1, -0.8)):
+            dipole = np.diag([Ppara if i==paraindex else Pperp for i in range(3)])
+            lambdaL = self.Dbcc.losstensors(self.thermodict['pre'], beta*self.thermodict['ene'],
+                                            [beta*dipole],
+                                            self.thermodict['preT'], beta*self.thermodict['eneT'])
+            omega = self.thermodict['preT'][0]/self.thermodict['pre'][0]*\
+                    np.exp(-beta*(self.thermodict['eneT'][0]-self.thermodict['ene'][0]))
+            self.assertEqual(len(lambdaL), 1)  # should only have one unique eigenmode: 6*omega
+            for (lamb, L) in lambdaL:
+                self.assertAlmostEqual(lamb, 6*omega)
+                self.assertEqual(L.shape, (3,3,3,3))  # fourth-rank tensor
+                for a,b,c,d in ((a,b,c,d) for a in range(3) for b in range(3) for c in range(3) for d in range(3)):
+                    # symmetric tensor:
+                    self.assertEqual(L[b,a,c,d], L[a,b,c,d])
+                    self.assertEqual(L[a,b,d,c], L[a,b,c,d])
+                    self.assertEqual(L[c,d,a,b], L[a,b,c,d])
+                    # specific to BCC case:
+                    if a!=b: self.assertAlmostEqual(L[a,b,c,d], 0)
+                    if c!=d: self.assertAlmostEqual(L[a,b,c,d], 0)
+                self.assertAlmostEqual(L[0,0,0,0], L[1,1,1,1])
+                self.assertAlmostEqual(L[1,1,1,1], L[2,2,2,2])
+                self.assertAlmostEqual(L[2,2,2,2], L[0,0,0,0])
+                self.assertAlmostEqual(L[0,0,1,1], L[1,1,2,2])
+                self.assertAlmostEqual(L[1,1,2,2], L[2,2,0,0])
+                self.assertAlmostEqual(L[2,2,0,0], L[0,0,1,1])
+                Lave = (L[0,0,0,0]+2*L[0,0,1,1])/3
+                self.assertAlmostEqual(Lave, 0)
+                self.assertAlmostEqual(L[0,0,0,0], (2/9)*(Ppara-Pperp)**2)
+                self.assertAlmostEqual(L[0,0,1,1], -(1/9)*(Ppara-Pperp)**2)
+                self.assertAlmostEqual(L[0,1,0,1], 0)
 
 if __name__ == '__main__':
     # check our command line options for "verbose" to set the logging level higher
