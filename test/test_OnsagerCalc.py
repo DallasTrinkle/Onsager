@@ -1444,22 +1444,47 @@ class InternalFrictionTests(unittest.TestCase):
                            'preT': np.ones(len(self.BCC_jumpnetwork)),
                            'eneT': np.zeros(len(self.BCC_jumpnetwork))}
 
-    def testFourthRankAverage(self):
+    def testIsotropicFourthRank(self):
+        """Check that the construction of the fourth rank tensor from average and shear is correct"""
+        for n in range(10):
+            av1,sh1,av2,sh2 = np.random.random_sample(4)*2-1
+            F1,F2 = crystal.isotropicFourthRank(av1,sh1), crystal.isotropicFourthRank(av2,sh2)
+            Fsum = crystal.isotropicFourthRank(av1+av2,sh1+sh2)
+            msg = "({av1},{sh1})+({av2},{sh2}) != ({av1}+{sh1},{av2}+{sh2})".format(
+                av1=av1,av2=av2,sh1=sh1,sh2=sh2)
+            self.assertTrue(np.allclose(F1+F2,Fsum), msg=msg)
+            isoav, isosh = crystal.FourthRankIsotropic(F1)
+            self.assertAlmostEqual(av1, isoav)
+            self.assertAlmostEqual(sh1, isosh)
+
+    def testFourthRankIsotropic(self):
         """Check the spherical averaging of a fourth rank symmetric tensor is correct"""
         # randomly populate (between -1 and 1), but enforce symmetry
-        L = np.random.random_sample((3,3,3,3))*2 - 1
-        aveset = set()
-        for a, b, c, d in ((a, b, c, d) for a in range(3) for b in range(3) for c in range(3) for d in range(3)):
-            if (a,b,c,d) in aveset: continue
-            # first, a list of the 8 symmetry-related combinations:
-            indlist = ((a,b,c,d), (b,a,c,d), (a,b,d,c), (b,a,d,c),
-                       (c,d,a,b), (c,d,b,a), (d,c,a,b), (d,c,b,a))
-            Lave = 0.125*sum(L[ind] for ind in indlist)
-            for ind in indlist:
-                L[ind] = Lave
-            aveset.update(indlist)
-        print(L)
-        self.assertTrue(False)
+        for n in range(10):
+            L = np.random.random_sample((3,3,3,3))*2 - 1
+            aveset = set()
+            for a, b, c, d in ((a, b, c, d) for a in range(3) for b in range(3) for c in range(3) for d in range(3)):
+                if (a,b,c,d) in aveset: continue
+                # first, a list of the 8 symmetry-related combinations:
+                indlist = ((a,b,c,d), (b,a,c,d), (a,b,d,c), (b,a,d,c),
+                           (c,d,a,b), (c,d,b,a), (d,c,a,b), (d,c,b,a))
+                Lave = 0.125*sum(L[ind] for ind in indlist)
+                for ind in indlist:
+                    L[ind] = Lave
+                aveset.update(indlist)
+            average, shear = crystal.FourthRankIsotropic(L)
+            # random orientations
+            for m in range(10):
+                # quick code to make "random" orientation matrices; doesn't have to be uniformly distributed
+                v1,v2 = np.random.random_sample(3)*2-1, np.random.random_sample(3)*2-1
+                v1 /= np.sqrt(np.dot(v1,v1))
+                v2 -= np.dot(v2,v1)*v1
+                v2 /= np.sqrt(np.dot(v2,v2))
+                theta = np.array((v1,v2,np.cross(v1,v2)))
+                Lrot = np.einsum('ai,bj,ck,dl,abcd->ijkl', theta, theta, theta, theta, L)
+                average_rot, shear_rot = crystal.FourthRankIsotropic(Lrot)
+                self.assertAlmostEqual(average, average_rot)
+                self.assertAlmostEqual(shear, shear_rot)
 
 
     def testBCCinternalfriction(self):

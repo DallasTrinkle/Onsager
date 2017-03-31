@@ -506,7 +506,7 @@ def FourthRankIsotropic(F):
     :return average: average value = (F11+2F12)/3, orientationally averaged
     :return shear: shear value = F44, orientationally averaged
     """
-    return F[0,0,0,0], F[0,1,0,1]
+    return (F[0,0,0,0]+2*F[0,0,1,1])/3, F[0,1,0,1]
 
 
 # TODO: Add the ability to explicitly specify "metastable" states that should be considered the same chemistry, but not subject to reduction
