@@ -1483,8 +1483,8 @@ class InternalFrictionTests(unittest.TestCase):
                 theta = np.array((v1,v2,np.cross(v1,v2)))
                 Lrot = np.einsum('ai,bj,ck,dl,abcd->ijkl', theta, theta, theta, theta, L)
                 average_rot, shear_rot = crystal.FourthRankIsotropic(Lrot)
-                self.assertAlmostEqual(average, average_rot)
-                self.assertAlmostEqual(shear, shear_rot)
+                self.assertAlmostEqual(average, average_rot, msg='average failure')
+                self.assertAlmostEqual(shear, shear_rot, msg='shear failure')
 
 
     def testBCCinternalfriction(self):
