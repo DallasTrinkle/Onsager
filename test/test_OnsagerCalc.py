@@ -1486,7 +1486,6 @@ class InternalFrictionTests(unittest.TestCase):
                 self.assertAlmostEqual(average, average_rot, msg='average failure')
                 self.assertAlmostEqual(shear, shear_rot, msg='shear failure')
 
-
     def testBCCinternalfriction(self):
         """Check that BCC internal friction calculator works"""
         beta = 1.
