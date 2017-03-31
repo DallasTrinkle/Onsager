@@ -477,6 +477,38 @@ def Voigtstrain(e1, e2, e3, e4, e5, e6):
     return np.array([[e1, 0.5 * e6, 0.5 * e5], [0.5 * e6, e2, 0.5 * e4], [0.5 * e5, 0.5 * e4, e3]])
 
 
+def isotropicFourthRank(average, shear):
+    """
+    Returns a symmetrized, isotropic fourth-rank tensor based on an average value and "shear" value
+
+    :param average: averaged value = (F11+2F12)/3
+    :param shear: shear value = F44 = (F11-F12)/2
+    :return F[a,b,c,d]: isotropic fourth-rank tensor
+    """
+    F = np.zeros((3,3,3,3))
+    F11, F12, F44 = average + 4*shear/3, average - 2*shear/3, shear
+    for a in range(3):
+        F[a,a,a,a] = F11
+        for b in range(3):
+            if b != a:
+                F[a,a,b,b] = F12
+                F[a,b,a,b] = F44
+                F[a,b,b,a] = F44
+    return F
+
+
+def FourthRankIsotropic(F):
+    """
+    Returns the average and shear values from orientational averaging of a symmetric fourth-rank
+    tensor.
+
+    :param F[a,b,c,d]: symmetric fourth-rank tensor (F[abcd]=F[abcd]=F[bacd]=F[cdab])
+    :return average: average value = (F11+2F12)/3, orientationally averaged
+    :return shear: shear value = F44, orientationally averaged
+    """
+    return F[0,0,0,0], F[0,1,0,1]
+
+
 # TODO: Add the ability to explicitly specify "metastable" states that should be considered the same chemistry, but not subject to reduction
 class Crystal(object):
     """

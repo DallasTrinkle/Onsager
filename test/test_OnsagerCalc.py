@@ -1444,6 +1444,24 @@ class InternalFrictionTests(unittest.TestCase):
                            'preT': np.ones(len(self.BCC_jumpnetwork)),
                            'eneT': np.zeros(len(self.BCC_jumpnetwork))}
 
+    def testFourthRankAverage(self):
+        """Check the spherical averaging of a fourth rank symmetric tensor is correct"""
+        # randomly populate (between -1 and 1), but enforce symmetry
+        L = np.random.random_sample((3,3,3,3))*2 - 1
+        aveset = set()
+        for a, b, c, d in ((a, b, c, d) for a in range(3) for b in range(3) for c in range(3) for d in range(3)):
+            if (a,b,c,d) in aveset: continue
+            # first, a list of the 8 symmetry-related combinations:
+            indlist = ((a,b,c,d), (b,a,c,d), (a,b,d,c), (b,a,d,c),
+                       (c,d,a,b), (c,d,b,a), (d,c,a,b), (d,c,b,a))
+            Lave = 0.125*sum(L[ind] for ind in indlist)
+            for ind in indlist:
+                L[ind] = Lave
+            aveset.update(indlist)
+        print(L)
+        self.assertTrue(False)
+
+
     def testBCCinternalfriction(self):
         """Check that BCC internal friction calculator works"""
         beta = 1.
