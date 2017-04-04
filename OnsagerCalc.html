@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -30,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="Onsager 1.2.1 documentation" href="index.html"/>
         <link rel="next" title="Automator" href="automator.html"/>
         <link rel="prev" title="GFcalc" href="GFcalc.html"/> 
@@ -41,6 +46,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -81,7 +87,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="includeme.html#references">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="includeme.html#contributors">Contributors</a></li>
@@ -106,8 +115,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Onsager</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Onsager</a>
+        
       </nav>
 
 
@@ -116,23 +127,40 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>OnsagerCalc</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>OnsagerCalc</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/OnsagerCalc.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/OnsagerCalc.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -287,7 +315,7 @@ The input list order corresponds to the sitelist and jumpnetwork</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return dD[3,3,3,3]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">elastodiffusion tensor as 3x3x3x3 tensor</p>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first last">elastodiffusion tensor as 3x3x3x3 tensor</p>
 </td>
 </tr>
 </tbody>
@@ -304,7 +332,7 @@ network into all of the other members; one group operation for each.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return siteGroupOps:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of list of group ops that mirrors the structure of jumpnetwork.</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list of list of group ops that mirrors the structure of jumpnetwork.</td>
 </tr>
 </tbody>
 </table>
@@ -320,7 +348,7 @@ in our jump network</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return TensorSet:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of list of symmetric tensors</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list of list of symmetric tensors</td>
 </tr>
 </tbody>
 </table>
@@ -336,7 +364,7 @@ into all of the other members; one group operation for each.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return siteGroupOps:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of list of group ops that mirrors the structure of site list</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list of list of group ops that mirrors the structure of site list</td>
 </tr>
 </tbody>
 </table>
@@ -352,7 +380,7 @@ in our site list.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return TensorSet:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of symmetric tensors</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list of symmetric tensors</td>
 </tr>
 </tbody>
 </table>
@@ -371,7 +399,7 @@ in our site list.</p>
 <tr class="field-even field"><th class="field-name">Return tagdict:</th><td class="field-body">dictionary that maps tag into the index of the corresponding list.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return tagdicttype:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">dictionary that maps tag into the key for the corresponding list.</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">dictionary that maps tag into the key for the corresponding list.</td>
 </tr>
 </tbody>
 </table>
@@ -389,7 +417,7 @@ for the representatives. (&#8220;populating&#8221; the full set of dipoles)</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dipoles</strong> &#8211; list of dipoles for the first representative transition</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return dipolelist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of lists of dipole for each jump[site][3][3]</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list of lists of dipole for each jump[site][3][3]</td>
 </tr>
 </tbody>
 </table>
@@ -399,6 +427,33 @@ for the representatives. (&#8220;populating&#8221; the full set of dipoles)</p>
 <dt id="OnsagerCalc.Interstitial.jumpnetworkYAML">
 <em class="property">static </em><code class="descname">jumpnetworkYAML</code><span class="sig-paren">(</span><em>jumpnetwork</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.jumpnetworkYAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.jumpnetworkYAML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dumps a &#8220;sample&#8221; YAML formatted version of the jumpnetwork with data to be entered</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.Interstitial.losstensors">
+<code class="descname">losstensors</code><span class="sig-paren">(</span><em>pre</em>, <em>betaene</em>, <em>dipole</em>, <em>preT</em>, <em>betaeneT</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.losstensors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.losstensors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the internal friction loss tensors for our element given prefactors, energies/kB T,
+and elastic dipoles/kB T
+The input list order corresponds to the sitelist and jumpnetwork</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pre</strong> &#8211; list of prefactors for unique sites</li>
+<li><strong>betaene</strong> &#8211; list of site energies divided by kB T</li>
+<li><strong>dipole</strong> &#8211; list of elastic dipoles divided by kB T</li>
+<li><strong>preT</strong> &#8211; list of prefactors for transition states</li>
+<li><strong>betaeneT</strong> &#8211; list of transition state energies divided by kB T</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return lambdaL:</th><td class="field-body"><p class="first last">list of tuples of (eigenmode, L-tensor) where L-tensor is a 3x3x3x3 loss tensor
+L-tensor needs to be multiplied by kB T to have proper units of energy.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -414,7 +469,7 @@ site energies and transitions (corresponding to the representatives).</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return superdict:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>,
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>,
 and <code class="docutils literal"><span class="pre">indices</span></code> that correspond to dictionaries with tags.</p>
 <ul class="last simple">
 <li>superdict[&#8216;states&#8217;][i] = supercell of site;</li>
@@ -446,7 +501,7 @@ for the representatives. (&#8220;populating&#8221; the full set of dipoles)</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dipoles</strong> &#8211; list of dipoles for the first representative site</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return dipolelist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">array of dipole for each site [site][3][3]</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">array of dipole for each site [site][3][3]</td>
 </tr>
 </tbody>
 </table>
@@ -501,30 +556,30 @@ and hash function.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>bFV[NWyckoff]</strong> &#8211; beta*eneV - ln(preV) (relative to minimum value)</li>
-<li><strong>bFS[NWyckoff]</strong> &#8211; beta*eneS - ln(preS) (relative to minimum value)</li>
-<li><strong>bFSV[Nthermo]</strong> &#8211; beta*eneSV - ln(preSV) (excess)</li>
-<li><strong>bFT0[Nomega0]</strong> &#8211; beta*eneT0 - ln(preT0) (relative to minimum value of bFV)</li>
-<li><strong>bFT1[Nomega1]</strong> &#8211; beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)</li>
-<li><strong>bFT2[Nomega2]</strong> &#8211; beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)</li>
+<li><strong>bFV</strong><strong>[</strong><strong>NWyckoff</strong><strong>]</strong><strong></strong> &#8211; beta*eneV - ln(preV) (relative to minimum value)</li>
+<li><strong>bFS</strong><strong>[</strong><strong>NWyckoff</strong><strong>]</strong><strong></strong> &#8211; beta*eneS - ln(preS) (relative to minimum value)</li>
+<li><strong>bFSV</strong><strong>[</strong><strong>Nthermo</strong><strong>]</strong><strong></strong> &#8211; beta*eneSV - ln(preSV) (excess)</li>
+<li><strong>bFT0</strong><strong>[</strong><strong>Nomega0</strong><strong>]</strong><strong></strong> &#8211; beta*eneT0 - ln(preT0) (relative to minimum value of bFV)</li>
+<li><strong>bFT1</strong><strong>[</strong><strong>Nomega1</strong><strong>]</strong><strong></strong> &#8211; beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)</li>
+<li><strong>bFT2</strong><strong>[</strong><strong>Nomega2</strong><strong>]</strong><strong></strong> &#8211; beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)</li>
 <li><strong>large_om2</strong> &#8211; threshold for changing treatment of omega2 contributions (default: 10^8)</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return Lvv[3, 3]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">vacancy-vacancy; needs to be multiplied by cv/kBT</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">vacancy-vacancy; needs to be multiplied by cv/kBT</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return Lss[3, 3]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">solute-solute; needs to be multiplied by cv*cs/kBT</p>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">solute-solute; needs to be multiplied by cv*cs/kBT</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return Lsv[3, 3]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">solute-vacancy; needs to be multiplied by cv*cs/kBT</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">solute-vacancy; needs to be multiplied by cv*cs/kBT</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return Lvv1[3, 3]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT</p>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first last">vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT</p>
 </td>
 </tr>
 </tbody>
@@ -625,7 +680,7 @@ omega0, omega1, and omega2 transition states.</p>
 <tr class="field-even field"><th class="field-name">Return tagdict:</th><td class="field-body">dictionary that maps tag into the index of the corresponding list.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return tagdicttype:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">dictionary that maps tag into the key for the corresponding list.</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">dictionary that maps tag into the key for the corresponding list.</td>
 </tr>
 </tbody>
 </table>
@@ -641,7 +696,7 @@ to a vector between a solute atom and a vacancy. Defined by Stars.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return statelist:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of PairStates for the solute-vacancy interactions</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list of PairStates for the solute-vacancy interactions</td>
 </tr>
 </tbody>
 </table>
@@ -658,7 +713,7 @@ to a vector between a solute atom and a vacancy. Defined by Stars.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDFgroup</strong> &#8211; HDF5 group</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return VacancyMediated:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">new VacancyMediated diffuser object from HDF5</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">new VacancyMediated diffuser object from HDF5</td>
 </tr>
 </tbody>
 </table>
@@ -675,29 +730,29 @@ to a vector between a solute atom and a vacancy. Defined by Stars.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>preS[NWyckoff]</strong> &#8211; prefactor for solute formation</li>
-<li><strong>eneS[NWyckoff]</strong> &#8211; solute formation energy</li>
-<li><strong>preSV[Nthermo]</strong> &#8211; prefactor for solute-vacancy interaction</li>
-<li><strong>eneSV[Nthermo]</strong> &#8211; solute-vacancy binding energy</li>
-<li><strong>preT0[Nomeg0]</strong> &#8211; prefactor for vacancy jump transitions (follows jumpnetwork)</li>
-<li><strong>eneT0[Nomega0]</strong> &#8211; transition energy for vacancy jumps</li>
+<li><strong>preS</strong><strong>[</strong><strong>NWyckoff</strong><strong>]</strong><strong></strong> &#8211; prefactor for solute formation</li>
+<li><strong>eneS</strong><strong>[</strong><strong>NWyckoff</strong><strong>]</strong><strong></strong> &#8211; solute formation energy</li>
+<li><strong>preSV</strong><strong>[</strong><strong>Nthermo</strong><strong>]</strong><strong></strong> &#8211; prefactor for solute-vacancy interaction</li>
+<li><strong>eneSV</strong><strong>[</strong><strong>Nthermo</strong><strong>]</strong><strong></strong> &#8211; solute-vacancy binding energy</li>
+<li><strong>preT0</strong><strong>[</strong><strong>Nomeg0</strong><strong>]</strong><strong></strong> &#8211; prefactor for vacancy jump transitions (follows jumpnetwork)</li>
+<li><strong>eneT0</strong><strong>[</strong><strong>Nomega0</strong><strong>]</strong><strong></strong> &#8211; transition energy for vacancy jumps</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return preT1[Nomega1]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">prefactor for omega1-style transitions (follows om1_jn)</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">prefactor for omega1-style transitions (follows om1_jn)</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return eneT1[Nomega1]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">transition energy/kBT for omega1-style jumps</p>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">transition energy/kBT for omega1-style jumps</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return preT2[Nomega2]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">prefactor for omega2-style transitions (follows om2_jn)</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">prefactor for omega2-style transitions (follows om2_jn)</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return eneT2[Nomega2]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">transition energy/kBT for omega2-style jumps</p>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first last">transition energy/kBT for omega2-style jumps</p>
 </td>
 </tr>
 </tbody>
@@ -732,7 +787,7 @@ barriers. Extreme caution should be used if any of the other warnings are raised
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return superdict:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>,
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>,
 <code class="docutils literal"><span class="pre">indices</span></code> that correspond to dictionaries with tags; the final tag
 <code class="docutils literal"><span class="pre">reference</span></code> is the basesupercell for calculations without defects.</p>
 <ul class="last simple">
@@ -758,41 +813,41 @@ barriers. Extreme caution should be used if any of the other warnings are raised
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>preT0[Nomeg0]</strong> &#8211; prefactor for vacancy jump transitions (follows jumpnetwork)</li>
-<li><strong>eneT0[Nomega0]</strong> &#8211; transition energy state for vacancy jumps</li>
+<li><strong>preT0</strong><strong>[</strong><strong>Nomeg0</strong><strong>]</strong><strong></strong> &#8211; prefactor for vacancy jump transitions (follows jumpnetwork)</li>
+<li><strong>eneT0</strong><strong>[</strong><strong>Nomega0</strong><strong>]</strong><strong></strong> &#8211; transition energy state for vacancy jumps</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return preS[NWyckoff]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">prefactor for solute formation</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">prefactor for solute formation</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return eneS[NWyckoff]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">solute formation energy</p>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">solute formation energy</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return preSV[Nthermo]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">prefactor for solute-vacancy interaction</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">prefactor for solute-vacancy interaction</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return eneSV[Nthermo]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">solute-vacancy binding energy</p>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">solute-vacancy binding energy</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return preT1[Nomega1]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">prefactor for omega1-style transitions (follows om1_jn)</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">prefactor for omega1-style transitions (follows om1_jn)</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return eneT1[Nomega1]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">transition energy for omega1-style jumps</p>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">transition energy for omega1-style jumps</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return preT2[Nomega2]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">prefactor for omega2-style transitions (follows om2_jn)</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">prefactor for omega2-style transitions (follows om2_jn)</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return eneT2[Nomega2]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">transition energy for omega2-style jumps</p>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first last">transition energy for omega2-style jumps</p>
 </td>
 </tr>
 </tbody>
@@ -811,10 +866,10 @@ Solute at the origin, vacancy hopping between two sites. Defined by om1_jumpnetw
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fivefreqindex</strong> &#8211; 1 or 2, corresponding to omega1 or omega2</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return omegalist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of tuples of PairStates</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list of tuples of PairStates</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return omegajumptype:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">index of corresponding omega0 jumptype</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">index of corresponding omega0 jumptype</td>
 </tr>
 </tbody>
 </table>
@@ -887,20 +942,20 @@ and then send that output as input to Lij: <code class="docutils literal"><span 
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return thermodict:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">dictionary of ene&#8217;s and pre&#8217;s corresponding to usertagdict</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">dictionary of ene&#8217;s and pre&#8217;s corresponding to usertagdict</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return missingdict:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">dictionary with keys corresponding to tag types, and the values are
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">dictionary with keys corresponding to tag types, and the values are
 lists of lists of symmetry equivalent tags that are missing</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return duplicatelist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">list of lists of tags in usertagdict that are (symmetry) duplicates</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">list of lists of tags in usertagdict that are (symmetry) duplicates</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return badtaglist:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of all tags in usertagdict that aren&#8217;t found in our dictionary</p>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first last">list of all tags in usertagdict that aren&#8217;t found in our dictionary</p>
 </td>
 </tr>
 </tbody>
@@ -944,13 +999,13 @@ and the splits to separate vTKarray back into vTK</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vTKdict</strong> &#8211; dictionary, indexed by vTK objects, whose entries are arrays</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return vTKarray:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">array of vTK entries</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">array of vTK entries</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return valarray:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">array of values</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">array of values</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return vTKsplits:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">split placement for vTK entries</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">split placement for vTK entries</td>
 </tr>
 </tbody>
 </table>
@@ -992,15 +1047,18 @@ and the splits to separate vTKarray back into vTK</p>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="automator.html" class="btn btn-neutral float-right" title="Automator" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="automator.html" class="btn btn-neutral float-right" title="Automator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="GFcalc.html" class="btn btn-neutral" title="GFcalc" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="GFcalc.html" class="btn btn-neutral" title="GFcalc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1034,7 +1092,8 @@ and the splits to separate vTKarray back into vTK</p>
             VERSION:'1.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

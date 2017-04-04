@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -30,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="Onsager 1.2.1 documentation" href="index.html"/>
         <link rel="next" title="GFcalc" href="GFcalc.html"/>
         <link rel="prev" title="Supercell" href="supercell.html"/> 
@@ -41,6 +46,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -81,7 +87,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="includeme.html#references">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="includeme.html#contributors">Contributors</a></li>
@@ -106,8 +115,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Onsager</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Onsager</a>
+        
       </nav>
 
 
@@ -116,23 +127,40 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>PowerExpansion</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>PowerExpansion</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/PowerExpansion.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/PowerExpansion.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -210,7 +238,7 @@ values, and leave it at that.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return value or dictionary:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">depending on fnu; default is dictionary</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">depending on fnu; default is dictionary</p>
 </td>
 </tr>
 </tbody>
@@ -228,7 +256,7 @@ values, and leave it at that.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> &#8211; indices for our Taylor expansion</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return Taylor3D:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Taylor expansion after indexing</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Taylor expansion after indexing</td>
 </tr>
 </tbody>
 </table>
@@ -297,7 +325,7 @@ doesn&#8217;t make copies of the underlying matrices.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return Taylor3D:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">expansion of product</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">expansion of product</td>
 </tr>
 </tbody>
 </table>
@@ -332,7 +360,7 @@ doesn&#8217;t make copies of the underlying matrices.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return Taylor3D:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">expansion of product</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">expansion of product</td>
 </tr>
 </tbody>
 </table>
@@ -472,7 +500,7 @@ reduce is called.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return coefflist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">a</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">a</p>
 </td>
 </tr>
 </tbody>
@@ -490,7 +518,7 @@ Takes a direction expansion a and b, and returns the sum of the expansions.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>= list((coeffmatrix, vect))</strong> (<em>basis</em>) &#8211; expansions to create;
+<li><strong>= list</strong><strong>(</strong><strong></strong><strong>(</strong><strong>coeffmatrix</strong><strong>, </strong><strong>vect</strong><strong>)</strong><strong></strong><strong>)</strong><strong></strong> (<em>basis</em>) &#8211; expansions to create;
 sum(coeffmatrix * (vect*q)^n), for powers n = 0..N</li>
 <li><strong>N</strong> &#8211; maximum power to consider; for N=-1, use Lmax</li>
 <li><strong>pre</strong> &#8211; list of prefactors, defining the Taylor expansion. Default = 1</li>
@@ -498,7 +526,7 @@ sum(coeffmatrix * (vect*q)^n), for powers n = 0..N</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return list((n, lmax, powexpansion)),...:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">our expansion, as input to create
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">our expansion, as input to create
 Taylor3D objects</p>
 </td>
 </tr>
@@ -544,7 +572,7 @@ sanity check</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Nmax</strong> &#8211; maximum order in the inverse expansion</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return Taylor3D^-1:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Taylor series of inverse</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Taylor series of inverse</td>
 </tr>
 </tbody>
 </table>
@@ -653,7 +681,7 @@ projection of powers containing <em>only</em> l component.
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return Ylmpow[lm, p]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">expansion of each Ylm in powers</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">expansion of each Ylm in powers</td>
 </tr>
 </tbody>
 </table>
@@ -667,7 +695,7 @@ projection of powers containing <em>only</em> l component.
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return direcmult[p][p&#8217;]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">index that corresponds to the multiplication of power indices p and p&#8217;</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">index that corresponds to the multiplication of power indices p and p&#8217;</td>
 </tr>
 </tbody>
 </table>
@@ -689,19 +717,19 @@ series of index functions.</p>
 <tr class="field-odd field"><th class="field-name">Return Npower:</th><td class="field-body">number of power coefficients</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return pow2ind[n1][n2][n3]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">powers to index</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">powers to index</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return ind2pow[n]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">powers for a given index</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">powers for a given index</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return Ylm2ind[l][m]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">(l,m) to index</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">(l,m) to index</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return ind2Ylm[lm]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">(l,m) for a given index</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">(l,m) for a given index</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return powlrange[l]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">upper limit of power indices for a given l value; note: [-1] = 0</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">upper limit of power indices for a given l value; note: [-1] = 0</td>
 </tr>
 </tbody>
 </table>
@@ -718,7 +746,7 @@ quadrature.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return powYlm[p][lm]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">expansion of powers in Ylm; uses indexing scheme above</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">expansion of powers in Ylm; uses indexing scheme above</td>
 </tr>
 </tbody>
 </table>
@@ -733,7 +761,7 @@ quadrature.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return powercoeff[n][p]:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">vector we multiply by our power expansion to get the n&#8217;th coefficients</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">vector we multiply by our power expansion to get the n&#8217;th coefficients</td>
 </tr>
 </tbody>
 </table>
@@ -747,10 +775,10 @@ quadrature.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>= list</strong><strong>(</strong><strong></strong><strong>(</strong><strong>n</strong><strong>, </strong><strong>lmax</strong><strong>, </strong><strong>powexpansion</strong><strong>)</strong><strong></strong> (<em>a</em>) &#8211; expansion of function in powers</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return coefflist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">-a</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">-a</td>
 </tr>
 </tbody>
 </table>
@@ -779,13 +807,13 @@ quadrature.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>u[3]</strong> &#8211; vector to apply</li>
+<li><strong>u</strong><strong>[</strong><strong>3</strong><strong>]</strong><strong></strong> &#8211; vector to apply</li>
 <li><strong>normalize</strong> &#8211; do we normalize u first?</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return upow[Npower]:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">ux uy uz products of powers</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">ux uy uz products of powers</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return umagn:</th><td class="field-body"><p class="first last">magnitude of u (if normalized)</p>
@@ -824,7 +852,7 @@ the same values of n together. Done in place.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return coefflist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">a</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">a</p>
 </td>
 </tr>
 </tbody>
@@ -842,7 +870,7 @@ the same values of n together. Done in place.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>powtrans</strong> &#8211; Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return rTaylor3D:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Taylor expansion, rotated</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Taylor expansion, rotated</td>
 </tr>
 </tbody>
 </table>
@@ -887,7 +915,7 @@ for n=2, the power <span class="math">\(x^0 y^0 z^0\)</span> is, in reality, <sp
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>qptrans</strong> &#8211; 3x3 matrix</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return npowtrans:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">[Lmax +1][Npow][Npow] transformation matrix [n][original pow][new pow]
+<tr class="field-even field"><td>&#160;</td><td class="field-body">[Lmax +1][Npow][Npow] transformation matrix [n][original pow][new pow]
 for each n from 0 up to Lmax</td>
 </tr>
 </tbody>
@@ -904,13 +932,13 @@ for each n from 0 up to Lmax</td>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>c</strong> &#8211; scalar <em>or</em> dictionary mapping (n,l) to scalars</li>
-<li><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</li>
+<li><strong>= list</strong><strong>(</strong><strong></strong><strong>(</strong><strong>n</strong><strong>, </strong><strong>lmax</strong><strong>, </strong><strong>powexpansion</strong><strong>)</strong><strong></strong> (<em>a</em>) &#8211; expansion of function in powers</li>
 <li><strong>inplace</strong> &#8211; modify a in place?</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return coefflist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">c*a</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">c*a</p>
 </td>
 </tr>
 </tbody>
@@ -941,7 +969,7 @@ each (n,l) term <em>only</em> contains terms equal to l, rather than terms &lt;=
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return coefflist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">a</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">a</p>
 </td>
 </tr>
 </tbody>
@@ -965,7 +993,7 @@ fail if not true. The entries in the list are <em>tuples</em> of n, lmax, pow</p
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>beta</strong> (<em>alpha,</em>) &#8211; optional scalars: c = alpha*a + beta*b; allows for more efficient expansions</li>
+<li><strong>beta</strong> (<em>alpha</em><em>,</em><em></em>) &#8211; optional scalars: c = alpha*a + beta*b; allows for more efficient expansions</li>
 <li><strong>inplace</strong> &#8211; True if the summation should modify a in place</li>
 </ul>
 </td>
@@ -988,13 +1016,13 @@ sum of a and b</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>c</strong> &#8211; array <em>or</em> dictionary mapping (n,l) to arrays</li>
-<li><strong>= list((n, lmax, powexpansion)</strong> (<em>a</em>) &#8211; expansion of function in powers</li>
+<li><strong>= list</strong><strong>(</strong><strong></strong><strong>(</strong><strong>n</strong><strong>, </strong><strong>lmax</strong><strong>, </strong><strong>powexpansion</strong><strong>)</strong><strong></strong> (<em>a</em>) &#8211; expansion of function in powers</li>
 <li><strong>leftmultiply</strong> &#8211; tensordot(c,a) vs. tensordot(a,c)</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return coefflist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">c.a (or a.c)</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">c.a (or a.c)</p>
 </td>
 </tr>
 </tbody>
@@ -1057,7 +1085,7 @@ zeros, by explicitly making the full range of l values.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return Taylor3D:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">Taylor3D, with a zero coefficient list</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Taylor3D, with a zero coefficient list</p>
 </td>
 </tr>
 </tbody>
@@ -1070,15 +1098,18 @@ zeros, by explicitly making the full range of l values.</p>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="GFcalc.html" class="btn btn-neutral float-right" title="GFcalc" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="GFcalc.html" class="btn btn-neutral float-right" title="GFcalc" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="supercell.html" class="btn btn-neutral" title="Supercell" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="supercell.html" class="btn btn-neutral" title="Supercell" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1112,7 +1143,8 @@ zeros, by explicitly making the full range of l values.</p>
             VERSION:'1.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

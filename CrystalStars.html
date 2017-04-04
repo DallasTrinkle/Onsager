@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -30,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="Onsager 1.2.1 documentation" href="index.html"/>
         <link rel="next" title="Supercell" href="supercell.html"/>
         <link rel="prev" title="Crystal" href="crystal.html"/> 
@@ -41,6 +46,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -81,7 +87,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="includeme.html#references">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="includeme.html#contributors">Contributors</a></li>
@@ -106,8 +115,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Onsager</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Onsager</a>
+        
       </nav>
 
 
@@ -116,23 +127,40 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>CrystalStars</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>CrystalStars</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/CrystalStars.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/CrystalStars.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -339,7 +367,7 @@ Note: b + (a^b) = a but (a^b) + b is an error. a + (b^a) = b</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return g*PairState:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">corresponding to group operation applied to self</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">corresponding to group operation applied to self</p>
 </td>
 </tr>
 </tbody>
@@ -497,17 +525,17 @@ are PairStates that iszero() is True; they are only needed if crystal has a nonz
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return jumpnetwork:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of symmetry unique jumps; list of list of tuples (i,f), dx where
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list of symmetry unique jumps; list of list of tuples (i,f), dx where
 i,f index into states for the initial and final states, and dx = displacement of vacancy
 in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return jumptype:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of indices corresponding to the (original) jump type for each
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list of indices corresponding to the (original) jump type for each
 symmetry unique jump; useful for constructing a LIMB approximation, and needed to
 construct delta_omega</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return starpair:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of tuples of the star indices of the i and f states for each
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list of tuples of the star indices of the i and f states for each
 symmetry unique jump</td>
 </tr>
 </tbody>
@@ -523,17 +551,17 @@ symmetry unique jump</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return jumpnetwork:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of symmetry unique jumps; list of list of tuples (i,f), dx where
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list of symmetry unique jumps; list of list of tuples (i,f), dx where
 i,f index into states for the initial and final states, and dx = displacement of vacancy
 in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return jumptype:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of indices corresponding to the (original) jump type for each
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list of indices corresponding to the (original) jump type for each
 symmetry unique jump; useful for constructing a LIMB approximation, and needed to
 construct delta_omega</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return starpair:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of tuples of the star indices of the i and f states for each
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list of tuples of the star indices of the i and f states for each
 symmetry unique jump</td>
 </tr>
 </tbody>
@@ -595,7 +623,7 @@ symmetry unique jump</td>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return symmjumplist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of tuples of ((gi, gf), gdx) for every group op</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">list of tuples of ((gi, gf), gdx) for every group op</p>
 </td>
 </tr>
 </tbody>
@@ -619,11 +647,11 @@ to GFstarset.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return GFexpansion:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">array[Nsv, Nsv, NGFstars]
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">array[Nsv, Nsv, NGFstars]
 the GF matrix[i, j] = sum(GFexpansion[i, j, k] * GF(starGF[k]))</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return GFstarset:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">starSet corresponding to the GF</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">starSet corresponding to the GF</td>
 </tr>
 </tbody>
 </table>
@@ -694,12 +722,12 @@ are indices corresponding to states in our starset.</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return D0expansion:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">array[3,3, Njump_omega0]
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">array[3,3, Njump_omega0]
 the D0[a,b,jt] = sum(D0expansion[a,b, jt] * sqrt(probfactor0[PS[jt][0]]*probfactor0[PS[jt][1]) * omega0[jt])</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return D1expansion:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">array[3,3, Njump_omega1]
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first last">array[3,3, Njump_omega1]
 the D1[a,b,k] = sum(D1expansion[a,b, k] * sqrt(probfactor[PS[k][0]]*probfactor[PS[k][1]) * omega[k])</p>
 </td>
 </tr>
@@ -737,12 +765,12 @@ origin states? (default=False)</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return bias0expansion:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">array[Nsv, Njump_omega0]
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">array[Nsv, Njump_omega0]
 the gen0 vector[i] = sum(bias0expasion[i, k] * sqrt(probfactor0[PS[k]]) * omega0[k])</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return bias1expansion:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">array[Nsv, Njump_omega1]
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first last">array[Nsv, Njump_omega1]
 the gen1 vector[i] = sum(bias1expansion[i, k] * sqrt(probfactor[PS[k]] * omega1[k])</p>
 </td>
 </tr>
@@ -794,7 +822,7 @@ outer[:, :, i, j] is the 3x3 tensor outer product for two vector-stars vs[i] and
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return VectorStarSet:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">new VectorStarSet object</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">new VectorStarSet object</p>
 </td>
 </tr>
 </tbody>
@@ -812,10 +840,10 @@ outer[:, :, i, j] is the 3x3 tensor outer product for two vector-stars vs[i] and
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>elemtype</strong> &#8211; &#8216;solute&#8217; of &#8216;vacancy&#8217;, depending on which site we need to reduce</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return OSindices:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of indices corresponding to origin states</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list of indices corresponding to origin states</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return folddown:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">[NOS, Nvstars] to map vector stars to origin states</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">[NOS, Nvstars] to map vector stars to origin states</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return OS_VB:</th><td class="field-body">[NOS, Nsites, 3] mapping of origin state to a vector basis</td>
 </tr>
@@ -850,24 +878,24 @@ origin states? (default=False)</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return rate0expansion:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">array[Nsv, Nsv, Njump_omega0]
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">array[Nsv, Nsv, Njump_omega0]
 the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k]); <em>IF</em> NVB&gt;0
 we &#8220;hijack&#8221; this and use it for [NVB, Nsv, Njump_omega0], as we&#8217;re doing an omega2
 calc and rate0expansion won&#8217;t be used <em>anyway</em>.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return rate0escape:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first">array[Nsv, Njump_omega0]
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">array[Nsv, Njump_omega0]
 the escape contributions: omega0[i,i] += sum(rate0escape[i,k]*omega0[k]*probfactor0(PS[k]))</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return rate1expansion:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">array[Nsv, Nsv, Njump_omega1]
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">array[Nsv, Nsv, Njump_omega1]
 the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return rate1escape:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first last">array[Nsv, Njump_omega1]
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first last">array[Nsv, Njump_omega1]
 the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega1[k]*probfactor(PS[k]))</p>
 </td>
 </tr>
@@ -910,10 +938,10 @@ the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega1[k]*probfact
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>listlist</strong> &#8211; list of lists of objects</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return flatlist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">flat list of objects (preserving order)</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">flat list of objects (preserving order)</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return indexarray:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">array indexing which original list it came from</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">array indexing which original list it came from</td>
 </tr>
 </tbody>
 </table>
@@ -934,7 +962,7 @@ the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega1[k]*probfact
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return listlist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of lists of objects</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">list of lists of objects</p>
 </td>
 </tr>
 </tbody>
@@ -951,15 +979,18 @@ the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega1[k]*probfact
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="supercell.html" class="btn btn-neutral float-right" title="Supercell" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="supercell.html" class="btn btn-neutral float-right" title="Supercell" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="crystal.html" class="btn btn-neutral" title="Crystal" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="crystal.html" class="btn btn-neutral" title="Crystal" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -993,7 +1024,8 @@ the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega1[k]*probfact
             VERSION:'1.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

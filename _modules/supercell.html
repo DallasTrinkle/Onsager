@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -30,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="Onsager 1.2.1 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
@@ -40,6 +45,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -80,7 +86,10 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
@@ -105,8 +114,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Onsager</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Onsager</a>
+        
       </nav>
 
 
@@ -119,19 +130,36 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="index.html">Module code</a> &raquo;</li>
-      
-    <li>supercell</li>
+        
+      <li>supercell</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -221,7 +249,7 @@
 
 <span class="sd">        :return: new supercell object, copy of the original</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">supercopy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">super</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">interstitial</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nchem</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">Nchem</span><span class="p">,</span>
+        <span class="n">supercopy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">super</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">interstitial</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nchem</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">Nchem</span><span class="p">,</span>
                                    <span class="n">empty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__copyattr__</span><span class="p">:</span> <span class="nb">setattr</span><span class="p">(</span><span class="n">supercopy</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eqattr__</span><span class="p">:</span> <span class="nb">setattr</span><span class="p">(</span><span class="n">supercopy</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
@@ -235,13 +263,13 @@
 <span class="sd">        :param other: supercell for comparison</span>
 <span class="sd">        :return: True if same crystal, supercell, occupancy, and ordering; False otherwise</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">super</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">super</span><span class="p">)</span> <span class="ow">and</span> \
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">super</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">super</span><span class="p">)</span> <span class="ow">and</span> \
                <span class="bp">self</span><span class="o">.</span><span class="n">interstitial</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">interstitial</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span> <span class="ow">and</span> \
                <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">occ</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">occ</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemorder</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">chemorder</span></div>
 
 <div class="viewcode-block" id="Supercell.__ne__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__ne__">[docs]</a>    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Inequality == not __eq__&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Supercell.stoichiometry"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.stoichiometry">[docs]</a>    <span class="k">def</span> <span class="nf">stoichiometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a string representing the current stoichiometry&quot;&quot;&quot;</span>
@@ -259,9 +287,9 @@
         <span class="nb">str</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stoichiometry</span><span class="p">()</span>
         <span class="nb">str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Kroger-Vink: &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">KrogerVink</span><span class="p">()</span>
         <span class="nb">str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Positions:</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="nb">str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">u</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="n">o</span><span class="p">]</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">)])</span>
+        <span class="nb">str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">u</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="n">o</span><span class="p">]</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">)])</span>
         <span class="nb">str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Ordering:</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="nb">str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">u</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">ulist</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">occposlist</span><span class="p">())</span>
+        <span class="nb">str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">u</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">ulist</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemistry</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">occposlist</span><span class="p">())</span>
                           <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">ulist</span><span class="p">])</span>
         <span class="k">return</span> <span class="nb">str</span></div>
 
@@ -285,7 +313,7 @@
 <span class="sd">        :return: rotated supercell</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">crystal</span><span class="o">.</span><span class="n">GroupOp</span><span class="p">):</span> <span class="k">return</span> <span class="bp">NotImplemented</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Supercell.__imul__"><a class="viewcode-back" href="../supercell.html#supercell.Supercell.__imul__">[docs]</a>    <span class="k">def</span> <span class="nf">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -644,6 +672,9 @@
 </pre></div>
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
@@ -677,7 +708,8 @@
             VERSION:'1.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="../_static/jquery.js"></script>

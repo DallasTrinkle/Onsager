@@ -1,0 +1,498 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "# Si in FCC Ni\n",
+    "Based on data in [hdl.handle.net/11115/239](http://hdl.handle.net/11115/239), \"Data Citation: Diffusion of Si impurities in Ni under stress: A first-principles study\" by T. Garnier, V. R. Manga, P. Bellon, and D. R. Trinkle (2014). The transport coefficient results, using the self-consistent mean-field method, appear in T. Garnier, V. R. Manga, D. R. Trinkle, M. Nastar, and P. Bellon, \"Stress-induced anisotropic diffusion in alloys: Complex Si solute flow near a dislocation core in Ni,\" *Phys. Rev. B* **88**, 134108 (2013), [doi:10.1103/PhysRevB.88.134108](http://dx.doi.org/10.1103/PhysRevB.88.134108)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [],
+   "source": [
+    "import sys\n",
+    "sys.path.append('../')\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "plt.style.use('seaborn-whitegrid')\n",
+    "%matplotlib inline\n",
+    "import onsager.crystal as crystal\n",
+    "import onsager.OnsagerCalc as onsager\n",
+    "from scipy.constants import physical_constants\n",
+    "kB = physical_constants['Boltzmann constant in eV/K'][0]\n",
+    "import h5py, json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Create an FCC Ni crystal."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "#Lattice:\n",
+      "  a1 = [ 0.      0.1715  0.1715]\n",
+      "  a2 = [ 0.1715  0.      0.1715]\n",
+      "  a3 = [ 0.1715  0.1715  0.    ]\n",
+      "#Basis:\n",
+      "  (Ni) 0.0 = [ 0.  0.  0.]\n"
+     ]
+    }
+   ],
+   "source": [
+    "a0 = 0.343\n",
+    "Ni = crystal.Crystal.FCC(a0, chemistry=\"Ni\")\n",
+    "print(Ni)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Next, we construct our diffuser. For this problem, our thermodynamic range is out to the fourth neighbor; hence, we construct a *two shell* thermodynamic range (that is, sums of two $\\frac{a}{2}\\langle 110\\rangle$ vectors. That is, $N_\\text{thermo}=2$ gives 4 stars: $\\frac{a}2\\langle110\\rangle$, $a\\langle100\\rangle$, $\\frac{a}2\\langle112\\rangle$, and $a\\langle110\\rangle$. For Si in Ni, the first three have non-zero interaction energies, while the fourth is zero. The states, as written, are the solute (basis index + lattice position) : vacancy (basis index + lattice position), and $dx$ is the (Cartesian) vector separating them."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Diffuser for atom 0 (Ni), Nthermo=2\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.      0.1715  0.1715]\n",
+      "  a2 = [ 0.1715  0.      0.1715]\n",
+      "  a3 = [ 0.1715  0.1715  0.    ]\n",
+      "#Basis:\n",
+      "  (Ni) 0.0 = [ 0.  0.  0.]\n",
+      "vacancy configurations:\n",
+      "v:+0.000,+0.000,+0.000\n",
+      "solute configurations:\n",
+      "s:+0.000,+0.000,+0.000\n",
+      "solute-vacancy configurations:\n",
+      "s:+0.000,+0.000,+0.000-v:+1.000,-1.000,+0.000\n",
+      "s:+0.000,+0.000,+0.000-v:-1.000,-1.000,+1.000\n",
+      "s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-2.000\n",
+      "s:+0.000,+0.000,+0.000-v:-2.000,+0.000,+0.000\n",
+      "omega0 jumps:\n",
+      "omega0:v:+0.000,+0.000,+0.000^v:+0.000,+0.000,-1.000\n",
+      "omega1 jumps:\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:-1.000,+0.000,+0.000^v:-1.000,+0.000,-1.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:+1.000,+0.000,+0.000^v:+1.000,+0.000,-1.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:-1.000,+1.000,+0.000^v:-1.000,+1.000,-1.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:+0.000,+0.000,-1.000^v:+0.000,+0.000,-2.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,-1.000^v:+1.000,-1.000,-2.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:-1.000,-1.000,+1.000^v:-1.000,-1.000,+0.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:-1.000,+0.000,-1.000^v:-1.000,+0.000,-2.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:-2.000,+1.000,+0.000^v:-2.000,+1.000,-1.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:+1.000,+1.000,-2.000^v:+1.000,+1.000,-3.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:+2.000,+0.000,-1.000^v:+2.000,+0.000,-2.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:-2.000,+1.000,+1.000^v:-2.000,+1.000,+0.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:-2.000,+0.000,+0.000^v:-2.000,+0.000,-1.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:+2.000,-2.000,+0.000^v:+2.000,-2.000,-1.000\n",
+      "omega1:s:+0.000,+0.000,+0.000-v:+0.000,+0.000,-2.000^v:+0.000,+0.000,-3.000\n",
+      "omega2 jumps:\n",
+      "omega2:s:+0.000,+0.000,+0.000-v:+0.000,+0.000,+1.000^s:+0.000,+0.000,+0.000-v:+0.000,+0.000,-1.000\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "chemistry = 0 # only one sublattice anyway\n",
+    "Nthermo = 2\n",
+    "NiSi = onsager.VacancyMediated(Ni, chemistry, Ni.sitelist(chemistry), \n",
+    "                               Ni.jumpnetwork(chemistry, 0.75*a0), Nthermo)\n",
+    "print(NiSi)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "collapsed": true,
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Below is an example of the above data translated into a dictionary corresponding to the data for Ni-Si; it is output into a `JSON` compliant file for reference. The strings are the corresponding tags in the diffuser. The first entry in each list is the prefactor (in THz) and the second is the corresponding energy (in eV). **Note:** all jumps are defined as *transition state energies*, hence the reference energy is added / subtracted as needed. Also, there are \"missing\" transition states; these will have there energies defined using the LIMB (linear interpolation of migration barriers) approximation. This introduces an error of no more than 10 meV in any activation barrier."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{\n",
+      "    \"omega0:v:+0.000,+0.000,+0.000^v:+0.000,+1.000,-1.000\": [\n",
+      "        4.8,\n",
+      "        1.074\n",
+      "    ],\n",
+      "    \"omega1:s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000^v:+0.000,+2.000,-2.000\": [\n",
+      "        4.8,\n",
+      "        1.0279999999999998\n",
+      "    ],\n",
+      "    \"omega1:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000^v:+0.000,+0.000,-1.000\": [\n",
+      "        5.2,\n",
+      "        0.9029999999999999\n",
+      "    ],\n",
+      "    \"omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,-1.000^v:+1.000,+0.000,-2.000\": [\n",
+      "        4.8,\n",
+      "        1.1019999999999999\n",
+      "    ],\n",
+      "    \"omega1:s:+0.000,+0.000,+0.000-v:-1.000,+0.000,+0.000^v:-1.000,+1.000,-1.000\": [\n",
+      "        5.2,\n",
+      "        1.113\n",
+      "    ],\n",
+      "    \"omega1:s:+0.000,+0.000,+0.000-v:-1.000,+1.000,+0.000^v:-1.000,+2.000,-1.000\": [\n",
+      "        5.2,\n",
+      "        1.053\n",
+      "    ],\n",
+      "    \"omega2:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+1.000^s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000\": [\n",
+      "        5.1,\n",
+      "        0.791\n",
+      "    ],\n",
+      "    \"s:+0.000,+0.000,+0.000\": [\n",
+      "        1.0,\n",
+      "        0.0\n",
+      "    ],\n",
+      "    \"s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000\": [\n",
+      "        1.0,\n",
+      "        -0.1\n",
+      "    ],\n",
+      "    \"s:+0.000,+0.000,+0.000-v:+0.000,-2.000,+0.000\": [\n",
+      "        1.0,\n",
+      "        0\n",
+      "    ],\n",
+      "    \"s:+0.000,+0.000,+0.000-v:+1.000,-2.000,+0.000\": [\n",
+      "        1.0,\n",
+      "        0.045\n",
+      "    ],\n",
+      "    \"s:+0.000,+0.000,+0.000-v:-1.000,-1.000,+1.000\": [\n",
+      "        1.0,\n",
+      "        0.011\n",
+      "    ],\n",
+      "    \"v:+0.000,+0.000,+0.000\": [\n",
+      "        1.0,\n",
+      "        0.0\n",
+      "    ]\n",
+      "}\n"
+     ]
+    }
+   ],
+   "source": [
+    "NiSidata={\n",
+    "\"v:+0.000,+0.000,+0.000\": [1., 0.],\n",
+    "\"s:+0.000,+0.000,+0.000\": [1., 0.],\n",
+    "\"s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000\": [1., -0.108],\n",
+    "\"s:+0.000,+0.000,+0.000-v:-1.000,-1.000,+1.000\": [1., +0.004],\n",
+    "\"s:+0.000,+0.000,+0.000-v:+1.000,-2.000,+0.000\": [1., +0.037],\n",
+    "\"s:+0.000,+0.000,+0.000-v:+0.000,-2.000,+0.000\": [1., -0.008],\n",
+    "\"omega0:v:+0.000,+0.000,+0.000^v:+0.000,+1.000,-1.000\": [4.8, 1.074],\n",
+    "\"omega1:s:+0.000,+0.000,+0.000-v:-1.000,+0.000,+0.000^v:-1.000,+1.000,-1.000\": [5.2, 1.213-0.108],\n",
+    "\"omega1:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000^v:+0.000,+0.000,-1.000\": [5.2, 1.003-0.108],\n",
+    "\"omega1:s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000^v:+0.000,+2.000,-2.000\": [4.8, 1.128-0.108],\n",
+    "\"omega1:s:+0.000,+0.000,+0.000-v:-1.000,+1.000,+0.000^v:-1.000,+2.000,-1.000\": [5.2, 1.153-0.108],\n",
+    "\"omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,-1.000^v:+1.000,+0.000,-2.000\": [4.8, 1.091+0.004],\n",
+    "\"omega2:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+1.000^s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000\": [5.1, 0.891-0.108]\n",
+    "}\n",
+    "NiSi2013data={\n",
+    "\"v:+0.000,+0.000,+0.000\": [1., 0.],\n",
+    "\"s:+0.000,+0.000,+0.000\": [1., 0.],\n",
+    "\"s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000\": [1., -0.100],\n",
+    "\"s:+0.000,+0.000,+0.000-v:-1.000,-1.000,+1.000\": [1., +0.011],\n",
+    "\"s:+0.000,+0.000,+0.000-v:+1.000,-2.000,+0.000\": [1., +0.045],\n",
+    "\"s:+0.000,+0.000,+0.000-v:+0.000,-2.000,+0.000\": [1., 0],\n",
+    "\"omega0:v:+0.000,+0.000,+0.000^v:+0.000,+1.000,-1.000\": [4.8, 1.074],\n",
+    "\"omega1:s:+0.000,+0.000,+0.000-v:-1.000,+0.000,+0.000^v:-1.000,+1.000,-1.000\": [5.2, 1.213-0.100],\n",
+    "\"omega1:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000^v:+0.000,+0.000,-1.000\": [5.2, 1.003-0.100],\n",
+    "\"omega1:s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000^v:+0.000,+2.000,-2.000\": [4.8, 1.128-0.100],\n",
+    "\"omega1:s:+0.000,+0.000,+0.000-v:-1.000,+1.000,+0.000^v:-1.000,+2.000,-1.000\": [5.2, 1.153-0.100],\n",
+    "\"omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,-1.000^v:+1.000,+0.000,-2.000\": [4.8, 1.091+0.011],\n",
+    "\"omega2:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+1.000^s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000\": [5.1, 0.891-0.100]\n",
+    "}\n",
+    "print(json.dumps(NiSi2013data, sort_keys=True, indent=4))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "Next, we convert our dictionary into the simpler form used by the diffuser."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'eneS': array([ 0.]),\n",
+       " 'eneSV': array([-0.1  ,  0.011,  0.045,  0.   ]),\n",
+       " 'eneT0': array([ 1.074]),\n",
+       " 'eneT1': array([ 1.053 ,  0.903 ,  1.113 ,  1.028 ,  1.0795,  1.102 ,  1.0965,\n",
+       "         1.0965,  1.0965,  1.0965,  1.119 ,  1.074 ,  1.074 ,  1.074 ]),\n",
+       " 'eneT2': array([ 0.791]),\n",
+       " 'eneV': array([ 0.]),\n",
+       " 'preS': array([ 1.]),\n",
+       " 'preSV': array([ 1.,  1.,  1.,  1.]),\n",
+       " 'preT0': array([ 4.8]),\n",
+       " 'preT1': array([ 5.2,  5.2,  5.2,  4.8,  4.8,  4.8,  4.8,  4.8,  4.8,  4.8,  4.8,\n",
+       "         4.8,  4.8,  4.8]),\n",
+       " 'preT2': array([ 5.1]),\n",
+       " 'preV': array([ 1.])}"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "preenedict = NiSi.tags2preene(NiSi2013data)\n",
+    "preenedict"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "We can now calculate the diffusion coefficients and drag ratio. **Note:** the diffusion coefficients $L_\\text{ss}$ and $L_\\text{sv}$ both need to be multiplied by $c_\\text{s}c_\\text{v}/k_\\text{B}T$ where $c_\\text{s}$ is the solute concentration, $c_\\text{v}$ the (equilibrium) vacancy concentration, and $k_\\text{B}T$ is the thermal energy of the system. The current units shown below are in $\\text{nm}^2\\cdot\\text{THz}$. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "#T #Lss #Lsv #drag\n",
+      "300.0 4.1020388689e-16 4.03521345382e-16 0.983709219436\n",
+      "350.0 5.99654580387e-14 5.75933473853e-14 0.960442048956\n",
+      "400.0 2.51914470587e-12 2.32702939103e-12 0.923737880405\n",
+      "450.0 4.61249420384e-11 4.03116417036e-11 0.873966230027\n",
+      "500.0 4.7250491963e-10 3.84170227063e-10 0.813050216206\n",
+      "550.0 3.17382569388e-09 2.36031280433e-09 0.743680665541\n",
+      "600.0 1.55354740581e-08 1.03884191885e-08 0.668690195716\n",
+      "650.0 5.96097883468e-08 3.52092669306e-08 0.590662505388\n",
+      "700.0 1.88868586771e-07 9.66525181976e-08 0.511744805477\n",
+      "750.0 5.13340570374e-07 2.22584238868e-07 0.43359954719\n",
+      "800.0 1.23159242387e-06 4.40215392835e-07 0.357435937654\n",
+      "850.0 2.66586838346e-06 7.57314596438e-07 0.28407801418\n",
+      "900.0 5.29556637614e-06 1.13347630469e-06 0.214042507294\n",
+      "950.0 9.78435004446e-06 1.44428949825e-06 0.147612206399\n",
+      "1000.0 1.69973273335e-05 1.44304978386e-06 0.084898628799\n",
+      "1050.0 2.80063788635e-05 7.25153043356e-07 0.0258924242542\n",
+      "1100.0 4.4083410105e-05 -1.3003604007e-06 -0.0294977270951\n",
+      "1150.0 6.66826933232e-05 -5.4290391372e-06 -0.0814160146604\n",
+      "1200.0 9.74143994545e-05 -1.26676005168e-05 -0.130038275529\n",
+      "1250.0 0.000138011882666 -2.42289344792e-05 -0.175556872431\n",
+      "1300.0 0.000190295346612 -4.15167679854e-05 -0.21817016929\n",
+      "1350.0 0.000256134304169 -6.61019634203e-05 -0.258075401632\n",
+      "1400.0 0.000337410855954 -9.96927651132e-05 -0.295464011765\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"#T #Lss #Lsv #drag\")\n",
+    "for T in np.linspace(300, 1400, 23):\n",
+    "    L0vv, Lss, Lsv, L1vv = NiSi.Lij(*NiSi.preene2betafree(kB*T, **preenedict))\n",
+    "    print(T, Lss[0,0], Lsv[0,0], Lsv[0,0]/Lss[0,0])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": true,
+    "editable": true
+   },
+   "source": [
+    "For direct comparison with the SCMF data in the 2013 *Phys. Rev. B* paper, we evaluate at 960K, 1060K (the predicted crossover temperature), and 1160K. The reported data is in units of mol/eV Å ns."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "#T #Lvv #Lsv #Lss\n",
+      "960 0.1556 (0.9766) 0.1773 (0.8856) 1.315 (0.9807)\n",
+      "1060 0.4797 (0.9777) 0.04852 (0) 3.339 (0.9792)\n",
+      "1160 1.208 (0.9769) -0.6537 (1.155) 7.152 (0.9815)\n"
+     ]
+    }
+   ],
+   "source": [
+    "volume = 0.25*a0**3\n",
+    "conv = 1e3*0.1/volume  # 10^3 for THz->ns^-1, 10^-1 for nm^-1 ->Ang^-1\n",
+    "# T: (L0vv, Lsv, Lss)\n",
+    "PRBdata = {960: (1.52e-1, 1.57e-1, 1.29e0), \n",
+    "           1060: (4.69e-1, 0., 3.27e0), \n",
+    "           1160: (1.18e0, -7.55e-1, 7.02e0)}\n",
+    "print(\"#T #Lvv #Lsv #Lss\")\n",
+    "for T in (960, 1060, 1160):\n",
+    "    c = conv/(kB*T)\n",
+    "    L0vv, Lss, Lsv, L1vv = NiSi.Lij(*NiSi.preene2betafree(kB*T, **preenedict))\n",
+    "    vv, sv, ss = L0vv[0,0]*c, Lsv[0,0]*c, Lss[0,0]*c\n",
+    "    vvref, svref, ssref = PRBdata[T]\n",
+    "    print(\"{} {:.4g} ({:.4g}) {:.4g} ({:.4g}) {:.4g} ({:.4g})\".format(T, vv, vvref/vv, sv, svref/sv, ss, ssref/ss))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "collapsed": true,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [],
+   "source": [
+    "# raw comparison data from 2013 paper\n",
+    "Tval = np.array([510, 530, 550, 570, 590, 610, 630, 650, 670, 690, \n",
+    "                 710, 730, 750, 770, 790, 810, 830, 850, 870, 890, \n",
+    "                 910, 930, 950, 970, 990, 1010, 1030, 1050, 1070, 1090, \n",
+    "                 1110, 1130, 1150, 1170, 1190, 1210, 1230, 1250, 1270, 1290, \n",
+    "                 1310, 1330, 1350, 1370, 1390, 1410, 1430, 1450, 1470, 1490])\n",
+    "fluxval = np.array([0.771344, 0.743072, 0.713923, 0.684066, 0.653661, 0.622858, \n",
+    "                    0.591787, 0.560983, 0.529615, 0.498822, 0.467298, 0.436502, \n",
+    "                    0.406013, 0.376193, 0.346530, 0.316744, 0.288483, 0.260656, \n",
+    "                    0.232809, 0.205861, 0.179139, 0.154038, 0.128150, 0.103273, \n",
+    "                    0.079025, 0.055587, 0.032558, 0.010136, -0.011727, -0.033069, \n",
+    "                    -0.053826, -0.074061, -0.093802, -0.113075, -0.132267, -0.149595, \n",
+    "                    -0.167389, -0.184604, -0.202465, -0.218904, -0.234157, -0.250360, \n",
+    "                    -0.265637, -0.280173, -0.294940, -0.308410, -0.322271, -0.335809, \n",
+    "                    -0.349106, -0.361605])\n",
+    "# Trange = np.linspace(300, 1500, 121)\n",
+    "Draglist = []\n",
+    "for T in Tval:\n",
+    "    L0vv, Lss, Lsv, L1vv = NiSi.Lij(*NiSi.preene2betafree(kB*T, **preenedict))\n",
+    "    Draglist.append(Lsv[0,0]/Lss[0,0])\n",
+    "Drag = np.array(Draglist)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {
+    "collapsed": false,
+    "deletable": true,
+    "editable": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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\nAAAAAElFTkSuQmCC\n",
+      "text/plain": [
+       "<matplotlib.figure.Figure at 0x114ac12e8>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "fig, ax1 = plt.subplots()\n",
+    "ax1.plot(Tval, Drag, 'k', label='GF')\n",
+    "ax1.plot(Tval, fluxval, 'r', label='SCMF (PRB 2013)')\n",
+    "ax1.set_ylabel('drag ratio $L^{\\\\rm{SiV}}/L^{\\\\rm{SiSi}}$', fontsize='x-large')\n",
+    "ax1.set_xlabel('$T$ [K]', fontsize='x-large')\n",
+    "ax1.legend(bbox_to_anchor=(0.5,0.6,0.5,0.2), ncol=1,\n",
+    "           shadow=True, frameon=True, fontsize='x-large')\n",
+    "plt.show()\n",
+    "# plt.savefig('NiSi-drag.pdf', transparent=True, format='pdf')"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.1"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}

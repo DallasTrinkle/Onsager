@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -30,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="Onsager 1.2.1 documentation" href="index.html"/>
         <link rel="next" title="PowerExpansion" href="PowerExpansion.html"/>
         <link rel="prev" title="CrystalStars" href="CrystalStars.html"/> 
@@ -41,6 +46,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -81,7 +87,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="includeme.html#references">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="includeme.html#contributors">Contributors</a></li>
@@ -106,8 +115,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Onsager</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Onsager</a>
+        
       </nav>
 
 
@@ -116,23 +127,40 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Supercell</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Supercell</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/supercell.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/supercell.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -529,14 +557,14 @@ cell that remain inside the supercell</p>
 <tr class="field-even field"><th class="field-name">Return size:</th><td class="field-body">integer, corresponding to number of unit cells</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return invsuper:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">integer matrix inverse of supercell (needs to be divided by size)</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">integer matrix inverse of supercell (needs to be divided by size)</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return translist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of integer vectors (to be divided by <code class="docutils literal"><span class="pre">size</span></code>) corresponding
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list of integer vectors (to be divided by <code class="docutils literal"><span class="pre">size</span></code>) corresponding
 to unit cell positions</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return transdict:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">dictionary of tuples and their corresponding index (inverse of trans)</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">dictionary of tuples and their corresponding index (inverse of trans)</td>
 </tr>
 </tbody>
 </table>
@@ -551,7 +579,7 @@ to unit cell positions</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return occposlist:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of lists of supercell coord. positions</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list of lists of supercell coord. positions</td>
 </tr>
 </tbody>
 </table>
@@ -605,15 +633,18 @@ for &#8220;presentation&#8221;.</p>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="PowerExpansion.html" class="btn btn-neutral float-right" title="PowerExpansion" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="PowerExpansion.html" class="btn btn-neutral float-right" title="PowerExpansion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="CrystalStars.html" class="btn btn-neutral" title="CrystalStars" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="CrystalStars.html" class="btn btn-neutral" title="CrystalStars" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -647,7 +678,8 @@ for &#8220;presentation&#8221;.</p>
             VERSION:'1.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

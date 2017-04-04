@@ -1,0 +1,866 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Si in FCC Ni &mdash; Onsager 1.2.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Onsager 1.2.1 documentation" href="../index.html"/>
+        <link rel="up" title="Notebooks" href="../notebooks.html"/>
+        <link rel="next" title="Split oxygen-vacancy defects in Co" href="FCC-Co-O.html"/>
+        <link rel="prev" title="Large \(\omega^2\) correction" href="LargeOmega2.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Onsager
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html#support">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crystal.html">Crystal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supercell.html">Supercell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PowerExpansion.html">PowerExpansion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GFcalc.html">GFcalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OnsagerCalc.html">OnsagerCalc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../automator.html">Automator</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../notebooks.html">Notebooks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Fe-C.html">Fe-C diffusion and elastodiffusivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GF-convergence.html">Convergence of Green function calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tracer-correlation.html">Tracer correlation coefficients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LargeOmega2.html">Large <span class="math">\(\omega^2\)</span> correction</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Si in FCC Ni</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FCC-Co-O.html">Split oxygen-vacancy defects in Co</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Onsager</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../notebooks.html">Notebooks</a> &raquo;</li>
+        
+      <li>Si in FCC Ni</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/examples/NiSi.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-bold { font-weight: bold; }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="Si-in-FCC-Ni">
+<h1>Si in FCC Ni<a class="headerlink" href="#Si-in-FCC-Ni" title="Permalink to this headline">¶</a></h1>
+<p>Based on data in
+<a class="reference external" href="http://hdl.handle.net/11115/239">hdl.handle.net/11115/239</a>, &#8220;Data
+Citation: Diffusion of Si impurities in Ni under stress: A
+first-principles study&#8221; by T. Garnier, V. R. Manga, P. Bellon, and D. R.
+Trinkle (2014). The transport coefficient results, using the
+self-consistent mean-field method, appear in T. Garnier, V. R. Manga, D.
+R. Trinkle, M. Nastar, and P. Bellon, &#8220;Stress-induced anisotropic
+diffusion in alloys: Complex Si solute flow near a dislocation core in
+Ni,&#8221; <em>Phys. Rev. B</em> <strong>88</strong>, 134108 (2013),
+<a class="reference external" href="http://dx.doi.org/10.1103/PhysRevB.88.134108">doi:10.1103/PhysRevB.88.134108</a>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>import sys
+sys.path.append(&#39;../&#39;)
+import numpy as np
+import matplotlib.pyplot as plt
+plt.style.use(&#39;seaborn-whitegrid&#39;)
+%matplotlib inline
+import onsager.crystal as crystal
+import onsager.OnsagerCalc as onsager
+from scipy.constants import physical_constants
+kB = physical_constants[&#39;Boltzmann constant in eV/K&#39;][0]
+import h5py, json
+</pre></div>
+</div>
+</div>
+<p>Create an FCC Ni crystal.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>a0 = 0.343
+Ni = crystal.Crystal.FCC(a0, chemistry=&quot;Ni&quot;)
+print(Ni)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+#Lattice:
+  a1 = [ 0.      0.1715  0.1715]
+  a2 = [ 0.1715  0.      0.1715]
+  a3 = [ 0.1715  0.1715  0.    ]
+#Basis:
+  (Ni) 0.0 = [ 0.  0.  0.]
+</pre></div></div>
+</div>
+<p>Next, we construct our diffuser. For this problem, our thermodynamic
+range is out to the fourth neighbor; hence, we construct a <em>two shell</em>
+thermodynamic range (that is, sums of two
+<span class="math">\(\frac{a}{2}\langle 110\rangle\)</span> vectors. That is,
+<span class="math">\(N_\text{thermo}=2\)</span> gives 4 stars:
+<span class="math">\(\frac{a}2\langle110\rangle\)</span>, <span class="math">\(a\langle100\rangle\)</span>,
+<span class="math">\(\frac{a}2\langle112\rangle\)</span>, and <span class="math">\(a\langle110\rangle\)</span>. For
+Si in Ni, the first three have non-zero interaction energies, while the
+fourth is zero. The states, as written, are the solute (basis index +
+lattice position) : vacancy (basis index + lattice position), and
+<span class="math">\(dx\)</span> is the (Cartesian) vector separating them.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>chemistry = 0 # only one sublattice anyway
+Nthermo = 2
+NiSi = onsager.VacancyMediated(Ni, chemistry, Ni.sitelist(chemistry),
+                               Ni.jumpnetwork(chemistry, 0.75*a0), Nthermo)
+print(NiSi)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Diffuser for atom 0 (Ni), Nthermo=2
+#Lattice:
+  a1 = [ 0.      0.1715  0.1715]
+  a2 = [ 0.1715  0.      0.1715]
+  a3 = [ 0.1715  0.1715  0.    ]
+#Basis:
+  (Ni) 0.0 = [ 0.  0.  0.]
+vacancy configurations:
+v:+0.000,+0.000,+0.000
+solute configurations:
+s:+0.000,+0.000,+0.000
+solute-vacancy configurations:
+s:+0.000,+0.000,+0.000-v:+1.000,-1.000,+0.000
+s:+0.000,+0.000,+0.000-v:-1.000,-1.000,+1.000
+s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-2.000
+s:+0.000,+0.000,+0.000-v:-2.000,+0.000,+0.000
+omega0 jumps:
+omega0:v:+0.000,+0.000,+0.000^v:+0.000,+0.000,-1.000
+omega1 jumps:
+omega1:s:+0.000,+0.000,+0.000-v:-1.000,+0.000,+0.000^v:-1.000,+0.000,-1.000
+omega1:s:+0.000,+0.000,+0.000-v:+1.000,+0.000,+0.000^v:+1.000,+0.000,-1.000
+omega1:s:+0.000,+0.000,+0.000-v:-1.000,+1.000,+0.000^v:-1.000,+1.000,-1.000
+omega1:s:+0.000,+0.000,+0.000-v:+0.000,+0.000,-1.000^v:+0.000,+0.000,-2.000
+omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,-1.000^v:+1.000,-1.000,-2.000
+omega1:s:+0.000,+0.000,+0.000-v:-1.000,-1.000,+1.000^v:-1.000,-1.000,+0.000
+omega1:s:+0.000,+0.000,+0.000-v:-1.000,+0.000,-1.000^v:-1.000,+0.000,-2.000
+omega1:s:+0.000,+0.000,+0.000-v:-2.000,+1.000,+0.000^v:-2.000,+1.000,-1.000
+omega1:s:+0.000,+0.000,+0.000-v:+1.000,+1.000,-2.000^v:+1.000,+1.000,-3.000
+omega1:s:+0.000,+0.000,+0.000-v:+2.000,+0.000,-1.000^v:+2.000,+0.000,-2.000
+omega1:s:+0.000,+0.000,+0.000-v:-2.000,+1.000,+1.000^v:-2.000,+1.000,+0.000
+omega1:s:+0.000,+0.000,+0.000-v:-2.000,+0.000,+0.000^v:-2.000,+0.000,-1.000
+omega1:s:+0.000,+0.000,+0.000-v:+2.000,-2.000,+0.000^v:+2.000,-2.000,-1.000
+omega1:s:+0.000,+0.000,+0.000-v:+0.000,+0.000,-2.000^v:+0.000,+0.000,-3.000
+omega2 jumps:
+omega2:s:+0.000,+0.000,+0.000-v:+0.000,+0.000,+1.000^s:+0.000,+0.000,+0.000-v:+0.000,+0.000,-1.000
+
+</pre></div></div>
+</div>
+<p>Below is an example of the above data translated into a dictionary
+corresponding to the data for Ni-Si; it is output into a <code class="docutils literal"><span class="pre">JSON</span></code>
+compliant file for reference. The strings are the corresponding tags in
+the diffuser. The first entry in each list is the prefactor (in THz) and
+the second is the corresponding energy (in eV). <strong>Note:</strong> all jumps are
+defined as <em>transition state energies</em>, hence the reference energy is
+added / subtracted as needed. Also, there are &#8220;missing&#8221; transition
+states; these will have there energies defined using the LIMB (linear
+interpolation of migration barriers) approximation. This introduces an
+error of no more than 10 meV in any activation barrier.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>NiSidata={
+&quot;v:+0.000,+0.000,+0.000&quot;: [1., 0.],
+&quot;s:+0.000,+0.000,+0.000&quot;: [1., 0.],
+&quot;s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000&quot;: [1., -0.108],
+&quot;s:+0.000,+0.000,+0.000-v:-1.000,-1.000,+1.000&quot;: [1., +0.004],
+&quot;s:+0.000,+0.000,+0.000-v:+1.000,-2.000,+0.000&quot;: [1., +0.037],
+&quot;s:+0.000,+0.000,+0.000-v:+0.000,-2.000,+0.000&quot;: [1., -0.008],
+&quot;omega0:v:+0.000,+0.000,+0.000^v:+0.000,+1.000,-1.000&quot;: [4.8, 1.074],
+&quot;omega1:s:+0.000,+0.000,+0.000-v:-1.000,+0.000,+0.000^v:-1.000,+1.000,-1.000&quot;: [5.2, 1.213-0.108],
+&quot;omega1:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000^v:+0.000,+0.000,-1.000&quot;: [5.2, 1.003-0.108],
+&quot;omega1:s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000^v:+0.000,+2.000,-2.000&quot;: [4.8, 1.128-0.108],
+&quot;omega1:s:+0.000,+0.000,+0.000-v:-1.000,+1.000,+0.000^v:-1.000,+2.000,-1.000&quot;: [5.2, 1.153-0.108],
+&quot;omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,-1.000^v:+1.000,+0.000,-2.000&quot;: [4.8, 1.091+0.004],
+&quot;omega2:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+1.000^s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000&quot;: [5.1, 0.891-0.108]
+}
+NiSi2013data={
+&quot;v:+0.000,+0.000,+0.000&quot;: [1., 0.],
+&quot;s:+0.000,+0.000,+0.000&quot;: [1., 0.],
+&quot;s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000&quot;: [1., -0.100],
+&quot;s:+0.000,+0.000,+0.000-v:-1.000,-1.000,+1.000&quot;: [1., +0.011],
+&quot;s:+0.000,+0.000,+0.000-v:+1.000,-2.000,+0.000&quot;: [1., +0.045],
+&quot;s:+0.000,+0.000,+0.000-v:+0.000,-2.000,+0.000&quot;: [1., 0],
+&quot;omega0:v:+0.000,+0.000,+0.000^v:+0.000,+1.000,-1.000&quot;: [4.8, 1.074],
+&quot;omega1:s:+0.000,+0.000,+0.000-v:-1.000,+0.000,+0.000^v:-1.000,+1.000,-1.000&quot;: [5.2, 1.213-0.100],
+&quot;omega1:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000^v:+0.000,+0.000,-1.000&quot;: [5.2, 1.003-0.100],
+&quot;omega1:s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000^v:+0.000,+2.000,-2.000&quot;: [4.8, 1.128-0.100],
+&quot;omega1:s:+0.000,+0.000,+0.000-v:-1.000,+1.000,+0.000^v:-1.000,+2.000,-1.000&quot;: [5.2, 1.153-0.100],
+&quot;omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,-1.000^v:+1.000,+0.000,-2.000&quot;: [4.8, 1.091+0.011],
+&quot;omega2:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+1.000^s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000&quot;: [5.1, 0.891-0.100]
+}
+print(json.dumps(NiSi2013data, sort_keys=True, indent=4))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{
+    &#34;omega0:v:+0.000,+0.000,+0.000^v:+0.000,+1.000,-1.000&#34;: [
+        4.8,
+        1.074
+    ],
+    &#34;omega1:s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000^v:+0.000,+2.000,-2.000&#34;: [
+        4.8,
+        1.0279999999999998
+    ],
+    &#34;omega1:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000^v:+0.000,+0.000,-1.000&#34;: [
+        5.2,
+        0.9029999999999999
+    ],
+    &#34;omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,-1.000^v:+1.000,+0.000,-2.000&#34;: [
+        4.8,
+        1.1019999999999999
+    ],
+    &#34;omega1:s:+0.000,+0.000,+0.000-v:-1.000,+0.000,+0.000^v:-1.000,+1.000,-1.000&#34;: [
+        5.2,
+        1.113
+    ],
+    &#34;omega1:s:+0.000,+0.000,+0.000-v:-1.000,+1.000,+0.000^v:-1.000,+2.000,-1.000&#34;: [
+        5.2,
+        1.053
+    ],
+    &#34;omega2:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+1.000^s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000&#34;: [
+        5.1,
+        0.791
+    ],
+    &#34;s:+0.000,+0.000,+0.000&#34;: [
+        1.0,
+        0.0
+    ],
+    &#34;s:+0.000,+0.000,+0.000-v:+0.000,+1.000,-1.000&#34;: [
+        1.0,
+        -0.1
+    ],
+    &#34;s:+0.000,+0.000,+0.000-v:+0.000,-2.000,+0.000&#34;: [
+        1.0,
+        0
+    ],
+    &#34;s:+0.000,+0.000,+0.000-v:+1.000,-2.000,+0.000&#34;: [
+        1.0,
+        0.045
+    ],
+    &#34;s:+0.000,+0.000,+0.000-v:-1.000,-1.000,+1.000&#34;: [
+        1.0,
+        0.011
+    ],
+    &#34;v:+0.000,+0.000,+0.000&#34;: [
+        1.0,
+        0.0
+    ]
+}
+</pre></div></div>
+</div>
+<p>Next, we convert our dictionary into the simpler form used by the
+diffuser.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>preenedict = NiSi.tags2preene(NiSi2013data)
+preenedict
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[5]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>{&#39;eneS&#39;: array([ 0.]),
+ &#39;eneSV&#39;: array([-0.1  ,  0.011,  0.045,  0.   ]),
+ &#39;eneT0&#39;: array([ 1.074]),
+ &#39;eneT1&#39;: array([ 1.053 ,  0.903 ,  1.113 ,  1.028 ,  1.0795,  1.102 ,  1.0965,
+         1.0965,  1.0965,  1.0965,  1.119 ,  1.074 ,  1.074 ,  1.074 ]),
+ &#39;eneT2&#39;: array([ 0.791]),
+ &#39;eneV&#39;: array([ 0.]),
+ &#39;preS&#39;: array([ 1.]),
+ &#39;preSV&#39;: array([ 1.,  1.,  1.,  1.]),
+ &#39;preT0&#39;: array([ 4.8]),
+ &#39;preT1&#39;: array([ 5.2,  5.2,  5.2,  4.8,  4.8,  4.8,  4.8,  4.8,  4.8,  4.8,  4.8,
+         4.8,  4.8,  4.8]),
+ &#39;preT2&#39;: array([ 5.1]),
+ &#39;preV&#39;: array([ 1.])}
+</pre></div>
+</div>
+</div>
+<p>We can now calculate the diffusion coefficients and drag ratio.
+<strong>Note:</strong> the diffusion coefficients <span class="math">\(L_\text{ss}\)</span> and
+<span class="math">\(L_\text{sv}\)</span> both need to be multiplied by
+<span class="math">\(c_\text{s}c_\text{v}/k_\text{B}T\)</span> where <span class="math">\(c_\text{s}\)</span> is the
+solute concentration, <span class="math">\(c_\text{v}\)</span> the (equilibrium) vacancy
+concentration, and <span class="math">\(k_\text{B}T\)</span> is the thermal energy of the
+system. The current units shown below are in
+<span class="math">\(\text{nm}^2\cdot\text{THz}\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>print(&quot;#T #Lss #Lsv #drag&quot;)
+for T in np.linspace(300, 1400, 23):
+    L0vv, Lss, Lsv, L1vv = NiSi.Lij(*NiSi.preene2betafree(kB*T, **preenedict))
+    print(T, Lss[0,0], Lsv[0,0], Lsv[0,0]/Lss[0,0])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+#T #Lss #Lsv #drag
+300.0 4.1020388689e-16 4.03521345382e-16 0.983709219436
+350.0 5.99654580387e-14 5.75933473853e-14 0.960442048956
+400.0 2.51914470587e-12 2.32702939103e-12 0.923737880405
+450.0 4.61249420384e-11 4.03116417036e-11 0.873966230027
+500.0 4.7250491963e-10 3.84170227063e-10 0.813050216206
+550.0 3.17382569388e-09 2.36031280433e-09 0.743680665541
+600.0 1.55354740581e-08 1.03884191885e-08 0.668690195716
+650.0 5.96097883468e-08 3.52092669306e-08 0.590662505388
+700.0 1.88868586771e-07 9.66525181976e-08 0.511744805477
+750.0 5.13340570374e-07 2.22584238868e-07 0.43359954719
+800.0 1.23159242387e-06 4.40215392835e-07 0.357435937654
+850.0 2.66586838346e-06 7.57314596438e-07 0.28407801418
+900.0 5.29556637614e-06 1.13347630469e-06 0.214042507294
+950.0 9.78435004446e-06 1.44428949825e-06 0.147612206399
+1000.0 1.69973273335e-05 1.44304978386e-06 0.084898628799
+1050.0 2.80063788635e-05 7.25153043356e-07 0.0258924242542
+1100.0 4.4083410105e-05 -1.3003604007e-06 -0.0294977270951
+1150.0 6.66826933232e-05 -5.4290391372e-06 -0.0814160146604
+1200.0 9.74143994545e-05 -1.26676005168e-05 -0.130038275529
+1250.0 0.000138011882666 -2.42289344792e-05 -0.175556872431
+1300.0 0.000190295346612 -4.15167679854e-05 -0.21817016929
+1350.0 0.000256134304169 -6.61019634203e-05 -0.258075401632
+1400.0 0.000337410855954 -9.96927651132e-05 -0.295464011765
+</pre></div></div>
+</div>
+<p>For direct comparison with the SCMF data in the 2013 <em>Phys. Rev. B</em>
+paper, we evaluate at 960K, 1060K (the predicted crossover temperature),
+and 1160K. The reported data is in units of mol/eV Å ns.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>volume = 0.25*a0**3
+conv = 1e3*0.1/volume  # 10^3 for THz-&gt;ns^-1, 10^-1 for nm^-1 -&gt;Ang^-1
+# T: (L0vv, Lsv, Lss)
+PRBdata = {960: (1.52e-1, 1.57e-1, 1.29e0),
+           1060: (4.69e-1, 0., 3.27e0),
+           1160: (1.18e0, -7.55e-1, 7.02e0)}
+print(&quot;#T #Lvv #Lsv #Lss&quot;)
+for T in (960, 1060, 1160):
+    c = conv/(kB*T)
+    L0vv, Lss, Lsv, L1vv = NiSi.Lij(*NiSi.preene2betafree(kB*T, **preenedict))
+    vv, sv, ss = L0vv[0,0]*c, Lsv[0,0]*c, Lss[0,0]*c
+    vvref, svref, ssref = PRBdata[T]
+    print(&quot;{} {:.4g} ({:.4g}) {:.4g} ({:.4g}) {:.4g} ({:.4g})&quot;.format(T, vv, vvref/vv, sv, svref/sv, ss, ssref/ss))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+#T #Lvv #Lsv #Lss
+960 0.1556 (0.9766) 0.1773 (0.8856) 1.315 (0.9807)
+1060 0.4797 (0.9777) 0.04852 (0) 3.339 (0.9792)
+1160 1.208 (0.9769) -0.6537 (1.155) 7.152 (0.9815)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span># raw comparison data from 2013 paper
+Tval = np.array([510, 530, 550, 570, 590, 610, 630, 650, 670, 690,
+                 710, 730, 750, 770, 790, 810, 830, 850, 870, 890,
+                 910, 930, 950, 970, 990, 1010, 1030, 1050, 1070, 1090,
+                 1110, 1130, 1150, 1170, 1190, 1210, 1230, 1250, 1270, 1290,
+                 1310, 1330, 1350, 1370, 1390, 1410, 1430, 1450, 1470, 1490])
+fluxval = np.array([0.771344, 0.743072, 0.713923, 0.684066, 0.653661, 0.622858,
+                    0.591787, 0.560983, 0.529615, 0.498822, 0.467298, 0.436502,
+                    0.406013, 0.376193, 0.346530, 0.316744, 0.288483, 0.260656,
+                    0.232809, 0.205861, 0.179139, 0.154038, 0.128150, 0.103273,
+                    0.079025, 0.055587, 0.032558, 0.010136, -0.011727, -0.033069,
+                    -0.053826, -0.074061, -0.093802, -0.113075, -0.132267, -0.149595,
+                    -0.167389, -0.184604, -0.202465, -0.218904, -0.234157, -0.250360,
+                    -0.265637, -0.280173, -0.294940, -0.308410, -0.322271, -0.335809,
+                    -0.349106, -0.361605])
+# Trange = np.linspace(300, 1500, 121)
+Draglist = []
+for T in Tval:
+    L0vv, Lss, Lsv, L1vv = NiSi.Lij(*NiSi.preene2betafree(kB*T, **preenedict))
+    Draglist.append(Lsv[0,0]/Lss[0,0])
+Drag = np.array(Draglist)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>fig, ax1 = plt.subplots()
+ax1.plot(Tval, Drag, &#39;k&#39;, label=&#39;GF&#39;)
+ax1.plot(Tval, fluxval, &#39;r&#39;, label=&#39;SCMF (PRB 2013)&#39;)
+ax1.set_ylabel(&#39;drag ratio $L^{\\rm{SiV}}/L^{\\rm{SiSi}}$&#39;, fontsize=&#39;x-large&#39;)
+ax1.set_xlabel(&#39;$T$ [K]&#39;, fontsize=&#39;x-large&#39;)
+ax1.legend(bbox_to_anchor=(0.5,0.6,0.5,0.2), ncol=1,
+           shadow=True, frameon=True, fontsize=&#39;x-large&#39;)
+plt.show()
+# plt.savefig(&#39;NiSi-drag.pdf&#39;, transparent=True, format=&#39;pdf&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_NiSi_15_0.png" src="../_images/examples_NiSi_15_0.png" />
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="FCC-Co-O.html" class="btn btn-neutral float-right" title="Split oxygen-vacancy defects in Co" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="LargeOmega2.html" class="btn btn-neutral" title="Large \(\omega^2\) correction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Dallas R. Trinkle.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

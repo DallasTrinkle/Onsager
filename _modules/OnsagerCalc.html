@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -30,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="Onsager 1.2.1 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
@@ -40,6 +45,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -80,7 +86,10 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
@@ -105,8 +114,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Onsager</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Onsager</a>
+        
       </nav>
 
 
@@ -119,19 +130,36 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="index.html">Module code</a> &raquo;</li>
-      
-    <li>OnsagerCalc</li>
+        
+      <li>OnsagerCalc</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -286,7 +314,7 @@
 <div class="viewcode-block" id="Interstitial.__str__"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.Interstitial.__str__">[docs]</a>    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Human readable version of diffuser&quot;&quot;&quot;</span>
         <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Diffuser for atom </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chem</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">chem</span><span class="p">])</span>
-        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;states&#39;</span><span class="p">,</span> <span class="s1">&#39;transitions&#39;</span><span class="p">):</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="n">t</span> <span class="o">+</span> <span class="s1">&#39;:</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">taglist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">taglist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="n">t</span><span class="p">]])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
@@ -658,7 +686,78 @@
                 <span class="n">Dp</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">D0</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="n">d</span><span class="p">:</span>
                 <span class="n">Dp</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">D0</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">D0</span><span class="p">,</span> <span class="n">Dp</span></div></div>
+        <span class="k">return</span> <span class="n">D0</span><span class="p">,</span> <span class="n">Dp</span></div>
+
+<div class="viewcode-block" id="Interstitial.losstensors"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.Interstitial.losstensors">[docs]</a>    <span class="k">def</span> <span class="nf">losstensors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pre</span><span class="p">,</span> <span class="n">betaene</span><span class="p">,</span> <span class="n">dipole</span><span class="p">,</span> <span class="n">preT</span><span class="p">,</span> <span class="n">betaeneT</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the internal friction loss tensors for our element given prefactors, energies/kB T,</span>
+<span class="sd">        and elastic dipoles/kB T</span>
+<span class="sd">        The input list order corresponds to the sitelist and jumpnetwork</span>
+
+<span class="sd">        :param pre: list of prefactors for unique sites</span>
+<span class="sd">        :param betaene: list of site energies divided by kB T</span>
+<span class="sd">        :param dipole: list of elastic dipoles divided by kB T</span>
+<span class="sd">        :param preT: list of prefactors for transition states</span>
+<span class="sd">        :param betaeneT: list of transition state energies divided by kB T</span>
+<span class="sd">        :return lambdaL: list of tuples of (eigenmode, L-tensor) where L-tensor is a 3x3x3x3 loss tensor</span>
+<span class="sd">            L-tensor needs to be multiplied by kB T to have proper units of energy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">tensor_square</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Construct the outer product of a with itself&quot;&quot;&quot;</span>
+            <span class="n">aa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)):</span>
+                <span class="n">aa</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">aa</span>
+
+        <span class="k">if</span> <span class="n">__debug__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pre</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sitelist</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="s2">&quot;length of prefactor </span><span class="si">{}</span><span class="s2"> doesn&#39;t match sitelist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pre</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">betaene</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sitelist</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="s2">&quot;length of energies </span><span class="si">{}</span><span class="s2"> doesn&#39;t match sitelist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">betaene</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dipole</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sitelist</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="s2">&quot;length of dipoles </span><span class="si">{}</span><span class="s2"> doesn&#39;t match sitelist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dipole</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">preT</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="s2">&quot;length of prefactor </span><span class="si">{}</span><span class="s2"> doesn&#39;t match jump network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">preT</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">betaeneT</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="s2">&quot;length of energies </span><span class="si">{}</span><span class="s2"> doesn&#39;t match jump network&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">betaeneT</span><span class="p">))</span>
+        <span class="n">rho</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">siteprob</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">betaene</span><span class="p">)</span>
+        <span class="n">sqrtrho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rho</span><span class="p">)</span>
+        <span class="n">ratelist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratelist</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">betaene</span><span class="p">,</span> <span class="n">preT</span><span class="p">,</span> <span class="n">betaeneT</span><span class="p">)</span>
+        <span class="n">symmratelist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symmratelist</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">betaene</span><span class="p">,</span> <span class="n">preT</span><span class="p">,</span> <span class="n">betaeneT</span><span class="p">)</span>
+        <span class="n">omega_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">))</span>
+        <span class="n">sitedipoles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">siteDipoles</span><span class="p">(</span><span class="n">dipole</span><span class="p">)</span>
+
+        <span class="c1"># populate our symmetrized transition matrix:</span>
+        <span class="k">for</span> <span class="n">transitionset</span><span class="p">,</span> <span class="n">rates</span><span class="p">,</span> <span class="n">symmrates</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">,</span> <span class="n">ratelist</span><span class="p">,</span> <span class="n">symmratelist</span><span class="p">):</span>
+            <span class="k">for</span> <span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">dx</span><span class="p">),</span> <span class="n">rate</span><span class="p">,</span> <span class="n">symmrate</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">transitionset</span><span class="p">,</span> <span class="n">rates</span><span class="p">,</span> <span class="n">symmrates</span><span class="p">):</span>
+                <span class="c1"># symmrate = sqrtrho[i]*invsqrtrho[j]*rate</span>
+                <span class="n">omega_ij</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">symmrate</span>
+                <span class="n">omega_ij</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-=</span> <span class="n">rate</span>
+        <span class="c1"># next, diagonalize:</span>
+        <span class="c1"># lamb: eigenvalues, in ascending order, with eigenvalues phi</span>
+        <span class="c1"># then, the *largest* should be lamb = 0</span>
+        <span class="n">lamb</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">omega_ij</span><span class="p">)</span>
+        <span class="n">averate</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">omega_ij</span><span class="o">.</span><span class="n">trace</span><span class="p">()</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">lambdaL</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># work through the eigenvalues / vectors individually:</span>
+        <span class="c1"># NOTE: we should have a negative definite matrix, so negate those eigenvalues...</span>
+        <span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">-</span><span class="n">lamb</span><span class="p">,</span> <span class="n">phi</span><span class="o">.</span><span class="n">T</span><span class="p">):</span>
+            <span class="c1"># need to check if lamb is (approximately) 0. Can also check if p is close to sqrtrho</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-8</span><span class="o">*</span><span class="n">averate</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">sqrtrho</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span> <span class="k">continue</span>
+            <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">p</span><span class="o">*</span><span class="n">sqrtrho</span><span class="p">,</span> <span class="n">sitedipoles</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">L</span> <span class="o">=</span> <span class="n">tensor_square</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+            <span class="c1"># determine if we have a new mode or not</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">lamb0</span><span class="p">,</span> <span class="n">L0</span><span class="p">)</span> <span class="ow">in</span> <span class="n">lambdaL</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">lamb0</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
+                    <span class="n">L0</span> <span class="o">+=</span> <span class="n">L</span>
+                    <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+                <span class="n">lambdaL</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">l</span><span class="p">,</span> <span class="n">L</span><span class="p">))</span>
+        <span class="c1"># pass back list</span>
+        <span class="k">return</span> <span class="n">lambdaL</span></div></div>
 
 
 <span class="c1"># YAML tags</span>
@@ -677,7 +776,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(pre=</span><span class="si">{}</span><span class="s2">, betaene=</span><span class="si">{}</span><span class="s2">, preT=</span><span class="si">{}</span><span class="s2">, betaeneT=</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(pre=</span><span class="si">{}</span><span class="s2">, betaene=</span><span class="si">{}</span><span class="s2">, preT=</span><span class="si">{}</span><span class="s2">, betaeneT=</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
                                                                      <span class="bp">self</span><span class="o">.</span><span class="n">pre</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">betaene</span><span class="p">,</span>
                                                                      <span class="bp">self</span><span class="o">.</span><span class="n">preT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">betaeneT</span><span class="p">)</span>
 
@@ -687,12 +786,12 @@
 
     <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="c1"># Note: could scale all prefactors by min(pre) and subtract all energies by min(ene)...?</span>
-        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span> <span class="ow">and</span> \
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span> <span class="ow">and</span> \
                <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pre</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">pre</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">betaene</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">betaene</span><span class="p">)</span> <span class="ow">and</span> \
                <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preT</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">preT</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">betaeneT</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">betaeneT</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="ow">not</span> <span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pre</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">betaene</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span> <span class="o">+</span>
@@ -937,7 +1036,7 @@
         <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Diffuser for atom </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">), Nthermo=</span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chem</span><span class="p">,</span>
                                                              <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">chemistry</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">chem</span><span class="p">],</span>
                                                              <span class="bp">self</span><span class="o">.</span><span class="n">Nthermo</span><span class="p">)</span>
-        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;vacancy&#39;</span><span class="p">,</span> <span class="s1">&#39;solute&#39;</span><span class="p">,</span> <span class="s1">&#39;solute-vacancy&#39;</span><span class="p">):</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="n">t</span> <span class="o">+</span> <span class="s1">&#39; configurations:</span><span class="se">\n</span><span class="s1">&#39;</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">taglist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">taglist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="n">t</span><span class="p">]])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
@@ -1110,9 +1209,9 @@
 
 <span class="sd">        :param HDF5group: HDF5 group</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">HDF5group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">HDF5group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
         <span class="n">HDF5group</span><span class="p">[</span><span class="s1">&#39;crystal_yaml&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="p">)</span>
-        <span class="n">HDF5group</span><span class="p">[</span><span class="s1">&#39;crystal_yaml&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;pythonrep&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+        <span class="n">HDF5group</span><span class="p">[</span><span class="s1">&#39;crystal_yaml&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;pythonrep&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
         <span class="n">HDF5group</span><span class="p">[</span><span class="s1">&#39;crystal_lattice&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">T</span>
         <span class="n">basislist</span><span class="p">,</span> <span class="n">basisindex</span> <span class="o">=</span> <span class="n">stars</span><span class="o">.</span><span class="n">doublelist2flatlistindex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">basis</span><span class="p">)</span>
         <span class="n">HDF5group</span><span class="p">[</span><span class="s1">&#39;crystal_basisarray&#39;</span><span class="p">],</span> <span class="n">HDF5group</span><span class="p">[</span><span class="s1">&#39;crystal_basisindex&#39;</span><span class="p">]</span> <span class="o">=</span> \
@@ -1169,16 +1268,16 @@
             <span class="n">HDF5group</span><span class="p">[</span><span class="n">tag</span> <span class="o">+</span> <span class="s1">&#39;_taglist&#39;</span><span class="p">],</span> <span class="n">HDF5group</span><span class="p">[</span><span class="n">tag</span> <span class="o">+</span> <span class="s1">&#39;_tagindex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">taglist</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">),</span> <span class="n">tagindex</span></div>
 
     <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="VacancyMediated.loadhdf5"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.VacancyMediated.loadhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
+<div class="viewcode-block" id="VacancyMediated.loadhdf5"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.VacancyMediated.loadhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a new VacancyMediated diffuser from an HDF5 group.</span>
 
 <span class="sd">        :param HDFgroup: HDF5 group</span>
 <span class="sd">        :return VacancyMediated: new VacancyMediated diffuser object from HDF5</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">diffuser</span> <span class="o">=</span> <span class="n">cls</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># initialize</span>
+        <span class="n">diffuser</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># initialize</span>
         <span class="n">diffuser</span><span class="o">.</span><span class="n">crys</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">HDF5group</span><span class="p">[</span><span class="s1">&#39;crystal_yaml&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">internal</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">__HDF5list__</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">internal</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__HDF5list__</span><span class="p">:</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">diffuser</span><span class="p">,</span> <span class="n">internal</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">[</span><span class="n">internal</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
         <span class="n">diffuser</span><span class="o">.</span><span class="n">sitelist</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">diffuser</span><span class="o">.</span><span class="n">invmap</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">site</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">diffuser</span><span class="o">.</span><span class="n">invmap</span><span class="p">):</span>
@@ -1223,7 +1322,7 @@
             <span class="n">diffuser</span><span class="o">.</span><span class="n">GFvalues</span><span class="p">,</span> <span class="n">diffuser</span><span class="o">.</span><span class="n">Lvvvalues</span><span class="p">,</span> <span class="n">diffuser</span><span class="o">.</span><span class="n">etavvalues</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{},</span> <span class="p">{}</span>
         <span class="c1"># tags</span>
         <span class="n">diffuser</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="n">diffuser</span><span class="o">.</span><span class="n">tagdict</span><span class="p">,</span> <span class="n">diffuser</span><span class="o">.</span><span class="n">tagdicttype</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{},</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">__taglist__</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__taglist__</span><span class="p">:</span>
             <span class="c1"># needed because of how HDF5 stores strings...</span>
             <span class="n">utf8list</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">HDF5group</span><span class="p">[</span><span class="n">tag</span> <span class="o">+</span> <span class="s1">&#39;_taglist&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
             <span class="n">diffuser</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">stars</span><span class="o">.</span><span class="n">flatlistindex2doublelist</span><span class="p">(</span><span class="n">utf8list</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">[</span><span class="n">tag</span> <span class="o">+</span> <span class="s1">&#39;_tagindex&#39;</span><span class="p">])</span>
@@ -1470,7 +1569,7 @@
         <span class="k">return</span> <span class="n">omega0</span><span class="p">,</span> <span class="n">omega1</span><span class="p">,</span> <span class="n">omega2</span><span class="p">,</span> \
                <span class="n">omega0escape</span><span class="p">,</span> <span class="n">omega1escape</span><span class="p">,</span> <span class="n">omega2escape</span>
 
-<div class="viewcode-block" id="VacancyMediated.Lij"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.VacancyMediated.Lij">[docs]</a>    <span class="k">def</span> <span class="nf">Lij</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bFV</span><span class="p">,</span> <span class="n">bFS</span><span class="p">,</span> <span class="n">bFSV</span><span class="p">,</span> <span class="n">bFT0</span><span class="p">,</span> <span class="n">bFT1</span><span class="p">,</span> <span class="n">bFT2</span><span class="p">,</span> <span class="n">large_om2</span><span class="o">=</span><span class="mi">1</span><span class="n">e8</span><span class="p">):</span>
+<div class="viewcode-block" id="VacancyMediated.Lij"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.VacancyMediated.Lij">[docs]</a>    <span class="k">def</span> <span class="nf">Lij</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bFV</span><span class="p">,</span> <span class="n">bFS</span><span class="p">,</span> <span class="n">bFSV</span><span class="p">,</span> <span class="n">bFT0</span><span class="p">,</span> <span class="n">bFT1</span><span class="p">,</span> <span class="n">bFT2</span><span class="p">,</span> <span class="n">large_om2</span><span class="o">=</span><span class="mf">1e8</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the transport coefficients: L0vv, Lss, Lsv, L1vv from the scaled free energies.</span>
 <span class="sd">        The Green function entries are calculated from the omega0 info. As this is the most</span>
@@ -1667,6 +1766,9 @@
 </pre></div>
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
@@ -1700,7 +1802,8 @@
             VERSION:'1.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="../_static/jquery.js"></script>

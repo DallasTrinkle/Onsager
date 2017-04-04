@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -30,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="Onsager 1.2.1 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
@@ -40,6 +45,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -80,7 +86,10 @@
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
@@ -105,8 +114,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Onsager</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Onsager</a>
+        
       </nav>
 
 
@@ -119,19 +130,36 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="index.html">Module code</a> &raquo;</li>
-      
-    <li>automator</li>
+        
+      <li>automator</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -245,7 +273,7 @@
 <span class="s2">0. 0. 0.</span>
 <span class="s2">&quot;&quot;&quot;</span>
 
-<span class="n">MAKEFILE</span> <span class="o">=</span> <span class="s2">r&quot;&quot;&quot;# Makefile to construct NEB input from relaxation output</span>
+<span class="n">MAKEFILE</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;# Makefile to construct NEB input from relaxation output</span>
 <span class="s2"># we set this so that the makefile doesn&#39;t use builtin implicit rules</span>
 <span class="s2">MAKEFLAGS = -rk</span>
 
@@ -364,9 +392,9 @@
     <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">strdata</span> <span class="ow">in</span> <span class="p">((</span><span class="s1">&#39;INCAR.relax&#39;</span><span class="p">,</span> <span class="n">INCARrelax</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;INCAR.NEB&#39;</span><span class="p">,</span> <span class="n">INCARNEB</span><span class="p">))</span> <span class="o">+</span> \
             <span class="p">(((</span><span class="s1">&#39;KPOINTS&#39;</span><span class="p">,</span> <span class="n">KPOINTS</span><span class="p">),)</span> <span class="k">if</span> <span class="n">kpoints</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">()):</span>
         <span class="n">addfile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">strdata</span><span class="p">)</span>
-    <span class="n">addfile</span><span class="p">(</span><span class="s1">&#39;trans.pl&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_string</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s1">&#39;trans.pl&#39;</span><span class="p">),</span> <span class="s1">&#39;ascii&#39;</span><span class="p">),</span> <span class="n">executable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">addfile</span><span class="p">(</span><span class="s1">&#39;nebmake.pl&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_string</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s1">&#39;nebmake.pl&#39;</span><span class="p">),</span> <span class="s1">&#39;ascii&#39;</span><span class="p">),</span> <span class="n">executable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">addfile</span><span class="p">(</span><span class="s1">&#39;Vasp.pm&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_string</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s1">&#39;Vasp.pm&#39;</span><span class="p">),</span> <span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
+    <span class="n">addfile</span><span class="p">(</span><span class="s1">&#39;trans.pl&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_string</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;trans.pl&#39;</span><span class="p">),</span> <span class="s1">&#39;ascii&#39;</span><span class="p">),</span> <span class="n">executable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">addfile</span><span class="p">(</span><span class="s1">&#39;nebmake.pl&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_string</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;nebmake.pl&#39;</span><span class="p">),</span> <span class="s1">&#39;ascii&#39;</span><span class="p">),</span> <span class="n">executable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">addfile</span><span class="p">(</span><span class="s1">&#39;Vasp.pm&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_string</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;Vasp.pm&#39;</span><span class="p">),</span> <span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
     <span class="c1"># now, go through the states:</span>
     <span class="k">if</span> <span class="s1">&#39;reference&#39;</span> <span class="ow">in</span> <span class="n">superdict</span><span class="p">:</span>
         <span class="n">addfile</span><span class="p">(</span><span class="s1">&#39;POSCAR&#39;</span><span class="p">,</span> <span class="n">superdict</span><span class="p">[</span><span class="s1">&#39;reference&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">POSCAR</span><span class="p">(</span><span class="s1">&#39;Defect-free reference&#39;</span><span class="p">))</span>
@@ -424,6 +452,9 @@
 </pre></div>
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
@@ -457,7 +488,8 @@
             VERSION:'1.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="../_static/jquery.js"></script>

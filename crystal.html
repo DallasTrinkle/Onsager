@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -30,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="Onsager 1.2.1 documentation" href="index.html"/>
         <link rel="next" title="CrystalStars" href="CrystalStars.html"/>
         <link rel="prev" title="Onsager" href="includeme.html"/> 
@@ -41,6 +46,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -81,7 +87,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="includeme.html#references">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="includeme.html#contributors">Contributors</a></li>
@@ -106,8 +115,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Onsager</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Onsager</a>
+        
       </nav>
 
 
@@ -116,23 +127,40 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Crystal</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Crystal</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/crystal.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/crystal.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -197,7 +225,7 @@
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return tensorbasis:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of 2nd-rank symmetric tensors making up the basis</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">list of 2nd-rank symmetric tensors making up the basis</p>
 </td>
 </tr>
 </tbody>
@@ -230,7 +258,7 @@
 
 <dl class="class">
 <dt id="crystal.Crystal">
-<em class="property">class </em><code class="descclassname">crystal.</code><code class="descname">Crystal</code><span class="sig-paren">(</span><em>lattice</em>, <em>basis</em>, <em>chemistry=None</em>, <em>spins=None</em>, <em>NOSYM=False</em>, <em>noreduce=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">crystal.</code><code class="descname">Crystal</code><span class="sig-paren">(</span><em>lattice</em>, <em>basis</em>, <em>chemistry=None</em>, <em>spins=None</em>, <em>NOSYM=False</em>, <em>noreduce=False</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class that defines a crystal, as well as the symmetry analysis that goes along with it.
 Now includes optional spins. These can be vectors or &#8220;scalar&#8221; spins, for which we need
 to consider a phase factor. In general, they can be complex. Ideally, they should have
@@ -248,7 +276,7 @@ Can also name the elements (chemistry), and specify spin degrees of freedom.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>a0</strong> &#8211; lattice constant</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return BCC crystal:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
@@ -265,7 +293,7 @@ Can also name the elements (chemistry), and specify spin degrees of freedom.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>a0</strong> &#8211; lattice constant</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return FCC crystal:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
@@ -282,7 +310,7 @@ Can also name the elements (chemistry), and specify spin degrees of freedom.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>chem</strong> &#8211; (optional) chemical index to consider; otherwise return a list of such</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return VBfunctions:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">(list) of our unique vector basis lattice functions, normalized; each is an array
+<tr class="field-even field"><td>&#160;</td><td class="field-body">(list) of our unique vector basis lattice functions, normalized; each is an array
 (NVbasis x Nsites x 3)</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return VVouter:</th><td class="field-body">(list) of ouf VV &#8220;outer&#8221; expansion (NVbasis x NVbasis for each chemistry)</td>
@@ -306,7 +334,7 @@ Can also name the elements (chemistry), and specify spin degrees of freedom.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return HCP crystal:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"></td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
@@ -323,7 +351,7 @@ Can also name the elements (chemistry), and specify spin degrees of freedom.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ind</strong> &#8211; tuple index for atom</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return tensorbasis:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of 2nd-rank symmetric tensors making up the basis</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list of 2nd-rank symmetric tensors making up the basis</td>
 </tr>
 </tbody>
 </table>
@@ -358,7 +386,7 @@ Can also name the elements (chemistry), and specify spin degrees of freedom.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uvec</strong> &#8211; 3-vector (float) vector in direct coordinates</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return Wyckofflist:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of equivalent Wyckoff positions</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list of equivalent Wyckoff positions</td>
 </tr>
 </tbody>
 </table>
@@ -366,7 +394,7 @@ Can also name the elements (chemistry), and specify spin degrees of freedom.</p>
 
 <dl class="method">
 <dt id="crystal.Crystal.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>lattice</em>, <em>basis</em>, <em>chemistry=None</em>, <em>spins=None</em>, <em>NOSYM=False</em>, <em>noreduce=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>lattice</em>, <em>basis</em>, <em>chemistry=None</em>, <em>spins=None</em>, <em>NOSYM=False</em>, <em>noreduce=False</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialization; starts off with the lattice vector definition and the
 basis vectors. While it does not explicitly store the specific chemical
 elements involved, it does store that there are different elements.</p>
@@ -388,6 +416,7 @@ spins for individual atoms; if not None, needs to match the basis. Can either be
 scalars or vectors, corresponding to collinear or non-collinear magnetism</li>
 <li><strong>NOSYM</strong> &#8211; turn off all symmetry finding (except identity)</li>
 <li><strong>noreduce</strong> &#8211; do not attempt to reduce the atomic basis</li>
+<li><strong>threshold</strong> &#8211; threshold for symmetry equivalence (stored in the class)</li>
 </ul>
 </td>
 </tr>
@@ -448,7 +477,7 @@ maintained, should be the output from Wyckoffpos().</p>
 <tr class="field-odd field"><th class="field-name">Return volume:</th><td class="field-body">cell volume</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return metric tensor:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">3x3</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">3x3</td>
 </tr>
 </tbody>
 </table>
@@ -525,7 +554,7 @@ in cartesian coord.</p>
 can contain optional &#8216;lattice_constant&#8217;</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return Crystal(lattice.T, basis):</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">new crystal object</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">new crystal object</td>
 </tr>
 </tbody>
 </table>
@@ -606,7 +635,7 @@ k-points inside the BZ. Does not return any <em>weights</em> as every point is e
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return equivalent:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">True if equivalent by a point group operation</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">True if equivalent by a point group operation</p>
 </td>
 </tr>
 </tbody>
@@ -706,7 +735,7 @@ in the unit cell in direct coordinates</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return Wyckoffsets:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">set of sets of tuples of positions that correspond to identical Wyckoff positions</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">set of sets of tuples of positions that correspond to identical Wyckoff positions</td>
 </tr>
 </tbody>
 </table>
@@ -737,7 +766,7 @@ structure of our basis.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Return Gpointlists:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">list of lists of frozensets of point group operations that leave a site unchanged</td>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list of lists of frozensets of point group operations that leave a site unchanged</td>
 </tr>
 </tbody>
 </table>
@@ -784,7 +813,7 @@ parameter.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return jumpnetwork:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of symmetry-unique transitions; each is a list of tuples:
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">list of symmetry-unique transitions; each is a list of tuples:
 <code class="docutils literal"><span class="pre">((i,j),</span> <span class="pre">dx)</span></code> corresponding to jump from <span class="math">\(i \to j\)</span> with vector <span class="math">\(\mathbf{\delta x}\)</span></p>
 </td>
 </tr>
@@ -809,7 +838,7 @@ representation, where we replace dx with the lattice vector from i to j.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return jumplattice:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of symmetry-unique transitions; each is a list of tuples:
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">list of symmetry-unique transitions; each is a list of tuples:
 <code class="docutils literal"><span class="pre">((i,j),</span> <span class="pre">R)</span></code> corresponding to jump from i in unit cell 0 -&gt; j in unit cell R</p>
 </td>
 </tr>
@@ -872,13 +901,32 @@ cartesian vectors.</p>
 
 <dl class="method">
 <dt id="crystal.Crystal.reduce">
-<code class="descname">reduce</code><span class="sig-paren">(</span><em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.reduce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.reduce" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reduce</code><span class="sig-paren">(</span><em>threshold=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.reduce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.reduce" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reduces the lattice and basis, if needed. Works (tail) recursively.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>threshold</strong> &#8211; threshold for symmetry comparison; default = self.threshold</td>
+</tr>
+</tbody>
+</table>
+<p>Algorithm is slightly complicated: we attempt to identify if there is a internal
+translation symmetry in the crystal (called <cite>t</cite>) that applies to all sites. Once identified,
+we transform the lattice vectors and basis into the &#8220;reduced&#8221; form of the cell. We use
+tail recursion to continue until no further reduction is possible. Will usually require
+some &#8220;polishing&#8221; on the unit cell after the fact.</p>
+<p>We try to do this efficiently: we check the GCD of the site counts (called <cite>M</cite>); if it&#8217;s 1,
+we kick out. We check translations against the smallest site set first.</p>
+<p>We try to do this carefully: We make sure that our translation can be expressed rationally
+with <cite>M</cite> as the denominator; this helps protect against roundoff error. When we reduce the
+atomic basis, we <em>average</em> the values that match. Finally, as we reduce, we also change the
+<cite>self.threshold</cite> value accordingly so that recursion uses the same &#8220;effective&#8221; threshold.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="crystal.Crystal.reducekptmesh">
-<code class="descname">reducekptmesh</code><span class="sig-paren">(</span><em>kptfull</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.reducekptmesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.reducekptmesh" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reducekptmesh</code><span class="sig-paren">(</span><em>kptfull</em>, <em>threshold=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.reducekptmesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.reducekptmesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a fully expanded mesh, and reduces it by symmetry. Assumes every point is
 equally weighted. We would need a different (more complicated) algorithm if not true...</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -912,7 +960,7 @@ equally weighted. We would need a different (more complicated) algorithm if not 
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>supercell</strong> &#8211; integer array[3,3]</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return atomic basis:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of list of positions</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list of list of positions</td>
 </tr>
 </tbody>
 </table>
@@ -944,7 +992,7 @@ Done with a single list comprehension&#8211;useful as input for diffusion calcul
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>chem</strong> &#8211; index corresponding to chemistry to consider</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return symmequivsites:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of lists of indices that are equivalent by symmetry</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list of lists of indices that are equivalent by symmetry</td>
 </tr>
 </tbody>
 </table>
@@ -1004,6 +1052,25 @@ unit cell coordinates</p>
 </table>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="function">
+<dt id="crystal.FourthRankIsotropic">
+<code class="descclassname">crystal.</code><code class="descname">FourthRankIsotropic</code><span class="sig-paren">(</span><em>F</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#FourthRankIsotropic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.FourthRankIsotropic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the average and shear values from orientational averaging of a symmetric fourth-rank
+tensor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>F</strong><strong>[</strong><strong>a</strong><strong>,</strong><strong>b</strong><strong>,</strong><strong>c</strong><strong>,</strong><strong>d</strong><strong>]</strong><strong></strong> &#8211; symmetric fourth-rank tensor (F[abcd]=F[abcd]=F[bacd]=F[cdab])</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return average:</th><td class="field-body">average value = (F11+2F12)/3, orientationally averaged</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return shear:</th><td class="field-body">shear value = F44, orientationally averaged</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="class">
@@ -1105,7 +1172,7 @@ eigenvector for the complex eigenvalue is [1] + i [2].</p>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">integer</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return eigenvectors:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">list of [ev0, ev1, ev2]</td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list of [ev0, ev1, ev2]</td>
 </tr>
 </tbody>
 </table>
@@ -1194,7 +1261,7 @@ for a GroupOp</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return tensorbasis:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">list of 2nd-rank symmetric tensors making up the basis</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">list of 2nd-rank symmetric tensors making up the basis</p>
 </td>
 </tr>
 </tbody>
@@ -1251,6 +1318,12 @@ for a GroupOp</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="crystal.gcdlist">
+<code class="descclassname">crystal.</code><code class="descname">gcdlist</code><span class="sig-paren">(</span><em>lis</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#gcdlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.gcdlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the GCD of a list of integers</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="crystal.incell">
 <code class="descclassname">crystal.</code><code class="descname">incell</code><span class="sig-paren">(</span><em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#incell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.incell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the vector inside the unit cell (in [0,1)**3)</p>
@@ -1283,6 +1356,28 @@ for a GroupOp</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="crystal.isotropicFourthRank">
+<code class="descclassname">crystal.</code><code class="descname">isotropicFourthRank</code><span class="sig-paren">(</span><em>average</em>, <em>shear</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#isotropicFourthRank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.isotropicFourthRank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a symmetrized, isotropic fourth-rank tensor based on an average value and &#8220;shear&#8221; value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>average</strong> &#8211; averaged value = (F11+2F12)/3</li>
+<li><strong>shear</strong> &#8211; shear value = F44 = (F11-F12)/2</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return F[a,b,c,d]:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">isotropic fourth-rank tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="crystal.maptranslation">
 <code class="descclassname">crystal.</code><code class="descname">maptranslation</code><span class="sig-paren">(</span><em>oldpos</em>, <em>newpos</em>, <em>oldspins=None</em>, <em>newspins=None</em>, <em>threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#maptranslation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.maptranslation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a list of transformed positions, identify if there&#8217;s a translation vector
@@ -1305,7 +1400,7 @@ This means that a loop is needed to consider possible spin phase factors.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return translation:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first">array[3]</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">array[3]</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return mapping:</th><td class="field-body"><p class="first last">list of list of indices</p>
@@ -1325,15 +1420,18 @@ This means that a loop is needed to consider possible spin phase factors.</p>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="CrystalStars.html" class="btn btn-neutral float-right" title="CrystalStars" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="CrystalStars.html" class="btn btn-neutral float-right" title="CrystalStars" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="includeme.html" class="btn btn-neutral" title="Onsager" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="includeme.html" class="btn btn-neutral" title="Onsager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1367,7 +1465,8 @@ This means that a loop is needed to consider possible spin phase factors.</p>
             VERSION:'1.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

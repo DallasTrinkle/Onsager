@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -30,6 +32,9 @@
   
 
   
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="Onsager 1.2.1 documentation" href="../index.html"/>
         <link rel="up" title="Notebooks" href="../notebooks.html"/>
         <link rel="next" title="Garnet correlation coefficients" href="Garnet.html"/>
@@ -42,6 +47,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -82,7 +88,10 @@
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
@@ -100,6 +109,8 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Tracer correlation coefficients</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LargeOmega2.html">Large <span class="math">\(\omega^2\)</span> correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NiSi.html">Si in FCC Ni</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FCC-Co-O.html">Split oxygen-vacancy defects in Co</a></li>
 </ul>
 </li>
 </ul>
@@ -114,8 +125,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Onsager</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Onsager</a>
+        
       </nav>
 
 
@@ -124,25 +137,42 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../notebooks.html">Notebooks</a> &raquo;</li>
-      
-    <li>Tracer correlation coefficients</li>
+        
+      <li>Tracer correlation coefficients</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="../_sources/examples/Tracer-correlation.txt" rel="nofollow"> View page source</a>
+            
+            <a href="../_sources/examples/Tracer-correlation.ipynb.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -154,13 +184,15 @@
 
 /* remove conflicting styling from Sphinx themes */
 div.nbinput,
-div.nbinput > div,
-div.nbinput div[class^=highlight],
-div.nbinput div[class^=highlight] pre,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
 div.nboutput,
-div.nboutput > div,
-div.nboutput div[class^=highlight],
-div.nboutput div[class^=highlight] pre {
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
     background: none;
     border: none;
     padding: 0 0;
@@ -169,7 +201,7 @@ div.nboutput div[class^=highlight] pre {
 }
 
 /* avoid gaps between output lines */
-div.nboutput div[class^=highlight] pre {
+div.nboutput div[class*=highlight] pre {
     line-height: normal;
 }
 
@@ -180,6 +212,13 @@ div.nboutput {
     display: flex;
     align-items: flex-start;
     margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
 }
 
 /* input container */
@@ -193,38 +232,58 @@ div.nblast {
 }
 
 /* input prompt */
-div.nbinput > :first-child pre {
+div.nbinput div.prompt pre {
     color: #303F9F;
 }
 
 /* output prompt */
-div.nboutput > :first-child pre {
+div.nboutput div.prompt pre {
     color: #D84315;
 }
 
 /* all prompts */
-div.nbinput > :first-child[class^=highlight],
-div.nboutput > :first-child[class^=highlight],
-div.nboutput > :first-child {
-    min-width: 11ex;
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
     padding-top: 0.4em;
     padding-right: 0.4em;
     text-align: right;
     flex: 0;
 }
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
 
 /* input/output area */
-div.nbinput > :nth-child(2)[class^=highlight],
-div.nboutput > :nth-child(2),
-div.nboutput > :nth-child(2)[class^=highlight] {
+div.nbinput div.input_area,
+div.nboutput div.output_area {
     padding: 0.4em;
     -webkit-flex: 1;
     flex: 1;
     overflow: auto;
 }
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
 
 /* input area */
-div.nbinput > :nth-child(2)[class^=highlight] {
+div.nbinput div.input_area {
     border: 1px solid #cfcfcf;
     border-radius: 2px;
     background: #f7f7f7;
@@ -241,7 +300,7 @@ div.nboutput div.math p {
 }
 
 /* standard error */
-div.nboutput  > :nth-child(2).stderr {
+div.nboutput div.output_area.stderr {
     background: #fdd;
 }
 
@@ -329,12 +388,12 @@ tracers for several different crystal structures:</p>
 <li>octahedral-tetrahedral network in HCP</li>
 </ul>
 <p>Some are well-known (previously published) others are new.</p>
-<div class="nbinput nblast container">
-<div class="highlight-none"><div class="highlight"><pre>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [1]:
 </pre></div>
 </div>
-<div class="highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
 <span></span>import sys
 sys.path.extend([&#39;../&#39;])
 import numpy as np
@@ -346,12 +405,12 @@ from onsager import crystal, OnsagerCalc
 </div>
 </div>
 <p>Create all of our lattices, with lattice constant a0.</p>
-<div class="nbinput nblast container">
-<div class="highlight-none"><div class="highlight"><pre>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [2]:
 </pre></div>
 </div>
-<div class="highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
 <span></span>a0 = 1.
 SC = crystal.Crystal(a0*np.eye(3), [np.array([0.,0.,0.])], [&quot;SC&quot;])
 BCC = crystal.Crystal.BCC(a0, [&quot;BCC&quot;])
@@ -391,12 +450,12 @@ crystalnames = [&quot;simple cubic&quot;, &quot;body-centered cubic&quot;, &quot
 </pre></div>
 </div>
 </div>
-<div class="nbinput container">
-<div class="highlight-none"><div class="highlight"><pre>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [3]:
 </pre></div>
 </div>
-<div class="highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
 <span></span>for name, crys in zip(crystalnames, crystallist):
     print(name)
     print(crys)
@@ -404,10 +463,10 @@ crystalnames = [&quot;simple cubic&quot;, &quot;body-centered cubic&quot;, &quot
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast container">
-<div class="container">
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-<div class="container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
 simple cubic
 #Lattice:
@@ -504,12 +563,12 @@ HCP octahedral-tetrahedral
 </div>
 <p>Now we generate diffusers for <em>every crystal</em>. This is fairly automated,
 where the main input is the cutoff distance.</p>
-<div class="nbinput container">
-<div class="highlight-none"><div class="highlight"><pre>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [4]:
 </pre></div>
 </div>
-<div class="highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
 <span></span>cutoffs = [1.01*a0, 0.9*a0, 0.75*a0, 0.45*a0, 0.62*a0, 1.01*a0, 0.8*a0, 0.66*a0, 0.71*a0]
 diffusers = []
 for name, crys, cut in zip(crystalnames, crystallist, cutoffs):
@@ -522,10 +581,10 @@ for name, crys, cut in zip(crystalnames, crystallist, cutoffs):
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast container">
-<div class="container">
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-<div class="container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
 simple cubic
  Unique jumps: 1
@@ -570,12 +629,12 @@ networks, for example), and then assigning the same energy for all
 transitions (again, may not apply for cases where there is more than one
 unique jump). We compute the full Onsager matrix, then look at the
 diagonal of <span class="math">\(f=-L_{\mathrm{ss}}/L_{\mathrm{sv}}\)</span>.</p>
-<div class="nbinput container">
-<div class="highlight-none"><div class="highlight"><pre>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [5]:
 </pre></div>
 </div>
-<div class="highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
 <span></span>print(&#39;crystal\tf_xx\tf_zz&#39;)
 for name, diff in zip(crystalnames, diffusers):
     nsites, njumps = len(diff.sitelist), len(diff.om0_jn)
@@ -589,10 +648,10 @@ for name, diff in zip(crystalnames, diffusers):
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast container">
-<div class="container">
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-<div class="container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
 crystal f_xx    f_zz
 simple cubic    0.65310884      0.65310884
@@ -608,12 +667,12 @@ HCP octahedral-tetrahedral      0.63052307      0.65230273
 </div>
 <p>Look at variation in correlation coefficient for wurtzite structure by
 varying the ratio of the two rates.</p>
-<div class="nbinput container">
-<div class="highlight-none"><div class="highlight"><pre>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [6]:
 </pre></div>
 </div>
-<div class="highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
 <span></span>print(&#39;w(c)/w(basal)\tf_xx\tf_zz&#39;)
 crysindex = crystalnames.index(&#39;wurtzite&#39;)
 diff = diffusers[crysindex]
@@ -636,10 +695,10 @@ for i, w0_w1 in enumerate(np.linspace(-2,2,num=33)):
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast container">
-<div class="container">
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-<div class="container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
 w(c)/w(basal)   f_xx    f_zz
 10^-2.00        0.34028415      0.97703525
@@ -653,12 +712,12 @@ w(c)/w(basal)   f_xx    f_zz
 10^+2.00        0.66602090      0.55182811
 </pre></div></div>
 </div>
-<div class="nbinput container">
-<div class="highlight-none"><div class="highlight"><pre>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [7]:
 </pre></div>
 </div>
-<div class="highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
 <span></span>freq, correl_xx, correl_zz = np.array(freq_list), np.array(correl_xx_list), np.array(correl_zz_list)
 fig, ax1 = plt.subplots()
 ax1.plot(freq, correl_xx, &#39;k&#39;, label=&#39;$f_{xx}$&#39;)
@@ -675,10 +734,10 @@ plt.show()
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast container">
-<div class="container">
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
 </div>
-<div class="container">
+<div class="output_area docutils container">
 <img alt="../_images/examples_Tracer-correlation_11_0.png" src="../_images/examples_Tracer-correlation_11_0.png" />
 </div>
 </div>
@@ -686,15 +745,18 @@ plt.show()
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Garnet.html" class="btn btn-neutral float-right" title="Garnet correlation coefficients" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Garnet.html" class="btn btn-neutral float-right" title="Garnet correlation coefficients" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="GF-convergence.html" class="btn btn-neutral" title="Convergence of Green function calculation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="GF-convergence.html" class="btn btn-neutral" title="Convergence of Green function calculation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -728,7 +790,8 @@ plt.show()
             VERSION:'1.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="../_static/jquery.js"></script>

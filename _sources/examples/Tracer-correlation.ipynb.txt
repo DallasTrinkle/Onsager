@@ -1,0 +1,426 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Tracer correlation coefficients\n",
+    "We want (for testing purposes) to compute correlation coefficients for tracers for several different crystal structures:\n",
+    "\n",
+    "* Simple cubic\n",
+    "* Body-centered cubic\n",
+    "* Face-centered cubic\n",
+    "* Diamond\n",
+    "* Wurtzite\n",
+    "* Hexagonal closed-packed\n",
+    "* NbO\n",
+    "* omega\n",
+    "* octahedral-tetrahedral network in HCP\n",
+    "\n",
+    "Some are well-known (previously published) others are new."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "import sys\n",
+    "sys.path.extend(['../'])\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "plt.style.use('seaborn-whitegrid')\n",
+    "%matplotlib inline\n",
+    "from onsager import crystal, OnsagerCalc"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Create all of our lattices, with lattice constant a0."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "a0 = 1.\n",
+    "SC = crystal.Crystal(a0*np.eye(3), [np.array([0.,0.,0.])], [\"SC\"])\n",
+    "BCC = crystal.Crystal.BCC(a0, [\"BCC\"])\n",
+    "FCC = crystal.Crystal.FCC(a0, [\"FCC\"])\n",
+    "diamond = crystal.Crystal(a0*np.array([[0,1/2,1/2],[1/2,0,1/2],[1/2,1/2,0]]), \n",
+    "                          [np.array([1/8,1/8,1/8]), np.array([-1/8,-1/8,-1/8])], \n",
+    "                          [\"diamond\"])\n",
+    "wurtzite = crystal.Crystal(a0*np.array([[1/2,1/2,0],\n",
+    "                                        [-np.sqrt(3/4),np.sqrt(3/4),0.],\n",
+    "                                        [0.,0.,np.sqrt(8/3)]]), \n",
+    "                           [np.array([1/3,2/3,1/4-3/16]), np.array([1/3,2/3,1/4+3/16]), \n",
+    "                            np.array([2/3,1/3,3/4-3/16]), np.array([2/3,1/3,3/4+3/16])], \n",
+    "                           [\"wurtzite\"])\n",
+    "HCP = crystal.Crystal.HCP(a0, np.sqrt(8/3), [\"HCP\"])\n",
+    "NbO = crystal.Crystal(a0*np.eye(3),\n",
+    "                      [[np.array([0,1/2,1/2]), np.array([1/2,0,1/2]),np.array([1/2,1/2,0])],\n",
+    "                       [np.array([1/2,0,0]), np.array([0,1/2,0]), np.array([0,0,1/2])]],\n",
+    "                      ['Nb', 'O'])\n",
+    "omega = crystal.Crystal(a0*np.array([[1/2,1/2,0],\n",
+    "                                     [-np.sqrt(3/4),np.sqrt(3/4),0.],\n",
+    "                                     [0.,0.,np.sqrt(3/8)]]), \n",
+    "                           [np.array([0.,0.,0.]),\n",
+    "                            np.array([1/3,2/3,1/2]), np.array([2/3,1/3,1/2])], \n",
+    "                           [\"omega\"])\n",
+    "octtet = crystal.Crystal(a0*np.array([[1/2,1/2,0],\n",
+    "                                      [-np.sqrt(3/4),np.sqrt(3/4),0.],\n",
+    "                                      [0.,0.,np.sqrt(8/3)]]), \n",
+    "                           [[np.array([0.,0.,0.]), np.array([0.,0.,0.5]), \n",
+    "                             np.array([1/3,2/3,5/8]), np.array([1/3,2/3,7/8]), \n",
+    "                             np.array([2/3,1/3,3/8]), np.array([2/3,1/3,1/8])],\n",
+    "                            [np.array([1/3,2/3,1/4]), np.array([2/3,1/3,3/4])]], \n",
+    "                           [\"O\", \"Ti\"])\n",
+    "crystallist = [SC, BCC, FCC, diamond, wurtzite, HCP, NbO, omega, octtet]\n",
+    "crystalnames = [\"simple cubic\", \"body-centered cubic\", \"face-centered cubic\", \"diamond\", \n",
+    "                \"wurtzite\", \"hexagonal closed-packed\", \"NbO\", \"hexagonal omega\", \n",
+    "                \"HCP octahedral-tetrahedral\"]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "simple cubic\n",
+      "#Lattice:\n",
+      "  a1 = [ 1.  0.  0.]\n",
+      "  a2 = [ 0.  1.  0.]\n",
+      "  a3 = [ 0.  0.  1.]\n",
+      "#Basis:\n",
+      "  (SC) 0.0 = [ 0.  0.  0.]\n",
+      "\n",
+      "body-centered cubic\n",
+      "#Lattice:\n",
+      "  a1 = [-0.5  0.5  0.5]\n",
+      "  a2 = [ 0.5 -0.5  0.5]\n",
+      "  a3 = [ 0.5  0.5 -0.5]\n",
+      "#Basis:\n",
+      "  (BCC) 0.0 = [ 0.  0.  0.]\n",
+      "\n",
+      "face-centered cubic\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.   0.5  0.5]\n",
+      "  a2 = [ 0.5  0.   0.5]\n",
+      "  a3 = [ 0.5  0.5  0. ]\n",
+      "#Basis:\n",
+      "  (FCC) 0.0 = [ 0.  0.  0.]\n",
+      "\n",
+      "diamond\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.   0.5  0.5]\n",
+      "  a2 = [ 0.5  0.   0.5]\n",
+      "  a3 = [ 0.5  0.5  0. ]\n",
+      "#Basis:\n",
+      "  (diamond) 0.0 = [ 0.625  0.625  0.625]\n",
+      "  (diamond) 0.1 = [ 0.375  0.375  0.375]\n",
+      "\n",
+      "wurtzite\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.5       -0.8660254  0.       ]\n",
+      "  a2 = [ 0.5        0.8660254  0.       ]\n",
+      "  a3 = [ 0.          0.          1.63299316]\n",
+      "#Basis:\n",
+      "  (wurtzite) 0.0 = [ 0.33333333  0.66666667  0.0625    ]\n",
+      "  (wurtzite) 0.1 = [ 0.33333333  0.66666667  0.4375    ]\n",
+      "  (wurtzite) 0.2 = [ 0.66666667  0.33333333  0.5625    ]\n",
+      "  (wurtzite) 0.3 = [ 0.66666667  0.33333333  0.9375    ]\n",
+      "\n",
+      "hexagonal closed-packed\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.5       -0.8660254  0.       ]\n",
+      "  a2 = [ 0.5        0.8660254  0.       ]\n",
+      "  a3 = [ 0.          0.          1.63299316]\n",
+      "#Basis:\n",
+      "  (HCP) 0.0 = [ 0.33333333  0.66666667  0.25      ]\n",
+      "  (HCP) 0.1 = [ 0.66666667  0.33333333  0.75      ]\n",
+      "\n",
+      "NbO\n",
+      "#Lattice:\n",
+      "  a1 = [ 1.  0.  0.]\n",
+      "  a2 = [ 0.  1.  0.]\n",
+      "  a3 = [ 0.  0.  1.]\n",
+      "#Basis:\n",
+      "  (Nb) 0.0 = [ 0.   0.5  0.5]\n",
+      "  (Nb) 0.1 = [ 0.5  0.   0.5]\n",
+      "  (Nb) 0.2 = [ 0.5  0.5  0. ]\n",
+      "  (O) 1.0 = [ 0.5  0.   0. ]\n",
+      "  (O) 1.1 = [ 0.   0.5  0. ]\n",
+      "  (O) 1.2 = [ 0.   0.   0.5]\n",
+      "\n",
+      "hexagonal omega\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.          0.          0.61237244]\n",
+      "  a2 = [ 0.5       -0.8660254  0.       ]\n",
+      "  a3 = [ 0.5        0.8660254  0.       ]\n",
+      "#Basis:\n",
+      "  (omega) 0.0 = [ 0.  0.  0.]\n",
+      "  (omega) 0.1 = [ 0.5         0.33333333  0.66666667]\n",
+      "  (omega) 0.2 = [ 0.5         0.66666667  0.33333333]\n",
+      "\n",
+      "HCP octahedral-tetrahedral\n",
+      "#Lattice:\n",
+      "  a1 = [ 0.5       -0.8660254  0.       ]\n",
+      "  a2 = [ 0.5        0.8660254  0.       ]\n",
+      "  a3 = [ 0.          0.          1.63299316]\n",
+      "#Basis:\n",
+      "  (O) 0.0 = [ 0.  0.  0.]\n",
+      "  (O) 0.1 = [ 0.   0.   0.5]\n",
+      "  (O) 0.2 = [ 0.33333333  0.66666667  0.625     ]\n",
+      "  (O) 0.3 = [ 0.33333333  0.66666667  0.875     ]\n",
+      "  (O) 0.4 = [ 0.66666667  0.33333333  0.375     ]\n",
+      "  (O) 0.5 = [ 0.66666667  0.33333333  0.125     ]\n",
+      "  (Ti) 1.0 = [ 0.33333333  0.66666667  0.25      ]\n",
+      "  (Ti) 1.1 = [ 0.66666667  0.33333333  0.75      ]\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "for name, crys in zip(crystalnames, crystallist):\n",
+    "    print(name)\n",
+    "    print(crys)\n",
+    "    print()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now we generate diffusers for *every crystal*. This is fairly automated, where the main input is the cutoff distance. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "simple cubic\n",
+      " Unique jumps: 1\n",
+      "  connectivity: 6\n",
+      "body-centered cubic\n",
+      " Unique jumps: 1\n",
+      "  connectivity: 8\n",
+      "face-centered cubic\n",
+      " Unique jumps: 1\n",
+      "  connectivity: 12\n",
+      "diamond\n",
+      " Unique jumps: 1\n",
+      "  connectivity: 4\n",
+      "wurtzite\n",
+      " Unique jumps: 2\n",
+      "  connectivity: 1\n",
+      "  connectivity: 3\n",
+      "hexagonal closed-packed\n",
+      " Unique jumps: 2\n",
+      "  connectivity: 6\n",
+      "  connectivity: 6\n",
+      "NbO\n",
+      " Unique jumps: 1\n",
+      "  connectivity: 8\n",
+      "hexagonal omega\n",
+      " Unique jumps: 4\n",
+      "  connectivity: 2\n",
+      "  connectivity: 12\n",
+      "  connectivity: 2\n",
+      "  connectivity: 3\n",
+      "HCP octahedral-tetrahedral\n",
+      " Unique jumps: 3\n",
+      "  connectivity: 6\n",
+      "  connectivity: 1\n",
+      "  connectivity: 3\n"
+     ]
+    }
+   ],
+   "source": [
+    "cutoffs = [1.01*a0, 0.9*a0, 0.75*a0, 0.45*a0, 0.62*a0, 1.01*a0, 0.8*a0, 0.66*a0, 0.71*a0]\n",
+    "diffusers = []\n",
+    "for name, crys, cut in zip(crystalnames, crystallist, cutoffs):\n",
+    "    jn = crys.jumpnetwork(0, cut, 0.01)\n",
+    "    print(name)\n",
+    "    print(' Unique jumps:', len(jn))\n",
+    "    for jlist in jn:\n",
+    "        print('  connectivity:', len([i for (i,j), dx in jlist if i==jlist[0][0][0]]))\n",
+    "    diffusers.append(OnsagerCalc.VacancyMediated(crys, 0, crys.sitelist(0), jn, 1, 6))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now run through each, creating the \"tracer\" and compute the correlation coefficient. We do this by giving all of the vacancy positions the same energy (may not apply for true omega and octahedral-tetrahedral networks, for example), and then assigning the same energy for all transitions (again, may not apply for cases where there is more than one unique jump). We compute the full Onsager matrix, then look at the diagonal of $f=-L_{\\mathrm{ss}}/L_{\\mathrm{sv}}$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "crystal\tf_xx\tf_zz\n",
+      "simple cubic\t0.65310884\t0.65310884\n",
+      "body-centered cubic\t0.72719414\t0.72719414\n",
+      "face-centered cubic\t0.78145142\t0.78145142\n",
+      "diamond\t0.50000000\t0.50000000\n",
+      "wurtzite\t0.50000000\t0.50000000\n",
+      "hexagonal closed-packed\t0.78120488\t0.78145142\n",
+      "NbO\t0.68891612\t0.68891612\n",
+      "hexagonal omega\t0.78122649\t0.78157339\n",
+      "HCP octahedral-tetrahedral\t0.63052307\t0.65230273\n"
+     ]
+    }
+   ],
+   "source": [
+    "print('crystal\\tf_xx\\tf_zz')\n",
+    "for name, diff in zip(crystalnames, diffusers):\n",
+    "    nsites, njumps = len(diff.sitelist), len(diff.om0_jn)\n",
+    "    tdict = {'preV': np.ones(nsites), 'eneV': np.zeros(nsites), \n",
+    "             'preT0': np.ones(njumps), 'eneT0': np.zeros(njumps)}\n",
+    "    # make a tracer out of it:\n",
+    "    tdict.update(diff.maketracerpreene(**tdict))\n",
+    "    Lss, Lsv = diff.Lij(*diff.preene2betafree(1, **tdict))[1:3]  # just pull out ss and sv\n",
+    "    f = np.diag(-np.dot(Lss, np.linalg.inv(Lsv)))\n",
+    "    print('{name}\\t{f[0]:.8f}\\t{f[2]:.8f}'.format(name=name, f=f))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Look at variation in correlation coefficient for wurtzite structure by varying the ratio of the two rates."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "w(c)/w(basal)\tf_xx\tf_zz\n",
+      "10^-2.00\t0.34028415\t0.97703525\n",
+      "10^-1.50\t0.35071960\t0.94102894\n",
+      "10^-1.00\t0.37474153\t0.85697089\n",
+      "10^-0.50\t0.42323211\t0.69772423\n",
+      "10^+0.00\t0.50000000\t0.50000000\n",
+      "10^+0.50\t0.58129067\t0.40813890\n",
+      "10^+1.00\t0.63424155\t0.45691154\n",
+      "10^+1.50\t0.65763077\t0.52060064\n",
+      "10^+2.00\t0.66602090\t0.55182811\n"
+     ]
+    }
+   ],
+   "source": [
+    "print('w(c)/w(basal)\\tf_xx\\tf_zz')\n",
+    "crysindex = crystalnames.index('wurtzite')\n",
+    "diff = diffusers[crysindex]\n",
+    "nsites, njumps = len(diff.sitelist), len(diff.om0_jn)\n",
+    "freq_list, correl_xx_list, correl_zz_list = [], [], []\n",
+    "for i, w0_w1 in enumerate(np.linspace(-2,2,num=33)):\n",
+    "    w0 = 10**(w0_w1)\n",
+    "    w1 = 1\n",
+    "    tdict = {'preV': np.ones(nsites), 'eneV': np.zeros(nsites), \n",
+    "             'preT0': np.array([w0,w1]), 'eneT0': np.zeros(njumps)}\n",
+    "    # make a tracer out of it:\n",
+    "    tdict.update(diff.maketracerpreene(**tdict))\n",
+    "    Lss, Lsv = diff.Lij(*diff.preene2betafree(1, **tdict))[1:3]  # just pull out ss and sv\n",
+    "    f = np.diag(-np.dot(Lss, np.linalg.inv(Lsv)))\n",
+    "    freq_list.append(w0)\n",
+    "    correl_xx_list.append(f[0])\n",
+    "    correl_zz_list.append(f[2])\n",
+    "    if i%4==0:\n",
+    "        print('10^{w0_w1:+.2f}\\t{f[0]:.8f}\\t{f[2]:.8f}'.format(w0_w1=w0_w1, f=f))    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<matplotlib.figure.Figure at 0x1123400f0>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "freq, correl_xx, correl_zz = np.array(freq_list), np.array(correl_xx_list), np.array(correl_zz_list)\n",
+    "fig, ax1 = plt.subplots()\n",
+    "ax1.plot(freq, correl_xx, 'k', label='$f_{xx}$')\n",
+    "ax1.plot(freq, correl_zz, 'r', label='$f_{zz}$')\n",
+    "ax1.set_xscale('log')\n",
+    "ax1.set_ylabel('$f$', fontsize='x-large')\n",
+    "ax1.set_xlabel('$\\omega_{c}/\\omega_{\\mathrm{basal}}$', fontsize='x-large')\n",
+    "ax1.set_ylim((0,1))\n",
+    "ax1.set_yticks(np.linspace(0,1,11))\n",
+    "ax1.legend(bbox_to_anchor=(0.4,0.1,0.2,0.3), ncol=1, \n",
+    "           shadow=True, frameon=True, fontsize='x-large')\n",
+    "plt.show()\n",
+    "# plt.savefig('wurtzite-correlation.pdf', transparent=True, format='pdf')"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.4.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}
