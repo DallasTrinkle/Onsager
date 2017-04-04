@@ -29,6 +29,7 @@ Releases:
 * 1.1 Automator update with Makefile; corrections for possible overflow error when omega2 gets very large.
 * 1.2 Combined "large omega2" and "non-zero bias" algorithms; notebook for Fe-C added to documentation; cleanup of code and improved testing.
 * 1.2.1 Additional notebooks added for vacancy-mediated diffuser.
+* 1.2.2 New internal friction calculator for interstitial diffuser; improvement in Crystal class symmetry to handle larger error in unit cell.
 
 References
 ==========

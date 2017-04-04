@@ -6,4 +6,5 @@ v0.9.1, 2016-06-09 -- Added supercells
 v1.0, 2016-06-12 -- Added automator
 v1.1, 2016-06-17 -- Roundoff error correction, automator updates
 v1.2, 2016-07-10 -- Roundoff error + non-zero bias, vacancy probability bug fix, Fe-C notebook
-v1.2.1, 2016-08-03 -- Additional notebooks added for vacancy-mediated diffuser.
+v1.2.1, 2016-08-03 -- Additional notebooks added for vacancy-mediated diffuser
+v1.2.2, 2017-04-04 -- New internal friction calculator for interstitial diffuser
