@@ -9,6 +9,7 @@ Contents:
    :maxdepth: 2
 
    includeme
+   InputOutput
    crystal
    CrystalStars
    supercell
