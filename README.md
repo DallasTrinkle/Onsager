@@ -36,7 +36,7 @@ Releases:
 References
 ==========
 * Dallas R. Trinkle, "Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors." Philos. Mag. (2016) [doi:10.1080/14786435.2016.1212175](http://dx.doi.org/10.1080/14786435.2016.1212175); [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)
-* Dallas R. Trinkle, "Automatic numerical evaluation of vacancy-mediated transport for arbitrary crystals: Onsager coefficients in the dilute limit using a Green function approach." [arXiv:1608.01252](http://arxiv.org/abs/1608.01252)
+* Dallas R. Trinkle, "Automatic numerical evaluation of vacancy-mediated transport for arbitrary crystals: Onsager coefficients in the dilute limit using a Green function approach." Philos. Mag. (2017) [doi:10.1080/14786435.2017.1340685](http://dx.doi.org/10.1080/14786435.2017.1340685); [arXiv:1608.01252](http://arxiv.org/abs/1608.01252)
 
 Contributors
 ============
