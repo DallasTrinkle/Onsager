@@ -56,6 +56,16 @@ A few quick examples:
 Face-centered cubic crystal, vacancy-diffusion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Face-centered cubic crystals could be created either by entering the primitive basis::
+
+  from onsager import crystal
+  a0 = 1.
+  FCCcrys = crystal.Crystal([a0*np.array([0,0.5,0.5]),
+                                 a0*np.array([0.5,0,0.5]),
+				 a0*np.array([0.5,0.5,0])],
+				 [np.array([0, 0, 0])])
+
+or 
 
 Interstitial calculator setup
 --------------------
