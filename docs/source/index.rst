@@ -11,13 +11,7 @@ Contents:
    includeme
    InputOutput.ipynb
    notebooks
-   crystal
-   CrystalStars
-   supercell
-   PowerExpansion
-   GFcalc
-   OnsagerCalc
-   automator
+   modules
 
 Indices and tables
 ==================

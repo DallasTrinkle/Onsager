@@ -73,7 +73,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Onsager'
-copyright = '2016, Dallas R. Trinkle'
+copyright = '2017, Dallas R. Trinkle'
 author = 'Dallas R. Trinkle'
 
 # The version info for the project you're documenting, acts as replacement for

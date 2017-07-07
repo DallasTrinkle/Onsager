@@ -1,8 +1,6 @@
 Example Notebooks
 =================
 
-Example notebooks:
-
 Below are several jupyter notebooks with example input and output from ``onsager``.
 
 .. toctree::

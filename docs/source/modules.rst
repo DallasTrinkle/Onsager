@@ -1,16 +1,11 @@
-Onsager: Automated diffusion calculation
-========================================
+Modules
+=======
 
-Documentation for ``Onsager`` python module for automated computation of diffusivity for interstitial and vacancy mediated diffusion.
-
-Contents:
+Modules in ``Onsager`` code for automated computation of diffusivity for interstitial and vacancy mediated diffusion.
 
 .. toctree::
    :maxdepth: 2
 
-   includeme
-   InputOutput.ipynb
-   notebooks
    crystal
    CrystalStars
    supercell
@@ -19,10 +14,5 @@ Contents:
    OnsagerCalc
    automator
 
-Indices and tables
-==================
-
-* :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
 
