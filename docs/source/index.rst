@@ -10,6 +10,7 @@ Contents:
 
    includeme
    InputOutput.ipynb
+   notebooks
    crystal
    CrystalStars
    supercell
@@ -17,7 +18,6 @@ Contents:
    GFcalc
    OnsagerCalc
    automator
-   notebooks
 
 Indices and tables
 ==================
