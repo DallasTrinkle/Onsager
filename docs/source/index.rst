@@ -9,7 +9,7 @@ Contents:
    :maxdepth: 2
 
    includeme
-   InputOutput
+   InputOutput.ipynb
    crystal
    CrystalStars
    supercell
