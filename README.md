@@ -24,7 +24,7 @@ The code uses YAML format for input/output of crystal structures, and diffusion 
 The vacancy-mediated diffuser can be stored as an HDF5 file (which internally stores the crystal structure in YAML format). The thermal/kinetic data is most easily serialized as JSON, but any dictionary-compatible format will do, by making use of tags.
 
 Releases
-^^^^^^^^
+--------
 
 * 0.9. Full release of Interstitial calculator, along with theory paper (see References below).
 * 0.9.1. Added spin degrees of freedom to `crystal` for symmetry purposes; added `supercell` class to aid in automated setup of calculation.
@@ -35,12 +35,14 @@ Releases
 * 1.2.2 New internal friction calculator for interstitial diffuser; improvement in Crystal class symmetry to handle larger error in unit cell.
 
 References
-^^^^^^^^^^
+----------
+
 * Dallas R. Trinkle, "Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors." Philos. Mag. (2016) [doi:10.1080/14786435.2016.1212175](http://dx.doi.org/10.1080/14786435.2016.1212175); [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)
 * Dallas R. Trinkle, "Automatic numerical evaluation of vacancy-mediated transport for arbitrary crystals: Onsager coefficients in the dilute limit using a Green function approach." Philos. Mag. (2017) [doi:10.1080/14786435.2017.1340685](http://dx.doi.org/10.1080/14786435.2017.1340685); [arXiv:1608.01252](http://arxiv.org/abs/1608.01252)
 
 Contributors
-^^^^^^^^^^^^
+------------
+
 * Dallas R. Trinkle, initial design, derivation, and implementation.
 * Ravi Agarwal, testing of HCP interstitial calculations; testing of HCP vacancy-mediated diffusion calculations
 * Abhinav Jain, testing of HCP vacancy-mediated diffusion calculations.
