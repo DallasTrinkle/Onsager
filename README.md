@@ -50,7 +50,8 @@ Contributors
 Thanks to discussions with Maylise Nastar (CEA, Saclay), Thomas Garnier (CEA, Saclay and UIUC), Thomas Schuler (CEA, Saclay), and Pascal Bellon (UIUC).
 
 Support
-^^^^^^^
+-------
+
 This work has been supported in part by
 
 * DOE/BES grant DE-FG02-05ER46217,
