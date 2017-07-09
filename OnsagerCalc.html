@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>OnsagerCalc &mdash; Onsager 1.2.2 documentation</title>
+  <title>OnsagerCalc &mdash; Onsager 1.2.3 documentation</title>
   
 
   
@@ -35,7 +35,8 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Onsager 1.2.2 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 1.2.3 documentation" href="index.html"/>
+        <link rel="up" title="Modules" href="modules.html"/>
         <link rel="next" title="Automator" href="automator.html"/>
         <link rel="prev" title="GFcalc" href="GFcalc.html"/> 
 
@@ -92,17 +93,18 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="includeme.html#references">References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="includeme.html#contributors">Contributors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="includeme.html#support">Support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="crystal.html">Crystal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
-<li class="toctree-l1"><a class="reference internal" href="supercell.html">Supercell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">OnsagerCalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="automator.html">Automator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InputOutput.html">Input and output for Onsager transport calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Example Notebooks</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="crystal.html">Crystal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supercell.html">Supercell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">OnsagerCalc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automator.html">Automator</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -146,6 +148,8 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">Modules</a> &raquo;</li>
         
       <li>OnsagerCalc</li>
     
@@ -205,7 +209,7 @@
 <p>OnsagerCalc:</p>
 <p>The OnsagerCalc module defines the <code class="docutils literal"><span class="pre">Intersitial</span></code> class (for computation of interstitial-mediated diffusion), and <code class="docutils literal"><span class="pre">VacancyMediated</span></code> class (for computation of vacancy-mediated diffusion).</p>
 <span class="target" id="module-OnsagerCalc"></span><p>Onsager calculator module: Interstitialcy mechanism and Vacancy-mediated mechanism</p>
-<p>Class to create an Onsager &#8220;calculator&#8221;, which brings two functionalities:
+<p>Class to create an Onsager “calculator”, which brings two functionalities:
 1. determines <em>what</em> input is needed to compute the Onsager (mobility, or L) tensors
 2. constructs the function that calculates those tensors, given the input values.</p>
 <p>This class is designed to be combined with code that can, e.g., automatically
@@ -236,11 +240,11 @@ a corresponding Wyckoff site list and jump network.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>crys</strong> &#8211; Crystal object</li>
-<li><strong>chem</strong> &#8211; integer, index into the basis of crys, corresponding to the chemical element that hops</li>
-<li><strong>sitelist</strong> &#8211; list of lists of indices, site indices where the atom may hop;
+<li><strong>crys</strong> – Crystal object</li>
+<li><strong>chem</strong> – integer, index into the basis of crys, corresponding to the chemical element that hops</li>
+<li><strong>sitelist</strong> – list of lists of indices, site indices where the atom may hop;
 grouped by symmetry equivalency</li>
-<li><strong>jumpnetwork</strong> &#8211; list of lists of tuples: ( (i, j), dx )
+<li><strong>jumpnetwork</strong> – list of lists of tuples: ( (i, j), dx )
 symmetry unique transitions; each list is all of the possible transitions
 from site i to site j with jump vector dx; includes i-&gt;j and j-&gt;i</li>
 </ul>
@@ -274,10 +278,10 @@ The input list order corresponds to the sitelist and jumpnetwork</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pre</strong> &#8211; list of prefactors for unique sites</li>
-<li><strong>betaene</strong> &#8211; list of site energies divided by kB T</li>
-<li><strong>preT</strong> &#8211; list of prefactors for transition states</li>
-<li><strong>betaeneT</strong> &#8211; list of transition state energies divided by kB T</li>
+<li><strong>pre</strong> – list of prefactors for unique sites</li>
+<li><strong>betaene</strong> – list of site energies divided by kB T</li>
+<li><strong>preT</strong> – list of prefactors for transition states</li>
+<li><strong>betaeneT</strong> – list of transition state energies divided by kB T</li>
 </ul>
 </td>
 </tr>
@@ -302,12 +306,12 @@ The input list order corresponds to the sitelist and jumpnetwork</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pre</strong> &#8211; list of prefactors for unique sites</li>
-<li><strong>betaene</strong> &#8211; list of site energies divided by kB T</li>
-<li><strong>dipole</strong> &#8211; list of elastic dipoles divided by kB T</li>
-<li><strong>preT</strong> &#8211; list of prefactors for transition states</li>
-<li><strong>betaeneT</strong> &#8211; list of transition state energies divided by kB T</li>
-<li><strong>dipoleT</strong> &#8211; list of elastic dipoles divided by kB T</li>
+<li><strong>pre</strong> – list of prefactors for unique sites</li>
+<li><strong>betaene</strong> – list of site energies divided by kB T</li>
+<li><strong>dipole</strong> – list of elastic dipoles divided by kB T</li>
+<li><strong>preT</strong> – list of prefactors for transition states</li>
+<li><strong>betaeneT</strong> – list of transition state energies divided by kB T</li>
+<li><strong>dipoleT</strong> – list of elastic dipoles divided by kB T</li>
 </ul>
 </td>
 </tr>
@@ -409,12 +413,12 @@ in our site list.</p>
 <dt id="OnsagerCalc.Interstitial.jumpDipoles">
 <code class="descname">jumpDipoles</code><span class="sig-paren">(</span><em>dipoles</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.jumpDipoles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.jumpDipoles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of the elastic dipole for each transition, given the dipoles
-for the representatives. (&#8220;populating&#8221; the full set of dipoles)</p>
+for the representatives. (“populating” the full set of dipoles)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dipoles</strong> &#8211; list of dipoles for the first representative transition</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dipoles</strong> – list of dipoles for the first representative transition</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return dipolelist:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body">list of lists of dipole for each jump[site][3][3]</td>
@@ -426,7 +430,7 @@ for the representatives. (&#8220;populating&#8221; the full set of dipoles)</p>
 <dl class="staticmethod">
 <dt id="OnsagerCalc.Interstitial.jumpnetworkYAML">
 <em class="property">static </em><code class="descname">jumpnetworkYAML</code><span class="sig-paren">(</span><em>jumpnetwork</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.jumpnetworkYAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.jumpnetworkYAML" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dumps a &#8220;sample&#8221; YAML formatted version of the jumpnetwork with data to be entered</p>
+<dd><p>Dumps a “sample” YAML formatted version of the jumpnetwork with data to be entered</p>
 </dd></dl>
 
 <dl class="method">
@@ -440,11 +444,11 @@ The input list order corresponds to the sitelist and jumpnetwork</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pre</strong> &#8211; list of prefactors for unique sites</li>
-<li><strong>betaene</strong> &#8211; list of site energies divided by kB T</li>
-<li><strong>dipole</strong> &#8211; list of elastic dipoles divided by kB T</li>
-<li><strong>preT</strong> &#8211; list of prefactors for transition states</li>
-<li><strong>betaeneT</strong> &#8211; list of transition state energies divided by kB T</li>
+<li><strong>pre</strong> – list of prefactors for unique sites</li>
+<li><strong>betaene</strong> – list of site energies divided by kB T</li>
+<li><strong>dipole</strong> – list of elastic dipoles divided by kB T</li>
+<li><strong>preT</strong> – list of prefactors for transition states</li>
+<li><strong>betaeneT</strong> – list of transition state energies divided by kB T</li>
 </ul>
 </td>
 </tr>
@@ -465,17 +469,17 @@ site energies and transitions (corresponding to the representatives).</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>super_n</strong> &#8211; 3x3 integer matrix to define our supercell</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>super_n</strong> – 3x3 integer matrix to define our supercell</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return superdict:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>,
 and <code class="docutils literal"><span class="pre">indices</span></code> that correspond to dictionaries with tags.</p>
 <ul class="last simple">
-<li>superdict[&#8216;states&#8217;][i] = supercell of site;</li>
-<li>superdict[&#8216;transitions&#8217;][n] = (supercell initial, supercell final);</li>
-<li>superdict[&#8216;transmapping&#8217;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</li>
-<li>superdict[&#8216;indices&#8217;][tag] = index of tag, where tag is either a state or transition tag.</li>
+<li>superdict[‘states’][i] = supercell of site;</li>
+<li>superdict[‘transitions’][n] = (supercell initial, supercell final);</li>
+<li>superdict[‘transmapping’][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</li>
+<li>superdict[‘indices’][tag] = index of tag, where tag is either a state or transition tag.</li>
 </ul>
 </td>
 </tr>
@@ -493,12 +497,12 @@ and <code class="docutils literal"><span class="pre">indices</span></code> that 
 <dt id="OnsagerCalc.Interstitial.siteDipoles">
 <code class="descname">siteDipoles</code><span class="sig-paren">(</span><em>dipoles</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.siteDipoles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.siteDipoles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of the elastic dipole on each site, given the dipoles
-for the representatives. (&#8220;populating&#8221; the full set of dipoles)</p>
+for the representatives. (“populating” the full set of dipoles)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dipoles</strong> &#8211; list of dipoles for the first representative site</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dipoles</strong> – list of dipoles for the first representative site</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return dipolelist:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body">array of dipole for each site [site][3][3]</td>
@@ -510,7 +514,7 @@ for the representatives. (&#8220;populating&#8221; the full set of dipoles)</p>
 <dl class="staticmethod">
 <dt id="OnsagerCalc.Interstitial.sitelistYAML">
 <em class="property">static </em><code class="descname">sitelistYAML</code><span class="sig-paren">(</span><em>sitelist</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.sitelistYAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.sitelistYAML" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dumps a &#8220;sample&#8221; YAML formatted version of the sitelist with data to be entered</p>
+<dd><p>Dumps a “sample” YAML formatted version of the sitelist with data to be entered</p>
 </dd></dl>
 
 <dl class="method">
@@ -537,7 +541,7 @@ it determines <em>what</em> quantities are needed as inputs in order to perform 
 storage in HDF5 format.</p>
 <p>Requires a crystal, chemical identity of vacancy, list of symmetry-equivalent
 sites for that chemistry, and a jumpnetwork for the vacancy. The thermodynamic
-range (number of &#8220;shells&#8221; &#8211; see <code class="docutils literal"><span class="pre">crystalStars.StarSet</span></code> for precise definition).</p>
+range (number of “shells” – see <code class="docutils literal"><span class="pre">crystalStars.StarSet</span></code> for precise definition).</p>
 <dl class="method">
 <dt id="OnsagerCalc.VacancyMediated.GFcalculator">
 <code class="descname">GFcalculator</code><span class="sig-paren">(</span><em>NGFmax=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.GFcalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.GFcalculator" title="Permalink to this definition">¶</a></dt>
@@ -556,13 +560,13 @@ and hash function.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>bFV</strong><strong>[</strong><strong>NWyckoff</strong><strong>]</strong><strong></strong> &#8211; beta*eneV - ln(preV) (relative to minimum value)</li>
-<li><strong>bFS</strong><strong>[</strong><strong>NWyckoff</strong><strong>]</strong><strong></strong> &#8211; beta*eneS - ln(preS) (relative to minimum value)</li>
-<li><strong>bFSV</strong><strong>[</strong><strong>Nthermo</strong><strong>]</strong><strong></strong> &#8211; beta*eneSV - ln(preSV) (excess)</li>
-<li><strong>bFT0</strong><strong>[</strong><strong>Nomega0</strong><strong>]</strong><strong></strong> &#8211; beta*eneT0 - ln(preT0) (relative to minimum value of bFV)</li>
-<li><strong>bFT1</strong><strong>[</strong><strong>Nomega1</strong><strong>]</strong><strong></strong> &#8211; beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)</li>
-<li><strong>bFT2</strong><strong>[</strong><strong>Nomega2</strong><strong>]</strong><strong></strong> &#8211; beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)</li>
-<li><strong>large_om2</strong> &#8211; threshold for changing treatment of omega2 contributions (default: 10^8)</li>
+<li><strong>bFV</strong><strong>[</strong><strong>NWyckoff</strong><strong>]</strong> – beta*eneV - ln(preV) (relative to minimum value)</li>
+<li><strong>bFS</strong><strong>[</strong><strong>NWyckoff</strong><strong>]</strong> – beta*eneS - ln(preS) (relative to minimum value)</li>
+<li><strong>bFSV</strong><strong>[</strong><strong>Nthermo</strong><strong>]</strong> – beta*eneSV - ln(preSV) (excess)</li>
+<li><strong>bFT0</strong><strong>[</strong><strong>Nomega0</strong><strong>]</strong> – beta*eneT0 - ln(preT0) (relative to minimum value of bFV)</li>
+<li><strong>bFT1</strong><strong>[</strong><strong>Nomega1</strong><strong>]</strong> – beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)</li>
+<li><strong>bFT2</strong><strong>[</strong><strong>Nomega2</strong><strong>]</strong> – beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)</li>
+<li><strong>large_om2</strong> – threshold for changing treatment of omega2 contributions (default: 10^8)</li>
 </ul>
 </td>
 </tr>
@@ -596,12 +600,12 @@ jumpnetwork (for the vacancy) and thermodynamic shell.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>crys</strong> &#8211; Crystal object</li>
-<li><strong>chem</strong> &#8211; index identifying the diffusing species</li>
-<li><strong>sitelist</strong> &#8211; list, grouped into Wyckoff common positions, of unique sites</li>
-<li><strong>jumpnetwork</strong> &#8211; list of unique transitions as lists of ((i,j), dx)</li>
-<li><strong>Nthermo</strong> &#8211; range of thermodynamic interaction (in successive jumpnetworks)</li>
-<li><strong>NGFmax</strong> &#8211; parameter controlling k-point density of GF calculator; 4 seems reasonably accurate</li>
+<li><strong>crys</strong> – Crystal object</li>
+<li><strong>chem</strong> – index identifying the diffusing species</li>
+<li><strong>sitelist</strong> – list, grouped into Wyckoff common positions, of unique sites</li>
+<li><strong>jumpnetwork</strong> – list of unique transitions as lists of ((i,j), dx)</li>
+<li><strong>Nthermo</strong> – range of thermodynamic interaction (in successive jumpnetworks)</li>
+<li><strong>NGFmax</strong> – parameter controlling k-point density of GF calculator; 4 seems reasonably accurate</li>
 </ul>
 </td>
 </tr>
@@ -625,13 +629,13 @@ jumpnetwork (for the vacancy) and thermodynamic shell.</p>
 <dt id="OnsagerCalc.VacancyMediated.addhdf5">
 <code class="descname">addhdf5</code><span class="sig-paren">(</span><em>HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.addhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.addhdf5" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds an HDF5 representation of object into an HDF5group (needs to already exist).</p>
-<p>Example: if f is an open HDF5, then VacancyMediated.addhdf5(f.create_group(&#8216;Diffuser&#8217;)) will
-(1) create the group named &#8216;Diffuser&#8217;, and then (2) put the VacancyMediated representation in that group.</p>
+<p>Example: if f is an open HDF5, then VacancyMediated.addhdf5(f.create_group(‘Diffuser’)) will
+(1) create the group named ‘Diffuser’, and then (2) put the VacancyMediated representation in that group.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> &#8211; HDF5 group</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDF5group</strong> – HDF5 group</td>
 </tr>
 </tbody>
 </table>
@@ -651,7 +655,7 @@ jumpnetwork (for the vacancy) and thermodynamic shell.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Nthermo</strong> &#8211; range of thermodynamic interactions, in terms of &#8220;shells&#8221;,
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Nthermo</strong> – range of thermodynamic interactions, in terms of “shells”,
 which is multiple summations of jumpvect</td>
 </tr>
 </tbody>
@@ -661,9 +665,9 @@ which is multiple summations of jumpvect</td>
 <dl class="method">
 <dt id="OnsagerCalc.VacancyMediated.generatematrices">
 <code class="descname">generatematrices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.generatematrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.generatematrices" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates all the matrices and &#8220;helper&#8221; pieces, based on our jump networks.
+<dd><p>Generates all the matrices and “helper” pieces, based on our jump networks.
 This has been separated out in case the user wants to, e.g., prune / modify the networks
-after they&#8217;ve been created with generate(), then generatematrices() can be rerun.</p>
+after they’ve been created with generate(), then generatematrices() can be rerun.</p>
 </dd></dl>
 
 <dl class="method">
@@ -710,7 +714,7 @@ to a vector between a solute atom and a vacancy. Defined by Stars.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDFgroup</strong> &#8211; HDF5 group</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>HDFgroup</strong> – HDF5 group</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return VacancyMediated:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body">new VacancyMediated diffuser object from HDF5</td>
@@ -730,12 +734,12 @@ to a vector between a solute atom and a vacancy. Defined by Stars.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>preS</strong><strong>[</strong><strong>NWyckoff</strong><strong>]</strong><strong></strong> &#8211; prefactor for solute formation</li>
-<li><strong>eneS</strong><strong>[</strong><strong>NWyckoff</strong><strong>]</strong><strong></strong> &#8211; solute formation energy</li>
-<li><strong>preSV</strong><strong>[</strong><strong>Nthermo</strong><strong>]</strong><strong></strong> &#8211; prefactor for solute-vacancy interaction</li>
-<li><strong>eneSV</strong><strong>[</strong><strong>Nthermo</strong><strong>]</strong><strong></strong> &#8211; solute-vacancy binding energy</li>
-<li><strong>preT0</strong><strong>[</strong><strong>Nomeg0</strong><strong>]</strong><strong></strong> &#8211; prefactor for vacancy jump transitions (follows jumpnetwork)</li>
-<li><strong>eneT0</strong><strong>[</strong><strong>Nomega0</strong><strong>]</strong><strong></strong> &#8211; transition energy for vacancy jumps</li>
+<li><strong>preS</strong><strong>[</strong><strong>NWyckoff</strong><strong>]</strong> – prefactor for solute formation</li>
+<li><strong>eneS</strong><strong>[</strong><strong>NWyckoff</strong><strong>]</strong> – solute formation energy</li>
+<li><strong>preSV</strong><strong>[</strong><strong>Nthermo</strong><strong>]</strong> – prefactor for solute-vacancy interaction</li>
+<li><strong>eneSV</strong><strong>[</strong><strong>Nthermo</strong><strong>]</strong> – solute-vacancy binding energy</li>
+<li><strong>preT0</strong><strong>[</strong><strong>Nomeg0</strong><strong>]</strong> – prefactor for vacancy jump transitions (follows jumpnetwork)</li>
+<li><strong>eneT0</strong><strong>[</strong><strong>Nomega0</strong><strong>]</strong> – transition energy for vacancy jumps</li>
 </ul>
 </td>
 </tr>
@@ -769,7 +773,7 @@ our thermodynamic range. Note that there will be escape states are endpoints of
 some omega1 jumps. They are not relaxed, and have no pre-existing tag. They will
 only be output as a single endpoint of an NEB run; there may be symmetry equivalent
 duplicates, as we construct these supercells on an as needed basis.</p>
-<p>We&#8217;ve got a few classes of warnings (from most egregious to least) that can issued
+<p>We’ve got a few classes of warnings (from most egregious to least) that can issued
 if the supercell is too small; the analysis will continue despite any warnings:</p>
 <ol class="arabic simple">
 <li>Thermodynamic shell states map to different states in supercell</li>
@@ -783,7 +787,7 @@ barriers. Extreme caution should be used if any of the other warnings are raised
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>super_n</strong> &#8211; 3x3 integer matrix to define our supercell</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>super_n</strong> – 3x3 integer matrix to define our supercell</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return superdict:</th></tr>
@@ -791,11 +795,11 @@ barriers. Extreme caution should be used if any of the other warnings are raised
 <code class="docutils literal"><span class="pre">indices</span></code> that correspond to dictionaries with tags; the final tag
 <code class="docutils literal"><span class="pre">reference</span></code> is the basesupercell for calculations without defects.</p>
 <ul class="last simple">
-<li>superdict[&#8216;states&#8217;][i] = supercell of state;</li>
-<li>superdict[&#8216;transitions&#8217;][n] = (supercell initial, supercell final);</li>
-<li>superdict[&#8216;transmapping&#8217;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</li>
-<li>superdict[&#8216;indices&#8217;][tag] = (type, index) of tag, where tag is either a state or transition tag.</li>
-<li>superdict[&#8216;reference&#8217;] = supercell reference, no defects</li>
+<li>superdict[‘states’][i] = supercell of state;</li>
+<li>superdict[‘transitions’][n] = (supercell initial, supercell final);</li>
+<li>superdict[‘transmapping’][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</li>
+<li>superdict[‘indices’][tag] = (type, index) of tag, where tag is either a state or transition tag.</li>
+<li>superdict[‘reference’] = supercell reference, no defects</li>
 </ul>
 </td>
 </tr>
@@ -813,8 +817,8 @@ barriers. Extreme caution should be used if any of the other warnings are raised
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>preT0</strong><strong>[</strong><strong>Nomeg0</strong><strong>]</strong><strong></strong> &#8211; prefactor for vacancy jump transitions (follows jumpnetwork)</li>
-<li><strong>eneT0</strong><strong>[</strong><strong>Nomega0</strong><strong>]</strong><strong></strong> &#8211; transition energy state for vacancy jumps</li>
+<li><strong>preT0</strong><strong>[</strong><strong>Nomeg0</strong><strong>]</strong> – prefactor for vacancy jump transitions (follows jumpnetwork)</li>
+<li><strong>eneT0</strong><strong>[</strong><strong>Nomega0</strong><strong>]</strong> – transition energy state for vacancy jumps</li>
 </ul>
 </td>
 </tr>
@@ -863,7 +867,7 @@ Solute at the origin, vacancy hopping between two sites. Defined by om1_jumpnetw
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fivefreqindex</strong> &#8211; 1 or 2, corresponding to omega1 or omega2</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fivefreqindex</strong> – 1 or 2, corresponding to omega1 or omega2</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return omegalist:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body">list of tuples of PairStates</td>
@@ -889,19 +893,19 @@ and then send that output as input to Lij: <code class="docutils literal"><span 
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>kT</strong> &#8211; temperature times Boltzmann&#8217;s constant kB</li>
-<li><strong>preV</strong> &#8211; prefactor for vacancy formation (prod of inverse vibrational frequencies)</li>
-<li><strong>eneV</strong> &#8211; vacancy formation energy</li>
-<li><strong>preS</strong> &#8211; prefactor for solute formation (prod of inverse vibrational frequencies)</li>
-<li><strong>eneS</strong> &#8211; solute formation energy</li>
-<li><strong>preSV</strong> &#8211; excess prefactor for solute-vacancy binding</li>
-<li><strong>eneSV</strong> &#8211; solute-vacancy binding energy</li>
-<li><strong>preT0</strong> &#8211; prefactor for vacancy transition state</li>
-<li><strong>eneT0</strong> &#8211; energy for vacancy transition state (relative to eneV)</li>
-<li><strong>preT1</strong> &#8211; prefactor for vacancy swing transition state</li>
-<li><strong>eneT1</strong> &#8211; energy for vacancy swing transition state (relative to eneV + eneS + eneSV)</li>
-<li><strong>preT2</strong> &#8211; prefactor for vacancy exchange transition state</li>
-<li><strong>eneT2</strong> &#8211; energy for vacancy exchange transition state (relative to eneV + eneS + eneSV)</li>
+<li><strong>kT</strong> – temperature times Boltzmann’s constant kB</li>
+<li><strong>preV</strong> – prefactor for vacancy formation (prod of inverse vibrational frequencies)</li>
+<li><strong>eneV</strong> – vacancy formation energy</li>
+<li><strong>preS</strong> – prefactor for solute formation (prod of inverse vibrational frequencies)</li>
+<li><strong>eneS</strong> – solute formation energy</li>
+<li><strong>preSV</strong> – excess prefactor for solute-vacancy binding</li>
+<li><strong>eneSV</strong> – solute-vacancy binding energy</li>
+<li><strong>preT0</strong> – prefactor for vacancy transition state</li>
+<li><strong>eneT0</strong> – energy for vacancy transition state (relative to eneV)</li>
+<li><strong>preT1</strong> – prefactor for vacancy swing transition state</li>
+<li><strong>eneT1</strong> – energy for vacancy swing transition state (relative to eneV + eneS + eneSV)</li>
+<li><strong>preT2</strong> – prefactor for vacancy exchange transition state</li>
+<li><strong>eneT2</strong> – energy for vacancy exchange transition state (relative to eneV + eneS + eneSV)</li>
 </ul>
 </td>
 </tr>
@@ -936,13 +940,13 @@ and then send that output as input to Lij: <code class="docutils literal"><span 
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>usertagdict</strong> &#8211; dictionary where the keys are tags, and the values are tuples: (pre, ene)</li>
-<li><strong>VERBOSE</strong> &#8211; (optional) if True, also return a dictionary of missing tags, duplicate tags, and bad tags</li>
+<li><strong>usertagdict</strong> – dictionary where the keys are tags, and the values are tuples: (pre, ene)</li>
+<li><strong>VERBOSE</strong> – (optional) if True, also return a dictionary of missing tags, duplicate tags, and bad tags</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return thermodict:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">dictionary of ene&#8217;s and pre&#8217;s corresponding to usertagdict</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">dictionary of ene’s and pre’s corresponding to usertagdict</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return missingdict:</th></tr>
@@ -955,7 +959,7 @@ lists of lists of symmetry equivalent tags that are missing</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return badtaglist:</th></tr>
-<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first last">list of all tags in usertagdict that aren&#8217;t found in our dictionary</p>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first last">list of all tags in usertagdict that aren’t found in our dictionary</p>
 </td>
 </tr>
 </tbody>
@@ -974,9 +978,9 @@ and returns a dictionary indexed by the vTK.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>vTKarray</strong> &#8211; array of vTK entries</li>
-<li><strong>valarray</strong> &#8211; array of values</li>
-<li><strong>vTKsplits</strong> &#8211; split placement for vTK entries</li>
+<li><strong>vTKarray</strong> – array of vTK entries</li>
+<li><strong>valarray</strong> – array of values</li>
+<li><strong>vTKsplits</strong> – split placement for vTK entries</li>
 </ul>
 </td>
 </tr>
@@ -996,7 +1000,7 @@ and the splits to separate vTKarray back into vTK</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vTKdict</strong> &#8211; dictionary, indexed by vTK objects, whose entries are arrays</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vTKdict</strong> – dictionary, indexed by vTK objects, whose entries are arrays</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return vTKarray:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body">array of vTK entries</td>
@@ -1020,10 +1024,10 @@ and the splits to separate vTKarray back into vTK</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>pre</strong> &#8211; prefactors for sites</li>
-<li><strong>betaene</strong> &#8211; energy for sites / kBT</li>
-<li><strong>preT</strong> &#8211; prefactors for transition states</li>
-<li><strong>betaeneT</strong> &#8211; transition state energy for sites / kBT</li>
+<li><strong>pre</strong> – prefactors for sites</li>
+<li><strong>betaene</strong> – energy for sites / kBT</li>
+<li><strong>preT</strong> – prefactors for transition states</li>
+<li><strong>betaeneT</strong> – transition state energy for sites / kBT</li>
 </ul>
 </td>
 </tr>
@@ -1067,7 +1071,7 @@ and the splits to separate vTKarray back into vTK</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Dallas R. Trinkle.
+        &copy; Copyright 2017, Dallas R. Trinkle.
 
     </p>
   </div>
@@ -1089,7 +1093,7 @@ and the splits to separate vTKarray back into vTK</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.2',
+            VERSION:'1.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -1099,7 +1103,7 @@ and the splits to separate vTKarray back into vTK</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

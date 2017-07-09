@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Automator &mdash; Onsager 1.2.2 documentation</title>
+  <title>Automator &mdash; Onsager 1.2.3 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Onsager 1.2.2 documentation" href="index.html"/>
-        <link rel="next" title="Notebooks" href="notebooks.html"/>
+    <link rel="top" title="Onsager 1.2.3 documentation" href="index.html"/>
+        <link rel="up" title="Modules" href="modules.html"/>
         <link rel="prev" title="OnsagerCalc" href="OnsagerCalc.html"/> 
 
   
@@ -92,17 +92,18 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="includeme.html#references">References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="includeme.html#contributors">Contributors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="includeme.html#support">Support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="crystal.html">Crystal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
-<li class="toctree-l1"><a class="reference internal" href="supercell.html">Supercell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Automator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InputOutput.html">Input and output for Onsager transport calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Example Notebooks</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="crystal.html">Crystal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supercell.html">Supercell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Automator</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -146,6 +147,8 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">Modules</a> &raquo;</li>
         
       <li>Automator</li>
     
@@ -227,9 +230,9 @@ to be dumped to a file. If we want to call using the tuple, <code class="docutil
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>tag</strong> &#8211; string of initial state to rotate</li>
-<li><strong>groupop</strong> &#8211; see crystal.GroupOp; we use the rot and trans. This is in the supercell coord.</li>
-<li><strong>mapping</strong> &#8211; in &#8220;chemorder&#8221; format; list by chemistry of lists of indices of position
+<li><strong>tag</strong> – string of initial state to rotate</li>
+<li><strong>groupop</strong> – see crystal.GroupOp; we use the rot and trans. This is in the supercell coord.</li>
+<li><strong>mapping</strong> – in “chemorder” format; list by chemistry of lists of indices of position
 in initial cell to use.</li>
 </ul>
 </td>
@@ -244,7 +247,7 @@ in initial cell to use.</li>
 
 <dl class="function">
 <dt id="automator.supercelltar">
-<code class="descclassname">automator.</code><code class="descname">supercelltar</code><span class="sig-paren">(</span><em>tar</em>, <em>superdict</em>, <em>filemode=436</em>, <em>directmode=509</em>, <em>timestamp=None</em>, <em>INCARrelax='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\n'</em>, <em>INCARNEB='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\nIMAGES = 1\nSPRING = -5\nLCLIMB = .TRUE.\nNELMIN = 4\nNFREE = 10\n'</em>, <em>KPOINTS='Gamma\n1\nReciprocal\n0. 0. 0. 1.\n'</em>, <em>basedir=''</em>, <em>statename='relax.'</em>, <em>transitionname='neb.'</em>, <em>IDformat='{:02d}'</em>, <em>JSONdict='tags.json'</em>, <em>YAMLdef='supercell.yaml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#supercelltar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.supercelltar" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">automator.</code><code class="descname">supercelltar</code><span class="sig-paren">(</span><em>tar</em>, <em>superdict</em>, <em>filemode=436</em>, <em>directmode=509</em>, <em>timestamp=None</em>, <em>INCARrelax=’SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\n’</em>, <em>INCARNEB=’SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\nIMAGES = 1\nSPRING = -5\nLCLIMB = .TRUE.\nNELMIN = 4\nNFREE = 10\n’</em>, <em>KPOINTS=’Gamma\n1\nReciprocal\n0. 0. 0. 1.\n’</em>, <em>basedir=”</em>, <em>statename=’relax.’</em>, <em>transitionname=’neb.’</em>, <em>IDformat=’{:02d}’</em>, <em>JSONdict=’tags.json’</em>, <em>YAMLdef=’supercell.yaml’</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#supercelltar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.supercelltar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes in a tarfile (needs to be open for writing) and a supercelldict (from a
 diffuser) and creates the full directory structure inside the tarfile. Best used in
 a form like</p>
@@ -257,34 +260,34 @@ a form like</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>tar</strong> &#8211; tarfile open for writing; may contain other files in advance.</li>
-<li><strong>superdict</strong> &#8211; <p>dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>, <code class="docutils literal"><span class="pre">indices</span></code> that
+<li><strong>tar</strong> – tarfile open for writing; may contain other files in advance.</li>
+<li><strong>superdict</strong> – <p>dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>, <code class="docutils literal"><span class="pre">indices</span></code> that
 correspond to dictionaries with tags; the final tag <code class="docutils literal"><span class="pre">reference</span></code> is the basesupercell
 for calculations without defects.</p>
 <ul>
-<li>superdict[&#8216;states&#8217;][i] = supercell of state;</li>
-<li>superdict[&#8216;transitions&#8217;][n] = (supercell initial, supercell final);</li>
-<li>superdict[&#8216;transmapping&#8217;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</li>
-<li>superdict[&#8216;indices&#8217;][tag] = (type, index) of tag, where tag is either a state or transition tag; or...</li>
-<li>superdict[&#8216;indices&#8217;][tag] = index of tag, where tag is either a state or transition tag.</li>
-<li>superdict[&#8216;reference&#8217;] = (optional) supercell reference, no defects</li>
+<li>superdict[‘states’][i] = supercell of state;</li>
+<li>superdict[‘transitions’][n] = (supercell initial, supercell final);</li>
+<li>superdict[‘transmapping’][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</li>
+<li>superdict[‘indices’][tag] = (type, index) of tag, where tag is either a state or transition tag; or…</li>
+<li>superdict[‘indices’][tag] = index of tag, where tag is either a state or transition tag.</li>
+<li>superdict[‘reference’] = (optional) supercell reference, no defects</li>
 </ul>
 </li>
-<li><strong>filemode</strong> &#8211; mode to use for files (default: 664)</li>
-<li><strong>directmode</strong> &#8211; mode to use for directories (default: 775)</li>
-<li><strong>timestamp</strong> &#8211; UNIX time for files; if None, use current time (default)</li>
-<li><strong>INCARrelax</strong> &#8211; contents of INCAR file to use for relaxation; must contain {system} to be replaced
+<li><strong>filemode</strong> – mode to use for files (default: 664)</li>
+<li><strong>directmode</strong> – mode to use for directories (default: 775)</li>
+<li><strong>timestamp</strong> – UNIX time for files; if None, use current time (default)</li>
+<li><strong>INCARrelax</strong> – contents of INCAR file to use for relaxation; must contain {system} to be replaced
 by tag value (default: automator.INCARrelax)</li>
-<li><strong>INCARNEB</strong> &#8211; contents of INCAR file to use for NEB; must contain {system} to be replaced
+<li><strong>INCARNEB</strong> – contents of INCAR file to use for NEB; must contain {system} to be replaced
 by tag value (default: automator.INCARNEB)</li>
-<li><strong>KPOINTS</strong> &#8211; contents of KPOINTS file (default: gamma-point only calculation);
+<li><strong>KPOINTS</strong> – contents of KPOINTS file (default: gamma-point only calculation);
 if None or empty, no KPOINTS file at all</li>
-<li><strong>basedir</strong> &#8211; prepended to all files/directories (default: &#8216;&#8217;)</li>
-<li><strong>statename</strong> &#8211; prepended to all state names, before 2 digit number (default: relax.)</li>
-<li><strong>transitionname</strong> &#8211; prepended to all transition names, before 2 digit number  (default: neb.)</li>
-<li><strong>IDformat</strong> &#8211; format for integer tags (default: {:02d})</li>
-<li><strong>JSONdict</strong> &#8211; name of JSON file storing the tags corresponding to each directory (default: tags.json)</li>
-<li><strong>YAMLdef</strong> &#8211; YAML file containing full definition of supercells, relationship, etc. (default: supercell.yaml);
+<li><strong>basedir</strong> – prepended to all files/directories (default: ”)</li>
+<li><strong>statename</strong> – prepended to all state names, before 2 digit number (default: relax.)</li>
+<li><strong>transitionname</strong> – prepended to all transition names, before 2 digit number  (default: neb.)</li>
+<li><strong>IDformat</strong> – format for integer tags (default: {:02d})</li>
+<li><strong>JSONdict</strong> – name of JSON file storing the tags corresponding to each directory (default: tags.json)</li>
+<li><strong>YAMLdef</strong> – YAML file containing full definition of supercells, relationship, etc. (default: supercell.yaml);
 set to None to not output. <strong>may want to change this to None for the future</strong></li>
 </ul>
 </td>
@@ -305,8 +308,6 @@ set to None to not output. <strong>may want to change this to None for the futur
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="notebooks.html" class="btn btn-neutral float-right" title="Notebooks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
       
         <a href="OnsagerCalc.html" class="btn btn-neutral" title="OnsagerCalc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
@@ -317,7 +318,7 @@ set to None to not output. <strong>may want to change this to None for the futur
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Dallas R. Trinkle.
+        &copy; Copyright 2017, Dallas R. Trinkle.
 
     </p>
   </div>
@@ -339,7 +340,7 @@ set to None to not output. <strong>may want to change this to None for the futur
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.2',
+            VERSION:'1.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -349,7 +350,7 @@ set to None to not output. <strong>may want to change this to None for the futur
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -9,14 +9,9 @@ Contents:
    :maxdepth: 2
 
    includeme
-   crystal
-   CrystalStars
-   supercell
-   PowerExpansion
-   GFcalc
-   OnsagerCalc
-   automator
+   InputOutput.ipynb
    notebooks
+   modules
 
 Indices and tables
 ==================

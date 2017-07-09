@@ -1,7 +1,5 @@
-Notebooks
-=========
-
-Example notebooks:
+Example Notebooks
+=================
 
 Below are several jupyter notebooks with example input and output from ``onsager``.
 

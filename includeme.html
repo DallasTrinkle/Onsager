@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Onsager &mdash; Onsager 1.2.2 documentation</title>
+  <title>Onsager &mdash; Onsager 1.2.3 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Onsager 1.2.2 documentation" href="index.html"/>
-        <link rel="next" title="Crystal" href="crystal.html"/>
+    <link rel="top" title="Onsager 1.2.3 documentation" href="index.html"/>
+        <link rel="next" title="Input and output for Onsager transport calculation" href="InputOutput.html"/>
         <link rel="prev" title="Onsager: Automated diffusion calculation" href="index.html"/> 
 
   
@@ -91,18 +91,16 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Onsager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#references">References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#contributors">Contributors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#support">Support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="crystal.html">Crystal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
-<li class="toctree-l1"><a class="reference internal" href="supercell.html">Supercell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="automator.html">Automator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Notebooks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Onsager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#releases">Releases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contributors">Contributors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#support">Support</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="InputOutput.html">Input and output for Onsager transport calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Example Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
 </ul>
 
             
@@ -202,6 +200,7 @@
 </style>
 <div class="section" id="onsager">
 <h1>Onsager<a class="headerlink" href="#onsager" title="Permalink to this headline">¶</a></h1>
+<p>[![PyPI version](<a class="reference external" href="https://img.shields.io/pypi/v/onsager.svg)](http://pypi.python.org/pypi/onsager">https://img.shields.io/pypi/v/onsager.svg)](http://pypi.python.org/pypi/onsager</a>)</p>
 <p>Documentation now available at the [Onsager github page](<a class="reference external" href="http://dallastrinkle.github.io/Onsager/">http://dallastrinkle.github.io/Onsager/</a>). Please cite as [![DOI](<a class="reference external" href="https://zenodo.org/badge/14172/DallasTrinkle/Onsager.svg)](https://zenodo.org/badge/latestdoi/14172/DallasTrinkle/Onsager">https://zenodo.org/badge/14172/DallasTrinkle/Onsager.svg)](https://zenodo.org/badge/latestdoi/14172/DallasTrinkle/Onsager</a>) or see <a class="reference external" href="https://github.com/DallasTrinkle/Onsager">Onsager github</a> for current version doi information.</p>
 <p>The Onsager package provides routines for the general calculation of transport coefficients in vacancy-mediated diffusion and interstitial diffusion. It does this using a Green function approach, combined with point group symmetry reduction for maximum efficiency.</p>
 <p>Typical usage can be seen in the ipython notebooks in <cite>examples</cite>; the usual import will be:</p>
@@ -217,26 +216,27 @@
 <p>The tests for the package are include in <cite>test</cite>; <cite>tests.py</cite> will run all of the tests in the directory with verbosity level 2. This can be time-consuming (on the order of several of minutes) to run all tests; coverage is currently &gt;90%.</p>
 <p>The code uses YAML format for input/output of crystal structures, and diffusion data for the interstitial calculator. The vacancy-mediated calculator requires much more data, and uses HDF5 format to save/reload as needed. The vacancy-mediated calculator uses tags (unique human-readable-ish strings) to identify all (symmetry-unique) vacancy, solute, and complex states, and transitions between them.
 The vacancy-mediated diffuser can be stored as an HDF5 file (which internally stores the crystal structure in YAML format). The thermal/kinetic data is most easily serialized as JSON, but any dictionary-compatible format will do, by making use of tags.</p>
-<p>Releases:</p>
+<div class="section" id="releases">
+<h2>Releases<a class="headerlink" href="#releases" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>0.9. Full release of Interstitial calculator, along with theory paper (see References below).</li>
 <li>0.9.1. Added spin degrees of freedom to <cite>crystal</cite> for symmetry purposes; added <cite>supercell</cite> class to aid in automated setup of calculation.</li>
 <li>1.0 Now including automator for supercell calculations.</li>
 <li>1.1 Automator update with Makefile; corrections for possible overflow error when omega2 gets very large.</li>
-<li>1.2 Combined &#8220;large omega2&#8221; and &#8220;non-zero bias&#8221; algorithms; notebook for Fe-C added to documentation; cleanup of code and improved testing.</li>
+<li>1.2 Combined “large omega2” and “non-zero bias” algorithms; notebook for Fe-C added to documentation; cleanup of code and improved testing.</li>
 <li>1.2.1 Additional notebooks added for vacancy-mediated diffuser.</li>
 <li>1.2.2 New internal friction calculator for interstitial diffuser; improvement in Crystal class symmetry to handle larger error in unit cell.</li>
 </ul>
 </div>
 <div class="section" id="references">
-<h1>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h1>
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Dallas R. Trinkle, &#8220;Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors.&#8221; Philos. Mag. (2016) [doi:10.1080/14786435.2016.1212175](http://dx.doi.org/10.1080/14786435.2016.1212175); [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)</li>
-<li>Dallas R. Trinkle, &#8220;Automatic numerical evaluation of vacancy-mediated transport for arbitrary crystals: Onsager coefficients in the dilute limit using a Green function approach.&#8221; [arXiv:1608.01252](http://arxiv.org/abs/1608.01252)</li>
+<li>Dallas R. Trinkle, “Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors.” Philos. Mag. (2016) [doi:10.1080/14786435.2016.1212175](http://dx.doi.org/10.1080/14786435.2016.1212175); [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)</li>
+<li>Dallas R. Trinkle, “Automatic numerical evaluation of vacancy-mediated transport for arbitrary crystals: Onsager coefficients in the dilute limit using a Green function approach.” Philos. Mag. (2017) [doi:10.1080/14786435.2017.1340685](http://dx.doi.org/10.1080/14786435.2017.1340685); [arXiv:1608.01252](http://arxiv.org/abs/1608.01252)</li>
 </ul>
 </div>
 <div class="section" id="contributors">
-<h1>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h1>
+<h2>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Dallas R. Trinkle, initial design, derivation, and implementation.</li>
 <li>Ravi Agarwal, testing of HCP interstitial calculations; testing of HCP vacancy-mediated diffusion calculations</li>
@@ -245,7 +245,7 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
 <p>Thanks to discussions with Maylise Nastar (CEA, Saclay), Thomas Garnier (CEA, Saclay and UIUC), Thomas Schuler (CEA, Saclay), and Pascal Bellon (UIUC).</p>
 </div>
 <div class="section" id="support">
-<h1>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h1>
+<h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
 <p>This work has been supported in part by</p>
 <ul class="simple">
 <li>DOE/BES grant DE-FG02-05ER46217,</li>
@@ -253,6 +253,7 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
 <li>NSF/CDSE grant 1411106.</li>
 <li>Dallas R. Trinkle began the theoretical work for this code during the long program on Material Defects at the [Institute for Pure and Applied Mathematics](<a class="reference external" href="https://www.ipam.ucla.edu/">https://www.ipam.ucla.edu/</a>) at UCLA, Fall 2012, which is supported by the National Science Foundation.</li>
 </ul>
+</div>
 </div>
 
 
@@ -265,7 +266,7 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="crystal.html" class="btn btn-neutral float-right" title="Crystal" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="InputOutput.html" class="btn btn-neutral float-right" title="Input and output for Onsager transport calculation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral" title="Onsager: Automated diffusion calculation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -277,7 +278,7 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Dallas R. Trinkle.
+        &copy; Copyright 2017, Dallas R. Trinkle.
 
     </p>
   </div>
@@ -299,7 +300,7 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.2',
+            VERSION:'1.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -309,7 +310,7 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

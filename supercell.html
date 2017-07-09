@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Supercell &mdash; Onsager 1.2.2 documentation</title>
+  <title>Supercell &mdash; Onsager 1.2.3 documentation</title>
   
 
   
@@ -35,7 +35,8 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Onsager 1.2.2 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 1.2.3 documentation" href="index.html"/>
+        <link rel="up" title="Modules" href="modules.html"/>
         <link rel="next" title="PowerExpansion" href="PowerExpansion.html"/>
         <link rel="prev" title="CrystalStars" href="CrystalStars.html"/> 
 
@@ -92,17 +93,18 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="includeme.html#references">References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="includeme.html#contributors">Contributors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="includeme.html#support">Support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="crystal.html">Crystal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Supercell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="automator.html">Automator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InputOutput.html">Input and output for Onsager transport calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Example Notebooks</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="crystal.html">Crystal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Supercell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automator.html">Automator</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -146,6 +148,8 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">Modules</a> &raquo;</li>
         
       <li>Supercell</li>
     
@@ -217,11 +221,11 @@ periodically repeating unit cells. In that framework we can</p>
 <em class="property">class </em><code class="descclassname">supercell.</code><code class="descname">Supercell</code><span class="sig-paren">(</span><em>crys</em>, <em>super</em>, <em>interstitial=()</em>, <em>Nsolute=0</em>, <em>empty=False</em>, <em>NOSYM=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class that defines a Supercell of a crystal.</p>
 <p>Takes in a crystal, a supercell (3x3 integer matrix). We can identify sites
-as interstitial sites, and specify if we&#8217;ll have solutes.</p>
+as interstitial sites, and specify if we’ll have solutes.</p>
 <dl class="method">
 <dt id="supercell.Supercell.KrogerVink">
 <code class="descname">KrogerVink</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.KrogerVink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.KrogerVink" title="Permalink to this definition">¶</a></dt>
-<dd><p>Attempt to make a &#8220;simple&#8221; string based on the defectindices, using Kroger-Vink notation.
+<dd><p>Attempt to make a “simple” string based on the defectindices, using Kroger-Vink notation.
 That is, we identify: vacancies, antisites, and interstitial sites, and return a string.
 NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -243,8 +247,8 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>name</strong> &#8211; (optional) name to use for first list</li>
-<li><strong>stoichiometry</strong> &#8211; (optional) if True, append stoichiometry to name</li>
+<li><strong>name</strong> – (optional) name to use for first list</li>
+<li><strong>stoichiometry</strong> – (optional) if True, append stoichiometry to name</li>
 </ul>
 </td>
 </tr>
@@ -264,7 +268,7 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; supercell for comparison</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> – supercell for comparison</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if same crystal, supercell, occupancy, and ordering; False otherwise</td>
 </tr>
@@ -280,7 +284,7 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> &#8211; index (either an int, a slice, or a position)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> – index (either an int, a slice, or a position)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">chemical occupation at that point</td>
 </tr>
@@ -296,7 +300,7 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; must be a GroupOp (and <em>should</em> be a GroupOp of the supercell!)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> – must be a GroupOp (and <em>should</em> be a GroupOp of the supercell!)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">self</td>
 </tr>
@@ -313,12 +317,12 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>crys</strong> &#8211; crystal object</li>
-<li><strong>super</strong> &#8211; 3x3 integer matrix</li>
-<li><strong>interstitial</strong> &#8211; (optional) list/tuple of indices that correspond to interstitial sites</li>
-<li><strong>Nsolute</strong> &#8211; (optional) number of substitutional solute elements to consider; default=0</li>
-<li><strong>empty</strong> &#8211; (optional) designed to allow &#8220;copy&#8221; to work&#8211;skips all derived info</li>
-<li><strong>NOSYM</strong> &#8211; (optional) does not do symmetry analysis (intended ONLY for testing purposes)</li>
+<li><strong>crys</strong> – crystal object</li>
+<li><strong>super</strong> – 3x3 integer matrix</li>
+<li><strong>interstitial</strong> – (optional) list/tuple of indices that correspond to interstitial sites</li>
+<li><strong>Nsolute</strong> – (optional) number of substitutional solute elements to consider; default=0</li>
+<li><strong>empty</strong> – (optional) designed to allow “copy” to work–skips all derived info</li>
+<li><strong>NOSYM</strong> – (optional) does not do symmetry analysis (intended ONLY for testing purposes)</li>
 </ul>
 </td>
 </tr>
@@ -334,7 +338,7 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; must be a GroupOp (and <em>should</em> be a GroupOp of the supercell!)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> – must be a GroupOp (and <em>should</em> be a GroupOp of the supercell!)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">rotated supercell</td>
 </tr>
@@ -356,7 +360,7 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; must be a GroupOp (and <em>should</em> be a GroupOp of the supercell!)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> – must be a GroupOp (and <em>should</em> be a GroupOp of the supercell!)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">rotated supercell</td>
 </tr>
@@ -379,8 +383,8 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>key</strong> &#8211; index (either an int, a slice, or a position)</li>
-<li><strong>value</strong> &#8211; chemical occupation at that point</li>
+<li><strong>key</strong> – index (either an int, a slice, or a position)</li>
+<li><strong>value</strong> – chemical occupation at that point</li>
 </ul>
 </td>
 </tr>
@@ -418,7 +422,7 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <dl class="method">
 <dt id="supercell.Supercell.defectindices">
 <code class="descname">defectindices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.defectindices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.defectindices" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a dictionary that corresponds to the &#8220;defect&#8221; content of the supercell.</p>
+<dd><p>Return a dictionary that corresponds to the “defect” content of the supercell.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -438,8 +442,8 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>c</strong> &#8211; index</li>
-<li><strong>chemistry</strong> &#8211; string</li>
+<li><strong>c</strong> – index</li>
+<li><strong>chemistry</strong> – string</li>
 </ul>
 </td>
 </tr>
@@ -455,14 +459,14 @@ into other. This is a GroupOp <em>along</em> with an index mapping of chemorder.
 mapping is to get the occposlist to match up:
 <code class="docutils literal"><span class="pre">(g*self).occposlist()[c][mapping[c][i]]</span> <span class="pre">==</span> <span class="pre">other.occposlist()[c][i]</span></code>
 (We can write a similar expression using chemorder, since chemorder indexes into pos).
-We&#8217;re going to return both g and mapping.</p>
+We’re going to return both g and mapping.</p>
 <p><em>Remember:</em> <code class="docutils literal"><span class="pre">g</span></code> does not change the presentation ordering; <code class="docutils literal"><span class="pre">mapping</span></code> is
 necessary for full equivalence. If no such equivalence, return <code class="docutils literal"><span class="pre">None,None</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; Supercell</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> – Supercell</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return g:</th><td class="field-body">GroupOp to transform sites from <code class="docutils literal"><span class="pre">self</span></code> to <code class="docutils literal"><span class="pre">other</span></code></td>
 </tr>
@@ -481,8 +485,8 @@ necessary for full equivalence. If no such equivalence, return <code class="docu
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>ci</strong> &#8211; tuple of (chem, index) in crystal</li>
-<li><strong>Wyckoff</strong> &#8211; (optional) if False, <em>only</em> occupy the specific tuple, but still periodically</li>
+<li><strong>ci</strong> – tuple of (chem, index) in crystal</li>
+<li><strong>Wyckoff</strong> – (optional) if False, <em>only</em> occupy the specific tuple, but still periodically</li>
 </ul>
 </td>
 </tr>
@@ -516,8 +520,8 @@ Done in direct coordinates of the supercell, using periodic boundary conditions.
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pos</strong> &#8211; 3-vector</li>
-<li><strong>threshold</strong> &#8211; (optional) minimum squared &#8220;distance&#8221; in supercell for a match; default=1.</li>
+<li><strong>pos</strong> – 3-vector</li>
+<li><strong>threshold</strong> – (optional) minimum squared “distance” in supercell for a match; default=1.</li>
 </ul>
 </td>
 </tr>
@@ -552,7 +556,7 @@ cell that remain inside the supercell</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>super</strong> &#8211; 3x3 integer matrix</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>super</strong> – 3x3 integer matrix</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return size:</th><td class="field-body">integer, corresponding to number of unit cells</td>
 </tr>
@@ -589,12 +593,12 @@ to unit cell positions</td>
 <dt id="supercell.Supercell.reorder">
 <code class="descname">reorder</code><span class="sig-paren">(</span><em>mapping</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.reorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.reorder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reorder (in place) the occupied sites. Does not change the occupancies, only the ordering
-for &#8220;presentation&#8221;.</p>
+for “presentation”.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mapping</strong> &#8211; list of maps; will make newchemorder[c][i] = chemorder[c][mapping[c][i]]</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mapping</strong> – list of maps; will make newchemorder[c][i] = chemorder[c][mapping[c][i]]</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return self:</th><td class="field-body"></td>
 </tr>
@@ -612,8 +616,8 @@ for &#8220;presentation&#8221;.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>ind</strong> &#8211; integer index</li>
-<li><strong>c</strong> &#8211; chemistry index</li>
+<li><strong>ind</strong> – integer index</li>
+<li><strong>c</strong> – chemistry index</li>
 </ul>
 </td>
 </tr>
@@ -653,7 +657,7 @@ for &#8220;presentation&#8221;.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Dallas R. Trinkle.
+        &copy; Copyright 2017, Dallas R. Trinkle.
 
     </p>
   </div>
@@ -675,7 +679,7 @@ for &#8220;presentation&#8221;.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.2',
+            VERSION:'1.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -685,7 +689,7 @@ for &#8220;presentation&#8221;.</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

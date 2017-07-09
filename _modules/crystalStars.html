@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>crystalStars &mdash; Onsager 1.2.2 documentation</title>
+  <title>crystalStars &mdash; Onsager 1.2.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Onsager 1.2.2 documentation" href="../index.html"/>
+    <link rel="top" title="Onsager 1.2.3 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -91,17 +91,9 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../includeme.html#support">Support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../crystal.html">Crystal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../CrystalStars.html">CrystalStars</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../supercell.html">Supercell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../PowerExpansion.html">PowerExpansion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../GFcalc.html">GFcalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../OnsagerCalc.html">OnsagerCalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../automator.html">Automator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../InputOutput.html">Input and output for Onsager transport calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Example Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
 </ul>
 
             
@@ -214,21 +206,21 @@
 <span class="sd">    :param dx: Cartesian vector pointing from first to second member of pair</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="PairState.zero"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.PairState.zero">[docs]</a>    <span class="k">def</span> <span class="nf">zero</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="PairState.zero"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.PairState.zero">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">zero</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a &quot;zero&quot; state&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span> <span class="n">dx</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span></div>
 
-    <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="PairState.fromcrys"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.PairState.fromcrys">[docs]</a>    <span class="k">def</span> <span class="nf">fromcrys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">ij</span><span class="p">,</span> <span class="n">dx</span><span class="p">):</span>
+<div class="viewcode-block" id="PairState.fromcrys"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.PairState.fromcrys">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromcrys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">ij</span><span class="p">,</span> <span class="n">dx</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert (i,j), dx into PairState&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="n">ij</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                    <span class="n">j</span><span class="o">=</span><span class="n">ij</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                    <span class="n">R</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">crys</span><span class="o">.</span><span class="n">invlatt</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span> <span class="o">-</span> <span class="n">crys</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">chem</span><span class="p">][</span><span class="n">ij</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">+</span> <span class="n">crys</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">chem</span><span class="p">][</span><span class="n">ij</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
                    <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">)</span></div>
 
-    <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="PairState.fromcrys_latt"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.PairState.fromcrys_latt">[docs]</a>    <span class="k">def</span> <span class="nf">fromcrys_latt</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">ij</span><span class="p">,</span> <span class="n">R</span><span class="p">):</span>
+<div class="viewcode-block" id="PairState.fromcrys_latt"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.PairState.fromcrys_latt">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromcrys_latt</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">ij</span><span class="p">,</span> <span class="n">R</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert (i,j), R into PairState&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="n">ij</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                    <span class="n">j</span><span class="o">=</span><span class="n">ij</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
@@ -330,15 +322,15 @@
     <span class="k">def</span> <span class="nf">sortkey</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">entry</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span>
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="PairState.PairState_representer"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.PairState.PairState_representer">[docs]</a>    <span class="k">def</span> <span class="nf">PairState_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="PairState.PairState_representer"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.PairState.PairState_representer">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">PairState_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Output a PairState&quot;&quot;&quot;</span>
         <span class="c1"># asdict() returns an OrderedDictionary, so pass through dict()</span>
         <span class="c1"># had to rewrite _asdict() for some reason...?</span>
         <span class="k">return</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_mapping</span><span class="p">(</span><span class="n">PAIRSTATE_YAMLTAG</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">_asdict</span><span class="p">())</span></div>
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="PairState.PairState_constructor"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.PairState.PairState_constructor">[docs]</a>    <span class="k">def</span> <span class="nf">PairState_constructor</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+<div class="viewcode-block" id="PairState.PairState_constructor"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.PairState.PairState_constructor">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">PairState_constructor</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Construct a GroupOp from YAML&quot;&quot;&quot;</span>
         <span class="c1"># ** turns the dictionary into parameters for PairState constructor</span>
         <span class="k">return</span> <span class="n">PairState</span><span class="p">(</span><span class="o">**</span><span class="n">loader</span><span class="o">.</span><span class="n">construct_mapping</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span></div></div>
@@ -578,8 +570,8 @@
             <span class="n">PSlist2array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">)</span>
         <span class="n">HDF5group</span><span class="p">[</span><span class="s1">&#39;states_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span></div>
 
-    <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="StarSet.loadhdf5"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.StarSet.loadhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
+<div class="viewcode-block" id="StarSet.loadhdf5"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.StarSet.loadhdf5">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a new StarSet from an HDF5 group.</span>
 
@@ -1058,8 +1050,8 @@
         <span class="n">HDF5group</span><span class="p">[</span><span class="s1">&#39;vecveclist&#39;</span><span class="p">],</span> <span class="n">HDF5group</span><span class="p">[</span><span class="s1">&#39;vecvecindex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">doublelist2flatlistindex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vecvec</span><span class="p">)</span>
         <span class="n">HDF5group</span><span class="p">[</span><span class="s1">&#39;outer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outer</span></div>
 
-    <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="VectorStarSet.loadhdf5"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.VectorStarSet.loadhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">SSet</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
+<div class="viewcode-block" id="VectorStarSet.loadhdf5"><a class="viewcode-back" href="../CrystalStars.html#crystalStars.VectorStarSet.loadhdf5">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">SSet</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a new VectorStarSet from an HDF5 group.</span>
 
@@ -1298,7 +1290,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Dallas R. Trinkle.
+        &copy; Copyright 2017, Dallas R. Trinkle.
 
     </p>
   </div>
@@ -1320,7 +1312,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.2',
+            VERSION:'1.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -1330,7 +1322,7 @@
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

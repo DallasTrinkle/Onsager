@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>GFcalc &mdash; Onsager 1.2.2 documentation</title>
+  <title>GFcalc &mdash; Onsager 1.2.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Onsager 1.2.2 documentation" href="../index.html"/>
+    <link rel="top" title="Onsager 1.2.3 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -91,17 +91,9 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../includeme.html#support">Support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../crystal.html">Crystal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../CrystalStars.html">CrystalStars</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../supercell.html">Supercell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../PowerExpansion.html">PowerExpansion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../GFcalc.html">GFcalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../OnsagerCalc.html">OnsagerCalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../automator.html">Automator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../InputOutput.html">Input and output for Onsager transport calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Example Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
 </ul>
 
             
@@ -288,8 +280,8 @@
                                <span class="k">for</span> <span class="n">jumplist</span> <span class="ow">in</span> <span class="n">jumpnetwork</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eta</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>  <span class="c1"># we don&#39;t yet know the diffusivity</span></div>
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="GFCrystalcalc.networkcount"><a class="viewcode-back" href="../GFcalc.html#GFcalc.GFCrystalcalc.networkcount">[docs]</a>    <span class="k">def</span> <span class="nf">networkcount</span><span class="p">(</span><span class="n">jumpnetwork</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+<div class="viewcode-block" id="GFCrystalcalc.networkcount"><a class="viewcode-back" href="../GFcalc.html#GFcalc.GFCrystalcalc.networkcount">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">networkcount</span><span class="p">(</span><span class="n">jumpnetwork</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a count of how many separate connected networks there are&quot;&quot;&quot;</span>
         <span class="n">jngraph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">jlist</span> <span class="ow">in</span> <span class="n">jumpnetwork</span><span class="p">:</span>
@@ -349,8 +341,8 @@
             <span class="n">t3d</span><span class="o">.</span><span class="n">addhdf5</span><span class="p">(</span><span class="n">HDF5group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">coeffstr</span><span class="p">))</span>
         <span class="n">HDF5group</span><span class="p">[</span><span class="s1">&#39;jumppairs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jumppairs</span><span class="p">)</span></div>
 
-    <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="GFCrystalcalc.loadhdf5"><a class="viewcode-back" href="../GFcalc.html#GFcalc.GFCrystalcalc.loadhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
+<div class="viewcode-block" id="GFCrystalcalc.loadhdf5"><a class="viewcode-back" href="../GFcalc.html#GFcalc.GFCrystalcalc.loadhdf5">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a new GFcalc from an HDF5 group.</span>
 
@@ -683,7 +675,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Dallas R. Trinkle.
+        &copy; Copyright 2017, Dallas R. Trinkle.
 
     </p>
   </div>
@@ -705,7 +697,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.2',
+            VERSION:'1.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -715,7 +707,7 @@
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

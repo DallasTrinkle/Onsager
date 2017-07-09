@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Fe-C diffusion and elastodiffusivity &mdash; Onsager 1.2.2 documentation</title>
+  <title>Fe-C diffusion and elastodiffusivity &mdash; Onsager 1.2.3 documentation</title>
   
 
   
@@ -35,10 +35,10 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Onsager 1.2.2 documentation" href="../index.html"/>
-        <link rel="up" title="Notebooks" href="../notebooks.html"/>
+    <link rel="top" title="Onsager 1.2.3 documentation" href="../index.html"/>
+        <link rel="up" title="Example Notebooks" href="../notebooks.html"/>
         <link rel="next" title="Convergence of Green function calculation" href="GF-convergence.html"/>
-        <link rel="prev" title="Notebooks" href="../notebooks.html"/> 
+        <link rel="prev" title="Example Notebooks" href="../notebooks.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -93,17 +93,8 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../includeme.html#support">Support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../crystal.html">Crystal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../CrystalStars.html">CrystalStars</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../supercell.html">Supercell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../PowerExpansion.html">PowerExpansion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../GFcalc.html">GFcalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../OnsagerCalc.html">OnsagerCalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../automator.html">Automator</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../notebooks.html">Notebooks</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../InputOutput.html">Input and output for Onsager transport calculation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../notebooks.html">Example Notebooks</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Fe-C diffusion and elastodiffusivity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="GF-convergence.html">Convergence of Green function calculation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tracer-correlation.html">Tracer correlation coefficients</a></li>
@@ -113,6 +104,7 @@
 <li class="toctree-l2"><a class="reference internal" href="FCC-Co-O.html">Split oxygen-vacancy defects in Co</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
 </ul>
 
             
@@ -157,7 +149,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../notebooks.html">Notebooks</a> &raquo;</li>
+          <li><a href="../notebooks.html">Example Notebooks</a> &raquo;</li>
         
       <li>Fe-C diffusion and elastodiffusivity</li>
     
@@ -470,7 +462,7 @@ S11 = 0.1023 S12 = -0.0382 S44 = 0.1187
 code (1) gets the set of symmetric Wyckoff positions corresponding to
 the single site <span class="math">\([00\frac12]\)</span> (first translated into unit cell
 coordinates), and then adds that new basis to our Fe crystal to generate
-a <em>new</em> crystal structure, that we name &#8220;FeC&#8221;.</p>
+a <em>new</em> crystal structure, that we name “FeC”.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none"><div class="highlight"><pre>
 <span></span>In [4]:
@@ -707,7 +699,7 @@ plt.show()
 <p>Activation volume. We plot the isotropic value (change in diffusivity
 with respect to pressure), but also the <span class="math">\(V_{xxxx}\)</span>,
 <span class="math">\(V_{xxyy}\)</span>, and <span class="math">\(V_{xyxy}\)</span> terms. Interestingly, the
-<span class="math">\(V_{xxxx}\)</span> term is negative&#8212;which indicates that diffusivity
+<span class="math">\(V_{xxxx}\)</span> term is negative—which indicates that diffusivity
 along the <span class="math">\([100]\)</span> direction <em>increases</em> with compressive stress in
 the <span class="math">\([100]\)</span> direction.</p>
 <div class="nbinput docutils container">
@@ -801,7 +793,7 @@ Spherical average uniaxial activation volume: -0.0237 -0.2757A^3
         <a href="GF-convergence.html" class="btn btn-neutral float-right" title="Convergence of Green function calculation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../notebooks.html" class="btn btn-neutral" title="Notebooks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../notebooks.html" class="btn btn-neutral" title="Example Notebooks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -810,7 +802,7 @@ Spherical average uniaxial activation volume: -0.0237 -0.2757A^3
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Dallas R. Trinkle.
+        &copy; Copyright 2017, Dallas R. Trinkle.
 
     </p>
   </div>
@@ -832,7 +824,7 @@ Spherical average uniaxial activation volume: -0.0237 -0.2757A^3
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.2',
+            VERSION:'1.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -842,7 +834,7 @@ Spherical average uniaxial activation volume: -0.0237 -0.2757A^3
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>OnsagerCalc &mdash; Onsager 1.2.2 documentation</title>
+  <title>OnsagerCalc &mdash; Onsager 1.2.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Onsager 1.2.2 documentation" href="../index.html"/>
+    <link rel="top" title="Onsager 1.2.3 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -91,17 +91,9 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../includeme.html#references">References</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../includeme.html#contributors">Contributors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../includeme.html#support">Support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../crystal.html">Crystal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../CrystalStars.html">CrystalStars</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../supercell.html">Supercell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../PowerExpansion.html">PowerExpansion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../GFcalc.html">GFcalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../OnsagerCalc.html">OnsagerCalc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../automator.html">Automator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../InputOutput.html">Input and output for Onsager transport calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Example Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
 </ul>
 
             
@@ -263,16 +255,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">jumpSymmTensorBasis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generateJumpSymmTensorBasis</span><span class="p">()</span>  <span class="c1"># projections for *first rep. only*</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tagdict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tagdicttype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generatetags</span><span class="p">()</span>  <span class="c1"># now with tags!</span></div>
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="Interstitial.sitelistYAML"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.Interstitial.sitelistYAML">[docs]</a>    <span class="k">def</span> <span class="nf">sitelistYAML</span><span class="p">(</span><span class="n">sitelist</span><span class="p">):</span>
+<div class="viewcode-block" id="Interstitial.sitelistYAML"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.Interstitial.sitelistYAML">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">sitelistYAML</span><span class="p">(</span><span class="n">sitelist</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Dumps a &quot;sample&quot; YAML formatted version of the sitelist with data to be entered&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">crystal</span><span class="o">.</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">({</span><span class="s1">&#39;Dipole&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">sitelist</span><span class="p">],</span>
                                   <span class="s1">&#39;Energy&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">sitelist</span><span class="p">],</span>
                                   <span class="s1">&#39;Prefactor&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">sitelist</span><span class="p">],</span>
                                   <span class="s1">&#39;sitelist&#39;</span><span class="p">:</span> <span class="n">sitelist</span><span class="p">})</span></div>
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="Interstitial.jumpnetworkYAML"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.Interstitial.jumpnetworkYAML">[docs]</a>    <span class="k">def</span> <span class="nf">jumpnetworkYAML</span><span class="p">(</span><span class="n">jumpnetwork</span><span class="p">):</span>
+<div class="viewcode-block" id="Interstitial.jumpnetworkYAML"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.Interstitial.jumpnetworkYAML">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">jumpnetworkYAML</span><span class="p">(</span><span class="n">jumpnetwork</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Dumps a &quot;sample&quot; YAML formatted version of the jumpnetwork with data to be entered&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">crystal</span><span class="o">.</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">({</span><span class="s1">&#39;DipoleT&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">jumpnetwork</span><span class="p">],</span>
                                   <span class="s1">&#39;EnergyT&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">jumpnetwork</span><span class="p">],</span>
@@ -797,15 +789,15 @@
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pre</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">betaene</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span> <span class="o">+</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">preT</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">betaeneT</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="vacancyThermoKinetics.vacancyThermoKinetics_representer"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.vacancyThermoKinetics.vacancyThermoKinetics_representer">[docs]</a>    <span class="k">def</span> <span class="nf">vacancyThermoKinetics_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="vacancyThermoKinetics.vacancyThermoKinetics_representer"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.vacancyThermoKinetics.vacancyThermoKinetics_representer">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">vacancyThermoKinetics_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Output a PairState&quot;&quot;&quot;</span>
         <span class="c1"># asdict() returns an OrderedDictionary, so pass through dict()</span>
         <span class="c1"># had to rewrite _asdict() for some reason...?</span>
         <span class="k">return</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_mapping</span><span class="p">(</span><span class="n">VACANCYTHERMOKINETICS_YAMLTAG</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">_asdict</span><span class="p">())</span></div>
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="vacancyThermoKinetics.vacancyThermoKinetics_constructor"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.vacancyThermoKinetics.vacancyThermoKinetics_constructor">[docs]</a>    <span class="k">def</span> <span class="nf">vacancyThermoKinetics_constructor</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+<div class="viewcode-block" id="vacancyThermoKinetics.vacancyThermoKinetics_constructor"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.vacancyThermoKinetics.vacancyThermoKinetics_constructor">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">vacancyThermoKinetics_constructor</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Construct a GroupOp from YAML&quot;&quot;&quot;</span>
         <span class="c1"># ** turns the dictionary into parameters for GroupOp constructor</span>
         <span class="k">return</span> <span class="n">vacancyThermoKinetics</span><span class="p">(</span><span class="o">**</span><span class="n">loader</span><span class="o">.</span><span class="n">construct_mapping</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span></div></div>
@@ -1267,8 +1259,8 @@
             <span class="n">taglist</span><span class="p">,</span> <span class="n">tagindex</span> <span class="o">=</span> <span class="n">stars</span><span class="o">.</span><span class="n">doublelist2flatlistindex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="n">tag</span><span class="p">])</span>
             <span class="n">HDF5group</span><span class="p">[</span><span class="n">tag</span> <span class="o">+</span> <span class="s1">&#39;_taglist&#39;</span><span class="p">],</span> <span class="n">HDF5group</span><span class="p">[</span><span class="n">tag</span> <span class="o">+</span> <span class="s1">&#39;_tagindex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">taglist</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">),</span> <span class="n">tagindex</span></div>
 
-    <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="VacancyMediated.loadhdf5"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.VacancyMediated.loadhdf5">[docs]</a>    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
+<div class="viewcode-block" id="VacancyMediated.loadhdf5"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.VacancyMediated.loadhdf5">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">loadhdf5</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">HDF5group</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a new VacancyMediated diffuser from an HDF5 group.</span>
 
@@ -1481,8 +1473,8 @@
                 <span class="n">duplicatelist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">thermodict</span><span class="p">,</span> <span class="n">missingdict</span><span class="p">,</span> <span class="n">duplicatelist</span><span class="p">,</span> <span class="n">badtaglist</span></div>
 
-    <span class="nd">@staticmethod</span>
-<div class="viewcode-block" id="VacancyMediated.preene2betafree"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.VacancyMediated.preene2betafree">[docs]</a>    <span class="k">def</span> <span class="nf">preene2betafree</span><span class="p">(</span><span class="n">kT</span><span class="p">,</span> <span class="n">preV</span><span class="p">,</span> <span class="n">eneV</span><span class="p">,</span> <span class="n">preS</span><span class="p">,</span> <span class="n">eneS</span><span class="p">,</span> <span class="n">preSV</span><span class="p">,</span> <span class="n">eneSV</span><span class="p">,</span>
+<div class="viewcode-block" id="VacancyMediated.preene2betafree"><a class="viewcode-back" href="../OnsagerCalc.html#OnsagerCalc.VacancyMediated.preene2betafree">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">preene2betafree</span><span class="p">(</span><span class="n">kT</span><span class="p">,</span> <span class="n">preV</span><span class="p">,</span> <span class="n">eneV</span><span class="p">,</span> <span class="n">preS</span><span class="p">,</span> <span class="n">eneS</span><span class="p">,</span> <span class="n">preSV</span><span class="p">,</span> <span class="n">eneSV</span><span class="p">,</span>
                         <span class="n">preT0</span><span class="p">,</span> <span class="n">eneT0</span><span class="p">,</span> <span class="n">preT1</span><span class="p">,</span> <span class="n">eneT1</span><span class="p">,</span> <span class="n">preT2</span><span class="p">,</span> <span class="n">eneT2</span><span class="p">,</span> <span class="o">**</span><span class="n">ignoredextraarguments</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read in a series of prefactors (:math:`\\exp(S/k_\\text{B})`) and energies, and return</span>
@@ -1777,7 +1769,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Dallas R. Trinkle.
+        &copy; Copyright 2017, Dallas R. Trinkle.
 
     </p>
   </div>
@@ -1799,7 +1791,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.2',
+            VERSION:'1.2.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -1809,7 +1801,7 @@
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

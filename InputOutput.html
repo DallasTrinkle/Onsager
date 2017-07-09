@@ -1,0 +1,3049 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Input and output for Onsager transport calculation &mdash; Onsager 1.2.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Onsager 1.2.3 documentation" href="index.html"/>
+        <link rel="next" title="Example Notebooks" href="notebooks.html"/>
+        <link rel="prev" title="Onsager" href="includeme.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Onsager
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Input and output for Onsager transport calculation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Assumptions-used-in-Onsager">Assumptions used in Onsager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Crystal-class-setup">Crystal class setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-vacancy-diffusion">Face-centered cubic crystal, vacancy-diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Rocksalt-crystal,-vacancy-diffusion">Rocksalt crystal, vacancy-diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-interstitial-diffusion">Face-centered cubic crystal, interstitial diffusion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Interstitial-calculator-setup">Interstitial calculator setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-vacancy-diffusion">Face-centered cubic crystal, vacancy-diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Rocksalt-crystal,-vacancy-diffusion">Rocksalt crystal, vacancy-diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-interstitial-diffusion">Face-centered cubic crystal, interstitial diffusion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Vacancy-mediated-calculator-setup">Vacancy-mediated calculator setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion">Face-centered cubic crystal, vacancy mediated-diffusion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#VASP-style-input-files">VASP-style input files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-interstitial-diffusion">Face-centered cubic crystal, interstitial diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion">Face-centered cubic crystal, vacancy mediated-diffusion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Formatting-of-input-data">Formatting of input data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-interstitial-diffusion">Face-centered cubic crystal, interstitial diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion">Face-centered cubic crystal, vacancy mediated-diffusion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Interpretation-of-output">Interpretation of output</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Interstitial-diffusivity">Interstitial diffusivity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Derivatives-of-diffusivity:-activation-barrier-tensor">Derivatives of diffusivity: activation barrier tensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Derivatives-of-diffusivity:-elastodiffusion-and-activation-volume-tensor">Derivatives of diffusivity: elastodiffusion and activation volume tensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Vacancy-mediated-diffusivity">Vacancy-mediated diffusivity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Drag-ratio">Drag ratio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Solute-diffusivity-in-the-dilute-limit">Solute diffusivity in the dilute limit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Example Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Onsager</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Input and output for Onsager transport calculation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/InputOutput.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-bold { font-weight: bold; }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="Input-and-output-for-Onsager-transport-calculation">
+<h1>Input and output for Onsager transport calculation<a class="headerlink" href="#Input-and-output-for-Onsager-transport-calculation" title="Permalink to this headline">¶</a></h1>
+<p>The Onsager calculators currently include two computational approaches
+to determining transport coefficients: an “interstitial” calculation,
+and a “vacancy-mediated” calculator. Below we describe the</p>
+<ol class="arabic simple" start="0">
+<li><strong>Assumptions used in transport model</strong> that are necessary to
+understand the data to be input, and the limitations of the results;</li>
+<li><strong>Crystal class setup</strong> needed to initiate a calculation;</li>
+<li><strong>Interstitial calculator setup</strong> needed for an single mobile species
+calculation, or,</li>
+<li><strong>Vacancy-mediated calculator setup</strong> needed for a vacancy-mediated
+substitutional solute calculation;</li>
+<li>the creation of <strong>VASP-style input files</strong> to be run to generate
+input data;</li>
+<li>proper <strong>Formatting of input data</strong> to be compatible with the
+calculators; and</li>
+<li><strong>Interpretation of output</strong> which includes how to convert output
+into transport coefficients.</li>
+</ol>
+<p>This follows the overall structure of a transport coefficient
+calculation. Broadly speaking, these are the steps necessary to compute
+transport coefficients:</p>
+<ol class="arabic simple">
+<li>Identify the crystal to be considered; this requires mapping whatever
+defects are to be considered mobile onto appropriate Wyckoff sites in
+the crystal, even if those exact sites are not occupied by true
+atoms.</li>
+<li>Generate lists of symmetry unrelated “defect states” and “defect
+state transitions,” along with the appropriate “calculator object.”</li>
+<li>Construct input files for total energy calculations to be run outside
+of the Onsager codebase; extract appropriate energy and frequency
+information from those runs.</li>
+<li>Input the data in a format that the calculator can understand, and
+transform those energies and frequencies into rates at a given
+temperature assuming Arrhenius behavior.</li>
+<li>Transform the output into physically relevant quantities (Onsager
+coefficients, solute diffusivities, mobilities, or drag ratios) with
+appropriate units.</li>
+</ol>
+<div class="section" id="Assumptions-used-in-Onsager">
+<h2>Assumptions used in Onsager<a class="headerlink" href="#Assumptions-used-in-Onsager" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">Onsager</span></code> code computes transport of defects on an infinite
+crystalline lattice. Currently, the code requires that the particular
+defects can be mapped onto Wyckoff positions in a crystal. This does not
+<em>require</em> that the defect be an atom occupying various Wyckoff positions
+(though that obviously is captured), but merely that the defect have the
+symmetry and transitions that can be equivalently described by an
+“object” that occupies Wyckoff positions. Simple examples include
+vacancies, substitutional solutes, simple interstitial atoms, as well as
+more complex cases such as split vacancy defects (e.g.: a
+V-O<span class="math">\(_\text{i}\)</span>-V split double vacancy with oxygen interstitial
+in a closed-packed crystal; the entire defect complex can be mapped on
+to the Wyckoff position of the oxygen interstitial). In order to
+calculate diffusion, a few assumptions are made:</p>
+<ul class="simple">
+<li><strong>defects are dilute:</strong> we never consider more than one defect at a
+time in an “infinite” periodic crystal; the vacancy-mediated diffuser
+uses one vacancy and one solute.</li>
+<li><strong>defects diffuse via a Markovian process</strong>: defect states are
+well-defined, and the transition time from state-to-state is much
+longer than the equilibration time in a state, so that the evolution
+of the system is described by the Master equation with
+time-independent rates.</li>
+<li><strong>defects do not alter the underlying symmetry of the crystal</strong>:
+while the defect itself can have a lower symmetry (according to its
+Wyckoff position), the presence of a defect does not lead to a global
+phase transformation to a different crystal; moreover, the crystal
+maintains translational invariance so that the energy of the system
+with defect(s) is unchanged under translations.</li>
+</ul>
+<p>All of these assumptions are usually good: the dilute limit is valid
+without strong interactions (such as site blocking), Markovian processes
+are valid as long as barriers are a few times <span class="math">\(k_\text{B}T\)</span>, and
+we are not currently aware of any (simple) defects that induce phase
+transformations.</p>
+<p>Furthermore, relaxation around a defect (or defect cluster) is allowed,
+but the assumption is that all of the atomic positions can be easily
+mapped back to “perfect” crystal lattice sites. This is an “off-lattice”
+model. In some cases, it can be possible to incorporate “new” states,
+especially metastable states, that are only accessible by a defect.</p>
+<p>Finally, the code requires that all diffusion happens on a single
+sublattice. This sublattice is defined by a single chemical species; it
+can include multiple Wyckoff positions. But the current algorithms
+assume that transitions do not result in the creation of <em>antisite
+defects</em> (where a chemical species is on an “incorrect” sublattice).</p>
+</div>
+<div class="section" id="Crystal-class-setup">
+<h2>Crystal class setup<a class="headerlink" href="#Crystal-class-setup" title="Permalink to this headline">¶</a></h2>
+<p>The assumption of translational invariance of our defects is captured by
+the use of a <code class="docutils literal"><span class="pre">Crystal</span></code> object. Following the standard definition of a
+crystal, we need to specify (a) three lattice vectors, and (b) at least
+one basis position, corresponding to at least one site. The crystal
+needs to contain <em>at least</em> the Wyckoff positions on a single sublattice
+corresponding to the diffusing defects. It can be useful for it to
+contain <em>more</em> atoms that act as “spectator” atoms: they do not
+participate in diffusion, but define both the underlying symmetry of the
+crystal, and if atomic-scale calculations will be used to compute
+configuration and transition-state energies, are necessary to define the
+energy landscape of diffusion.</p>
+<p>The lattice vectors of the underlying crystal set the units of <em>length</em>
+in the transport coefficients. Hence, if the vectors are entered in
+units of nm, this corresponds to a factor of <span class="math">\(10^{-18}\text{ m}^2\)</span>
+in the transport coefficients. This should also be considered when
+including factors of volume per atom as well.</p>
+<ul class="simple">
+<li>The <em>lattice vectors</em> are given by three vectors,
+<span class="math">\(\mathbf{a}_1\)</span>, <span class="math">\(\mathbf{a}_2\)</span>, <span class="math">\(\mathbf{a}_3\)</span> in
+Cartesian coordinates. In python, these are input when creating a
+Crystal either as a list of three <code class="docutils literal"><span class="pre">numpy</span></code> vectors, <em>or</em> as a square
+<code class="docutils literal"><span class="pre">numpy</span></code> matrix. <strong>Note:</strong> if you enter the three vectors as a
+matrix, remember that <strong>it assumes the vectors are column vectors</strong>.
+That is, if <code class="docutils literal"><span class="pre">amat</span></code> is the matrix, then <code class="docutils literal"><span class="pre">amat[:,0]</span></code> is
+<span class="math">\(\mathbf{a}_1\)</span>, <code class="docutils literal"><span class="pre">amat[:,1]</span></code> is <span class="math">\(\mathbf{a}_2\)</span>, and
+<code class="docutils literal"><span class="pre">amat[:,2]</span></code> is <span class="math">\(\mathbf{a}_3\)</span>. <strong>This may not be what you’re
+expecting.</strong> The main recommendation is to enter the lattice vectors
+as a list (or tuple) of three <code class="docutils literal"><span class="pre">numpy</span></code> vectors.</li>
+<li>The <em>atomic basis</em> is given by a <em>list</em> of <em>lists</em> of <code class="docutils literal"><span class="pre">numpy</span></code>
+vectors of positions in <em>unit cell coordinates</em>. For a given
+<code class="docutils literal"><span class="pre">basis</span></code>, then <code class="docutils literal"><span class="pre">basis[0]</span></code> is a list of all positions for the first
+chemical element in the crystal, <code class="docutils literal"><span class="pre">basis[1]</span></code> is the second chemical
+element, and so on. <strong>If you only have a single chemical element, you
+may enter a list of ``numpy`` vectors.</strong></li>
+<li>An optional <em>spin</em> degree of freedom can be included. This is a list
+of objects, with one for each chemical element. These can be either
+scalar or vectors, with the assumption that they transform as those
+objects under group operations. If not included, the spins are all
+assumed to be equal to 0. Inclusion of these additional degrees of
+freedom (currently) only impacts the reduction of the unit cell, and
+the construction of the space group operations.</li>
+<li>We also take in, strictly for bookkeeping purposes, a list of names
+for the chemical elements. <em>This is an optional input</em>, but
+recommended for readability.</li>
+</ul>
+<p>Once initialized, two main internal operations take place:</p>
+<ol class="arabic simple">
+<li>The unit cell is <em>reduced</em> and <em>optimized</em>. Reduction is a process
+where we try to find the smallest unit cell representation for the
+<code class="docutils literal"><span class="pre">Crystal</span></code>. This means that the four-atom “simple cubic” unit cell
+of face-centered cubic can be input, and the code will reduce it to
+the standard single-atom primitive cell. The reduction algorithm can
+end up with “unusual” choices of lattice vectors, so we also optimize
+the lattice vectors so that they are as close to orthogonal as
+possible, and ordered from smallest to largest. The atomic basis may
+be shifted uniformly so that <em>if</em> an inversion operation is present,
+then the inversion center is the origin. Neither choice changes the
+representation of the crystal; however, the <em>reduction</em> operation can
+be skipped by including the option <code class="docutils literal"><span class="pre">noreduce=True</span></code>.</li>
+<li>Full symmetry analysis is performed, including: automated
+construction of space group generator operators, partitioning of
+basis sites into symmetry related Wyckoff positions, and
+determination of point group operations for every basis site. All of
+these operations are automated, and make no reference to
+crystallographic tables. The algorithm cannot identify which space
+group it has generated, nor which Wyckoff positions are present. The
+algorithm respects both <em>chemistry</em> and <em>spin</em>; this also makes spin
+a useful manipulation tool to artificially lower symmetry for testing
+purposes as needed.</li>
+</ol>
+<p><strong>Note</strong>: <code class="docutils literal"><span class="pre">Crystal</span></code>s can also be constructed by manipulating
+existing <code class="docutils literal"><span class="pre">Crystal</span></code> objects. A useful case is for the interstitial
+diffuser: when working “interactively,” it is often easier to first make
+the underlying “spectator” crystal, and then have that <code class="docutils literal"><span class="pre">Crystal</span></code>
+construct the set of Wyckoff positions for a single site in the crystal,
+and then add that to the basis. <code class="docutils literal"><span class="pre">Crystal</span></code> objects are intended to be
+read-only, so these manipulations result in the creation of a new
+<code class="docutils literal"><span class="pre">Crystal</span></code> object.</p>
+<p>A few quick examples:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>import numpy as np
+import sys
+sys.path.extend([&#39;.&#39;, &#39;..&#39;])
+from onsager import crystal
+</pre></div>
+</div>
+</div>
+<div class="section" id="Face-centered-cubic-crystal,-vacancy-diffusion">
+<h3>Face-centered cubic crystal, vacancy-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-diffusion" title="Permalink to this headline">¶</a></h3>
+<p>Face-centered cubic crystals could be created either by entering the
+primitive basis:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>a0 = 1.
+FCCcrys = crystal.Crystal([a0*np.array([0,0.5,0.5]),
+                           a0*np.array([0.5,0,0.5]),
+                           a0*np.array([0.5,0.5,0])],
+                          [np.array([0.,0.,0.])], chemistry=[&#39;fcc&#39;])
+print(FCCcrys)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+#Lattice:
+  a1 = [ 0.   0.5  0.5]
+  a2 = [ 0.5  0.   0.5]
+  a3 = [ 0.5  0.5  0. ]
+#Basis:
+  (fcc) 0.0 = [ 0.  0.  0.]
+</pre></div></div>
+</div>
+<p>or by entering the simple cubic unit cell with four atoms:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>FCCcrys2 = crystal.Crystal(a0*np.eye(3),
+                           [np.array([0.,0.,0.]), np.array([0,0.5,0.5]),
+                            np.array([0.5,0,0.5]), np.array([0.5,0.5,0])],
+                           chemistry=[&#39;fcc&#39;])
+print(FCCcrys2)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+#Lattice:
+  a1 = [ 0.5  0.   0.5]
+  a2 = [ 0.   0.5  0.5]
+  a3 = [-0.5  0.   0.5]
+#Basis:
+  (fcc) 0.0 = [ 0.  0.  0.]
+</pre></div></div>
+</div>
+<p>The effect of <code class="docutils literal"><span class="pre">noreduce</span></code> can be seen by regenerating the FCC crystal
+using the simple cubic unit cell:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>FCCcrys3 = crystal.Crystal(a0*np.eye(3),
+                           [np.array([0.,0.,0.]), np.array([0,0.5,0.5]),
+                            np.array([0.5,0,0.5]), np.array([0.5,0.5,0])],
+                           chemistry=[&#39;fcc&#39;], noreduce=True)
+print(FCCcrys3)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+#Lattice:
+  a1 = [ 1.  0.  0.]
+  a2 = [ 0.  1.  0.]
+  a3 = [ 0.  0.  1.]
+#Basis:
+  (fcc) 0.0 = [ 0.  0.  0.]
+  (fcc) 0.1 = [ 0.   0.5  0.5]
+  (fcc) 0.2 = [ 0.5  0.   0.5]
+  (fcc) 0.3 = [ 0.5  0.5  0. ]
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Rocksalt-crystal,-vacancy-diffusion">
+<h3>Rocksalt crystal, vacancy-diffusion<a class="headerlink" href="#Rocksalt-crystal,-vacancy-diffusion" title="Permalink to this headline">¶</a></h3>
+<p>Two chemical species, with interpenetrating FCC lattices. In MgO, we
+would allow for V<span class="math">\(_\text{O}\)</span> (oxygen vacancies) to diffuse, with
+Mg as a “spectator species”:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>MgO = crystal.Crystal([a0*np.array([0,0.5,0.5]),
+                       a0*np.array([0.5,0,0.5]),
+                       a0*np.array([0.5,0.5,0])],
+                      [[np.array([0.,0.,0.])], [np.array([0.5,0.5,0.5])]],
+                      chemistry=[&#39;Mg&#39;, &#39;O&#39;])
+print(MgO)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+#Lattice:
+  a1 = [ 0.   0.5  0.5]
+  a2 = [ 0.5  0.   0.5]
+  a3 = [ 0.5  0.5  0. ]
+#Basis:
+  (Mg) 0.0 = [ 0.  0.  0.]
+  (O) 1.0 = [ 0.5  0.5  0.5]
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Face-centered-cubic-crystal,-interstitial-diffusion">
+<h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Permalink to this headline">¶</a></h3>
+<p>Interstitials in FCC crystals usually diffuse through a network of
+octahedral and tetrahedral sites. We can use the <code class="docutils literal"><span class="pre">Wyckoffpos(u)</span></code>
+function in a crystal to generate a list of equivalent sites
+corresponding to the interstitial positions, and the <code class="docutils literal"><span class="pre">addbasis()</span></code>
+function to create a new crystal with these interstitial sites.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>octbasis = FCCcrys.Wyckoffpos(np.array([0.5, 0.5, 0.5]))
+tetbasis = FCCcrys.Wyckoffpos(np.array([0.25, 0.25, 0.25]))
+FCCcrysint = FCCcrys.addbasis(octbasis + tetbasis, [&#39;int&#39;])
+print(octbasis)
+print(tetbasis)
+print(FCCcrysint)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[array([ 0.5,  0.5,  0.5])]
+[array([ 0.25,  0.25,  0.25]), array([ 0.75,  0.75,  0.75])]
+#Lattice:
+  a1 = [ 0.   0.5  0.5]
+  a2 = [ 0.5  0.   0.5]
+  a3 = [ 0.5  0.5  0. ]
+#Basis:
+  (fcc) 0.0 = [ 0.  0.  0.]
+  (int) 1.0 = [ 0.5  0.5  0.5]
+  (int) 1.1 = [ 0.25  0.25  0.25]
+  (int) 1.2 = [ 0.75  0.75  0.75]
+</pre></div></div>
+</div>
+</div>
+</div>
+<div class="section" id="Interstitial-calculator-setup">
+<h2>Interstitial calculator setup<a class="headerlink" href="#Interstitial-calculator-setup" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">Interstitial</span></code> calculator is designed for systems where we have a
+<strong>single defect species</strong> that diffuses throughout the crystal. This
+includes single vacancy diffusion, and interstitial solute diffusivity.
+As for any diffusion calculator, we need to define the configurations
+that the defect will sample, and the transition states of the defect. In
+the case of a single defect species,</p>
+<ul class="simple">
+<li>configurations are simply the Wyckoff positions of the particular
+sublattice (specified by a <code class="docutils literal"><span class="pre">chemistry</span></code> index);</li>
+<li>transition states are pairs of configurations with a displacement
+vector that connects the initial to the final system.</li>
+</ul>
+<p>We use the <code class="docutils literal"><span class="pre">sitelist(chemistry)</span></code> function to construct a <em>list</em> of
+<em>lists</em> of indices for a given <code class="docutils literal"><span class="pre">chemistry</span></code>; the lists of indices are
+all symmetrically equivalent crystal basis indices, and each list is
+symmetrically inequivalent: this is a space group partitioning into
+equivalent Wyckoff positions.</p>
+<p>The transition states are stored as a <code class="docutils literal"><span class="pre">jumpnetwork</span></code>, which is a <em>list</em>
+of <em>lists</em> of <em>tuples</em> of transitions:
+<code class="docutils literal"><span class="pre">(initial</span> <span class="pre">index,</span> <span class="pre">final</span> <span class="pre">index,</span> <span class="pre">deltax)</span></code> where the indices are
+self-explanatory, and <code class="docutils literal"><span class="pre">deltax</span></code> is a Cartesian vector corresponding to
+the translation from the initial state to the final state. The
+transitions in each list is equivalent by symmetry, and the separate
+lists are symmetrically inequivalent. Note also that <em>reverse</em>
+transitions are included: <code class="docutils literal"><span class="pre">(final</span> <span class="pre">index,</span> <span class="pre">initial</span> <span class="pre">index,</span> <span class="pre">-deltax)</span></code>.
+While the jumpnetwork can be constructed “by hand,” it is recommended to
+use the <code class="docutils literal"><span class="pre">jumpnetwork()</span></code> function inside of a crystal to automate the
+generation, and then remove “spurious” transitions that are identified.</p>
+<p>The algorithm in <code class="docutils literal"><span class="pre">jumpnetwork()</span></code> is rather simple: a transition is
+included if</p>
+<ul class="simple">
+<li>the distance between the initial and final state is less than a
+cutoff distance, and</li>
+<li>the line segment between the initial and final state does not come
+within a minimum distance of other defect states, and</li>
+<li>the line segment between the initial and final state does not come
+within a minimum distance of <em>any</em> atomic site in the crystal.</li>
+</ul>
+<p>The first criterion identifies “close” jumps, while the second criterion
+eliminates “long” transitions between states when an intermediate
+configuration may be possible (i.e., <span class="math">\(\text{A}\to\text{B}\)</span> when
+<span class="math">\(\text{A}\to\text{C}\to\text{B}\)</span> would be more likely as the state
+C is “close” to the line connecting A to B), and the final criterion
+elimates transitions that takes the defect too close to a “spectator”
+atom in the crystal.</p>
+<p>The interstitial diffuser also identifies unique <strong>tags</strong> for all
+configurations and transition states. The interstitial tags for
+<em>configurations</em> are strings with <code class="docutils literal"><span class="pre">i:</span></code> followed by unit cell
+coordinates of site to three decimal digits. The interstitial tags for
+<em>transition states</em> are strings with <code class="docutils literal"><span class="pre">i:</span></code> followed by the unit cell
+coordinates of the initial state, a <code class="docutils literal"><span class="pre">^</span></code>, and the unit cell coordinates
+of the final state. When one pretty-prints the interstitial diffuser
+object, the symmetry unique tags are printed. Note that all of the
+symmetry equivalent tags are stored in the object, and can be used to
+identify configurations and transition states, and this is the preferred
+method for indexing, rather than relying on the particular index into
+the corresponding lists. The interstitial diffuser calculator contains
+dictionaries that can be used to convert from tags to indices and vice
+versa.</p>
+<p>Finally, <code class="docutils literal"><span class="pre">YAML</span></code> interfaces to output the <code class="docutils literal"><span class="pre">sitelist</span></code> and
+<code class="docutils literal"><span class="pre">jumpnetwork</span></code> for an interstitial diffuser are includes; combined with
+the <code class="docutils literal"><span class="pre">YAML</span></code> output of the Crystal, this allows for a <code class="docutils literal"><span class="pre">YAML</span></code>
+serialized representation of the diffusion object.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>from onsager import OnsagerCalc
+</pre></div>
+</div>
+</div>
+<div class="section" id="Face-centered-cubic-crystal,-vacancy-diffusion">
+<h3>Face-centered cubic crystal, vacancy-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-diffusion" title="Permalink to this headline">¶</a></h3>
+<p>We identify the vacancy sites with the crystal sites in the lattice.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>chem = 0
+FCCsitelist = FCCcrys.sitelist(chem)
+print(FCCsitelist)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[[0]]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>chem = 0
+FCCjumpnetwork = FCCcrys.jumpnetwork(chem, cutoff=a0*0.78)
+for n, jn in enumerate(FCCjumpnetwork):
+    print(&#39;Jump type {}&#39;.format(n))
+    for (i,j), dx in jn:
+        print(&#39;  {} -&gt; {} dx= {}&#39;.format(i,j,dx))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Jump type 0
+  0 -&gt; 0 dx= [ 0.5  0.   0.5]
+  0 -&gt; 0 dx= [-0.5 -0.  -0.5]
+  0 -&gt; 0 dx= [ 0.5  0.5  0. ]
+  0 -&gt; 0 dx= [-0.5 -0.5 -0. ]
+  0 -&gt; 0 dx= [ 0.  -0.5  0.5]
+  0 -&gt; 0 dx= [-0.   0.5 -0.5]
+  0 -&gt; 0 dx= [ 0.5 -0.5  0. ]
+  0 -&gt; 0 dx= [-0.5  0.5 -0. ]
+  0 -&gt; 0 dx= [ 0.  -0.5 -0.5]
+  0 -&gt; 0 dx= [-0.   0.5  0.5]
+  0 -&gt; 0 dx= [ 0.5  0.  -0.5]
+  0 -&gt; 0 dx= [-0.5 -0.   0.5]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>chem = 0
+FCCvacancydiffuser = OnsagerCalc.Interstitial(FCCcrys, chem, FCCsitelist, FCCjumpnetwork)
+print(FCCvacancydiffuser)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Diffuser for atom 0 (fcc)
+#Lattice:
+  a1 = [ 0.   0.5  0.5]
+  a2 = [ 0.5  0.   0.5]
+  a3 = [ 0.5  0.5  0. ]
+#Basis:
+  (fcc) 0.0 = [ 0.  0.  0.]
+states:
+i:+0.000,+0.000,+0.000
+transitions:
+i:+0.000,+0.000,+0.000^i:+0.000,+1.000,+0.000
+
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Rocksalt-crystal,-vacancy-diffusion">
+<h3>Rocksalt crystal, vacancy-diffusion<a class="headerlink" href="#Rocksalt-crystal,-vacancy-diffusion" title="Permalink to this headline">¶</a></h3>
+<p>Two chemical species, with interpenetrating FCC lattices. In MgO, we
+would allow for V<span class="math">\(_\text{O}\)</span> (oxygen vacancies) to diffuse, with
+Mg as a “spectator species”.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>chem = 1
+MgOsitelist = MgO.sitelist(chem)
+print(MgOsitelist)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[[0]]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>chem = 1
+MgOjumpnetwork = MgO.jumpnetwork(chem, cutoff=a0*0.78)
+for n, jn in enumerate(MgOjumpnetwork):
+    print(&#39;Jump type {}&#39;.format(n))
+    for (i,j), dx in jn:
+        print(&#39;  {} -&gt; {} dx= {}&#39;.format(i,j,dx))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Jump type 0
+  0 -&gt; 0 dx= [ 0.   0.5 -0.5]
+  0 -&gt; 0 dx= [-0.  -0.5  0.5]
+  0 -&gt; 0 dx= [-0.5  0.5  0. ]
+  0 -&gt; 0 dx= [ 0.5 -0.5 -0. ]
+  0 -&gt; 0 dx= [ 0.   0.5  0.5]
+  0 -&gt; 0 dx= [-0.  -0.5 -0.5]
+  0 -&gt; 0 dx= [-0.5  0.   0.5]
+  0 -&gt; 0 dx= [ 0.5 -0.  -0.5]
+  0 -&gt; 0 dx= [-0.5  0.  -0.5]
+  0 -&gt; 0 dx= [ 0.5 -0.   0.5]
+  0 -&gt; 0 dx= [-0.5 -0.5  0. ]
+  0 -&gt; 0 dx= [ 0.5  0.5 -0. ]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>chem = 1
+MgOdiffuser = OnsagerCalc.Interstitial(MgO, chem, MgOsitelist, MgOjumpnetwork)
+print(MgOdiffuser)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Diffuser for atom 1 (O)
+#Lattice:
+  a1 = [ 0.   0.5  0.5]
+  a2 = [ 0.5  0.   0.5]
+  a3 = [ 0.5  0.5  0. ]
+#Basis:
+  (Mg) 0.0 = [ 0.  0.  0.]
+  (O) 1.0 = [ 0.5  0.5  0.5]
+states:
+i:+0.500,+0.500,+0.500
+transitions:
+i:+0.500,+0.500,+0.500^i:+0.500,-0.500,+1.500
+
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Face-centered-cubic-crystal,-interstitial-diffusion">
+<h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Permalink to this headline">¶</a></h3>
+<p>Interstitials in FCC crystals usually diffuse through a network of
+octahedral and tetrahedral sites. Nominally, diffusion should occur
+through an octahedral-tetrahedral jumps, but we can extend the cutoff
+distance to find additinoal jumps between tetrahedrals.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>chem = 1
+FCCintsitelist = FCCcrysint.sitelist(chem)
+print(FCCintsitelist)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[[0], [1, 2]]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>chem = 1
+FCCintjumpnetwork = FCCcrysint.jumpnetwork(chem, cutoff=a0*0.51)
+for n, jn in enumerate(FCCintjumpnetwork):
+    print(&#39;Jump type {}&#39;.format(n))
+    for (i,j), dx in jn:
+        print(&#39;  {} -&gt; {} dx= {}&#39;.format(i,j,dx))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Jump type 0
+  0 -&gt; 1 dx= [-0.25  0.25  0.25]
+  1 -&gt; 0 dx= [ 0.25 -0.25 -0.25]
+  0 -&gt; 1 dx= [ 0.25  0.25 -0.25]
+  1 -&gt; 0 dx= [-0.25 -0.25  0.25]
+  0 -&gt; 2 dx= [-0.25  0.25 -0.25]
+  2 -&gt; 0 dx= [ 0.25 -0.25  0.25]
+  0 -&gt; 2 dx= [ 0.25  0.25  0.25]
+  2 -&gt; 0 dx= [-0.25 -0.25 -0.25]
+  0 -&gt; 1 dx= [-0.25 -0.25 -0.25]
+  1 -&gt; 0 dx= [ 0.25  0.25  0.25]
+  0 -&gt; 2 dx= [-0.25 -0.25  0.25]
+  2 -&gt; 0 dx= [ 0.25  0.25 -0.25]
+  0 -&gt; 1 dx= [ 0.25 -0.25  0.25]
+  1 -&gt; 0 dx= [-0.25  0.25 -0.25]
+  0 -&gt; 2 dx= [ 0.25 -0.25 -0.25]
+  2 -&gt; 0 dx= [-0.25  0.25  0.25]
+Jump type 1
+  1 -&gt; 2 dx= [ 0.   0.5  0. ]
+  2 -&gt; 1 dx= [-0.  -0.5 -0. ]
+  1 -&gt; 2 dx= [ 0.   0.  -0.5]
+  2 -&gt; 1 dx= [-0.  -0.   0.5]
+  2 -&gt; 1 dx= [ 0.   0.  -0.5]
+  1 -&gt; 2 dx= [-0.  -0.   0.5]
+  2 -&gt; 1 dx= [ 0.   0.5  0. ]
+  1 -&gt; 2 dx= [-0.  -0.5 -0. ]
+  1 -&gt; 2 dx= [-0.5  0.   0. ]
+  2 -&gt; 1 dx= [ 0.5 -0.  -0. ]
+  2 -&gt; 1 dx= [-0.5  0.   0. ]
+  1 -&gt; 2 dx= [ 0.5 -0.  -0. ]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>chem = 1
+FCCintdiffuser = OnsagerCalc.Interstitial(FCCcrysint, chem,
+                                          FCCintsitelist, FCCintjumpnetwork)
+print(FCCintdiffuser)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Diffuser for atom 1 (int)
+#Lattice:
+  a1 = [ 0.   0.5  0.5]
+  a2 = [ 0.5  0.   0.5]
+  a3 = [ 0.5  0.5  0. ]
+#Basis:
+  (fcc) 0.0 = [ 0.  0.  0.]
+  (int) 1.0 = [ 0.5  0.5  0.5]
+  (int) 1.1 = [ 0.25  0.25  0.25]
+  (int) 1.2 = [ 0.75  0.75  0.75]
+states:
+i:+0.500,+0.500,+0.500
+i:+0.250,+0.250,+0.250
+transitions:
+i:+0.500,+0.500,+0.500^i:+1.250,+0.250,+0.250
+i:+0.250,+0.250,+0.250^i:+0.750,-0.250,+0.750
+
+</pre></div></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">YAML</span></code> representation is intended to combine both the structural
+information necessary to construct the (1) crystal, (2) chemistry index
+of the diffusing defect, (3) sitelist, and (4) jumpnetwork; <strong>and</strong> the
+energies, prefactors, and elastic dipoles (derivative of energy with
+respect to strain) for the symmetry representatives of configurations
+and jumps. This will become input for the diffuser when computing
+transport coefficients as a function of temperature, as well as
+derivatives with respect to strain (elastodiffusion tensor, activation
+volume tensor).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>print(FCCintdiffuser.crys.simpleYAML() +
+      &#39;chem: {}\n&#39;.format(FCCintdiffuser.chem) +
+      FCCintdiffuser.sitelistYAML(FCCintsitelist) +
+      FCCintdiffuser.jumpnetworkYAML(FCCintjumpnetwork))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+basis:
+- - !numpy.ndarray [0.0, 0.0, 0.0]
+- - !numpy.ndarray [0.5, 0.5, 0.5]
+  - !numpy.ndarray [0.25, 0.25, 0.25]
+  - !numpy.ndarray [0.75, 0.75, 0.75]
+chemistry: [fcc, int]
+lattice: !numpy.ndarray
+- [0.0, 0.5, 0.5]
+- [0.5, 0.0, 0.5]
+- [0.5, 0.5, 0.0]
+lattice_constant: 1.0
+spins: null
+threshold: 1.0e-08
+chem: 1
+Dipole:
+- !numpy.ndarray
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+- !numpy.ndarray
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+Energy: [0, 0]
+Prefactor: [1, 1]
+sitelist:
+- [0]
+- [1, 2]
+DipoleT:
+- !numpy.ndarray
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+- !numpy.ndarray
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+  - [0.0, 0.0, 0.0]
+EnergyT: [0, 0]
+PrefactorT: [1, 1]
+jumpnetwork:
+- - !!python/tuple
+    - !!python/tuple [0, 1]
+    - !numpy.ndarray [-0.25, 0.25, 0.25]
+  - !!python/tuple
+    - !!python/tuple [1, 0]
+    - !numpy.ndarray [0.25, -0.25, -0.25]
+  - !!python/tuple
+    - !!python/tuple [0, 1]
+    - !numpy.ndarray [0.25, 0.25, -0.25]
+  - !!python/tuple
+    - !!python/tuple [1, 0]
+    - !numpy.ndarray [-0.25, -0.25, 0.25]
+  - !!python/tuple
+    - !!python/tuple [0, 2]
+    - !numpy.ndarray [-0.25, 0.25, -0.25]
+  - !!python/tuple
+    - !!python/tuple [2, 0]
+    - !numpy.ndarray [0.25, -0.25, 0.25]
+  - !!python/tuple
+    - !!python/tuple [0, 2]
+    - !numpy.ndarray [0.25, 0.25, 0.25]
+  - !!python/tuple
+    - !!python/tuple [2, 0]
+    - !numpy.ndarray [-0.25, -0.25, -0.25]
+  - !!python/tuple
+    - !!python/tuple [0, 1]
+    - !numpy.ndarray [-0.25, -0.25, -0.25]
+  - !!python/tuple
+    - !!python/tuple [1, 0]
+    - !numpy.ndarray [0.25, 0.25, 0.25]
+  - !!python/tuple
+    - !!python/tuple [0, 2]
+    - !numpy.ndarray [-0.25, -0.25, 0.25]
+  - !!python/tuple
+    - !!python/tuple [2, 0]
+    - !numpy.ndarray [0.25, 0.25, -0.25]
+  - !!python/tuple
+    - !!python/tuple [0, 1]
+    - !numpy.ndarray [0.25, -0.25, 0.25]
+  - !!python/tuple
+    - !!python/tuple [1, 0]
+    - !numpy.ndarray [-0.25, 0.25, -0.25]
+  - !!python/tuple
+    - !!python/tuple [0, 2]
+    - !numpy.ndarray [0.25, -0.25, -0.25]
+  - !!python/tuple
+    - !!python/tuple [2, 0]
+    - !numpy.ndarray [-0.25, 0.25, 0.25]
+- - !!python/tuple
+    - !!python/tuple [1, 2]
+    - !numpy.ndarray [0.0, 0.5, 0.0]
+  - !!python/tuple
+    - !!python/tuple [2, 1]
+    - !numpy.ndarray [-0.0, -0.5, -0.0]
+  - !!python/tuple
+    - !!python/tuple [1, 2]
+    - !numpy.ndarray [0.0, 0.0, -0.5]
+  - !!python/tuple
+    - !!python/tuple [2, 1]
+    - !numpy.ndarray [-0.0, -0.0, 0.5]
+  - !!python/tuple
+    - !!python/tuple [2, 1]
+    - !numpy.ndarray [0.0, 0.0, -0.5]
+  - !!python/tuple
+    - !!python/tuple [1, 2]
+    - !numpy.ndarray [-0.0, -0.0, 0.5]
+  - !!python/tuple
+    - !!python/tuple [2, 1]
+    - !numpy.ndarray [0.0, 0.5, 0.0]
+  - !!python/tuple
+    - !!python/tuple [1, 2]
+    - !numpy.ndarray [-0.0, -0.5, -0.0]
+  - !!python/tuple
+    - !!python/tuple [1, 2]
+    - !numpy.ndarray [-0.5, 0.0, 0.0]
+  - !!python/tuple
+    - !!python/tuple [2, 1]
+    - !numpy.ndarray [0.5, -0.0, -0.0]
+  - !!python/tuple
+    - !!python/tuple [2, 1]
+    - !numpy.ndarray [-0.5, 0.0, 0.0]
+  - !!python/tuple
+    - !!python/tuple [1, 2]
+    - !numpy.ndarray [0.5, -0.0, -0.0]
+
+</pre></div></div>
+</div>
+</div>
+</div>
+<div class="section" id="Vacancy-mediated-calculator-setup">
+<h2>Vacancy-mediated calculator setup<a class="headerlink" href="#Vacancy-mediated-calculator-setup" title="Permalink to this headline">¶</a></h2>
+<p>For the vacancy mediated diffuser, the configurations and transition
+states are more complicated. First, we have three types of
+configurations:</p>
+<ol class="arabic simple">
+<li>Vacancy, sufficiently far away from the solute to have zero
+interaction energy.</li>
+<li>Solute, sufficiently far away from the vacancy to have zero
+interaction energy.</li>
+<li>Vacancy-solute complexes.</li>
+</ol>
+<p>The vacancies and solutes are assumed to be able to occupy the <em>same</em>
+sites in the crystal, and that neither the vacancy or solute lowers the
+underlying symmetry of the site. This is a rephrasing of our previous
+assumption that the symmetry of the defect can be mapped onto the
+symmetry of the crystal Wyckoff position. There are cases where <em>this is
+not true</em>: that is, some solutes, when substituted into a crystal, will
+relax in a way that <em>breaks symmetry</em>. While mathematically this can be
+treated, we do not currently have an implementation that supports this.</p>
+<p>The complexes are only considered out to a finite distance; this is
+called the “thermodynamic range.” It is defined in terms of “shells,”
+which is the number of “jumps” from the solute in order to reach the
+vacancy. We include one more shell out, called the “kinetic range,”
+which are complexes that include transitions to complexes in the
+thermodynamic range.</p>
+<p>When we consider transition states, we have three types of transition
+states:</p>
+<ol class="arabic simple">
+<li>Vacancy transitions, sufficiently far away from the solute to have
+zero interaction energy.</li>
+<li>Vacancy-solute complex transitions, where only the vacancy changes
+position (both between complexes in the thermodynamic range, and
+between the kinetic and thermodynamic range).</li>
+<li>Vacancy-solute complex transitions, where the vacancy and solute
+exchange place.</li>
+</ol>
+<p>These are called, in the “five-frequency framework”, omega-0, omega-1,
+and omega-2 jumps, respectively. The five-frequency model technically
+identifies omega-1 jumps as <em>only</em> between complexes in the
+thermodynamic range, while the two “additional” jump types, omega-3 and
+omega-4, connect complexes in the kinetic range to the thermodynamic
+range. Operationally, we combine omega-1, -3, and -4 into a single set.</p>
+<p>To make a diffuser, we need to</p>
+<ol class="arabic simple">
+<li>Identify the <code class="docutils literal"><span class="pre">sitelist</span></code> of the vacancies (and hence, solutes),</li>
+<li>Identify the <code class="docutils literal"><span class="pre">jumpnetwork</span></code> of the vacancies</li>
+<li>Determine the thermodynamic range</li>
+</ol>
+<p>then, the diffuser automatically constructs the complexes out to the
+thermodynamic range, and the full jumpnetworks.</p>
+<p>The vacancy-mediated diffuser also identifies unique <strong>tags</strong> for all
+configurations and transition states. The tags for <em>configurations</em> are
+strings with</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">v:</span></code> followed by unit cell coordinates of site to three decimal
+digits for the vacancy;</li>
+<li><code class="docutils literal"><span class="pre">s:</span></code> followed by unit cell coordinates of site to three decimal
+digits for the solute;</li>
+<li><code class="docutils literal"><span class="pre">s:...-v:...</span></code> for a solute-vacancy complex.</li>
+</ul>
+<p>The <em>transition states</em> are strings with</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">omega0:</span></code> + (initial vacancy configuration) + <code class="docutils literal"><span class="pre">^</span></code> + (final
+vacancy configuration);</li>
+<li><code class="docutils literal"><span class="pre">omega1:</span></code> + (initial solute-vacancy configuration) + <code class="docutils literal"><span class="pre">^</span></code> + (final
+vacancy configuration);</li>
+<li><code class="docutils literal"><span class="pre">omega2:</span></code> + (initial solute-vacancy configuration) + <code class="docutils literal"><span class="pre">^</span></code> + (final
+solute-vacancy configuration).</li>
+</ul>
+<p>When one pretty-prints the vacancy-mediated diffuser object, the
+symmetry unique tags are printed. Note that all of the symmetry
+equivalent tags are stored in the object, and can be used to identify
+configurations and transition states, and this is the preferred method
+for indexing, rather than relying on the particular index into the
+corresponding lists. The vacancy-mediated diffuser calculator contains
+dictionaries that can be used to convert from tags to indices and vice
+versa.</p>
+<div class="section" id="Face-centered-cubic-crystal,-vacancy-mediated-diffusion">
+<h3>Face-centered cubic crystal, vacancy mediated-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion" title="Permalink to this headline">¶</a></h3>
+<p>We construct the <code class="docutils literal"><span class="pre">Onsager</span></code> equivalent of the classic five-frequency
+model. We can use the sitelist and jumpnetwork that we <em>already
+constructed for the vacancy by itself</em>. Note that the omega-1 list
+contains four jumps: one that is the normally identified “omega-1”, and
+three others that correspond to vacancy “escapes” from the first
+neighbor complex: to the second, third, and fourth neighbors. In the
+classic five-frequency model, these rates are all forced to be equal.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>chem = 0
+fivefreqdiffuser = OnsagerCalc.VacancyMediated(FCCcrys, chem,
+                                               FCCsitelist, FCCjumpnetwork, 1)
+print(fivefreqdiffuser)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Diffuser for atom 0 (fcc), Nthermo=1
+#Lattice:
+  a1 = [ 0.   0.5  0.5]
+  a2 = [ 0.5  0.   0.5]
+  a3 = [ 0.5  0.5  0. ]
+#Basis:
+  (fcc) 0.0 = [ 0.  0.  0.]
+vacancy configurations:
+v:+0.000,+0.000,+0.000
+solute configurations:
+s:+0.000,+0.000,+0.000
+solute-vacancy configurations:
+s:+0.000,+0.000,+0.000-v:+0.000,+0.000,-1.000
+omega0 jumps:
+omega0:v:+0.000,+0.000,+0.000^v:+0.000,+1.000,+0.000
+omega1 jumps:
+omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,+0.000^v:+1.000,+0.000,+0.000
+omega1:s:+0.000,+0.000,+0.000-v:+1.000,+0.000,-1.000^v:+1.000,+1.000,-1.000
+omega1:s:+0.000,+0.000,+0.000-v:-1.000,+1.000,+0.000^v:-1.000,+2.000,+0.000
+omega1:s:+0.000,+0.000,+0.000-v:+0.000,+1.000,+0.000^v:+0.000,+2.000,+0.000
+omega2 jumps:
+omega2:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000^s:+0.000,+0.000,+0.000-v:+0.000,+1.000,+0.000
+
+</pre></div></div>
+</div>
+<p>An <code class="docutils literal"><span class="pre">HDF5</span></code> representation of the diffusion calculator can be stored for
+efficient reconstruction of the object, as well as passing between
+machines. The <code class="docutils literal"><span class="pre">HDF5</span></code> representation includes <em>everything</em>: the
+underlying <code class="docutils literal"><span class="pre">Crystal</span></code>, the <code class="docutils literal"><span class="pre">sitelist</span></code> and <code class="docutils literal"><span class="pre">jumpnetwork</span></code>s, all of
+the precalculation and analysis needed for diffusion. This greatly
+speeds up the construction of the calculator.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>import h5py
+# replace &#39;/dev/null&#39; with your file of choice, and remove backing_store=False
+# to read and write to an HDF5 file.
+f = h5py.File(&#39;/dev/null&#39;, &#39;w&#39;, driver=&#39;core&#39;, backing_store=False)
+fivefreqdiffuser.addhdf5(f)  # adds the diffuser to the HDF5 file
+
+# how to read in (after opening `f` as an HDF5 file)
+fivefreqcopy = OnsagerCalc.VacancyMediated.loadhdf5(f)  # creates a new diffuser from HDF5
+f.close()  # close up the HDF5 file
+print(fivefreqcopy)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Diffuser for atom 0 (fcc), Nthermo=1
+#Lattice:
+  a1 = [ 0.   0.5  0.5]
+  a2 = [ 0.5  0.   0.5]
+  a3 = [ 0.5  0.5  0. ]
+#Basis:
+  (fcc) 0.0 = [ 0.  0.  0.]
+vacancy configurations:
+v:+0.000,+0.000,+0.000
+solute configurations:
+s:+0.000,+0.000,+0.000
+solute-vacancy configurations:
+s:+0.000,+0.000,+0.000-v:+0.000,+0.000,-1.000
+omega0 jumps:
+omega0:v:+0.000,+0.000,+0.000^v:+0.000,+1.000,+0.000
+omega1 jumps:
+omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,+0.000^v:+1.000,+0.000,+0.000
+omega1:s:+0.000,+0.000,+0.000-v:+1.000,+0.000,-1.000^v:+1.000,+1.000,-1.000
+omega1:s:+0.000,+0.000,+0.000-v:-1.000,+1.000,+0.000^v:-1.000,+2.000,+0.000
+omega1:s:+0.000,+0.000,+0.000-v:+0.000,+1.000,+0.000^v:+0.000,+2.000,+0.000
+omega2 jumps:
+omega2:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000^s:+0.000,+0.000,+0.000-v:+0.000,+1.000,+0.000
+
+</pre></div></div>
+</div>
+</div>
+</div>
+<div class="section" id="VASP-style-input-files">
+<h2>VASP-style input files<a class="headerlink" href="#VASP-style-input-files" title="Permalink to this headline">¶</a></h2>
+<p>At this stage, we have the diffusion “calculator” necessary to compute
+diffusion, but we need to determine appropriate atomic-scale data to act
+as input into our calculators. There are two primary steps: (1)
+constructing appropriate “supercells” containing defect configurations
+and transition states to be computed, and (2) extracting the appropriate
+information from those calculations to use in the diffuser. This section
+deals with the former; the next section will deal with the latter.</p>
+<p>The tags are the most straightforward way to identify structures as they
+are computed, and hence they serve as the mechanism for communicating
+data into the calculators. To make supercells with defects, we take
+advantage of the <code class="docutils literal"><span class="pre">supercell</span></code> module in <code class="docutils literal"><span class="pre">Onsager</span></code>; both calculators
+contain a <code class="docutils literal"><span class="pre">makesupercell()</span></code> function that returns dictionaries of
+supercells, tags, and appropriate information. Currently, to transform
+these into usable input files, the <code class="docutils literal"><span class="pre">automator</span></code> module can convert such
+dictionaries into tarballs with an appropriate directory structure,
+files containing information about appropriate tags for the different
+configurations, a <code class="docutils literal"><span class="pre">Makefile</span></code> that converts <code class="docutils literal"><span class="pre">CONTCAR</span></code> output into
+appropriate <code class="docutils literal"><span class="pre">POS</span></code> input for the nudged-elastic band calculation.</p>
+<p>Both <code class="docutils literal"><span class="pre">makesupercell()</span></code> commands require an input supercell definition,
+which is a <span class="math">\(3\times3\)</span> integer matrix of column vectors; if <code class="docutils literal"><span class="pre">N</span></code>
+is such a matrix, then the supercell vectors are the columns of
+<code class="docutils literal"><span class="pre">A</span> <span class="pre">=</span> <span class="pre">np.dot(a,</span> <span class="pre">N)</span></code>, so that <span class="math">\(\mathbf A_1\)</span> has components
+<code class="docutils literal"><span class="pre">N[:,0]</span></code> in direct coordinates.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>from onsager import automator
+import tarfile
+</pre></div>
+</div>
+</div>
+<div class="section" id="Face-centered-cubic-crystal,-interstitial-diffusion">
+<h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Permalink to this headline">¶</a></h3>
+<p>We will need to construct (and relax) appropriate intersitial sites, and
+the transition states between them.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>help(FCCintdiffuser.makesupercells)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on method makesupercells in module onsager.OnsagerCalc:
+
+makesupercells(super_n) method of onsager.OnsagerCalc.Interstitial instance
+    Take in a supercell matrix, then generate all of the supercells needed to compute
+    site energies and transitions (corresponding to the representatives).
+
+    :param super_n: 3x3 integer matrix to define our supercell
+    :return superdict: dictionary of ``states``, ``transitions``, ``transmapping``,
+        and ``indices`` that correspond to dictionaries with tags.
+
+        * superdict[&#39;states&#39;][i] = supercell of site;
+        * superdict[&#39;transitions&#39;][n] = (supercell initial, supercell final);
+        * superdict[&#39;transmapping&#39;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+        * superdict[&#39;indices&#39;][tag] = index of tag, where tag is either a state or transition tag.
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>N = np.array([[-2,2,2],[2,-2,2],[2,2,-2]])  # 32 atom FCC supercell
+print(np.dot(FCCcrys.lattice, N))
+FCCintsupercells = FCCintdiffuser.makesupercells(N)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[[ 2.  0.  0.]
+ [ 0.  2.  0.]
+ [ 0.  0.  2.]]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>help(automator.supercelltar)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on function supercelltar in module onsager.automator:
+
+supercelltar(tar, superdict, filemode=436, directmode=509, timestamp=None, INCARrelax=&#39;...&#39;, INCARNEB=&#39;...&#39;, KPOINTS=&#39;...&#39;, basedir=&#39;&#39;, statename=&#39;relax.&#39;, transitionname=&#39;neb.&#39;, IDformat=&#39;{:02d}&#39;, JSONdict=&#39;tags.json&#39;, YAMLdef=&#39;supercell.yaml&#39;)
+    Takes in a tarfile (needs to be open for writing) and a supercelldict (from a
+    diffuser) and creates the full directory structure inside the tarfile. Best used in
+    a form like
+
+    ::
+
+        with tarfile.open(&#39;supercells.tar.gz&#39;, mode=&#39;w:gz&#39;) as tar:
+            automator.supercelltar(tar, supercelldict)
+
+    :param tar: tarfile open for writing; may contain other files in advance.
+    :param superdict: dictionary of ``states``, ``transitions``, ``transmapping``, ``indices`` that
+        correspond to dictionaries with tags; the final tag ``reference`` is the basesupercell
+        for calculations without defects.
+
+        * superdict[&#39;states&#39;][i] = supercell of state;
+        * superdict[&#39;transitions&#39;][n] = (supercell initial, supercell final);
+        * superdict[&#39;transmapping&#39;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+        * superdict[&#39;indices&#39;][tag] = (type, index) of tag, where tag is either a state or transition tag; or...
+        * superdict[&#39;indices&#39;][tag] = index of tag, where tag is either a state or transition tag.
+        * superdict[&#39;reference&#39;] = (optional) supercell reference, no defects
+
+    :param filemode: mode to use for files (default: 664)
+    :param directmode: mode to use for directories (default: 775)
+    :param timestamp: UNIX time for files; if None, use current time (default)
+    :param INCARrelax: contents of INCAR file to use for relaxation; must contain {system} to be replaced
+        by tag value (default: automator.INCARrelax)
+    :param INCARNEB: contents of INCAR file to use for NEB; must contain {system} to be replaced
+        by tag value (default: automator.INCARNEB)
+    :param KPOINTS: contents of KPOINTS file (default: gamma-point only calculation);
+        if None or empty, no KPOINTS file at all
+    :param basedir: prepended to all files/directories (default: &#39;&#39;)
+    :param statename: prepended to all state names, before 2 digit number (default: relax.)
+    :param transitionname: prepended to all transition names, before 2 digit number  (default: neb.)
+    :param IDformat: format for integer tags (default: {:02d})
+    :param JSONdict: name of JSON file storing the tags corresponding to each directory (default: tags.json)
+    :param YAMLdef: YAML file containing full definition of supercells, relationship, etc. (default: supercell.yaml);
+        set to None to not output. **may want to change this to None for the future**
+
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>with tarfile.open(&#39;io-test-int.tar.gz&#39;, mode=&#39;w:gz&#39;) as tar:
+    automator.supercelltar(tar, FCCintsupercells)
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>tar = tarfile.open(&#39;io-test-int.tar.gz&#39;, mode=&#39;r:gz&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>tar.list()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+?rw-rw-r-- 0/0        244 2017-07-07 20:34:49 INCAR.relax
+?rw-rw-r-- 0/0        305 2017-07-07 20:34:49 INCAR.NEB
+?rw-rw-r-- 0/0         31 2017-07-07 20:34:49 KPOINTS
+?rwxrwxr-x 0/0       1344 2017-07-07 20:34:49 trans.pl
+?rwxrwxr-x 0/0       6283 2017-07-07 20:34:49 nebmake.pl
+?rw-rw-r-- 0/0      25975 2017-07-07 20:34:49 Vasp.pm
+?rwxrwxr-x 0/0          0 2017-07-07 20:34:49 relax.00/
+?rw-rw-r-- 0/0       2267 2017-07-07 20:34:49 relax.00/POSCAR
+?rw-rw-r-- 0/0        258 2017-07-07 20:34:49 relax.00/INCAR
+?rw-rw-r-- 0/0         35 2017-07-07 20:34:49 relax.00/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:34:49 relax.00/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:34:49 relax.00/POTCAR -&gt; ../POTCAR
+?rwxrwxr-x 0/0          0 2017-07-07 20:34:49 relax.01/
+?rw-rw-r-- 0/0       2267 2017-07-07 20:34:49 relax.01/POSCAR
+?rw-rw-r-- 0/0        258 2017-07-07 20:34:49 relax.01/INCAR
+?rw-rw-r-- 0/0         35 2017-07-07 20:34:49 relax.01/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:34:49 relax.01/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:34:49 relax.01/POTCAR -&gt; ../POTCAR
+?rwxrwxr-x 0/0          0 2017-07-07 20:34:49 neb.01/
+?rw-rw-r-- 0/0       2298 2017-07-07 20:34:49 neb.01/POS.init
+?rw-rw-r-- 0/0       2296 2017-07-07 20:34:49 neb.01/POS.final
+?rw-rw-r-- 0/0        342 2017-07-07 20:34:49 neb.01/INCAR
+?rw-rw-r-- 0/0         58 2017-07-07 20:34:49 neb.01/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:34:49 neb.01/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:34:49 neb.01/POTCAR -&gt; ../POTCAR
+?rwxrwxr-x 0/0          0 2017-07-07 20:34:49 neb.00/
+?rw-rw-r-- 0/0       2298 2017-07-07 20:34:49 neb.00/POS.init
+?rw-rw-r-- 0/0       2296 2017-07-07 20:34:49 neb.00/POS.final
+?rw-rw-r-- 0/0        342 2017-07-07 20:34:49 neb.00/INCAR
+?rw-rw-r-- 0/0         58 2017-07-07 20:34:49 neb.00/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:34:49 neb.00/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:34:49 neb.00/POTCAR -&gt; ../POTCAR
+?rw-rw-r-- 0/0        191 2017-07-07 20:34:49 neb.00/trans.init
+?rw-rw-r-- 0/0        191 2017-07-07 20:34:49 neb.00/trans.final
+?rw-rw-r-- 0/0        191 2017-07-07 20:34:49 neb.01/trans.init
+?rw-rw-r-- 0/0        191 2017-07-07 20:34:49 neb.01/trans.final
+?rw-rw-r-- 0/0       1170 2017-07-07 20:34:49 Makefile
+?rw-rw-r-- 0/0         14 2017-07-07 20:34:49 relax.01/NEBlist
+?rw-rw-r-- 0/0          7 2017-07-07 20:34:49 relax.00/NEBlist
+?rw-rw-r-- 0/0        213 2017-07-07 20:34:49 tags.json
+?rw-rw-r-- 0/0    1243794 2017-07-07 20:34:49 supercell.yaml
+</pre></div></div>
+</div>
+<p>Contents of the <code class="docutils literal"><span class="pre">Makefile</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>with tar.extractfile(&#39;Makefile&#39;) as f:
+    print(f.read().decode(&#39;ascii&#39;))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+# Makefile to construct NEB input from relaxation output
+# we set this so that the makefile doesn&#39;t use builtin implicit rules
+MAKEFLAGS = -rk
+
+makeneb := &#34;./nebmake.pl&#34;
+transform := &#34;./trans.pl&#34;
+
+Nimages ?= 1
+
+.PHONY: help
+
+target := $(foreach neb, $(wildcard neb.*), $(neb)/01/POSCAR)
+target: $(target)
+
+help:
+        @echo &#34;# Creates input POSCAR for NEB runs, once relaxation runs are complete&#34;
+        @echo &#34;# Uses CONTCAR in relaxation directories to create initial run geometry&#34;
+        @echo &#34;# environment variable: Nimages (default: $(Nimages))&#34;
+        @echo &#34;# target files:&#34;
+        @echo $(target) | sed &#39;s/ / /g&#39;
+        @echo &#34;# default target: all&#34;
+
+neb.%: neb.%/01/POSCAR neb.%/POSCAR.init neb.%/POSCAR.final
+
+neb.%/01/POSCAR: neb.%/POSCAR.init neb.%/POSCAR.final
+        @$(makeneb) $^ $(Nimages)
+
+neb.%/POSCAR.init:
+        @$(transform) $^ &gt; $@
+
+neb.%/POSCAR.final:
+        @$(transform) $^ &gt; $@
+
+###############################################################
+# structure of NEB runs:
+neb.00/POSCAR.init: neb.00/trans.init relax.01/CONTCAR
+neb.00/POSCAR.final: neb.00/trans.final relax.01/CONTCAR
+neb.01/POSCAR.init: neb.01/trans.init relax.00/CONTCAR
+neb.01/POSCAR.final: neb.01/trans.final relax.01/CONTCAR
+
+</pre></div></div>
+</div>
+<p>Contents of the <code class="docutils literal"><span class="pre">tags.json</span></code> file:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>with tar.extractfile(&#39;tags.json&#39;) as f:
+    print(f.read().decode(&#39;ascii&#39;))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{
+    &#34;neb.00&#34;: &#34;i:+0.250,+0.250,+0.250^i:+0.750,-0.250,+0.750&#34;,
+    &#34;neb.01&#34;: &#34;i:+0.500,+0.500,+0.500^i:+1.250,+0.250,+0.250&#34;,
+    &#34;relax.00&#34;: &#34;i:+0.500,+0.500,+0.500&#34;,
+    &#34;relax.01&#34;: &#34;i:+0.250,+0.250,+0.250&#34;
+}
+
+</pre></div></div>
+</div>
+<p>Contents of one <code class="docutils literal"><span class="pre">POSCAR</span></code> file for relaxation of a configuration:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>with tar.extractfile(&#39;relax.00/POSCAR&#39;) as f:
+    print(f.read().decode(&#39;ascii&#39;))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+i:+0.500,+0.500,+0.500 fcc(32),int_i(1)
+1.0
+   2.0000000000000000    0.0000000000000000    0.0000000000000000
+   0.0000000000000000    2.0000000000000000    0.0000000000000000
+   0.0000000000000000    0.0000000000000000    2.0000000000000000
+32 1
+Direct
+  0.0000000000000000  0.0000000000000000  0.0000000000000000
+  0.2500000000000000  0.2500000000000000  0.0000000000000000
+  0.5000000000000000  0.5000000000000000  0.0000000000000000
+  0.7500000000000000  0.7500000000000000  0.0000000000000000
+  0.2500000000000000  0.0000000000000000  0.2500000000000000
+  0.5000000000000000  0.2500000000000000  0.2500000000000000
+  0.7500000000000000  0.5000000000000000  0.2500000000000000
+  0.0000000000000000  0.7500000000000000  0.2500000000000000
+  0.5000000000000000  0.0000000000000000  0.5000000000000000
+  0.7500000000000000  0.2500000000000000  0.5000000000000000
+  0.0000000000000000  0.5000000000000000  0.5000000000000000
+  0.2500000000000000  0.7500000000000000  0.5000000000000000
+  0.7500000000000000  0.0000000000000000  0.7500000000000000
+  0.0000000000000000  0.2500000000000000  0.7500000000000000
+  0.2500000000000000  0.5000000000000000  0.7500000000000000
+  0.5000000000000000  0.7500000000000000  0.7500000000000000
+  0.0000000000000000  0.2500000000000000  0.2500000000000000
+  0.2500000000000000  0.5000000000000000  0.2500000000000000
+  0.5000000000000000  0.7500000000000000  0.2500000000000000
+  0.7500000000000000  0.0000000000000000  0.2500000000000000
+  0.2500000000000000  0.2500000000000000  0.5000000000000000
+  0.5000000000000000  0.5000000000000000  0.5000000000000000
+  0.7500000000000000  0.7500000000000000  0.5000000000000000
+  0.0000000000000000  0.0000000000000000  0.5000000000000000
+  0.5000000000000000  0.2500000000000000  0.7500000000000000
+  0.7500000000000000  0.5000000000000000  0.7500000000000000
+  0.0000000000000000  0.7500000000000000  0.7500000000000000
+  0.2500000000000000  0.0000000000000000  0.7500000000000000
+  0.7500000000000000  0.2500000000000000  0.0000000000000000
+  0.0000000000000000  0.5000000000000000  0.0000000000000000
+  0.2500000000000000  0.7500000000000000  0.0000000000000000
+  0.5000000000000000  0.0000000000000000  0.0000000000000000
+  0.2500000000000000  0.2500000000000000  0.2500000000000000
+
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>tar.close()
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Face-centered-cubic-crystal,-vacancy-mediated-diffusion">
+<h3>Face-centered cubic crystal, vacancy mediated-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion" title="Permalink to this headline">¶</a></h3>
+<p>We will need to construct (and relax) appropriate vacancy, solute, and
+solute-vacancy complexes, and the transition states between them. The
+commands are nearly identical to the interstitial diffuser; the primary
+difference is the larger number of configurations and files.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>help(fivefreqdiffuser.makesupercells)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on method makesupercells in module onsager.OnsagerCalc:
+
+makesupercells(super_n) method of onsager.OnsagerCalc.VacancyMediated instance
+    Take in a supercell matrix, then generate all of the supercells needed to compute
+    site energies and transitions (corresponding to the representatives).
+
+    Note: the states are lone vacancy, lone solute, solute-vacancy complexes in
+    our thermodynamic range. Note that there will be escape states are endpoints of
+    some omega1 jumps. They are not relaxed, and have no pre-existing tag. They will
+    only be output as a single endpoint of an NEB run; there may be symmetry equivalent
+    duplicates, as we construct these supercells on an as needed basis.
+
+    We&#39;ve got a few classes of warnings (from most egregious to least) that can issued
+    if the supercell is too small; the analysis will continue despite any warnings:
+
+    1. Thermodynamic shell states map to different states in supercell
+    2. Thermodynamic shell states are not unique in supercell (multiplicity)
+    3. Kinetic shell states map to different states in supercell
+    4. Kinetic shell states are not unique in supercell (multiplicity)
+
+    The lowest level can still be run reliably but runs the risk of errors in escape transition
+    barriers. Extreme caution should be used if any of the other warnings are raised.
+
+    :param super_n: 3x3 integer matrix to define our supercell
+    :return superdict: dictionary of ``states``, ``transitions``, ``transmapping``,
+        ``indices`` that correspond to dictionaries with tags; the final tag
+        ``reference`` is the basesupercell for calculations without defects.
+
+        * superdict[&#39;states&#39;][i] = supercell of state;
+        * superdict[&#39;transitions&#39;][n] = (supercell initial, supercell final);
+        * superdict[&#39;transmapping&#39;][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))
+        * superdict[&#39;indices&#39;][tag] = (type, index) of tag, where tag is either a state or transition tag.
+        * superdict[&#39;reference&#39;] = supercell reference, no defects
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>N = np.array([[-3,3,3],[3,-3,3],[3,3,-3]])  # 108 atom FCC supercell
+print(np.dot(FCCcrys.lattice, N))
+fivefreqsupercells = fivefreqdiffuser.makesupercells(N)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[[ 3.  0.  0.]
+ [ 0.  3.  0.]
+ [ 0.  0.  3.]]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>with tarfile.open(&#39;io-test-fivefreq.tar.gz&#39;, mode=&#39;w:gz&#39;) as tar:
+    automator.supercelltar(tar, fivefreqsupercells)
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>tar = tarfile.open(&#39;io-test-fivefreq.tar.gz&#39;, mode=&#39;r:gz&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>tar.list()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+?rw-rw-r-- 0/0        244 2017-07-07 20:35:07 INCAR.relax
+?rw-rw-r-- 0/0        305 2017-07-07 20:35:07 INCAR.NEB
+?rw-rw-r-- 0/0         31 2017-07-07 20:35:07 KPOINTS
+?rwxrwxr-x 0/0       1344 2017-07-07 20:35:07 trans.pl
+?rwxrwxr-x 0/0       6283 2017-07-07 20:35:07 nebmake.pl
+?rw-rw-r-- 0/0      25975 2017-07-07 20:35:07 Vasp.pm
+?rw-rw-r-- 0/0       6844 2017-07-07 20:35:07 POSCAR
+?rwxrwxr-x 0/0          0 2017-07-07 20:35:07 relax.00/
+?rw-rw-r-- 0/0       6784 2017-07-07 20:35:07 relax.00/POSCAR
+?rw-rw-r-- 0/0        258 2017-07-07 20:35:07 relax.00/INCAR
+?rw-rw-r-- 0/0         35 2017-07-07 20:35:07 relax.00/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 relax.00/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 relax.00/POTCAR -&gt; ../POTCAR
+?rwxrwxr-x 0/0          0 2017-07-07 20:35:07 relax.02/
+?rw-rw-r-- 0/0       6845 2017-07-07 20:35:07 relax.02/POSCAR
+?rw-rw-r-- 0/0        258 2017-07-07 20:35:07 relax.02/INCAR
+?rw-rw-r-- 0/0         35 2017-07-07 20:35:07 relax.02/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 relax.02/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 relax.02/POTCAR -&gt; ../POTCAR
+?rwxrwxr-x 0/0          0 2017-07-07 20:35:07 relax.01/
+?rw-rw-r-- 0/0       6807 2017-07-07 20:35:07 relax.01/POSCAR
+?rw-rw-r-- 0/0        281 2017-07-07 20:35:07 relax.01/INCAR
+?rw-rw-r-- 0/0         58 2017-07-07 20:35:07 relax.01/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 relax.01/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 relax.01/POTCAR -&gt; ../POTCAR
+?rwxrwxr-x 0/0          0 2017-07-07 20:35:07 neb.00/
+?rw-rw-r-- 0/0       6822 2017-07-07 20:35:07 neb.00/POS.init
+?rw-rw-r-- 0/0       6820 2017-07-07 20:35:07 neb.00/POS.final
+?rw-rw-r-- 0/0        349 2017-07-07 20:35:07 neb.00/INCAR
+?rw-rw-r-- 0/0         65 2017-07-07 20:35:07 neb.00/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 neb.00/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 neb.00/POTCAR -&gt; ../POTCAR
+?rwxrwxr-x 0/0          0 2017-07-07 20:35:07 neb.03/
+?rw-rw-r-- 0/0       6845 2017-07-07 20:35:07 neb.03/POS.init
+?rw-rw-r-- 0/0       6843 2017-07-07 20:35:07 neb.03/POS.final
+?rw-rw-r-- 0/0        372 2017-07-07 20:35:07 neb.03/INCAR
+?rw-rw-r-- 0/0         88 2017-07-07 20:35:07 neb.03/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 neb.03/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 neb.03/POTCAR -&gt; ../POTCAR
+?rwxrwxr-x 0/0          0 2017-07-07 20:35:07 neb.02/
+?rw-rw-r-- 0/0       6845 2017-07-07 20:35:07 neb.02/POS.init
+?rw-rw-r-- 0/0       6843 2017-07-07 20:35:07 neb.02/POSCAR.final
+?rw-rw-r-- 0/0        372 2017-07-07 20:35:07 neb.02/INCAR
+?rw-rw-r-- 0/0         88 2017-07-07 20:35:07 neb.02/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 neb.02/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 neb.02/POTCAR -&gt; ../POTCAR
+?rwxrwxr-x 0/0          0 2017-07-07 20:35:07 neb.04/
+?rw-rw-r-- 0/0       6845 2017-07-07 20:35:07 neb.04/POS.init
+?rw-rw-r-- 0/0       6843 2017-07-07 20:35:07 neb.04/POSCAR.final
+?rw-rw-r-- 0/0        372 2017-07-07 20:35:07 neb.04/INCAR
+?rw-rw-r-- 0/0         88 2017-07-07 20:35:07 neb.04/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 neb.04/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 neb.04/POTCAR -&gt; ../POTCAR
+?rwxrwxr-x 0/0          0 2017-07-07 20:35:07 neb.01/
+?rw-rw-r-- 0/0       6845 2017-07-07 20:35:07 neb.01/POS.init
+?rw-rw-r-- 0/0       6843 2017-07-07 20:35:07 neb.01/POSCAR.final
+?rw-rw-r-- 0/0        372 2017-07-07 20:35:07 neb.01/INCAR
+?rw-rw-r-- 0/0         88 2017-07-07 20:35:07 neb.01/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 neb.01/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 neb.01/POTCAR -&gt; ../POTCAR
+?rwxrwxr-x 0/0          0 2017-07-07 20:35:07 neb.05/
+?rw-rw-r-- 0/0       6868 2017-07-07 20:35:07 neb.05/POS.init
+?rw-rw-r-- 0/0       6866 2017-07-07 20:35:07 neb.05/POS.final
+?rw-rw-r-- 0/0        395 2017-07-07 20:35:07 neb.05/INCAR
+?rw-rw-r-- 0/0        111 2017-07-07 20:35:07 neb.05/incar.sed
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 neb.05/KPOINTS -&gt; ../KPOINTS
+?rw-rw-r-- 0/0          0 2017-07-07 20:35:07 neb.05/POTCAR -&gt; ../POTCAR
+?rw-rw-r-- 0/0        420 2017-07-07 20:35:07 neb.00/trans.init
+?rw-rw-r-- 0/0        420 2017-07-07 20:35:07 neb.00/trans.final
+?rw-rw-r-- 0/0        420 2017-07-07 20:35:07 neb.01/trans.init
+?rw-rw-r-- 0/0        420 2017-07-07 20:35:07 neb.02/trans.init
+?rw-rw-r-- 0/0        420 2017-07-07 20:35:07 neb.03/trans.init
+?rw-rw-r-- 0/0        420 2017-07-07 20:35:07 neb.03/trans.final
+?rw-rw-r-- 0/0        420 2017-07-07 20:35:07 neb.04/trans.init
+?rw-rw-r-- 0/0        420 2017-07-07 20:35:07 neb.05/trans.init
+?rw-rw-r-- 0/0        420 2017-07-07 20:35:07 neb.05/trans.final
+?rw-rw-r-- 0/0       1447 2017-07-07 20:35:07 Makefile
+?rw-rw-r-- 0/0          7 2017-07-07 20:35:07 relax.00/NEBlist
+?rw-rw-r-- 0/0         35 2017-07-07 20:35:07 relax.01/NEBlist
+?rw-rw-r-- 0/0        710 2017-07-07 20:35:07 tags.json
+?rw-rw-r-- 0/0    3458543 2017-07-07 20:35:07 supercell.yaml
+</pre></div></div>
+</div>
+<p>Contents of <code class="docutils literal"><span class="pre">Makefile</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>with tar.extractfile(&#39;Makefile&#39;) as f:
+    print(f.read().decode(&#39;ascii&#39;))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+# Makefile to construct NEB input from relaxation output
+# we set this so that the makefile doesn&#39;t use builtin implicit rules
+MAKEFLAGS = -rk
+
+makeneb := &#34;./nebmake.pl&#34;
+transform := &#34;./trans.pl&#34;
+
+Nimages ?= 1
+
+.PHONY: help
+
+target := $(foreach neb, $(wildcard neb.*), $(neb)/01/POSCAR)
+target: $(target)
+
+help:
+        @echo &#34;# Creates input POSCAR for NEB runs, once relaxation runs are complete&#34;
+        @echo &#34;# Uses CONTCAR in relaxation directories to create initial run geometry&#34;
+        @echo &#34;# environment variable: Nimages (default: $(Nimages))&#34;
+        @echo &#34;# target files:&#34;
+        @echo $(target) | sed &#39;s/ / /g&#39;
+        @echo &#34;# default target: all&#34;
+
+neb.%: neb.%/01/POSCAR neb.%/POSCAR.init neb.%/POSCAR.final
+
+neb.%/01/POSCAR: neb.%/POSCAR.init neb.%/POSCAR.final
+        @$(makeneb) $^ $(Nimages)
+
+neb.%/POSCAR.init:
+        @$(transform) $^ &gt; $@
+
+neb.%/POSCAR.final:
+        @$(transform) $^ &gt; $@
+
+###############################################################
+# structure of NEB runs:
+neb.00/POSCAR.init: neb.00/trans.init relax.00/CONTCAR
+neb.00/POSCAR.final: neb.00/trans.final relax.00/CONTCAR
+neb.01/POSCAR.init: neb.01/trans.init relax.01/CONTCAR
+neb.02/POSCAR.init: neb.02/trans.init relax.01/CONTCAR
+neb.03/POSCAR.init: neb.03/trans.init relax.01/CONTCAR
+neb.03/POSCAR.final: neb.03/trans.final relax.01/CONTCAR
+neb.04/POSCAR.init: neb.04/trans.init relax.01/CONTCAR
+neb.05/POSCAR.init: neb.05/trans.init relax.01/CONTCAR
+neb.05/POSCAR.final: neb.05/trans.final relax.01/CONTCAR
+
+</pre></div></div>
+</div>
+<p>Contents of the <code class="docutils literal"><span class="pre">tags.json</span></code> file:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>with tar.extractfile(&#39;tags.json&#39;) as f:
+    print(f.read().decode(&#39;ascii&#39;))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{
+    &#34;neb.00&#34;: &#34;omega0:v:+0.000,+0.000,+0.000^v:+0.000,+1.000,+0.000&#34;,
+    &#34;neb.01&#34;: &#34;omega1:s:+0.000,+0.000,+0.000-v:+0.000,+1.000,+0.000^v:+0.000,+2.000,+0.000&#34;,
+    &#34;neb.02&#34;: &#34;omega1:s:+0.000,+0.000,+0.000-v:+1.000,+0.000,-1.000^v:+1.000,+1.000,-1.000&#34;,
+    &#34;neb.03&#34;: &#34;omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,+0.000^v:+1.000,+0.000,+0.000&#34;,
+    &#34;neb.04&#34;: &#34;omega1:s:+0.000,+0.000,+0.000-v:-1.000,+1.000,+0.000^v:-1.000,+2.000,+0.000&#34;,
+    &#34;neb.05&#34;: &#34;omega2:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000^s:+0.000,+0.000,+0.000-v:+0.000,+1.000,+0.000&#34;,
+    &#34;relax.00&#34;: &#34;v:+0.000,+0.000,+0.000&#34;,
+    &#34;relax.01&#34;: &#34;s:+0.000,+0.000,+0.000-v:+0.000,+0.000,-1.000&#34;,
+    &#34;relax.02&#34;: &#34;s:+0.000,+0.000,+0.000&#34;
+}
+
+</pre></div></div>
+</div>
+<p>Contents of one <code class="docutils literal"><span class="pre">POSCAR</span></code> file for relaxation of a configuration:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>with tar.extractfile(&#39;relax.01/POSCAR&#39;) as f:
+    print(f.read().decode(&#39;ascii&#39;))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+s:+0.000,+0.000,+0.000-v:+0.000,+0.000,-1.000 fcc(106),solute(1)
+1.0
+   3.0000000000000000    0.0000000000000000    0.0000000000000000
+   0.0000000000000000    3.0000000000000000    0.0000000000000000
+   0.0000000000000000    0.0000000000000000    3.0000000000000000
+106 1
+Direct
+  0.1666666666666667  0.1666666666666667  0.0000000000000000
+  0.3333333333333333  0.3333333333333333  0.0000000000000000
+  0.5000000000000000  0.5000000000000000  0.0000000000000000
+  0.6666666666666666  0.6666666666666666  0.0000000000000000
+  0.1666666666666667  0.0000000000000000  0.1666666666666667
+  0.3333333333333333  0.1666666666666667  0.1666666666666667
+  0.5000000000000000  0.3333333333333333  0.1666666666666667
+  0.6666666666666666  0.5000000000000000  0.1666666666666667
+  0.8333333333333333  0.6666666666666666  0.1666666666666667
+  0.0000000000000000  0.8333333333333333  0.1666666666666667
+  0.3333333333333333  0.0000000000000000  0.3333333333333333
+  0.5000000000000000  0.1666666666666667  0.3333333333333333
+  0.6666666666666666  0.3333333333333333  0.3333333333333333
+  0.8333333333333333  0.5000000000000000  0.3333333333333333
+  0.0000000000000000  0.6666666666666666  0.3333333333333333
+  0.1666666666666667  0.8333333333333333  0.3333333333333333
+  0.5000000000000000  0.0000000000000000  0.5000000000000000
+  0.6666666666666666  0.1666666666666667  0.5000000000000000
+  0.8333333333333333  0.3333333333333333  0.5000000000000000
+  0.0000000000000000  0.5000000000000000  0.5000000000000000
+  0.1666666666666667  0.6666666666666666  0.5000000000000000
+  0.3333333333333333  0.8333333333333333  0.5000000000000000
+  0.6666666666666666  0.0000000000000000  0.6666666666666666
+  0.8333333333333333  0.1666666666666667  0.6666666666666666
+  0.0000000000000000  0.3333333333333333  0.6666666666666666
+  0.1666666666666667  0.5000000000000000  0.6666666666666666
+  0.3333333333333333  0.6666666666666666  0.6666666666666666
+  0.5000000000000000  0.8333333333333333  0.6666666666666666
+  0.8333333333333333  0.0000000000000000  0.8333333333333333
+  0.0000000000000000  0.1666666666666667  0.8333333333333333
+  0.1666666666666667  0.3333333333333333  0.8333333333333333
+  0.3333333333333333  0.5000000000000000  0.8333333333333333
+  0.5000000000000000  0.6666666666666666  0.8333333333333333
+  0.6666666666666666  0.8333333333333333  0.8333333333333333
+  0.0000000000000000  0.1666666666666667  0.1666666666666667
+  0.1666666666666667  0.3333333333333333  0.1666666666666667
+  0.3333333333333333  0.5000000000000000  0.1666666666666667
+  0.5000000000000000  0.6666666666666666  0.1666666666666667
+  0.6666666666666666  0.8333333333333333  0.1666666666666667
+  0.8333333333333333  0.0000000000000000  0.1666666666666667
+  0.1666666666666667  0.1666666666666667  0.3333333333333333
+  0.3333333333333333  0.3333333333333333  0.3333333333333333
+  0.5000000000000000  0.5000000000000000  0.3333333333333333
+  0.6666666666666666  0.6666666666666666  0.3333333333333333
+  0.8333333333333333  0.8333333333333333  0.3333333333333333
+  0.0000000000000000  0.0000000000000000  0.3333333333333333
+  0.3333333333333333  0.1666666666666667  0.5000000000000000
+  0.5000000000000000  0.3333333333333333  0.5000000000000000
+  0.6666666666666666  0.5000000000000000  0.5000000000000000
+  0.8333333333333333  0.6666666666666666  0.5000000000000000
+  0.0000000000000000  0.8333333333333333  0.5000000000000000
+  0.1666666666666667  0.0000000000000000  0.5000000000000000
+  0.5000000000000000  0.1666666666666667  0.6666666666666666
+  0.6666666666666666  0.3333333333333333  0.6666666666666666
+  0.8333333333333333  0.5000000000000000  0.6666666666666666
+  0.0000000000000000  0.6666666666666666  0.6666666666666666
+  0.1666666666666667  0.8333333333333333  0.6666666666666666
+  0.3333333333333333  0.0000000000000000  0.6666666666666666
+  0.6666666666666666  0.1666666666666667  0.8333333333333333
+  0.8333333333333333  0.3333333333333333  0.8333333333333333
+  0.0000000000000000  0.5000000000000000  0.8333333333333333
+  0.1666666666666667  0.6666666666666666  0.8333333333333333
+  0.3333333333333333  0.8333333333333333  0.8333333333333333
+  0.5000000000000000  0.0000000000000000  0.8333333333333333
+  0.8333333333333333  0.1666666666666667  0.0000000000000000
+  0.0000000000000000  0.3333333333333333  0.0000000000000000
+  0.1666666666666667  0.5000000000000000  0.0000000000000000
+  0.3333333333333333  0.6666666666666666  0.0000000000000000
+  0.5000000000000000  0.8333333333333333  0.0000000000000000
+  0.6666666666666666  0.0000000000000000  0.0000000000000000
+  0.0000000000000000  0.3333333333333333  0.3333333333333333
+  0.1666666666666667  0.5000000000000000  0.3333333333333333
+  0.3333333333333333  0.6666666666666666  0.3333333333333333
+  0.5000000000000000  0.8333333333333333  0.3333333333333333
+  0.6666666666666666  0.0000000000000000  0.3333333333333333
+  0.8333333333333333  0.1666666666666667  0.3333333333333333
+  0.1666666666666667  0.3333333333333333  0.5000000000000000
+  0.3333333333333333  0.5000000000000000  0.5000000000000000
+  0.5000000000000000  0.6666666666666666  0.5000000000000000
+  0.6666666666666666  0.8333333333333333  0.5000000000000000
+  0.8333333333333333  0.0000000000000000  0.5000000000000000
+  0.0000000000000000  0.1666666666666667  0.5000000000000000
+  0.3333333333333333  0.3333333333333333  0.6666666666666666
+  0.5000000000000000  0.5000000000000000  0.6666666666666666
+  0.6666666666666666  0.6666666666666666  0.6666666666666666
+  0.8333333333333333  0.8333333333333333  0.6666666666666666
+  0.0000000000000000  0.0000000000000000  0.6666666666666666
+  0.1666666666666667  0.1666666666666667  0.6666666666666666
+  0.5000000000000000  0.3333333333333333  0.8333333333333333
+  0.6666666666666666  0.5000000000000000  0.8333333333333333
+  0.8333333333333333  0.6666666666666666  0.8333333333333333
+  0.0000000000000000  0.8333333333333333  0.8333333333333333
+  0.1666666666666667  0.0000000000000000  0.8333333333333333
+  0.3333333333333333  0.1666666666666667  0.8333333333333333
+  0.6666666666666666  0.3333333333333333  0.0000000000000000
+  0.8333333333333333  0.5000000000000000  0.0000000000000000
+  0.0000000000000000  0.6666666666666666  0.0000000000000000
+  0.1666666666666667  0.8333333333333333  0.0000000000000000
+  0.3333333333333333  0.0000000000000000  0.0000000000000000
+  0.5000000000000000  0.1666666666666667  0.0000000000000000
+  0.8333333333333333  0.3333333333333333  0.1666666666666667
+  0.0000000000000000  0.5000000000000000  0.1666666666666667
+  0.1666666666666667  0.6666666666666666  0.1666666666666667
+  0.3333333333333333  0.8333333333333333  0.1666666666666667
+  0.5000000000000000  0.0000000000000000  0.1666666666666667
+  0.6666666666666666  0.1666666666666667  0.1666666666666667
+  0.0000000000000000  0.0000000000000000  0.0000000000000000
+
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>tar.close()
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="Formatting-of-input-data">
+<h2>Formatting of input data<a class="headerlink" href="#Formatting-of-input-data" title="Permalink to this headline">¶</a></h2>
+<p>Once the atomic-scale data from an appropriate total energy calculation
+is finished, the data needs to be input into formats that the
+appropriate diffusion calculator can understand. There are some common
+definitions between the two, but some differences as well.</p>
+<p>In all cases, we work with the assumption that our states are thermally
+occupied, and our rates are Arrhenius. That means that the (relative)
+probability of any state can be written as</p>
+<div class="math">
+\[\rho = Z^{-1}\rho^0 \exp(-E/k_\text{B}T)\]</div>
+<p>for the partition function <span class="math">\(Z\)</span>, a site entropic term
+<span class="math">\(\rho^0 = \exp(S/k_\text{B})\)</span>, and energy <span class="math">\(E\)</span>. The
+transition rate from state A to state B is given by</p>
+<div class="math">
+\[\lambda(\text{A}\to\text{B}) = \frac{\nu^\text{T}_{\text{A}-\text{B}}}{\rho^0_A} \exp(-(E^\text{T}_{\text{A}-\text{B}} - E_\text{A})/k_\text{B}T)\]</div>
+<p>where <span class="math">\(E^\text{T}_{\text{A}-\text{B}}\)</span> is the energy of the
+transition state between A and B, and
+<span class="math">\(\nu^\text{T}_{\text{A}-\text{B}}\)</span> is the prefactor for the
+transition state.</p>
+<p>If we assume harmonic transition state theory, then we can write the
+site entropic term <span class="math">\(\rho^0\)</span> as</p>
+<div class="math">
+\[\rho^0 = \frac{\prod \nu^{\text{defect-supercell}}}{\prod \nu^{\text{perfect-supercell}}}\]</div>
+<p>where <span class="math">\(\nu\)</span> are the vibrational eigenvalues of the corresponding
+supercells, and the prefactor for the transition state is</p>
+<div class="math">
+\[\nu^\text{T} = \frac{\prod \nu^{\text{perfect-supercell}}}{\prod_{\nu^2&gt;0} \nu^{\text{transition state}}}\]</div>
+<p>where we take the product over the real vibrational frequencies in the
+transition state (there should be one imaginary mode). From a practical
+point of view, the perfect-supercell cancels out; we will often set
+<span class="math">\(\rho^0\)</span> to 1 for a single state (so that the other <span class="math">\(\rho^0\)</span>
+are relative probabilities), and then <span class="math">\(\nu^\text{T}\)</span> becomes more
+similar to the attempt frequency for the particular jumps. The
+definitions above map most simply onto a “hopping atom” approximation
+for the jump rates: the <span class="math">\(3\times3\)</span> force-constant matrix is
+computed for the atom that is moving in the transition, and its
+eigenvalues are used to determine the modes <span class="math">\(\nu\)</span>.</p>
+<p>Note the units: <span class="math">\(\rho^0\)</span> is unitless, while <span class="math">\(\nu^\text{T}\)</span>
+has units of inverse time; this means that the inverse time unit in the
+computed transport coefficients will come from <span class="math">\(\nu^\text{T}\)</span>
+values. If they are entered in THz, that contributes
+<span class="math">\(10^{12}\text{ s}^{-1}\)</span>.</p>
+<p>Because we normalize our probabilities, our energies and transition
+state energies are relative to each other. In all of our calculations,
+we will multiply energies by <span class="math">\(\beta=(k_\text{B}T)^{-1}\)</span> to get a
+unitless values as inputs for our diffusion calculators. This means that
+the diffusers <em>do not have direct information about temperature</em>;
+explicit temperature factors that appear in the Onsager coefficients
+must be included by hand from the output transport coefficients. It also
+means that the calculators do not have a “unit” of energy; rather,
+<span class="math">\(k_\text{B}T\)</span> and the energies must be in the same units.</p>
+<div class="section" id="Face-centered-cubic-crystal,-interstitial-diffusion">
+<h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Permalink to this headline">¶</a></h3>
+<p>We need to compute prefactors and energies for our interstitial
+diffuser. We can <em>also</em> include information about elastic dipoles
+(derivatives of energy with respect to strain) in order to compute
+derivatives of diffusivity with respect to strain (elastodiffusion).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>help(FCCintdiffuser.diffusivity)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on method diffusivity in module onsager.OnsagerCalc:
+
+diffusivity(pre, betaene, preT, betaeneT, CalcDeriv=False) method of onsager.OnsagerCalc.Interstitial instance
+    Computes the diffusivity for our element given prefactors and energies/kB T.
+    Also returns the negative derivative of diffusivity with respect to beta (used to compute
+    the activation barrier tensor) if CalcDeriv = True
+    The input list order corresponds to the sitelist and jumpnetwork
+
+    :param pre: list of prefactors for unique sites
+    :param betaene: list of site energies divided by kB T
+    :param preT: list of prefactors for transition states
+    :param betaeneT: list of transition state energies divided by kB T
+    :return D[3,3]: diffusivity as a 3x3 tensor
+    :return DE[3,3]: diffusivity times activation barrier (if CalcDeriv == True)
+
+</pre></div></div>
+</div>
+<p>The ordering in the lists <code class="docutils literal"><span class="pre">pre</span></code>, <code class="docutils literal"><span class="pre">beteene</span></code>, <code class="docutils literal"><span class="pre">preT</span></code> and
+<code class="docutils literal"><span class="pre">betaeneT</span></code> corresponds to the <code class="docutils literal"><span class="pre">sitelist</span></code> and <code class="docutils literal"><span class="pre">jumpnetwork</span></code> lists.
+The tags can be used to determine the proper indices. The most
+straightforward way to store this in python is a dictionary, where the
+key is the tag, and the value is a list of <code class="docutils literal"><span class="pre">[prefactor,</span> <span class="pre">energy]</span></code>. The
+advantage of this is that it can be easily transformed to and from
+<code class="docutils literal"><span class="pre">JSON</span></code> for simple serialization.</p>
+<p>To see a full list of all tags in the dictionary, the <code class="docutils literal"><span class="pre">tags</span></code> member of
+a diffuser gives a dictionary of all tags, ordered to match the
+structure of <code class="docutils literal"><span class="pre">sitelist</span></code> and <code class="docutils literal"><span class="pre">jumpnetwork</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>FCCintdiffuser.tags
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[41]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>{&#39;states&#39;: [[&#39;i:+0.500,+0.500,+0.500&#39;],
+  [&#39;i:+0.250,+0.250,+0.250&#39;, &#39;i:+0.750,+0.750,+0.750&#39;]],
+ &#39;transitions&#39;: [[&#39;i:+0.500,+0.500,+0.500^i:+1.250,+0.250,+0.250&#39;,
+   &#39;i:+0.250,+0.250,+0.250^i:-0.500,+0.500,+0.500&#39;,
+   &#39;i:+0.500,+0.500,+0.500^i:+0.250,+0.250,+1.250&#39;,
+   &#39;i:+0.250,+0.250,+0.250^i:+0.500,+0.500,-0.500&#39;,
+   &#39;i:+0.500,+0.500,+0.500^i:+0.750,-0.250,+0.750&#39;,
+   &#39;i:+0.750,+0.750,+0.750^i:+0.500,+1.500,+0.500&#39;,
+   &#39;i:+0.500,+0.500,+0.500^i:+0.750,+0.750,+0.750&#39;,
+   &#39;i:+0.750,+0.750,+0.750^i:+0.500,+0.500,+0.500&#39;,
+   &#39;i:+0.500,+0.500,+0.500^i:+0.250,+0.250,+0.250&#39;,
+   &#39;i:+0.250,+0.250,+0.250^i:+0.500,+0.500,+0.500&#39;,
+   &#39;i:+0.500,+0.500,+0.500^i:+0.750,+0.750,-0.250&#39;,
+   &#39;i:+0.750,+0.750,+0.750^i:+0.500,+0.500,+1.500&#39;,
+   &#39;i:+0.500,+0.500,+0.500^i:+0.250,+1.250,+0.250&#39;,
+   &#39;i:+0.250,+0.250,+0.250^i:+0.500,-0.500,+0.500&#39;,
+   &#39;i:+0.500,+0.500,+0.500^i:-0.250,+0.750,+0.750&#39;,
+   &#39;i:+0.750,+0.750,+0.750^i:+1.500,+0.500,+0.500&#39;],
+  [&#39;i:+0.250,+0.250,+0.250^i:+0.750,-0.250,+0.750&#39;,
+   &#39;i:+0.750,+0.750,+0.750^i:+0.250,+1.250,+0.250&#39;,
+   &#39;i:+0.250,+0.250,+0.250^i:-0.250,-0.250,+0.750&#39;,
+   &#39;i:+0.750,+0.750,+0.750^i:+1.250,+1.250,+0.250&#39;,
+   &#39;i:+0.750,+0.750,+0.750^i:+0.250,+0.250,+1.250&#39;,
+   &#39;i:+0.250,+0.250,+0.250^i:+0.750,+0.750,-0.250&#39;,
+   &#39;i:+0.750,+0.750,+0.750^i:+1.250,+0.250,+1.250&#39;,
+   &#39;i:+0.250,+0.250,+0.250^i:-0.250,+0.750,-0.250&#39;,
+   &#39;i:+0.250,+0.250,+0.250^i:+0.750,-0.250,-0.250&#39;,
+   &#39;i:+0.750,+0.750,+0.750^i:+0.250,+1.250,+1.250&#39;,
+   &#39;i:+0.750,+0.750,+0.750^i:+1.250,+0.250,+0.250&#39;,
+   &#39;i:+0.250,+0.250,+0.250^i:-0.250,+0.750,+0.750&#39;]]}
+</pre></div>
+</div>
+</div>
+<p>In this example, the energy of the octahedral site is 0, with a base
+prefactor of 1. The tetrahedral site has an energy of 0.5 (eV) above,
+with a higher relative vibrational degeneracy of 2. The transition state
+energy from octahedral to tetrahedral is 1.0 (eV) with a prefactor of 10
+(THz); and the transition state energy from tetrahedral to tetrahedral
+is 2.0 (eV) with a prefactor of 50 (THz).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>FCCintdata = {
+    &#39;i:+0.500,+0.500,+0.500&#39;: [1., 0.],
+    &#39;i:+0.750,+0.750,+0.750&#39;: [2., 0.5],
+    &#39;i:+0.500,+0.500,+0.500^i:+0.750,+0.750,-0.250&#39;: [10., 1.0],
+    &#39;i:+0.750,+0.750,+0.750^i:+1.250,+1.250,+0.250&#39;: [50., 2.0]
+}
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span># Conversion from dictionary to lists for a given kBT
+# We go through the tags in order, and find one in our data set.
+kBT = 0.25  # eV; a rather high temperature
+pre = [FCCintdata[t][0] for taglist in FCCintdiffuser.tags[&#39;states&#39;]
+       for t in taglist if t in FCCintdata]
+betaene = [FCCintdata[t][1]/kBT for taglist in FCCintdiffuser.tags[&#39;states&#39;]
+           for t in taglist if t in FCCintdata]
+preT = [FCCintdata[t][0] for taglist in FCCintdiffuser.tags[&#39;transitions&#39;]
+        for t in taglist if t in FCCintdata]
+betaeneT = [FCCintdata[t][1]/kBT for taglist in FCCintdiffuser.tags[&#39;transitions&#39;]
+            for t in taglist if t in FCCintdata]
+print(pre,betaene,preT,betaeneT,sep=&#39;\n&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[1.0, 2.0]
+[0.0, 2.0]
+[10.0, 50.0]
+[4.0, 8.0]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>DFCCint, dDFCCint = FCCintdiffuser.diffusivity(pre, betaene, preT, betaeneT, CalcDeriv=True)
+print(DFCCint, dDFCCint, sep=&#39;\n&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[[  6.48557013e-02  -1.30104261e-18   1.30104261e-18]
+ [ -1.30104261e-18   6.48557013e-02  -4.33680869e-19]
+ [  1.30104261e-18  -4.33680869e-19   6.48557013e-02]]
+[[  2.35630632e-01  -3.46944695e-18   3.46944695e-18]
+ [ -3.46944695e-18   2.35630632e-01   0.00000000e+00]
+ [  3.46944695e-18   0.00000000e+00   2.35630632e-01]]
+</pre></div></div>
+</div>
+<p>The interpretation of this output will be described below.</p>
+</div>
+<div class="section" id="Face-centered-cubic-crystal,-vacancy-mediated-diffusion">
+<h3>Face-centered cubic crystal, vacancy mediated-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion" title="Permalink to this headline">¶</a></h3>
+<p>We will need to compute prefactors and energies for our vacancy, solute,
+and solute-vacancy complexes, and the transition states between them.
+The difference compared with the interstitial case is that complex
+prefactors and energies are <em>excess</em> quantities. That means for a
+complex, its <span class="math">\(\rho^0\)</span> is the product of <span class="math">\(\rho^0\)</span> for the
+solute state, the vacancy state, <em>and</em> the excess; the energy <span class="math">\(E\)</span>
+is the sum of the energy of the solute state, the vacancy state, <em>and</em>
+the excess. <strong>However</strong> for the <em>transition states</em>, the prefactors and
+energies are “absolute”.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>help(fivefreqdiffuser.Lij)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on method Lij in module onsager.OnsagerCalc:
+
+Lij(bFV, bFS, bFSV, bFT0, bFT1, bFT2, large_om2=100000000.0) method of onsager.OnsagerCalc.VacancyMediated instance
+    Calculates the transport coefficients: L0vv, Lss, Lsv, L1vv from the scaled free energies.
+    The Green function entries are calculated from the omega0 info. As this is the most
+    time-consuming part of the calculation, we cache these values with a dictionary
+    and hash function.
+
+    :param bFV[NWyckoff]: beta*eneV - ln(preV) (relative to minimum value)
+    :param bFS[NWyckoff]: beta*eneS - ln(preS) (relative to minimum value)
+    :param bFSV[Nthermo]: beta*eneSV - ln(preSV) (excess)
+    :param bFT0[Nomega0]: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
+    :param bFT1[Nomega1]: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
+    :param bFT2[Nomega2]: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
+    :param large_om2: threshold for changing treatment of omega2 contributions (default: 10^8)
+    :return Lvv[3, 3]: vacancy-vacancy; needs to be multiplied by cv/kBT
+    :return Lss[3, 3]: solute-solute; needs to be multiplied by cv*cs/kBT
+    :return Lsv[3, 3]: solute-vacancy; needs to be multiplied by cv*cs/kBT
+    :return Lvv1[3, 3]: vacancy-vacancy correction due to solute; needs to be multiplied by cv*cs/kBT
+
+</pre></div></div>
+</div>
+<p>The vacancy-mediated diffuser expects combined
+<span class="math">\(\beta F := (E - TS)/k_\text{B}T\)</span>, so that our probabilities and
+rates are proportional to <span class="math">\(\exp(-\beta F)\)</span>. This is complicated to
+directly construct, so we have the intermediate function
+<code class="docutils literal"><span class="pre">preene2betafree()</span></code>, which is best used by feeding a <em>dictionary</em> of
+arrays:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>help(fivefreqdiffuser.preene2betafree)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on function preene2betafree in module onsager.OnsagerCalc:
+
+preene2betafree(kT, preV, eneV, preS, eneS, preSV, eneSV, preT0, eneT0, preT1, eneT1, preT2, eneT2, **ignoredextraarguments)
+    Read in a series of prefactors (exp(S/k_B)) and energies, and return
+    beta F for energies and transition state energies. Used to provide scaled values
+    to Lij().
+    Can specify all of the entries using a dictionary; e.g., ``preene2betafree(kT, **data_dict)``
+    and then send that output as input to Lij: ``Lij(*preene2betafree(kT, **data_dict))``
+    (we ignore extra arguments so that a dictionary including additional entries can be passed)
+
+    :param kT: temperature times Boltzmann&#39;s constant kB
+    :param preV: prefactor for vacancy formation (prod of inverse vibrational frequencies)
+    :param eneV: vacancy formation energy
+    :param preS: prefactor for solute formation (prod of inverse vibrational frequencies)
+    :param eneS: solute formation energy
+    :param preSV: excess prefactor for solute-vacancy binding
+    :param eneSV: solute-vacancy binding energy
+    :param preT0: prefactor for vacancy transition state
+    :param eneT0: energy for vacancy transition state (relative to eneV)
+    :param preT1: prefactor for vacancy swing transition state
+    :param eneT1: energy for vacancy swing transition state (relative to eneV + eneS + eneSV)
+    :param preT2: prefactor for vacancy exchange transition state
+    :param eneT2: energy for vacancy exchange transition state (relative to eneV + eneS + eneSV)
+    :return bFV: beta*eneV - ln(preV) (relative to minimum value)
+    :return bFS: beta*eneS - ln(preS) (relative to minimum value)
+    :return bFSV: beta*eneSV - ln(preSV) (excess)
+    :return bFT0: beta*eneT0 - ln(preT0) (relative to minimum value of bFV)
+    :return bFT1: beta*eneT1 - ln(preT1) (relative to minimum value of bFV + bFS)
+    :return bFT2: beta*eneT2 - ln(preT2) (relative to minimum value of bFV + bFS)
+
+</pre></div></div>
+</div>
+<p>Even this is a bit complicated; so we use an additional function that
+maps the tags into the appropriate lists, <code class="docutils literal"><span class="pre">tags2preene()</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>help(fivefreqdiffuser.tags2preene)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Help on method tags2preene in module onsager.OnsagerCalc:
+
+tags2preene(usertagdict, VERBOSE=False) method of onsager.OnsagerCalc.VacancyMediated instance
+    Generates energies and prefactors based on a dictionary of tags.
+
+    :param usertagdict: dictionary where the keys are tags, and the values are tuples: (pre, ene)
+    :param VERBOSE: (optional) if True, also return a dictionary of missing tags, duplicate tags, and bad tags
+    :return thermodict: dictionary of ene&#39;s and pre&#39;s corresponding to usertagdict
+    :return missingdict: dictionary with keys corresponding to tag types, and the values are
+      lists of lists of symmetry equivalent tags that are missing
+    :return duplicatelist: list of lists of tags in usertagdict that are (symmetry) duplicates
+    :return badtaglist: list of all tags in usertagdict that aren&#39;t found in our dictionary
+
+</pre></div></div>
+</div>
+<p>In this example, we have a vacancy-solute binding energy of -0.25 (eV),
+a vacancy jump barrier of 1.0 (eV) with a prefactor of 10 (THz), an
+“omega-1” activation barrier of 0.75 (eV) which is a transition state
+energy of 0.75-0.25 = 0.5, an omega-2 activation barrier of 0.5 (eV)
+which is a transition state energy of 0.5-0.25 = 0.25, and all of the
+“omega-3/-4” escape jumps with a transition state energy of 1-0.25/2 =
+0.875 (eV).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>fivefreqdata = {
+    &#39;v:+0.000,+0.000,+0.000&#39;: [1., 0.],
+    &#39;s:+0.000,+0.000,+0.000&#39;: [1., 0.],
+    &#39;s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000&#39;: [1., -0.25],
+    &#39;omega0:v:+0.000,+0.000,+0.000^v:+0.000,+1.000,+0.000&#39;: [10., 1.],
+    &#39;omega1:s:+0.000,+0.000,+0.000-v:+1.000,+0.000,-1.000^v:+1.000,+1.000,-1.000&#39;: [10., 0.5],
+    &#39;omega1:s:+0.000,+0.000,+0.000-v:+1.000,-1.000,+0.000^v:+1.000,+0.000,+0.000&#39;: [20., 0.875],
+    &#39;omega1:s:+0.000,+0.000,+0.000-v:-1.000,+1.000,+0.000^v:-1.000,+2.000,+0.000&#39;: [20., 0.875],
+    &#39;omega1:s:+0.000,+0.000,+0.000-v:+0.000,+1.000,+0.000^v:+0.000,+2.000,+0.000&#39;: [20., 0.875],
+    &#39;omega2:s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000^s:+0.000,+0.000,+0.000-v:+0.000,+1.000,+0.000&#39;:
+    [10., 0.5]
+}
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [49]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span># Conversion from dictionary to lists for a given kBT
+# note that we can nest the mapping functions.
+kBT = 0.25  # eV; a rather high temperature
+fivefreqpreene = fivefreqdiffuser.tags2preene(fivefreqdata)
+fivefreqbetaF = fivefreqdiffuser.preene2betafree(kBT, **fivefreqpreene)
+L0vv, Lss, Lsv, L1vv = fivefreqdiffuser.Lij(*fivefreqbetaF)
+print(L0vv, Lss, Lsv, L1vv, sep=&#39;\n&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[[ 0.18315639 -0.         -0.        ]
+ [-0.          0.18315639 -0.        ]
+ [-0.         -0.          0.18315639]]
+[[ 0.82628623  0.          0.        ]
+ [ 0.          0.82628623  0.        ]
+ [ 0.          0.          0.82628623]]
+[[-0.25155  0.       0.     ]
+ [ 0.      -0.25155  0.     ]
+ [ 0.       0.      -0.25155]]
+[[ 6.19369584  0.          0.        ]
+ [ 0.          6.19369584  0.        ]
+ [ 0.          0.          6.19369584]]
+</pre></div></div>
+</div>
+<p>The interpretation of this output will be described below.</p>
+</div>
+</div>
+<div class="section" id="Interpretation-of-output">
+<h2>Interpretation of output<a class="headerlink" href="#Interpretation-of-output" title="Permalink to this headline">¶</a></h2>
+<p>The final step is to take the output from the diffuser calculator, and
+convert this into physical quantities: solute diffusivity,
+elastodiffusivity, Onsager coefficients, drag ratios, and so on.</p>
+<p>There are two underlying definitions that we use to define our transport
+coefficients:</p>
+<div class="math">
+\[\mathbf j = -\underline D \nabla c\]</div>
+<p>defines the <em>solute diffusivity</em> as the tensorial transport coefficient
+that relates defect concentration gradients to defect fluxes, and</p>
+<div class="math">
+\[\mathbf j^\text{s} = -\underline L^\text{ss}\nabla\mu^\text{s} - \underline L^\text{sv}\nabla\mu^\text{v}\]</div>
+<div class="math">
+\[\mathbf j^\text{v} = -\underline L^\text{vv}\nabla\mu^\text{v} - \underline L^\text{sv}\nabla\mu^\text{s}\]</div>
+<p>defines the <em>Onsager coefficients</em> as the tensorial transport
+coefficients that relate solute and vacancy chemical potential gradients
+to solute and vacancy fluxes. We use these equation to also define the
+<em>units</em> of our transport coefficients. Fluxes are in units of
+(number)/area/time, so with concentration in (number)/volume,
+diffusivity has units of area/time. If the chemical potential is written
+in units of energy, the Onsager coefficients have units of
+(number)/length/energy/time. If the chemical potentials will instead
+have units of energy/volume, then the corresponding Onsager coefficients
+have units of area/energy/time.</p>
+<p>Below are more specific details about the different calculators and the
+output available.</p>
+<div class="section" id="Interstitial-diffusivity">
+<h3>Interstitial diffusivity<a class="headerlink" href="#Interstitial-diffusivity" title="Permalink to this headline">¶</a></h3>
+<p>The interstitial diffuser outputs a diffusivity tensor that has the
+units of squared length based on the lengths in the corresponding
+<code class="docutils literal"><span class="pre">Crystal</span></code>, and inverse time units corresponding to the rates that are
+given as input: the ratio of transition state prefactors to
+configuration prefactors. In a crystalline system, it is typical to
+specify the lattice vectors in either nm (<span class="math">\(10^{-9}\text{ m}\)</span>) or Å
+(<span class="math">\(10^{-10}\text{ m}\)</span>), and the prefactors of rates are often THz
+(<span class="math">\(10^{12}\text{ s}\)</span>), while diffusivity is often reported in
+either <span class="math">\(\text{m}^2/\text{s}\)</span> or <span class="math">\(\text{cm}^2/\text{s}\)</span>. The
+conversion factors are</p>
+<div class="math">
+\[1\text{ nm}^2\cdot\text{THz} = 10^{-6}\text{ m}^2/\text{s} = 10^{-2}\text{ cm}^2/\text{s}\]</div>
+<div class="math">
+\[1\text{ A}^2\cdot\text{THz} = 10^{-8}\text{ m}^2/\text{s} = 10^{-4}\text{ cm}^2/\text{s}\]</div>
+<p>It it worth noting that this model of diffusion assumes that the
+“interstitial” form of the defect is its ground state configuration (or
+at least <em>one</em> of the configurations used in the derivation of the
+diffusivity is a ground state configuration). This is generally the case
+for the diffusion of a vacancy, or light interstitial elements; however,
+the are materials where a solute has a lower energy as a substitutional
+defect, but can occupy an interstitial site and diffuse from there. This
+requires knowledge of the <em>relative occupancy</em> of the two states. Using
+Kroger-Vink notation, let [B] be the total solute concentration, and
+<span class="math">\([\text{B}_\text{A}]\)</span> and <span class="math">\([\text{B}_\text{i}]\)</span> the
+substitutional and interstitial concentrations, then</p>
+<div class="math">
+\[D_\text{B} = \left\{[\text{B}_\text{i}]D_\text{int} + [\text{B}_\text{A}]D_\text{sub}\right\}/[\text{B}]\]</div>
+<p>for interstitial diffusivity <span class="math">\(D_\text{int}\)</span> and substitutional
+diffusivity <span class="math">\(D_\text{sub}\)</span>. The relative occupancies may be
+determined by <em>global thermal equilibrium</em> or <em>local thermal
+equilibrium</em>. The latter is more complex, and relies on knowledge of
+local defect processes and conditions, and is not discussed further
+here. For global thermal equilibrium, if we know the energy of the
+ground state substitutional defect <span class="math">\(E_\text{sub}\)</span> and the lowest
+energy configuration used by the diffuser <span class="math">\(E_\text{int}\)</span>, then</p>
+<div class="math">
+\[[\text{B}_\text{i}]/[\text{B}] = (1 + \exp((E_\text{int}-E_\text{sub})/k_\text{B}T)^{-1} \approx \exp(-(E_\text{int}-E_\text{sub})/k_\text{B}T)\]</div>
+<p>and</p>
+<div class="math">
+\[[\text{B}_\text{A}]/[\text{B}] = (1 + \exp(-(E_\text{int}-E_\text{sub})/k_\text{B}T)^{-1} \approx 1\]</div>
+<p>where the approximations are valid when
+<span class="math">\(E_\text{int}-E_\text{sub}\gg k_\text{B}T\)</span>.</p>
+</div>
+<div class="section" id="Derivatives-of-diffusivity:-activation-barrier-tensor">
+<h3>Derivatives of diffusivity: activation barrier tensor<a class="headerlink" href="#Derivatives-of-diffusivity:-activation-barrier-tensor" title="Permalink to this headline">¶</a></h3>
+<p>At any given temperature, the temperature dependence of the diffusivity
+can be taken as an Arrhenius form,</p>
+<div class="math">
+\[\underline D = \underline D_0 \exp(-\beta \underline E^\text{act})\]</div>
+<p>for inverse temperature <span class="math">\(\beta = (k_\text{B}T)^{-1}\)</span>, and the
+activation barrier, <span class="math">\(\underline E^\text{act}\)</span> can also display
+anisotropy. Note that in this expression, the exponential is taken on a
+per-component basis, not as a true tensor exponential. We can compute
+<span class="math">\(Q\)</span> by taking the per-component logarithmic derivative with
+respect to inverse temperature,</p>
+<div class="math">
+\[\underline E^\text{act} = -\underline D^{-1/2}\frac{d\underline D}{d\beta}\underline D^{-1/2}\]</div>
+<p>The <code class="docutils literal"><span class="pre">diffusivity()</span></code> function with <code class="docutils literal"><span class="pre">CalcDeriv=True</span></code> returns a second
+tensorial quantity, <code class="docutils literal"><span class="pre">dD</span></code> which when multiplied by <span class="math">\(k_\text{B}T\)</span>,
+gives <span class="math">\(d\underline D/d\beta\)</span>. Hence, to compute the activation
+barrier tensor, we evaluate:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [50]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>np.dot(np.linalg.inv(DFCCint), kBT*dDFCCint)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[50]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>array([[  9.08288044e-01,   4.84706356e-18,  -4.84706356e-18],
+       [  4.84706356e-18,   9.08288044e-01,   6.07359322e-18],
+       [ -4.84706356e-18,   6.07359322e-18,   9.08288044e-01]])
+</pre></div>
+</div>
+</div>
+<p>In this case, as the matrices are isotropic, we can use
+<span class="math">\(\underline D^{-1}\)</span> rather than <span class="math">\(\underline D^{-1/2}\)</span> which
+must be computed via diagonalization.</p>
+<p>This tensor has the same energy units as the variable <code class="docutils literal"><span class="pre">kBT</span></code>.</p>
+<p>Given the barriers for diffusion, one might have expected that
+<span class="math">\(\underline E^\text{act}\)</span> would be 1, as that is the transition
+state energy to go from octahedral to tetrahedral. However, the
+activation barrier is approximately the rate-limiting transition state
+energy minus the <em>average configuration energy</em>. Since we’ve chosen a
+large temperature, the tetrahedral sites have non-negligible occupation,
+which raises the average energy. As the temperature decreases, the
+activation energy will approach 1.</p>
+</div>
+<div class="section" id="Derivatives-of-diffusivity:-elastodiffusion-and-activation-volume-tensor">
+<h3>Derivatives of diffusivity: elastodiffusion and activation volume tensor<a class="headerlink" href="#Derivatives-of-diffusivity:-elastodiffusion-and-activation-volume-tensor" title="Permalink to this headline">¶</a></h3>
+<p>The derivative with respect to strain is the fourth-rank
+<em>elastodiffusivity</em> tensor <span class="math">\(\underline d\)</span>, where</p>
+<div class="math">
+\[d_{abcd} = \frac{dD_{ab}}{d\varepsilon_{cd}}\]</div>
+<p>This is returned by the <code class="docutils literal"><span class="pre">elastodiffusion</span></code> function, which requires the
+elastic dipole tensors be included in the function call as well. The
+elastic dipoles have the same units of energies, and so are input as
+<span class="math">\(\beta\underline P\)</span>, which is unitless. The returned tensor has
+the same units as the diffusivity.</p>
+<p>The <em>activation volume</em> tensor (logarithmic derivative of diffusivity
+with respect to stress) can be computed from the elastodiffusivity
+tensor if the compliance tensor <span class="math">\(\underline S\)</span> is known; then,</p>
+<div class="math">
+\[V^\text{act}_{abcd} = k_\text{B}T \sum_{ijkl=1}^3 (\underline D^{-1/2})_{ai} d_{ijkl} (\underline D^{-1/2})_{bj} S_{klcd}\]</div>
+<p>The units of this quantity are given by the units of <span class="math">\(k_\text{B}T\)</span>
+(energy) multiplied by the units of <span class="math">\(\underline S\)</span> (inverse
+pressure). Typically, <span class="math">\(k_\text{B}T\)</span> will be known in eV and
+<span class="math">\(\underline S\)</span> in GPa<span class="math">\(^{-1}\)</span>, so the conversion factor</p>
+<div class="math">
+\[1\text{ eV}\cdot\text{GPa}^{-1} = 1.6022\times10^{-19}\text{ J}\cdot10^{-9}\text{ m}^3/\text{J} = 0.16022\text{ nm}^3 = 160.22\text{ A}^3\]</div>
+<p>can be useful.</p>
+</div>
+<div class="section" id="Vacancy-mediated-diffusivity">
+<h3>Vacancy-mediated diffusivity<a class="headerlink" href="#Vacancy-mediated-diffusivity" title="Permalink to this headline">¶</a></h3>
+<p>The interstitial diffuser outputs a diffusivity tensor that has the
+units of squared length based on the lengths in the corresponding
+<code class="docutils literal"><span class="pre">Crystal</span></code>, and inverse time units corresponding to the rates that are
+given as input: the ratio of transition state prefactors to
+configuration prefactors. In a crystalline system, it is typical to
+specify the lattice vectors in either nm (<span class="math">\(10^{-9}\text{ m}\)</span>) or Å
+(<span class="math">\(10^{-10}\text{ m}\)</span>), and the prefactors of rates are often THz
+(<span class="math">\(10^{12}\text{ s}\)</span>). The quantities <code class="docutils literal"><span class="pre">L0vv</span></code>, <code class="docutils literal"><span class="pre">Lss</span></code>, <code class="docutils literal"><span class="pre">Lsv</span></code>,
+and <code class="docutils literal"><span class="pre">L1vv</span></code> output by the <code class="docutils literal"><span class="pre">Lij</span></code> function all have the units of
+area/time, so the the conversion factors below are often useful:</p>
+<div class="math">
+\[1\text{ nm}^2\cdot\text{THz} = 10^{-6}\text{ m}^2/\text{s} = 10^{-2}\text{ cm}^2/\text{s}\]</div>
+<div class="math">
+\[1\text{ A}^2\cdot\text{THz} = 10^{-8}\text{ m}^2/\text{s} = 10^{-4}\text{ cm}^2/\text{s}\]</div>
+<p>To convert the four quantities into <span class="math">\(\underline L^\text{vv}\)</span>,
+<span class="math">\(\underline L^\text{ss}\)</span>, and <span class="math">\(\underline L^\text{sv}\)</span>, some
+additional information is required.</p>
+<p>First, in the dilute limit, <span class="math">\(\underline L^\text{ss}\)</span> and
+<span class="math">\(\underline L^\text{sv}\)</span> are proportional to
+<span class="math">\((k_\text{B}T)^{-1}c^\text{v}c^\text{s}\)</span>; none of these quantities
+are known to the diffuser, and the two concentrations are essentially
+independent variables that must be supplied. The concentrations in these
+cases are <em>fractional concentrations</em>, not per volume. Finally, if the
+Onsager coefficients are for chemical potential specified as energies
+(not energies per volume), the quantities need to be <em>divided by the
+volume per atom</em>, and the final quantity has the appropriate units.
+Hence,</p>
+<ul class="simple">
+<li><span class="math">\(\underline L^\text{ss}\)</span> =
+<code class="docutils literal"><span class="pre">Lss*(solute</span> <span class="pre">concentration)*(vacancy</span> <span class="pre">concentration)/(volume)/kBT</span></code></li>
+<li><span class="math">\(\underline L^\text{sv}\)</span> =
+<code class="docutils literal"><span class="pre">Lsv*(solute</span> <span class="pre">concentration)*(vacancy</span> <span class="pre">concentration)/(volume)/kBT</span></code></li>
+</ul>
+<p>where the concentration quantities are <em>fractional</em>.</p>
+<p>The vacancy <span class="math">\(\underline L^\text{vv}\)</span> is more complicated, as it
+has a leading order term that is independent of solute, and a first
+order correction that is linear in the solute concentration. Hence,</p>
+<ul class="simple">
+<li><span class="math">\(\underline L^\text{vv}\)</span> =
+<code class="docutils literal"><span class="pre">(L0vv</span> <span class="pre">+</span> <span class="pre">L1vv*(solute</span> <span class="pre">concentration))*(vacancy</span> <span class="pre">concentration)/(volume)/kBT</span></code></li>
+</ul>
+</div>
+<div class="section" id="Drag-ratio">
+<h3>Drag ratio<a class="headerlink" href="#Drag-ratio" title="Permalink to this headline">¶</a></h3>
+<p>The <em>drag ratio</em> is the unitless (tensorial) quantity
+<span class="math">\(\underline L^\text{sv}(\underline L^\text{ss})^{-1}\)</span>. Because of
+the identical prefactors in front of both terms in the dilute limit,
+this is given by</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>In [51]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<span></span>np.dot(Lsv, np.linalg.inv(Lss))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none"><div class="highlight"><pre>
+<span></span>Out[51]:
+</pre></div>
+</div>
+<div class="output_area highlight-none"><div class="highlight"><pre>
+<span></span>array([[-0.30443445,  0.        ,  0.        ],
+       [ 0.        , -0.30443445,  0.        ],
+       [ 0.        ,  0.        , -0.30443445]])
+</pre></div>
+</div>
+</div>
+<p>The vacancy wind factor
+<span class="math">\(G=\underline L^\text{As}(\underline L^\text{ss})^{-1}\)</span> is related
+to the drag ratio by simple transformations.</p>
+</div>
+<div class="section" id="Solute-diffusivity-in-the-dilute-limit">
+<h3>Solute diffusivity in the dilute limit<a class="headerlink" href="#Solute-diffusivity-in-the-dilute-limit" title="Permalink to this headline">¶</a></h3>
+<p>The solute diffusivity can also be computed for the dilute limit as
+well. The general relation between <span class="math">\(\underline D^\text{s}\)</span> and the
+Onsager transport coefficients is</p>
+<div class="math">
+\[\underline D^\text{s} = k_\text{B}T\Omega\left\{(c^\text{s})^{-1}\underline L^\text{ss} - (1-c^\text{s}-c^\text{v})^{-1}\underline L^\text{As}\right\}\left(1+\frac{d\ln\gamma^\text{s}}{d\ln c^\text{s}}\right)\]</div>
+<p>where <span class="math">\(\Omega\)</span> is the volume per atom and <span class="math">\(\gamma^\text{s}\)</span>
+is the solute activity:</p>
+<div class="math">
+\[\mu^\text{s} = \mu^\text{s}_0 + k_\text{B}T\ln\left(\gamma^\text{s}c^\text{s}/c^\text{s}_0\right)\]</div>
+<p>In the dilute limit, <span class="math">\(\gamma^\text{s}\to 1\)</span>, and thus</p>
+<div class="math">
+\[\underline D^\text{s} = k_\text{B}T\Omega(c^\text{s})^{-1}\underline L^\text{ss}\]</div>
+<p>Conveniently, this cancels most of the “missing” prefactors we put in to
+compute the Onsager coefficient; hence,</p>
+<ul class="simple">
+<li><span class="math">\(\underline D^\text{s}\)</span> = <code class="docutils literal"><span class="pre">Lss*(vacancy</span> <span class="pre">concentration)</span></code></li>
+</ul>
+<p>where the concentration quantities are <em>fractional</em>. In the case of
+<em>global thermal equilibrium</em>, the vacancy concentration is the
+equilibrium concentration
+<span class="math">\(\exp(-(E^\text{v}_\text{form} - TS^\text{v}_\text{form})/k_\text{B}T)\)</span>.</p>
+<p>A similar argument holds for the vacancy diffusivity in the dilute limit</p>
+<ul class="simple">
+<li><span class="math">\(\underline D^\text{v}\)</span> =
+<code class="docutils literal"><span class="pre">L0vv</span> <span class="pre">+</span> <span class="pre">(solute</span> <span class="pre">concentration)*L1vv</span></code></li>
+</ul>
+<p>The off-diagonal diffusivity terms are more complex as (1) they are
+non-symmetric
+(<span class="math">\(\underline D^\text{sv} \ne \underline D^\text{vs}\)</span>), and (2) the
+vacancy-dependency of the solute activity and the solute-dependence of
+the vacancy activity needs to be known to properly include thermodynamic
+factors.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="notebooks.html" class="btn btn-neutral float-right" title="Example Notebooks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="includeme.html" class="btn btn-neutral" title="Onsager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Dallas R. Trinkle.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.2.3',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
