@@ -28,6 +28,9 @@ setup(
     download_url = 'https://github.com/DallasTrinkle/onsager/tarball/v1.2.3', # for when we upload
     keywords = ['diffusion', 'elastodiffusion', 'mass transport',
                 'Onsager coefficients', 'transport coefficieints'],
+    package_data = {
+        'onsager': ['onsager/*.pl']
+        },
     classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
