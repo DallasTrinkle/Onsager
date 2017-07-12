@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Automator &mdash; Onsager 1.2.3 documentation</title>
+  <title>Automator &mdash; Onsager 1.2.4 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Onsager 1.2.3 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 1.2.4 documentation" href="index.html"/>
         <link rel="up" title="Modules" href="modules.html"/>
         <link rel="prev" title="OnsagerCalc" href="OnsagerCalc.html"/> 
 
@@ -247,7 +247,7 @@ in initial cell to use.</li>
 
 <dl class="function">
 <dt id="automator.supercelltar">
-<code class="descclassname">automator.</code><code class="descname">supercelltar</code><span class="sig-paren">(</span><em>tar</em>, <em>superdict</em>, <em>filemode=436</em>, <em>directmode=509</em>, <em>timestamp=None</em>, <em>INCARrelax=’SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\n’</em>, <em>INCARNEB=’SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\nIMAGES = 1\nSPRING = -5\nLCLIMB = .TRUE.\nNELMIN = 4\nNFREE = 10\n’</em>, <em>KPOINTS=’Gamma\n1\nReciprocal\n0. 0. 0. 1.\n’</em>, <em>basedir=”</em>, <em>statename=’relax.’</em>, <em>transitionname=’neb.’</em>, <em>IDformat=’{:02d}’</em>, <em>JSONdict=’tags.json’</em>, <em>YAMLdef=’supercell.yaml’</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#supercelltar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.supercelltar" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">automator.</code><code class="descname">supercelltar</code><span class="sig-paren">(</span><em>tar</em>, <em>superdict</em>, <em>filemode=436</em>, <em>directmode=509</em>, <em>timestamp=None</em>, <em>INCARrelax='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\n'</em>, <em>INCARNEB='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\nIMAGES = 1\nSPRING = -5\nLCLIMB = .TRUE.\nNELMIN = 4\nNFREE = 10\n'</em>, <em>KPOINTS='Gamma\n1\nReciprocal\n0. 0. 0. 1.\n'</em>, <em>basedir=''</em>, <em>statename='relax.'</em>, <em>transitionname='neb.'</em>, <em>IDformat='{:02d}'</em>, <em>JSONdict='tags.json'</em>, <em>YAMLdef='supercell.yaml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#supercelltar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.supercelltar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes in a tarfile (needs to be open for writing) and a supercelldict (from a
 diffuser) and creates the full directory structure inside the tarfile. Best used in
 a form like</p>
@@ -282,7 +282,7 @@ by tag value (default: automator.INCARrelax)</li>
 by tag value (default: automator.INCARNEB)</li>
 <li><strong>KPOINTS</strong> – contents of KPOINTS file (default: gamma-point only calculation);
 if None or empty, no KPOINTS file at all</li>
-<li><strong>basedir</strong> – prepended to all files/directories (default: ”)</li>
+<li><strong>basedir</strong> – prepended to all files/directories (default: ‘’)</li>
 <li><strong>statename</strong> – prepended to all state names, before 2 digit number (default: relax.)</li>
 <li><strong>transitionname</strong> – prepended to all transition names, before 2 digit number  (default: neb.)</li>
 <li><strong>IDformat</strong> – format for integer tags (default: {:02d})</li>
@@ -340,7 +340,7 @@ set to None to not output. <strong>may want to change this to None for the futur
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.3',
+            VERSION:'1.2.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
