@@ -1765,7 +1765,7 @@
     "where $E^\\text{T}_{\\text{A}-\\text{B}}$ is the energy of the transition state between A and B, and $\\nu^\\text{T}_{\\text{A}-\\text{B}}$ is the prefactor for the transition state.\n",
     "\n",
     "If we assume harmonic transition state theory, then we can write the site entropic term $\\rho^0$ as\n",
-    "$$\\rho^0 = \\frac{\\prod \\nu^{\\text{defect-supercell}}}{\\prod \\nu^{\\text{perfect-supercell}}}$$\n\n",
+    "$$\\rho^0 = \\frac{\\prod \\nu^{\\text{perfect-supercell}}}{\\prod \\nu^{\\text{defect-supercell}}}$$\n\n",
     "\n",
     "where $\\nu$ are the vibrational eigenvalues of the corresponding supercells, and the prefactor for the transition state is\n",
     "$$\\nu^\\text{T} = \\frac{\\prod \\nu^{\\text{perfect-supercell}}}{\\prod_{\\nu^2>0} \\nu^{\\text{transition state}}}$$\n\n",
