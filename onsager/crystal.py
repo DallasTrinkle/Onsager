@@ -13,8 +13,8 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 import collections, copy, itertools
 from numbers import Number
-from fractions import gcd
-import yaml  ### use crystal.yaml to call--may need to change in the future
+from math import gcd
+import yaml  # use crystal.yaml to call--may need to change in the future
 from functools import reduce
 
 # YAML tags:
@@ -92,10 +92,10 @@ def maptranslation(oldpos, newpos, oldspins=None, newspins=None, threshold=1e-8)
         newspins = oldspins
 
     # Work with the shortest possible list for identifying translations
-    maxlen = 0
     atomindex = 0
+    maxlen = len(oldpos[atomindex])
     for i, ulist in enumerate(oldpos):
-        if len(ulist) > maxlen:
+        if len(ulist) < maxlen:
             maxlen = len(ulist)
             atomindex = i
     ru0 = newpos[atomindex][0]
@@ -512,7 +512,8 @@ def FourthRankIsotropic(F):
     return average, shear
 
 
-# TODO: Add the ability to explicitly specify "metastable" states that should be considered the same chemistry, but not subject to reduction
+# TODO: Add the ability to explicitly specify "metastable" states
+# that should be considered the same chemistry, but not subject to reduction
 class Crystal(object):
     """
     A class that defines a crystal, as well as the symmetry analysis that goes along with it.
