@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 # Added nbsphinx to include our jupyter notebooks in examples
+# Added console_highlighting cf. https://github.com/spatialaudio/nbsphinx/issues/24
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
@@ -43,6 +44,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'nbsphinx',
+    'IPython.sphinxext.ipython_console_highlighting',
 ]
 
 # nbsphinx: if there is an output cell present, the default is not to evaluate
