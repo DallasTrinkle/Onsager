@@ -13,6 +13,7 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 from numbers import Number
 from scipy.special import factorial
+from scipy.misc import comb
 
 
 class Taylor3D(object):
@@ -84,7 +85,8 @@ class Taylor3D(object):
                     zz = (-1) ** (l - k) * factorial(2 * k, True) / \
                          (2 ** l * factorial(2 * k - l - m, True) * factorial(k, True) * factorial(l - k, True))
                     for j in range(m + 1):
-                        xy = factorial(m, True) / (factorial(j, True) * factorial(m - j, True))
+                        # xy = factorial(m, True) / (factorial(j, True) * factorial(m - j, True))
+                        xy = comb(m, j)
                         Ylmpow[ind, cls.pow2ind[j, m - j, 2 * k - l - m]] = pre * zz * xy * (1.j) ** (m - j)
             for m in range(-l, 0):
                 ind = cls.Ylm2ind[l, m]
@@ -1202,90 +1204,32 @@ class Taylor2D(Taylor3D):
         """
         Construct the expansion of the FC's in powers of x,y. Done via brute force.
 
-        :return FCpow[lm, p]: expansion of each FC in powers
+        :return FCpow[l, p]: expansion of each FC in powers
         """
         FCpow = np.zeros((cls.NFC, cls.Npower), dtype=complex)
-        for l in range(cls.Lmax + 1):
-            # do the positive m first; then easily swap to get the negative m
-            for m in range(l + 1):
-                ind = cls.FC2ind[l, m]
-                pre = (-1) ** m * np.sqrt((2 * l + 1) * factorial(l - m, True) /
-                                          (4 * np.pi * factorial(l + m, True)))
-                for k in range((l + m + 1) // 2, l + 1):
-                    zz = (-1) ** (l - k) * factorial(2 * k, True) / \
-                         (2 ** l * factorial(2 * k - l - m, True) * factorial(k, True) * factorial(l - k, True))
-                    for j in range(m + 1):
-                        xy = factorial(m, True) / (factorial(j, True) * factorial(m - j, True))
-                        FCpow[ind, cls.pow2ind[j, m - j, 2 * k - l - m]] = pre * zz * xy * (1.j) ** (m - j)
-            for m in range(-l, 0):
-                ind = cls.FC2ind[l, m]
-                indpos = cls.FC2ind[l, -m]
-                for p in range(cls.Npower):
-                    FCpow[ind, p] = (-1) ** (-m) * FCpow[indpos, p].conjugate()
+        for lind, l in enumerate(cls.ind2FC):
+            labs = abs(l)
+            lsign = 1j if l >= 0 else -1j
+            for k in range(labs + 1):
+                nmind = cls.pow2ind[k, labs - k]
+                FCpow[lind, nmind] = comb(labs, k) * (lsign) ** (labs - k)
         return FCpow
 
     @classmethod
     def makepowFC(cls):
         """
-        Construct the expansion of the powers in FC's. Done using recursion relations
-        instead of direct calculation. Note: an alternative approach would be Gaussian
-        quadrature.
+        Construct the expansion of the powers in FC's. Done using brute force
 
-        :return powFC[p][lm]: expansion of powers in FC; uses indexing scheme above
+        :return powFC[p][l]: expansion of powers in FC; uses indexing scheme above
         """
         powFC = np.zeros((cls.Npower, cls.NFC), dtype=complex)
-        Cp = np.zeros((cls.Lmax, 2 * cls.Lmax - 1))
-        Cm = np.zeros((cls.Lmax, 2 * cls.Lmax - 1))
-        Sp = np.zeros((cls.Lmax, 2 * cls.Lmax - 1))
-        Sm = np.zeros((cls.Lmax, 2 * cls.Lmax - 1))
-        # because this is for our recursion relations, we only need to work to Lmax-1 !
-        for l, m in ((l, m) for l in range(cls.Lmax) for m in range(-l, l + 1)):
-            Cp[l, m] = np.sqrt((l - m + 1) * (l + m + 1) / ((2 * l + 1) * (2 * l + 3)))
-            Sp[l, m] = 0.5 * np.sqrt((l + m + 1) * (l + m + 2) / ((2 * l + 1) * (2 * l + 3)))
-            if l > 0:  # and -l < m < l:
-                Cm[l, m] = np.sqrt((l - m) * (l + m) / ((2 * l - 1) * (2 * l + 1)))
-                Sm[l, m] = 0.5 * np.sqrt((l - m) * (l - m - 1) / ((2 * l - 1) * (2 * l + 1)))
-
-        # first, prime the pump with 1
-        powFC[cls.pow2ind[0, 0, 0], cls.FC2ind[0, 0]] = np.sqrt(4 * np.pi)
-        for n0, n1, n2 in ((n0, n1, n2) for n0 in range(cls.Lmax + 1)
-                           for n1 in range(cls.Lmax + 1)
-                           for n2 in range(cls.Lmax + 1)
-                           if 0 < n0 + n1 + n2 <= cls.Lmax):
-            ind = cls.pow2ind[n0, n1, n2]
-            lmax = n0 + n1 + n2
-            if n2 > 0:
-                # we can recurse up from n0, n1, n2-1
-                indlow = cls.pow2ind[n0, n1, n2 - 1]
-                for l, m in ((l, m) for l in range(lmax) for m in range(-l, l + 1)):
-                    plm = powFC[indlow, cls.FC2ind[l, m]]
-                    powFC[ind, cls.FC2ind[l + 1, m]] += Cp[l, m] * plm
-                    if l > 0 and -l < m < l:
-                        powFC[ind, cls.FC2ind[l - 1, m]] += Cm[l, m] * plm
-            elif n1 > 0:
-                # we can recurse up from n0, n1-1, n2
-                indlow = cls.pow2ind[n0, n1 - 1, n2]
-                for l, m in ((l, m) for l in range(lmax) for m in range(-l, l + 1)):
-                    plm = powFC[indlow, cls.FC2ind[l, m]]
-                    powFC[ind, cls.FC2ind[l + 1, m + 1]] += 1.j * Sp[l, m] * plm
-                    powFC[ind, cls.FC2ind[l + 1, m - 1]] += 1.j * Sp[l, -m] * plm
-                    # if l>0:
-                    if m < l - 1:
-                        powFC[ind, cls.FC2ind[l - 1, m + 1]] += -1.j * Sm[l, m] * plm
-                    if m > -l + 1:
-                        powFC[ind, cls.FC2ind[l - 1, m - 1]] += -1.j * Sm[l, -m] * plm
-            elif n0 > 0:
-                # we can recurse up from n0-1, n1, n2
-                indlow = cls.pow2ind[n0 - 1, n1, n2]
-                for l, m in ((l, m) for l in range(lmax) for m in range(-l, l + 1)):
-                    plm = powFC[indlow, cls.FC2ind[l, m]]
-                    powFC[ind, cls.FC2ind[l + 1, m + 1]] += -Sp[l, m] * plm
-                    powFC[ind, cls.FC2ind[l + 1, m - 1]] += Sp[l, -m] * plm
-                    # if l>0:
-                    if m < l - 1:
-                        powFC[ind, cls.FC2ind[l - 1, m + 1]] += Sm[l, m] * plm
-                    if m > -l + 1:
-                        powFC[ind, cls.FC2ind[l - 1, m - 1]] += -Sm[l, -m] * plm
+        for nind, (n,m) in enumerate(cls.ind2pow):
+            pre = (-1j) ** m / (2 ** (n + m))
+            for j in range(n + 1):
+                for k in range(m + 1):
+                    l = 2 * j - n + 2 * k - m
+                    powFC[nind, cls.FC2ind[l]] += pre * comb(n, j) * comb(m, k) * \
+                                                  (-1) ** (m - k)
         return powFC
 
     @classmethod
