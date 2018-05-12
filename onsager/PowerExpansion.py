@@ -391,7 +391,7 @@ class Taylor3D(object):
 
     def copy(self):
         """Returns a copy of the current expansion"""
-        return Taylor3D(self.coefflist)
+        return type(self)(self.coefflist)
 
     def addhdf5(self, HDF5group):
         """
@@ -487,7 +487,7 @@ class Taylor3D(object):
             keyt = (key,)
         else:
             keyt = key
-        return Taylor3D([(n, l, c[(slice(0, None, None),) + keyt]) for n, l, c in self.coefflist], nodeepcopy=True)
+        return type(self)([(n, l, c[(slice(0, None, None),) + keyt]) for n, l, c in self.coefflist], nodeepcopy=True)
 
     def __setitem__(self, key, value):
         """
@@ -499,7 +499,7 @@ class Taylor3D(object):
         :return: Taylor expansion after indexing
         """
         if not hasattr(value, "coefflist"):
-            raise ValueError("Can only do setitem ([...] = ) with another Taylor3D on the rhs")
+            raise ValueError("Can only do setitem ([...] = ) with another {} on the rhs".format(type(self)))
         if type(key) is not tuple:
             keyt = (key,)
         else:
@@ -648,7 +648,7 @@ class Taylor3D(object):
         :param powtrans: Npow x Npow matrix, of [oldpow,newpow] corresponding to the rotation
         :return rTaylor3D: Taylor expansion, rotated
         """
-        return Taylor3D(self.rotatecoeff(self.coefflist, powtrans))
+        return type(self)(self.rotatecoeff(self.coefflist, powtrans))
 
     def irotate(self, powtrans):
         """
@@ -727,13 +727,13 @@ class Taylor3D(object):
 
     def __neg__(self):
         """Return -T3D"""
-        return Taylor3D(self.negcoeff(self))
+        return type(self)(self.negcoeff(self))
 
     def __add__(self, other):
         """Add a set of Taylor expansions"""
         # if we're passed an array, just take it in stride
         if hasattr(other, 'shape'): other = [(0, 0, other.reshape((1,) + other.shape))]
-        return Taylor3D(self.sumcoeff(self, other))
+        return type(self)(self.sumcoeff(self, other))
 
     def __radd__(self, other):
         """Add a set of Taylor expansions"""
@@ -741,7 +741,7 @@ class Taylor3D(object):
         if other == 0: return self.copy()
         # if we're passed an array, just take it in stride
         if hasattr(other, 'shape'): other = [(0, 0, other.reshape((1,) + other.shape))]
-        return Taylor3D(self.sumcoeff(self, other))
+        return type(self)(self.sumcoeff(self, other))
 
     def __iadd__(self, other):
         """Add a set of Taylor expansions"""
@@ -754,13 +754,13 @@ class Taylor3D(object):
         """Subtract a set of Taylor expansions"""
         # if we're passed an array, just take it in stride
         if hasattr(other, 'shape'): other = [(0, 0, other.reshape((1,) + other.shape))]
-        return Taylor3D(self.sumcoeff(self, other, 1, -1))
+        return type(self)(self.sumcoeff(self, other, 1, -1))
 
     def __rsub__(self, other):
         """Subtract a set of Taylor expansions"""
         # if we're passed an array, just take it in stride
         if hasattr(other, 'shape'): other = [(0, 0, other.reshape((1,) + other.shape))]
-        return Taylor3D(self.sumcoeff(self, other, -1, 1))
+        return type(self)(self.sumcoeff(self, other, -1, 1))
 
     def __isub__(self, other):
         """Subtract a set of Taylor expansions"""
@@ -802,11 +802,11 @@ class Taylor3D(object):
 
     def ldot(self, c):
         """Returns :math:`c\\cdot self`"""
-        return Taylor3D(self.tensorproductcoeff(c, self))
+        return type(self)(self.tensorproductcoeff(c, self))
 
     def rdot(self, c):
         """Returns :math:`self\\cdot c`"""
-        return Taylor3D(self.tensorproductcoeff(c, self, leftmultiply=False))
+        return type(self)(self.tensorproductcoeff(c, self, leftmultiply=False))
 
     def ildot(self, c):
         """Computes :math:`c\\cdot self` in place"""
@@ -899,7 +899,7 @@ class Taylor3D(object):
             coeff = self.scalarproductcoeff(other, self)
         else:
             coeff = self.coeffproductcoeff(self, other)
-        return Taylor3D(coeff)
+        return type(self)(coeff)
 
     def __rmul__(self, other):
         """
@@ -912,7 +912,7 @@ class Taylor3D(object):
             coeff = self.scalarproductcoeff(other, self)
         else:
             coeff = self.coeffproductcoeff(self, other)
-        return Taylor3D(coeff)
+        return type(self)(coeff)
 
     @classmethod
     def inversecoeff(cls, a, Nmax=0):
@@ -983,7 +983,7 @@ class Taylor3D(object):
         :param Nmax: maximum order in the inverse expansion
         :return Taylor3D^-1: Taylor series of inverse
         """
-        return Taylor3D(self.inversecoeff(self, Nmax))
+        return type(self)(self.inversecoeff(self, Nmax))
 
     @classmethod
     def reducecoeff(cls, a, inplace=False, atol=1e-10):
@@ -1145,4 +1145,4 @@ class Taylor3D(object):
             self.truncatecoeff(self.coefflist, Nmax, inplace)
             return self
         else:
-            return Taylor3D(self.truncatecoeff(self.coefflist, Nmax))
+            return type(self)(self.truncatecoeff(self.coefflist, Nmax))
