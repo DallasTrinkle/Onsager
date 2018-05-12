@@ -199,7 +199,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         if __debug__:
             if type(other) is not np.ndarray: raise TypeError('Can only add a translation to a group operation')
             if other.shape != (3,): raise IndexError('Can only add a 3 dimensional vector')
-            if not np.issubdtype(other.dtype, int): raise TypeError('Can only add a lattice vector translation')
+            if not np.issubdtype(other.dtype, np.integer): raise TypeError('Can only add a lattice vector translation')
         return GroupOp(self.rot, self.trans + other, self.cartrot, self.indexmap)
 
     def __sub__(self, other):
