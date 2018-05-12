@@ -1164,45 +1164,43 @@ class Taylor2D(Taylor3D):
         :param Lmax: maximum l value to consider; equal to the sum of powers
         :return NFC: number of Fourier coefficients
         :return Npower: number of power coefficients
-        :return pow2ind[n1][n2][n3]: powers to index
+        :return pow2ind[n1][n2]: powers to index
         :return ind2pow[n]: powers for a given index
-        :return FC2ind[l][m]: (l,m) to index
-        :return ind2FC[lm]: (l,m) for a given index
+        :return FC2ind[l]: (l) to index
+        :return ind2FC[lind]: (l) for a given index
         :return powlrange[l]: upper limit of power indices for a given l value; note: [-1] = 0
         """
         # first, the counts
-        NFC = (Lmax + 1) ** 2
-        Npower = NFC + ((Lmax + 1) * Lmax * (Lmax - 1)) // 6
+        NFC = 2*Lmax + 1
+        Npower = (Lmax+1)*(Lmax+2)//2
         # indexing arrays
         powlrange = np.zeros(Lmax + 2, dtype=int)
         powlrange[-1] = 0
-        pow2ind = -np.ones((Lmax + 1, Lmax + 1, Lmax + 1), dtype=int)
-        ind2pow = np.zeros((Npower, 3), dtype=int)
-        FC2ind = -np.ones((Lmax + 1, 2 * Lmax + 1), dtype=int)
-        ind2FC = np.zeros((NFC, 2), dtype=int)
-        # powers first; these are ordered by increasing l = n1+n2+n3
+        pow2ind = -np.ones((Lmax + 1, Lmax + 1), dtype=int)
+        ind2pow = np.zeros((Npower, 2), dtype=int)
+        FC2ind = np.zeros(NFC, dtype=int)
+        ind2FC = np.zeros(NFC, dtype=int)
+        # powers first; these are ordered by increasing l = n1+n2
         ind = 0
         for l in range(Lmax + 1):
             for n1 in range(l + 1):
-                for n2 in range(l + 1 - n1):
-                    n3 = l - n1 - n2
-                    pow2ind[n1, n2, n3] = ind
-                    ind2pow[ind, 0], ind2pow[ind, 1], ind2pow[ind, 2] = n1, n2, n3
-                    ind += 1
+                n2 = l-n1
+                pow2ind[n1, n2] = ind
+                ind2pow[ind,0], ind2pow[ind, 1] = n1, n2
+                ind += 1
             powlrange[l] = ind
         # next, FC values
         ind = 0
-        for l in range(Lmax + 1):
-            for m in range(-l, l + 1):
-                FC2ind[l, m] = ind
-                ind2FC[ind, 0], ind2FC[ind, 1] = l, m
-                ind += 1
+        for l in range(-Lmax,Lmax+1):
+            FC2ind[l] = ind
+            ind2FC[ind] = l
+            ind += 1
         return NFC, Npower, pow2ind, ind2pow, FC2ind, ind2FC, powlrange
 
     @classmethod
     def makeFCpow(cls):
         """
-        Construct the expansion of the FC's in powers of x,y,z. Done via brute force.
+        Construct the expansion of the FC's in powers of x,y. Done via brute force.
 
         :return FCpow[lm, p]: expansion of each FC in powers
         """
