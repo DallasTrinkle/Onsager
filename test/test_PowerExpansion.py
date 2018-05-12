@@ -414,27 +414,21 @@ class PowerExpansion2DTests(unittest.TestCase):
 
     def setUp(self):
         """initial setup for testing"""
-        self.phi = np.pi * 0.2234
-        self.theta = np.pi * 0.7261
+        self.theta = np.pi * 0.2234
         self.c = T2D()
-        self.basis = [(np.eye(2), np.array([0.5, -np.sqrt(0.75), 0.])),
-                      (np.eye(2), np.array([0.5, np.sqrt(0.75), 0.])),
-                      (np.eye(2), np.array([-1., 0., 0.])),
-                      (np.eye(2), np.array([-0.5, -np.sqrt(0.75), 0.])),
-                      (np.eye(2), np.array([-0.5, np.sqrt(0.75), 0.])),
-                      (np.eye(2), np.array([1., 0., 0.])),
-                      (np.eye(2) * 2, np.array([0., 0., 1.])),
-                      (np.eye(2) * 2, np.array([0., 0., -1.])),
+        self.basis = [(np.eye(2), np.array([0.5, -np.sqrt(0.75)])),
+                      (np.eye(2), np.array([0.5, np.sqrt(0.75)])),
+                      (np.eye(2), np.array([-1., 0.])),
+                      (np.eye(2), np.array([-0.5, -np.sqrt(0.75)])),
+                      (np.eye(2), np.array([-0.5, np.sqrt(0.75)])),
+                      (np.eye(2), np.array([1., 0.]))
                       ]
 
     def testExpansionYlmpow(self):
         """Test the expansion of Ylm into powers"""
-        for (phi, theta) in [(self.phi + dp, self.theta + dt)
-                             for dp in (0., 0.25 * np.pi, 0.5 * np.pi, 0.75 * np.pi)
-                             for dt in (0., 0.5 * np.pi, np.pi, 1.5 * np.pi)]:
-            utest, umagn = T2D.powexp(np.array([np.sin(phi) * np.cos(theta),
-                                                np.sin(phi) * np.sin(theta),
-                                                np.cos(phi)]))
+        pass
+        for theta in [self.theta + dt*np.pi for dt in np.linspace(0, 2, num=16, endpoint=False)]:
+            utest, umagn = T2D.powexp(np.array([np.cos(theta), np.sin(theta)]))
             self.assertAlmostEqual(umagn, 1)
             Ylm0 = np.zeros(T2D.NYlm, dtype=complex)
             # Ylm as power expansions
@@ -462,6 +456,7 @@ class PowerExpansion2DTests(unittest.TestCase):
     def testProjection(self):
         """Test that the L-projections are correct"""
         # Try to do this sequentially
+        pass
         for tup in [(0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)]:
             v = np.zeros(T2D.Npower)
             v[T2D.pow2ind[tup]] = 1.

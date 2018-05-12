@@ -1156,30 +1156,30 @@ class Taylor2D(Taylor3D):
     # As much as possible, we inherit from the 2D code; below are the changes we make
 
     @staticmethod
-    def makeindexPowerYlm(Lmax):
+    def makeindexPowerFC(Lmax):
         """
-        Analyzes the spherical harmonics and powers for a given Lmax; returns a
+        Analyzes the Fourier coefficients and powers for a given Lmax; returns a
         series of index functions.
 
         :param Lmax: maximum l value to consider; equal to the sum of powers
-        :return NYlm: number of Ylm coefficients
+        :return NFC: number of Fourier coefficients
         :return Npower: number of power coefficients
         :return pow2ind[n1][n2][n3]: powers to index
         :return ind2pow[n]: powers for a given index
-        :return Ylm2ind[l][m]: (l,m) to index
-        :return ind2Ylm[lm]: (l,m) for a given index
+        :return FC2ind[l][m]: (l,m) to index
+        :return ind2FC[lm]: (l,m) for a given index
         :return powlrange[l]: upper limit of power indices for a given l value; note: [-1] = 0
         """
         # first, the counts
-        NYlm = (Lmax + 1) ** 2
-        Npower = NYlm + ((Lmax + 1) * Lmax * (Lmax - 1)) // 6
+        NFC = (Lmax + 1) ** 2
+        Npower = NFC + ((Lmax + 1) * Lmax * (Lmax - 1)) // 6
         # indexing arrays
         powlrange = np.zeros(Lmax + 2, dtype=int)
         powlrange[-1] = 0
         pow2ind = -np.ones((Lmax + 1, Lmax + 1, Lmax + 1), dtype=int)
         ind2pow = np.zeros((Npower, 3), dtype=int)
-        Ylm2ind = -np.ones((Lmax + 1, 2 * Lmax + 1), dtype=int)
-        ind2Ylm = np.zeros((NYlm, 2), dtype=int)
+        FC2ind = -np.ones((Lmax + 1, 2 * Lmax + 1), dtype=int)
+        ind2FC = np.zeros((NFC, 2), dtype=int)
         # powers first; these are ordered by increasing l = n1+n2+n3
         ind = 0
         for l in range(Lmax + 1):
@@ -1190,27 +1190,27 @@ class Taylor2D(Taylor3D):
                     ind2pow[ind, 0], ind2pow[ind, 1], ind2pow[ind, 2] = n1, n2, n3
                     ind += 1
             powlrange[l] = ind
-        # next, Ylm values
+        # next, FC values
         ind = 0
         for l in range(Lmax + 1):
             for m in range(-l, l + 1):
-                Ylm2ind[l, m] = ind
-                ind2Ylm[ind, 0], ind2Ylm[ind, 1] = l, m
+                FC2ind[l, m] = ind
+                ind2FC[ind, 0], ind2FC[ind, 1] = l, m
                 ind += 1
-        return NYlm, Npower, pow2ind, ind2pow, Ylm2ind, ind2Ylm, powlrange
+        return NFC, Npower, pow2ind, ind2pow, FC2ind, ind2FC, powlrange
 
     @classmethod
-    def makeYlmpow(cls):
+    def makeFCpow(cls):
         """
-        Construct the expansion of the Ylm's in powers of x,y,z. Done via brute force.
+        Construct the expansion of the FC's in powers of x,y,z. Done via brute force.
 
-        :return Ylmpow[lm, p]: expansion of each Ylm in powers
+        :return FCpow[lm, p]: expansion of each FC in powers
         """
-        Ylmpow = np.zeros((cls.NYlm, cls.Npower), dtype=complex)
+        FCpow = np.zeros((cls.NFC, cls.Npower), dtype=complex)
         for l in range(cls.Lmax + 1):
             # do the positive m first; then easily swap to get the negative m
             for m in range(l + 1):
-                ind = cls.Ylm2ind[l, m]
+                ind = cls.FC2ind[l, m]
                 pre = (-1) ** m * np.sqrt((2 * l + 1) * factorial(l - m, True) /
                                           (4 * np.pi * factorial(l + m, True)))
                 for k in range((l + m + 1) // 2, l + 1):
@@ -1218,24 +1218,24 @@ class Taylor2D(Taylor3D):
                          (2 ** l * factorial(2 * k - l - m, True) * factorial(k, True) * factorial(l - k, True))
                     for j in range(m + 1):
                         xy = factorial(m, True) / (factorial(j, True) * factorial(m - j, True))
-                        Ylmpow[ind, cls.pow2ind[j, m - j, 2 * k - l - m]] = pre * zz * xy * (1.j) ** (m - j)
+                        FCpow[ind, cls.pow2ind[j, m - j, 2 * k - l - m]] = pre * zz * xy * (1.j) ** (m - j)
             for m in range(-l, 0):
-                ind = cls.Ylm2ind[l, m]
-                indpos = cls.Ylm2ind[l, -m]
+                ind = cls.FC2ind[l, m]
+                indpos = cls.FC2ind[l, -m]
                 for p in range(cls.Npower):
-                    Ylmpow[ind, p] = (-1) ** (-m) * Ylmpow[indpos, p].conjugate()
-        return Ylmpow
+                    FCpow[ind, p] = (-1) ** (-m) * FCpow[indpos, p].conjugate()
+        return FCpow
 
     @classmethod
-    def makepowYlm(cls):
+    def makepowFC(cls):
         """
-        Construct the expansion of the powers in Ylm's. Done using recursion relations
+        Construct the expansion of the powers in FC's. Done using recursion relations
         instead of direct calculation. Note: an alternative approach would be Gaussian
         quadrature.
 
-        :return powYlm[p][lm]: expansion of powers in Ylm; uses indexing scheme above
+        :return powFC[p][lm]: expansion of powers in FC; uses indexing scheme above
         """
-        powYlm = np.zeros((cls.Npower, cls.NYlm), dtype=complex)
+        powFC = np.zeros((cls.Npower, cls.NFC), dtype=complex)
         Cp = np.zeros((cls.Lmax, 2 * cls.Lmax - 1))
         Cm = np.zeros((cls.Lmax, 2 * cls.Lmax - 1))
         Sp = np.zeros((cls.Lmax, 2 * cls.Lmax - 1))
@@ -1249,7 +1249,7 @@ class Taylor2D(Taylor3D):
                 Sm[l, m] = 0.5 * np.sqrt((l - m) * (l - m - 1) / ((2 * l - 1) * (2 * l + 1)))
 
         # first, prime the pump with 1
-        powYlm[cls.pow2ind[0, 0, 0], cls.Ylm2ind[0, 0]] = np.sqrt(4 * np.pi)
+        powFC[cls.pow2ind[0, 0, 0], cls.FC2ind[0, 0]] = np.sqrt(4 * np.pi)
         for n0, n1, n2 in ((n0, n1, n2) for n0 in range(cls.Lmax + 1)
                            for n1 in range(cls.Lmax + 1)
                            for n2 in range(cls.Lmax + 1)
@@ -1260,35 +1260,35 @@ class Taylor2D(Taylor3D):
                 # we can recurse up from n0, n1, n2-1
                 indlow = cls.pow2ind[n0, n1, n2 - 1]
                 for l, m in ((l, m) for l in range(lmax) for m in range(-l, l + 1)):
-                    plm = powYlm[indlow, cls.Ylm2ind[l, m]]
-                    powYlm[ind, cls.Ylm2ind[l + 1, m]] += Cp[l, m] * plm
+                    plm = powFC[indlow, cls.FC2ind[l, m]]
+                    powFC[ind, cls.FC2ind[l + 1, m]] += Cp[l, m] * plm
                     if l > 0 and -l < m < l:
-                        powYlm[ind, cls.Ylm2ind[l - 1, m]] += Cm[l, m] * plm
+                        powFC[ind, cls.FC2ind[l - 1, m]] += Cm[l, m] * plm
             elif n1 > 0:
                 # we can recurse up from n0, n1-1, n2
                 indlow = cls.pow2ind[n0, n1 - 1, n2]
                 for l, m in ((l, m) for l in range(lmax) for m in range(-l, l + 1)):
-                    plm = powYlm[indlow, cls.Ylm2ind[l, m]]
-                    powYlm[ind, cls.Ylm2ind[l + 1, m + 1]] += 1.j * Sp[l, m] * plm
-                    powYlm[ind, cls.Ylm2ind[l + 1, m - 1]] += 1.j * Sp[l, -m] * plm
+                    plm = powFC[indlow, cls.FC2ind[l, m]]
+                    powFC[ind, cls.FC2ind[l + 1, m + 1]] += 1.j * Sp[l, m] * plm
+                    powFC[ind, cls.FC2ind[l + 1, m - 1]] += 1.j * Sp[l, -m] * plm
                     # if l>0:
                     if m < l - 1:
-                        powYlm[ind, cls.Ylm2ind[l - 1, m + 1]] += -1.j * Sm[l, m] * plm
+                        powFC[ind, cls.FC2ind[l - 1, m + 1]] += -1.j * Sm[l, m] * plm
                     if m > -l + 1:
-                        powYlm[ind, cls.Ylm2ind[l - 1, m - 1]] += -1.j * Sm[l, -m] * plm
+                        powFC[ind, cls.FC2ind[l - 1, m - 1]] += -1.j * Sm[l, -m] * plm
             elif n0 > 0:
                 # we can recurse up from n0-1, n1, n2
                 indlow = cls.pow2ind[n0 - 1, n1, n2]
                 for l, m in ((l, m) for l in range(lmax) for m in range(-l, l + 1)):
-                    plm = powYlm[indlow, cls.Ylm2ind[l, m]]
-                    powYlm[ind, cls.Ylm2ind[l + 1, m + 1]] += -Sp[l, m] * plm
-                    powYlm[ind, cls.Ylm2ind[l + 1, m - 1]] += Sp[l, -m] * plm
+                    plm = powFC[indlow, cls.FC2ind[l, m]]
+                    powFC[ind, cls.FC2ind[l + 1, m + 1]] += -Sp[l, m] * plm
+                    powFC[ind, cls.FC2ind[l + 1, m - 1]] += Sp[l, -m] * plm
                     # if l>0:
                     if m < l - 1:
-                        powYlm[ind, cls.Ylm2ind[l - 1, m + 1]] += Sm[l, m] * plm
+                        powFC[ind, cls.FC2ind[l - 1, m + 1]] += Sm[l, m] * plm
                     if m > -l + 1:
-                        powYlm[ind, cls.Ylm2ind[l - 1, m - 1]] += -Sm[l, -m] * plm
-        return powYlm
+                        powFC[ind, cls.FC2ind[l - 1, m - 1]] += -Sm[l, -m] * plm
+        return powFC
 
     @classmethod
     def makeLprojections(cls):
@@ -1300,15 +1300,15 @@ class Taylor2D(Taylor3D):
             -1 component = sum(l=0..Lmax, projL[l]) = simplification projection
         """
         projL = np.zeros((cls.Lmax + 2, cls.Npower, cls.Npower))
-        projLYlm = np.zeros((cls.Lmax + 2, cls.NYlm, cls.NYlm), dtype=complex)
+        projLFC = np.zeros((cls.Lmax + 2, cls.NFC, cls.NFC), dtype=complex)
         for l, m in ((l, m) for l in range(0, cls.Lmax + 1) for m in range(-l, l + 1)):
-            lm = cls.Ylm2ind[l, m]
-            projLYlm[l, lm, lm] = 1.  # l,m is part of l
-            projLYlm[-1, lm, lm] = 1.  # all part of the sum
+            lm = cls.FC2ind[l, m]
+            projLFC[l, lm, lm] = 1.  # l,m is part of l
+            projLFC[-1, lm, lm] = 1.  # all part of the sum
         for l in range(cls.Lmax + 2):
-            # projL[l] = np.dot(cls.powYlm, np.dot(projLYlm[l], cls.Ylmpow)).real
-            projL[l] = np.tensordot(cls.Ylmpow,
-                                    np.tensordot(projLYlm[l], cls.powYlm, axes=(1, 1)),
+            # projL[l] = np.dot(cls.powFC, np.dot(projLFC[l], cls.FCpow)).real
+            projL[l] = np.tensordot(cls.FCpow,
+                                    np.tensordot(projLFC[l], cls.powFC, axes=(1, 1)),
                                     axes=(0, 0)).real
         return projL
 
@@ -1476,7 +1476,7 @@ class Taylor2D(Taylor3D):
     # allow for Lmax to be *increased* as necessary, and all of the structures should be
     # "backwards compatible". That said, this has not been tested.
     @classmethod
-    def __initTaylor3Dindexing__(cls, Lmax):
+    def __initTaylor2Dindexing__(cls, Lmax):
         """
         This calls *all* the class methods defined above, and stores them *for the class*.
         This is intended to be done *once*
@@ -1487,18 +1487,18 @@ class Taylor2D(Taylor3D):
             # we only need initialize our class once!
             return
         cls.Lmax = Lmax
-        cls.NYlm, cls.Npower, \
+        cls.NFC, cls.Npower, \
         cls.pow2ind, cls.ind2pow, \
-        cls.Ylm2ind, cls.ind2Ylm, \
-        cls.powlrange = cls.makeindexPowerYlm(Lmax)
-        cls.Ylmpow = cls.makeYlmpow()
-        cls.powYlm = cls.makepowYlm()
+        cls.FC2ind, cls.ind2FC, \
+        cls.powlrange = cls.makeindexPowerFC(Lmax)
+        cls.FCpow = cls.makeFCpow()
+        cls.powFC = cls.makepowFC()
         cls.Lproj = cls.makeLprojections()
         cls.directmult = cls.makedirectmult()
         cls.powercoeff = cls.makepowercoeff()
         cls.HDF5str = 'coeff.{}.{}'  # needed for addhdf5()
-        cls.__internallist__ = ('pow2ind', 'ind2pow', 'Ylm2ind', 'ind2Ylm',
-                                'powlrange', 'Ylmpow', 'powYlm',
+        cls.__internallist__ = ('pow2ind', 'ind2pow', 'FC2ind', 'ind2FC',
+                                'powlrange', 'FCpow', 'powFC',
                                 'Lproj', 'directmult', 'powercoeff')
         cls.__INITIALIZED__ = True
 
@@ -1516,9 +1516,41 @@ class Taylor2D(Taylor3D):
             etc., that modify matrices *in place*. We always copy the list, but that
             doesn't make copies of the underlying matrices.
         """
-        self.__initTaylor3Dindexing__(Lmax)
+        self.__initTaylor2Dindexing__(Lmax)
         if nodeepcopy:
             self.coefflist = coefflist.copy()
         else:
             self.coefflist = [(n, l, c.copy()) for n, l, c in coefflist]
+
+    def dumpinternalsHDF5(self, HDF5group):
+        """
+        Adds the initialized power expansion internals into an HDF5group--should be stored for a
+        sanity check
+
+        :param HDF5group: HDF5 group
+        """
+        HDF5group.attrs['description'] = 'Internals of PowerExpansion class'
+        HDF5group.attrs['Lmax'] = self.Lmax
+        HDF5group.attrs['NFC'] = self.NFC
+        HDF5group.attrs['Npower'] = self.Npower
+        for internal in self.__internallist__:
+            HDF5group[internal] = getattr(self, internal)
+
+    @classmethod
+    def checkinternalsHDF5(cls, HDF5group):
+        """
+        Reads the power expansion internals into an HDF5group, and performs sanity check
+
+        :param HDF5group: HDF5 group
+        """
+        if not cls.__INITIALIZED__: raise ValueError('Must initialize first to perform sanity check')
+        if HDF5group.attrs['description'] != u'Internals of PowerExpansion class':
+            raise ValueError(
+                'HDF5 group lacks the attribute "description" which matches "Internals of PowerExpansion class"')
+        if HDF5group.attrs['Lmax'] != cls.Lmax: return False
+        if HDF5group.attrs['NFC'] != cls.NFC: return False
+        if HDF5group.attrs['Npower'] != cls.Npower: return False
+        for internal in cls.__internallist__:
+            if not np.all(HDF5group[internal][:] == getattr(cls, internal)): return False
+        return True
 
