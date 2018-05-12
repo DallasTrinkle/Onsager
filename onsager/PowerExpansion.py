@@ -1146,3 +1146,379 @@ class Taylor3D(object):
             return self
         else:
             return type(self)(self.truncatecoeff(self.coefflist, Nmax))
+
+
+class Taylor2D(Taylor3D):
+    """
+    Class that stores a Taylor expansion of a function in 2D, and defines some arithmetic
+    """
+
+    # As much as possible, we inherit from the 2D code; below are the changes we make
+
+    @staticmethod
+    def makeindexPowerYlm(Lmax):
+        """
+        Analyzes the spherical harmonics and powers for a given Lmax; returns a
+        series of index functions.
+
+        :param Lmax: maximum l value to consider; equal to the sum of powers
+        :return NYlm: number of Ylm coefficients
+        :return Npower: number of power coefficients
+        :return pow2ind[n1][n2][n3]: powers to index
+        :return ind2pow[n]: powers for a given index
+        :return Ylm2ind[l][m]: (l,m) to index
+        :return ind2Ylm[lm]: (l,m) for a given index
+        :return powlrange[l]: upper limit of power indices for a given l value; note: [-1] = 0
+        """
+        # first, the counts
+        NYlm = (Lmax + 1) ** 2
+        Npower = NYlm + ((Lmax + 1) * Lmax * (Lmax - 1)) // 6
+        # indexing arrays
+        powlrange = np.zeros(Lmax + 2, dtype=int)
+        powlrange[-1] = 0
+        pow2ind = -np.ones((Lmax + 1, Lmax + 1, Lmax + 1), dtype=int)
+        ind2pow = np.zeros((Npower, 3), dtype=int)
+        Ylm2ind = -np.ones((Lmax + 1, 2 * Lmax + 1), dtype=int)
+        ind2Ylm = np.zeros((NYlm, 2), dtype=int)
+        # powers first; these are ordered by increasing l = n1+n2+n3
+        ind = 0
+        for l in range(Lmax + 1):
+            for n1 in range(l + 1):
+                for n2 in range(l + 1 - n1):
+                    n3 = l - n1 - n2
+                    pow2ind[n1, n2, n3] = ind
+                    ind2pow[ind, 0], ind2pow[ind, 1], ind2pow[ind, 2] = n1, n2, n3
+                    ind += 1
+            powlrange[l] = ind
+        # next, Ylm values
+        ind = 0
+        for l in range(Lmax + 1):
+            for m in range(-l, l + 1):
+                Ylm2ind[l, m] = ind
+                ind2Ylm[ind, 0], ind2Ylm[ind, 1] = l, m
+                ind += 1
+        return NYlm, Npower, pow2ind, ind2pow, Ylm2ind, ind2Ylm, powlrange
+
+    @classmethod
+    def makeYlmpow(cls):
+        """
+        Construct the expansion of the Ylm's in powers of x,y,z. Done via brute force.
+
+        :return Ylmpow[lm, p]: expansion of each Ylm in powers
+        """
+        Ylmpow = np.zeros((cls.NYlm, cls.Npower), dtype=complex)
+        for l in range(cls.Lmax + 1):
+            # do the positive m first; then easily swap to get the negative m
+            for m in range(l + 1):
+                ind = cls.Ylm2ind[l, m]
+                pre = (-1) ** m * np.sqrt((2 * l + 1) * factorial(l - m, True) /
+                                          (4 * np.pi * factorial(l + m, True)))
+                for k in range((l + m + 1) // 2, l + 1):
+                    zz = (-1) ** (l - k) * factorial(2 * k, True) / \
+                         (2 ** l * factorial(2 * k - l - m, True) * factorial(k, True) * factorial(l - k, True))
+                    for j in range(m + 1):
+                        xy = factorial(m, True) / (factorial(j, True) * factorial(m - j, True))
+                        Ylmpow[ind, cls.pow2ind[j, m - j, 2 * k - l - m]] = pre * zz * xy * (1.j) ** (m - j)
+            for m in range(-l, 0):
+                ind = cls.Ylm2ind[l, m]
+                indpos = cls.Ylm2ind[l, -m]
+                for p in range(cls.Npower):
+                    Ylmpow[ind, p] = (-1) ** (-m) * Ylmpow[indpos, p].conjugate()
+        return Ylmpow
+
+    @classmethod
+    def makepowYlm(cls):
+        """
+        Construct the expansion of the powers in Ylm's. Done using recursion relations
+        instead of direct calculation. Note: an alternative approach would be Gaussian
+        quadrature.
+
+        :return powYlm[p][lm]: expansion of powers in Ylm; uses indexing scheme above
+        """
+        powYlm = np.zeros((cls.Npower, cls.NYlm), dtype=complex)
+        Cp = np.zeros((cls.Lmax, 2 * cls.Lmax - 1))
+        Cm = np.zeros((cls.Lmax, 2 * cls.Lmax - 1))
+        Sp = np.zeros((cls.Lmax, 2 * cls.Lmax - 1))
+        Sm = np.zeros((cls.Lmax, 2 * cls.Lmax - 1))
+        # because this is for our recursion relations, we only need to work to Lmax-1 !
+        for l, m in ((l, m) for l in range(cls.Lmax) for m in range(-l, l + 1)):
+            Cp[l, m] = np.sqrt((l - m + 1) * (l + m + 1) / ((2 * l + 1) * (2 * l + 3)))
+            Sp[l, m] = 0.5 * np.sqrt((l + m + 1) * (l + m + 2) / ((2 * l + 1) * (2 * l + 3)))
+            if l > 0:  # and -l < m < l:
+                Cm[l, m] = np.sqrt((l - m) * (l + m) / ((2 * l - 1) * (2 * l + 1)))
+                Sm[l, m] = 0.5 * np.sqrt((l - m) * (l - m - 1) / ((2 * l - 1) * (2 * l + 1)))
+
+        # first, prime the pump with 1
+        powYlm[cls.pow2ind[0, 0, 0], cls.Ylm2ind[0, 0]] = np.sqrt(4 * np.pi)
+        for n0, n1, n2 in ((n0, n1, n2) for n0 in range(cls.Lmax + 1)
+                           for n1 in range(cls.Lmax + 1)
+                           for n2 in range(cls.Lmax + 1)
+                           if 0 < n0 + n1 + n2 <= cls.Lmax):
+            ind = cls.pow2ind[n0, n1, n2]
+            lmax = n0 + n1 + n2
+            if n2 > 0:
+                # we can recurse up from n0, n1, n2-1
+                indlow = cls.pow2ind[n0, n1, n2 - 1]
+                for l, m in ((l, m) for l in range(lmax) for m in range(-l, l + 1)):
+                    plm = powYlm[indlow, cls.Ylm2ind[l, m]]
+                    powYlm[ind, cls.Ylm2ind[l + 1, m]] += Cp[l, m] * plm
+                    if l > 0 and -l < m < l:
+                        powYlm[ind, cls.Ylm2ind[l - 1, m]] += Cm[l, m] * plm
+            elif n1 > 0:
+                # we can recurse up from n0, n1-1, n2
+                indlow = cls.pow2ind[n0, n1 - 1, n2]
+                for l, m in ((l, m) for l in range(lmax) for m in range(-l, l + 1)):
+                    plm = powYlm[indlow, cls.Ylm2ind[l, m]]
+                    powYlm[ind, cls.Ylm2ind[l + 1, m + 1]] += 1.j * Sp[l, m] * plm
+                    powYlm[ind, cls.Ylm2ind[l + 1, m - 1]] += 1.j * Sp[l, -m] * plm
+                    # if l>0:
+                    if m < l - 1:
+                        powYlm[ind, cls.Ylm2ind[l - 1, m + 1]] += -1.j * Sm[l, m] * plm
+                    if m > -l + 1:
+                        powYlm[ind, cls.Ylm2ind[l - 1, m - 1]] += -1.j * Sm[l, -m] * plm
+            elif n0 > 0:
+                # we can recurse up from n0-1, n1, n2
+                indlow = cls.pow2ind[n0 - 1, n1, n2]
+                for l, m in ((l, m) for l in range(lmax) for m in range(-l, l + 1)):
+                    plm = powYlm[indlow, cls.Ylm2ind[l, m]]
+                    powYlm[ind, cls.Ylm2ind[l + 1, m + 1]] += -Sp[l, m] * plm
+                    powYlm[ind, cls.Ylm2ind[l + 1, m - 1]] += Sp[l, -m] * plm
+                    # if l>0:
+                    if m < l - 1:
+                        powYlm[ind, cls.Ylm2ind[l - 1, m + 1]] += Sm[l, m] * plm
+                    if m > -l + 1:
+                        powYlm[ind, cls.Ylm2ind[l - 1, m - 1]] += -Sm[l, -m] * plm
+        return powYlm
+
+    @classmethod
+    def makeLprojections(cls):
+        """
+        Constructs a series of projection matrices for each l component in our power series
+
+        :return: projL[l][p][p']
+            projection of powers containing *only* l component.
+            -1 component = sum(l=0..Lmax, projL[l]) = simplification projection
+        """
+        projL = np.zeros((cls.Lmax + 2, cls.Npower, cls.Npower))
+        projLYlm = np.zeros((cls.Lmax + 2, cls.NYlm, cls.NYlm), dtype=complex)
+        for l, m in ((l, m) for l in range(0, cls.Lmax + 1) for m in range(-l, l + 1)):
+            lm = cls.Ylm2ind[l, m]
+            projLYlm[l, lm, lm] = 1.  # l,m is part of l
+            projLYlm[-1, lm, lm] = 1.  # all part of the sum
+        for l in range(cls.Lmax + 2):
+            # projL[l] = np.dot(cls.powYlm, np.dot(projLYlm[l], cls.Ylmpow)).real
+            projL[l] = np.tensordot(cls.Ylmpow,
+                                    np.tensordot(projLYlm[l], cls.powYlm, axes=(1, 1)),
+                                    axes=(0, 0)).real
+        return projL
+
+    @classmethod
+    def makedirectmult(cls):
+        """
+        :return direcmult[p][p']: index that corresponds to the multiplication of power indices p and p'
+        """
+        directmult = -np.ones((cls.Npower, cls.Npower), dtype=int)
+        for (p0, p1) in ((p0, p1) for p0 in range(cls.Npower) for p1 in range(cls.Npower)):
+            nsum = cls.ind2pow[p0] + cls.ind2pow[p1]
+            if sum(nsum) <= cls.Lmax:
+                directmult[p0, p1] = cls.pow2ind[nsum[0], nsum[1], nsum[2]]
+        return directmult
+
+    @classmethod
+    def powexp(cls, u, normalize=True):
+        """
+        Given a vector u, normalize it and return the power expansion of uvec
+
+        :param u[3]: vector to apply
+        :param normalize: do we normalize u first?
+        :return upow[Npower]: ux uy uz products of powers
+        :return umagn: magnitude of u (if normalized)
+        """
+        umagn = np.sqrt(np.dot(u, u))
+        upow = np.zeros(cls.Npower)
+        if umagn < 1e-8:
+            upow[cls.pow2ind[0, 0, 0]] = 1.
+            umagn = 0.
+        else:
+            u0 = u.copy()
+            if normalize: u0 /= umagn
+            xyz = np.ones((cls.Lmax + 1, 3))
+            for n in range(1, cls.Lmax + 1):
+                xyz[n, :] = xyz[n - 1, :] * u0[:]
+            for n0, n1, n2 in ((n0, n1, n2) for n0 in range(cls.Lmax + 1)
+                               for n1 in range(cls.Lmax + 1)
+                               for n2 in range(cls.Lmax + 1)
+                               if n0 + n1 + n2 <= cls.Lmax):
+                upow[cls.pow2ind[n0, n1, n2]] = xyz[n0, 0] * xyz[n1, 1] * xyz[n2, 2]
+        if normalize:
+            return upow, umagn
+        else:
+            return upow
+
+    @classmethod
+    def makepowercoeff(cls):
+        """
+        Make our power coefficients for our construct expansion method
+
+        :return powercoeff[n][p]: vector we multiply by our power expansion to get the n'th coefficients
+        """
+        powercoeff = np.zeros((cls.Lmax + 1, cls.Npower))
+        for n0 in range(cls.Lmax + 1):
+            for n1 in range(cls.Lmax + 1):
+                for n2 in range(cls.Lmax + 1):
+                    n = n0 + n1 + n2
+                    if n <= cls.Lmax:
+                        powercoeff[n, cls.pow2ind[n0, n1, n2]] = \
+                            factorial(n, True) / (factorial(n0, True) * factorial(n1, True) * factorial(n2, True))
+        return powercoeff
+
+    @classmethod
+    def constructexpansion(cls, basis, N=-1, pre=None):
+        """
+        Takes a "basis" for constructing an expansion -- list of vectors and matrices --
+        and constructs the expansions up to power N (default = Lmax)
+        Takes a direction expansion a and b, and returns the sum of the expansions.
+
+        :param basis = list((coeffmatrix, vect)): expansions to create;
+          sum(coeffmatrix * (vect*q)^n), for powers n = 0..N
+        :param N: maximum power to consider; for N=-1, use Lmax
+        :param pre: list of prefactors, defining the Taylor expansion. Default = 1
+        :return list((n, lmax, powexpansion)),...: our expansion, as input to create
+          Taylor3D objects
+        """
+        if N < 0: N = cls.Lmax
+        if pre is None:
+            pre = [1 for n in range(N + 1)]
+        c = []
+        for n in range(N + 1):
+            c.append([(n, n, np.zeros((cls.powlrange[n],) + basis[0][0].shape, dtype=complex))])
+        for coeff, vect in basis:
+            pexp = cls.powexp(vect, normalize=False)
+            for n in range(N + 1):
+                vnpow = (cls.powercoeff[n] * pexp)[:cls.powlrange[n]]
+                cn = c[n][0][2]
+                for p in range(cls.powlrange[n]):
+                    cn[p] += pre[n] * vnpow[p] * coeff
+        return tuple(c)
+
+    @classmethod
+    def rotatedirections(cls, qptrans):
+        """
+        Takes a transformation matrix qptrans, where q[i] = sum_j qptrans[i][j] p[j], and
+        returns the Npow x Npow transformation matrix for the new components in terms of
+        the old.
+        NOTE: This is more complex than one might first realize. If we only work with cases
+        where all of the entries for a given power n have those same n (that is, not reduced),
+        then this is straightforward. However, we run into problems with *reductions*: e.g.,
+        for n=2, the power :math:`x^0 y^0 z^0` is, in reality, :math:`x^2+y^2+z^2`, and hence
+        *it must be transformed* because we allow non-orthogonal transformation matrices.
+
+        :param qptrans: 3x3 matrix
+        :return npowtrans: [Lmax +1][Npow][Npow] transformation matrix [n][original pow][new pow]
+            for each n from 0 up to Lmax
+        """
+        powtrans = np.zeros((cls.Npower, cls.Npower))
+        # l = 0 case
+        powtrans[0, 0] = 1
+        # single q value cases
+        for i in range(3):
+            qi_pow = cls.powexp(qptrans[i, :], normalize=False)
+            for n in range(1, cls.Lmax + 1):
+                powtrans[cls.pow2ind[(0,) * i + (n,) + (0,) * (2 - i)], :] = cls.powercoeff[n] * qi_pow
+        # pairs of q cases: we get qi^ni qj^nj by direct multiplication
+        # triplet is done inside the loop: q1^n1 q2^n2 q3^n3 = (q1^n1 q2^n2) (q3^n3)
+        for i in range(3):
+            for j in range(i + 1, 3):
+                for ni in range(1, cls.Lmax + 1):
+                    powi = cls.pow2ind[(0,) * i + (ni,) + (0,) * (2 - i)]
+                    for nj in range(1, cls.Lmax + 1 - ni):
+                        powj = cls.pow2ind[(0,) * j + (nj,) + (0,) * (2 - j)]
+                        powij = cls.pow2ind[(0,) * i + (ni,) + (0,) * (j - i - 1) + (nj,) + (0,) * (2 - j)]
+                        # multiply the pair!
+                        for pi in range(cls.powlrange[ni - 1], cls.powlrange[ni]):
+                            for pj in range(cls.powlrange[nj - 1], cls.powlrange[nj]):
+                                powtrans[powij, cls.directmult[pi, pj]] += powtrans[powi, pi] * powtrans[powj, pj]
+                        if j == 1:
+                            # do the triplet
+                            # k = 2 (instead of explicitly writing another loop)
+                            for nk in range(1, cls.Lmax + 1 - ni - nj):
+                                powk = cls.pow2ind[0, 0, nk]
+                                powijk = cls.pow2ind[ni, nj, nk]
+                                for pij in range(cls.powlrange[ni + nj - 1], cls.powlrange[ni + nj]):
+                                    for pk in range(cls.powlrange[nk - 1], cls.powlrange[nk]):
+                                        powtrans[powijk, cls.directmult[pij, pk]] += powtrans[powij, pij] * powtrans[
+                                            powk, pk]
+        npowtrans = np.zeros((cls.Lmax + 1, cls.Npower, cls.Npower))
+        for n in range(cls.Lmax + 1):
+            prange = slice(cls.powlrange[n - 1], cls.powlrange[n])
+            npowtrans[n, prange, prange] = powtrans[prange, prange]
+            # now, work on lower values (n-2, n-4, ...)
+            for m in range(n - 2, -1, -2):
+                # powers that sum up to m:
+                for tup in [(n0, n1, m - n0 - n1) for n0 in range(m + 1) for n1 in range(m - n0 + 1)]:
+                    npowtrans[n, cls.pow2ind[tup], :] = npowtrans[n, cls.pow2ind[tup[0] + 2, tup[1], tup[2]], :] + \
+                                                        npowtrans[n, cls.pow2ind[tup[0], tup[1] + 2, tup[2]], :] + \
+                                                        npowtrans[n, cls.pow2ind[tup[0], tup[1], tup[2] + 2], :]
+        return npowtrans
+
+    # for sorting our coefficient lists:
+    @classmethod
+    def __sortkey(cls, entry):
+        return (entry[0] + entry[1] / (cls.Lmax + 1))
+
+    __INITIALIZED__ = False
+
+    # these are all *class* parameters, not object parameters: they are computed
+    # and defined once for the entire class. It means that once, in your code, you *choose*
+    # a value for Lmax, you are stuck with it. This is a choice: it makes compatibility between
+    # the expansions easy, for a minor loss in flexibility.
+    # Note: I believe, given the way we've set this up, that it *could* be modified to
+    # allow for Lmax to be *increased* as necessary, and all of the structures should be
+    # "backwards compatible". That said, this has not been tested.
+    @classmethod
+    def __initTaylor3Dindexing__(cls, Lmax):
+        """
+        This calls *all* the class methods defined above, and stores them *for the class*.
+        This is intended to be done *once*
+
+        :param Lmax: maximum power / orbital angular momentum
+        """
+        if cls.__INITIALIZED__:
+            # we only need initialize our class once!
+            return
+        cls.Lmax = Lmax
+        cls.NYlm, cls.Npower, \
+        cls.pow2ind, cls.ind2pow, \
+        cls.Ylm2ind, cls.ind2Ylm, \
+        cls.powlrange = cls.makeindexPowerYlm(Lmax)
+        cls.Ylmpow = cls.makeYlmpow()
+        cls.powYlm = cls.makepowYlm()
+        cls.Lproj = cls.makeLprojections()
+        cls.directmult = cls.makedirectmult()
+        cls.powercoeff = cls.makepowercoeff()
+        cls.HDF5str = 'coeff.{}.{}'  # needed for addhdf5()
+        cls.__internallist__ = ('pow2ind', 'ind2pow', 'Ylm2ind', 'ind2Ylm',
+                                'powlrange', 'Ylmpow', 'powYlm',
+                                'Lproj', 'directmult', 'powercoeff')
+        cls.__INITIALIZED__ = True
+
+    def __init__(self, coefflist=[], Lmax=4, nodeepcopy=False):
+        """
+        Initializes a Taylor3D object, with coefflist (default = empty)
+
+        :param coefflist: list((n, lmax, powexpansion)). No type checking; default empty
+        :param Lmax: maximum power / orbital angular momentum; can be set only once the
+            first time a Taylor expansion is constructed, and is set for all objects
+        :param nodeepcopy: true if we don't want to copy the matrices on creation of object
+            (i.e., deep copy, which is the default) **Note:** deep copy is strongly preferred.
+            The *only* real reason to use nodeepcopy is when returning slices / indexing in
+            arrays, but even then we have to be careful about doing things like reductions,
+            etc., that modify matrices *in place*. We always copy the list, but that
+            doesn't make copies of the underlying matrices.
+        """
+        self.__initTaylor3Dindexing__(Lmax)
+        if nodeepcopy:
+            self.coefflist = coefflist.copy()
+        else:
+            self.coefflist = [(n, l, c.copy()) for n, l, c in coefflist]
+
