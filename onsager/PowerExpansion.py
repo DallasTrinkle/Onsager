@@ -1243,10 +1243,10 @@ class Taylor2D(Taylor3D):
         """
         projL = np.zeros((cls.Lmax + 2, cls.Npower, cls.Npower))
         projLFC = np.zeros((cls.Lmax + 2, cls.NFC, cls.NFC), dtype=complex)
-        for l, m in ((l, m) for l in range(0, cls.Lmax + 1) for m in range(-l, l + 1)):
-            lm = cls.FC2ind[l, m]
-            projLFC[l, lm, lm] = 1.  # l,m is part of l
-            projLFC[-1, lm, lm] = 1.  # all part of the sum
+        for l in range(-cls.Lmax, cls.Lmax+1):
+            lind = cls.FC2ind[l]
+            projLFC[abs(l), lind] = 1.  # l is part of abs(l)--gets +-l
+            projLFC[-1, lind] = 1.      # all part of the sum
         for l in range(cls.Lmax + 2):
             # projL[l] = np.dot(cls.powFC, np.dot(projLFC[l], cls.FCpow)).real
             projL[l] = np.tensordot(cls.FCpow,
@@ -1263,7 +1263,7 @@ class Taylor2D(Taylor3D):
         for (p0, p1) in ((p0, p1) for p0 in range(cls.Npower) for p1 in range(cls.Npower)):
             nsum = cls.ind2pow[p0] + cls.ind2pow[p1]
             if sum(nsum) <= cls.Lmax:
-                directmult[p0, p1] = cls.pow2ind[nsum[0], nsum[1], nsum[2]]
+                directmult[p0, p1] = cls.pow2ind[nsum[0], nsum[1]]
         return directmult
 
     @classmethod
@@ -1271,7 +1271,7 @@ class Taylor2D(Taylor3D):
         """
         Given a vector u, normalize it and return the power expansion of uvec
 
-        :param u[3]: vector to apply
+        :param u[2]: vector to apply
         :param normalize: do we normalize u first?
         :return upow[Npower]: ux uy uz products of powers
         :return umagn: magnitude of u (if normalized)
@@ -1279,19 +1279,18 @@ class Taylor2D(Taylor3D):
         umagn = np.sqrt(np.dot(u, u))
         upow = np.zeros(cls.Npower)
         if umagn < 1e-8:
-            upow[cls.pow2ind[0, 0, 0]] = 1.
+            upow[cls.pow2ind[0, 0]] = 1.
             umagn = 0.
         else:
             u0 = u.copy()
             if normalize: u0 /= umagn
-            xyz = np.ones((cls.Lmax + 1, 3))
+            xy = np.ones((cls.Lmax + 1, 2))
             for n in range(1, cls.Lmax + 1):
-                xyz[n, :] = xyz[n - 1, :] * u0[:]
-            for n0, n1, n2 in ((n0, n1, n2) for n0 in range(cls.Lmax + 1)
-                               for n1 in range(cls.Lmax + 1)
-                               for n2 in range(cls.Lmax + 1)
-                               if n0 + n1 + n2 <= cls.Lmax):
-                upow[cls.pow2ind[n0, n1, n2]] = xyz[n0, 0] * xyz[n1, 1] * xyz[n2, 2]
+                xy[n, :] = xy[n - 1, :] * u0[:]
+            for n0, n1 in ((n0, n1) for n0 in range(cls.Lmax + 1)
+                           for n1 in range(cls.Lmax + 1)
+                           if n0 + n1 <= cls.Lmax):
+                upow[cls.pow2ind[n0, n1]] = xy[n0, 0] * xy[n1, 1]
         if normalize:
             return upow, umagn
         else:
@@ -1307,13 +1306,13 @@ class Taylor2D(Taylor3D):
         powercoeff = np.zeros((cls.Lmax + 1, cls.Npower))
         for n0 in range(cls.Lmax + 1):
             for n1 in range(cls.Lmax + 1):
-                for n2 in range(cls.Lmax + 1):
-                    n = n0 + n1 + n2
-                    if n <= cls.Lmax:
-                        powercoeff[n, cls.pow2ind[n0, n1, n2]] = \
-                            factorial(n, True) / (factorial(n0, True) * factorial(n1, True) * factorial(n2, True))
+                n = n0 + n1
+                if n <= cls.Lmax:
+                    powercoeff[n, cls.pow2ind[n0, n1]] = \
+                        factorial(n, True) / (factorial(n0, True) * factorial(n1, True))
         return powercoeff
 
+    # NOTE: this appears to be entirely unchanged? Maybe try removing it
     @classmethod
     def constructexpansion(cls, basis, N=-1, pre=None):
         """
@@ -1326,7 +1325,7 @@ class Taylor2D(Taylor3D):
         :param N: maximum power to consider; for N=-1, use Lmax
         :param pre: list of prefactors, defining the Taylor expansion. Default = 1
         :return list((n, lmax, powexpansion)),...: our expansion, as input to create
-          Taylor3D objects
+          Taylor2D objects
         """
         if N < 0: N = cls.Lmax
         if pre is None:
