@@ -409,6 +409,11 @@ class PowerExpansionTests(unittest.TestCase):
                                        msg="Failed after reduce() for\n{}".format(rot))
 
 
+def FourierCoeff(l, theta):
+    """This is the equivalent of sph_harm for the two-dimensional case"""
+    return np.exp(1j*l*theta)
+
+
 class PowerExpansion2DTests(unittest.TestCase):
     """Tests to make sure our power expansions are constructed correctly and behaving as advertised"""
 
@@ -424,31 +429,30 @@ class PowerExpansion2DTests(unittest.TestCase):
                       (np.eye(2), np.array([1., 0.]))
                       ]
 
-    def testExpansionYlmpow(self):
-        """Test the expansion of Ylm into powers"""
-        pass
+    def testExpansionFCpow(self):
+        """Test the expansion of FC into powers"""
         for theta in [self.theta + dt*np.pi for dt in np.linspace(0, 2, num=16, endpoint=False)]:
             utest, umagn = T2D.powexp(np.array([np.cos(theta), np.sin(theta)]))
             self.assertAlmostEqual(umagn, 1)
-            Ylm0 = np.zeros(T2D.NYlm, dtype=complex)
-            # Ylm as power expansions
-            for lm in range(T2D.NYlm):
-                l, m = T2D.ind2Ylm[lm, 0], T2D.ind2Ylm[lm, 1]
-                Ylm0[lm] = sph_harm(m, l, theta, phi)
-                Ylmexp = np.dot(T2D.Ylmpow[lm], utest)
-                self.assertAlmostEqual(Ylm0[lm], Ylmexp,
-                                       msg="Failure for Ylmpow " 
-                    "l={} m={}; theta={}, phi={}\n{} != {}".format(l, m, theta, phi, Ylm0[lm], Ylmexp))
-            # power expansions in Ylm's
-            for p in range(T2D.NYlm):
-                pYlm = np.dot(T2D.powYlm[p], Ylm0)
-                self.assertAlmostEqual(utest[p], pYlm,
-                                       msg="Failure for powYlm " 
-                    "{}; theta={}, phi={}\n{} != {}".format(T2D.ind2pow[p], theta, phi, utest[p], pYlm))
+            FC0 = np.zeros(T2D.NFC, dtype=complex)
+            # FC as power expansions
+            for lind in range(T2D.NFC):
+                l = T2D.ind2FC[lind]
+                FC0[lind] = FourierCoeff(l, theta)
+                FCexp = np.dot(T2D.FCpow[lind], utest)
+                self.assertAlmostEqual(FC0[lind], FCexp,
+                                       msg="Failure for FCpow " 
+                    "l={}; theta={}\n{} != {}".format(l, theta, FC0[lind], FCexp))
+            # power expansions in FC's
+            for p in range(T2D.NFC):
+                pFC = np.dot(T2D.powFC[p], FC0)
+                self.assertAlmostEqual(utest[p], pFC,
+                                       msg="Failure for powFC " 
+                    "{}; theta={}\n{} != {}".format(T2D.ind2pow[p], theta, utest[p], pFC))
             # projection (note that Lproj is not symmetric): so this test ensures that v.u and (proj.v).u
             # give the same value
             uproj = np.tensordot(T2D.Lproj[-1], utest, axes=(0, 0))
-            for p in range(T2D.NYlm):
+            for p in range(T2D.NFC):
                 self.assertAlmostEqual(utest[p], uproj[p],
                                        msg="Projection failure for " 
                     "{}\n{} != {}".format(T2D.ind2pow[p], uproj[p], utest[p]))
@@ -456,28 +460,26 @@ class PowerExpansion2DTests(unittest.TestCase):
     def testProjection(self):
         """Test that the L-projections are correct"""
         # Try to do this sequentially
-        pass
-        for tup in [(0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)]:
+        for tup in [(0, 0), (1, 0), (0, 1)]:
             v = np.zeros(T2D.Npower)
             v[T2D.pow2ind[tup]] = 1.
             Pv = np.tensordot(T2D.Lproj[-1], v, axes=1)
             # now, try with multiplying by x^2+y^2+z^2:
-            vxyz = np.zeros(T2D.Npower)
-            vxyz[T2D.pow2ind[tup[0] + 2, tup[1], tup[2]]] = 1.
-            vxyz[T2D.pow2ind[tup[0], tup[1] + 2, tup[2]]] = 1.
-            vxyz[T2D.pow2ind[tup[0], tup[1], tup[2] + 2]] = 1.
-            Pvxyz = np.tensordot(T2D.Lproj[-1], vxyz, axes=1)
+            vxy = np.zeros(T2D.Npower)
+            vxy[T2D.pow2ind[tup[0] + 2, tup[1]]] = 1.
+            vxy[T2D.pow2ind[tup[0], tup[1] + 2]] = 1.
+            Pvxy = np.tensordot(T2D.Lproj[-1], vxy, axes=1)
             self.assertTrue(np.allclose(v, Pv))
-            self.assertTrue(np.allclose(v, Pvxyz))
+            self.assertTrue(np.allclose(v, Pvxy))
             for l in range(T2D.Lmax + 1):
                 Pv = np.tensordot(T2D.Lproj[l], v, axes=1)
-                Pvxyz = np.tensordot(T2D.Lproj[l], vxyz, axes=1)
+                Pvxy = np.tensordot(T2D.Lproj[l], vxy, axes=1)
                 if l == sum(tup):
                     self.assertTrue(np.allclose(v, Pv))
-                    self.assertTrue(np.allclose(v, Pvxyz))
+                    self.assertTrue(np.allclose(v, Pvxy))
                 else:
                     self.assertTrue(np.allclose(Pv, 0))
-                    self.assertTrue(np.allclose(Pvxyz, 0))
+                    self.assertTrue(np.allclose(Pvxy, 0))
 
     def testEvaluation(self):
         """Test out the evaluation functions in an expansion, including with scalar multiply and addition"""
@@ -510,9 +512,9 @@ class PowerExpansion2DTests(unittest.TestCase):
         c7.irdot(prod)
         sum([c, c2, c3])  # tests whether we can use sum
 
-        for u in [np.zeros(3), np.array([1., 0., 0.]), np.array([0., 1., 0.]), np.array([0., 0., 1.]),
-                  np.array([0.234, -0.85, 1.25]),
-                  np.array([1.24, 0.71, -0.98])]:
+        for u in [np.zeros(2), np.array([1., 0.]), np.array([0., 1.]), np.array([0., 0.]),
+                  np.array([0.234, -0.85]),
+                  np.array([1.24, 0.71])]:
             umagn = np.sqrt(np.dot(u, u))
             fval = {nl: f(umagn) for nl, f in fnu.items()}
             # comparison value:
@@ -561,9 +563,8 @@ class PowerExpansion2DTests(unittest.TestCase):
             self.assertEqual(n, l)
         fnu = {(n, l): createExpansion(n) for (n, l) in c2.nl()}  # or could do this in previous loop
 
-        for u in [np.zeros(3), np.array([1., 0., 0.]), np.array([0., 1., 0.]), np.array([0., 0., 1.]),
-                  np.array([0.234, -0.85, 1.25]),
-                  np.array([1.24, 0.71, -0.98])]:
+        for u in [np.zeros(2), np.array([1., 0.]), np.array([0., 1.]),
+                  np.array([0.234, -0.85]), np.array([1.24, 0.71])]:
             umagn = np.sqrt(np.dot(u, u))
             fval = {nl: f(umagn) for nl, f in fnu.items()}
             # comparison value:
@@ -634,12 +635,12 @@ class PowerExpansion2DTests(unittest.TestCase):
             # self.assertTrue(np.allclose(coeff[0:lmin], 0))
             self.assertTrue(np.allclose(coeff[lmax:T2D.Npower], 0))
             self.assertFalse(np.allclose(coeff[lmin:lmax], 0))
-            Ylmcoeff = np.tensordot(T2D.powYlm[:T2D.powlrange[l], :], coeff, axes=(0, 0))  # now in Ylm
+            FCcoeff = np.tensordot(T2D.powFC[:T2D.powlrange[l], :], coeff, axes=(0, 0))  # now in FC
             lmin = l ** 2
             lmax = (l + 1) ** 2
-            self.assertTrue(np.allclose(Ylmcoeff[0:lmin], 0))
-            self.assertFalse(np.allclose(Ylmcoeff[lmin:lmax], 0))
-            self.assertTrue(np.allclose(Ylmcoeff[lmax:T2D.NYlm], 0))
+            self.assertTrue(np.allclose(FCcoeff[0:lmin], 0))
+            self.assertFalse(np.allclose(FCcoeff[lmin:lmax], 0))
+            self.assertTrue(np.allclose(FCcoeff[lmax:T2D.NFC], 0))
 
         # a little tricky to make sure we get ALL the functions (instead of making multiple dictionaries)
         fnu = {(n, l): createExpansion(n) for (n, l) in c.nl()}  # or could do this in previous loop
@@ -647,9 +648,8 @@ class PowerExpansion2DTests(unittest.TestCase):
             if (n, l) not in fnu:
                 fnu[(n, l)] = createExpansion(n)
 
-        for u in [np.zeros(3), np.array([1., 0., 0.]), np.array([0., 1., 0.]), np.array([0., 0., 1.]),
-                  np.array([0.234, -0.85, 1.25]),
-                  np.array([1.24, 0.71, -0.98])]:
+        for u in [np.zeros(2), np.array([1., 0.]), np.array([0., 1.]),
+                  np.array([0.234, -0.85]), np.array([1.24, 0.71])]:
             umagn = np.sqrt(np.dot(u, u))
             # compare values:
             self.assertTrue(np.allclose(c(u, fnu), c2(u, fnu)),
@@ -662,12 +662,12 @@ class PowerExpansion2DTests(unittest.TestCase):
         crand = T2D([(0, T2D.Lmax, coeffrand)])
         crand.separate()
         for (n, l, c) in crand.coefflist:
-            Ylmcoeff = np.tensordot(T2D.powYlm[:T2D.powlrange[l], :], c, axes=(0, 0))  # now in Ylm
+            FCcoeff = np.tensordot(T2D.powFC[:T2D.powlrange[l], :], c, axes=(0, 0))  # now in FC
             lmin = l ** 2
             lmax = (l + 1) ** 2
-            self.assertTrue(np.allclose(Ylmcoeff[0:lmin], 0))
-            self.assertFalse(np.allclose(Ylmcoeff[lmin:lmax], 0))
-            self.assertTrue(np.allclose(Ylmcoeff[lmax:T2D.NYlm], 0))
+            self.assertTrue(np.allclose(FCcoeff[0:lmin], 0))
+            self.assertFalse(np.allclose(FCcoeff[lmin:lmax], 0))
+            self.assertTrue(np.allclose(FCcoeff[lmax:T2D.NFC], 0))
 
     def testInverse(self):
         """Test our inverse expansion"""
@@ -681,12 +681,10 @@ class PowerExpansion2DTests(unittest.TestCase):
         def createExpansion(n):
             return lambda u: u ** n
 
-        cubicbasis = [(np.eye(2), np.array([1., 0., 0.])),
-                      (np.eye(2), np.array([-1., 0., 0.])),
-                      (np.eye(2), np.array([0., 1., 0.])),
-                      (np.eye(2), np.array([0., -1., 0.])),
-                      (np.eye(2), np.array([0., 0., 1.])),
-                      (np.eye(2), np.array([0., 0., -1.]))
+        cubicbasis = [(np.eye(2), np.array([1., 0.])),
+                      (np.eye(2), np.array([-1., 0.])),
+                      (np.eye(2), np.array([0., 1.])),
+                      (np.eye(2), np.array([0., -1.]))
                       ]
 
         c = T2D([c[0] for c in T2D.constructexpansion(cubicbasis, N=4, pre=(0, 1, 1 / 2, 1 / 6, 1 / 24))])
@@ -698,9 +696,8 @@ class PowerExpansion2DTests(unittest.TestCase):
             if (n, l) not in fnu:
                 fnu[(n, l)] = createExpansion(n)
 
-        for u in [np.array([0.25, 0., 0.]), np.array([0., 0.1, 0.]), np.array([0., 0., 0.1]),
-                  np.array([0.0234, -0.085, 0.125]),
-                  np.array([0.124, 0.071, -0.098])]:
+        for u in [np.array([0.25, 0.]), np.array([0., 0.1]),
+                  np.array([0.0234, -0.085]), np.array([0.124, 0.071])]:
             umagn = np.sqrt(np.dot(u, u))
             cval = c(u, fnu)
             cinvval = cinv(u, fnu)
@@ -726,14 +723,13 @@ class PowerExpansion2DTests(unittest.TestCase):
         def createExpansion(n):
             return lambda u: u ** n
 
-        newbasis = [(np.array([[1., 6., 5.], [5., 2., 4.], [5., 4., 3.]]), np.array([2 / 3., 1 / 3, -1 / 2]))]
+        newbasis = [(np.array([[1., 6.], [5., 2.], [5., 4.]]), np.array([2 / 3., 1 / 3]))]
         c = T2D([nlc[0] for nlc in T2D.constructexpansion(newbasis, N=4)])
         fnu = {(n, l): createExpansion(n) for n in range(5) for l in range(5)}
         # now we have something to work with. We should have a basis from n=0 up to n=4 of 3x3 matrices.
         c00 = c[0, 0]
-        for u in [np.array([0.25, 0., 0.]), np.array([0., 0.1, 0.]), np.array([0., 0., 0.1]),
-                  np.array([0.0234, -0.085, 0.125]),
-                  np.array([0.124, 0.071, -0.098])]:
+        for u in [np.array([0.25, 0.]), np.array([0., 0.1]),
+                  np.array([0.0234, -0.085]), np.array([0.124, 0.071])]:
             cval = c(u, fnu)
             c00val = c00(u, fnu)
             self.assertEqual(cval[0, 0], c00val)
@@ -742,17 +738,15 @@ class PowerExpansion2DTests(unittest.TestCase):
         c00 = c00.copy()
         # now, set the 0,0 value to be twice what it was before:
         c[0, 0] = 2. * c00
-        for u in [np.array([0.25, 0., 0.]), np.array([0., 0.1, 0.]), np.array([0., 0., 0.1]),
-                  np.array([0.0234, -0.085, 0.125]),
-                  np.array([0.124, 0.071, -0.098])]:
+        for u in [np.array([0.25, 0.]), np.array([0., 0.1]),
+                  np.array([0.0234, -0.085]), np.array([0.124, 0.071])]:
             cval = c(u, fnu)
             c00val = c00(u, fnu)
             self.assertEqual(cval[0, 0], 2. * c00val)
         c00inv = c00.inv(Nmax=4)
         c00inv.reduce()
-        for u in [np.array([0.025, 0., 0.]), np.array([0., 0.025, 0.]), np.array([0., 0., 0.025]),
-                  np.array([0.0234, -0.05, 0.05]),
-                  np.array([-0.024, 0.041, -0.033])]:
+        for u in [np.array([0.25, 0.]), np.array([0., 0.1]),
+                  np.array([0.0234, -0.085]), np.array([0.124, 0.071])]:
             c00val = c00(u, fnu)
             c00invval = c00inv(u, fnu)
             self.assertAlmostEqual(c00val * c00invval, 1)
@@ -763,38 +757,38 @@ class PowerExpansion2DTests(unittest.TestCase):
         def createExpansion(n):
             return lambda u: u ** n
 
-        newbasis = [(0.89 * np.eye(1), np.array([2 / 3., 1 / 3, -1 / 2]))]
+        newbasis = [(0.89 * np.eye(1), np.array([2 / 3., 1 / 3]))]
         c = T2D([nlc[0] for nlc in T2D.constructexpansion(newbasis, N=4)])
         # does this still work if we do this?
         # c.reduce()
         fnu = {(n, l): createExpansion(n) for n in range(5) for l in range(5)}
-        for rot in [np.eye(3), 2. * np.eye(3), 0.5 * np.eye(3),
-                    np.array([[1.25, 0.5, 0.25], [-0.25, 0.9, 0.5], [-0.75, -0.4, 0.6]]),
-                    np.array([[0., 1., 0.], [-1., 0., 0.], [0., 0., 1.]])]:
+        for rot in [np.eye(2), 2. * np.eye(2), 0.5 * np.eye(2),
+                    np.array([[1.25, 0.5], [-0.25, 0.9]]),
+                    np.array([[0., 1.], [-1., 0.]])]:
             rotbasis = [(newbasis[0][0], np.dot(newbasis[0][1], rot))]
             crotdirect = T2D([nlc[0] for nlc in T2D.constructexpansion(rotbasis, N=4)])
             crot = c.rotate(c.rotatedirections(rot))
-            for u in [np.array([1.2, 0., 0.]),
-                      np.array([0., 1.2, 0.]),
-                      np.array([0., 0., 1.2]),
-                      np.array([0.234, -0.5, 0.5]),
-                      np.array([-0.24, 0.41, -1.3])]:
+            for u in [np.array([1.2, 0.]),
+                      np.array([0., 1.2]),
+                      np.array([0., 0.]),
+                      np.array([0.234, -0.5]),
+                      np.array([-0.24, 0.41])]:
                 self.assertAlmostEqual(crot(u, fnu)[0, 0], crotdirect(u, fnu)[0, 0],
                                        msg="Failed before reduce()")
         # now, a more detailed test: do a reduce.
         c2 = c.copy()
         c.reduce()
-        for rot in [np.eye(3), 2. * np.eye(3), 0.5 * np.eye(3),
-                    np.array([[1.25, 0.5, 0.25], [-0.25, 0.9, 0.5], [-0.75, -0.4, 0.6]]),
-                    np.array([[0., 1., 0.], [-1., 0., 0.], [0., 0., 1.]])]:
+        for rot in [np.eye(2), 2. * np.eye(2), 0.5 * np.eye(2),
+                    np.array([[1.25, 0.5], [-0.25, 0.9]]),
+                    np.array([[0., 1.], [-1., 0.]])]:
             rotbasis = [(newbasis[0][0], np.dot(newbasis[0][1], rot))]
             crotdirect = T2D([nlc[0] for nlc in T2D.constructexpansion(rotbasis, N=4)])
             crot = c.rotate(c.rotatedirections(rot))
-            for u in [np.array([1.2, 0., 0.]),
-                      np.array([0., 1.2, 0.]),
-                      np.array([0., 0., 1.2]),
-                      np.array([0.234, -0.5, 0.5]),
-                      np.array([-0.24, 0.41, -1.3])]:
+            for u in [np.array([1.2, 0.]),
+                      np.array([0., 1.2]),
+                      np.array([0., 0.]),
+                      np.array([0.234, -0.5]),
+                      np.array([-0.24, 0.41])]:
                 self.assertAlmostEqual(c(u, fnu)[0, 0], c2(u, fnu)[0, 0],
                                        msg="Failure in reduce() to produce equal function values?")
                 self.assertAlmostEqual(crot(u, fnu)[0, 0], crotdirect(u, fnu)[0, 0],
