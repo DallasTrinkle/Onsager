@@ -616,8 +616,8 @@ class PowerExpansion2DTests(unittest.TestCase):
                 self.assertEqual(l, 4)
         c3 = c2.copy()
         c3.separate()
-        # print("c2:\n{}".format(c2))
-        # print("c3:\n{}".format(c3))
+        print("c2:\n{}".format(c2))
+        print("c3:\n{}".format(c3))
         # now should have 2 + 3 = 5 terms
         self.assertEqual(len(c3.coefflist), 5)
         for n, l, coeff in c3.coefflist:

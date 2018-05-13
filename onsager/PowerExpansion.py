@@ -246,7 +246,6 @@ class Taylor3D(object):
         """
         Takes a "basis" for constructing an expansion -- list of vectors and matrices --
         and constructs the expansions up to power N (default = Lmax)
-        Takes a direction expansion a and b, and returns the sum of the expansions.
 
         :param basis = list((coeffmatrix, vect)): expansions to create;
           sum(coeffmatrix * (vect*q)^n), for powers n = 0..N
@@ -1318,7 +1317,6 @@ class Taylor2D(Taylor3D):
         """
         Takes a "basis" for constructing an expansion -- list of vectors and matrices --
         and constructs the expansions up to power N (default = Lmax)
-        Takes a direction expansion a and b, and returns the sum of the expansions.
 
         :param basis = list((coeffmatrix, vect)): expansions to create;
           sum(coeffmatrix * (vect*q)^n), for powers n = 0..N
@@ -1481,4 +1479,17 @@ class Taylor2D(Taylor3D):
         for internal in cls.__internallist__:
             if not np.all(HDF5group[internal][:] == getattr(cls, internal)): return False
         return True
+
+    def __str__(self):
+        """Human readable string representation"""
+        strrep = ""
+        for n, l, coeff in self.coefflist:
+            strrep = strrep + "f^({}, {})(u)*(".format(n, l)
+            for p in range(self.powlrange[l]):
+                if not np.all(np.isclose(coeff[p], 0)):
+                    strrep = strrep + "\n{} x^{} y^{}".format(coeff[p],
+                                                              self.ind2pow[p, 0],
+                                                              self.ind2pow[p, 1])
+            strrep = strrep + " )\n"
+        return strrep
 
