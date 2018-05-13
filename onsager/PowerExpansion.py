@@ -1362,33 +1362,21 @@ class Taylor2D(Taylor3D):
         # l = 0 case
         powtrans[0, 0] = 1
         # single q value cases
-        for i in range(3):
+        for i in range(2):
             qi_pow = cls.powexp(qptrans[i, :], normalize=False)
             for n in range(1, cls.Lmax + 1):
-                powtrans[cls.pow2ind[(0,) * i + (n,) + (0,) * (2 - i)], :] = cls.powercoeff[n] * qi_pow
+                powtrans[cls.pow2ind[(0,) * i + (n,) + (0,) * (1 - i)], :] = cls.powercoeff[n] * qi_pow
         # pairs of q cases: we get qi^ni qj^nj by direct multiplication
         # triplet is done inside the loop: q1^n1 q2^n2 q3^n3 = (q1^n1 q2^n2) (q3^n3)
-        for i in range(3):
-            for j in range(i + 1, 3):
-                for ni in range(1, cls.Lmax + 1):
-                    powi = cls.pow2ind[(0,) * i + (ni,) + (0,) * (2 - i)]
-                    for nj in range(1, cls.Lmax + 1 - ni):
-                        powj = cls.pow2ind[(0,) * j + (nj,) + (0,) * (2 - j)]
-                        powij = cls.pow2ind[(0,) * i + (ni,) + (0,) * (j - i - 1) + (nj,) + (0,) * (2 - j)]
-                        # multiply the pair!
-                        for pi in range(cls.powlrange[ni - 1], cls.powlrange[ni]):
-                            for pj in range(cls.powlrange[nj - 1], cls.powlrange[nj]):
-                                powtrans[powij, cls.directmult[pi, pj]] += powtrans[powi, pi] * powtrans[powj, pj]
-                        if j == 1:
-                            # do the triplet
-                            # k = 2 (instead of explicitly writing another loop)
-                            for nk in range(1, cls.Lmax + 1 - ni - nj):
-                                powk = cls.pow2ind[0, 0, nk]
-                                powijk = cls.pow2ind[ni, nj, nk]
-                                for pij in range(cls.powlrange[ni + nj - 1], cls.powlrange[ni + nj]):
-                                    for pk in range(cls.powlrange[nk - 1], cls.powlrange[nk]):
-                                        powtrans[powijk, cls.directmult[pij, pk]] += powtrans[powij, pij] * powtrans[
-                                            powk, pk]
+        for ni in range(1, cls.Lmax + 1):
+            powi = cls.pow2ind[ni,0]
+            for nj in range(1, cls.Lmax + 1 - ni):
+                powj = cls.pow2ind[0,nj]
+                powij = cls.pow2ind[ni,nj]
+                # multiply the pair!
+                for pi in range(cls.powlrange[ni - 1], cls.powlrange[ni]):
+                    for pj in range(cls.powlrange[nj - 1], cls.powlrange[nj]):
+                        powtrans[powij, cls.directmult[pi, pj]] += powtrans[powi, pi] * powtrans[powj, pj]
         npowtrans = np.zeros((cls.Lmax + 1, cls.Npower, cls.Npower))
         for n in range(cls.Lmax + 1):
             prange = slice(cls.powlrange[n - 1], cls.powlrange[n])
@@ -1396,10 +1384,9 @@ class Taylor2D(Taylor3D):
             # now, work on lower values (n-2, n-4, ...)
             for m in range(n - 2, -1, -2):
                 # powers that sum up to m:
-                for tup in [(n0, n1, m - n0 - n1) for n0 in range(m + 1) for n1 in range(m - n0 + 1)]:
-                    npowtrans[n, cls.pow2ind[tup], :] = npowtrans[n, cls.pow2ind[tup[0] + 2, tup[1], tup[2]], :] + \
-                                                        npowtrans[n, cls.pow2ind[tup[0], tup[1] + 2, tup[2]], :] + \
-                                                        npowtrans[n, cls.pow2ind[tup[0], tup[1], tup[2] + 2], :]
+                for tup in [(n0, m- n0) for n0 in range(m + 1)]:
+                    npowtrans[n, cls.pow2ind[tup], :] = npowtrans[n, cls.pow2ind[tup[0] + 2, tup[1]], :] + \
+                                                        npowtrans[n, cls.pow2ind[tup[0], tup[1] + 2], :]
         return npowtrans
 
     # for sorting our coefficient lists:
