@@ -550,12 +550,15 @@ class Crystal(object):
         # Do some basic type checking and "formatting"
         self.lattice = None
         if type(lattice) is list:
-            if len(lattice) != 3: raise TypeError('lattice is a list, but does not contain 3 members')
+            if len(lattice) != 3 and len(lattice) != 2:
+                raise TypeError('lattice is a list, but does not contain 2 or 3 members')
             self.lattice = np.array(lattice).T
         if type(lattice) is np.ndarray:
             self.lattice = np.array(lattice)
         if self.lattice is None: raise TypeError('lattice is not a recognized type')
-        if self.lattice.shape != (3, 3): raise TypeError('lattice contains vectors that are not 3 dimensional')
+        if self.lattice.shape != (3, 3) and self.lattice.shape != (2, 2):
+            raise TypeError('lattice contains vectors that are not 2 or 3 dimensional')
+        self.dim = self.lattice.shape[0] # dimensionality of our lattice
         if type(basis) is not list: raise TypeError('basis needs to be a list or list of lists')
         if type(basis[0]) == np.ndarray:
             for u in basis:

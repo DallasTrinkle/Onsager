@@ -242,6 +242,8 @@ class CrystalClassTests(unittest.TestCase):
                                            [-np.sqrt(0.75), np.sqrt(0.75), 0],
                                            [0, 0, self.c_a]])
         self.basis = [np.array([0., 0., 0.])]
+        self.squarelatt = self.a0 * np.eye(2)  # two-dimensional crystal
+        self.basis2d = [np.zeros(2)]
 
     def isscMetric(self, crys, a0=0):
         if a0 == 0: a0 = self.a0
@@ -336,6 +338,12 @@ class CrystalClassTests(unittest.TestCase):
         """Does the body-centered cubic lattice have the right volume and metric?"""
         crys = crystal.Crystal(self.bcclatt, self.basis)
         self.isbccMetric(crys)
+        self.assertEqual(len(crys.basis), 1)  # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
+
+    def testsquareMetric(self):
+        """Does the square lattice have the right volume and metric?"""
+        crys = crystal.Crystal(self.squarelatt, self.basis2d)
         self.assertEqual(len(crys.basis), 1)  # one chemistry
         self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
 
