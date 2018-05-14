@@ -617,19 +617,19 @@ class PowerExpansion2DTests(unittest.TestCase):
         for n, l, coeff in c2.coefflist:
             self.assertTrue(n == 2 or n == 4)
             if n == 2:
-                self.assertEqual(l, 2)
+                self.assertEqual(l, 0)
             else:
-                self.assertEqual(l, 4)
+                self.assertEqual(l, 0)
         c3 = c2.copy()
         c3.separate()
         print("c2:\n{}".format(c2))
         print("c3:\n{}".format(c3))
-        # now should have 2 + 3 = 5 terms
-        self.assertEqual(len(c3.coefflist), 5)
+        # now should have 1 + 2 = 3 terms
+        self.assertEqual(len(c3.coefflist), 2)
         for n, l, coeff in c3.coefflist:
             self.assertTrue(n == 2 or n == 4)
             if n == 2:
-                self.assertTrue(l == 0 or l == 2)
+                self.assertTrue(l == 0)
             else:
                 self.assertTrue(l == 0 or l == 2 or l == 4)
             # also check that the only non-zero terms for a given l are value are those values
@@ -729,10 +729,10 @@ class PowerExpansion2DTests(unittest.TestCase):
         def createExpansion(n):
             return lambda u: u ** n
 
-        newbasis = [(np.array([[1., 6.], [5., 2.], [5., 4.]]), np.array([2 / 3., 1 / 3]))]
+        newbasis = [(np.array([[1., -2.], [-2., 2.]]), np.array([2 / 3., 1 / 3]))]
         c = T2D([nlc[0] for nlc in T2D.constructexpansion(newbasis, N=4)])
         fnu = {(n, l): createExpansion(n) for n in range(5) for l in range(5)}
-        # now we have something to work with. We should have a basis from n=0 up to n=4 of 3x3 matrices.
+        # now we have something to work with. We should have a basis from n=0 up to n=4 of 2x2 matrices.
         c00 = c[0, 0]
         for u in [np.array([0.25, 0.]), np.array([0., 0.1]),
                   np.array([0.0234, -0.085]), np.array([0.124, 0.071])]:
@@ -751,8 +751,8 @@ class PowerExpansion2DTests(unittest.TestCase):
             self.assertEqual(cval[0, 0], 2. * c00val)
         c00inv = c00.inv(Nmax=4)
         c00inv.reduce()
-        for u in [np.array([0.25, 0.]), np.array([0., 0.1]),
-                  np.array([0.0234, -0.085]), np.array([0.124, 0.071])]:
+        for u in [np.array([0.025, 0.]), np.array([0., 0.01]),
+                  np.array([0.0234, -0.085]), np.array([0.0124, 0.071])]:
             c00val = c00(u, fnu)
             c00invval = c00inv(u, fnu)
             self.assertAlmostEqual(c00val * c00invval, 1)

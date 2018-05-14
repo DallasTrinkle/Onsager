@@ -1309,35 +1309,6 @@ class Taylor2D(Taylor3D):
                         factorial(n, True) / (factorial(n0, True) * factorial(n1, True))
         return powercoeff
 
-    # NOTE: this appears to be entirely unchanged? Maybe try removing it
-    @classmethod
-    def constructexpansion(cls, basis, N=-1, pre=None):
-        """
-        Takes a "basis" for constructing an expansion -- list of vectors and matrices --
-        and constructs the expansions up to power N (default = Lmax)
-
-        :param basis = list((coeffmatrix, vect)): expansions to create;
-          sum(coeffmatrix * (vect*q)^n), for powers n = 0..N
-        :param N: maximum power to consider; for N=-1, use Lmax
-        :param pre: list of prefactors, defining the Taylor expansion. Default = 1
-        :return list((n, lmax, powexpansion)),...: our expansion, as input to create
-          Taylor2D objects
-        """
-        if N < 0: N = cls.Lmax
-        if pre is None:
-            pre = [1 for n in range(N + 1)]
-        c = []
-        for n in range(N + 1):
-            c.append([(n, n, np.zeros((cls.powlrange[n],) + basis[0][0].shape, dtype=complex))])
-        for coeff, vect in basis:
-            pexp = cls.powexp(vect, normalize=False)
-            for n in range(N + 1):
-                vnpow = (cls.powercoeff[n] * pexp)[:cls.powlrange[n]]
-                cn = c[n][0][2]
-                for p in range(cls.powlrange[n]):
-                    cn[p] += pre[n] * vnpow[p] * coeff
-        return tuple(c)
-
     @classmethod
     def rotatedirections(cls, qptrans):
         """
