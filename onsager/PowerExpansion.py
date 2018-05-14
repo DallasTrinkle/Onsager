@@ -1241,23 +1241,13 @@ class Taylor2D(Taylor3D):
             -1 component = sum(l=0..Lmax, projL[l]) = simplification projection
         """
         projL = np.zeros((cls.Lmax + 2, cls.Npower, cls.Npower))
-        # projLFC = np.zeros((cls.Lmax + 2, cls.NFC, cls.NFC), dtype=complex)
-        # for l in range(-cls.Lmax, cls.Lmax+1):
-        #     lind = cls.FC2ind[l]
-        #     projLFC[abs(l), lind] = 1.  # l is part of abs(l)--gets +-l
-        #     projLFC[-1, lind] = 1.      # all part of the sum
-        # for l in range(cls.Lmax + 2):
-        #     # projL[l] = np.dot(cls.powFC, np.dot(projLFC[l], cls.FCpow)).real
-        #     projL[l] = np.tensordot(cls.FCpow,
-        #                             np.tensordot(projLFC[l], cls.powFC, axes=(1, 1)),
-        #                             axes=(0, 0)).real
         for l in range(cls.Lmax + 1):
             lp, lm = cls.FC2ind[l], cls.FC2ind[-l]
             if l == 0:
-                projL[l] = np.outer(cls.powFC[:, lp], cls.FCpow[lp, :]).real
+                projL[l] = np.outer(cls.FCpow[lp, :], cls.powFC[:, lp]).real
             else:
-                projL[l] = np.outer(cls.powFC[:, lp], cls.FCpow[lp, :]).real
-                projL[l] += np.outer(cls.powFC[:, lm], cls.FCpow[lm, :]).real
+                projL[l] = np.outer(cls.FCpow[lp, :], cls.powFC[:, lp]).real
+                projL[l] += np.outer(cls.FCpow[lm, :], cls.powFC[:, lm]).real
         projL[-1] = np.sum(projL, axis=0)
         return projL
 
