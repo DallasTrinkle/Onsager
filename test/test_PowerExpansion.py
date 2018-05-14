@@ -429,6 +429,12 @@ class PowerExpansion2DTests(unittest.TestCase):
                       (np.eye(2), np.array([1., 0.]))
                       ]
 
+    def testIndexing(self):
+        for ind, l in enumerate(self.c.ind2FC):
+            self.assertEqual(ind, self.c.FC2ind[l])
+        for l in range(-self.c.Lmax, self.c.Lmax+1):
+            self.assertEqual(l, self.c.ind2FC[self.c.FC2ind[l]])
+
     def testExpansionFCpow(self):
         """Test the expansion of FC into powers"""
         for theta in [self.theta + dt*np.pi for dt in np.linspace(0, 2, num=16, endpoint=False)]:
