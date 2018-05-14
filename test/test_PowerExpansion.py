@@ -423,10 +423,10 @@ class PowerExpansion2DTests(unittest.TestCase):
         self.c = T2D()
         self.basis = [(np.eye(2), np.array([0.5, -np.sqrt(0.75)])),
                       (np.eye(2), np.array([0.5, np.sqrt(0.75)])),
-                      (np.eye(2), np.array([-1., 0.])),
+                      (2.*np.eye(2), np.array([-1., 0.])),
                       (np.eye(2), np.array([-0.5, -np.sqrt(0.75)])),
                       (np.eye(2), np.array([-0.5, np.sqrt(0.75)])),
-                      (np.eye(2), np.array([1., 0.]))
+                      (2.*np.eye(2), np.array([1., 0.]))
                       ]
 
     def testIndexing(self):
@@ -617,36 +617,34 @@ class PowerExpansion2DTests(unittest.TestCase):
         for n, l, coeff in c2.coefflist:
             self.assertTrue(n == 2 or n == 4)
             if n == 2:
-                self.assertEqual(l, 0)
+                self.assertEqual(l, 2)
             else:
-                self.assertEqual(l, 0)
+                self.assertEqual(l, 4)
         c3 = c2.copy()
         c3.separate()
-        print("c2:\n{}".format(c2))
-        print("c3:\n{}".format(c3))
-        # now should have 1 + 2 = 3 terms
-        self.assertEqual(len(c3.coefflist), 2)
+        # print("c2:\n{}".format(c2))
+        # print("c3:\n{}".format(c3))
+        # now should have 2 + 3 = 5 terms
+        self.assertEqual(len(c3.coefflist), 5)
         for n, l, coeff in c3.coefflist:
             self.assertTrue(n == 2 or n == 4)
             if n == 2:
-                self.assertTrue(l == 0)
+                self.assertTrue(l == 0 or l == 2)
             else:
                 self.assertTrue(l == 0 or l == 2 or l == 4)
             # also check that the only non-zero terms for a given l are value are those values
-            if l == 0:
-                lmin = 0
-            else:
-                lmin = T2D.powlrange[l - 1]
-            lmax = T2D.powlrange[l]
-            # self.assertTrue(np.allclose(coeff[0:lmin], 0))
+            lmin, lmax = T2D.powlrange[l-1], T2D.powlrange[l]
+            self.assertTrue(np.allclose(coeff[0:lmin], 0))
             self.assertTrue(np.allclose(coeff[lmax:T2D.Npower], 0))
             self.assertFalse(np.allclose(coeff[lmin:lmax], 0))
+            # check directly the Fourier transform:
             FCcoeff = np.tensordot(T2D.powFC[:T2D.powlrange[l], :], coeff, axes=(0, 0))  # now in FC
-            lmin = l ** 2
-            lmax = (l + 1) ** 2
-            self.assertTrue(np.allclose(FCcoeff[0:lmin], 0))
-            self.assertFalse(np.allclose(FCcoeff[lmin:lmax], 0))
-            self.assertTrue(np.allclose(FCcoeff[lmax:T2D.NFC], 0))
+            # only the lplus and lminus should be non-zero:
+            lp, lm = T2D.FC2ind[l], T2D.FC2ind[-l]
+            for lind in range(T2D.NFC):
+                if lind != lp and lind != lm:
+                    self.assertAlmostEqual(np.sum(np.abs(FCcoeff[lind])), 0)
+            self.assertNotAlmostEqual(np.sum(np.abs(FCcoeff[lp])+np.abs(FCcoeff[lm])), 0)
 
         # a little tricky to make sure we get ALL the functions (instead of making multiple dictionaries)
         fnu = {(n, l): createExpansion(n) for (n, l) in c.nl()}  # or could do this in previous loop
@@ -669,11 +667,12 @@ class PowerExpansion2DTests(unittest.TestCase):
         crand.separate()
         for (n, l, c) in crand.coefflist:
             FCcoeff = np.tensordot(T2D.powFC[:T2D.powlrange[l], :], c, axes=(0, 0))  # now in FC
-            lmin = l ** 2
-            lmax = (l + 1) ** 2
-            self.assertTrue(np.allclose(FCcoeff[0:lmin], 0))
-            self.assertFalse(np.allclose(FCcoeff[lmin:lmax], 0))
-            self.assertTrue(np.allclose(FCcoeff[lmax:T2D.NFC], 0))
+            # only the lplus and lminus should be non-zero:
+            lp, lm = T2D.FC2ind[l], T2D.FC2ind[-l]
+            for lind in range(T2D.NFC):
+                if lind != lp and lind != lm:
+                    self.assertAlmostEqual(np.sum(np.abs(FCcoeff[lind])), 0)
+            self.assertNotAlmostEqual(np.sum(np.abs(FCcoeff[lp])+np.abs(FCcoeff[lm])), 0)
 
     def testInverse(self):
         """Test our inverse expansion"""
