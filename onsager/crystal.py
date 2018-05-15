@@ -351,6 +351,11 @@ def VectorBasis(rottype, eigenvect):
     :return dim: dimensionality, 0..3
     :return vect: vector defining line direction (1) or plane normal (2)
     """
+    # 2d first
+    if len(eigenvect) == 2:
+        if rottype == 1: return (2, np.zeros(2))  # sphere (identity)
+        if rottype == -1: return (1, eigenvect[0])  # plane (pure mirror)
+        return (0, np.zeros(2))  # all others are rotation, which leaves nothing unchanged in 2d
     # edge cases first:
     if rottype == 1: return (3, np.zeros(3))  # sphere (identity)
     if rottype == -2: return (0, np.zeros(3))  # point (inversion)
@@ -379,6 +384,16 @@ def SymmTensorBasis(rottype, eigenvect):
     def SymmTensorCross(v1, v2):
         """Make a normalized, symmetric tensor from two vectors"""
         return (np.outer(v1, v2) + np.outer(v2, v1)) / np.sqrt(2)
+
+    # 2d first:
+    if len(eigenvect) == 2:
+        if rottype == 1 or rottype == -2:
+            return [SymmTensor1(np.array([1.,0.])), SymmTensor1(np.array([0.,1.])),
+                    SymmTensorCross(np.array([1.,0]), np.array([0.,1.]))]
+        if rottype == -1:
+            return [SymmTensor1(eigenvect[0]), SymmTensor1(eigenvect[1])]
+        # rotations kill everything except the isotropic case:
+        return [np.eye(2)]
 
     if rottype == 1 or rottype == -2:
         # identity / inversion: all symmetric tensors
@@ -411,10 +426,20 @@ def CombineVectorBasis(b1, b2):
     :return vect: vector defining line direction (1) or plane normal (2)
     """
     # edge cases first
-    if b1[0] == 3: return b2  # sphere with anything
-    if b2[0] == 3: return b1
     if b1[0] == 0: return b1  # point with anything
     if b2[0] == 0: return b2
+    # 2d first:
+    if b1[1].shape[0] == 2:
+        if b1[0] == 2: return b2
+        if b2[0] == 2: return b1
+        # all that remains now is b1[0] == b2[0] == 1 (two lines)
+        if abs(np.dot(b1[1], b2[1])) > (1. - 1e-8):  # parallel vectors
+            return (0, np.zeros(2))
+        else:  # two parallel lines
+            return b1
+
+    if b1[0] == 3: return b2  # sphere with anything
+    if b2[0] == 3: return b1
     if b1[0] == b2[0]:
         if abs(np.dot(b1[1], b2[1])) > (1. - 1e-8):  # parallel vectors
             return b1  # equal bases
