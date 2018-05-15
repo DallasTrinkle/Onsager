@@ -281,7 +281,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         tr = np.int(self.rot.trace())
         # two trivial cases: identity, inversion:
         if optype == 1 or optype == -2:
-            return optype, np.eye(3)
+            return optype, np.eye(self.rot.shape[0])
         # otherwise, there's an axis to find:
         vmat = np.eye(3)
         vsum = np.zeros((3, 3))
