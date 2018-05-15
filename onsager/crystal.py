@@ -805,16 +805,24 @@ class Crystal(object):
         # m = index of smallest non-zero value in T:
         m = min([i for (i, v) in enumerate(T) if v != 0], key=lambda n: abs(T[n]))
         # i, j = other indices, ordered so that T, e_i, e_j == right-handed coordinate system
-        if T[m] > 0:
-            i, j = (m+1)%3, (m+2)%3
+        if self.dim == 3:
+            if T[m] > 0:
+                i, j = (m+1)%3, (m+2)%3
+            else:
+                i, j = (m+2)%3, (m+1)%3
+            # new lattice: A0 = [a]*t, A1 = a_i, A2 = a_j
+            self.lattice = np.array([np.dot(self.lattice, t),
+                                     self.lattice[:, i],
+                                     self.lattice[:, j]]).T
         else:
-            i, j = (m+2)%3, (m+1)%3
-        # new lattice: A0 = [a]*t, A1 = a_i, A2 = a_j
-        self.lattice = np.array([np.dot(self.lattice, t),
-                                 self.lattice[:, i],
-                                 self.lattice[:, j]]).T
+            # 2-d
+            i = (m+1)%2
+            # new lattice: A0 = [a]*t, A1 = a_i
+            self.lattice = np.array([np.dot(self.lattice, t),
+                                     self.lattice[:, i]]).T
         reduction = abs(T[m]/M)
-        mult = np.array([M/T[m], T[i]/T[m], T[j]/T[m]])
+        mult = np.array([M/T[m], T[i]/T[m], T[j]/T[m]]) if self.dim == 3 else np.array([M/T[m], T[i]/T[m]])
+
         # 2. update the basis
         self.threshold *= abs(mult[0]) # need to update *before* doing matching below:
         newbasis = []
@@ -826,7 +834,9 @@ class Crystal(object):
             for u, s in zip(atomlist, spinlist):
                 v = incell(np.array([u[m]*mult[0],
                                      u[i] - u[m]*mult[1],
-                                     u[j] - u[m]*mult[2]]))
+                                     u[j] - u[m]*mult[2]])) if self.dim == 3 else \
+                    incell(np.array([u[m]*mult[0],
+                                     u[i] - u[m]*mult[1]]))
                 ind = 0
                 for v1 in newatomlist:
                     # dv = relative displacement of site

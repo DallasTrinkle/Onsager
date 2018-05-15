@@ -344,6 +344,7 @@ class CrystalClassTests(unittest.TestCase):
     def testsquareMetric(self):
         """Does the square lattice have the right volume and metric?"""
         crys = crystal.Crystal(self.squarelatt, self.basis2d)
+        # self.issquareMetric(crys)
         self.assertEqual(len(crys.basis), 1)  # one chemistry
         self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
 
@@ -382,6 +383,16 @@ class CrystalClassTests(unittest.TestCase):
         self.assertEqual(len(crys.basis), 1)  # one chemistry
         self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
         self.assertTrue(np.allclose(crys.basis[0][0], np.array([0, 0, 0])))
+
+    def testsquareReduce(self):
+        """If we start with a supercell, does it get reduced back to our start?"""
+        nsuper = np.array([[2, 0], [0, 2]], dtype=int)
+        doublebasis = [self.basis2d[0], np.array([0.5, 0]) + self.basis2d[0],
+                       np.array([0, 0.5]) + self.basis2d[0], np.array([0.5, 0.5]) + self.basis2d[0]]
+        crys = crystal.Crystal(np.dot(self.squarelatt, nsuper), doublebasis)
+        # self.issquareMetric(crys)
+        self.assertEqual(len(crys.basis), 1)  # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
 
     def testhcp(self):
         """If we start with a supercell, does it get reduced back to our start?"""
