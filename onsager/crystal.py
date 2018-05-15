@@ -227,7 +227,8 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         if np.int(np.round(np.linalg.det(self.cartrot))) != det: return False
         # sanity:
         if abs(det) != 1: return False
-        if det * tr < -1 or det * tr > 3: return False
+        dimshift = 0 if self.rot.shape[0] == 3 else -1
+        if det * tr < (-1+dimshift) or det * tr > (3+dimshift): return False
         return True
 
     def inv(self):
@@ -282,6 +283,12 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         # two trivial cases: identity, inversion:
         if optype == 1 or optype == -2:
             return optype, np.eye(self.rot.shape[0])
+        if self.rot.shape[0] == 2:
+            if optype != -1:
+                return optype, np.eye(self.rot.shape[0])
+            # only interesting case is how to deal with is the mirror plane; find the angle of the mirror
+            phi = 0.5*np.arctan2(self.cartrot[0,1]+self.cartrot[1,0], self.cartrot[0,0]-self.cartrot[1,1])
+            return optype, np.array([[np.cos(phi), -np.sin(phi)], [np.sin(phi), np.cos(phi)]])
         # otherwise, there's an axis to find:
         vmat = np.eye(3)
         vsum = np.zeros((3, 3))
@@ -616,8 +623,11 @@ class Crystal(object):
 
     def __str__(self):
         """Human-readable version of crystal (lattice + basis)"""
-        str_rep = "#Lattice:\n  a1 = {}\n  a2 = {}\n  a3 = {}\n#Basis:".format(
-            self.lattice.T[0], self.lattice.T[1], self.lattice.T[2])
+        str_rep = "#Lattice:\n  a1 = {}\n  a2 = {}\n".format(
+            self.lattice.T[0], self.lattice.T[1])
+        if self.dim > 2:
+            str_rep += "  a3 = {}\n".format(self.lattice.T[2])
+        str_rep += "#Basis:"
         for chemind, atoms in enumerate(self.basis):
             for atomind, pos in enumerate(atoms):
                 if self.spins is None:
