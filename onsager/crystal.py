@@ -154,11 +154,12 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
 
     def __str__(self):
         """Human-readable version of groupop"""
-        str_rep = "#Rotation (lattice, cartesian):\n {}\t{}\n {}\t{}\n {}\t{}\n#Translation: {}\n#Indexmap:".format(
+        str_rep = "#Rotation (lattice, cartesian):\n {}\t{}\n {}\t{}\n".format(
             self.rot[0], self.cartrot[0],
-            self.rot[1], self.cartrot[1],
-            self.rot[2], self.cartrot[2],
-            self.trans)
+            self.rot[1], self.cartrot[1])
+        if self.rot.shape == (3,3):
+            str_rep += " {}\t{}\n".format(self.rot[2], self.cartrot[2])
+        str_rep += "#Translation: {}\n#Indexmap:".format(self.trans)
         for chemind, atoms in enumerate(self.indexmap):
             for origind, finalind in enumerate(atoms):
                 str_rep = str_rep + "\n  {chem}.{o} -> {chem}.{f}".format(chem=chemind,
@@ -198,7 +199,8 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         """Add a translation to our group operation"""
         if __debug__:
             if type(other) is not np.ndarray: raise TypeError('Can only add a translation to a group operation')
-            if other.shape != (3,): raise IndexError('Can only add a 3 dimensional vector')
+            if other.shape != (self.rot.shape[0],):
+                raise IndexError('Can only add a {} dimensional vector'.format(self.rot.shape[0]))
             if not np.issubdtype(other.dtype, np.integer): raise TypeError('Can only add a lattice vector translation')
         return GroupOp(self.rot, self.trans + other, self.cartrot, self.indexmap)
 
@@ -239,7 +241,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
 
     @staticmethod
     def optype(rot):
-        """Returns the type of group operation (single integer) and eigenvectors.
+        """Returns the type of group operation (single integer):
         1 = identity
         2, 3, 4, 6 = n- fold rotation around an axis
         negative = rotation + mirror operation, perpendicular to axis
@@ -248,11 +250,13 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         :param rot: rotation matrix (can be the integer rot)
         :return type: integer
         """
+        # dim = rot.shape[0]
+        dimindexpos, dimindexneg = (1, 3) if rot.shape[0] == 3 else (2, 4)
         tr = np.int(rot.trace())
         if np.linalg.det(rot) > 0:
-            return (2, 3, 4, 6, 1)[tr + 1]  # trace determines the rotation type
+            return (2, 3, 4, 6, 1)[tr + dimindexpos]  # trace determines the rotation type [tr + 1] for 3d
         else:
-            return (-2, -3, -4, -6, -1)[tr + 3]  # trace determines the rotation type
+            return (-2, -3, -4, -6, -1)[tr + dimindexneg]  # trace determines the rotation type [tr + 3] fpr 3d
 
     def eigen(self):
         """Returns the type of group operation (single integer) and eigenvectors.
@@ -725,7 +729,7 @@ class Crystal(object):
         """Center the atoms in the cell if there is an inversion operation present."""
         # trivial case:
         if self.N == 1:
-            self.basis = [[np.array([0., 0., 0.])]]
+            self.basis = [[np.zeros(self.dim)]]
             return
         # else, invert positions!
         trans, indexmap = maptranslation(self.basis, [[-u for u in atomlist] for atomlist in self.basis])
@@ -945,11 +949,8 @@ class Crystal(object):
         """
         # Start with a list of possible vectors; add those that define the BZ...
         BZG = []
-        for nv in [[n0, n1, n2]
-                   for n0 in range(-3, 4)
-                   for n1 in range(-3, 4)
-                   for n2 in range(-3, 4)
-                   if (n0, n1, n2) != (0, 0, 0)]:
+        for nv in itertools.product(range(-3, 4), repeat = self.dim):
+            if all(n == 0 for n in nv): continue
             vec = np.dot(self.lattice, nv)
             if self.inBZ(vec, BZG, threshold=0): BZG.append(np.dot(self.reciplatt, nv))
         # ... and use a list comprehension to only keep those that still remain
@@ -969,12 +970,15 @@ class Crystal(object):
             rot2, rot4, rot6 = (1, -1), (1, -1, 1j, -1j), tuple(np.exp(n * np.pi * 2j / 6) for n in range(6))
             return (rot2, rot2, rot6, rot4, None, rot6)[abs(optype) - 1]  # (+-1, +-2, +-3, +-4, .., +-6)
 
+        def quickabsdet(M):
+            if M.shape == (2,2): return abs(M[0,0]*M[1,1]-M[0,1]*M[1,0])
+            if M.shape == (3,3): return abs(M[0,0]*(M[1,1]*M[2,2]-M[1,2]*M[2,1])
+                                            -M[0,1]*(M[1,0]*M[2,2]-M[1,2]*M[2,0])
+                                            +M[0,2]*(M[1,0]*M[2,1]-M[1,1]*M[2,0]))
+
         groupops = []
-        supercellvect = [np.array((n0, n1, n2))
-                         for n0 in range(-1, 2)
-                         for n1 in range(-1, 2)
-                         for n2 in range(-1, 2)
-                         if (n0, n1, n2) != (0, 0, 0)]
+        supercellvect = [np.array(nv) for nv in itertools.product(range(-1,2), repeat=self.dim)
+                         if any(n != 0 for n in nv)]
         matchvect = [[u for u in supercellvect
                       if self.__isclose__(np.dot(u, np.dot(self.metric, u)),
                                           self.metric[d, d])] for d in range(self.dim)]
@@ -983,11 +987,9 @@ class Crystal(object):
             spins = [[0 for u in atomlist] for atomlist in self.basis]
         else:
             spins = self.spins
-        for supercell in (np.array((r0, r1, r2)).T
-                          for r0 in matchvect[0]
-                          for r1 in matchvect[1]
-                          for r2 in matchvect[2]
-                          if abs(np.inner(r0, np.cross(r1, r2))) == 1):
+        for supertuple in itertools.product(*matchvect):
+            supercell = np.array(supertuple).T
+            if quickabsdet(supercell) != 1: continue
             if self.__isclose__(np.dot(supercell.T, np.dot(self.metric, supercell)), self.metric):
                 # possible operation--need to check the atomic positions with spin phase factors
                 optype = GroupOp.optype(supercell)
