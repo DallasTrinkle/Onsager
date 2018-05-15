@@ -1319,7 +1319,8 @@ class Crystal(object):
         """
         if vb[0] == 0: return []
         if vb[0] == 1: return [vb[1]]
-        if vb[0] == 2:
+        if vb[0] == vb[1].shape[0]: return [v for v in np.eye(vb[1].shape[0])]
+        if vb[0] == 2: # 3d only
             # now, construct the other two directions:
             norm = vb[1]
             if abs(norm[2]) < 0.75:
@@ -1329,7 +1330,6 @@ class Crystal(object):
             v1 /= np.sqrt(np.dot(v1, v1))
             v2 = np.cross(norm, v1)
             return [v1, v2]
-        if vb[0] == 3: return [v for v in np.eye(3)]
 
     def FullVectorBasis(self, chem=None):
         """
@@ -1353,13 +1353,13 @@ class Crystal(object):
                 for v in self.vectlist(self.VectorBasis((c, s[0]))):
                     v /= np.sqrt(len(s))  # additional normalization
                     # we have some constructing to do... first, make the vector we want to use
-                    vb = np.zeros((N, 3))
+                    vb = np.zeros((N, self.dim))
                     for g in self.G:
                         # what site do we land on, and what's the vector? (this is slight overkill)
                         vb[g.indexmap[c][s[0]]] = self.g_direc(g, v)
                     lis.append(vb)
             # need the *full matrix of this tensor*; could probably be done using tensordot?
-            VV = np.zeros((3, 3, len(lis), len(lis)))
+            VV = np.zeros((self.dim, self.dim, len(lis), len(lis)))
             for i, vb_i in enumerate(lis):
                 for j, vb_j in enumerate(lis):
                     VV[:, :, i, j] = np.dot(vb_i.T, vb_j)
@@ -1396,10 +1396,8 @@ class Crystal(object):
         r2 = cutoff * cutoff
         nmax = [int(np.round(np.sqrt(self.metric[i, i]))) + 1
                 for i in range(self.dim)]
-        supervect = [np.array([n0, n1, n2])
-                     for n0 in range(-nmax[0], nmax[0] + 1)
-                     for n1 in range(-nmax[1], nmax[1] + 1)
-                     for n2 in range(-nmax[2], nmax[2] + 1)]
+        nranges = [range(-n, n+1) for n in nmax]
+        supervect = [np.array(ntup) for ntup in itertools.product(*nranges)]
         lis = []
         u0 = self.basis[ind[0]][ind[1]]
         for u1 in self.basis[ind[0]]:
@@ -1433,10 +1431,8 @@ class Crystal(object):
         r2 = cutoff * cutoff
         nmax = [int(np.round(np.sqrt(self.metric[i, i]))) + 1
                 for i in range(self.dim)]
-        supervect = [np.array([n0, n1, n2])
-                     for n0 in range(-nmax[0], nmax[0] + 1)
-                     for n1 in range(-nmax[1], nmax[1] + 1)
-                     for n2 in range(-nmax[2], nmax[2] + 1)]
+        nranges = [range(-n, n+1) for n in nmax]
+        supervect = [np.array(ntup) for ntup in itertools.product(*nranges)]
         lis = []
         center = np.zeros(self.dim, dtype=int)
         for i, u0 in enumerate(self.basis[chem]):
@@ -1531,12 +1527,14 @@ class Crystal(object):
         """
         Nkpt = np.product(Nmesh)
         if Nkpt == 0: return
-        dN = np.array([1 / x for x in Nmesh])
-        # use a list comprehension to iterate and build:
-        kptfull = np.array([np.dot(self.reciplatt, (n0 * dN[0], n1 * dN[1], n2 * dN[2]))
-                            for n0 in range(-Nmesh[0] // 2 + 1, Nmesh[0] // 2 + 1)
-                            for n1 in range(-Nmesh[1] // 2 + 1, Nmesh[1] // 2 + 1)
-                            for n2 in range(-Nmesh[2] // 2 + 1, Nmesh[2] // 2 + 1)])
+        # dN = np.array([1 / x for x in Nmesh])
+        # # use a list comprehension to iterate and build:
+        # kptfull = np.array([np.dot(self.reciplatt, (n0 * dN[0], n1 * dN[1], n2 * dN[2]))
+        #                     for n0 in range(-Nmesh[0] // 2 + 1, Nmesh[0] // 2 + 1)
+        #                     for n1 in range(-Nmesh[1] // 2 + 1, Nmesh[1] // 2 + 1)
+        #                     for n2 in range(-Nmesh[2] // 2 + 1, Nmesh[2] // 2 + 1)])
+        kdiv = [np.linspace(1/2,-1/2,Nm,endpoint=False) for Nm in Nmesh]
+        kptfull = np.array([np.dot(self.reciplatt, ktup) for ktup in itertools.product(*kdiv)])
         # run through list to ensure that all k-points are inside the BZ
         Gmin = min(np.dot(G, G) for G in self.BZG)
         for k in kptfull:
