@@ -532,10 +532,10 @@ class Crystal(object):
         basis vectors. While it does not explicitly store the specific chemical
         elements involved, it does store that there are different elements.
 
-        :param lattice: array[3,3] or list of array[3]
+        :param lattice: array[3,3] or list of array[3] (or 2 if 2-dimensional)
             lattice vectors; if [3,3] array, then the vectors need to be in *column* format
             so that the first lattice vector is lattice[:,0]
-        :param basis: list of array[3] or list of list of array[3]
+        :param basis: list of array[3] or list of list of array[3] (or 2 if 2-dimensional)
             crystalline basis vectors, in unit cell coordinates. If a list of lists, then
             there are multiple chemical elements, with each list corresponding to a unique
             element
@@ -734,8 +734,8 @@ class Crystal(object):
         # translate by -1/2 * trans for inversion
         self.basis = [[incell(u - 0.5 * trans) for u in atomlist] for atomlist in self.basis]
         # now, check for "aesthetics" of our basis choice
-        shift = np.zeros(3)
-        for d in range(3):
+        shift = np.zeros(self.dim)
+        for d in range(self.dim):
             if np.any([np.isclose(u[d], 0, atol=self.threshold)
                        for atomlist in self.basis for u in atomlist]):
                 shift[d] = 0
@@ -840,7 +840,7 @@ class Crystal(object):
                 else:
                     # unmatched position!
                     newatomlist.append(v)
-                    avedisplist.append(np.zeros(3))
+                    avedisplist.append(np.zeros(self.dim))
                     newspinlist.append(s)
             if len(newatomlist)*(M//abs(T[m])) != len(atomlist):
                 raise ArithmeticError('Reduction did not produce correct reduced basis: {}*{} != {}'.format(len(newatomlist), M//abs(T[m]), len(atomlist)))
@@ -870,30 +870,34 @@ class Crystal(object):
         Works recursively, and in-place.
         """
         magnlist = sorted((np.dot(v, v), idx) for idx, v in enumerate(self.lattice.T))
-        super = np.zeros((3, 3), dtype=int)
+        super = np.zeros((self.dim, self.dim), dtype=int)
         for i, (magn, j) in enumerate(magnlist):
             super[j, i] = 1
         # check that we have a right-handed lattice
         if np.linalg.det(self.lattice) * np.linalg.det(super) < 0:
-            super[:, 2] = -super[:, 2]
-        if not np.all(super == np.eye(3, dtype=int)):
+            super[:, -1] = -super[:, -1]
+        if not np.all(super == np.eye(self.dim, dtype=int)):
             self.lattice = np.dot(self.lattice, super)
             self.basis = self.remapbasis(super)
 
-        super = np.eye(3, dtype=int)
+        super = np.eye(self.dim, dtype=int)
         modified = False
-        # check the possible vector reductions
+        # check the possible vector reductions (edited to handle 2 and 3 dimensions)
         asq = np.dot(self.lattice.T, self.lattice)
-        u = np.around([asq[0, 1] / asq[0, 0], asq[0, 2] / asq[0, 0], asq[1, 2] / asq[1, 1]])
-        if u[0] != 0:
-            super[0, 1] = -int(u[0])
+        u = np.around(asq[0, 1] / asq[0, 0])
+        if u != 0:
+            super[0, 1] = -int(u)
             modified = True
-        elif u[1] != 0:
-            super[0, 2] = -int(u[1])
-            modified = True
-        elif u[2] != 0:
-            super[1, 2] = -int(u[2])
-            modified = True
+        elif self.dim > 2:
+            u = np.around(asq[0, 2] / asq[0, 0])
+            if u != 0:
+                super[0, 2] = -int(u)
+                modified = True
+            else:
+                u = np.around(asq[1, 2] / asq[1, 1])
+                if u != 0:
+                    super[1, 2] = -int(u)
+                    modified = True
 
         if not modified:
             return
@@ -963,7 +967,7 @@ class Crystal(object):
                          if (n0, n1, n2) != (0, 0, 0)]
         matchvect = [[u for u in supercellvect
                       if self.__isclose__(np.dot(u, np.dot(self.metric, u)),
-                                          self.metric[d, d])] for d in range(3)]
+                                          self.metric[d, d])] for d in range(self.dim)]
         # if we don't have spins, just make a big list of lists of 0, otherwise there's too many "if spins None..."
         if self.spins is None:
             spins = [[0 for u in atomlist] for atomlist in self.basis]
@@ -1006,9 +1010,9 @@ class Crystal(object):
         :return Crystal: new crystal object, strained
         """
         if __debug__:
-            if type(eps) is not np.ndarray or eps.shape != (3, 3):
+            if type(eps) is not np.ndarray or eps.shape != (self.dim, self.dim):
                 raise TypeError('strain is not a 3x3 tensor')
-        return Crystal(np.dot(np.eye(3) + eps, self.lattice), self.basis,
+        return Crystal(np.dot(np.eye(self.dim) + eps, self.lattice), self.basis,
                        chemistry=self.chemistry, spins=self.spins, threshold=self.threshold)
 
     def addbasis(self, basis, chemistry=None, spins=None):
@@ -1134,7 +1138,7 @@ class Crystal(object):
         if __debug__:
             if type(g) is not GroupOp: raise TypeError
             if type(tensor) is not np.ndarray: raise TypeError
-            if tensor.shape != (3, 3): raise TypeError
+            if tensor.shape != (self.dim, self.dim): raise TypeError
         return np.dot(g.cartrot, np.dot(tensor, g.cartrot.T))
 
     def g_pos(self, g, lattvec, ind):
@@ -1210,7 +1214,7 @@ class Crystal(object):
         """
         if self.N == 1:
             return [[self.G]]
-        origin = np.zeros(3, dtype=int)
+        origin = np.zeros(self.dim, dtype=int)
         return [[frozenset([g - self.g_pos(g, origin, (atomtypeindex, atomindex))[0]
                             for g in self.G
                             if g.indexmap[atomtypeindex][atomindex] == atomindex])
@@ -1239,7 +1243,7 @@ class Crystal(object):
         :return Wyckofflist: list of equivalent Wyckoff positions
         """
         lis = []
-        zero = np.zeros(3, dtype=int)
+        zero = np.zeros(self.dim, dtype=int)
         for u in (self.g_vect(g, zero, uvec)[1] for g in self.G):
             if not np.any([self.__isclose__(u, u1) for u1 in lis]):
                 lis.append(u)
@@ -1344,7 +1348,7 @@ class Crystal(object):
         """
         r2 = cutoff * cutoff
         nmax = [int(np.round(np.sqrt(self.metric[i, i]))) + 1
-                for i in range(3)]
+                for i in range(self.dim)]
         supervect = [np.array([n0, n1, n2])
                      for n0 in range(-nmax[0], nmax[0] + 1)
                      for n1 in range(-nmax[1], nmax[1] + 1)
@@ -1381,13 +1385,13 @@ class Crystal(object):
 
         r2 = cutoff * cutoff
         nmax = [int(np.round(np.sqrt(self.metric[i, i]))) + 1
-                for i in range(3)]
+                for i in range(self.dim)]
         supervect = [np.array([n0, n1, n2])
                      for n0 in range(-nmax[0], nmax[0] + 1)
                      for n1 in range(-nmax[1], nmax[1] + 1)
                      for n2 in range(-nmax[2], nmax[2] + 1)]
         lis = []
-        center = np.zeros(3, dtype=int)
+        center = np.zeros(self.dim, dtype=int)
         for i, u0 in enumerate(self.basis[chem]):
             for j, u1 in enumerate(self.basis[chem]):
                 du = u1 - u0
