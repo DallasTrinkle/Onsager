@@ -1185,7 +1185,7 @@ class Crystal(object):
         if __debug__:
             if type(g) is not GroupOp: raise TypeError
             if type(tensor) is not np.ndarray: raise TypeError
-            if tensor.shape != (self.dim, self.dim): raise TypeError
+            if tensor.shape != g.rot.shape: raise TypeError
         return np.dot(g.cartrot, np.dot(tensor, g.cartrot.T))
 
     def g_pos(self, g, lattvec, ind):
