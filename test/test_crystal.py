@@ -999,12 +999,12 @@ class KPTgentest(unittest.TestCase):
         kptfull = crys.fullkptmesh(N)
         wtfull = np.array((1 / Nkpt,) * Nkpt)
         kpts, wts = crys.reducekptmesh(kptfull)  # self.crys.fullkptmesh(self.N)
-        print(kpts)
-        print(wts)
         self.assertAlmostEqual(sum(wtfull * [np.cos(sum(k)) ** 2 for k in kptfull]), 0.5)
         self.assertAlmostEqual(sum(wts * [np.cos(sum(k)) ** 2 for k in kpts]), 0.5)
-        self.assertAlmostEqual(sum(wtfull * [np.cos(sum(k)) for k in kptfull]), 0)
-        self.assertAlmostEqual(sum(wts * [np.cos(sum(k)) for k in kpts]), 0)
+        self.assertAlmostEqual(sum(wtfull * [np.cos(k[0])*np.cos(k[1]) for k in kptfull]), 0)
+        self.assertAlmostEqual(sum(wts * [np.cos(k[0])*np.cos(k[1]) for k in kpts]), 0)
+        self.assertAlmostEqual(sum(wtfull * [np.cos(k[0])**2*np.cos(k[1])**2 for k in kptfull]), 0.25)
+        self.assertAlmostEqual(sum(wts * [np.cos(k[0])**2*np.cos(k[1])**2 for k in kpts]), 0.25)
         # Note: below we have the true values of the integral, but these should disagree
         # due to numerical error.
         self.assertNotAlmostEqual(sum(wtfull * [sum(k) ** 2 for k in kptfull]), 6.579736267392905)
