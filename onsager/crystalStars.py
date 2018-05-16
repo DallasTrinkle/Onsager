@@ -154,9 +154,14 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
 
     def __str__(self):
         """Human readable version"""
-        return "{}.[0,0,0]:{}.[{},{},{}] (dx=[{},{},{}])".format(self.i, self.j,
-                                                                 self.R[0], self.R[1], self.R[2],
-                                                                 self.dx[0], self.dx[1], self.dx[2])
+        if len(self.R) == 3:
+            return "{}.[0,0,0]:{}.[{},{},{}] (dx=[{},{},{}])".format(self.i, self.j,
+                                                                     self.R[0], self.R[1], self.R[2],
+                                                                     self.dx[0], self.dx[1], self.dx[2])
+        else:
+            return "{}.[0,0]:{}.[{},{}] (dx=[{},{}])".format(self.i, self.j,
+                                                             self.R[0], self.R[1],
+                                                             self.dx[0], self.dx[1])
 
     @classmethod
     def sortkey(cls, entry):
@@ -773,6 +778,7 @@ class VectorStarSet(object):
         if starset.Nshells == 0: return
         if starset == self.starset: return
         self.starset = starset
+        dim = starset.crys.dim
         self.vecpos = []
         self.vecvec = []
         states = starset.states
@@ -801,14 +807,19 @@ class VectorStarSet(object):
                 self.vecpos.append(s.copy())
                 self.vecvec.append([states[si].dx * scale for si in s])
                 # next, try to generate perpendicular star-vectors, if present:
-                v0 = np.cross(vpara, np.array([0, 0, 1.]))
-                if np.dot(v0, v0) < threshold:
-                    v0 = np.cross(vpara, np.array([1., 0, 0]))
-                v1 = np.cross(vpara, v0)
-                # normalization:
-                v0 /= np.sqrt(np.dot(v0, v0))
-                v1 /= np.sqrt(np.dot(v1, v1))
-                Nvect = 2
+                if dim == 3:
+                    v0 = np.cross(vpara, np.array([0, 0, 1.]))
+                    if np.dot(v0, v0) < threshold:
+                        v0 = np.cross(vpara, np.array([1., 0, 0]))
+                    v1 = np.cross(vpara, v0)
+                    # normalization:
+                    v0 /= np.sqrt(np.dot(v0, v0))
+                    v1 /= np.sqrt(np.dot(v1, v1))
+                    Nvect = 2
+                else:
+                    # 2d is very simple...
+                    v0 = np.array([vpara[1], -vpara[0]])
+                    Nvect = 1
                 # run over the invariant group operations for state PS0
                 for g in self.starset.crys.G:
                     if Nvect == 0: continue
@@ -844,9 +855,9 @@ class VectorStarSet(object):
                 # so... do we have any vectors to add?
                 if Nvect > 0:
                     v0 /= np.sqrt(len(s) * np.dot(v0, v0))
-                    v1 /= np.sqrt(len(s) * np.dot(v1, v1))
                     vlist = [v0]
                     if Nvect > 1:
+                        v1 /= np.sqrt(len(s) * np.dot(v1, v1))
                         vlist.append(v1)
                     # add the positions
                     for v in vlist:
