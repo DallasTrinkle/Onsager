@@ -20,7 +20,7 @@ from numpy import linalg as LA
 from scipy.special import hyp1f1, gamma
 
 # two quick shortcuts
-T3D = PE.Taylor3D
+T3D, T2D = PE.Taylor3D, PE.Taylor2D
 factorial = PE.factorial
 
 
@@ -104,8 +104,9 @@ class GFCrystalcalc(object):
         # a copy for regeneration
         # self.jumpnetwork = jumpnetwork
         # generate a kptmesh: now we try to make the mesh more "uniform" ??
-        bmagn = np.array([np.sqrt(np.dot(crys.reciplatt[:, i], crys.reciplatt[:, i])) for i in range(3)])
-        bmagn /= np.power(np.product(bmagn), 1 / 3)
+        bmagn = np.array([np.sqrt(np.dot(crys.reciplatt[:, i], crys.reciplatt[:, i]))
+                          for i in range(self.crys.dim)])
+        bmagn /= np.power(np.product(bmagn), 1 / self.crys.dim)
         # make sure we have even meshes
         self.kptgrid = np.array([2 * np.int(np.ceil(2 * Nmax * b)) for b in bmagn], dtype=int)
         self.kpts, self.wts = crys.reducekptmesh(crys.fullkptmesh(self.kptgrid))
@@ -114,7 +115,7 @@ class GFCrystalcalc(object):
         # also includes the multiplicity for the onsite terms (site expansion)
         self.FTjumps, self.SEjumps = self.FourierTransformJumps(jumpnetwork, self.N, self.kpts)
         # generate the Taylor expansion coefficients for each jump
-        self.T3Djumps = self.TaylorExpandJumps(jumpnetwork, self.N)
+        self.Taylorjumps = self.TaylorExpandJumps(jumpnetwork, self.N)
         # tuple of the Wyckoff site indices for each jump (needed to make symmrate)
         self.jumppairs = tuple((self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
                                for jumplist in jumpnetwork)
@@ -173,11 +174,12 @@ class GFCrystalcalc(object):
         for internal in self.__HDF5list__:
             HDF5group[internal] = getattr(self, internal)
         # note: we don't store sitelist; we reconstruct it from invmap
-        # we need to deal with T3Djumps and jumppairs separately
-        NT3Djumps = len(self.T3Djumps)
-        HDF5group['NT3Djumps'] = NT3Djumps
-        for i, t3d in enumerate(self.T3Djumps):
-            coeffstr = 'T3Djump-{}'.format(i)
+        # we need to deal with Taylorjumps and jumppairs separately
+        NTaylorjumps = len(self.Taylorjumps)
+        TaylorTag = 'T3D' if self.crys.dim == 3 else 'T2D'
+        HDF5group['N' + TaylorTag + 'jumps'] = NTaylorjumps
+        for i, t3d in enumerate(self.Taylorjumps):
+            coeffstr = TaylorTag + 'jump-{}'.format(i)
             t3d.addhdf5(HDF5group.create_group(coeffstr))
         HDF5group['jumppairs'] = np.array(self.jumppairs)
 
@@ -195,10 +197,12 @@ class GFCrystalcalc(object):
         GFcalc.chem = HDF5group.attrs['chem']
         for internal in cls.__HDF5list__:
             setattr(GFcalc, internal, HDF5group[internal].value)
-        GFcalc.T3Djumps = []
-        for i in range(HDF5group['NT3Djumps'].value):
-            coeffstr = 'T3Djump-{}'.format(i)
-            GFcalc.T3Djumps.append(T3D.loadhdf5(HDF5group[coeffstr]))
+        GFcalc.Taylorjumps = []
+        Taylor = T3D if crys.dim == 3 else T2D
+        TaylorTag = 'T3D' if crys.dim == 3 else 'T2D'
+        for i in range(HDF5group['N' + TaylorTag + 'jumps'].value):
+            coeffstr = TaylorTag + 'jump-{}'.format(i)
+            GFcalc.Taylorjumps.append(Taylor.loadhdf5(HDF5group[coeffstr]))
         # construct sitelist and jumppairs
         GFcalc.sitelist = [[] for i in range(max(GFcalc.invmap) + 1)]
         for i, site in enumerate(GFcalc.invmap):
@@ -233,19 +237,20 @@ class GFCrystalcalc(object):
         :param N: number of sites
         :return T3Djumps: list of Taylor3D expansions of the jump network
         """
-        T3D()  # need to do just to initialize the class; if already initialized, won't do anything
+        Taylor = T3D if self.crys.dim == 3 else T2D
+        Taylor()  # need to do just to initialize the class; if already initialized, won't do anything
         # Taylor expansion coefficients for exp(1j*x) = (1j)^n/n!
-        pre = np.array([(1j) ** n / factorial(n, True) for n in range(T3D.Lmax + 1)])
-        T3Djumps = []
+        pre = np.array([(1j) ** n / factorial(n, True) for n in range(Taylor.Lmax + 1)])
+        Taylorjumps = []
         for jumplist in jumpnetwork:
             # coefficients; we use tuples because we'll be successively adding to the coefficients in place
-            c = [(n, n, np.zeros((T3D.powlrange[n], N, N), dtype=complex)) for n in range(T3D.Lmax + 1)]
+            c = [(n, n, np.zeros((Taylor.powlrange[n], N, N), dtype=complex)) for n in range(Taylor.Lmax + 1)]
             for (i, j), dx in jumplist:
-                pexp = T3D.powexp(dx, normalize=False)
-                for n in range(T3D.Lmax + 1):
-                    (c[n][2])[:, i, j] += pre[n] * (T3D.powercoeff[n] * pexp)[:T3D.powlrange[n]]
-            T3Djumps.append(T3D(c))
-        return T3Djumps
+                pexp = Taylor.powexp(dx, normalize=False)
+                for n in range(Taylor.Lmax + 1):
+                    (c[n][2])[:, i, j] += pre[n] * (Taylor.powercoeff[n] * pexp)[:Taylor.powlrange[n]]
+            Taylorjumps.append(Taylor(c))
+        return Taylorjumps
 
     def BreakdownGroups(self):
         """
@@ -290,8 +295,9 @@ class GFCrystalcalc(object):
         self.omega_qij = np.tensordot(self.symmrate, self.FTjumps, axes=(0, 0))
         self.omega_qij[:] += self.escape  # adds it to every point
         self.omega_Taylor = sum(symmrate * expansion
-                                for symmrate, expansion in zip(self.symmrate, self.T3Djumps))
+                                for symmrate, expansion in zip(self.symmrate, self.Taylorjumps))
         self.omega_Taylor += self.escape
+        Taylor = T3D if self.crys.dim == 3 else T2D
 
         # 1. Diagonalize gamma point value; use to rotate to diffusive / relaxive, and reduce
         self.r, self.vr = self.DiagGamma()
@@ -313,7 +319,7 @@ class GFCrystalcalc(object):
             self.qptrans[:, i] /= np.sqrt(self.d[i])
             self.pqtrans[i, :] *= np.sqrt(self.d[i])
             self.uxtrans[i, :] /= np.sqrt(self.d[i])
-        powtrans = T3D.rotatedirections(self.qptrans)
+        powtrans = Taylor.rotatedirections(self.qptrans)
         for t in [oT_dd, oT_dr, oT_rd, oT_rr, oT_D]:
             t.irotate(powtrans)  # rotate in place
             t.reduce()
@@ -413,7 +419,8 @@ class GFCrystalcalc(object):
         """
         if self.D is not 0 and omega_Taylor_D is None: return self.D
         if self.D is 0 and omega_Taylor_D is None: raise ValueError("Need omega_Taylor_D value")
-        D = np.zeros((3, 3))
+        Taylor = T3D if self.crys.dim == 3 else T2D
+        D = np.zeros((self.crys.dim, self.crys.dim))
         for (n, l, c) in omega_Taylor_D.coefflist:
             if n < 2: raise ValueError("Reduced Taylor expansion for D doesn't begin with n==2")
             DTr = np.trace(c.real, axis1=1, axis2=2)/self.Ndiff
@@ -424,7 +431,7 @@ class GFCrystalcalc(object):
                 if l >= 2:
                     # done in this way so that we get the 1/2 for the off-diagonal, and the 1 for diagonal
                     for t in ((i, j) for i in range(3) for j in range(i, 3)):
-                        ind = T3D.pow2ind[t.count(0), t.count(1), t.count(2)]  # count the powers
+                        ind = Taylor.pow2ind[t.count(0), t.count(1), t.count(2)]  # count the powers
                         D[t] += 0.5 * DTr[ind]
                         D[t[1], t[0]] += 0.5 * DTr[ind]
         # note: the "D" constructed this way will be negative! (as it is -q.D.q)
@@ -438,15 +445,16 @@ class GFCrystalcalc(object):
         :return eta: [N,3] array
         """
         if etav is None: return self.eta
-        eta = np.zeros((self.N, 3))
+        Taylor = T3D if self.crys.dim == 3 else T2D
+        eta = np.zeros((self.N, self.crys.dim))
         if etav == 0: return eta
         for (n, l, c) in etav.coefflist:
             if n < 1: raise ValueError("Reduced Taylor expansion for etav doesn't begin with n==1")
             if n == 1:
                 if l >= 1:
-                    for d, ind in ((0, T3D.pow2ind[1, 0, 0]),
-                                   (1, T3D.pow2ind[0, 1, 0]),
-                                   (2, T3D.pow2ind[0, 0, 1])):
+                    for d, ind in ((0, Taylor.pow2ind[1, 0, 0]),
+                                   (1, Taylor.pow2ind[0, 1, 0]),
+                                   (2, Taylor.pow2ind[0, 0, 1])):
                         eta[:, d] += sum(np.dot(self.vr[:, self.Ndiff:], c[ind, :])[:, n].imag
                                          for n in range(self.Ndiff))/self.Ndiff
         return eta
@@ -462,6 +470,7 @@ class GFCrystalcalc(object):
         :param rr: relaxive/relaxive block (lower right)
         :param D: :math:`dd - dr (rr)^{-1} rd` (diffusion)
         """
+        Taylor = T3D if self.crys.dim == 3 else T2D
         ND = self.Ndiff  # previously had been 1.
         dd = omega_Taylor_rotate[0:ND, 0:ND].copy()
         dr = omega_Taylor_rotate[0:ND, ND:].copy()
@@ -475,7 +484,7 @@ class GFCrystalcalc(object):
         else:
             D = dd.copy()
             etav = 0
-        D.truncate(T3D.Lmax, inplace=True)
+        D.truncate(Taylor.Lmax, inplace=True)
         D.reduce()
         return dd, dr, rd, rr, D, etav
 
@@ -491,8 +500,9 @@ class GFCrystalcalc(object):
         :param D: :math:`dd - dr (rr)^{-1} rd` (diffusion)
         :return gT: Taylor expansion of g in block form, and reduced (collected terms)
         """
+        Taylor = T3D if self.crys.dim == 3 else T2D
         ND = self.Ndiff  # previously had been 1.
-        gT = T3D.zeros(-2, 0, (self.N, self.N))  # where we'll place our Taylor expansion
+        gT = Taylor.zeros(-2, 0, (self.N, self.N))  # where we'll place our Taylor expansion
         D_inv = D.inv()
         gT[0:ND, 0:ND] = D_inv.truncate(0)
         if self.N > ND:
