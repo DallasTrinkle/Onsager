@@ -112,9 +112,14 @@ class GreenFuncCrystalTests(unittest.TestCase):
         square_GF.SetRates([1], [0], [1], [0])
         square_zero = np.zeros(2)
         square_1nn = np.array([1.,0.])
+        square_2nn = np.array([1.,1.])
+        square_3nn = np.array([2.,0.])
         g0 = square_GF(0, 0, square_zero)
         g1 = square_GF(0, 0, square_1nn)
+        g2 = square_GF(0, 0, square_2nn)
+        g3 = square_GF(0, 0, square_3nn)
         self.assertAlmostEqual(-4 * g0 + 4 * g1, 1, places=6)
+        self.assertAlmostEqual(-4 * g1 + g0 + 2*g2 + g3, 0, places=6)
 
     def testtria(self):
         """Test on triagonal"""
