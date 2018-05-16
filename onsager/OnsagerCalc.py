@@ -34,7 +34,8 @@ INTERSTITIAL_TAG = 'i'
 TRANSITION_TAG = '{state1}^{state2}'
 SOLUTE_TAG = 's'
 VACANCY_TAG = 'v'
-SINGLE_DEFECT_TAG = '{type}:{u[0]:+06.3f},{u[1]:+06.3f},{u[2]:+06.3f}'
+SINGLE_DEFECT_TAG_3D = '{type}:{u[0]:+06.3f},{u[1]:+06.3f},{u[2]:+06.3f}'
+SINGLE_DEFECT_TAG_2D = '{type}:{u[0]:+06.3f},{u[1]:+06.3f}'
 DOUBLE_DEFECT_TAG = '{state1}-{state2}'
 OM0_TAG = 'omega0:{vac1}^{vac2}'
 OM1_TAG = 'omega1:{solute}-{vac1}^{vac2}'
@@ -66,6 +67,7 @@ class Interstitial(object):
             from site i to site j with jump vector dx; includes i->j and j->i
         """
         self.crys = crys
+        self.dim = crys.dim
         self.chem = chem
         self.sitelist = sitelist
         self.N = sum(1 for w in sitelist for i in w)
@@ -81,7 +83,7 @@ class Interstitial(object):
         self.omega_invertible = True
         if self.NV > 0:
             # invertible if inversion is present
-            self.omega_invertible = any(np.allclose(g.cartrot, -np.eye(3)) for g in crys.G)
+            self.omega_invertible = any(np.allclose(g.cartrot, -np.eye(self.dim)) for g in crys.G)
         if self.omega_invertible:
             # invertible, so just use solve for speed (omega is technically *negative* definite)
             self.bias_solver = lambda omega, b: -solve(-omega, b, sym_pos=True)
@@ -96,17 +98,17 @@ class Interstitial(object):
         self.tags, self.tagdict, self.tagdicttype = self.generatetags()  # now with tags!
 
     @staticmethod
-    def sitelistYAML(sitelist):
+    def sitelistYAML(sitelist, dim=3):
         """Dumps a "sample" YAML formatted version of the sitelist with data to be entered"""
-        return crystal.yaml.dump({'Dipole': [np.zeros((3, 3)) for w in sitelist],
+        return crystal.yaml.dump({'Dipole': [np.zeros((dim, dim)) for w in sitelist],
                                   'Energy': [0 for w in sitelist],
                                   'Prefactor': [1 for w in sitelist],
                                   'sitelist': sitelist})
 
     @staticmethod
-    def jumpnetworkYAML(jumpnetwork):
+    def jumpnetworkYAML(jumpnetwork, dim=3):
         """Dumps a "sample" YAML formatted version of the jumpnetwork with data to be entered"""
-        return crystal.yaml.dump({'DipoleT': [np.zeros((3, 3)) for t in jumpnetwork],
+        return crystal.yaml.dump({'DipoleT': [np.zeros((dim, dim)) for t in jumpnetwork],
                                   'EnergyT': [0 for t in jumpnetwork],
                                   'PrefactorT': [1 for t in jumpnetwork],
                                   'jumpnetwork': jumpnetwork})
@@ -123,7 +125,8 @@ class Interstitial(object):
         basis = self.crys.basis[self.chem]  # shortcut
 
         def single_state(u):
-            return SINGLE_DEFECT_TAG.format(type=INTERSTITIAL_TAG, u=u)
+            return SINGLE_DEFECT_TAG_3D.format(type=INTERSTITIAL_TAG, u=u) if self.dim == 3 else \
+                    SINGLE_DEFECT_TAG_2D.format(type=INTERSTITIAL_TAG, u=u)
 
         def transition(ui, dx):
             return TRANSITION_TAG.format(state1=single_state(ui),
@@ -323,7 +326,7 @@ class Interstitial(object):
         """
         # difficult to do with list comprehension since we're mapping from Wyckoff positions
         # to site indices; need to create the "blank" list first, then map into it.
-        lis = np.zeros((self.N, 3, 3))  # blank list to index into
+        lis = np.zeros((self.N, self.dim, self.dim))  # blank list to index into
         for dipole, basis, sites, groupops in zip(dipoles, self.siteSymmTensorBasis,
                                                   self.sitelist, self.sitegroupops):
             symmdipole = crystal.ProjectTensorBasis(dipole, basis)
@@ -375,11 +378,11 @@ class Interstitial(object):
         symmratelist = self.symmratelist(pre, betaene, preT, betaeneT)
         omega_ij = np.zeros((self.N, self.N))
         domega_ij = np.zeros((self.N, self.N))
-        bias_i = np.zeros((self.N, 3))
-        dbias_i = np.zeros((self.N, 3))
-        D0 = np.zeros((3, 3))
-        Dcorrection = np.zeros((3, 3))
-        Db = np.zeros((3, 3))
+        bias_i = np.zeros((self.N, self.dim))
+        dbias_i = np.zeros((self.N, self.dim))
+        D0 = np.zeros((self.dim, self.dim))
+        Dcorrection = np.zeros((self.dim, self.dim))
+        Db = np.zeros((self.dim, self.dim))
         # bookkeeping for energies:
         siteene = np.array([betaene[w] for w in self.invmap])
         # transene = [ [ bET for (i,j), dx in t ] for t, bET in zip(self.jumpnetwork, betaeneT)]
@@ -438,15 +441,15 @@ class Interstitial(object):
 
         def vector_tensor_outer(v, a):
             """Construct the outer product of v and a"""
-            va = np.zeros((3, 3, 3))
-            for i, j, k in ((i, j, k) for i in range(3) for j in range(3) for k in range(3)):
+            va = np.zeros((self.dim, self.dim, self.dim))
+            for i, j, k in itertools.product(range(self.dim), repeat=3):
                 va[i, j, k] = v[i] * a[j, k]
             return va
 
         def tensor_tensor_outer(a, b):
             """Construct the outer product of a and b"""
-            ab = np.zeros((3, 3, 3, 3))
-            for i, j, k, l in ((i, j, k, l) for i in range(3) for j in range(3) for k in range(3) for l in range(3)):
+            ab = np.zeros((self.dim, self.dim, self.dim, self.dim))
+            for i, j, k, l in itertools.product(range(self.dim), repeat=4):
                 ab[i, j, k, l] = a[i, j] * b[k, l]
             return ab
 
@@ -468,15 +471,15 @@ class Interstitial(object):
         ratelist = self.ratelist(pre, betaene, preT, betaeneT)
         symmratelist = self.symmratelist(pre, betaene, preT, betaeneT)
         omega_ij = np.zeros((self.N, self.N))
-        bias_i = np.zeros((self.N, 3))
-        biasP_i = np.zeros((self.N, 3, 3, 3))
-        domega_ij = np.zeros((self.N, self.N, 3, 3))
+        bias_i = np.zeros((self.N, self.dim))
+        biasP_i = np.zeros((self.N, self.dim, self.dim, self.dim))
+        domega_ij = np.zeros((self.N, self.N, self.dim, self.dim))
         sitedipoles = self.siteDipoles(dipole)
         jumpdipoles = self.jumpDipoles(dipoleT)
         dipoleave = np.tensordot(rho, sitedipoles, [(0), (0)])  # average dipole
 
-        D0 = np.zeros((3, 3))
-        Dp = np.zeros((3, 3, 3, 3))
+        D0 = np.zeros((self.dim, self.dim))
+        Dp = np.zeros((self.dim, self.dim, self.dim, self.dim))
         for transitionset, rates, symmrates, dipoles in zip(self.jumpnetwork, ratelist, symmratelist, jumpdipoles):
             for ((i, j), dx), rate, symmrate, dipole in zip(transitionset, rates, symmrates, dipoles):
                 # symmrate = sqrtrho[i]*invsqrtrho[j]*rate
@@ -491,7 +494,7 @@ class Interstitial(object):
         if self.NV > 0:
             omega_v = np.zeros((self.NV, self.NV))
             bias_v = np.zeros(self.NV)
-            domega_v = np.zeros((self.NV, self.NV, 3, 3))
+            domega_v = np.zeros((self.NV, self.NV, self.dim, self.dim))
             # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
             for a, va in enumerate(self.VectorBasis):
                 bias_v[a] = np.tensordot(bias_i, va, ((0, 1), (0, 1)))  # can also use trace(dot(bias_i.T, va))
@@ -504,12 +507,12 @@ class Interstitial(object):
             # self.VectorBasis is a list of Nx3 matrices
             gamma_i = sum(g * va for g, va in zip(gamma_v, self.VectorBasis))
             D0 += np.dot(np.dot(self.VV, bias_v), gamma_v)
-            for c, d in ((c, d) for c in range(3) for d in range(3)):
+            for c, d in itertools.product(range(self.dim), repeat=2):
                 Dp[:, :, c, d] += np.tensordot(gamma_i, biasP_i[:, :, c, d], ((0), (0))) + \
                                   np.tensordot(biasP_i[:, :, c, d], gamma_i, ((0), (0)))
             Dp += np.tensordot(np.tensordot(self.VV, gamma_v, ((3), (0))), dg, ((2), (0)))
 
-        for a, b, c, d in ((a, b, c, d) for a in range(3) for b in range(3) for c in range(3) for d in range(3)):
+        for a, b, c, d in itertools.product(range(self.dim), repeat=4):
             if a == c:
                 Dp[a, b, c, d] += 0.5 * D0[b, d]
             if a == d:
@@ -537,8 +540,8 @@ class Interstitial(object):
 
         def tensor_square(a):
             """Construct the outer product of a with itself"""
-            aa = np.zeros((3, 3, 3, 3))
-            for i, j, k, l in ((i, j, k, l) for i in range(3) for j in range(3) for k in range(3) for l in range(3)):
+            aa = np.zeros((self.dim, self.dim, self.dim, self.dim))
+            for i, j, k, l in itertools.product(range(self.dim), repeat=4):
                 aa[i, j, k, l] = a[i, j] * a[k, l]
             return aa
 
@@ -710,6 +713,7 @@ class VacancyMediated(object):
         """
         if all(x is None for x in (crys, chem, sitelist, jumpnetwork)): return  # blank object
         self.crys = crys
+        self.dim = crys.dim
         self.chem = chem
         self.sitelist = copy.deepcopy(sitelist)
         self.jumpnetwork = copy.deepcopy(jumpnetwork)
@@ -825,7 +829,8 @@ class VacancyMediated(object):
         basis = self.crys.basis[self.chem]  # shortcut
 
         def single_defect(DEFECT_TAG, u):
-            return SINGLE_DEFECT_TAG.format(type=DEFECT_TAG, u=u)
+            return SINGLE_DEFECT_TAG_3D.format(type=DEFECT_TAG, u=u) if self.dim == 3 else \
+                    SINGLE_DEFECT_TAG_2D.format(type=DEFECT_TAG, u=u)
 
         def double_defect(PS):
             return DOUBLE_DEFECT_TAG.format( \
@@ -1109,6 +1114,7 @@ class VacancyMediated(object):
         """
         diffuser = cls(None, None, None, None)  # initialize
         diffuser.crys = crystal.yaml.load(HDF5group['crystal_yaml'].value)
+        diffuser.dim = diffuser.crys.dim
         for internal in cls.__HDF5list__:
             setattr(diffuser, internal, HDF5group[internal].value)
         diffuser.sitelist = [[] for i in range(max(diffuser.invmap) + 1)]
