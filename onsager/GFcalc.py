@@ -17,7 +17,7 @@ import numpy as np
 from onsager import PowerExpansion as PE
 import itertools
 from numpy import linalg as LA
-from scipy.special import hyp1f1, gamma
+from scipy.special import hyp1f1, gamma, expi #, gammainc
 
 # two quick shortcuts
 T3D, T2D = PE.Taylor3D, PE.Taylor2D
@@ -44,7 +44,7 @@ class Fnl_p(object):
 class Fnl_u(object):
     def __init__(self, n, l, pm, prefactor):
         """
-        Inverse Fourier transform of exponential cutoff function into real space (u)
+        Inverse Fourier transform of exponential cutoff function into real space (u) for 3d
 
         :param n: power
         :param l: angular momentum
@@ -60,6 +60,43 @@ class Fnl_u(object):
 
     def __call__(self, u):
         return self.pre * u ** self.l * hyp1f1(self.a, self.b, -(u * self.half_pm) ** 2)
+
+
+class Fnl_u2d(object):
+    def __init__(self, n, l, pm, prefactor):
+        """
+        Inverse Fourier transform of exponential cutoff function into real space (u) for 2d
+
+        :param n: power
+        :param l: angular momentum
+        :param pm: pmax value
+        :param prefactor: A/sqrt(d1 d2)
+        """
+        # I think we need something for n = -2, l = 0
+        if n == -2 and l == 0:
+            self.log = True
+            self.pre = prefactor/(2*np.pi)
+            self.half_pm = 0.5 * pm
+        else:
+            self.log = False
+            self.a = (l + n) / 2 + 1
+            self.b = 1 + l
+            self.l = l
+            self.half_pm = 0.5 * pm
+            self.pre = (-1j) ** l * prefactor * (pm ** (2 + n + l)) * gamma(self.a) / \
+                       (np.pi * (2 ** (2 + l)) * gamma(self.b))
+
+    def __call__(self, u):
+        # I think we need something for n = -2, l = 0
+        if not self.log:
+            return self.pre * u ** self.l * hyp1f1(self.a, self.b, -(u * self.half_pm) ** 2)
+        else:
+            if u == 0:
+                return self.pre * (-0.5*np.euler_gamma + np.log(self.half_pm))
+            else:
+                # incomplete Gamma(0,x) = -Ei(-x) (exponential integral), turns out...
+                # return self.pre * (-np.euler_gamma - np.log(u) -0.5*gammainc(0, (u*self.half_pm)**2))
+                return self.pre * (-np.euler_gamma - np.log(u) + 0.5*expi(-(u*self.half_pm)**2))
 
 
 class GFCrystalcalc(object):
@@ -259,7 +296,7 @@ class GFCrystalcalc(object):
         :return grouparray: array[NG][3][3] of the NG group operations
         :return indexpair: array[N][N][NG][2] of the index pair for each group operation
         """
-        grouparray = np.zeros((self.NG, 3, 3))
+        grouparray = np.zeros((self.NG, self.crys.dim, self.crys.dim))
         indexpair = np.zeros((self.N, self.N, self.NG, 2), dtype=int)
         for ng, g in enumerate(self.crys.G):
             grouparray[ng, :, :] = g.cartrot[:, :]
@@ -315,7 +352,7 @@ class GFCrystalcalc(object):
         self.qptrans = self.e.copy()
         self.pqtrans = self.e.T.copy()
         self.uxtrans = self.e.T.copy()
-        for i in range(3):
+        for i in range(self.crys.dim):
             self.qptrans[:, i] /= np.sqrt(self.d[i])
             self.pqtrans[i, :] *= np.sqrt(self.d[i])
             self.uxtrans[i, :] /= np.sqrt(self.d[i])
@@ -330,7 +367,10 @@ class GFCrystalcalc(object):
         self.g_Taylor.separate()
         g_Taylor_fnlp = {(n, l): Fnl_p(n, self.pmax) for (n, l) in self.g_Taylor.nl()}
         prefactor = self.crys.volume / np.sqrt(np.product(self.d))
-        self.g_Taylor_fnlu = {(n, l): Fnl_u(n, l, self.pmax, prefactor) for (n, l) in self.g_Taylor.nl()}
+        if self.crys.dim == 3:
+            self.g_Taylor_fnlu = {(n, l): Fnl_u(n, l, self.pmax, prefactor) for (n, l) in self.g_Taylor.nl()}
+        else:
+            self.g_Taylor_fnlu = {(n, l): Fnl_u2d(n, l, self.pmax, prefactor) for (n, l) in self.g_Taylor.nl()}
         # 5. Invert Fourier expansion
         gsc_qij = np.zeros_like(self.omega_qij)
         for qind, q in enumerate(self.kpts):
@@ -426,12 +466,13 @@ class GFCrystalcalc(object):
             DTr = np.trace(c.real, axis1=1, axis2=2)/self.Ndiff
             if n == 2:
                 # first up: constant term (if present)
-                D += np.eye(3) * DTr[0]
+                D += np.eye(self.crys.dim) * DTr[0]
                 # next: l == 2 contributions
                 if l >= 2:
                     # done in this way so that we get the 1/2 for the off-diagonal, and the 1 for diagonal
-                    for t in ((i, j) for i in range(3) for j in range(i, 3)):
-                        ind = Taylor.pow2ind[t.count(0), t.count(1), t.count(2)]  # count the powers
+                    for t in ((i, j) for i in range(self.crys.dim) for j in range(i, self.crys.dim)):
+                        tupind = tuple(t.count(d) for d in range(self.crys.dim))
+                        ind = Taylor.pow2ind[tupind]  # count the powers
                         D[t] += 0.5 * DTr[ind]
                         D[t[1], t[0]] += 0.5 * DTr[ind]
         # note: the "D" constructed this way will be negative! (as it is -q.D.q)

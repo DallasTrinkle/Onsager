@@ -103,6 +103,20 @@ class GreenFuncCrystalTests(unittest.TestCase):
                     gw += omega * (HCP_GF(i, j, dx) - g0)
         self.assertAlmostEqual(gw, 1, places=6)
 
+    def testsquare(self):
+        """Test on square"""
+        square = crystal.Crystal(np.eye(2), [np.zeros(2)])
+        square_sitelist = square.sitelist(0)
+        square_jumpnetwork = square.jumpnetwork(0, 1.01)
+        square_GF = GFcalc.GFCrystalcalc(square, 0, square_sitelist, square_jumpnetwork, Nmax=4)
+        square_GF.SetRates([1], [0], [1], [0])
+        square_zero = np.zeros(2)
+        square_1nn = np.array([1.,0.])
+        g0 = square_GF(0, 0, square_zero)
+        g1 = square_GF(0, 0, square_1nn)
+        self.assertAlmostEqual(-4 * g0 + 4 * g1, 1, places=6)
+
+
     def testBCC_B2(self):
         """Test that BCC and B2 produce the same GF"""
         a0 = 1.
