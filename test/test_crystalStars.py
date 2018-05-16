@@ -195,7 +195,6 @@ class StarTests(unittest.TestCase):
     def setUp(self):
         self.crys, self.jumpnetwork = setuportho()
         self.chem = 0
-        self.dim = 3
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def isclosed(self, starset, starindex):
@@ -217,13 +216,14 @@ class StarTests(unittest.TestCase):
 
     def testStarindices(self):
         """Check that our indexing is correct."""
+        dim = self.crys.dim
         self.starset.generate(4)
         for si, star in enumerate(self.starset.stars):
             for i in star:
                 self.assertEqual(si, self.starset.starindex(self.starset.states[i]))
-        self.assertEqual(None, self.starset.starindex(stars.PairState.zero(dim=self.dim)))
-        self.assertEqual(None, self.starset.stateindex(stars.PairState.zero(dim=self.dim)))
-        self.assertNotIn(stars.PairState.zero(dim=self.dim), self.starset)  # test __contains__ (PS in starset)
+        self.assertEqual(None, self.starset.starindex(stars.PairState.zero(dim=dim)))
+        self.assertEqual(None, self.starset.stateindex(stars.PairState.zero(dim=dim)))
+        self.assertNotIn(stars.PairState.zero(dim=dim), self.starset)  # test __contains__ (PS in starset)
 
     def assertEqualStars(self, s1, s2):
         """Asserts that two star sets are equal."""
@@ -272,17 +272,17 @@ class CubicStarTests(StarTests):
     def setUp(self):
         self.crys, self.jumpnetwork = setupcubic()
         self.chem = 0
-        self.dim = 3
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testStarConsistent(self):
         """Check that the counts (Npts, Nstars) make sense for cubic, with Nshells = 1..4"""
+        dim = self.crys.dim
         for n in range(1, 5):
             self.starset.generate(n)
             for starindex in range(self.starset.Nstars):
                 self.assertTrue(self.isclosed(self.starset, starindex))
-            self.assertEqual(None, self.starset.starindex(stars.PairState.zero(dim=self.dim)))
-            self.assertEqual(None, self.starset.stateindex(stars.PairState.zero(dim=self.dim)))
+            self.assertEqual(None, self.starset.starindex(stars.PairState.zero(dim=dim)))
+            self.assertEqual(None, self.starset.stateindex(stars.PairState.zero(dim=dim)))
 
             for s in self.starset.stars:
                 x = np.sort(abs(self.starset.states[s[0]].dx))
@@ -302,7 +302,6 @@ class HCPStarTests(StarTests):
     def setUp(self):
         self.crys, self.jumpnetwork = setupHCP()
         self.chem = 0
-        self.dim = 3
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testDiffGenerate(self):
@@ -322,7 +321,6 @@ class FCCStarTests(CubicStarTests):
     def setUp(self):
         self.crys, self.jumpnetwork = setupFCC()
         self.chem = 0
-        self.dim = 3
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testStarCount(self):
@@ -347,7 +345,6 @@ class SquareStarTests(StarTests):
     def setUp(self):
         self.crys, self.jumpnetwork = setupsquare()
         self.chem = 0
-        self.dim = 2
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
 
@@ -475,10 +472,11 @@ class VectorStarTests(unittest.TestCase):
 
     def testVectorStarOuterProduct(self):
         """Do we generate the correct outer products for our star-vectors (symmetry checks)?"""
+        dim = self.crys.dim
         self.starset.generate(2)
         self.vecstarset = stars.VectorStarSet(self.starset)
         self.assertEqual(np.shape(self.vecstarset.outer),
-                         (3, 3, self.vecstarset.Nvstars, self.vecstarset.Nvstars))
+                         (dim, dim, self.vecstarset.Nvstars, self.vecstarset.Nvstars))
         # check our diagonal blocks first:
         for outer in [self.vecstarset.outer[:, :, i, i]
                       for i in range(self.vecstarset.Nvstars)]:
@@ -499,7 +497,7 @@ class VectorStarTests(unittest.TestCase):
                 self.assertTrue(np.allclose(g_out_gT, outer))
         for i, (s0, svv0) in enumerate(zip(self.vecstarset.vecpos, self.vecstarset.vecvec)):
             for j, (s1, svv1) in enumerate(zip(self.vecstarset.vecpos, self.vecstarset.vecvec)):
-                testouter = np.zeros((3, 3))
+                testouter = np.zeros((dim, dim))
                 if s0[0] == s1[0]:
                     # we have the same underlying star to work with, so...
                     for v0, v1 in zip(svv0, svv1):
@@ -604,6 +602,15 @@ class VectorStarSquareTests(VectorStarTests):
         self.crys, self.jumpnetwork = setupsquare()
         self.chem = 0
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+    def testVectorStarCount(self):
+        """Does our star vector count make any sense?"""
+        self.starset.generate(3)
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        # nn + nn + nn = 5 stars (10,11,20,21,30), and that should make 6 star-vectors!
+        self.assertEqual(self.starset.Nstars, 5)
+        self.assertEqual(self.vecstarset.Nvstars, 6)
+
 
 import onsager.GFcalc as GFcalc
 
@@ -1086,6 +1093,7 @@ class VectorStarBias2linearTests(unittest.TestCase):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testConstructBias2(self):
+        dim = self.crys.dim
         self.starset.generate(2)  # we need at least 2nd nn to even have jump networks to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         jumpnetwork_omega2, jt, sp = self.starset.jumpnetwork_omega2()
@@ -1096,14 +1104,14 @@ class VectorStarBias2linearTests(unittest.TestCase):
         om0expand = self.rates.copy()
         self.assertEqual(np.shape(bias2expand),
                          (self.vecstarset.Nvstars, len(self.jumpnetwork)))
-        biasvec = np.zeros((self.starset.Nstates, 3))  # bias vector: only the exchange hops
+        biasvec = np.zeros((self.starset.Nstates, dim))  # bias vector: only the exchange hops
         for jumplist, rate in zip(jumpnetwork_omega2, self.rates):
             for (IS, FS), dx in jumplist:
                 for i in range(self.starset.Nstates):
                     if IS == i:
                         biasvec[i, :] += dx * (alpha - 1) * rate
         # construct the same bias vector using our expansion
-        biasveccomp = np.zeros((self.starset.Nstates, 3))
+        biasveccomp = np.zeros((self.starset.Nstates, dim))
         for b2, b0, svpos, svvec in zip(np.dot(bias2expand, om2expand),
                                         np.dot(bias0expand, om0expand),
                                         self.vecstarset.vecpos,
@@ -1186,6 +1194,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
 
     def testConstructBias1(self):
         """Do we construct our omega1 bias correctly?"""
+        dim = self.crys.dim
         self.starset.generate(2)  # we need at least 2nd nn to even have jump networks to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         jumpnetwork_omega1, jt, sp = self.starset.jumpnetwork_omega1()
@@ -1194,7 +1203,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
         om0expand = self.rates.copy()
         self.assertEqual(np.shape(bias1expand),
                          (self.vecstarset.Nvstars, len(jumpnetwork_omega1)))
-        biasvec = np.zeros((self.starset.Nstates, 3))  # bias vector: only the exchange hops
+        biasvec = np.zeros((self.starset.Nstates, dim))  # bias vector: only the exchange hops
         for jumplist, rate, om0type in zip(jumpnetwork_omega1, om1expand, jt):
             om0 = om0expand[om0type]
             for (IS, FS), dx in jumplist:
@@ -1202,7 +1211,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
                     if IS == i:
                         biasvec[i, :] += dx * (rate - om0)
         # construct the same bias vector using our expansion
-        biasveccomp = np.zeros((self.starset.Nstates, 3))
+        biasveccomp = np.zeros((self.starset.Nstates, dim))
         for b1, b0, svpos, svvec in zip(np.dot(bias1expand, om1expand),
                                         np.dot(bias0expand, om0expand),
                                         self.vecstarset.vecpos,
@@ -1217,6 +1226,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
 
     def testPeriodicBias(self):
         """Do we have no periodic bias?"""
+        dim = self.crys.dim
         vectorbasislist = self.crys.FullVectorBasis(self.chem)[0]  # just check the VB list
         # we *should* have some projection if there's a vectorbasis, so only continue if this is empty
         if len(vectorbasislist) != 0: return
@@ -1227,7 +1237,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
             NOS = len(OSindices)
             self.assertEqual(NOS, 0)
             self.assertEqual(folddown.shape, (NOS, self.vecstarset.Nvstars))
-            self.assertEqual(OS_VB.shape, (NOS, len(self.crys.basis[self.chem]), 3))
+            self.assertEqual(OS_VB.shape, (NOS, len(self.crys.basis[self.chem]), dim))
 
 
 class VectorStarFCCBias1linearTests(VectorStarBias1linearTests):

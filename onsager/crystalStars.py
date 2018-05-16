@@ -819,6 +819,7 @@ class VectorStarSet(object):
                 else:
                     # 2d is very simple...
                     v0 = np.array([vpara[1], -vpara[0]])
+                    v0 /= np.sqrt(np.dot(v0, v0))
                     Nvect = 1
                 # run over the invariant group operations for state PS0
                 for g in self.starset.crys.G:
