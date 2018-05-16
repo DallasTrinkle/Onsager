@@ -42,52 +42,32 @@ class Fnl_p(object):
 
 
 class Fnl_u(object):
-    def __init__(self, n, l, pm, prefactor):
+    def __init__(self, n, l, pm, prefactor, d=3):
         """
-        Inverse Fourier transform of exponential cutoff function into real space (u) for 3d
+        Inverse Fourier transform of exponential cutoff function into real space (u)
+        for 3d and 2d
 
         :param n: power
         :param l: angular momentum
         :param pm: pmax value
         :param prefactor: V/sqrt(d1 d2 d3)
+        :param d: dimensionality
         """
-        self.a = (3 + l + n) / 2
-        self.b = 3 / 2 + l
-        self.l = l
-        self.half_pm = 0.5 * pm
-        self.pre = (-1j) ** l * prefactor * (pm ** (3 + n + l)) * gamma(self.a) / \
-                   ((np.pi ** 1.5) * (2 ** (3 + l)) * gamma(self.b))
-
-    def __call__(self, u):
-        return self.pre * u ** self.l * hyp1f1(self.a, self.b, -(u * self.half_pm) ** 2)
-
-
-class Fnl_u2d(object):
-    def __init__(self, n, l, pm, prefactor):
-        """
-        Inverse Fourier transform of exponential cutoff function into real space (u) for 2d
-
-        :param n: power
-        :param l: angular momentum
-        :param pm: pmax value
-        :param prefactor: A/sqrt(d1 d2)
-        """
-        # I think we need something for n = -2, l = 0
-        if n == -2 and l == 0:
+        if n == -2 and l == 0 and d == 2:
             self.log = True
             self.pre = prefactor/(2*np.pi)
             self.half_pm = 0.5 * pm
         else:
             self.log = False
-            self.a = (l + n) / 2 + 1
-            self.b = 1 + l
+            self.a = (d + l + n) / 2
+            self.b = d / 2 + l
             self.l = l
             self.half_pm = 0.5 * pm
-            self.pre = (-1j) ** l * prefactor * (pm ** (2 + n + l)) * gamma(self.a) / \
-                       (np.pi * (2 ** (2 + l)) * gamma(self.b))
+            self.pre = (-1j) ** l * prefactor * (pm ** (d + n + l)) * gamma(self.a) / \
+                       ((np.pi ** (d/2)) * (2 ** (d + l)) * gamma(self.b))
 
     def __call__(self, u):
-        # I think we need something for n = -2, l = 0
+        # return self.pre * u ** self.l * hyp1f1(self.a, self.b, -(u * self.half_pm) ** 2)
         if not self.log:
             return self.pre * u ** self.l * hyp1f1(self.a, self.b, -(u * self.half_pm) ** 2)
         else:
@@ -367,10 +347,8 @@ class GFCrystalcalc(object):
         self.g_Taylor.separate()
         g_Taylor_fnlp = {(n, l): Fnl_p(n, self.pmax) for (n, l) in self.g_Taylor.nl()}
         prefactor = self.crys.volume / np.sqrt(np.product(self.d))
-        if self.crys.dim == 3:
-            self.g_Taylor_fnlu = {(n, l): Fnl_u(n, l, self.pmax, prefactor) for (n, l) in self.g_Taylor.nl()}
-        else:
-            self.g_Taylor_fnlu = {(n, l): Fnl_u2d(n, l, self.pmax, prefactor) for (n, l) in self.g_Taylor.nl()}
+        self.g_Taylor_fnlu = {(n, l): Fnl_u(n, l, self.pmax, prefactor, d=self.crys.dim)
+                              for (n, l) in self.g_Taylor.nl()}
         # 5. Invert Fourier expansion
         gsc_qij = np.zeros_like(self.omega_qij)
         for qind, q in enumerate(self.kpts):

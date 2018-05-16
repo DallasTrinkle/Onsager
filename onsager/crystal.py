@@ -393,7 +393,7 @@ def SymmTensorBasis(rottype, eigenvect):
         if rottype == -1:
             return [SymmTensor1(eigenvect[0]), SymmTensor1(eigenvect[1])]
         # rotations kill everything except the isotropic case:
-        return [np.eye(2)]
+        return [SymmTensor2(np.array([1.,0.]), np.array([0.,1.]))]
 
     if rottype == 1 or rottype == -2:
         # identity / inversion: all symmetric tensors
