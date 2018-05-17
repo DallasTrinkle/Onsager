@@ -465,15 +465,15 @@ class GFCrystalcalc(object):
         """
         if etav is None: return self.eta
         Taylor = T3D if self.crys.dim == 3 else T2D
+        d_ind_list = [(d, Taylor.pow2ind[(0,)*d + (1,) + (0,)*(self.crys.dim-1-d)])
+                       for d in range(self.crys.dim)]
         eta = np.zeros((self.N, self.crys.dim))
         if etav == 0: return eta
         for (n, l, c) in etav.coefflist:
             if n < 1: raise ValueError("Reduced Taylor expansion for etav doesn't begin with n==1")
             if n == 1:
                 if l >= 1:
-                    for d, ind in ((0, Taylor.pow2ind[1, 0, 0]),
-                                   (1, Taylor.pow2ind[0, 1, 0]),
-                                   (2, Taylor.pow2ind[0, 0, 1])):
+                    for d, ind in d_ind_list:
                         eta[:, d] += sum(np.dot(self.vr[:, self.Ndiff:], c[ind, :])[:, n].imag
                                          for n in range(self.Ndiff))/self.Ndiff
         return eta

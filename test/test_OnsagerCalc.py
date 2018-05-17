@@ -97,6 +97,7 @@ class CrystalOnsagerTestsSC(DiffusionTestCase):
         self.sitelist = self.crys.sitelist(self.chem)
         self.crystalname = 'Simple Cubic a0={}'.format(self.a0)
         self.correl = 0.653109  # 0.653
+        self.tol = 1e-6
 
     def assertOrderingSuperEqual(self, s0, s1, msg=""):
         if s0 != s1:
@@ -119,7 +120,8 @@ class CrystalOnsagerTestsSC(DiffusionTestCase):
                                                   1, NGFmax)
         thermaldef = self.makeunitythermodict(Diffusivity)
 
-        L0vv = np.zeros((3, 3))
+        dim = self.crys.dim
+        L0vv = np.zeros((dim, dim))
         om0 = thermaldef['preT0'][0] / thermaldef['preV'][0] * \
               np.exp((thermaldef['eneV'][0] - thermaldef['eneT0'][0]) / kT)
         for (i, j), dx in self.jumpnetwork[0]:
@@ -132,13 +134,13 @@ class CrystalOnsagerTestsSC(DiffusionTestCase):
             for Lname in ('Lvv', 'Lss', 'Lsv', 'L1vv'):
                 self.logger.debug('{}:\n{}'.format(Lname, locals()[Lname]))
         for L in [Lvv, Lss, Lsv, L1vv]:
-            self.assertTrue(np.allclose(L, L[0, 0] * np.eye(3)), msg='Diffusivity not isotropic?')
+            self.assertTrue(np.allclose(L, L[0, 0] * np.eye(dim)), msg='Diffusivity not isotropic?')
         # No solute drag, so Lsv = -Lvv; Lvv = normal vacancy diffusion
         # all correlation is in that geometric prefactor of Lss.
         self.assertTrue(np.allclose(Lvv, L0vv))
         self.assertTrue(np.allclose(-Lsv, L0vv))
         self.assertTrue(np.allclose(L1vv, 0.))
-        self.assertTrue(np.allclose(-Lss, self.correl * Lsv, rtol=1e-6),
+        self.assertTrue(np.allclose(-Lss, self.correl * Lsv, atol=self.tol),
                         msg='Failure to match correlation ({}), got {} from {}/{}'.format(
                             self.correl, -Lss[0, 0] / Lsv[0, 0], Lss[0,0], -Lsv[0,0]))
         # test large_om2 version:
@@ -159,6 +161,7 @@ class CrystalOnsagerTestsFCC(CrystalOnsagerTestsSC):
         self.sitelist = self.crys.sitelist(self.chem)
         self.crystalname = 'Face-Centered Cubic a0={}'.format(self.a0)
         self.correl = 0.78145142
+        self.tol = 1e-6
 
     @staticmethod
     def makethermodict(w0, w1, w2, w3, w4):
@@ -284,6 +287,7 @@ class CrystalOnsagerTestsBCC(CrystalOnsagerTestsSC):
         self.sitelist = self.crys.sitelist(self.chem)
         self.crystalname = 'Body-Centered Cubic a0={}'.format(self.a0)
         self.correl = 0.727194  # 0.727
+        self.tol = 1e-6
 
 
 class CrystalOnsagerTestsDiamond(CrystalOnsagerTestsSC):
@@ -301,6 +305,60 @@ class CrystalOnsagerTestsDiamond(CrystalOnsagerTestsSC):
         self.sitelist = self.crys.sitelist(self.chem)
         self.crystalname = 'Diamond Cubic a0={}'.format(self.a0)
         self.correl = 0.5
+        self.tol = 1e-6
+
+
+class CrystalOnsagerTestsSquare(CrystalOnsagerTestsSC):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+
+    def setUp(self):
+        self.a0 = 2.
+        self.crys = crystal.Crystal(self.a0 * np.eye(2), [np.zeros(2)])
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 1.01 * self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Square a0={}'.format(self.a0)
+        # self.correl = 0.46705  # doi://10.1039/TF9565200786
+        self.correl = 1/(np.pi-1)  # doi://10.1002/352760264X.ch3
+        self.tol = 1e-6
+
+
+class CrystalOnsagerTestsTria(CrystalOnsagerTestsSC):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+
+    def setUp(self):
+        self.a0 = 2.
+        self.crys = crystal.Crystal(self.a0 * np.array([[1/2,1/2],
+                                                        [-np.sqrt(3/4),np.sqrt(3/4)]]),
+                                    [np.zeros(2)])
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 1.01 * self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Triangle a0={}'.format(self.a0)
+        self.correl = 0.56006  # doi://10.1039/TF9565200786
+        self.tol = 1e-5
+
+
+class CrystalOnsagerTestsHoneycomb(CrystalOnsagerTestsSC):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+
+    def setUp(self):
+        self.a0 = 2.
+        self.crys = crystal.Crystal(self.a0 * np.array([[1/2,1/2],
+                                                        [-np.sqrt(3/4),np.sqrt(3/4)]]),
+                                    [np.array([2/3,1/3]), np.array([1/3,2/3])])
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 0.6 * self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Honeycomb a0={}'.format(self.a0)
+        self.correl = 1/3  # doi://10.1039/TF9565200786
+        self.tol = 1e-6
 
 
 class CrystalOnsagerTestsGarnet(CrystalOnsagerTestsSC):
@@ -323,6 +381,7 @@ class CrystalOnsagerTestsGarnet(CrystalOnsagerTestsSC):
         self.sitelist = self.crys.sitelist(self.chem)
         self.crystalname = 'Garnet (24c site only) a0={}'.format(self.a0)
         self.correl = 0.374973  # not quite 0.375
+        self.tol = 1e-6
         self.NGFmax = 4  # can override with, e.g., 6, but changes value by ~1e-8
 
 
@@ -342,6 +401,7 @@ class CrystalOnsagerTestsNbO(CrystalOnsagerTestsSC):
         self.sitelist = self.crys.sitelist(self.chem)
         self.crystalname = 'NbO (oxygen sublattice) a0={}'.format(self.a0)
         self.correl = 0.688916  # doi://10.1080/01418618308234882  (Koiwa & Ishioka paper)
+        self.tol = 1e-6
 
 
 class CrystalOnsagerTestsHCP(DiffusionTestCase):
@@ -638,7 +698,6 @@ class CrystalOnsagerTestsB2(DiffusionTestCase):
                                     diffuserargs2={'large_om2': 0}, msg='large omega test fail')
 
 
-
 class CrystalOnsagerTestsL12(CrystalOnsagerTestsB2):
     """Test our new crystal-based vacancy-mediated diffusion calculator"""
 
@@ -657,6 +716,31 @@ class CrystalOnsagerTestsL12(CrystalOnsagerTestsB2):
         self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 0.99 * self.a0)
         self.sitelist2 = self.crys2.sitelist(self.chem)
         self.crystalname2 = 'L1_2 a0={}'.format(self.a0)
+
+        self.solutebinding = 3.
+
+
+class CrystalOnsagerTestsDisplacedTria(CrystalOnsagerTestsB2):
+    """Test our new crystal-based vacancy-mediated diffusion calculator"""
+
+    longMessage = False
+
+    def setUp(self):
+        self.a0 = 1.
+        self.crys = crystal.Crystal(self.a0 * np.array([[1/2,1/2],
+                                                        [-np.sqrt(3/4),np.sqrt(3/4)]]),
+                                    [np.zeros(2)])
+        self.chem = 0
+        self.jumpnetwork = self.crys.jumpnetwork(self.chem, 1.01 * self.a0)
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.crystalname = 'Triangle a0={}'.format(self.a0)
+
+        self.crys2 = crystal.Crystal(self.a0 * np.array([[1.,0.],
+                                                         [0.,np.sqrt(3.)]]),
+                                    [np.zeros(2),np.array([0.5, 0.4])])
+        self.jumpnetwork2 = self.crys2.jumpnetwork(self.chem, 1.2 * self.a0)
+        self.sitelist2 = self.crys2.sitelist(self.chem)
+        self.crystalname2 = 'Doubled Triangle a0={}'.format(self.a0)
 
         self.solutebinding = 3.
 
