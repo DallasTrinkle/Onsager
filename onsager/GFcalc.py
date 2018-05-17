@@ -47,24 +47,20 @@ class Fnl_u(object):
         Inverse Fourier transform of exponential cutoff function into real space (u)
         for 3d and 2d
 
-        :param n: power
-        :param l: angular momentum
+        :param n: power > -2
+        :param l: angular momentum >= 0
         :param pm: pmax value
-        :param prefactor: V/sqrt(d1 d2 d3)
-        :param d: dimensionality
+        :param prefactor: V/sqrt(prod_i d_i)
+        :param d: dimensionality == 2, 3
         """
-        if n == -2 and l == 0 and d == 2:
-            self.log = True
-            self.pre = prefactor/(2*np.pi)
-            self.half_pm = 0.5 * pm
-        else:
-            self.log = False
-            self.a = (d + l + n) / 2
-            self.b = d / 2 + l
-            self.l = l
-            self.half_pm = 0.5 * pm
-            self.pre = (-1j) ** l * prefactor * (pm ** (d + n + l)) * gamma(self.a) / \
-                       ((np.pi ** (d/2)) * (2 ** (d + l)) * gamma(self.b))
+        self.a = (d + l + n) / 2
+        self.b = d / 2 + l
+        self.l = l
+        self.half_pm = 0.5 * pm
+        self.log = (self.a == 0)  # (n == -2 and l == 0 and d == 2)
+        self.pre = (-1j) ** l * prefactor * (pm ** (d + n + l)) * gamma(self.a) / \
+                   ((np.pi ** (d/2)) * (2 ** (d + l)) * gamma(self.b)) if not self.log else \
+                   prefactor/(2*np.pi)
 
     def __call__(self, u):
         # return self.pre * u ** self.l * hyp1f1(self.a, self.b, -(u * self.half_pm) ** 2)
