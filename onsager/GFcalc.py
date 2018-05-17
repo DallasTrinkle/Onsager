@@ -16,6 +16,7 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 from onsager import PowerExpansion as PE
 import itertools
+from copy import deepcopy
 from numpy import linalg as LA
 from scipy.special import hyp1f1, gamma, expi #, gammainc
 
@@ -84,7 +85,7 @@ class GFCrystalcalc(object):
     a corresponding jumpnetwork for that vacancy.
     """
 
-    def __init__(self, crys, chem, sitelist, jumpnetwork, Nmax=4):
+    def __init__(self, crys, chem, sitelist, jumpnetwork, Nmax=4, kptwt = None):
         """
         Initializes our calculator with the appropriate topology / connectivity. Doesn't
         require, at this point, the site probabilities or transition rates to be known.
@@ -94,6 +95,7 @@ class GFCrystalcalc(object):
         :param sitelist: list, grouped into Wyckoff common positions, of unique sites
         :param jumpnetwork: list of unique transitions as lists of ((i,j), dx)
         :param Nmax: maximum range as estimator for kpt mesh generation
+        :param kptwt: (optional) tuple of (kpts, wts) to short-circuit kpt mesh generation
         """
         # this is really just used by loadHDF5() to circumvent __init__
         if all(x is None for x in (crys, chem, sitelist, jumpnetwork)): return
@@ -121,8 +123,10 @@ class GFCrystalcalc(object):
                           for i in range(self.crys.dim)])
         bmagn /= np.power(np.product(bmagn), 1 / self.crys.dim)
         # make sure we have even meshes
-        self.kptgrid = np.array([2 * np.int(np.ceil(2 * Nmax * b)) for b in bmagn], dtype=int)
-        self.kpts, self.wts = crys.reducekptmesh(crys.fullkptmesh(self.kptgrid))
+        self.kptgrid = np.array([2 * np.int(np.ceil(2 * Nmax * b)) for b in bmagn], dtype=int) \
+            if kptwt is None else np.zeros(self.crys.dim, dtype=int)
+        self.kpts, self.wts = crys.reducekptmesh(crys.fullkptmesh(self.kptgrid)) \
+            if kptwt is None else deepcopy(kptwt)
         self.Nkpt = self.kpts.shape[0]
         # generate the Fourier transformation for each jump
         # also includes the multiplicity for the onsite terms (site expansion)
