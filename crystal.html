@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Crystal &mdash; Onsager 1.2.4 documentation</title>
+  <title>Crystal &mdash; Onsager 1.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Onsager 1.2.4 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 1.3 documentation" href="index.html"/>
         <link rel="up" title="Modules" href="modules.html"/>
         <link rel="next" title="CrystalStars" href="CrystalStars.html"/>
         <link rel="prev" title="Modules" href="modules.html"/> 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -207,7 +207,7 @@
 <div class="section" id="crystal">
 <h1>Crystal<a class="headerlink" href="#crystal" title="Permalink to this headline">¶</a></h1>
 <p>Crystal:</p>
-<p>The crystal module defines the <code class="docutils literal"><span class="pre">crystal</span></code> class, and <code class="docutils literal"><span class="pre">GroupOp</span></code> for group operations.</p>
+<p>The crystal module defines the <code class="docutils literal notranslate"><span class="pre">crystal</span></code> class, and <code class="docutils literal notranslate"><span class="pre">GroupOp</span></code> for group operations.</p>
 <span class="target" id="module-crystal"></span><p>Crystal class</p>
 <p>Class to store definition of a crystal, along with some analysis
 1. geometric analysis (nearest neighbor displacements)
@@ -325,7 +325,7 @@ Can also name the elements (chemistry), and specify spin degrees of freedom.</p>
 
 <dl class="classmethod">
 <dt id="crystal.Crystal.HCP">
-<em class="property">classmethod </em><code class="descname">HCP</code><span class="sig-paren">(</span><em>a0</em>, <em>c_a=1.6329931618554521</em>, <em>chemistry=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.HCP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.HCP" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">HCP</code><span class="sig-paren">(</span><em>a0</em>, <em>c_a=1.632993161855452</em>, <em>chemistry=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.HCP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.HCP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a hexagonal closed packed crystal with lattice constant a0, c/a ratio c_a</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -333,7 +333,7 @@ Can also name the elements (chemistry), and specify spin degrees of freedom.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>a0</strong> – lattice constant</li>
-<li><strong>c_a</strong> – (optional) c/a ratio, default=ideal <span class="math">\(\sqrt{8/3}\)</span></li>
+<li><strong>c_a</strong> – (optional) c/a ratio, default=ideal <span class="math notranslate nohighlight">\(\sqrt{8/3}\)</span></li>
 </ul>
 </td>
 </tr>
@@ -407,10 +407,10 @@ elements involved, it does store that there are different elements.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>lattice</strong> – array[3,3] or list of array[3]
+<li><strong>lattice</strong> – array[3,3] or list of array[3] (or 2 if 2-dimensional)
 lattice vectors; if [3,3] array, then the vectors need to be in <em>column</em> format
 so that the first lattice vector is lattice[:,0]</li>
-<li><strong>basis</strong> – list of array[3] or list of list of array[3]
+<li><strong>basis</strong> – list of array[3] or list of list of array[3] (or 2 if 2-dimensional)
 crystalline basis vectors, in unit cell coordinates. If a list of lists, then
 there are multiple chemical elements, with each list corresponding to a unique
 element</li>
@@ -818,7 +818,7 @@ parameter.</p>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return jumpnetwork:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">list of symmetry-unique transitions; each is a list of tuples:
-<code class="docutils literal"><span class="pre">((i,j),</span> <span class="pre">dx)</span></code> corresponding to jump from <span class="math">\(i \to j\)</span> with vector <span class="math">\(\mathbf{\delta x}\)</span></p>
+<code class="docutils literal notranslate"><span class="pre">((i,j),</span> <span class="pre">dx)</span></code> corresponding to jump from <span class="math notranslate nohighlight">\(i \to j\)</span> with vector <span class="math notranslate nohighlight">\(\mathbf{\delta x}\)</span></p>
 </td>
 </tr>
 </tbody>
@@ -837,13 +837,13 @@ representation, where we replace dx with the lattice vector from i to j.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>chem</strong> – index corresponding to the chemistry to consider</li>
 <li><strong>jumpnetwork</strong> – list of symmetry-unique transitions; each is a list of tuples:
-<code class="docutils literal"><span class="pre">((i,j),</span> <span class="pre">dx)</span></code> corresponding to jump from <span class="math">\(i \to j\)</span> with vector <span class="math">\(\mathbf{\delta x}\)</span></li>
+<code class="docutils literal notranslate"><span class="pre">((i,j),</span> <span class="pre">dx)</span></code> corresponding to jump from <span class="math notranslate nohighlight">\(i \to j\)</span> with vector <span class="math notranslate nohighlight">\(\mathbf{\delta x}\)</span></li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return jumplattice:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">list of symmetry-unique transitions; each is a list of tuples:
-<code class="docutils literal"><span class="pre">((i,j),</span> <span class="pre">R)</span></code> corresponding to jump from i in unit cell 0 -&gt; j in unit cell R</p>
+<code class="docutils literal notranslate"><span class="pre">((i,j),</span> <span class="pre">R)</span></code> corresponding to jump from i in unit cell 0 -&gt; j in unit cell R</p>
 </td>
 </tr>
 </tbody>
@@ -1209,7 +1209,7 @@ eigenvector for the complex eigenvalue is [1] + i [2].</p>
 <dl class="staticmethod">
 <dt id="crystal.GroupOp.optype">
 <em class="property">static </em><code class="descname">optype</code><span class="sig-paren">(</span><em>rot</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.optype"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.optype" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the type of group operation (single integer) and eigenvectors.
+<dd><p>Returns the type of group operation (single integer):
 1 = identity
 2, 3, 4, 6 = n- fold rotation around an axis
 negative = rotation + mirror operation, perpendicular to axis
@@ -1466,7 +1466,7 @@ This means that a loop is needed to consider possible spin phase factors.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4',
+            VERSION:'1.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Split oxygen-vacancy defects in Co &mdash; Onsager 1.2.4 documentation</title>
+  <title>Split oxygen-vacancy defects in Co &mdash; Onsager 1.3 documentation</title>
   
 
   
@@ -35,9 +35,9 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Onsager 1.2.4 documentation" href="../index.html"/>
+    <link rel="top" title="Onsager 1.3 documentation" href="../index.html"/>
         <link rel="up" title="Example Notebooks" href="../notebooks.html"/>
-        <link rel="next" title="Modules" href="../modules.html"/>
+        <link rel="next" title="Binary random alloy with dilute vacancy" href="Random-alloy.html"/>
         <link rel="prev" title="Si in FCC Ni" href="NiSi.html"/> 
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -99,9 +99,10 @@
 <li class="toctree-l2"><a class="reference internal" href="GF-convergence.html">Convergence of Green function calculation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tracer-correlation.html">Tracer correlation coefficients</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
-<li class="toctree-l2"><a class="reference internal" href="LargeOmega2.html">Large <span class="math">\(\omega^2\)</span> correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LargeOmega2.html">Large <span class="math notranslate nohighlight">\(\omega^2\)</span> correction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="NiSi.html">Si in FCC Ni</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Split oxygen-vacancy defects in Co</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Random-alloy.html">Binary random alloy with dilute vacancy</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
@@ -330,7 +331,11 @@ div.nboutput div.output_area.stderr {
 .ansi-white-intense-fg { color: #A1A6B2; }
 .ansi-white-intense-bg { background-color: #A1A6B2; }
 
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
 .ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
 
 /* CSS overrides for sphinx_rtd_theme */
 
@@ -367,38 +372,38 @@ div.nboutput div.output_area.stderr {
 <div class="section" id="Split-oxygen-vacancy-defects-in-Co">
 <h1>Split oxygen-vacancy defects in Co<a class="headerlink" href="#Split-oxygen-vacancy-defects-in-Co" title="Permalink to this headline">¶</a></h1>
 <p>We want to work out the symmetry analysis for our split oxygen-vacancy
-(V-O-V) defects <span class="math">\(\alpha\)</span>-Co (HCP) and <span class="math">\(\beta\)</span>-Co (FCC).</p>
+(V-O-V) defects <span class="math notranslate nohighlight">\(\alpha\)</span>-Co (HCP) and <span class="math notranslate nohighlight">\(\beta\)</span>-Co (FCC).</p>
 <p>The split defects can be represented simply as crowdion interstitial
 sites, for the purposes of symmetry analysis. We’re interested in
 extracting the tensor expansions around those sites, and (eventually)
 computing the damping coefficients from the DFT data.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>import sys
-sys.path.extend([&#39;../&#39;])
-import numpy as np
-import matplotlib.pyplot as plt
-plt.style.use(&#39;seaborn-whitegrid&#39;)
-%matplotlib inline
-import onsager.crystal as crystal
-import onsager.OnsagerCalc as onsager
-from scipy.constants import physical_constants
-kB = physical_constants[&#39;Boltzmann constant in eV/K&#39;][0]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;../&#39;</span><span class="p">])</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-whitegrid&#39;</span><span class="p">)</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">onsager.crystal</span> <span class="kn">as</span> <span class="nn">crystal</span>
+<span class="kn">import</span> <span class="nn">onsager.OnsagerCalc</span> <span class="kn">as</span> <span class="nn">onsager</span>
+<span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="kn">import</span> <span class="n">physical_constants</span>
+<span class="n">kB</span> <span class="o">=</span> <span class="n">physical_constants</span><span class="p">[</span><span class="s1">&#39;Boltzmann constant in eV/K&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>betaCo = crystal.Crystal.FCC(1.0, &#39;Co&#39;)
-print(betaCo)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">betaCo</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="o">.</span><span class="n">FCC</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;Co&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">betaCo</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -416,21 +421,21 @@ print(betaCo)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>betaCo.Wyckoffpos(np.array([0.5,0.,0.]))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">betaCo</span><span class="o">.</span><span class="n">Wyckoffpos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]))</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[3]:
 </pre></div>
 </div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>[array([ 0. ,  0. ,  0.5]),
  array([ 0.5,  0. ,  0.5]),
  array([ 0.5,  0. ,  0. ]),
@@ -441,13 +446,13 @@ print(betaCo)
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>betaCoO = betaCo.addbasis(betaCo.Wyckoffpos(np.array([0.5,0.,0.])), [&#39;O&#39;])
-print(betaCoO)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">betaCoO</span> <span class="o">=</span> <span class="n">betaCo</span><span class="o">.</span><span class="n">addbasis</span><span class="p">(</span><span class="n">betaCo</span><span class="o">.</span><span class="n">Wyckoffpos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">])),</span> <span class="p">[</span><span class="s1">&#39;O&#39;</span><span class="p">])</span>
+<span class="k">print</span><span class="p">(</span><span class="n">betaCoO</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -471,22 +476,22 @@ print(betaCoO)
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>Ojumpnetwork = betaCoO.jumpnetwork(1,0.5)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">Ojumpnetwork</span> <span class="o">=</span> <span class="n">betaCoO</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>Odiffuser = onsager.Interstitial(betaCoO, 1, betaCoO.sitelist(1), Ojumpnetwork)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">Odiffuser</span> <span class="o">=</span> <span class="n">onsager</span><span class="o">.</span><span class="n">Interstitial</span><span class="p">(</span><span class="n">betaCoO</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">betaCoO</span><span class="o">.</span><span class="n">sitelist</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">Ojumpnetwork</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -494,29 +499,29 @@ print(betaCoO)
 position, then find the zero entry in the position vector, and work from
 there.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>Ppara, Pperp, Pshear = -2.70, -4.30, 0.13
-reppos = betaCoO.pos2cart(np.zeros(3), (1, Odiffuser.sitelist[0][0]))
-perpindex = [n for n in range(3) if np.isclose(reppos[n], 0)][0]
-paraindex = [n for n in range(3) if n != perpindex]
-shearsign = 1 if reppos[paraindex[0]]*reppos[paraindex[1]] &gt; 0 else -1
-Pdipole = np.diag([Pperp if n == perpindex else Ppara for n in range(3)])
-Pdipole[paraindex[0], paraindex[1]] = shearsign*Pshear
-Pdipole[paraindex[1], paraindex[0]] = shearsign*Pshear
-Pdipole
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">Ppara</span><span class="p">,</span> <span class="n">Pperp</span><span class="p">,</span> <span class="n">Pshear</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.70</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.30</span><span class="p">,</span> <span class="mf">0.13</span>
+<span class="n">reppos</span> <span class="o">=</span> <span class="n">betaCoO</span><span class="o">.</span><span class="n">pos2cart</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Odiffuser</span><span class="o">.</span><span class="n">sitelist</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">perpindex</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">reppos</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="mi">0</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">paraindex</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="n">perpindex</span><span class="p">]</span>
+<span class="n">shearsign</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">reppos</span><span class="p">[</span><span class="n">paraindex</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">*</span><span class="n">reppos</span><span class="p">[</span><span class="n">paraindex</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+<span class="n">Pdipole</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="n">Pperp</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="n">perpindex</span> <span class="k">else</span> <span class="n">Ppara</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)])</span>
+<span class="n">Pdipole</span><span class="p">[</span><span class="n">paraindex</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">paraindex</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">shearsign</span><span class="o">*</span><span class="n">Pshear</span>
+<span class="n">Pdipole</span><span class="p">[</span><span class="n">paraindex</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">paraindex</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">shearsign</span><span class="o">*</span><span class="n">Pshear</span>
+<span class="n">Pdipole</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[7]:
 </pre></div>
 </div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>array([[-2.7 ,  0.13,  0.  ],
        [ 0.13, -2.7 ,  0.  ],
        [ 0.  ,  0.  , -4.3 ]])
@@ -524,30 +529,30 @@ Pdipole
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>nu0, Emig = 1e13, 0.91
-nsites, njumps = len(Odiffuser.sitelist), len(Odiffuser.jumpnetwork)
-betaCoOthermodict = {&#39;pre&#39;: np.ones(nsites), &#39;ene&#39;: np.zeros(nsites),
-                     &#39;preT&#39;: nu0*np.ones(nsites), &#39;eneT&#39;: Emig*np.ones(nsites)}
-beta = 1./(kB*300)  # 300K
-Llamb = Odiffuser.losstensors(betaCoOthermodict[&#39;pre&#39;], beta*betaCoOthermodict[&#39;ene&#39;],
-                              [Pdipole],
-                              betaCoOthermodict[&#39;preT&#39;], beta*betaCoOthermodict[&#39;eneT&#39;])
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">nu0</span><span class="p">,</span> <span class="n">Emig</span> <span class="o">=</span> <span class="mf">1e13</span><span class="p">,</span> <span class="mf">0.91</span>
+<span class="n">nsites</span><span class="p">,</span> <span class="n">njumps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Odiffuser</span><span class="o">.</span><span class="n">sitelist</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">Odiffuser</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">)</span>
+<span class="n">betaCoOthermodict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;pre&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nsites</span><span class="p">),</span> <span class="s1">&#39;ene&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nsites</span><span class="p">),</span>
+                     <span class="s1">&#39;preT&#39;</span><span class="p">:</span> <span class="n">nu0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nsites</span><span class="p">),</span> <span class="s1">&#39;eneT&#39;</span><span class="p">:</span> <span class="n">Emig</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nsites</span><span class="p">)}</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">kB</span><span class="o">*</span><span class="mi">300</span><span class="p">)</span>  <span class="c1"># 300K</span>
+<span class="n">Llamb</span> <span class="o">=</span> <span class="n">Odiffuser</span><span class="o">.</span><span class="n">losstensors</span><span class="p">(</span><span class="n">betaCoOthermodict</span><span class="p">[</span><span class="s1">&#39;pre&#39;</span><span class="p">],</span> <span class="n">beta</span><span class="o">*</span><span class="n">betaCoOthermodict</span><span class="p">[</span><span class="s1">&#39;ene&#39;</span><span class="p">],</span>
+                              <span class="p">[</span><span class="n">Pdipole</span><span class="p">],</span>
+                              <span class="n">betaCoOthermodict</span><span class="p">[</span><span class="s1">&#39;preT&#39;</span><span class="p">],</span> <span class="n">beta</span><span class="o">*</span><span class="n">betaCoOthermodict</span><span class="p">[</span><span class="s1">&#39;eneT&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>for (lamb, Ltens) in Llamb:
-    print(lamb, crystal.FourthRankIsotropic(Ltens))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">for</span> <span class="p">(</span><span class="n">lamb</span><span class="p">,</span> <span class="n">Ltens</span><span class="p">)</span> <span class="ow">in</span> <span class="n">Llamb</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">lamb</span><span class="p">,</span> <span class="n">crystal</span><span class="o">.</span><span class="n">FourthRankIsotropic</span><span class="p">(</span><span class="n">Ltens</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -561,14 +566,14 @@ Llamb = Odiffuser.losstensors(betaCoOthermodict[&#39;pre&#39;], beta*betaCoOther
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>sh1 = crystal.FourthRankIsotropic(Llamb[0][1])[1]
-sh2 = crystal.FourthRankIsotropic(Llamb[1][1])[1]
-print(sh2/sh1)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sh1</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">FourthRankIsotropic</span><span class="p">(</span><span class="n">Llamb</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">sh2</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">FourthRankIsotropic</span><span class="p">(</span><span class="n">Llamb</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">print</span><span class="p">(</span><span class="n">sh2</span><span class="o">/</span><span class="n">sh1</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -582,39 +587,39 @@ print(sh2/sh1)
 </div>
 <p>Internal friction resonance. We do loading at a frequency of 1 Hz.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>nuIF = 1.
-Trange = np.linspace(250,400,151)
-shlist = []
-for T in Trange:
-    beta = 1./(kB*T)
-    Llamb = Odiffuser.losstensors(betaCoOthermodict[&#39;pre&#39;], beta*betaCoOthermodict[&#39;ene&#39;],
-                                  [Pdipole],
-                                  betaCoOthermodict[&#39;preT&#39;], beta*betaCoOthermodict[&#39;eneT&#39;])
-    f1,L1,f2,L2 = Llamb[0][0], Llamb[0][1], Llamb[1][0], Llamb[1][1]
-    sh = crystal.FourthRankIsotropic(L1*nuIF*f1/(nuIF**2+f1**2) +
-                                     L2*nuIF*f2/(nuIF**2+f2**2))[1]
-    shlist.append(sh*kB*T)
-shear = np.array(shlist)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">nuIF</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="n">Trange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">250</span><span class="p">,</span><span class="mi">400</span><span class="p">,</span><span class="mi">151</span><span class="p">)</span>
+<span class="n">shlist</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">Trange</span><span class="p">:</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">kB</span><span class="o">*</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">Llamb</span> <span class="o">=</span> <span class="n">Odiffuser</span><span class="o">.</span><span class="n">losstensors</span><span class="p">(</span><span class="n">betaCoOthermodict</span><span class="p">[</span><span class="s1">&#39;pre&#39;</span><span class="p">],</span> <span class="n">beta</span><span class="o">*</span><span class="n">betaCoOthermodict</span><span class="p">[</span><span class="s1">&#39;ene&#39;</span><span class="p">],</span>
+                                  <span class="p">[</span><span class="n">Pdipole</span><span class="p">],</span>
+                                  <span class="n">betaCoOthermodict</span><span class="p">[</span><span class="s1">&#39;preT&#39;</span><span class="p">],</span> <span class="n">beta</span><span class="o">*</span><span class="n">betaCoOthermodict</span><span class="p">[</span><span class="s1">&#39;eneT&#39;</span><span class="p">])</span>
+    <span class="n">f1</span><span class="p">,</span><span class="n">L1</span><span class="p">,</span><span class="n">f2</span><span class="p">,</span><span class="n">L2</span> <span class="o">=</span> <span class="n">Llamb</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">Llamb</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">Llamb</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">Llamb</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">FourthRankIsotropic</span><span class="p">(</span><span class="n">L1</span><span class="o">*</span><span class="n">nuIF</span><span class="o">*</span><span class="n">f1</span><span class="o">/</span><span class="p">(</span><span class="n">nuIF</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">f1</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span>
+                                     <span class="n">L2</span><span class="o">*</span><span class="n">nuIF</span><span class="o">*</span><span class="n">f2</span><span class="o">/</span><span class="p">(</span><span class="n">nuIF</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">f2</span><span class="o">**</span><span class="mi">2</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">shlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sh</span><span class="o">*</span><span class="n">kB</span><span class="o">*</span><span class="n">T</span><span class="p">)</span>
+<span class="n">shear</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shlist</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>fig, ax1 = plt.subplots()
-ax1.plot(Trange, shear/np.max(shear), &#39;k&#39;)
-ax1.set_ylabel(&#39;loss $Q$ [unitless]&#39;, fontsize=&#39;x-large&#39;)
-ax1.set_xlabel(&#39;$T$ [K]&#39;, fontsize=&#39;x-large&#39;)
-plt.show()
-# plt.savefig(&#39;FCC-Co-O-loss.pdf&#39;, transparent=True, format=&#39;pdf&#39;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Trange</span><span class="p">,</span> <span class="n">shear</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">shear</span><span class="p">),</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;loss $Q$ [unitless]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$T$ [K]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># plt.savefig(&#39;FCC-Co-O-loss.pdf&#39;, transparent=True, format=&#39;pdf&#39;)</span>
 </pre></div>
 </div>
 </div>
@@ -627,21 +632,21 @@ plt.show()
 </div>
 <p>Temperature where peak maximum is found?</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>Trange[np.argmax(shear)]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">Trange</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">shear</span><span class="p">)]</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[13]:
 </pre></div>
 </div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>326.0
 </pre></div>
 </div>
@@ -658,7 +663,7 @@ plt.show()
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../modules.html" class="btn btn-neutral float-right" title="Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Random-alloy.html" class="btn btn-neutral float-right" title="Binary random alloy with dilute vacancy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="NiSi.html" class="btn btn-neutral" title="Si in FCC Ni" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -692,7 +697,7 @@ plt.show()
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.4',
+            VERSION:'1.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

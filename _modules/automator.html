@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>automator &mdash; Onsager 1.2.4 documentation</title>
+  <title>automator &mdash; Onsager 1.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Onsager 1.2.4 documentation" href="../index.html"/>
+    <link rel="top" title="Onsager 1.3 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -207,8 +207,8 @@
                             <span class="k">for</span> <span class="n">remap</span><span class="p">,</span> <span class="n">shift</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">indexshift</span><span class="p">)</span>
                             <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">remap</span><span class="p">])</span>
     <span class="c1"># needs a trailing newline</span>
-    <span class="k">return</span> <span class="n">string_rep</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span></div>
-
+    <span class="k">return</span> <span class="n">string_rep</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+</div>
 
 <span class="c1">### Some default input files to use for our runs, and a sed formatted script to recreate INCARs</span>
 
@@ -440,8 +440,8 @@
     <span class="c1"># JSON dictionary connecting directories and tags: (needs a trailing newline?)</span>
     <span class="n">addfile</span><span class="p">(</span><span class="n">JSONdict</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">tagmapping</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="c1"># YAML representation of supercell:</span>
-    <span class="k">if</span> <span class="n">YAMLdef</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">addfile</span><span class="p">(</span><span class="n">YAMLdef</span><span class="p">,</span> <span class="n">crystal</span><span class="o">.</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">superdict</span><span class="p">))</span></div>
-</pre></div>
+    <span class="k">if</span> <span class="n">YAMLdef</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">addfile</span><span class="p">(</span><span class="n">YAMLdef</span><span class="p">,</span> <span class="n">crystal</span><span class="o">.</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">superdict</span><span class="p">))</span>
+</pre></div></div>
 
            </div>
            <div class="articleComments">
@@ -477,7 +477,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.4',
+            VERSION:'1.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

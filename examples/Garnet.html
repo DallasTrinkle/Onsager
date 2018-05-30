@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Garnet correlation coefficients &mdash; Onsager 1.2.4 documentation</title>
+  <title>Garnet correlation coefficients &mdash; Onsager 1.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Onsager 1.2.4 documentation" href="../index.html"/>
+    <link rel="top" title="Onsager 1.3 documentation" href="../index.html"/>
         <link rel="up" title="Example Notebooks" href="../notebooks.html"/>
         <link rel="next" title="Large \(\omega^2\) correction" href="LargeOmega2.html"/>
         <link rel="prev" title="Tracer correlation coefficients" href="Tracer-correlation.html"/> 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -99,9 +99,10 @@
 <li class="toctree-l2"><a class="reference internal" href="GF-convergence.html">Convergence of Green function calculation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Tracer-correlation.html">Tracer correlation coefficients</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Garnet correlation coefficients</a></li>
-<li class="toctree-l2"><a class="reference internal" href="LargeOmega2.html">Large <span class="math">\(\omega^2\)</span> correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LargeOmega2.html">Large <span class="math notranslate nohighlight">\(\omega^2\)</span> correction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="NiSi.html">Si in FCC Ni</a></li>
 <li class="toctree-l2"><a class="reference internal" href="FCC-Co-O.html">Split oxygen-vacancy defects in Co</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Random-alloy.html">Binary random alloy with dilute vacancy</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
@@ -330,7 +331,11 @@ div.nboutput div.output_area.stderr {
 .ansi-white-intense-fg { color: #A1A6B2; }
 .ansi-white-intense-bg { background-color: #A1A6B2; }
 
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
 .ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
 
 /* CSS overrides for sphinx_rtd_theme */
 
@@ -373,12 +378,12 @@ R. Wilson, Phys Chem Minerals <strong>43</strong>, 363-369 (2016)
 with space group 230 (Ia3d) with stoichiometry Mg3Al2Si3O12. The
 occupied <a class="reference external" href="http://www.cryst.ehu.es/cgi-bin/cryst/programs/nph-wp-list?gnum=230">Wyckoff
 positions</a>
-for this are (lattice constant <span class="math">\(a_0\)</span>=1.1459 nm):</p>
+for this are (lattice constant <span class="math notranslate nohighlight">\(a_0\)</span>=1.1459 nm):</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="30%" />
-<col width="25%" />
-<col width="45%" />
+<col width="23%" />
+<col width="47%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head">Wykcoff site</th>
@@ -409,83 +414,83 @@ for this are (lattice constant <span class="math">\(a_0\)</span>=1.1459 nm):</p>
 structure of synthetic pyrope.” American Mineralogist <strong>50</strong> 2023-2039
 (1965), <a class="reference external" href="http://rruff.info/doclib/am/vol50/AM50_2023.pdf">PDF</a>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>import sys
-sys.path.extend([&#39;../&#39;])
-import numpy as np
-import onsager.crystal as crystal
-import onsager.OnsagerCalc as onsager
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;../&#39;</span><span class="p">])</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">onsager.crystal</span> <span class="kn">as</span> <span class="nn">crystal</span>
+<span class="kn">import</span> <span class="nn">onsager.OnsagerCalc</span> <span class="kn">as</span> <span class="nn">onsager</span>
 </pre></div>
 </div>
 </div>
 <p>Create garnet crystal (lattice constant in nm). Wyckoff positions cut
 and pasted from Bilbao crystallographic server.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># a0 = 1.1459
-# alatt = a0*np.eye(3)
-a0 = 1.
-alatt = a0*np.array([[-0.5,0.5,0.5],[0.5,-0.5,0.5],[0.5,0.5,-0.5]])
-invlatt = np.array([[0,1,1],[1,0,1],[1,1,0]])
-x,y,z = (.03284,.05014,.65330)
-uMg = ((1/8,0,1/4),(3/8,0,3/4),(1/4,1/8,0),(3/4,3/8,0),
-       (0,1/4,1/8),(0,3/4,3/8),(7/8,0,3/4),(5/8,0,1/4),
-       (3/4,7/8,0),(1/4,5/8,0),(0,3/4,7/8),(0,1/4,5/8))
-uAl = ((0,0,0),(1/2,0,1/2),(0,1/2,1/2),(1/2,1/2,0),
-       (3/4,1/4,1/4),(3/4,3/4,3/4),(1/4,1/4,3/4),(1/4,3/4,1/4))
-uSi = ((3/8,0,1/4),(1/8,0,3/4),(1/4,3/8,0),(3/4,1/8,0),
-       (0,1/4,3/8),(0,3/4,1/8),(3/4,5/8,0),(3/4,3/8,1/2),
-       (1/8,1/2,1/4),(7/8,0,1/4),(0,1/4,7/8),(1/2,1/4,1/8))
-uO = ((x,y,z),(-x+1/2,-y,z+1/2),(-x,y+1/2,-z+1/2),(x+1/2,-y+1/2,-z),
-      (z,x,y),(z+1/2,-x+1/2,-y),(-z+1/2,-x,y+1/2),(-z,x+1/2,-y+1/2),
-      (y,z,x),(-y,z+1/2,-x+1/2),(y+1/2,-z+1/2,-x),(-y+1/2,-z,x+1/2),
-      (y+3/4,x+1/4,-z+1/4),(-y+3/4,-x+3/4,-z+3/4),(y+1/4,-x+1/4,z+3/4),(-y+1/4,x+3/4,z+1/4),
-      (x+3/4,z+1/4,-y+1/4),(-x+1/4,z+3/4,y+1/4),(-x+3/4,-z+3/4,-y+3/4),(x+1/4,-z+1/4,y+3/4),
-      (z+3/4,y+1/4,-x+1/4),(z+1/4,-y+1/4,x+3/4),(-z+1/4,y+3/4,x+1/4),(-z+3/4,-y+3/4,-x+3/4),
-      (-x,-y,-z),(x+1/2,y,-z+1/2),(x,-y+1/2,z+1/2),(-x+1/2,y+1/2,z),
-      (-z,-x,-y),(-z+1/2,x+1/2,y),(z+1/2,x,-y+1/2),(z,-x+1/2,y+1/2),
-      (-y,-z,-x),(y,-z+1/2,x+1/2),(-y+1/2,z+1/2,x),(y+1/2,z,-x+1/2),
-      (-y+1/4,-x+3/4,z+3/4),(y+1/4,x+1/4,z+1/4),(-y+3/4,x+3/4,-z+1/4),(y+3/4,-x+1/4,-z+3/4),
-      (-x+1/4,-z+3/4,y+3/4),(x+3/4,-z+1/4,-y+3/4),(x+1/4,z+1/4,y+1/4),(-x+3/4,z+3/4,-y+1/4),
-      (-z+1/4,-y+3/4,x+3/4),(-z+3/4,y+3/4,-x+1/4),(z+3/4,-y+1/4,-x+3/4),(z+1/4,y+1/4,x+1/4))
-# tovec = lambda x: np.array(x)
-# tovec2 = lambda x: np.array((x[0]+1/2,x[1]+1/2,x[2]+1/2))
-tovec = lambda x: np.dot(invlatt, x)
-pyrope = crystal.Crystal(alatt, [[vec(w) for w in ulist for vec in (tovec,)]
-                                 for ulist in (uMg, uAl, uSi, uO)],
-                         [&#39;Mg&#39;,&#39;Al&#39;,&#39;Si&#39;,&#39;O&#39;])
-# print(pyrope)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># a0 = 1.1459</span>
+<span class="c1"># alatt = a0*np.eye(3)</span>
+<span class="n">a0</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="n">alatt</span> <span class="o">=</span> <span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.5</span><span class="p">]])</span>
+<span class="n">invlatt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span>
+<span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="o">.</span><span class="mo">032</span><span class="mi">84</span><span class="p">,</span><span class="o">.</span><span class="mo">05014</span><span class="p">,</span><span class="o">.</span><span class="mi">65330</span><span class="p">)</span>
+<span class="n">uMg</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="mi">3</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+       <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">8</span><span class="p">),(</span><span class="mi">7</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="mi">5</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),</span>
+       <span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">7</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">7</span><span class="o">/</span><span class="mi">8</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">/</span><span class="mi">8</span><span class="p">))</span>
+<span class="n">uAl</span> <span class="o">=</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+       <span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">uSi</span> <span class="o">=</span> <span class="p">((</span><span class="mi">3</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+       <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">8</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">),(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+       <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="mi">7</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">7</span><span class="o">/</span><span class="mi">8</span><span class="p">),(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">))</span>
+<span class="n">uO</span> <span class="o">=</span> <span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">),(</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),(</span><span class="o">-</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="p">),</span>
+      <span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),(</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="p">),(</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),(</span><span class="o">-</span><span class="n">z</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+      <span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">x</span><span class="p">),(</span><span class="o">-</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),(</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="p">),(</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+      <span class="p">(</span><span class="n">y</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),</span>
+      <span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),</span>
+      <span class="p">(</span><span class="n">z</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),</span>
+      <span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="p">),(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),(</span><span class="n">x</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),(</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">z</span><span class="p">),</span>
+      <span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="p">),(</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">y</span><span class="p">),(</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),(</span><span class="n">z</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+      <span class="p">(</span><span class="o">-</span><span class="n">y</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="p">),(</span><span class="n">y</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),(</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">x</span><span class="p">),(</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+      <span class="p">(</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="n">y</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),</span>
+      <span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),</span>
+      <span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="n">z</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),(</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">))</span>
+<span class="c1"># tovec = lambda x: np.array(x)</span>
+<span class="c1"># tovec2 = lambda x: np.array((x[0]+1/2,x[1]+1/2,x[2]+1/2))</span>
+<span class="n">tovec</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">invlatt</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">pyrope</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">(</span><span class="n">alatt</span><span class="p">,</span> <span class="p">[[</span><span class="n">vec</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ulist</span> <span class="k">for</span> <span class="n">vec</span> <span class="ow">in</span> <span class="p">(</span><span class="n">tovec</span><span class="p">,)]</span>
+                                 <span class="k">for</span> <span class="n">ulist</span> <span class="ow">in</span> <span class="p">(</span><span class="n">uMg</span><span class="p">,</span> <span class="n">uAl</span><span class="p">,</span> <span class="n">uSi</span><span class="p">,</span> <span class="n">uO</span><span class="p">)],</span>
+                         <span class="p">[</span><span class="s1">&#39;Mg&#39;</span><span class="p">,</span><span class="s1">&#39;Al&#39;</span><span class="p">,</span><span class="s1">&#39;Si&#39;</span><span class="p">,</span><span class="s1">&#39;O&#39;</span><span class="p">])</span>
+<span class="c1"># print(pyrope)</span>
 </pre></div>
 </div>
 </div>
 <p>Next, we construct a <em>diffuser</em> based on vacancies for our Mg ion. We
-need to create a <code class="docutils literal"><span class="pre">sitelist</span></code> (which will be the Wyckoff positions) and
-a <code class="docutils literal"><span class="pre">jumpnetwork</span></code> for the transitions between the sites. There are tags
+need to create a <code class="docutils literal notranslate"><span class="pre">sitelist</span></code> (which will be the Wyckoff positions) and
+a <code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code> for the transitions between the sites. There are tags
 that correspond to the unique states and transitions in the diffuser.
-The first cutoff is <span class="math">\(\sim 0.31a_0\)</span>, but that connects half of the
+The first cutoff is <span class="math notranslate nohighlight">\(\sim 0.31a_0\)</span>, but that connects half of the
 Mg cation sites to each other; increasing the cutoff to
-<span class="math">\(\sim 0.51a_0\)</span> introduces a second network that completes the
+<span class="math notranslate nohighlight">\(\sim 0.51a_0\)</span> introduces a second network that completes the
 connections.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>chem = 0  # 0 is the index corresponding to our Mg atom in the crystal
-cutoff = 0.31*a0  # had been 0.51*a0
-sitelist = pyrope.sitelist(chem)
-jumpnetwork = pyrope.jumpnetwork(chem, cutoff)
-Mgdiffuser = onsager.VacancyMediated(pyrope, chem, sitelist, jumpnetwork, 1)
-print(Mgdiffuser)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># 0 is the index corresponding to our Mg atom in the crystal</span>
+<span class="n">cutoff</span> <span class="o">=</span> <span class="mf">0.31</span><span class="o">*</span><span class="n">a0</span>  <span class="c1"># had been 0.51*a0</span>
+<span class="n">sitelist</span> <span class="o">=</span> <span class="n">pyrope</span><span class="o">.</span><span class="n">sitelist</span><span class="p">(</span><span class="n">chem</span><span class="p">)</span>
+<span class="n">jumpnetwork</span> <span class="o">=</span> <span class="n">pyrope</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">(</span><span class="n">chem</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
+<span class="n">Mgdiffuser</span> <span class="o">=</span> <span class="n">onsager</span><span class="o">.</span><span class="n">VacancyMediated</span><span class="p">(</span><span class="n">pyrope</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">sitelist</span><span class="p">,</span> <span class="n">jumpnetwork</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">Mgdiffuser</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -599,29 +604,29 @@ omega2:s:+0.250,+0.875,+0.625-v:+0.625,+1.250,+0.875^s:+0.625,+0.250,+0.875-v:+0
 </div>
 <p>Quick analysis on our jump network:</p>
 <ol class="arabic simple">
-<li>What is the connectivity, <span class="math">\(Z\)</span>?</li>
+<li>What is the connectivity, <span class="math notranslate nohighlight">\(Z\)</span>?</li>
 <li>What is the individual contribution to
-<span class="math">\(\mathbf{\delta x}\otimes\mathbf{\delta x}\)</span>? And 1/3 Tr (which
+<span class="math notranslate nohighlight">\(\mathbf{\delta x}\otimes\mathbf{\delta x}\)</span>? And 1/3 Tr (which
 will be the symmetrized contribution)?</li>
-<li>What is the squared magnitude <span class="math">\(\delta x^2\)</span>?</li>
+<li>What is the squared magnitude <span class="math notranslate nohighlight">\(\delta x^2\)</span>?</li>
 </ol>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>for jlist in jumpnetwork:
-    Z = 0
-    dx2 = np.zeros((3,3))
-    for (i,j), dx in jlist:
-        if i==0:
-            Z += 1
-            dx2 += np.outer(dx,dx)
-    print(&quot;coordination number:&quot;, Z)
-    print(dx2)
-    print(&quot;1/3 Tr dx dx:&quot;, dx2.trace()/3)
-    print(&quot;dx^2:&quot;, np.dot(dx,dx))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">for</span> <span class="n">jlist</span> <span class="ow">in</span> <span class="n">jumpnetwork</span><span class="p">:</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">dx2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">jlist</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">Z</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">dx2</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span><span class="n">dx</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;coordination number:&quot;</span><span class="p">,</span> <span class="n">Z</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">dx2</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;1/3 Tr dx dx:&quot;</span><span class="p">,</span> <span class="n">dx2</span><span class="o">.</span><span class="n">trace</span><span class="p">()</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;dx^2:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span><span class="n">dx</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -642,24 +647,24 @@ dx^2: 0.09375
 pyrope for our <em>representative</em> states and transitions: these are the
 first states in the lists, which are also identified by the tags above.
 As we are computing a tracer, we make the choice to set
-<span class="math">\(\nu_0 = 1/Z\)</span> where <span class="math">\(Z=4\)</span> is the coordination number.</p>
+<span class="math notranslate nohighlight">\(\nu_0 = 1/Z\)</span> where <span class="math notranslate nohighlight">\(Z=4\)</span> is the coordination number.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>nu0 = 0.25
-Etrans = 0.
-# we don&#39;t need to use the tags, since there&#39;s only one site and jump type, and
-# we want to build a tracer.
-Mgthermodict = {&#39;preV&#39;: np.ones(len(sitelist)),
-                &#39;eneV&#39;: np.zeros(len(sitelist)),
-                &#39;preT0&#39;: nu0*np.ones(len(jumpnetwork)),
-                &#39;eneT0&#39;: Etrans*np.ones(len(jumpnetwork))}
-Mgthermodict.update(Mgdiffuser.maketracerpreene(**Mgthermodict))
-for k,v in Mgthermodict.items():
-    print(&#39;{}: {}&#39;.format(k, v))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">nu0</span> <span class="o">=</span> <span class="mf">0.25</span>
+<span class="n">Etrans</span> <span class="o">=</span> <span class="mf">0.</span>
+<span class="c1"># we don&#39;t need to use the tags, since there&#39;s only one site and jump type, and</span>
+<span class="c1"># we want to build a tracer.</span>
+<span class="n">Mgthermodict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;preV&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sitelist</span><span class="p">)),</span>
+                <span class="s1">&#39;eneV&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sitelist</span><span class="p">)),</span>
+                <span class="s1">&#39;preT0&#39;</span><span class="p">:</span> <span class="n">nu0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jumpnetwork</span><span class="p">)),</span>
+                <span class="s1">&#39;eneT0&#39;</span><span class="p">:</span> <span class="n">Etrans</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">jumpnetwork</span><span class="p">))}</span>
+<span class="n">Mgthermodict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">Mgdiffuser</span><span class="o">.</span><span class="n">maketracerpreene</span><span class="p">(</span><span class="o">**</span><span class="n">Mgthermodict</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">Mgthermodict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;{}: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -683,24 +688,24 @@ preT2: [ 0.25]
 </pre></div></div>
 </div>
 <p>We compute the Onsager matrices, and look at
-<span class="math">\(-L_\text{ss}/L_\text{sv}\)</span> to get our correlation coefficient.</p>
-<p><em>Note:</em> we can define <span class="math">\(f\)</span> (for our tracer) as the ratio of
-<span class="math">\(L_\text{ss}\)</span> to
-<span class="math">\(Z (\delta x)^2 w_2 c_\text{v}c_\text{s}/6 = \frac{1}{16}\nu_0 a_0^2\)</span>
-in this case, the same as what we get for <span class="math">\(L_\text{vv}\)</span> and
-<span class="math">\(-L_\text{sv}\)</span>.</p>
+<span class="math notranslate nohighlight">\(-L_\text{ss}/L_\text{sv}\)</span> to get our correlation coefficient.</p>
+<p><em>Note:</em> we can define <span class="math notranslate nohighlight">\(f\)</span> (for our tracer) as the ratio of
+<span class="math notranslate nohighlight">\(L_\text{ss}\)</span> to
+<span class="math notranslate nohighlight">\(Z (\delta x)^2 w_2 c_\text{v}c_\text{s}/6 = \frac{1}{16}\nu_0 a_0^2\)</span>
+in this case, the same as what we get for <span class="math notranslate nohighlight">\(L_\text{vv}\)</span> and
+<span class="math notranslate nohighlight">\(-L_\text{sv}\)</span>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>Lvv, Lss, Lsv, L1vv = Mgdiffuser.Lij(*Mgdiffuser.preene2betafree(1, **Mgthermodict))
-print(Lvv)
-print(Lss)
-print(Lsv)
-print(L1vv)
-print(&quot;Correlation coefficient:&quot;, -Lss[0,0]/Lsv[0,0])
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">Lvv</span><span class="p">,</span> <span class="n">Lss</span><span class="p">,</span> <span class="n">Lsv</span><span class="p">,</span> <span class="n">L1vv</span> <span class="o">=</span> <span class="n">Mgdiffuser</span><span class="o">.</span><span class="n">Lij</span><span class="p">(</span><span class="o">*</span><span class="n">Mgdiffuser</span><span class="o">.</span><span class="n">preene2betafree</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">Mgthermodict</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="n">Lvv</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">Lss</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">Lsv</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">L1vv</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Correlation coefficient:&quot;</span><span class="p">,</span> <span class="o">-</span><span class="n">Lss</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">Lsv</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -725,8 +730,8 @@ Correlation coefficient: 0.374972670783
 </pre></div></div>
 </div>
 <p>Compare with tabulated GF data from Carlson and Wilson paper. They use
-the notation <span class="math">\((l,m,n)\)</span> for a <span class="math">\(\mathbf{\delta x}\)</span> vector that
-is <span class="math">\(a_0(l\hat x+m\hat y+n\hat z)/8\)</span>. We will need to find a
+the notation <span class="math notranslate nohighlight">\((l,m,n)\)</span> for a <span class="math notranslate nohighlight">\(\mathbf{\delta x}\)</span> vector that
+is <span class="math notranslate nohighlight">\(a_0(l\hat x+m\hat y+n\hat z)/8\)</span>. We will need to find a
 corresponding site that lands at that displacement from our origin site.</p>
 <p>Unfortunately, it looks like in two cases ((800), (444)) there are two
 distinct sites that are mapped in that displacement vector, which have
@@ -734,47 +739,47 @@ different GF values; the CW reported values appear to be the averaged
 values. In two other cases, ((640), (420)) the reported values are half
 of what the computed values are here.</p>
 <p>As Carlson and Wilson used a stochastic approach to compute their GF
-values, all of their other data has errors <span class="math">\(\sim 10^{-4}\)</span>.</p>
+values, all of their other data has errors <span class="math notranslate nohighlight">\(\sim 10^{-4}\)</span>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span># tabulated data from paper
-CarlsonWilsonGFdata = \
-{(0,0,0): 2.30796022, (2,1,1): 1.30807261, (3,3,2): 0.80669536,
- (4,2,0): 0.40469085, (4,4,4): 0.50242046, (5,3,2): 0.56195744,
- (6,1,1): 0.56071092, (6,4,0): 0.22460654, (6,5,3): 0.42028488,
- (6,5,5): 0.40137897, (7,2,1): 0.44437878, (8,0,0): 0.41938675}
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># tabulated data from paper</span>
+<span class="n">CarlsonWilsonGFdata</span> <span class="o">=</span> \
+<span class="p">{(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span> <span class="mf">2.30796022</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span> <span class="mf">1.30807261</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span> <span class="mf">0.80669536</span><span class="p">,</span>
+ <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span> <span class="mf">0.40469085</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span> <span class="mf">0.50242046</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span> <span class="mf">0.56195744</span><span class="p">,</span>
+ <span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span> <span class="mf">0.56071092</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span> <span class="mf">0.22460654</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span> <span class="mf">0.42028488</span><span class="p">,</span>
+ <span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span> <span class="mf">0.40137897</span><span class="p">,</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span> <span class="mf">0.44437878</span><span class="p">,</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span> <span class="mf">0.41938675</span><span class="p">}</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>print(&#39;CW index\tdx match\tGF (FT eval)\tGF(CW stoch.)\terror&#39;)
-GF = Mgdiffuser.GFcalc  # get our GF calculator; should already have rates set
-basis = pyrope.basis[chem]
-x0 = np.dot(alatt, basis[0])
-for vec,gCW in CarlsonWilsonGFdata.items():
-    dx0 = np.array(vec,dtype=float)/8
-    nmatch, Gave, Gmatch = 0, 0, {}
-    for g in pyrope.G:
-        dx = np.dot(g.cartrot, dx0)
-        j = pyrope.cart2pos(x0+dx)[1]
-        if j is not None and j[0]==chem and j[1]&lt;6:
-            G = GF(0, j[1], dx)
-            Gmatch[tuple((8*dx).astype(int))] = G
-            nmatch += 1
-            Gave += G
-    Gave /= nmatch
-    for t,G in Gmatch.items():
-        print(&#39;{}\t{}\t{:.12f}\t{:.8f}\t{:.4e}&#39;.format(vec, t, -G, gCW, abs(G+gCW)))
-    print(&#39;{}\taverage value\t{:.12f}\t{:.8f}\t{:.4e}&#39;.format(vec, -Gave, gCW, abs(Gave+gCW)))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">print</span><span class="p">(</span><span class="s1">&#39;CW index</span><span class="se">\t</span><span class="s1">dx match</span><span class="se">\t</span><span class="s1">GF (FT eval)</span><span class="se">\t</span><span class="s1">GF(CW stoch.)</span><span class="se">\t</span><span class="s1">error&#39;</span><span class="p">)</span>
+<span class="n">GF</span> <span class="o">=</span> <span class="n">Mgdiffuser</span><span class="o">.</span><span class="n">GFcalc</span>  <span class="c1"># get our GF calculator; should already have rates set</span>
+<span class="n">basis</span> <span class="o">=</span> <span class="n">pyrope</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">chem</span><span class="p">]</span>
+<span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">alatt</span><span class="p">,</span> <span class="n">basis</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">vec</span><span class="p">,</span><span class="n">gCW</span> <span class="ow">in</span> <span class="n">CarlsonWilsonGFdata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">dx0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">/</span><span class="mi">8</span>
+    <span class="n">nmatch</span><span class="p">,</span> <span class="n">Gave</span><span class="p">,</span> <span class="n">Gmatch</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">pyrope</span><span class="o">.</span><span class="n">G</span><span class="p">:</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">cartrot</span><span class="p">,</span> <span class="n">dx0</span><span class="p">)</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">pyrope</span><span class="o">.</span><span class="n">cart2pos</span><span class="p">(</span><span class="n">x0</span><span class="o">+</span><span class="n">dx</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">chem</span> <span class="ow">and</span> <span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">6</span><span class="p">:</span>
+            <span class="n">G</span> <span class="o">=</span> <span class="n">GF</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dx</span><span class="p">)</span>
+            <span class="n">Gmatch</span><span class="p">[</span><span class="nb">tuple</span><span class="p">((</span><span class="mi">8</span><span class="o">*</span><span class="n">dx</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))]</span> <span class="o">=</span> <span class="n">G</span>
+            <span class="n">nmatch</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">Gave</span> <span class="o">+=</span> <span class="n">G</span>
+    <span class="n">Gave</span> <span class="o">/=</span> <span class="n">nmatch</span>
+    <span class="k">for</span> <span class="n">t</span><span class="p">,</span><span class="n">G</span> <span class="ow">in</span> <span class="n">Gmatch</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;{}</span><span class="se">\t</span><span class="s1">{}</span><span class="se">\t</span><span class="s1">{:.12f}</span><span class="se">\t</span><span class="s1">{:.8f}</span><span class="se">\t</span><span class="s1">{:.4e}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="o">-</span><span class="n">G</span><span class="p">,</span> <span class="n">gCW</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">G</span><span class="o">+</span><span class="n">gCW</span><span class="p">)))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;{}</span><span class="se">\t</span><span class="s1">average value</span><span class="se">\t</span><span class="s1">{:.12f}</span><span class="se">\t</span><span class="s1">{:.8f}</span><span class="se">\t</span><span class="s1">{:.4e}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="o">-</span><span class="n">Gave</span><span class="p">,</span> <span class="n">gCW</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Gave</span><span class="o">+</span><span class="n">gCW</span><span class="p">)))</span>
 </pre></div>
 </div>
 </div>
@@ -907,7 +912,7 @@ CW index        dx match        GF (FT eval)    GF(CW stoch.)   error
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.4',
+            VERSION:'1.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

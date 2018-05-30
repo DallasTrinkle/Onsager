@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Tracer correlation coefficients &mdash; Onsager 1.2.4 documentation</title>
+  <title>Tracer correlation coefficients &mdash; Onsager 1.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Onsager 1.2.4 documentation" href="../index.html"/>
+    <link rel="top" title="Onsager 1.3 documentation" href="../index.html"/>
         <link rel="up" title="Example Notebooks" href="../notebooks.html"/>
         <link rel="next" title="Garnet correlation coefficients" href="Garnet.html"/>
         <link rel="prev" title="Convergence of Green function calculation" href="GF-convergence.html"/> 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -99,9 +99,10 @@
 <li class="toctree-l2"><a class="reference internal" href="GF-convergence.html">Convergence of Green function calculation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Tracer correlation coefficients</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
-<li class="toctree-l2"><a class="reference internal" href="LargeOmega2.html">Large <span class="math">\(\omega^2\)</span> correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LargeOmega2.html">Large <span class="math notranslate nohighlight">\(\omega^2\)</span> correction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="NiSi.html">Si in FCC Ni</a></li>
 <li class="toctree-l2"><a class="reference internal" href="FCC-Co-O.html">Split oxygen-vacancy defects in Co</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Random-alloy.html">Binary random alloy with dilute vacancy</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
@@ -330,7 +331,11 @@ div.nboutput div.output_area.stderr {
 .ansi-white-intense-fg { color: #A1A6B2; }
 .ansi-white-intense-bg { background-color: #A1A6B2; }
 
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
 .ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
 
 /* CSS overrides for sphinx_rtd_theme */
 
@@ -381,77 +386,77 @@ tracers for several different crystal structures:</p>
 </ul>
 <p>Some are well-known (previously published) others are new.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>import sys
-sys.path.extend([&#39;../&#39;])
-import numpy as np
-import matplotlib.pyplot as plt
-plt.style.use(&#39;seaborn-whitegrid&#39;)
-%matplotlib inline
-from onsager import crystal, OnsagerCalc
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;../&#39;</span><span class="p">])</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-whitegrid&#39;</span><span class="p">)</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">from</span> <span class="nn">onsager</span> <span class="kn">import</span> <span class="n">crystal</span><span class="p">,</span> <span class="n">OnsagerCalc</span>
 </pre></div>
 </div>
 </div>
 <p>Create all of our lattices, with lattice constant a0.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>a0 = 1.
-SC = crystal.Crystal(a0*np.eye(3), [np.array([0.,0.,0.])], [&quot;SC&quot;])
-BCC = crystal.Crystal.BCC(a0, [&quot;BCC&quot;])
-FCC = crystal.Crystal.FCC(a0, [&quot;FCC&quot;])
-diamond = crystal.Crystal(a0*np.array([[0,1/2,1/2],[1/2,0,1/2],[1/2,1/2,0]]),
-                          [np.array([1/8,1/8,1/8]), np.array([-1/8,-1/8,-1/8])],
-                          [&quot;diamond&quot;])
-wurtzite = crystal.Crystal(a0*np.array([[1/2,1/2,0],
-                                        [-np.sqrt(3/4),np.sqrt(3/4),0.],
-                                        [0.,0.,np.sqrt(8/3)]]),
-                           [np.array([1/3,2/3,1/4-3/16]), np.array([1/3,2/3,1/4+3/16]),
-                            np.array([2/3,1/3,3/4-3/16]), np.array([2/3,1/3,3/4+3/16])],
-                           [&quot;wurtzite&quot;])
-HCP = crystal.Crystal.HCP(a0, np.sqrt(8/3), [&quot;HCP&quot;])
-NbO = crystal.Crystal(a0*np.eye(3),
-                      [[np.array([0,1/2,1/2]), np.array([1/2,0,1/2]),np.array([1/2,1/2,0])],
-                       [np.array([1/2,0,0]), np.array([0,1/2,0]), np.array([0,0,1/2])]],
-                      [&#39;Nb&#39;, &#39;O&#39;])
-omega = crystal.Crystal(a0*np.array([[1/2,1/2,0],
-                                     [-np.sqrt(3/4),np.sqrt(3/4),0.],
-                                     [0.,0.,np.sqrt(3/8)]]),
-                           [np.array([0.,0.,0.]),
-                            np.array([1/3,2/3,1/2]), np.array([2/3,1/3,1/2])],
-                           [&quot;omega&quot;])
-octtet = crystal.Crystal(a0*np.array([[1/2,1/2,0],
-                                      [-np.sqrt(3/4),np.sqrt(3/4),0.],
-                                      [0.,0.,np.sqrt(8/3)]]),
-                           [[np.array([0.,0.,0.]), np.array([0.,0.,0.5]),
-                             np.array([1/3,2/3,5/8]), np.array([1/3,2/3,7/8]),
-                             np.array([2/3,1/3,3/8]), np.array([2/3,1/3,1/8])],
-                            [np.array([1/3,2/3,1/4]), np.array([2/3,1/3,3/4])]],
-                           [&quot;O&quot;, &quot;Ti&quot;])
-crystallist = [SC, BCC, FCC, diamond, wurtzite, HCP, NbO, omega, octtet]
-crystalnames = [&quot;simple cubic&quot;, &quot;body-centered cubic&quot;, &quot;face-centered cubic&quot;, &quot;diamond&quot;,
-                &quot;wurtzite&quot;, &quot;hexagonal closed-packed&quot;, &quot;NbO&quot;, &quot;hexagonal omega&quot;,
-                &quot;HCP octahedral-tetrahedral&quot;]
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">a0</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="n">SC</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">(</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">])],</span> <span class="p">[</span><span class="s2">&quot;SC&quot;</span><span class="p">])</span>
+<span class="n">BCC</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="o">.</span><span class="n">BCC</span><span class="p">(</span><span class="n">a0</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;BCC&quot;</span><span class="p">])</span>
+<span class="n">FCC</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="o">.</span><span class="n">FCC</span><span class="p">(</span><span class="n">a0</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;FCC&quot;</span><span class="p">])</span>
+<span class="n">diamond</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">(</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">],[</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">],[</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]]),</span>
+                          <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">])],</span>
+                          <span class="p">[</span><span class="s2">&quot;diamond&quot;</span><span class="p">])</span>
+<span class="n">wurtzite</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">(</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                                        <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),</span><span class="mf">0.</span><span class="p">],</span>
+                                        <span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">8</span><span class="o">/</span><span class="mi">3</span><span class="p">)]]),</span>
+                           <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="o">-</span><span class="mi">3</span><span class="o">/</span><span class="mi">16</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">16</span><span class="p">]),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="o">-</span><span class="mi">3</span><span class="o">/</span><span class="mi">16</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="o">+</span><span class="mi">3</span><span class="o">/</span><span class="mi">16</span><span class="p">])],</span>
+                           <span class="p">[</span><span class="s2">&quot;wurtzite&quot;</span><span class="p">])</span>
+<span class="n">HCP</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="o">.</span><span class="n">HCP</span><span class="p">(</span><span class="n">a0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">8</span><span class="o">/</span><span class="mi">3</span><span class="p">),</span> <span class="p">[</span><span class="s2">&quot;HCP&quot;</span><span class="p">])</span>
+<span class="n">NbO</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">(</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+                      <span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">]),</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">])],</span>
+                       <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">])]],</span>
+                      <span class="p">[</span><span class="s1">&#39;Nb&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">])</span>
+<span class="n">omega</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">(</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                                     <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),</span><span class="mf">0.</span><span class="p">],</span>
+                                     <span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">8</span><span class="p">)]]),</span>
+                           <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">])],</span>
+                           <span class="p">[</span><span class="s2">&quot;omega&quot;</span><span class="p">])</span>
+<span class="n">octtet</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">(</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">),</span><span class="mf">0.</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">8</span><span class="o">/</span><span class="mi">3</span><span class="p">)]]),</span>
+                           <span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]),</span>
+                             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="o">/</span><span class="mi">8</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">7</span><span class="o">/</span><span class="mi">8</span><span class="p">]),</span>
+                             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">8</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="p">])],</span>
+                            <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">])]],</span>
+                           <span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;Ti&quot;</span><span class="p">])</span>
+<span class="n">crystallist</span> <span class="o">=</span> <span class="p">[</span><span class="n">SC</span><span class="p">,</span> <span class="n">BCC</span><span class="p">,</span> <span class="n">FCC</span><span class="p">,</span> <span class="n">diamond</span><span class="p">,</span> <span class="n">wurtzite</span><span class="p">,</span> <span class="n">HCP</span><span class="p">,</span> <span class="n">NbO</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">octtet</span><span class="p">]</span>
+<span class="n">crystalnames</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;simple cubic&quot;</span><span class="p">,</span> <span class="s2">&quot;body-centered cubic&quot;</span><span class="p">,</span> <span class="s2">&quot;face-centered cubic&quot;</span><span class="p">,</span> <span class="s2">&quot;diamond&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;wurtzite&quot;</span><span class="p">,</span> <span class="s2">&quot;hexagonal closed-packed&quot;</span><span class="p">,</span> <span class="s2">&quot;NbO&quot;</span><span class="p">,</span> <span class="s2">&quot;hexagonal omega&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;HCP octahedral-tetrahedral&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>for name, crys in zip(crystalnames, crystallist):
-    print(name)
-    print(crys)
-    print()
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">crys</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">crystalnames</span><span class="p">,</span> <span class="n">crystallist</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">crys</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -556,20 +561,20 @@ HCP octahedral-tetrahedral
 <p>Now we generate diffusers for <em>every crystal</em>. This is fairly automated,
 where the main input is the cutoff distance.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>cutoffs = [1.01*a0, 0.9*a0, 0.75*a0, 0.45*a0, 0.62*a0, 1.01*a0, 0.8*a0, 0.66*a0, 0.71*a0]
-diffusers = []
-for name, crys, cut in zip(crystalnames, crystallist, cutoffs):
-    jn = crys.jumpnetwork(0, cut, 0.01)
-    print(name)
-    print(&#39; Unique jumps:&#39;, len(jn))
-    for jlist in jn:
-        print(&#39;  connectivity:&#39;, len([i for (i,j), dx in jlist if i==jlist[0][0][0]]))
-    diffusers.append(OnsagerCalc.VacancyMediated(crys, 0, crys.sitelist(0), jn, 1, 6))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">cutoffs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.01</span><span class="o">*</span><span class="n">a0</span><span class="p">,</span> <span class="mf">0.9</span><span class="o">*</span><span class="n">a0</span><span class="p">,</span> <span class="mf">0.75</span><span class="o">*</span><span class="n">a0</span><span class="p">,</span> <span class="mf">0.45</span><span class="o">*</span><span class="n">a0</span><span class="p">,</span> <span class="mf">0.62</span><span class="o">*</span><span class="n">a0</span><span class="p">,</span> <span class="mf">1.01</span><span class="o">*</span><span class="n">a0</span><span class="p">,</span> <span class="mf">0.8</span><span class="o">*</span><span class="n">a0</span><span class="p">,</span> <span class="mf">0.66</span><span class="o">*</span><span class="n">a0</span><span class="p">,</span> <span class="mf">0.71</span><span class="o">*</span><span class="n">a0</span><span class="p">]</span>
+<span class="n">diffusers</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">cut</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">crystalnames</span><span class="p">,</span> <span class="n">crystallist</span><span class="p">,</span> <span class="n">cutoffs</span><span class="p">):</span>
+    <span class="n">jn</span> <span class="o">=</span> <span class="n">crys</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39; Unique jumps:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">jn</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">jlist</span> <span class="ow">in</span> <span class="n">jn</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;  connectivity:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">jlist</span> <span class="k">if</span> <span class="n">i</span><span class="o">==</span><span class="n">jlist</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]))</span>
+    <span class="n">diffusers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OnsagerCalc</span><span class="o">.</span><span class="n">VacancyMediated</span><span class="p">(</span><span class="n">crys</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">crys</span><span class="o">.</span><span class="n">sitelist</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">jn</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -620,23 +625,23 @@ energy (may not apply for true omega and octahedral-tetrahedral
 networks, for example), and then assigning the same energy for all
 transitions (again, may not apply for cases where there is more than one
 unique jump). We compute the full Onsager matrix, then look at the
-diagonal of <span class="math">\(f=-L_{\mathrm{ss}}/L_{\mathrm{sv}}\)</span>.</p>
+diagonal of <span class="math notranslate nohighlight">\(f=-L_{\mathrm{ss}}/L_{\mathrm{sv}}\)</span>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>print(&#39;crystal\tf_xx\tf_zz&#39;)
-for name, diff in zip(crystalnames, diffusers):
-    nsites, njumps = len(diff.sitelist), len(diff.om0_jn)
-    tdict = {&#39;preV&#39;: np.ones(nsites), &#39;eneV&#39;: np.zeros(nsites),
-             &#39;preT0&#39;: np.ones(njumps), &#39;eneT0&#39;: np.zeros(njumps)}
-    # make a tracer out of it:
-    tdict.update(diff.maketracerpreene(**tdict))
-    Lss, Lsv = diff.Lij(*diff.preene2betafree(1, **tdict))[1:3]  # just pull out ss and sv
-    f = np.diag(-np.dot(Lss, np.linalg.inv(Lsv)))
-    print(&#39;{name}\t{f[0]:.8f}\t{f[2]:.8f}&#39;.format(name=name, f=f))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">print</span><span class="p">(</span><span class="s1">&#39;crystal</span><span class="se">\t</span><span class="s1">f_xx</span><span class="se">\t</span><span class="s1">f_zz&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">diff</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">crystalnames</span><span class="p">,</span> <span class="n">diffusers</span><span class="p">):</span>
+    <span class="n">nsites</span><span class="p">,</span> <span class="n">njumps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff</span><span class="o">.</span><span class="n">sitelist</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff</span><span class="o">.</span><span class="n">om0_jn</span><span class="p">)</span>
+    <span class="n">tdict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;preV&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nsites</span><span class="p">),</span> <span class="s1">&#39;eneV&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nsites</span><span class="p">),</span>
+             <span class="s1">&#39;preT0&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">njumps</span><span class="p">),</span> <span class="s1">&#39;eneT0&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">njumps</span><span class="p">)}</span>
+    <span class="c1"># make a tracer out of it:</span>
+    <span class="n">tdict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">diff</span><span class="o">.</span><span class="n">maketracerpreene</span><span class="p">(</span><span class="o">**</span><span class="n">tdict</span><span class="p">))</span>
+    <span class="n">Lss</span><span class="p">,</span> <span class="n">Lsv</span> <span class="o">=</span> <span class="n">diff</span><span class="o">.</span><span class="n">Lij</span><span class="p">(</span><span class="o">*</span><span class="n">diff</span><span class="o">.</span><span class="n">preene2betafree</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">tdict</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># just pull out ss and sv</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Lss</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Lsv</span><span class="p">)))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;{name}</span><span class="se">\t</span><span class="s1">{f[0]:.8f}</span><span class="se">\t</span><span class="s1">{f[2]:.8f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -660,30 +665,30 @@ HCP octahedral-tetrahedral      0.63052307      0.65230273
 <p>Look at variation in correlation coefficient for wurtzite structure by
 varying the ratio of the two rates.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>print(&#39;w(c)/w(basal)\tf_xx\tf_zz&#39;)
-crysindex = crystalnames.index(&#39;wurtzite&#39;)
-diff = diffusers[crysindex]
-nsites, njumps = len(diff.sitelist), len(diff.om0_jn)
-freq_list, correl_xx_list, correl_zz_list = [], [], []
-for i, w0_w1 in enumerate(np.linspace(-2,2,num=33)):
-    w0 = 10**(w0_w1)
-    w1 = 1
-    tdict = {&#39;preV&#39;: np.ones(nsites), &#39;eneV&#39;: np.zeros(nsites),
-             &#39;preT0&#39;: np.array([w0,w1]), &#39;eneT0&#39;: np.zeros(njumps)}
-    # make a tracer out of it:
-    tdict.update(diff.maketracerpreene(**tdict))
-    Lss, Lsv = diff.Lij(*diff.preene2betafree(1, **tdict))[1:3]  # just pull out ss and sv
-    f = np.diag(-np.dot(Lss, np.linalg.inv(Lsv)))
-    freq_list.append(w0)
-    correl_xx_list.append(f[0])
-    correl_zz_list.append(f[2])
-    if i%4==0:
-        print(&#39;10^{w0_w1:+.2f}\t{f[0]:.8f}\t{f[2]:.8f}&#39;.format(w0_w1=w0_w1, f=f))
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">print</span><span class="p">(</span><span class="s1">&#39;w(c)/w(basal)</span><span class="se">\t</span><span class="s1">f_xx</span><span class="se">\t</span><span class="s1">f_zz&#39;</span><span class="p">)</span>
+<span class="n">crysindex</span> <span class="o">=</span> <span class="n">crystalnames</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;wurtzite&#39;</span><span class="p">)</span>
+<span class="n">diff</span> <span class="o">=</span> <span class="n">diffusers</span><span class="p">[</span><span class="n">crysindex</span><span class="p">]</span>
+<span class="n">nsites</span><span class="p">,</span> <span class="n">njumps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff</span><span class="o">.</span><span class="n">sitelist</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff</span><span class="o">.</span><span class="n">om0_jn</span><span class="p">)</span>
+<span class="n">freq_list</span><span class="p">,</span> <span class="n">correl_xx_list</span><span class="p">,</span> <span class="n">correl_zz_list</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">w0_w1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">33</span><span class="p">)):</span>
+    <span class="n">w0</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">w0_w1</span><span class="p">)</span>
+    <span class="n">w1</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">tdict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;preV&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nsites</span><span class="p">),</span> <span class="s1">&#39;eneV&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nsites</span><span class="p">),</span>
+             <span class="s1">&#39;preT0&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">w0</span><span class="p">,</span><span class="n">w1</span><span class="p">]),</span> <span class="s1">&#39;eneT0&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">njumps</span><span class="p">)}</span>
+    <span class="c1"># make a tracer out of it:</span>
+    <span class="n">tdict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">diff</span><span class="o">.</span><span class="n">maketracerpreene</span><span class="p">(</span><span class="o">**</span><span class="n">tdict</span><span class="p">))</span>
+    <span class="n">Lss</span><span class="p">,</span> <span class="n">Lsv</span> <span class="o">=</span> <span class="n">diff</span><span class="o">.</span><span class="n">Lij</span><span class="p">(</span><span class="o">*</span><span class="n">diff</span><span class="o">.</span><span class="n">preene2betafree</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">tdict</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># just pull out ss and sv</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Lss</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Lsv</span><span class="p">)))</span>
+    <span class="n">freq_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span>
+    <span class="n">correl_xx_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">correl_zz_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">i</span><span class="o">%</span><span class="k">4</span>==0:
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;10^{w0_w1:+.2f}</span><span class="se">\t</span><span class="s1">{f[0]:.8f}</span><span class="se">\t</span><span class="s1">{f[2]:.8f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">w0_w1</span><span class="o">=</span><span class="n">w0_w1</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -705,24 +710,24 @@ w(c)/w(basal)   f_xx    f_zz
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
-<span></span>freq, correl_xx, correl_zz = np.array(freq_list), np.array(correl_xx_list), np.array(correl_zz_list)
-fig, ax1 = plt.subplots()
-ax1.plot(freq, correl_xx, &#39;k&#39;, label=&#39;$f_{xx}$&#39;)
-ax1.plot(freq, correl_zz, &#39;r&#39;, label=&#39;$f_{zz}$&#39;)
-ax1.set_xscale(&#39;log&#39;)
-ax1.set_ylabel(&#39;$f$&#39;, fontsize=&#39;x-large&#39;)
-ax1.set_xlabel(&#39;$\omega_{c}/\omega_{\mathrm{basal}}$&#39;, fontsize=&#39;x-large&#39;)
-ax1.set_ylim((0,1))
-ax1.set_yticks(np.linspace(0,1,11))
-ax1.legend(bbox_to_anchor=(0.4,0.1,0.2,0.3), ncol=1,
-           shadow=True, frameon=True, fontsize=&#39;x-large&#39;)
-plt.show()
-# plt.savefig(&#39;wurtzite-correlation.pdf&#39;, transparent=True, format=&#39;pdf&#39;)
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">freq</span><span class="p">,</span> <span class="n">correl_xx</span><span class="p">,</span> <span class="n">correl_zz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">freq_list</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">correl_xx_list</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">correl_zz_list</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">correl_xx</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$f_{xx}$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">correl_zz</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$f_{zz}$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$f$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$\omega_{c}/\omega_{\mathrm{basal}}$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">11</span><span class="p">))</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">),</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+           <span class="n">shadow</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># plt.savefig(&#39;wurtzite-correlation.pdf&#39;, transparent=True, format=&#39;pdf&#39;)</span>
 </pre></div>
 </div>
 </div>
@@ -779,7 +784,7 @@ plt.show()
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.4',
+            VERSION:'1.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

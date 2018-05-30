@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>OnsagerCalc &mdash; Onsager 1.2.4 documentation</title>
+  <title>OnsagerCalc &mdash; Onsager 1.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Onsager 1.2.4 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 1.3 documentation" href="index.html"/>
         <link rel="up" title="Modules" href="modules.html"/>
         <link rel="next" title="Automator" href="automator.html"/>
         <link rel="prev" title="GFcalc" href="GFcalc.html"/> 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -207,7 +207,7 @@
 <div class="section" id="onsagercalc">
 <h1>OnsagerCalc<a class="headerlink" href="#onsagercalc" title="Permalink to this headline">¶</a></h1>
 <p>OnsagerCalc:</p>
-<p>The OnsagerCalc module defines the <code class="docutils literal"><span class="pre">Intersitial</span></code> class (for computation of interstitial-mediated diffusion), and <code class="docutils literal"><span class="pre">VacancyMediated</span></code> class (for computation of vacancy-mediated diffusion).</p>
+<p>The OnsagerCalc module defines the <code class="docutils literal notranslate"><span class="pre">Intersitial</span></code> class (for computation of interstitial-mediated diffusion), and <code class="docutils literal notranslate"><span class="pre">VacancyMediated</span></code> class (for computation of vacancy-mediated diffusion).</p>
 <span class="target" id="module-OnsagerCalc"></span><p>Onsager calculator module: Interstitialcy mechanism and Vacancy-mediated mechanism</p>
 <p>Class to create an Onsager “calculator”, which brings two functionalities:
 1. determines <em>what</em> input is needed to compute the Onsager (mobility, or L) tensors
@@ -227,8 +227,8 @@ computation of the GF is included in the GFcalc module.</p>
 <dd><p>A class to compute interstitial diffusivity; uses structure of crystal to do most
 of the heavy lifting in terms of symmetry.</p>
 <p>Takes in a crystal that contains the interstitial as one of the chemical elements,
-to be specified by <code class="docutils literal"><span class="pre">chem</span></code>, the sitelist (list of symmetry equivalent sites), and
-jumpnetwork. Both of the latter can be computed automatically from <code class="docutils literal"><span class="pre">crys</span></code> methods,
+to be specified by <code class="docutils literal notranslate"><span class="pre">chem</span></code>, the sitelist (list of symmetry equivalent sites), and
+jumpnetwork. Both of the latter can be computed automatically from <code class="docutils literal notranslate"><span class="pre">crys</span></code> methods,
 but as they are lists, can also be editted or constructed by hand.</p>
 <dl class="method">
 <dt id="OnsagerCalc.Interstitial.__init__">
@@ -429,7 +429,7 @@ for the representatives. (“populating” the full set of dipoles)</p>
 
 <dl class="staticmethod">
 <dt id="OnsagerCalc.Interstitial.jumpnetworkYAML">
-<em class="property">static </em><code class="descname">jumpnetworkYAML</code><span class="sig-paren">(</span><em>jumpnetwork</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.jumpnetworkYAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.jumpnetworkYAML" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">jumpnetworkYAML</code><span class="sig-paren">(</span><em>jumpnetwork</em>, <em>dim=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.jumpnetworkYAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.jumpnetworkYAML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dumps a “sample” YAML formatted version of the jumpnetwork with data to be entered</p>
 </dd></dl>
 
@@ -473,8 +473,8 @@ site energies and transitions (corresponding to the representatives).</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return superdict:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>,
-and <code class="docutils literal"><span class="pre">indices</span></code> that correspond to dictionaries with tags.</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">dictionary of <code class="docutils literal notranslate"><span class="pre">states</span></code>, <code class="docutils literal notranslate"><span class="pre">transitions</span></code>, <code class="docutils literal notranslate"><span class="pre">transmapping</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">indices</span></code> that correspond to dictionaries with tags.</p>
 <ul class="last simple">
 <li>superdict[‘states’][i] = supercell of site;</li>
 <li>superdict[‘transitions’][n] = (supercell initial, supercell final);</li>
@@ -513,7 +513,7 @@ for the representatives. (“populating” the full set of dipoles)</p>
 
 <dl class="staticmethod">
 <dt id="OnsagerCalc.Interstitial.sitelistYAML">
-<em class="property">static </em><code class="descname">sitelistYAML</code><span class="sig-paren">(</span><em>sitelist</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.sitelistYAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.sitelistYAML" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">sitelistYAML</code><span class="sig-paren">(</span><em>sitelist</em>, <em>dim=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#Interstitial.sitelistYAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.Interstitial.sitelistYAML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dumps a “sample” YAML formatted version of the sitelist with data to be entered</p>
 </dd></dl>
 
@@ -541,7 +541,7 @@ it determines <em>what</em> quantities are needed as inputs in order to perform 
 storage in HDF5 format.</p>
 <p>Requires a crystal, chemical identity of vacancy, list of symmetry-equivalent
 sites for that chemistry, and a jumpnetwork for the vacancy. The thermodynamic
-range (number of “shells” – see <code class="docutils literal"><span class="pre">crystalStars.StarSet</span></code> for precise definition).</p>
+range (number of “shells” – see <code class="docutils literal notranslate"><span class="pre">crystalStars.StarSet</span></code> for precise definition).</p>
 <dl class="method">
 <dt id="OnsagerCalc.VacancyMediated.GFcalculator">
 <code class="descname">GFcalculator</code><span class="sig-paren">(</span><em>NGFmax=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.GFcalculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.GFcalculator" title="Permalink to this definition">¶</a></dt>
@@ -791,9 +791,9 @@ barriers. Extreme caution should be used if any of the other warnings are raised
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return superdict:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>,
-<code class="docutils literal"><span class="pre">indices</span></code> that correspond to dictionaries with tags; the final tag
-<code class="docutils literal"><span class="pre">reference</span></code> is the basesupercell for calculations without defects.</p>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">dictionary of <code class="docutils literal notranslate"><span class="pre">states</span></code>, <code class="docutils literal notranslate"><span class="pre">transitions</span></code>, <code class="docutils literal notranslate"><span class="pre">transmapping</span></code>,
+<code class="docutils literal notranslate"><span class="pre">indices</span></code> that correspond to dictionaries with tags; the final tag
+<code class="docutils literal notranslate"><span class="pre">reference</span></code> is the basesupercell for calculations without defects.</p>
 <ul class="last simple">
 <li>superdict[‘states’][i] = supercell of state;</li>
 <li>superdict[‘transitions’][n] = (supercell initial, supercell final);</li>
@@ -882,11 +882,11 @@ Solute at the origin, vacancy hopping between two sites. Defined by om1_jumpnetw
 <dl class="staticmethod">
 <dt id="OnsagerCalc.VacancyMediated.preene2betafree">
 <em class="property">static </em><code class="descname">preene2betafree</code><span class="sig-paren">(</span><em>kT</em>, <em>preV</em>, <em>eneV</em>, <em>preS</em>, <em>eneS</em>, <em>preSV</em>, <em>eneSV</em>, <em>preT0</em>, <em>eneT0</em>, <em>preT1</em>, <em>eneT1</em>, <em>preT2</em>, <em>eneT2</em>, <em>**ignoredextraarguments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#VacancyMediated.preene2betafree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.VacancyMediated.preene2betafree" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read in a series of prefactors (<span class="math">\(\exp(S/k_\text{B})\)</span>) and energies, and return
-<span class="math">\(\beta F\)</span> for energies and transition state energies. Used to provide scaled values
+<dd><p>Read in a series of prefactors (<span class="math notranslate nohighlight">\(\exp(S/k_\text{B})\)</span>) and energies, and return
+<span class="math notranslate nohighlight">\(\beta F\)</span> for energies and transition state energies. Used to provide scaled values
 to Lij().
-Can specify all of the entries using a dictionary; e.g., <code class="docutils literal"><span class="pre">preene2betafree(kT,</span> <span class="pre">**data_dict)</span></code>
-and then send that output as input to Lij: <code class="docutils literal"><span class="pre">Lij(*preene2betafree(kT,</span> <span class="pre">**data_dict))</span></code>
+Can specify all of the entries using a dictionary; e.g., <code class="docutils literal notranslate"><span class="pre">preene2betafree(kT,</span> <span class="pre">**data_dict)</span></code>
+and then send that output as input to Lij: <code class="docutils literal notranslate"><span class="pre">Lij(*preene2betafree(kT,</span> <span class="pre">**data_dict))</span></code>
 (we ignore extra arguments so that a dictionary including additional entries can be passed)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1033,6 +1033,30 @@ and the splits to separate vTKarray back into vTK</p>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="OnsagerCalc.vacancyThermoKinetics.__eq__">
+<code class="descname">__eq__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#vacancyThermoKinetics.__eq__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.vacancyThermoKinetics.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self==value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.vacancyThermoKinetics.__hash__">
+<code class="descname">__hash__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#vacancyThermoKinetics.__hash__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.vacancyThermoKinetics.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return hash(self).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.vacancyThermoKinetics.__ne__">
+<code class="descname">__ne__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#vacancyThermoKinetics.__ne__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.vacancyThermoKinetics.__ne__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self!=value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="OnsagerCalc.vacancyThermoKinetics.__repr__">
+<code class="descname">__repr__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#vacancyThermoKinetics.__repr__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.vacancyThermoKinetics.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a nicely formatted representation string</p>
+</dd></dl>
+
 <dl class="staticmethod">
 <dt id="OnsagerCalc.vacancyThermoKinetics.vacancyThermoKinetics_constructor">
 <em class="property">static </em><code class="descname">vacancyThermoKinetics_constructor</code><span class="sig-paren">(</span><em>loader</em>, <em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/OnsagerCalc.html#vacancyThermoKinetics.vacancyThermoKinetics_constructor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#OnsagerCalc.vacancyThermoKinetics.vacancyThermoKinetics_constructor" title="Permalink to this definition">¶</a></dt>
@@ -1093,7 +1117,7 @@ and the splits to separate vTKarray back into vTK</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4',
+            VERSION:'1.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

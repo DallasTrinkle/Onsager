@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>GFcalc &mdash; Onsager 1.2.4 documentation</title>
+  <title>GFcalc &mdash; Onsager 1.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Onsager 1.2.4 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 1.3 documentation" href="index.html"/>
         <link rel="up" title="Modules" href="modules.html"/>
         <link rel="next" title="OnsagerCalc" href="OnsagerCalc.html"/>
         <link rel="prev" title="PowerExpansion" href="PowerExpansion.html"/> 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -207,7 +207,7 @@
 <div class="section" id="gfcalc">
 <h1>GFcalc<a class="headerlink" href="#gfcalc" title="Permalink to this headline">¶</a></h1>
 <p>GFcalc:</p>
-<p>The GFcalc module defines the <code class="docutils literal"><span class="pre">GFCrystalcalc</span></code> class for the evaluation of the vacancy Green function.</p>
+<p>The GFcalc module defines the <code class="docutils literal notranslate"><span class="pre">GFCrystalcalc</span></code> class for the evaluation of the vacancy Green function.</p>
 <span class="target" id="module-GFcalc"></span><p>GFcalc module</p>
 <p>Code to compute the lattice Green function for diffusion; this entails inverting
 the “diffusion” matrix, which is infinite, singular, and has translational
@@ -219,7 +219,7 @@ the gamma-point (q=0), which also should be treated analytically. Then, the
 remaining function can be numerically inverse fourier transformed.</p>
 <dl class="class">
 <dt id="GFcalc.GFCrystalcalc">
-<em class="property">class </em><code class="descclassname">GFcalc.</code><code class="descname">GFCrystalcalc</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nmax=4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">GFcalc.</code><code class="descname">GFCrystalcalc</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nmax=4</em>, <em>kptwt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class calculator for the Green function, designed to work with the Crystal class.</p>
 <p>This computes the bare vacancy GF. It requires a crystal, chemical identity for the
 vacancy, list of symmetry unique sites (to define energies / entropies uniquely), and
@@ -238,7 +238,7 @@ correction). Needs to be rotated such that leading order of D is isotropic.</p>
 <li><strong>dr</strong> – diffusive/relaxive block (lower left)</li>
 <li><strong>rd</strong> – relaxive/diffusive block (upper right)</li>
 <li><strong>rr</strong> – relaxive/relaxive block (lower right)</li>
-<li><strong>D</strong> – <span class="math">\(dd - dr (rr)^{-1} rd\)</span> (diffusion)</li>
+<li><strong>D</strong> – <span class="math notranslate nohighlight">\(dd - dr (rr)^{-1} rd\)</span> (diffusion)</li>
 </ul>
 </td>
 </tr>
@@ -263,7 +263,7 @@ correction). Needs to be rotated such that leading order of D is isotropic.</p>
 <li><strong>dr</strong> – diffusive/relaxive block (lower left)</li>
 <li><strong>rd</strong> – relaxive/diffusive block (upper right)</li>
 <li><strong>rr</strong> – relaxive/relaxive block (lower right)</li>
-<li><strong>D</strong> – <span class="math">\(dd - dr (rr)^{-1} rd\)</span> (diffusion)</li>
+<li><strong>D</strong> – <span class="math notranslate nohighlight">\(dd - dr (rr)^{-1} rd\)</span> (diffusion)</li>
 </ul>
 </td>
 </tr>
@@ -415,7 +415,7 @@ the calculations so that GF calculation is (fairly) efficient for each input.</p
 
 <dl class="method">
 <dt id="GFcalc.GFCrystalcalc.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nmax=4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>crys</em>, <em>chem</em>, <em>sitelist</em>, <em>jumpnetwork</em>, <em>Nmax=4</em>, <em>kptwt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes our calculator with the appropriate topology / connectivity. Doesn’t
 require, at this point, the site probabilities or transition rates to be known.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -428,11 +428,18 @@ require, at this point, the site probabilities or transition rates to be known.<
 <li><strong>sitelist</strong> – list, grouped into Wyckoff common positions, of unique sites</li>
 <li><strong>jumpnetwork</strong> – list of unique transitions as lists of ((i,j), dx)</li>
 <li><strong>Nmax</strong> – maximum range as estimator for kpt mesh generation</li>
+<li><strong>kptwt</strong> – (optional) tuple of (kpts, wts) to short-circuit kpt mesh generation</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="GFcalc.GFCrystalcalc.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/GFcalc.html#GFCrystalcalc.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#GFcalc.GFCrystalcalc.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return str(self).</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -484,7 +491,7 @@ require, at this point, the site probabilities or transition rates to be known.<
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dx</strong> – vector</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return exp(-i q.dx):</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body">array of <span class="math">\(\exp(-i \cdot dx)\)</span></td>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">array of <span class="math notranslate nohighlight">\(\exp(-i \cdot dx)\)</span></td>
 </tr>
 </tbody>
 </table>
@@ -565,7 +572,7 @@ require, at this point, the site probabilities or transition rates to be known.<
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4',
+            VERSION:'1.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

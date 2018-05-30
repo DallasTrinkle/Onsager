@@ -1,0 +1,1660 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Binary random alloy with dilute vacancy &mdash; Onsager 1.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Onsager 1.3 documentation" href="../index.html"/>
+        <link rel="up" title="Example Notebooks" href="../notebooks.html"/>
+        <link rel="next" title="Modules" href="../modules.html"/>
+        <link rel="prev" title="Split oxygen-vacancy defects in Co" href="FCC-Co-O.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Onsager
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../InputOutput.html">Input and output for Onsager transport calculation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../notebooks.html">Example Notebooks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Fe-C.html">Fe-C diffusion and elastodiffusivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GF-convergence.html">Convergence of Green function calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Tracer-correlation.html">Tracer correlation coefficients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Garnet.html">Garnet correlation coefficients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LargeOmega2.html">Large <span class="math notranslate nohighlight">\(\omega^2\)</span> correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="NiSi.html">Si in FCC Ni</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FCC-Co-O.html">Split oxygen-vacancy defects in Co</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Binary random alloy with dilute vacancy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Model">Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Cases">Cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Approaches">Approaches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Kinetic-Monte-Carlo-functions">Kinetic Monte Carlo functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Mean-field-Green-function-solution">Mean-field Green function solution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Generalized-self-consistent-mean-field-method">Generalized self-consistent mean-field method</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Case-1:-">Case 1: <span class="math notranslate nohighlight">\(\nu_\text{B} = \nu_\text{A}\)</span></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Case-2:-">Case 2: <span class="math notranslate nohighlight">\(\nu_\text{B} = 4\nu_\text{A}\)</span></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Case-3:-">Case 3: <span class="math notranslate nohighlight">\(\nu_\text{B} = 0\)</span></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Analysis">Analysis</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Onsager</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../notebooks.html">Example Notebooks</a> &raquo;</li>
+        
+      <li>Binary random alloy with dilute vacancy</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/examples/Random-alloy.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 8ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+/* nice headers on first paragraph of info/warning boxes */
+.admonition .first {
+    margin: -12px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+    display: block;
+}
+.admonition.warning .first {
+    background: #f0b37e;
+}
+.admonition.note .first {
+    background: #6ab0de;
+}
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="Binary-random-alloy-with-dilute-vacancy">
+<h1>Binary random alloy with dilute vacancy<a class="headerlink" href="#Binary-random-alloy-with-dilute-vacancy" title="Permalink to this headline">¶</a></h1>
+<p>Multiple approaches to the same model binary alloy, evaluated
+numerically.</p>
+<div class="section" id="Model">
+<h2>Model<a class="headerlink" href="#Model" title="Permalink to this headline">¶</a></h2>
+<p>Our model is quite simple: there are A and B atoms, and one vacancy, in
+a periodic lattice. There is a concentration <span class="math notranslate nohighlight">\(c_\text{B}\)</span> of B
+atoms (solute). Only the vacancy is mobile. The thermodynamics are kept
+very simple: A, B, and vacancies have no interaction. There are only two
+rates in the problem: <span class="math notranslate nohighlight">\(\nu_\text{A}\)</span> and <span class="math notranslate nohighlight">\(\nu_\text{B}\)</span>
+which are the rates of vacancy-A and vacancy-B atom exchanges. Without
+loss of generality, we take <span class="math notranslate nohighlight">\(\nu_\text{A}=1\)</span>, and the lattice
+constant to be 1. We will solve our problem on a square lattice.</p>
+</div>
+<div class="section" id="Cases">
+<h2>Cases<a class="headerlink" href="#Cases" title="Permalink to this headline">¶</a></h2>
+<p>We will study variation with concentration <span class="math notranslate nohighlight">\(c_\text{B}\)</span> (and
+<span class="math notranslate nohighlight">\(c_\text{A}=1-c_\text{B}\)</span> for a dilute limit of vacancies), for
+three different choices of <span class="math notranslate nohighlight">\(\nu_\text{B}/\nu_\text{A}\)</span>:</p>
+<ol class="arabic simple">
+<li><span class="math notranslate nohighlight">\(\nu_\text{B}=\nu_\text{A}\)</span>. This is the “tracer” case, and the
+most trivial.</li>
+<li><span class="math notranslate nohighlight">\(\nu_\text{B}=4\nu_\text{A}\)</span>. This is the case of a “fast”
+diffuser. We could take much faster, but this begins to become
+limiting for KMC.</li>
+<li><span class="math notranslate nohighlight">\(\nu_\text{B}=0\)</span>. This is the case of a frozen solute, which
+has a percolation limit at finite concentration of
+<span class="math notranslate nohighlight">\(c_\text{B}&lt;1\)</span> where all diffusivities become 0.</li>
+</ol>
+</div>
+<div class="section" id="Approaches">
+<h2>Approaches<a class="headerlink" href="#Approaches" title="Permalink to this headline">¶</a></h2>
+<p>We consider multiple models to evaluate their accuracy:</p>
+<ol class="arabic simple">
+<li><em>Kinetic Monte Carlo.</em> We evaluate on a finite “supercell” lattice;
+this involves generating new starting configurations, running for
+finite “long” times, and averaging over multiple initial
+configurations.</li>
+<li><em>Mean-field Green function.</em> These expressions are known
+analytically. We also include a residual-bias correction evaluated
+for the frozen solute case.</li>
+<li><em>Bias-basis approximation.</em> Also known analytically; this ends up
+having the same functional form as the MFGF, with a different crystal
+structure parameter.</li>
+<li><em>Generalized self-consistent mean-field.</em> We study different ranges
+of “effective Hamiltonian,” but solve using the most general case.
+This is equivalent to using all orders of cluster expansion out to a
+finite range of sites.</li>
+</ol>
+<p>The 4 methods have different amounts of computational complexity.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-whitegrid&#39;</span><span class="p">)</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse.linalg</span> <span class="kn">import</span> <span class="n">minres</span>
+<span class="kn">import</span> <span class="nn">pyamg</span>  <span class="c1"># adaptive multigrid solver</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tnrange</span><span class="p">,</span> <span class="n">tqdm_notebook</span>  <span class="c1"># progress bar; not necessary, but helpful for long runs</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Turn off or on to run optional testing code in notebook:</span>
+<span class="c1"># Also turns on / off progress bars</span>
+<span class="n">__TESTING__</span> <span class="o">=</span> <span class="bp">False</span>
+</pre></div>
+</div>
+</div>
+<p>Setting up our simple square lattice:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">dxlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+<span class="n">z</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dxlist</span><span class="p">)</span> <span class="c1"># coordination number</span>
+<span class="n">d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dxlist</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># dimension</span>
+<span class="n">Nt</span> <span class="o">=</span> <span class="mi">3</span> <span class="c1"># number of species (A + B + vacancy)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">dxlist</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[array([1, 0]), array([-1,  0]), array([0, 1]), array([ 0, -1])]
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Kinetic-Monte-Carlo-functions">
+<h2>Kinetic Monte Carlo functions<a class="headerlink" href="#Kinetic-Monte-Carlo-functions" title="Permalink to this headline">¶</a></h2>
+<p>Below are some simple functions to run KMC simulations of diffusivity.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">make_connectivity</span><span class="p">(</span><span class="n">Npbc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes an `Npbc` x `Npbc` square lattice, with Npbc. Returns a matrix of &quot;connectivity&quot;</span>
+<span class="sd">    with dimensions (Nstates, coordination)</span>
+
+<span class="sd">    :param Nbpc: size of square lattice</span>
+<span class="sd">    :return connectivity: array of (Nstates, coordination) where for each state,</span>
+<span class="sd">        it gives the endpoint state for jump, indexed from our dxlist.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">toindex</span><span class="p">(</span><span class="n">nvec</span><span class="p">,</span> <span class="n">Npbc</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">nvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">%</span><span class="k">Npbc</span>) + Npbc*(nvec[1]%Npbc)
+    <span class="k">def</span> <span class="nf">fromindex</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">Npbc</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="k">Npbc</span>, n//Npbc)
+    <span class="n">Nsites</span> <span class="o">=</span> <span class="n">Npbc</span><span class="o">**</span><span class="n">d</span>
+    <span class="n">connectivity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nsites</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nsites</span><span class="p">):</span>
+        <span class="n">st</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">fromindex</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">Npbc</span><span class="p">),</span> <span class="n">connectivity</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dxlist</span><span class="p">):</span>
+            <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">toindex</span><span class="p">((</span><span class="n">st</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">dx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">st</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">dx</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">Npbc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">connectivity</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">if</span> <span class="n">__TESTING__</span><span class="p">:</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">make_connectivity</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">conn</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">conn</span><span class="p">[</span><span class="n">m</span><span class="p">]:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Missing back connection from {} to {}?&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>We define our system state very simply:</p>
+<ul class="simple">
+<li>index corresponding to the vacancy site position <code class="docutils literal notranslate"><span class="pre">vacsite</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">chemocc</span></code>, an integer vector of length <code class="docutils literal notranslate"><span class="pre">Nsites</span></code>, where values of
+0 = A, 1 = B. Note: the value of <code class="docutils literal notranslate"><span class="pre">chemocc[vacsite]</span></code> is undefined,
+but ignored.</li>
+</ul>
+<p>Because everything is random, we place the vacancy at site 0.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">generate_state</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">Ns</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate an initial configuration for a given concentration, number of sites.</span>
+
+<span class="sd">    :param cB: concentration of B atoms (probability a site has a B atom)</span>
+<span class="sd">    :param Ns: number of sites</span>
+
+<span class="sd">    :return vacsite: index of site corresponding to vacancy position</span>
+<span class="sd">    :return chemocc: vector of chemistries at each site</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vacsite</span><span class="p">,</span> <span class="n">chemocc</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">Ns</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">cB</span><span class="p">,</span> <span class="n">cB</span><span class="p">))</span>
+    <span class="n">chemocc</span><span class="p">[</span><span class="n">vacsite</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">vacsite</span><span class="p">,</span> <span class="n">chemocc</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">KMC_diff</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">connectivity</span><span class="p">,</span> <span class="n">Nkmc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Nsamples</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">8</span><span class="p">,</span> <span class="n">Nerror</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">4</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runs KMC to determine Onsager transport coefficients. A few parameters determine how the run goes:</span>
+
+<span class="sd">    :param cB: concentration of &quot;solute&quot;</span>
+<span class="sd">    :param nuB: relative rate of solute-vacancy exchange</span>
+<span class="sd">    :param Nkmc: number of jumps to include in a trajectory; this is a multiplier on the number of sites</span>
+<span class="sd">    :param Nsamples: number of trajectories to sample to determine the diffusivity</span>
+<span class="sd">    :param Nerror: number of averages to use to estimate stochastic error</span>
+
+<span class="sd">    :returns Lab: transport coefficients, for the different chemistries</span>
+<span class="sd">    :returns dLab: standard deviation in Lab</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Nsites</span> <span class="o">=</span> <span class="n">connectivity</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">Lmat</span><span class="p">,</span> <span class="n">dLmat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nt</span><span class="p">,</span> <span class="n">Nt</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nt</span><span class="p">,</span> <span class="n">Nt</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">nerror</span> <span class="ow">in</span> <span class="n">tnrange</span><span class="p">(</span><span class="n">Nerror</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;L average&#39;</span><span class="p">,</span>
+                          <span class="n">leave</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">__TESTING__</span><span class="p">):</span>
+        <span class="n">Dmat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nt</span><span class="p">,</span><span class="n">Nt</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">nsamp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nsamples</span><span class="p">):</span>
+            <span class="n">displace</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>  <span class="c1"># A, B, vacancy</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">vacsite</span><span class="p">,</span> <span class="n">chemocc</span> <span class="o">=</span> <span class="n">generate_state</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">Nsites</span><span class="p">)</span>
+            <span class="c1"># check to make sure there&#39;s an initial escape (important for nuB==0 only)</span>
+            <span class="k">if</span> <span class="ow">not</span><span class="p">((</span><span class="n">nuB</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">chemocc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">connectivity</span><span class="p">[</span><span class="n">vacsite</span><span class="p">])):</span>
+                <span class="k">for</span> <span class="n">nkmc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nkmc</span><span class="o">*</span><span class="n">Nsites</span><span class="p">):</span>
+                    <span class="c1"># rate table: very simple</span>
+                    <span class="n">rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span> <span class="k">if</span> <span class="n">chemocc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="n">nuB</span>
+                                      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">connectivity</span><span class="p">[</span><span class="n">vacsite</span><span class="p">]])</span>
+                    <span class="c1"># escape time</span>
+                    <span class="n">dT</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rates</span><span class="p">)</span>
+                    <span class="c1"># select the jump</span>
+                    <span class="n">jumptype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">dT</span><span class="o">*</span><span class="n">rates</span><span class="p">)</span>
+                    <span class="c1"># accumulate</span>
+                    <span class="n">T</span> <span class="o">+=</span> <span class="n">dT</span>
+                    <span class="n">displace</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dxlist</span><span class="p">[</span><span class="n">jumptype</span><span class="p">]</span>
+                    <span class="n">newvac</span> <span class="o">=</span> <span class="n">connectivity</span><span class="p">[</span><span class="n">vacsite</span><span class="p">,</span> <span class="n">jumptype</span><span class="p">]</span>
+                    <span class="n">displace</span><span class="p">[</span><span class="n">chemocc</span><span class="p">[</span><span class="n">newvac</span><span class="p">]]</span> <span class="o">-=</span> <span class="n">dxlist</span><span class="p">[</span><span class="n">jumptype</span><span class="p">]</span>
+                    <span class="c1"># update state</span>
+                    <span class="n">chemocc</span><span class="p">[</span><span class="n">vacsite</span><span class="p">]</span> <span class="o">=</span> <span class="n">chemocc</span><span class="p">[</span><span class="n">newvac</span><span class="p">]</span>
+                    <span class="n">chemocc</span><span class="p">[</span><span class="n">newvac</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                    <span class="n">vacsite</span> <span class="o">=</span> <span class="n">newvac</span>
+                <span class="k">for</span> <span class="n">c1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nt</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">c2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nt</span><span class="p">):</span>
+                        <span class="n">Dmat</span><span class="p">[</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">displace</span><span class="p">[</span><span class="n">c1</span><span class="p">],</span> <span class="n">displace</span><span class="p">[</span><span class="n">c2</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">Dmat</span> <span class="o">/=</span> <span class="n">Nsamples</span>
+        <span class="n">Lmat</span> <span class="o">+=</span> <span class="n">Dmat</span>
+        <span class="n">dLmat</span> <span class="o">+=</span> <span class="n">Dmat</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">Lmat</span> <span class="o">/=</span> <span class="n">Nerror</span>
+    <span class="n">dLmat</span> <span class="o">/=</span> <span class="n">Nerror</span>
+    <span class="k">return</span> <span class="n">Lmat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">dLmat</span> <span class="o">-</span> <span class="n">Lmat</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">Nerror</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Faster implementation using precalculated rate tables, and generating</span>
+<span class="c1"># all of the jump choices in advance, for the different environments</span>
+
+<span class="k">def</span> <span class="nf">KMC_diff_fast</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">connectivity</span><span class="p">,</span> <span class="n">Nkmc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Nsamples</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">8</span><span class="p">,</span> <span class="n">Nerror</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">4</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runs KMC to determine Onsager transport coefficients. A few parameters determine how the run goes:</span>
+
+<span class="sd">    :param cB: concentration of &quot;solute&quot;</span>
+<span class="sd">    :param nuB: relative rate of solute-vacancy exchange</span>
+<span class="sd">    :param Nkmc: number of jumps to include in a trajectory; this is a multiplier on the number of sites</span>
+<span class="sd">    :param Nsamples: number of trajectories to sample to determine the diffusivity</span>
+<span class="sd">    :param Nerror: number of averages to use to estimate stochastic error</span>
+
+<span class="sd">    :returns Lab: transport coefficients, for the different chemistries</span>
+<span class="sd">    :returns dLab: standard deviation in Lab</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Nsites</span> <span class="o">=</span> <span class="n">connectivity</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">Lmat</span><span class="p">,</span> <span class="n">dLmat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nt</span><span class="p">,</span> <span class="n">Nt</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nt</span><span class="p">,</span> <span class="n">Nt</span><span class="p">))</span>
+
+    <span class="c1"># setup some rate tables.</span>
+    <span class="n">Nstates</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">z</span>
+    <span class="n">bitlist</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">z</span><span class="p">)]</span>  <span class="c1"># mapping of index to bits</span>
+    <span class="n">intdict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">localchem</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="n">z</span><span class="p">):</span>
+        <span class="n">intdict</span><span class="p">[</span><span class="n">localchem</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">bitlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">localchem</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">int2index</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Takes in an integer and returns the mapping&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">i</span><span class="o">&amp;</span><span class="n">bitlist</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">z</span><span class="p">)]</span>
+
+    <span class="n">ratedict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nstates</span><span class="p">)</span>
+    <span class="n">probdict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nstates</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">localchem</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="n">z</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">intdict</span><span class="p">[</span><span class="n">localchem</span><span class="p">]</span>
+        <span class="n">rates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span> <span class="k">if</span> <span class="n">localchem</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="n">nuB</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">z</span><span class="p">)])</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rates</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># escape time</span>
+            <span class="n">dT</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rates</span><span class="p">)</span>
+            <span class="n">ratedict</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">dT</span>
+            <span class="n">probdict</span><span class="p">[</span><span class="n">n</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">dT</span><span class="o">*</span><span class="n">rates</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ratedict</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">probdict</span><span class="p">[</span><span class="n">n</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">z</span><span class="p">)])</span>
+
+    <span class="c1"># setup some random guesses</span>
+    <span class="n">Njumps</span> <span class="o">=</span> <span class="n">Nerror</span><span class="o">*</span><span class="n">Nsamples</span><span class="o">*</span><span class="n">Nsites</span><span class="o">*</span><span class="n">Nkmc</span>  <span class="c1"># total number of jumps needed</span>
+    <span class="n">ncount</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nstates</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">randjumps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nstates</span><span class="p">):</span>
+        <span class="c1"># estimate how many times we&#39;ll encounter a given environment:</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">([</span><span class="n">cB</span> <span class="k">if</span> <span class="n">c</span> <span class="k">else</span> <span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">cB</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">int2index</span><span class="p">(</span><span class="n">n</span><span class="p">)])</span><span class="o">*</span><span class="n">Njumps</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">N</span><span class="p">))</span> <span class="c1"># counting statistics; +3 standard deviations.</span>
+        <span class="n">ncount</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">ratedict</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">randjumps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">probdict</span><span class="p">[</span><span class="n">n</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">randjumps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>
+
+    <span class="k">for</span> <span class="n">nerror</span> <span class="ow">in</span> <span class="n">tnrange</span><span class="p">(</span><span class="n">Nerror</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;L average&#39;</span><span class="p">,</span>
+                          <span class="n">leave</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">__TESTING__</span><span class="p">):</span>
+        <span class="n">Dmat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nt</span><span class="p">,</span><span class="n">Nt</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">nsamp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nsamples</span><span class="p">):</span>
+            <span class="n">displace</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)]</span>  <span class="c1"># A, B, vacancy</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">vacsite</span><span class="p">,</span> <span class="n">chemocc</span> <span class="o">=</span> <span class="n">generate_state</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">Nsites</span><span class="p">)</span>
+            <span class="c1"># check to make sure there&#39;s an initial escape (important for nuB==0 only)</span>
+            <span class="k">if</span> <span class="n">ratedict</span><span class="p">[</span><span class="n">intdict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">chemocc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">connectivity</span><span class="p">[</span><span class="n">vacsite</span><span class="p">])]]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">nkmc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nsites</span><span class="o">*</span><span class="n">Nkmc</span><span class="p">):</span>
+                    <span class="c1"># rate table: very simple</span>
+                    <span class="n">n</span> <span class="o">=</span> <span class="n">intdict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">chemocc</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">connectivity</span><span class="p">[</span><span class="n">vacsite</span><span class="p">])]</span>
+                    <span class="c1"># select the jump</span>
+                    <span class="n">jumptype</span> <span class="o">=</span> <span class="n">randjumps</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="n">ncount</span><span class="p">[</span><span class="n">n</span><span class="p">]]</span>
+                    <span class="n">ncount</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="c1"># accumulate escape time</span>
+                    <span class="n">T</span> <span class="o">+=</span> <span class="n">ratedict</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+                    <span class="n">displace</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dxlist</span><span class="p">[</span><span class="n">jumptype</span><span class="p">]</span>
+                    <span class="n">newvac</span> <span class="o">=</span> <span class="n">connectivity</span><span class="p">[</span><span class="n">vacsite</span><span class="p">,</span> <span class="n">jumptype</span><span class="p">]</span>
+                    <span class="n">displace</span><span class="p">[</span><span class="n">chemocc</span><span class="p">[</span><span class="n">newvac</span><span class="p">]]</span> <span class="o">-=</span> <span class="n">dxlist</span><span class="p">[</span><span class="n">jumptype</span><span class="p">]</span>
+                    <span class="c1"># update state</span>
+                    <span class="n">chemocc</span><span class="p">[</span><span class="n">vacsite</span><span class="p">]</span> <span class="o">=</span> <span class="n">chemocc</span><span class="p">[</span><span class="n">newvac</span><span class="p">]</span>
+                    <span class="n">chemocc</span><span class="p">[</span><span class="n">newvac</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                    <span class="n">vacsite</span> <span class="o">=</span> <span class="n">newvac</span>
+                    <span class="c1"># check that we don&#39;t need more jumps:</span>
+                    <span class="k">if</span> <span class="n">ncount</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">randjumps</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">randjumps</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                        <span class="n">p</span><span class="o">=</span><span class="n">probdict</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+                        <span class="n">ncount</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">randjumps</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
+                <span class="k">for</span> <span class="n">c1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nt</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">c2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nt</span><span class="p">):</span>
+                        <span class="n">Dmat</span><span class="p">[</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">displace</span><span class="p">[</span><span class="n">c1</span><span class="p">],</span> <span class="n">displace</span><span class="p">[</span><span class="n">c2</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">Dmat</span> <span class="o">/=</span> <span class="n">Nsamples</span>
+        <span class="n">Lmat</span> <span class="o">+=</span> <span class="n">Dmat</span>
+        <span class="n">dLmat</span> <span class="o">+=</span> <span class="n">Dmat</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">Lmat</span> <span class="o">/=</span> <span class="n">Nerror</span>
+    <span class="n">dLmat</span> <span class="o">/=</span> <span class="n">Nerror</span>
+    <span class="k">return</span> <span class="n">Lmat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">dLmat</span> <span class="o">-</span> <span class="n">Lmat</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">Nerror</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">if</span> <span class="n">__TESTING__</span><span class="p">:</span>
+    <span class="n">L</span><span class="p">,</span> <span class="n">dL</span> <span class="o">=</span> <span class="n">KMC_diff</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="n">make_connectivity</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">dL</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">percolation_diff</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">connectivity</span><span class="p">,</span> <span class="n">Nsamples</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span> <span class="n">Nerror</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">4</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Directly computes diffusivity for a percolation problem (nuB==0)</span>
+
+<span class="sd">    :param cB: concentration of &quot;solute&quot;</span>
+<span class="sd">    :param Nsamples: number of configurations to sample to determine the diffusivity</span>
+<span class="sd">    :param Nerror: number of averages to use to estimate stochastic error</span>
+
+<span class="sd">    :returns Lab: transport coefficients, for the different chemistries</span>
+<span class="sd">    :returns dLab: standard deviation in Lab</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Nsites</span> <span class="o">=</span> <span class="n">connectivity</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">Lmat</span><span class="p">,</span> <span class="n">dLmat</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span>
+    <span class="k">for</span> <span class="n">nerror</span> <span class="ow">in</span> <span class="n">tnrange</span><span class="p">(</span><span class="n">Nerror</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;L average&#39;</span><span class="p">,</span> <span class="n">leave</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">__TESTING__</span><span class="p">):</span>
+        <span class="n">Dmat</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">nsamp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nsamples</span><span class="p">):</span>
+            <span class="n">D0</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">vacsite</span><span class="p">,</span> <span class="n">chemocc</span> <span class="o">=</span> <span class="n">generate_state</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">Nsites</span><span class="p">)</span>
+            <span class="c1"># break into connected domains (a list of connected networks)</span>
+            <span class="c1"># first get a set of sites that are not B atoms</span>
+            <span class="n">asites</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chemocc</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span><span class="o">!=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">asites</span><span class="p">:</span>
+                <span class="c1"># try to create a new network:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">asites</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  <span class="c1"># first member, random</span>
+                <span class="c1"># two sets: the network being constructed, sites to branch from</span>
+                <span class="n">net</span><span class="p">,</span> <span class="n">remainders</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">},</span> <span class="p">{</span><span class="n">n</span><span class="p">}</span>
+                <span class="k">while</span> <span class="n">remainders</span><span class="p">:</span>
+                    <span class="c1"># grab a new member whose connections we&#39;ll check:</span>
+                    <span class="n">n</span> <span class="o">=</span> <span class="n">remainders</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">connectivity</span><span class="p">[</span><span class="n">n</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">asites</span><span class="p">:</span>
+                            <span class="c1"># m is in asites if we&#39;ve not already checked its connections</span>
+                            <span class="n">net</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                            <span class="n">remainders</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                            <span class="n">asites</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="c1"># remove it from the global list</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">net</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">:</span> <span class="k">continue</span>
+                <span class="n">D0</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">sitelist</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">net</span><span class="p">]</span>
+                <span class="n">siteindex</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sitelist</span><span class="p">)}</span>
+                <span class="n">Ilist</span><span class="p">,</span> <span class="n">Jlist</span><span class="p">,</span> <span class="n">Vlist</span><span class="p">,</span> <span class="n">blist</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sitelist</span><span class="p">):</span>
+                    <span class="n">conn</span> <span class="o">=</span> <span class="n">connectivity</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+                    <span class="n">b0</span><span class="p">,</span> <span class="n">d0</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span>
+                    <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">dx</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">dxlist</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">j</span> <span class="o">=</span> <span class="n">siteindex</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
+                            <span class="n">d0</span> <span class="o">+=</span> <span class="mf">1.</span>
+                            <span class="n">Ilist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                            <span class="n">Jlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                            <span class="n">Vlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.</span><span class="p">)</span>
+                            <span class="n">b0</span> <span class="o">+=</span> <span class="n">dx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                    <span class="n">blist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b0</span><span class="p">)</span>
+                    <span class="n">Ilist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">Jlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">Vlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="n">d0</span><span class="p">)</span>
+                    <span class="n">D0</span> <span class="o">+=</span> <span class="n">d0</span>
+                <span class="n">bvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">blist</span><span class="p">)</span>
+                <span class="n">W</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">((</span><span class="n">Vlist</span><span class="p">,</span> <span class="p">(</span><span class="n">Ilist</span><span class="p">,</span> <span class="n">Jlist</span><span class="p">)),</span>
+                                      <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sitelist</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">sitelist</span><span class="p">)))</span>
+                <span class="n">etabar</span><span class="p">,</span><span class="n">info</span> <span class="o">=</span> <span class="n">minres</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">bvec</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">info</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span> <span class="k">print</span><span class="p">(</span><span class="s1">&#39;got {} return from minres&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">info</span><span class="p">))</span>
+                <span class="n">etabar</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">etabar</span><span class="p">)</span>
+                <span class="n">Dmat</span> <span class="o">+=</span> <span class="p">(</span><span class="mf">0.25</span><span class="o">*</span><span class="n">D0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">bvec</span><span class="p">,</span> <span class="n">etabar</span><span class="p">))</span><span class="o">/</span><span class="n">Nsites</span>
+                <span class="c1"># Dmat += 0.25*D0/Nsites</span>
+        <span class="n">Dmat</span> <span class="o">/=</span> <span class="n">Nsamples</span>
+        <span class="n">Lmat</span> <span class="o">+=</span> <span class="n">Dmat</span>
+        <span class="n">dLmat</span> <span class="o">+=</span> <span class="n">Dmat</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">Lmat</span> <span class="o">/=</span> <span class="n">Nerror</span>
+    <span class="n">dLmat</span> <span class="o">/=</span> <span class="n">Nerror</span>
+    <span class="k">return</span> <span class="n">Lmat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">dLmat</span> <span class="o">-</span> <span class="n">Lmat</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">Nerror</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Mean-field-Green-function-solution">
+<h2>Mean-field Green function solution<a class="headerlink" href="#Mean-field-Green-function-solution" title="Permalink to this headline">¶</a></h2>
+<p>These are simple analytic expressions; the built in crystal structure
+“parameter” is gamma, which is a function of the dilute tracer
+correlation coefficient (<span class="math notranslate nohighlight">\(f\)</span>) for a square lattice,</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\gamma = \frac{f+1}{f-1}\\We can get the bias basis solution by replacing this value with z, the\end{aligned}\end{align} \]</div>
+<p>coordination number.</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\gamma_\text{bias basis} = -z\\which corresponds to a dilute tracer correlation coefficient of\end{aligned}\end{align} \]</div>
+<p><span class="math notranslate nohighlight">\(f=1-2/(z+1)\)</span>. The analytic solution for the square lattice is
+<span class="math notranslate nohighlight">\(f=1/(\pi-1)\approx 0.467\)</span>, so
+<span class="math notranslate nohighlight">\(\gamma = -\pi/(\pi-2) \approx -2.752\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">Danalytic</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="mi">2</span><span class="p">)):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Analytic GF solution.</span>
+
+<span class="sd">    :param cB: concentration of &quot;solute&quot;</span>
+<span class="sd">    :param nuB: relative rate of solute-vacancy exchange</span>
+<span class="sd">    :param gamma: optional parameter. This is (f+1)/(f-1) for full correlation, or -z for bias basis.</span>
+
+<span class="sd">    :returns Lab: transport coefficients, for the different chemistries</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cA</span><span class="p">,</span> <span class="n">nuA</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">-</span><span class="n">cB</span><span class="p">,</span> <span class="mf">1.</span>
+    <span class="n">nuave</span> <span class="o">=</span> <span class="n">cA</span><span class="o">*</span><span class="n">nuA</span> <span class="o">+</span> <span class="n">cB</span><span class="o">*</span><span class="n">nuB</span>
+    <span class="n">bv</span> <span class="o">=</span> <span class="n">cA</span><span class="o">*</span><span class="p">(</span><span class="n">nuave</span><span class="o">-</span><span class="n">nuA</span><span class="p">)</span> <span class="o">-</span> <span class="n">cB</span><span class="o">*</span><span class="p">(</span><span class="n">nuave</span><span class="o">-</span><span class="n">nuB</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">gamma</span><span class="o">*</span><span class="n">nuave</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">nuA</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">nuB</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">nuave</span><span class="p">))</span>
+    <span class="n">DAA</span> <span class="o">=</span> <span class="n">cA</span><span class="o">*</span><span class="n">nuA</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">cA</span><span class="o">*</span><span class="n">cB</span><span class="o">*</span><span class="n">nuA</span><span class="o">*</span><span class="n">nuA</span><span class="o">*</span><span class="n">g</span>
+    <span class="n">DBB</span> <span class="o">=</span> <span class="n">cB</span><span class="o">*</span><span class="n">nuB</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">cA</span><span class="o">*</span><span class="n">cB</span><span class="o">*</span><span class="n">nuB</span><span class="o">*</span><span class="n">nuB</span><span class="o">*</span><span class="n">g</span>
+    <span class="n">DAB</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">cA</span><span class="o">*</span><span class="n">cB</span><span class="o">*</span><span class="n">nuA</span><span class="o">*</span><span class="n">nuB</span><span class="o">*</span><span class="n">g</span>
+    <span class="n">DvA</span> <span class="o">=</span> <span class="o">-</span><span class="n">cA</span><span class="o">*</span><span class="n">nuA</span> <span class="o">+</span> <span class="n">nuA</span><span class="o">*</span><span class="n">bv</span><span class="o">*</span><span class="n">g</span>
+    <span class="n">DvB</span> <span class="o">=</span> <span class="o">-</span><span class="n">cB</span><span class="o">*</span><span class="n">nuB</span> <span class="o">-</span> <span class="n">nuB</span><span class="o">*</span><span class="n">bv</span><span class="o">*</span><span class="n">g</span>
+    <span class="n">Dvv</span> <span class="o">=</span> <span class="n">nuave</span> <span class="o">+</span> <span class="n">cA</span><span class="o">*</span><span class="n">cB</span><span class="o">*</span><span class="p">((</span><span class="n">nuA</span><span class="o">-</span><span class="n">nuB</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">g</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">DAA</span><span class="p">,</span> <span class="n">DAB</span><span class="p">,</span> <span class="n">DvA</span><span class="p">],</span> <span class="p">[</span><span class="n">DAB</span><span class="p">,</span> <span class="n">DBB</span><span class="p">,</span> <span class="n">DvB</span><span class="p">],</span> <span class="p">[</span><span class="n">DvA</span><span class="p">,</span> <span class="n">DvB</span><span class="p">,</span> <span class="n">Dvv</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+<p>The <strong>residual bias correction</strong> allows for any linear basis solution,
+such as the mean-field Green function solution, to be corrected by using
+the residual bias as a new basis. For the percolation problem, we can
+construct an analytic expression that involves numerical terms to be
+evaluated.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">Dbiascorrect</span><span class="p">(</span><span class="n">cB</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Residual-bias corrected SCGF solution; only for nuB = 0, just returns DAA,</span>
+<span class="sd">    which is already divided by cA.</span>
+
+<span class="sd">    :param cB: concentration of &quot;solute&quot;</span>
+
+<span class="sd">    :returns DAA: transport coefficient (diffusivity) of A.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check edge cases first:</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">cB</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="mf">0.1415926534</span><span class="o">*</span><span class="n">cB</span><span class="p">)</span> <span class="o">+</span> \
+        <span class="p">(</span><span class="o">-</span><span class="mf">0.01272990905</span><span class="o">*</span><span class="n">cB</span> <span class="o">+</span> <span class="mf">4.529059154</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">399.7080744</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> \
+         <span class="mf">561.6483202</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">4</span> <span class="o">+</span> <span class="mf">665.0100411</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">5</span> <span class="o">+</span> <span class="mf">622.9427624</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">6</span> <span class="o">-</span> \
+         <span class="mf">379.2388949</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">7</span> <span class="o">+</span> <span class="mf">48.12615674</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">8</span><span class="p">)</span><span class="o">/</span>\
+        <span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="mf">361.2297602</span><span class="o">*</span><span class="n">cB</span> <span class="o">+</span> <span class="mf">590.7833342</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">222.4121227</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">3</span> <span class="o">+</span> \
+         <span class="mf">307.7589952</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">4</span> <span class="o">+</span> <span class="mf">208.3266238</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">5</span> <span class="o">-</span> <span class="mf">52.05560275</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">6</span> <span class="o">-</span> \
+         <span class="mf">24.0423294</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">7</span> <span class="o">-</span> <span class="mf">1.884593043</span><span class="o">*</span><span class="n">cB</span><span class="o">**</span><span class="mi">8</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">if</span> <span class="n">__TESTING__</span><span class="p">:</span>
+    <span class="n">LGF</span> <span class="o">=</span> <span class="n">Danalytic</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)</span>
+    <span class="n">Lbb</span> <span class="o">=</span> <span class="n">Danalytic</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="o">-</span><span class="n">z</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">LGF</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">Lbb</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Generalized-self-consistent-mean-field-method">
+<h2>Generalized self-consistent mean-field method<a class="headerlink" href="#Generalized-self-consistent-mean-field-method" title="Permalink to this headline">¶</a></h2>
+<p>In this approach, we expand a basis set entirely from the local
+chemistry around the vacancy. By doing this explicitly in terms of the
+states, we capture all possible cluster expansions out to a fixed range.
+The computational complexity grows quite rapidly, so we keep the cutoff
+a bit short, as it grows like <span class="math notranslate nohighlight">\(2^n\)</span> for <span class="math notranslate nohighlight">\(n\)</span> sites around the
+vacancy.</p>
+<p>First, we make lists of the sites we want to consider:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sitelists</span> <span class="o">=</span> <span class="p">[</span><span class="n">dxlist</span><span class="o">.</span><span class="n">copy</span><span class="p">()]</span>
+<span class="k">for</span> <span class="n">shell</span> <span class="ow">in</span> <span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])],</span>
+              <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])],</span>
+              <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])],</span>
+              <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])],</span>
+              <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])]]:</span>
+    <span class="n">sitelists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sitelists</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">+</span> <span class="n">shell</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">__TESTING__</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sitelists</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">s</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Next, we make a function which constructs all of the necessary
+information for the states to make the Wbar and bbar matrices
+corresponding to our sitelists. It is recommended, that for a given
+sitelist, this only be done once, as it can be reused to make Wbar and
+bbar for different concentrations and rates.</p>
+<p>Next: we are going to run through and construct our mappings. Here is
+what we will store:</p>
+<ul class="simple">
+<li>For each basis function (indexed by <code class="docutils literal notranslate"><span class="pre">n</span></code>), we will store a list of
+other basis functions to which it can transition; the rate type (0 or
+1), and the probability factor as a tuple (nA, nB). This will be used
+to construct the off-diagonal components of <code class="docutils literal notranslate"><span class="pre">Wbar</span></code>.</li>
+<li>For each basis function, we will store the diagonal information as a
+probability factor and a single integer, which counts the number of
+nuB type of jumps (which is consistent with the off-diagonal
+components).</li>
+<li>For each basis function, the bias factors involve the same
+probability factor as the diagonal information. We don’t bother
+computing both x and y, but rather get the A and B components (bV =
+-bA-bB). The rate information for xA is either +1 (==+nuA), 0 (==0)
+or -1 (==-nuA), and similar for B. WLOG, we look at the x component.
+So we can include this with the diagonal information.</li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">make_Wbarlists</span><span class="p">(</span><span class="n">sitelist</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes in a list of sites, and constructs two lists that contain all the information</span>
+<span class="sd">    needed to make Wbar and bbar.</span>
+<span class="sd">    :param sitelist: list of sites to include</span>
+<span class="sd">    :returns Wbarlist: list of information to construct off-diagonal components of Wbar</span>
+<span class="sd">    :returns Wbardiag: list of information to construct diagonal components of Wbar *and* bbar vector</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># helper functions and analysis:</span>
+    <span class="n">Nsites</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sitelist</span><span class="p">)</span>
+    <span class="n">Nstates</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">Nsites</span>
+    <span class="n">bitlist</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nsites</span><span class="p">)]</span>  <span class="c1"># mapping of index to bits, equivalent to 2**i</span>
+    <span class="k">def</span> <span class="nf">index2int</span><span class="p">(</span><span class="n">lis</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Takes a list returns the integer mapping&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">bitlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lis</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">int2index</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Takes in an integer and returns the mapping&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">i</span><span class="o">&amp;</span><span class="n">bitlist</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nsites</span><span class="p">)]</span>
+    <span class="c1"># lists for shifts:</span>
+    <span class="c1"># * `shiftlist` contains the new bit in the translated basis if that position is set in the current list</span>
+    <span class="c1"># * `unsetbitlist` contains the list of bits that are &quot;missing&quot;, and hence free to be set.</span>
+    <span class="n">shiftlist</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">unsetbitlist</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">dxlist</span><span class="p">:</span>
+        <span class="n">shifts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">sitelist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">dx</span><span class="p">):</span>
+                <span class="n">newsite</span> <span class="o">=</span> <span class="o">-</span><span class="n">dx</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">newsite</span> <span class="o">=</span> <span class="n">site</span> <span class="o">-</span> <span class="n">dx</span>
+            <span class="c1"># is that a site that we are tracking?</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">newbit</span> <span class="o">=</span> <span class="n">bitlist</span><span class="p">[</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">newsite</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sitelist</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span> <span class="p">]</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">newbit</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">shifts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newbit</span><span class="p">)</span>
+        <span class="n">shiftlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shifts</span><span class="p">)</span>
+        <span class="n">unsetbitlist</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bitlist</span> <span class="k">if</span> <span class="n">b</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">shifts</span><span class="p">])</span>
+
+    <span class="n">Wbarlist</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">Wbardiag</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">Nnew</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">unsetbitlist</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># how many unset bits are there?</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">tnrange</span><span class="p">(</span><span class="n">Nstates</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">__TESTING__</span><span class="p">):</span>
+        <span class="n">lis</span> <span class="o">=</span> <span class="n">int2index</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">nB</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">lis</span> <span class="k">if</span> <span class="n">c</span><span class="p">)</span>
+        <span class="n">nA</span> <span class="o">=</span> <span class="n">Nsites</span><span class="o">-</span><span class="n">nB</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="n">nA</span><span class="p">,</span> <span class="n">nB</span><span class="p">)</span>
+        <span class="c1"># counters for our jumptype:</span>
+        <span class="n">nuBt</span><span class="p">,</span> <span class="n">nuAx</span><span class="p">,</span> <span class="n">nuBx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="c1"># now, run through our jumps (dx)</span>
+        <span class="n">Wbarentries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">njump</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">shifts</span><span class="p">,</span> <span class="n">unsetbits</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span> <span class="n">dxlist</span><span class="p">,</span> <span class="n">shiftlist</span><span class="p">,</span> <span class="n">unsetbitlist</span><span class="p">):</span>
+            <span class="n">jumptype</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">lis</span><span class="p">[</span><span class="n">njump</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">jumptype</span><span class="p">:</span>
+                <span class="c1"># we count how often nuB appears:</span>
+                <span class="n">nuBt</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">nuBx</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">dx</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nuAx</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">dx</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="c1"># construct all of the end states that should appear</span>
+            <span class="n">basebits</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lis</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">cnew</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="n">Nnew</span><span class="p">):</span>
+                <span class="n">newnB</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cnew</span> <span class="k">if</span> <span class="n">c</span><span class="p">)</span>
+                <span class="n">newnA</span> <span class="o">=</span> <span class="n">Nnew</span> <span class="o">-</span> <span class="n">newnB</span>
+                <span class="n">endstate</span> <span class="o">=</span> <span class="n">basebits</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">unsetbits</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cnew</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span><span class="p">)</span>
+                <span class="n">Wbarentries</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">endstate</span><span class="p">,</span> <span class="p">(</span><span class="n">nA</span><span class="o">+</span><span class="n">newnA</span><span class="p">,</span> <span class="n">nB</span><span class="o">+</span><span class="n">newnB</span><span class="p">),</span> <span class="n">jumptype</span><span class="p">))</span>
+        <span class="n">Wbarlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Wbarentries</span><span class="p">)</span>
+        <span class="n">Wbardiag</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="n">nuBt</span><span class="p">,</span> <span class="n">nuAx</span><span class="p">,</span> <span class="n">nuBx</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">if</span> <span class="n">__TESTING__</span><span class="p">:</span>
+    <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span> <span class="o">=</span> <span class="n">make_Wbarlists</span><span class="p">(</span><span class="n">sitelists</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">Wbarlist</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">Wbardiag</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>Function to construct Wbar and bbar for a given concentration and rate.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">make_Wbar_bbar</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes in the analysis from our &quot;cluster expansion&quot; generator above and constructs corresponding matrices.</span>
+
+<span class="sd">    :param cB: concentration of &quot;solute&quot;</span>
+<span class="sd">    :param nuB: relative rate of solute-vacancy exchange</span>
+<span class="sd">    :param Wbarlist: output from make_Wbarlist</span>
+<span class="sd">    :param Wbardiag: output from make_Wbarlist</span>
+
+<span class="sd">    :returns Wbar: sparse matrix representation of Wbar</span>
+<span class="sd">    :returns bbar: vector of biases, only in the x direction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Nstates</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Wbardiag</span><span class="p">)</span>
+    <span class="n">Nsites</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">Nstates</span><span class="p">))</span>
+    <span class="n">cA</span><span class="p">,</span> <span class="n">nuA</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">cB</span><span class="p">,</span> <span class="mf">1.</span>
+    <span class="n">nubase</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dxlist</span><span class="p">)</span><span class="o">*</span><span class="n">nuA</span>
+    <span class="n">nudiff</span> <span class="o">=</span> <span class="n">nuB</span><span class="o">-</span><span class="n">nuA</span>
+    <span class="n">nubar</span> <span class="o">=</span> <span class="n">cA</span><span class="o">*</span><span class="n">nuA</span> <span class="o">+</span> <span class="n">cB</span><span class="o">*</span><span class="n">nuB</span>
+    <span class="n">lncA</span><span class="p">,</span> <span class="n">lncB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">cA</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">cB</span><span class="p">)</span> <span class="c1"># for doing powers quickly</span>
+    <span class="n">probdict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">nA</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Nsites</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">nB</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Nsites</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">probdict</span><span class="p">[(</span><span class="n">nA</span><span class="p">,</span> <span class="n">nB</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">nA</span><span class="o">*</span><span class="n">lncA</span> <span class="o">+</span> <span class="n">nB</span><span class="o">*</span><span class="n">lncB</span><span class="p">)</span>
+
+    <span class="c1"># Wbarmatrix, bbar = np.zeros((Nstates, Nstates)), np.zeros((Nstates, 2))</span>
+    <span class="n">bbar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nstates</span><span class="p">,</span> <span class="n">Nt</span><span class="p">))</span>  <span class="c1"># A, B, vac</span>
+    <span class="c1"># sparse matrix version of Wbarmatrix</span>
+    <span class="n">Ilist</span><span class="p">,</span> <span class="n">Jlist</span><span class="p">,</span> <span class="n">Vlist</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>  <span class="c1"># sparse matrix version</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">Wbarentries</span><span class="p">,</span> <span class="p">(</span><span class="n">ptup</span><span class="p">,</span> <span class="n">nuBt</span><span class="p">,</span> <span class="n">nuAx</span><span class="p">,</span> <span class="n">nuBx</span><span class="p">)</span> <span class="ow">in</span> \
+        <span class="n">tqdm_notebook</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span> <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="n">Nstates</span><span class="p">,</span>
+                      <span class="n">leave</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">__TESTING__</span><span class="p">):</span>
+        <span class="c1"># diagonal first</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">probdict</span><span class="p">[</span><span class="n">ptup</span><span class="p">]</span>
+        <span class="n">bbar</span><span class="p">[</span><span class="n">n</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">p</span><span class="o">*</span><span class="n">nuA</span><span class="o">*</span><span class="n">nuAx</span><span class="p">,</span> <span class="n">p</span><span class="o">*</span><span class="n">nuB</span><span class="o">*</span><span class="n">nuBx</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="n">nuB</span><span class="o">*</span><span class="n">nuBx</span><span class="o">+</span><span class="n">nuA</span><span class="o">*</span><span class="n">nuAx</span><span class="p">)</span>
+        <span class="n">Il</span><span class="p">,</span> <span class="n">Jl</span><span class="p">,</span> <span class="n">Vl</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="n">nubase</span><span class="o">+</span><span class="n">nuBt</span><span class="o">*</span><span class="n">nudiff</span><span class="p">)]</span>
+        <span class="n">jdict</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">Vl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># now the off-diagonal</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">pnewtup</span><span class="p">,</span> <span class="n">jtype</span><span class="p">)</span> <span class="ow">in</span> <span class="n">Wbarentries</span><span class="p">:</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">probdict</span><span class="p">[</span><span class="n">pnewtup</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">nuB</span> <span class="k">if</span> <span class="n">jtype</span> <span class="k">else</span> <span class="n">nuA</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">jdict</span><span class="p">:</span>
+                    <span class="n">Vl</span><span class="p">[</span><span class="n">jdict</span><span class="p">[</span><span class="n">m</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">w</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">jdict</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Vl</span><span class="p">)</span>
+                    <span class="n">Il</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                    <span class="n">Jl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                    <span class="n">Vl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+        <span class="n">Ilist</span> <span class="o">+=</span> <span class="n">Il</span>
+        <span class="n">Jlist</span> <span class="o">+=</span> <span class="n">Jl</span>
+        <span class="n">Vlist</span> <span class="o">+=</span> <span class="n">Vl</span>
+    <span class="n">Wbarmatrix</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">((</span><span class="n">Vlist</span><span class="p">,</span> <span class="p">(</span><span class="n">Ilist</span><span class="p">,</span> <span class="n">Jlist</span><span class="p">)),</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">Nstates</span><span class="p">,</span><span class="n">Nstates</span><span class="p">))</span>
+    <span class="k">del</span><span class="p">(</span><span class="n">Ilist</span><span class="p">,</span> <span class="n">Jlist</span><span class="p">,</span> <span class="n">Vlist</span><span class="p">)</span> <span class="c1"># garbage collect</span>
+    <span class="k">return</span> <span class="n">Wbarmatrix</span><span class="p">,</span> <span class="n">bbar</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">if</span> <span class="n">__TESTING__</span><span class="p">:</span>
+    <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span> <span class="o">=</span> <span class="n">make_Wbarlists</span><span class="p">(</span><span class="n">sitelists</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">Wbar</span><span class="p">,</span> <span class="n">bbar</span> <span class="o">=</span> <span class="n">make_Wbar_bbar</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">Wbar</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">bbar</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">def</span> <span class="nf">SCMF_diff</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the transport coefficients using the generalized SCMF</span>
+
+<span class="sd">    :param cB: concentration of &quot;solute&quot;</span>
+<span class="sd">    :param nuB: relative rate of solute-vacancy exchange</span>
+<span class="sd">    :param Wbarlist: output from make_Wbarlist</span>
+<span class="sd">    :param Wbardiag: output from make_Wbarlist</span>
+
+<span class="sd">    :returns Lab: transport coefficients, for the different chemistries</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># uncorrelated first:</span>
+    <span class="n">cA</span><span class="p">,</span> <span class="n">nuA</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">cB</span><span class="p">,</span> <span class="mf">1.</span>
+    <span class="n">nubar</span> <span class="o">=</span> <span class="n">cA</span><span class="o">*</span><span class="n">nuA</span> <span class="o">+</span> <span class="n">cB</span><span class="o">*</span><span class="n">nuB</span>
+    <span class="n">L0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cA</span><span class="o">*</span><span class="n">nuA</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">cA</span><span class="o">*</span><span class="n">nuA</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">cB</span><span class="o">*</span><span class="n">nuB</span><span class="p">,</span> <span class="o">-</span><span class="n">cB</span><span class="o">*</span><span class="n">nuB</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">cA</span><span class="o">*</span><span class="n">nuA</span><span class="p">,</span> <span class="o">-</span><span class="n">cB</span><span class="o">*</span><span class="n">nuB</span><span class="p">,</span> <span class="n">nubar</span><span class="p">]])</span>
+    <span class="c1"># correlated:</span>
+    <span class="n">Wbar</span><span class="p">,</span> <span class="n">bbar</span> <span class="o">=</span> <span class="n">make_Wbar_bbar</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span><span class="p">)</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">Wbar</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># ml = pyamg.smoothed_aggregation_solver(Wbar, symmetry=&#39;symmetric&#39;, max_coarse=10)</span>
+    <span class="c1"># etabar = np.array([ml.solve(bbar[:,0], x0=x0, tol=1e-8),</span>
+    <span class="c1">#                ml.solve(bbar[:,1], x0=x0, tol=1e-8),</span>
+    <span class="c1">#                ml.solve(bbar[:,2], x0=x0, tol=1e-8)]).T</span>
+    <span class="n">etabar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">minres</span><span class="p">(</span><span class="n">Wbar</span><span class="p">,</span> <span class="n">bbar</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                       <span class="n">minres</span><span class="p">(</span><span class="n">Wbar</span><span class="p">,</span> <span class="n">bbar</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                       <span class="n">minres</span><span class="p">(</span><span class="n">Wbar</span><span class="p">,</span> <span class="n">bbar</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)[</span><span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">etaave</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">etabar</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">etabar</span> <span class="o">-=</span> <span class="n">etaave</span>
+    <span class="k">return</span> <span class="n">L0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">etabar</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">bbar</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">if</span> <span class="n">__TESTING__</span><span class="p">:</span>
+    <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span> <span class="o">=</span> <span class="n">make_Wbarlists</span><span class="p">(</span><span class="n">sitelists</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">SCMF_diff</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Now, setup different levels of SCMF cluster expansions:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">NSCMF</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># maximum depth in the sitelists we&#39;ll go; 5 requires 1M states, 6 requires 16M states.</span>
+<span class="n">Wbarlists</span> <span class="o">=</span> <span class="p">[</span><span class="n">make_Wbarlists</span><span class="p">(</span><span class="n">sitelists</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NSCMF</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Case-1:-">
+<h3>Case 1: <span class="math notranslate nohighlight">\(\nu_\text{B} = \nu_\text{A}\)</span><a class="headerlink" href="#Case-1:-" title="Permalink to this headline">¶</a></h3>
+<p>We’ll run through a set of calculations for the transport coefficients
+using our 4 different approaches, to compare how they each perform.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># KMC parameters that we&#39;ll use throughout:</span>
+<span class="n">connectivity</span> <span class="o">=</span> <span class="n">make_connectivity</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span>  <span class="c1"># 4096 sites.</span>
+<span class="n">Nkmc</span><span class="p">,</span> <span class="n">Nsamples</span><span class="p">,</span> <span class="n">Nerror</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">32</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># data collection parameters we will use throughout</span>
+<span class="n">NdivKMC</span><span class="p">,</span> <span class="n">NdivGF</span><span class="p">,</span> <span class="n">NdivSCMF</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">64</span>  <span class="c1"># KMC is least efficient, SCMF next least, GF very fast.</span>
+<span class="n">conc_KMC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">NdivKMC</span><span class="o">+</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># leave out c=0,1</span>
+<span class="n">conc_GF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">NdivGF</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">conc_SCMF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">NdivSCMF</span><span class="o">+</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># leave out c=0,1</span>
+
+<span class="c1"># dictionary of results: keys will be 1 (equal), 4 (fast diffuser), 0 (stopped solute)</span>
+<span class="n">Diff_results</span> <span class="o">=</span> <span class="p">{}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">nuB</span> <span class="o">=</span> <span class="mf">1.</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">L_KMC</span><span class="p">,</span> <span class="n">dL_KMC</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">cB</span> <span class="ow">in</span> <span class="n">tqdm_notebook</span><span class="p">(</span><span class="n">conc_KMC</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">__TESTING__</span><span class="p">):</span>
+    <span class="n">Lab</span><span class="p">,</span> <span class="n">dLab</span> <span class="o">=</span> <span class="n">KMC_diff_fast</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">connectivity</span><span class="p">,</span> <span class="n">Nkmc</span><span class="p">,</span> <span class="n">Nsamples</span><span class="p">,</span> <span class="n">Nerror</span><span class="p">)</span>
+    <span class="n">L_KMC</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+    <span class="n">dL_KMC</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dLab</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">L_GF</span><span class="p">,</span> <span class="n">L_bb</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">cB</span> <span class="ow">in</span> <span class="n">conc_GF</span><span class="p">:</span>
+    <span class="n">Lab</span> <span class="o">=</span> <span class="n">Danalytic</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">)</span>
+    <span class="n">L_GF</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+    <span class="n">Lab</span> <span class="o">=</span> <span class="n">Danalytic</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=-</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">L_bb</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">L_SCMF</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Wbarlists</span><span class="p">))]</span>
+<span class="k">for</span> <span class="n">cB</span> <span class="ow">in</span> <span class="n">tqdm_notebook</span><span class="p">(</span><span class="n">conc_SCMF</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">__TESTING__</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Wbarlists</span><span class="p">):</span>
+        <span class="n">Lab</span> <span class="o">=</span> <span class="n">SCMF_diff</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span><span class="p">)</span>
+        <span class="n">L_SCMF</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># list of dictionary of results</span>
+<span class="n">Diff_results</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;L_KMC&quot;</span><span class="p">:</span> <span class="n">L_KMC</span><span class="p">,</span> <span class="s2">&quot;dL_KMC&quot;</span><span class="p">:</span> <span class="n">dL_KMC</span><span class="p">,</span> <span class="s2">&quot;L_GF&quot;</span><span class="p">:</span> <span class="n">L_GF</span><span class="p">,</span> <span class="s2">&quot;L_bb&quot;</span><span class="p">:</span> <span class="n">L_bb</span><span class="p">,</span> <span class="s2">&quot;L_SCMF&quot;</span><span class="p">:</span> <span class="n">L_SCMF</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Case-2:-">
+<h3>Case 2: <span class="math notranslate nohighlight">\(\nu_\text{B} = 4\nu_\text{A}\)</span><a class="headerlink" href="#Case-2:-" title="Permalink to this headline">¶</a></h3>
+<p>Next, the fast diffuser.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">nuB</span> <span class="o">=</span> <span class="mf">4.</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">L_KMC</span><span class="p">,</span> <span class="n">dL_KMC</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">cB</span> <span class="ow">in</span> <span class="n">tqdm_notebook</span><span class="p">(</span><span class="n">conc_KMC</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">__TESTING__</span><span class="p">):</span>
+    <span class="n">Lab</span><span class="p">,</span> <span class="n">dLab</span> <span class="o">=</span> <span class="n">KMC_diff_fast</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">connectivity</span><span class="p">,</span> <span class="n">Nkmc</span><span class="p">,</span> <span class="n">Nsamples</span><span class="p">,</span> <span class="n">Nerror</span><span class="p">)</span>
+    <span class="n">L_KMC</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+    <span class="n">dL_KMC</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dLab</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">L_GF</span><span class="p">,</span> <span class="n">L_bb</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">cB</span> <span class="ow">in</span> <span class="n">conc_GF</span><span class="p">:</span>
+    <span class="n">Lab</span> <span class="o">=</span> <span class="n">Danalytic</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">)</span>
+    <span class="n">L_GF</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+    <span class="n">Lab</span> <span class="o">=</span> <span class="n">Danalytic</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=-</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">L_bb</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">L_SCMF</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Wbarlists</span><span class="p">))]</span>
+<span class="k">for</span> <span class="n">cB</span> <span class="ow">in</span> <span class="n">tqdm_notebook</span><span class="p">(</span><span class="n">conc_SCMF</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">__TESTING__</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Wbarlists</span><span class="p">):</span>
+        <span class="n">Lab</span> <span class="o">=</span> <span class="n">SCMF_diff</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span><span class="p">)</span>
+        <span class="n">L_SCMF</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># list of dictionary of results</span>
+<span class="n">Diff_results</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;L_KMC&quot;</span><span class="p">:</span> <span class="n">L_KMC</span><span class="p">,</span> <span class="s2">&quot;dL_KMC&quot;</span><span class="p">:</span> <span class="n">dL_KMC</span><span class="p">,</span> <span class="s2">&quot;L_GF&quot;</span><span class="p">:</span> <span class="n">L_GF</span><span class="p">,</span> <span class="s2">&quot;L_bb&quot;</span><span class="p">:</span> <span class="n">L_bb</span><span class="p">,</span> <span class="s2">&quot;L_SCMF&quot;</span><span class="p">:</span> <span class="n">L_SCMF</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Case-3:-">
+<h3>Case 3: <span class="math notranslate nohighlight">\(\nu_\text{B} = 0\)</span><a class="headerlink" href="#Case-3:-" title="Permalink to this headline">¶</a></h3>
+<p>Finally, the fixed solute. Should include a percolation threshold where
+<span class="math notranslate nohighlight">\(L^\text{AA}\to0\)</span> for <span class="math notranslate nohighlight">\(c_\text{B}&lt;1\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">nuB</span> <span class="o">=</span> <span class="mf">0.</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">L_KMC</span><span class="p">,</span> <span class="n">dL_KMC</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">cB</span> <span class="ow">in</span> <span class="n">tqdm_notebook</span><span class="p">(</span><span class="n">conc_KMC</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">__TESTING__</span><span class="p">):</span>
+    <span class="n">Lab</span><span class="p">,</span> <span class="n">dLab</span> <span class="o">=</span> <span class="n">KMC_diff_fast</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">connectivity</span><span class="p">,</span> <span class="n">Nkmc</span><span class="p">,</span> <span class="n">Nsamples</span><span class="p">,</span> <span class="n">Nerror</span><span class="p">)</span>
+    <span class="n">L_KMC</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+    <span class="n">dL_KMC</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dLab</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">L_GF</span><span class="p">,</span> <span class="n">L_bb</span><span class="p">,</span> <span class="n">L_GFrbc</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">cB</span> <span class="ow">in</span> <span class="n">conc_GF</span><span class="p">:</span>
+    <span class="n">Lab</span> <span class="o">=</span> <span class="n">Danalytic</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">)</span>
+    <span class="n">L_GF</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+    <span class="n">Lab</span> <span class="o">=</span> <span class="n">Danalytic</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=-</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">L_bb</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+    <span class="n">Lab</span> <span class="o">=</span> <span class="n">Dbiascorrect</span><span class="p">(</span><span class="n">cB</span><span class="p">)</span>
+    <span class="n">L_GFrbc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">L_SCMF</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Wbarlists</span><span class="p">))]</span>
+<span class="k">for</span> <span class="n">cB</span> <span class="ow">in</span> <span class="n">tqdm_notebook</span><span class="p">(</span><span class="n">conc_SCMF</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">__TESTING__</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Wbarlists</span><span class="p">):</span>
+        <span class="n">Lab</span> <span class="o">=</span> <span class="n">SCMF_diff</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">nuB</span><span class="p">,</span> <span class="n">Wbarlist</span><span class="p">,</span> <span class="n">Wbardiag</span><span class="p">)</span>
+        <span class="n">L_SCMF</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># percolation runner</span>
+<span class="n">perc_connectivity</span> <span class="o">=</span> <span class="n">make_connectivity</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span>  <span class="c1"># 65536 sites.</span>
+<span class="n">L_perc</span><span class="p">,</span> <span class="n">dL_perc</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">cB</span> <span class="ow">in</span> <span class="n">tqdm_notebook</span><span class="p">(</span><span class="n">conc_KMC</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">__TESTING__</span><span class="p">):</span>
+    <span class="n">Lab</span><span class="p">,</span> <span class="n">dLab</span> <span class="o">=</span> <span class="n">percolation_diff</span><span class="p">(</span><span class="n">cB</span><span class="p">,</span> <span class="n">perc_connectivity</span><span class="p">)</span>
+    <span class="n">L_perc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Lab</span><span class="p">)</span>
+    <span class="n">dL_perc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dLab</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># list of dictionary of results</span>
+<span class="n">Diff_results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;L_KMC&quot;</span><span class="p">:</span> <span class="n">L_KMC</span><span class="p">,</span> <span class="s2">&quot;dL_KMC&quot;</span><span class="p">:</span> <span class="n">dL_KMC</span><span class="p">,</span>
+                   <span class="s2">&quot;L_GF&quot;</span><span class="p">:</span> <span class="n">L_GF</span><span class="p">,</span> <span class="s2">&quot;L_GFrbc&quot;</span><span class="p">:</span> <span class="n">L_GFrbc</span><span class="p">,</span>
+                   <span class="s2">&quot;L_bb&quot;</span><span class="p">:</span> <span class="n">L_bb</span><span class="p">,</span> <span class="s2">&quot;L_SCMF&quot;</span><span class="p">:</span> <span class="n">L_SCMF</span><span class="p">,</span>
+                   <span class="s2">&quot;L_perc&quot;</span><span class="p">:</span> <span class="n">L_perc</span><span class="p">,</span> <span class="s2">&quot;dL_perc&quot;</span><span class="p">:</span> <span class="n">dL_perc</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Analysis">
+<h3>Analysis<a class="headerlink" href="#Analysis" title="Permalink to this headline">¶</a></h3>
+<p>All of our analysis and development of plots from our data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">,</span> <span class="n">dLab</span><span class="p">,</span> <span class="n">Labperc</span><span class="p">,</span> <span class="n">dLabperc</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">conc_KMC</span><span class="p">,</span>
+                                           <span class="n">Diff_results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;L_KMC&#39;</span><span class="p">],</span> <span class="n">Diff_results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;dL_KMC&#39;</span><span class="p">],</span>
+                                           <span class="n">Diff_results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;L_perc&#39;</span><span class="p">],</span> <span class="n">Diff_results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;dL_perc&#39;</span><span class="p">]):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">dLab</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">Lab</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">Labperc</span><span class="p">,</span> <span class="n">dLabperc</span><span class="o">/</span><span class="n">Labperc</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.0625 0.8629499174066048 0.008451011119766117 0.808514204008143 0.0002585545108616046
+0.125 0.7115697231954404 0.009921893400274457 0.6273008984248463 0.0003829601585262315
+0.1875 0.5607261008620464 0.010417625306137194 0.45689939798052454 0.0004799456579681356
+0.25 0.4009898434562457 0.00946024555540577 0.29931744009480565 0.0010851038023369996
+0.3125 0.24339044479727687 0.011061480030178357 0.1573835169823426 0.0023167579308859634
+0.375 0.10776475515197109 0.014321499605599752 0.03981578389073146 0.011404987756544586
+0.4375 0.03021514989547705 0.019122745284185092 -7.164314792472541e-05 -0.5579909509397684
+0.5 0.006602982151677691 0.02287548851043285 5.9485437404650915e-05 0.8004890875491952
+0.5625 0.0018585020152682022 0.026275104510385415 -6.768107402924543e-05 -0.7740423133698235
+0.625 0.000693910501205702 0.02488514676332758 -1.2397766105082957e-05 -3.0455336259450414
+0.6875 0.0003002182528832531 0.03238746362895716 -4.4077634793503446e-05 -0.718143755210495
+0.75 0.0001370547702228491 0.031520213106036234 4.8995018004773915e-05 0.6857389712553215
+0.8125 5.970586962547377e-05 0.03551091744653467 2.8431415557900553e-05 0.7472079788338198
+0.875 2.210295267998805e-05 0.04479276192266607 2.2947788238525343e-05 1.208548673871216
+0.9375 5.100558913274012e-06 0.07347474790648414 2.861022949218694e-06 2.9156620293588182
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># 1: KMC, 2: GF, 3: bias basis, 4: SCMF</span>
+<span class="n">component</span><span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;$D^{</span><span class="se">\\</span><span class="s2">rm B}=(c_{</span><span class="se">\\</span><span class="s2">rm v}c_{</span><span class="se">\\</span><span class="s2">rm B})^{-1}\ L^{</span><span class="se">\\</span><span class="s2">rm{BB}}$&quot;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ncase</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">ax1</span><span class="p">):</span>
+
+    <span class="n">cL1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">[</span><span class="n">component</span><span class="p">]</span><span class="o">/</span><span class="n">c</span><span class="p">,</span> <span class="n">dLab</span><span class="p">[</span><span class="n">component</span><span class="p">]</span><span class="o">/</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">,</span> <span class="n">dLab</span> <span class="ow">in</span>
+                    <span class="nb">zip</span><span class="p">(</span><span class="n">conc_KMC</span><span class="p">,</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;L_KMC&#39;</span><span class="p">],</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;dL_KMC&#39;</span><span class="p">])])</span>
+    <span class="n">cL2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">[</span><span class="n">component</span><span class="p">]</span><span class="o">/</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">Lab</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">conc_GF</span><span class="p">,</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;L_GF&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">c</span><span class="o">!=</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">cL3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">[</span><span class="n">component</span><span class="p">]</span><span class="o">/</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">Lab</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">conc_GF</span><span class="p">,</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;L_bb&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">c</span><span class="o">!=</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">cL4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">[</span><span class="n">component</span><span class="p">]</span><span class="o">/</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">Lab</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">conc_SCMF</span><span class="p">,</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;L_SCMF&#39;</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Lab</span><span class="p">[</span><span class="n">component</span><span class="p">])</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cL4</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cL4</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;SCMF&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cL3</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cL3</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;bias basis&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cL2</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cL2</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;GF&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">cL1</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cL1</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">yerr</span><span class="o">=</span><span class="n">cL1</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;KMC&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="o">*</span><span class="n">ncase</span><span class="p">,</span> <span class="s2">&quot;$</span><span class="se">\\</span><span class="s2">nu_{</span><span class="se">\\</span><span class="s2">rm B}=&quot;</span> <span class="o">+</span> <span class="s2">&quot;{}$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ncase</span><span class="p">),</span>
+            <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;facecolor&#39;</span><span class="p">:</span> <span class="s1">&#39;white&#39;</span><span class="p">})</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">1.1</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.3</span><span class="p">),</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+          <span class="n">frameon</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;large&#39;</span><span class="p">,</span> <span class="n">framealpha</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$c_{</span><span class="se">\\</span><span class="s1">rm{B}}$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># plt.savefig(&#39;solute-diffusivity.pdf&#39;, transparent=True, format=&#39;pdf&#39;)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Random-alloy_55_0.png" src="../_images/examples_Random-alloy_55_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># 1: KMC, 2: GF, 3: bias basis, 4: SCMF</span>
+<span class="n">component</span><span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;$D^{</span><span class="se">\\</span><span class="s2">rm A}=(c_{</span><span class="se">\\</span><span class="s2">rm v}c_{</span><span class="se">\\</span><span class="s2">rm A})^{-1}\ L^{</span><span class="se">\\</span><span class="s2">rm{AA}}$&quot;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ncase</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">ax1</span><span class="p">):</span>
+
+    <span class="n">cL1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">[</span><span class="n">component</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">c</span><span class="p">),</span> <span class="n">dLab</span><span class="p">[</span><span class="n">component</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">c</span><span class="p">)]</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">,</span> <span class="n">dLab</span> <span class="ow">in</span>
+                    <span class="nb">zip</span><span class="p">(</span><span class="n">conc_KMC</span><span class="p">,</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;L_KMC&#39;</span><span class="p">],</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;dL_KMC&#39;</span><span class="p">])])</span>
+    <span class="k">if</span> <span class="n">ncase</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">cL1p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="p">[[</span><span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">c</span><span class="p">),</span> <span class="n">dLab</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">c</span><span class="p">)]</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">,</span> <span class="n">dLab</span> <span class="ow">in</span>
+                         <span class="nb">zip</span><span class="p">(</span><span class="n">conc_KMC</span><span class="p">,</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;L_perc&#39;</span><span class="p">],</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;dL_perc&#39;</span><span class="p">])])</span>
+        <span class="n">cL2p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">Lab</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">conc_GF</span><span class="p">,</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;L_GFrbc&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">c</span><span class="o">!=</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">cL2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">[</span><span class="n">component</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">c</span><span class="p">)]</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">Lab</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">conc_GF</span><span class="p">,</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;L_GF&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">c</span><span class="o">!=</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">cL3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">[</span><span class="n">component</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">c</span><span class="p">)]</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">Lab</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">conc_GF</span><span class="p">,</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;L_bb&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">c</span><span class="o">!=</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">cL4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">c</span><span class="p">,</span> <span class="n">Lab</span><span class="p">[</span><span class="n">component</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">c</span><span class="p">)]</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">Lab</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">conc_SCMF</span><span class="p">,</span> <span class="n">Diff_results</span><span class="p">[</span><span class="n">ncase</span><span class="p">][</span><span class="s1">&#39;L_SCMF&#39;</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Lab</span><span class="p">[</span><span class="n">component</span><span class="p">])</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cL4</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cL4</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;SCMF&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cL3</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cL3</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;bias basis&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cL2</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cL2</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;GF&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ncase</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cL2p</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cL2p</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;g--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;GF+RBC&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">cL1</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cL1</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">yerr</span><span class="o">=</span><span class="n">cL1</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;KMC&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ncase</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">cL1p</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cL1p</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">yerr</span><span class="o">=</span><span class="n">cL1p</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span>
+                             <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;mo-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;percolation&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.05</span> <span class="k">if</span> <span class="n">ncase</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="mf">0.8</span><span class="p">,</span> <span class="s2">&quot;$</span><span class="se">\\</span><span class="s2">nu_{</span><span class="se">\\</span><span class="s2">rm B}=&quot;</span> <span class="o">+</span> <span class="s2">&quot;{}$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ncase</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;facecolor&#39;</span><span class="p">:</span> <span class="s1">&#39;white&#39;</span><span class="p">})</span>
+<span class="n">ax1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.55</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.3</span><span class="p">),</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+          <span class="n">frameon</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;large&#39;</span><span class="p">,</span> <span class="n">framealpha</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$c_{</span><span class="se">\\</span><span class="s1">rm{B}}$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># plt.savefig(&#39;solvent-diffusivity.pdf&#39;, transparent=True, format=&#39;pdf&#39;)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Random-alloy_56_0.png" src="../_images/examples_Random-alloy_56_0.png" />
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../modules.html" class="btn btn-neutral float-right" title="Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="FCC-Co-O.html" class="btn btn-neutral" title="Split oxygen-vacancy defects in Co" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Dallas R. Trinkle.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.3',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Supercell &mdash; Onsager 1.2.4 documentation</title>
+  <title>Supercell &mdash; Onsager 1.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Onsager 1.2.4 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 1.3 documentation" href="index.html"/>
         <link rel="up" title="Modules" href="modules.html"/>
         <link rel="next" title="PowerExpansion" href="PowerExpansion.html"/>
         <link rel="prev" title="CrystalStars" href="CrystalStars.html"/> 
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -207,7 +207,7 @@
 <div class="section" id="supercell">
 <h1>Supercell<a class="headerlink" href="#supercell" title="Permalink to this headline">¶</a></h1>
 <p>Supercell:</p>
-<p>The supercell module defines the <code class="docutils literal"><span class="pre">supercell</span></code> class for building supercells from <code class="docutils literal"><span class="pre">crystal.Crystal</span></code> classes.</p>
+<p>The supercell module defines the <code class="docutils literal notranslate"><span class="pre">supercell</span></code> class for building supercells from <code class="docutils literal notranslate"><span class="pre">crystal.Crystal</span></code> classes.</p>
 <span class="target" id="module-supercell"></span><p>Supercell class</p>
 <p>Class to store supercells of crystals. A supercell is a lattice model of a crystal, with
 periodically repeating unit cells. In that framework we can</p>
@@ -407,8 +407,8 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <dl class="method">
 <dt id="supercell.Supercell.copy">
 <code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a copy of the supercell; initializes, then copies over <code class="docutils literal"><span class="pre">__copyattr__</span></code> and
-<code class="docutils literal"><span class="pre">__eqattr__</span></code>.</p>
+<dd><p>Make a copy of the supercell; initializes, then copies over <code class="docutils literal notranslate"><span class="pre">__copyattr__</span></code> and
+<code class="docutils literal notranslate"><span class="pre">__eqattr__</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -454,21 +454,21 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <dl class="method">
 <dt id="supercell.Supercell.equivalencemap">
 <code class="descname">equivalencemap</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.equivalencemap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.equivalencemap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given the super <code class="docutils literal"><span class="pre">other</span></code> we want to find a group operation that transforms <code class="docutils literal"><span class="pre">self</span></code>
+<dd><p>Given the super <code class="docutils literal notranslate"><span class="pre">other</span></code> we want to find a group operation that transforms <code class="docutils literal notranslate"><span class="pre">self</span></code>
 into other. This is a GroupOp <em>along</em> with an index mapping of chemorder. The index
 mapping is to get the occposlist to match up:
-<code class="docutils literal"><span class="pre">(g*self).occposlist()[c][mapping[c][i]]</span> <span class="pre">==</span> <span class="pre">other.occposlist()[c][i]</span></code>
+<code class="docutils literal notranslate"><span class="pre">(g*self).occposlist()[c][mapping[c][i]]</span> <span class="pre">==</span> <span class="pre">other.occposlist()[c][i]</span></code>
 (We can write a similar expression using chemorder, since chemorder indexes into pos).
 We’re going to return both g and mapping.</p>
-<p><em>Remember:</em> <code class="docutils literal"><span class="pre">g</span></code> does not change the presentation ordering; <code class="docutils literal"><span class="pre">mapping</span></code> is
-necessary for full equivalence. If no such equivalence, return <code class="docutils literal"><span class="pre">None,None</span></code>.</p>
+<p><em>Remember:</em> <code class="docutils literal notranslate"><span class="pre">g</span></code> does not change the presentation ordering; <code class="docutils literal notranslate"><span class="pre">mapping</span></code> is
+necessary for full equivalence. If no such equivalence, return <code class="docutils literal notranslate"><span class="pre">None,None</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> – Supercell</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return g:</th><td class="field-body">GroupOp to transform sites from <code class="docutils literal"><span class="pre">self</span></code> to <code class="docutils literal"><span class="pre">other</span></code></td>
+<tr class="field-even field"><th class="field-name">Return g:</th><td class="field-body">GroupOp to transform sites from <code class="docutils literal notranslate"><span class="pre">self</span></code> to <code class="docutils literal notranslate"><span class="pre">other</span></code></td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return mapping:</th><td class="field-body">list of maps, such that (g*self).chemorder[c][mapping[c][i]] == other.chemorder[c][i]</td>
 </tr>
@@ -564,7 +564,7 @@ cell that remain inside the supercell</p>
 <tr class="field-odd field"><td>&#160;</td><td class="field-body">integer matrix inverse of supercell (needs to be divided by size)</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Return translist:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body">list of integer vectors (to be divided by <code class="docutils literal"><span class="pre">size</span></code>) corresponding
+<tr class="field-even field"><td>&#160;</td><td class="field-body">list of integer vectors (to be divided by <code class="docutils literal notranslate"><span class="pre">size</span></code>) corresponding
 to unit cell positions</td>
 </tr>
 <tr class="field-odd field"><th class="field-name" colspan="2">Return transdict:</th></tr>
@@ -679,7 +679,7 @@ for “presentation”.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4',
+            VERSION:'1.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

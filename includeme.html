@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Onsager &mdash; Onsager 1.2.4 documentation</title>
+  <title>Onsager &mdash; Onsager 1.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Onsager 1.2.4 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 1.3 documentation" href="index.html"/>
         <link rel="next" title="Input and output for Onsager transport calculation" href="InputOutput.html"/>
         <link rel="prev" title="Onsager: Automated diffusion calculation" href="index.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -204,7 +204,7 @@
 <p>Documentation now available at the [Onsager github page](<a class="reference external" href="http://dallastrinkle.github.io/Onsager/">http://dallastrinkle.github.io/Onsager/</a>). Please cite as [![DOI](<a class="reference external" href="https://zenodo.org/badge/14172/DallasTrinkle/Onsager.svg)](https://zenodo.org/badge/latestdoi/14172/DallasTrinkle/Onsager">https://zenodo.org/badge/14172/DallasTrinkle/Onsager.svg)](https://zenodo.org/badge/latestdoi/14172/DallasTrinkle/Onsager</a>) or see <a class="reference external" href="https://github.com/DallasTrinkle/Onsager">Onsager github</a> for current version doi information.</p>
 <p>The Onsager package provides routines for the general calculation of transport coefficients in vacancy-mediated diffusion and interstitial diffusion. It does this using a Green function approach, combined with point group symmetry reduction for maximum efficiency.</p>
 <p>Typical usage can be seen in the ipython notebooks in <cite>examples</cite>; the usual import will be:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
 
     <span class="kn">from</span> <span class="nn">onsager</span> <span class="k">import</span> <span class="n">crystal</span>
     <span class="kn">from</span> <span class="nn">onsager</span> <span class="k">import</span> <span class="n">OnsagerCalc</span>
@@ -225,7 +225,8 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
 <li>1.1 Automator update with Makefile; corrections for possible overflow error when omega2 gets very large.</li>
 <li>1.2 Combined “large omega2” and “non-zero bias” algorithms; notebook for Fe-C added to documentation; cleanup of code and improved testing.</li>
 <li>1.2.1 Additional notebooks added for vacancy-mediated diffuser.</li>
-<li>1.2.2 New internal friction calculator for interstitial diffuser; improvement in Crystal class symmetry to handle larger error in unit cell.</li>
+<li>1.2.2 New internal friction calculator for interstitial diffuser; improvement in <cite>Crystal</cite> class symmetry to handle larger error in unit cell.</li>
+<li>1.3 Two-dimensional lattice support added; new notebooks for variational calculations.</li>
 </ul>
 </div>
 <div class="section" id="references">
@@ -233,6 +234,7 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
 <ul class="simple">
 <li>Dallas R. Trinkle, “Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors.” Philos. Mag. (2016) [doi:10.1080/14786435.2016.1212175](http://dx.doi.org/10.1080/14786435.2016.1212175); [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)</li>
 <li>Dallas R. Trinkle, “Automatic numerical evaluation of vacancy-mediated transport for arbitrary crystals: Onsager coefficients in the dilute limit using a Green function approach.” Philos. Mag. (2017) [doi:10.1080/14786435.2017.1340685](http://dx.doi.org/10.1080/14786435.2017.1340685); [arXiv:1608.01252](http://arxiv.org/abs/1608.01252)</li>
+<li>Dallas R. Trinkle, “A variational principle for mass transport.” <em>submitted</em> (2018); [arXiv:16XX.YYYYY](http://arxiv.org/abs/16XX.YYYYY)</li>
 </ul>
 </div>
 <div class="section" id="contributors">
@@ -251,7 +253,7 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
 <li>DOE/BES grant DE-FG02-05ER46217,</li>
 <li>ONR grant N000141210752,</li>
 <li>NSF/CDSE grant 1411106.</li>
-<li>Dallas R. Trinkle began the theoretical work for this code during the long program on Material Defects at the [Institute for Pure and Applied Mathematics](<a class="reference external" href="https://www.ipam.ucla.edu/">https://www.ipam.ucla.edu/</a>) at UCLA, Fall 2012, which is supported by the National Science Foundation.</li>
+<li>Dallas R. Trinkle began the theoretical work for this code during the long program on Material Defects at the [Institute for Pure and Applied Mathematics](<a class="reference external" href="https://www.ipam.ucla.edu/">https://www.ipam.ucla.edu/</a>) at UCLA, Fall 2012, and again during the long program on Complex Energy Landscapes, Fall 2017. IPAM is supported by the National Science Foundation.</li>
 </ul>
 </div>
 </div>
@@ -300,7 +302,7 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4',
+            VERSION:'1.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Automator &mdash; Onsager 1.2.4 documentation</title>
+  <title>Automator &mdash; Onsager 1.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Onsager 1.2.4 documentation" href="index.html"/>
+    <link rel="top" title="Onsager 1.3 documentation" href="index.html"/>
         <link rel="up" title="Modules" href="modules.html"/>
         <link rel="prev" title="OnsagerCalc" href="OnsagerCalc.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -224,7 +224,7 @@ atomic-scale transition state calculations. This includes:</p>
 <dt id="automator.map2string">
 <code class="descclassname">automator.</code><code class="descname">map2string</code><span class="sig-paren">(</span><em>tag</em>, <em>groupop</em>, <em>mapping</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#map2string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.map2string" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes in a map: tag, groupop, mapping and constructs a string representation
-to be dumped to a file. If we want to call using the tuple, <code class="docutils literal"><span class="pre">map2string(*(map))</span></code> will suffice.</p>
+to be dumped to a file. If we want to call using the tuple, <code class="docutils literal notranslate"><span class="pre">map2string(*(map))</span></code> will suffice.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -251,7 +251,7 @@ in initial cell to use.</li>
 <dd><p>Takes in a tarfile (needs to be open for writing) and a supercelldict (from a
 diffuser) and creates the full directory structure inside the tarfile. Best used in
 a form like</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;supercells.tar.gz&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w:gz&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;supercells.tar.gz&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w:gz&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
     <span class="n">automator</span><span class="o">.</span><span class="n">supercelltar</span><span class="p">(</span><span class="n">tar</span><span class="p">,</span> <span class="n">supercelldict</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -261,8 +261,8 @@ a form like</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>tar</strong> – tarfile open for writing; may contain other files in advance.</li>
-<li><strong>superdict</strong> – <p>dictionary of <code class="docutils literal"><span class="pre">states</span></code>, <code class="docutils literal"><span class="pre">transitions</span></code>, <code class="docutils literal"><span class="pre">transmapping</span></code>, <code class="docutils literal"><span class="pre">indices</span></code> that
-correspond to dictionaries with tags; the final tag <code class="docutils literal"><span class="pre">reference</span></code> is the basesupercell
+<li><strong>superdict</strong> – <p>dictionary of <code class="docutils literal notranslate"><span class="pre">states</span></code>, <code class="docutils literal notranslate"><span class="pre">transitions</span></code>, <code class="docutils literal notranslate"><span class="pre">transmapping</span></code>, <code class="docutils literal notranslate"><span class="pre">indices</span></code> that
+correspond to dictionaries with tags; the final tag <code class="docutils literal notranslate"><span class="pre">reference</span></code> is the basesupercell
 for calculations without defects.</p>
 <ul>
 <li>superdict[‘states’][i] = supercell of state;</li>
@@ -340,7 +340,7 @@ set to None to not output. <strong>may want to change this to None for the futur
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4',
+            VERSION:'1.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
