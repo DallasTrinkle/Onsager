@@ -103,6 +103,52 @@ class GreenFuncCrystalTests(unittest.TestCase):
                     gw += omega * (HCP_GF(i, j, dx) - g0)
         self.assertAlmostEqual(gw, 1, places=6)
 
+    def testsquare(self):
+        """Test on square"""
+        square = crystal.Crystal(np.eye(2), [np.zeros(2)])
+        square_sitelist = square.sitelist(0)
+        square_jumpnetwork = square.jumpnetwork(0, 1.01)
+        square_GF = GFcalc.GFCrystalcalc(square, 0, square_sitelist, square_jumpnetwork, Nmax=4)
+        square_GF.SetRates([1], [0], [1], [0])
+        square_zero = np.zeros(2)
+        square_1nn = np.array([1.,0.])
+        square_2nn = np.array([1.,1.])
+        square_3nn = np.array([2.,0.])
+        g0 = square_GF(0, 0, square_zero)
+        g1 = square_GF(0, 0, square_1nn)
+        g2 = square_GF(0, 0, square_2nn)
+        g3 = square_GF(0, 0, square_3nn)
+        self.assertAlmostEqual(-4 * g0 + 4 * g1, 1, places=6)
+        self.assertAlmostEqual(-4 * g1 + g0 + 2*g2 + g3, 0, places=6)
+
+    def testtria(self):
+        """Test on triagonal"""
+        tria = crystal.Crystal(np.array([[1/2, 1/2], [-np.sqrt(3/4), np.sqrt(3/4)]]), [np.zeros(2)])
+        tria_sitelist = tria.sitelist(0)
+        tria_jumpnetwork = tria.jumpnetwork(0, 1.01)
+        tria_GF = GFcalc.GFCrystalcalc(tria, 0, tria_sitelist, tria_jumpnetwork, Nmax=4)
+        tria_GF.SetRates([1], [0], [1], [0])
+        tria_zero = np.zeros(2)
+        tria_1nn = np.array([1.,0.])
+        g0 = tria_GF(0, 0, tria_zero)
+        g1 = tria_GF(0, 0, tria_1nn)
+        self.assertAlmostEqual(-6 * g0 + 6 * g1, 1, places=6)
+
+    def testhoneycomb(self):
+        """Test on honeycomb"""
+        honey = crystal.Crystal(np.array([[1/2, 1/2], [-np.sqrt(3/4), np.sqrt(3/4)]]),
+                                [np.array([2/3, 1/3]), np.array([1/3, 2/3])])
+        honey_sitelist = honey.sitelist(0)
+        honey_jumpnetwork = honey.jumpnetwork(0, 0.6)
+        honey_GF = GFcalc.GFCrystalcalc(honey, 0, honey_sitelist, honey_jumpnetwork, Nmax=4)
+        honey_GF.SetRates([1], [0], [1], [0])
+        honey_zero = np.zeros(2)
+        honey_1nn = honey.pos2cart(np.zeros(2), (0, 1)) - honey.pos2cart(np.zeros(2), (0, 0))
+        g0 = honey_GF(0, 0, honey_zero)
+        g1 = honey_GF(0, 1, honey_1nn)
+        self.assertAlmostEqual(-3 * g0 + 3 * g1, 1, places=6)
+
+
     def testBCC_B2(self):
         """Test that BCC and B2 produce the same GF"""
         a0 = 1.

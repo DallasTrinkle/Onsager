@@ -13,3 +13,4 @@ Below are several jupyter notebooks with example input and output from ``onsager
    examples/LargeOmega2.ipynb
    examples/NiSi.ipynb
    examples/FCC-Co-O.ipynb 
+   examples/Random-alloy.ipynb

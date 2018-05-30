@@ -34,9 +34,19 @@ def setupcubic():
                     ((0, 0), np.array([0., 0., 1.])), ((0, 0), np.array([0., 0., -1.]))]]
     return crys, jumpnetwork
 
+def setupsquare():
+    crys = crystal.Crystal(np.eye(2), [[np.zeros(2)]])
+    jumpnetwork = [[((0, 0), np.array([1., 0.])), ((0, 0), np.array([-1., 0.])),
+                    ((0, 0), np.array([0., 1.])), ((0, 0), np.array([0., -1.]))]]
+    return crys, jumpnetwork
+
+
 
 def cubicrates():
     return np.array([1. / 6.])
+
+def squarerates():
+    return np.array([1. / 4.])
 
 
 def setupFCC():
@@ -206,13 +216,14 @@ class StarTests(unittest.TestCase):
 
     def testStarindices(self):
         """Check that our indexing is correct."""
+        dim = self.crys.dim
         self.starset.generate(4)
         for si, star in enumerate(self.starset.stars):
             for i in star:
                 self.assertEqual(si, self.starset.starindex(self.starset.states[i]))
-        self.assertEqual(None, self.starset.starindex(stars.PairState.zero()))
-        self.assertEqual(None, self.starset.stateindex(stars.PairState.zero()))
-        self.assertNotIn(stars.PairState.zero(), self.starset)  # test __contains__ (PS in starset)
+        self.assertEqual(None, self.starset.starindex(stars.PairState.zero(dim=dim)))
+        self.assertEqual(None, self.starset.stateindex(stars.PairState.zero(dim=dim)))
+        self.assertNotIn(stars.PairState.zero(dim=dim), self.starset)  # test __contains__ (PS in starset)
 
     def assertEqualStars(self, s1, s2):
         """Asserts that two star sets are equal."""
@@ -265,12 +276,13 @@ class CubicStarTests(StarTests):
 
     def testStarConsistent(self):
         """Check that the counts (Npts, Nstars) make sense for cubic, with Nshells = 1..4"""
+        dim = self.crys.dim
         for n in range(1, 5):
             self.starset.generate(n)
             for starindex in range(self.starset.Nstars):
                 self.assertTrue(self.isclosed(self.starset, starindex))
-            self.assertEqual(None, self.starset.starindex(stars.PairState.zero()))
-            self.assertEqual(None, self.starset.stateindex(stars.PairState.zero()))
+            self.assertEqual(None, self.starset.starindex(stars.PairState.zero(dim=dim)))
+            self.assertEqual(None, self.starset.stateindex(stars.PairState.zero(dim=dim)))
 
             for s in self.starset.stars:
                 x = np.sort(abs(self.starset.states[s[0]].dx))
@@ -325,6 +337,15 @@ class FCCStarTests(CubicStarTests):
         # 110, 200, 211, 220, 310, 321, 330, 222
         self.starset.generate(3)
         self.assertEqual(self.starset.Nstars, 8)
+
+
+class SquareStarTests(StarTests):
+    """Set of tests that our star code is behaving correctly for square"""
+
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupsquare()
+        self.chem = 0
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
 
 # replaced DoubleStarTests
@@ -451,10 +472,11 @@ class VectorStarTests(unittest.TestCase):
 
     def testVectorStarOuterProduct(self):
         """Do we generate the correct outer products for our star-vectors (symmetry checks)?"""
+        dim = self.crys.dim
         self.starset.generate(2)
         self.vecstarset = stars.VectorStarSet(self.starset)
         self.assertEqual(np.shape(self.vecstarset.outer),
-                         (3, 3, self.vecstarset.Nvstars, self.vecstarset.Nvstars))
+                         (dim, dim, self.vecstarset.Nvstars, self.vecstarset.Nvstars))
         # check our diagonal blocks first:
         for outer in [self.vecstarset.outer[:, :, i, i]
                       for i in range(self.vecstarset.Nvstars)]:
@@ -475,7 +497,7 @@ class VectorStarTests(unittest.TestCase):
                 self.assertTrue(np.allclose(g_out_gT, outer))
         for i, (s0, svv0) in enumerate(zip(self.vecstarset.vecpos, self.vecstarset.vecvec)):
             for j, (s1, svv1) in enumerate(zip(self.vecstarset.vecpos, self.vecstarset.vecvec)):
-                testouter = np.zeros((3, 3))
+                testouter = np.zeros((dim, dim))
                 if s0[0] == s1[0]:
                     # we have the same underlying star to work with, so...
                     for v0, v1 in zip(svv0, svv1):
@@ -571,6 +593,23 @@ class VectorStarB2Tests(VectorStarTests):
         # nn + nn = 10 stars, and that should make 20 star-vectors!
         self.assertEqual(self.starset.Nstars, 10)
         self.assertEqual(self.vecstarset.Nvstars, 20)
+
+
+class VectorStarSquareTests(VectorStarTests):
+    """Set of tests that our VectorStar class is behaving correctly, for square"""
+
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupsquare()
+        self.chem = 0
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+    def testVectorStarCount(self):
+        """Does our star vector count make any sense?"""
+        self.starset.generate(3)
+        self.vecstarset = stars.VectorStarSet(self.starset)
+        # nn + nn + nn = 5 stars (10,11,20,21,30), and that should make 6 star-vectors!
+        self.assertEqual(self.starset.Nstars, 5)
+        self.assertEqual(self.vecstarset.Nvstars, 6)
 
 
 import onsager.GFcalc as GFcalc
@@ -701,6 +740,28 @@ class VectorStarGFBCClinearTests(VectorStarGFlinearTests):
         self.ConstructGF(2)
 
 
+class VectorStarGFSquarelinearTests(VectorStarGFlinearTests):
+    """Set of tests that make sure we can construct the GF matrix as a linear combination for square"""
+
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupsquare()
+        self.rates = squarerates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+        # not an accurate value for Nmax; but since we just need some values, it's fine
+        self.GF = GFcalc.GFCrystalcalc(self.crys, self.chem, self.sitelist, self.jumpnetwork, Nmax=2)
+        self.GF.SetRates([1 for s in self.sitelist],
+                         [0 for s in self.sitelist],
+                         self.rates,
+                         [0 for j in self.rates])
+
+    def testConstructGF(self):
+        """Test the construction of the GF using double-nn shell"""
+        self.ConstructGF(2)
+
+
 class VectorStarGFB2linearTests(VectorStarGFlinearTests):
     """Set of tests that make sure we can construct the GF matrix as a linear combination for B2"""
 
@@ -806,6 +867,17 @@ class VectorStarBCCOmega0Tests(VectorStarOmega0Tests):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
 
+class VectorStarSquareOmega0Tests(VectorStarOmega0Tests):
+    """Set of tests for our expansion of omega_0 for square"""
+
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupsquare()
+        self.rates = squarerates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+
 class VectorStarB2Omega0Tests(VectorStarOmega0Tests):
     """Set of tests for our expansion of omega_0 for B2"""
 
@@ -885,6 +957,17 @@ class VectorStarBCCOmegalinearTests(VectorStarOmegalinearTests):
 
     def setUp(self):
         self.crys, self.jumpnetwork = setupBCC()
+        # self.rates = HCPrates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+
+class VectorStarSquareOmegalinearTests(VectorStarOmegalinearTests):
+    """Set of tests for our expansion of omega_1 for square"""
+
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupsquare()
         # self.rates = HCPrates()
         self.chem = 0
         self.sitelist = self.crys.sitelist(self.chem)
@@ -975,6 +1058,17 @@ class VectorStarBCCOmega2linearTests(VectorStarOmega2linearTests):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
 
+class VectorStarSquareOmega2linearTests(VectorStarOmega2linearTests):
+    """Set of tests for our expansion of omega_2 for square"""
+
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupsquare()
+        self.rates = squarerates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+
 class VectorStarB2Omega2linearTests(VectorStarOmega2linearTests):
     """Set of tests for our expansion of omega_2 for B2"""
 
@@ -999,6 +1093,7 @@ class VectorStarBias2linearTests(unittest.TestCase):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
     def testConstructBias2(self):
+        dim = self.crys.dim
         self.starset.generate(2)  # we need at least 2nd nn to even have jump networks to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         jumpnetwork_omega2, jt, sp = self.starset.jumpnetwork_omega2()
@@ -1009,14 +1104,14 @@ class VectorStarBias2linearTests(unittest.TestCase):
         om0expand = self.rates.copy()
         self.assertEqual(np.shape(bias2expand),
                          (self.vecstarset.Nvstars, len(self.jumpnetwork)))
-        biasvec = np.zeros((self.starset.Nstates, 3))  # bias vector: only the exchange hops
+        biasvec = np.zeros((self.starset.Nstates, dim))  # bias vector: only the exchange hops
         for jumplist, rate in zip(jumpnetwork_omega2, self.rates):
             for (IS, FS), dx in jumplist:
                 for i in range(self.starset.Nstates):
                     if IS == i:
                         biasvec[i, :] += dx * (alpha - 1) * rate
         # construct the same bias vector using our expansion
-        biasveccomp = np.zeros((self.starset.Nstates, 3))
+        biasveccomp = np.zeros((self.starset.Nstates, dim))
         for b2, b0, svpos, svvec in zip(np.dot(bias2expand, om2expand),
                                         np.dot(bias0expand, om0expand),
                                         self.vecstarset.vecpos,
@@ -1063,6 +1158,17 @@ class VectorStarBCCBias2linearTests(VectorStarBias2linearTests):
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
 
 
+class VectorStarSquareBias2linearTests(VectorStarBias2linearTests):
+    """Set of tests for our expansion of bias vector (2) for square"""
+
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupsquare()
+        self.rates = squarerates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+
 class VectorStarB2Bias2linearTests(VectorStarBias2linearTests):
     """Set of tests for our expansion of bias vector (2) for B2"""
 
@@ -1072,9 +1178,6 @@ class VectorStarB2Bias2linearTests(VectorStarBias2linearTests):
         self.chem = 0
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
-
-
-import onsager.OnsagerCalc as OnsagerCalc  # we use this for the Interstitial Calculator
 
 
 class VectorStarBias1linearTests(unittest.TestCase):
@@ -1091,6 +1194,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
 
     def testConstructBias1(self):
         """Do we construct our omega1 bias correctly?"""
+        dim = self.crys.dim
         self.starset.generate(2)  # we need at least 2nd nn to even have jump networks to worry about...
         self.vecstarset = stars.VectorStarSet(self.starset)
         jumpnetwork_omega1, jt, sp = self.starset.jumpnetwork_omega1()
@@ -1099,7 +1203,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
         om0expand = self.rates.copy()
         self.assertEqual(np.shape(bias1expand),
                          (self.vecstarset.Nvstars, len(jumpnetwork_omega1)))
-        biasvec = np.zeros((self.starset.Nstates, 3))  # bias vector: only the exchange hops
+        biasvec = np.zeros((self.starset.Nstates, dim))  # bias vector: only the exchange hops
         for jumplist, rate, om0type in zip(jumpnetwork_omega1, om1expand, jt):
             om0 = om0expand[om0type]
             for (IS, FS), dx in jumplist:
@@ -1107,7 +1211,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
                     if IS == i:
                         biasvec[i, :] += dx * (rate - om0)
         # construct the same bias vector using our expansion
-        biasveccomp = np.zeros((self.starset.Nstates, 3))
+        biasveccomp = np.zeros((self.starset.Nstates, dim))
         for b1, b0, svpos, svvec in zip(np.dot(bias1expand, om1expand),
                                         np.dot(bias0expand, om0expand),
                                         self.vecstarset.vecpos,
@@ -1122,6 +1226,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
 
     def testPeriodicBias(self):
         """Do we have no periodic bias?"""
+        dim = self.crys.dim
         vectorbasislist = self.crys.FullVectorBasis(self.chem)[0]  # just check the VB list
         # we *should* have some projection if there's a vectorbasis, so only continue if this is empty
         if len(vectorbasislist) != 0: return
@@ -1132,7 +1237,7 @@ class VectorStarBias1linearTests(unittest.TestCase):
             NOS = len(OSindices)
             self.assertEqual(NOS, 0)
             self.assertEqual(folddown.shape, (NOS, self.vecstarset.Nvstars))
-            self.assertEqual(OS_VB.shape, (NOS, len(self.crys.basis[self.chem]), 3))
+            self.assertEqual(OS_VB.shape, (NOS, len(self.crys.basis[self.chem]), dim))
 
 
 class VectorStarFCCBias1linearTests(VectorStarBias1linearTests):
@@ -1163,6 +1268,17 @@ class VectorStarBCCBias1linearTests(VectorStarBias1linearTests):
     def setUp(self):
         self.crys, self.jumpnetwork = setupBCC()
         self.rates = BCCrates()
+        self.chem = 0
+        self.sitelist = self.crys.sitelist(self.chem)
+        self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
+
+
+class VectorStarSquareBias1linearTests(VectorStarBias1linearTests):
+    """Set of tests for our expansion of bias vector (1) for square"""
+
+    def setUp(self):
+        self.crys, self.jumpnetwork = setupsquare()
+        self.rates = squarerates()
         self.chem = 0
         self.sitelist = self.crys.sitelist(self.chem)
         self.starset = stars.StarSet(self.jumpnetwork, self.crys, self.chem)
