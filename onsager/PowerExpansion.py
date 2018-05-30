@@ -13,6 +13,7 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 from numbers import Number
 from scipy.special import factorial
+from scipy.misc import comb
 
 
 class Taylor3D(object):
@@ -84,7 +85,8 @@ class Taylor3D(object):
                     zz = (-1) ** (l - k) * factorial(2 * k, True) / \
                          (2 ** l * factorial(2 * k - l - m, True) * factorial(k, True) * factorial(l - k, True))
                     for j in range(m + 1):
-                        xy = factorial(m, True) / (factorial(j, True) * factorial(m - j, True))
+                        # xy = factorial(m, True) / (factorial(j, True) * factorial(m - j, True))
+                        xy = comb(m, j)
                         Ylmpow[ind, cls.pow2ind[j, m - j, 2 * k - l - m]] = pre * zz * xy * (1.j) ** (m - j)
             for m in range(-l, 0):
                 ind = cls.Ylm2ind[l, m]
@@ -244,7 +246,6 @@ class Taylor3D(object):
         """
         Takes a "basis" for constructing an expansion -- list of vectors and matrices --
         and constructs the expansions up to power N (default = Lmax)
-        Takes a direction expansion a and b, and returns the sum of the expansions.
 
         :param basis = list((coeffmatrix, vect)): expansions to create;
           sum(coeffmatrix * (vect*q)^n), for powers n = 0..N
@@ -1146,3 +1147,318 @@ class Taylor3D(object):
             return self
         else:
             return type(self)(self.truncatecoeff(self.coefflist, Nmax))
+
+
+class Taylor2D(Taylor3D):
+    """
+    Class that stores a Taylor expansion of a function in 2D, and defines some arithmetic
+    """
+
+    # As much as possible, we inherit from the 2D code; below are the changes we make
+
+    @staticmethod
+    def makeindexPowerFC(Lmax):
+        """
+        Analyzes the Fourier coefficients and powers for a given Lmax; returns a
+        series of index functions.
+
+        :param Lmax: maximum l value to consider; equal to the sum of powers
+        :return NFC: number of Fourier coefficients
+        :return Npower: number of power coefficients
+        :return pow2ind[n1][n2]: powers to index
+        :return ind2pow[n]: powers for a given index
+        :return FC2ind[l]: (l) to index
+        :return ind2FC[lind]: (l) for a given index
+        :return powlrange[l]: upper limit of power indices for a given l value; note: [-1] = 0
+        """
+        # first, the counts
+        NFC = 2*Lmax + 1
+        Npower = (Lmax+1)*(Lmax+2)//2
+        # indexing arrays
+        powlrange = np.zeros(Lmax + 2, dtype=int)
+        powlrange[-1] = 0
+        pow2ind = -np.ones((Lmax + 1, Lmax + 1), dtype=int)
+        ind2pow = np.zeros((Npower, 2), dtype=int)
+        FC2ind = np.zeros(NFC, dtype=int)
+        ind2FC = np.zeros(NFC, dtype=int)
+        # powers first; these are ordered by increasing l = n1+n2
+        ind = 0
+        for l in range(Lmax + 1):
+            for n1 in range(l + 1):
+                n2 = l-n1
+                pow2ind[n1, n2] = ind
+                ind2pow[ind,0], ind2pow[ind, 1] = n1, n2
+                ind += 1
+            powlrange[l] = ind
+        # next, FC values
+        ind = 0
+        for l in range(-Lmax,Lmax+1):
+            FC2ind[l] = ind
+            ind2FC[ind] = l
+            ind += 1
+        return NFC, Npower, pow2ind, ind2pow, FC2ind, ind2FC, powlrange
+
+    @classmethod
+    def makeFCpow(cls):
+        """
+        Construct the expansion of the FC's in powers of x,y. Done via brute force.
+
+        :return FCpow[l, p]: expansion of each FC in powers
+        """
+        FCpow = np.zeros((cls.NFC, cls.Npower), dtype=complex)
+        for lind, l in enumerate(cls.ind2FC):
+            labs = abs(l)
+            lsign = 1j if l >= 0 else -1j
+            for k in range(labs + 1):
+                nmind = cls.pow2ind[k, labs - k]
+                FCpow[lind, nmind] = comb(labs, k) * (lsign) ** (labs - k)
+        return FCpow
+
+    @classmethod
+    def makepowFC(cls):
+        """
+        Construct the expansion of the powers in FC's. Done using brute force
+
+        :return powFC[p, l]: expansion of powers in FC; uses indexing scheme above
+        """
+        powFC = np.zeros((cls.Npower, cls.NFC), dtype=complex)
+        for nind, (n,m) in enumerate(cls.ind2pow):
+            pre = (-1j) ** m / (2 ** (n + m))
+            for j in range(n + 1):
+                for k in range(m + 1):
+                    l = 2 * j - n + 2 * k - m
+                    powFC[nind, cls.FC2ind[l]] += pre * comb(n, j) * comb(m, k) * \
+                                                  (-1) ** (m - k)
+        return powFC
+
+    @classmethod
+    def makeLprojections(cls):
+        """
+        Constructs a series of projection matrices for each l component in our power series
+
+        :return: projL[l][p][p']
+            projection of powers containing *only* l component.
+            -1 component = sum(l=0..Lmax, projL[l]) = simplification projection
+        """
+        projL = np.zeros((cls.Lmax + 2, cls.Npower, cls.Npower))
+        for l in range(cls.Lmax + 1):
+            lp, lm = cls.FC2ind[l], cls.FC2ind[-l]
+            if l == 0:
+                projL[l] = np.outer(cls.FCpow[lp, :], cls.powFC[:, lp]).real
+            else:
+                projL[l] = np.outer(cls.FCpow[lp, :], cls.powFC[:, lp]).real
+                projL[l] += np.outer(cls.FCpow[lm, :], cls.powFC[:, lm]).real
+        projL[-1] = np.sum(projL, axis=0)
+        return projL
+
+    @classmethod
+    def makedirectmult(cls):
+        """
+        :return direcmult[p][p']: index that corresponds to the multiplication of power indices p and p'
+        """
+        directmult = -np.ones((cls.Npower, cls.Npower), dtype=int)
+        for (p0, p1) in ((p0, p1) for p0 in range(cls.Npower) for p1 in range(cls.Npower)):
+            nsum = cls.ind2pow[p0] + cls.ind2pow[p1]
+            if sum(nsum) <= cls.Lmax:
+                directmult[p0, p1] = cls.pow2ind[nsum[0], nsum[1]]
+        return directmult
+
+    @classmethod
+    def powexp(cls, u, normalize=True):
+        """
+        Given a vector u, normalize it and return the power expansion of uvec
+
+        :param u[2]: vector to apply
+        :param normalize: do we normalize u first?
+        :return upow[Npower]: ux uy uz products of powers
+        :return umagn: magnitude of u (if normalized)
+        """
+        umagn = np.sqrt(np.dot(u, u))
+        upow = np.zeros(cls.Npower)
+        if umagn < 1e-8:
+            upow[cls.pow2ind[0, 0]] = 1.
+            umagn = 0.
+        else:
+            u0 = u.copy()
+            if normalize: u0 /= umagn
+            xy = np.ones((cls.Lmax + 1, 2))
+            for n in range(1, cls.Lmax + 1):
+                xy[n, :] = xy[n - 1, :] * u0[:]
+            for n0, n1 in ((n0, n1) for n0 in range(cls.Lmax + 1)
+                           for n1 in range(cls.Lmax + 1)
+                           if n0 + n1 <= cls.Lmax):
+                upow[cls.pow2ind[n0, n1]] = xy[n0, 0] * xy[n1, 1]
+        if normalize:
+            return upow, umagn
+        else:
+            return upow
+
+    @classmethod
+    def makepowercoeff(cls):
+        """
+        Make our power coefficients for our construct expansion method
+
+        :return powercoeff[n][p]: vector we multiply by our power expansion to get the n'th coefficients
+        """
+        powercoeff = np.zeros((cls.Lmax + 1, cls.Npower))
+        for n0 in range(cls.Lmax + 1):
+            for n1 in range(cls.Lmax + 1):
+                n = n0 + n1
+                if n <= cls.Lmax:
+                    powercoeff[n, cls.pow2ind[n0, n1]] = \
+                        factorial(n, True) / (factorial(n0, True) * factorial(n1, True))
+        return powercoeff
+
+    @classmethod
+    def rotatedirections(cls, qptrans):
+        """
+        Takes a transformation matrix qptrans, where q[i] = sum_j qptrans[i][j] p[j], and
+        returns the Npow x Npow transformation matrix for the new components in terms of
+        the old.
+        NOTE: This is more complex than one might first realize. If we only work with cases
+        where all of the entries for a given power n have those same n (that is, not reduced),
+        then this is straightforward. However, we run into problems with *reductions*: e.g.,
+        for n=2, the power :math:`x^0 y^0 z^0` is, in reality, :math:`x^2+y^2+z^2`, and hence
+        *it must be transformed* because we allow non-orthogonal transformation matrices.
+
+        :param qptrans: 3x3 matrix
+        :return npowtrans: [Lmax +1][Npow][Npow] transformation matrix [n][original pow][new pow]
+            for each n from 0 up to Lmax
+        """
+        powtrans = np.zeros((cls.Npower, cls.Npower))
+        # l = 0 case
+        powtrans[0, 0] = 1
+        # single q value cases
+        for i in range(2):
+            qi_pow = cls.powexp(qptrans[i, :], normalize=False)
+            for n in range(1, cls.Lmax + 1):
+                powtrans[cls.pow2ind[(0,) * i + (n,) + (0,) * (1 - i)], :] = cls.powercoeff[n] * qi_pow
+        # pairs of q cases: we get qi^ni qj^nj by direct multiplication
+        # triplet is done inside the loop: q1^n1 q2^n2 q3^n3 = (q1^n1 q2^n2) (q3^n3)
+        for ni in range(1, cls.Lmax + 1):
+            powi = cls.pow2ind[ni,0]
+            for nj in range(1, cls.Lmax + 1 - ni):
+                powj = cls.pow2ind[0,nj]
+                powij = cls.pow2ind[ni,nj]
+                # multiply the pair!
+                for pi in range(cls.powlrange[ni - 1], cls.powlrange[ni]):
+                    for pj in range(cls.powlrange[nj - 1], cls.powlrange[nj]):
+                        powtrans[powij, cls.directmult[pi, pj]] += powtrans[powi, pi] * powtrans[powj, pj]
+        npowtrans = np.zeros((cls.Lmax + 1, cls.Npower, cls.Npower))
+        for n in range(cls.Lmax + 1):
+            prange = slice(cls.powlrange[n - 1], cls.powlrange[n])
+            npowtrans[n, prange, prange] = powtrans[prange, prange]
+            # now, work on lower values (n-2, n-4, ...)
+            for m in range(n - 2, -1, -2):
+                # powers that sum up to m:
+                for tup in [(n0, m- n0) for n0 in range(m + 1)]:
+                    npowtrans[n, cls.pow2ind[tup], :] = npowtrans[n, cls.pow2ind[tup[0] + 2, tup[1]], :] + \
+                                                        npowtrans[n, cls.pow2ind[tup[0], tup[1] + 2], :]
+        return npowtrans
+
+    # for sorting our coefficient lists:
+    @classmethod
+    def __sortkey(cls, entry):
+        return (entry[0] + entry[1] / (cls.Lmax + 1))
+
+    __INITIALIZED__ = False
+
+    # these are all *class* parameters, not object parameters: they are computed
+    # and defined once for the entire class. It means that once, in your code, you *choose*
+    # a value for Lmax, you are stuck with it. This is a choice: it makes compatibility between
+    # the expansions easy, for a minor loss in flexibility.
+    # Note: I believe, given the way we've set this up, that it *could* be modified to
+    # allow for Lmax to be *increased* as necessary, and all of the structures should be
+    # "backwards compatible". That said, this has not been tested.
+    @classmethod
+    def __initTaylor2Dindexing__(cls, Lmax):
+        """
+        This calls *all* the class methods defined above, and stores them *for the class*.
+        This is intended to be done *once*
+
+        :param Lmax: maximum power / orbital angular momentum
+        """
+        if cls.__INITIALIZED__:
+            # we only need initialize our class once!
+            return
+        cls.Lmax = Lmax
+        cls.NFC, cls.Npower, \
+        cls.pow2ind, cls.ind2pow, \
+        cls.FC2ind, cls.ind2FC, \
+        cls.powlrange = cls.makeindexPowerFC(Lmax)
+        cls.FCpow = cls.makeFCpow()
+        cls.powFC = cls.makepowFC()
+        cls.Lproj = cls.makeLprojections()
+        cls.directmult = cls.makedirectmult()
+        cls.powercoeff = cls.makepowercoeff()
+        cls.HDF5str = 'coeff.{}.{}'  # needed for addhdf5()
+        cls.__internallist__ = ('pow2ind', 'ind2pow', 'FC2ind', 'ind2FC',
+                                'powlrange', 'FCpow', 'powFC',
+                                'Lproj', 'directmult', 'powercoeff')
+        cls.__INITIALIZED__ = True
+
+    def __init__(self, coefflist=[], Lmax=4, nodeepcopy=False):
+        """
+        Initializes a Taylor3D object, with coefflist (default = empty)
+
+        :param coefflist: list((n, lmax, powexpansion)). No type checking; default empty
+        :param Lmax: maximum power / orbital angular momentum; can be set only once the
+            first time a Taylor expansion is constructed, and is set for all objects
+        :param nodeepcopy: true if we don't want to copy the matrices on creation of object
+            (i.e., deep copy, which is the default) **Note:** deep copy is strongly preferred.
+            The *only* real reason to use nodeepcopy is when returning slices / indexing in
+            arrays, but even then we have to be careful about doing things like reductions,
+            etc., that modify matrices *in place*. We always copy the list, but that
+            doesn't make copies of the underlying matrices.
+        """
+        self.__initTaylor2Dindexing__(Lmax)
+        if nodeepcopy:
+            self.coefflist = coefflist.copy()
+        else:
+            self.coefflist = [(n, l, c.copy()) for n, l, c in coefflist]
+
+    def dumpinternalsHDF5(self, HDF5group):
+        """
+        Adds the initialized power expansion internals into an HDF5group--should be stored for a
+        sanity check
+
+        :param HDF5group: HDF5 group
+        """
+        HDF5group.attrs['description'] = 'Internals of PowerExpansion class'
+        HDF5group.attrs['Lmax'] = self.Lmax
+        HDF5group.attrs['NFC'] = self.NFC
+        HDF5group.attrs['Npower'] = self.Npower
+        for internal in self.__internallist__:
+            HDF5group[internal] = getattr(self, internal)
+
+    @classmethod
+    def checkinternalsHDF5(cls, HDF5group):
+        """
+        Reads the power expansion internals into an HDF5group, and performs sanity check
+
+        :param HDF5group: HDF5 group
+        """
+        if not cls.__INITIALIZED__: raise ValueError('Must initialize first to perform sanity check')
+        if HDF5group.attrs['description'] != u'Internals of PowerExpansion class':
+            raise ValueError(
+                'HDF5 group lacks the attribute "description" which matches "Internals of PowerExpansion class"')
+        if HDF5group.attrs['Lmax'] != cls.Lmax: return False
+        if HDF5group.attrs['NFC'] != cls.NFC: return False
+        if HDF5group.attrs['Npower'] != cls.Npower: return False
+        for internal in cls.__internallist__:
+            if not np.all(HDF5group[internal][:] == getattr(cls, internal)): return False
+        return True
+
+    def __str__(self):
+        """Human readable string representation"""
+        strrep = ""
+        for n, l, coeff in self.coefflist:
+            strrep = strrep + "f^({}, {})(u)*(".format(n, l)
+            for p in range(self.powlrange[l]):
+                if not np.all(np.isclose(coeff[p], 0)):
+                    strrep = strrep + "\n{} x^{} y^{}".format(coeff[p],
+                                                              self.ind2pow[p, 0],
+                                                              self.ind2pow[p, 1])
+            strrep = strrep + " )\n"
+        return strrep
+

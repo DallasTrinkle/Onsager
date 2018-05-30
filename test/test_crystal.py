@@ -242,6 +242,8 @@ class CrystalClassTests(unittest.TestCase):
                                            [-np.sqrt(0.75), np.sqrt(0.75), 0],
                                            [0, 0, self.c_a]])
         self.basis = [np.array([0., 0., 0.])]
+        self.squarelatt = self.a0 * np.eye(2)  # two-dimensional crystal
+        self.basis2d = [np.zeros(2)]
 
     def isscMetric(self, crys, a0=0):
         if a0 == 0: a0 = self.a0
@@ -287,12 +289,24 @@ class CrystalClassTests(unittest.TestCase):
         self.assertAlmostEqual(crys.metric[0, 2], 0)
         self.assertAlmostEqual(crys.metric[1, 2], 0)
 
+    def issquareMetric(self, crys, a0=0):
+        if a0 == 0: a0 = self.a0
+        self.assertAlmostEqual(crys.volume, a0 ** 2)
+        for i, a2 in enumerate(crys.metric.flatten()):
+            if i % 3 == 0:
+                # diagonal element
+                self.assertAlmostEqual(a2, a0 ** 2)
+            else:
+                # off-diagonal element
+                self.assertAlmostEqual(a2, 0)
+
     def isspacegroup(self, crys):
         """Check that the space group obeys all group definitions: not fast."""
         # 1. Contains the identity: O(group size)
         identity = None
+        dim = crys.dim
         for g in crys.G:
-            if np.all(g.rot == np.eye(3, dtype=int)):
+            if np.all(g.rot == np.eye(dim, dtype=int)):
                 identity = g
                 self.assertTrue(np.allclose(g.trans, 0),
                                 msg="Identity has bad translation: {}".format(g.trans))
@@ -339,6 +353,13 @@ class CrystalClassTests(unittest.TestCase):
         self.assertEqual(len(crys.basis), 1)  # one chemistry
         self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
 
+    def testsquareMetric(self):
+        """Does the square lattice have the right volume and metric?"""
+        crys = crystal.Crystal(self.squarelatt, self.basis2d)
+        self.issquareMetric(crys)
+        self.assertEqual(len(crys.basis), 1)  # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
+
     def testscReduce(self):
         """If we start with a supercell, does it get reduced back to our start?"""
         nsuper = np.array([[2, 0, 0], [0, 2, 0], [0, 0, 1]], dtype=int)
@@ -374,6 +395,16 @@ class CrystalClassTests(unittest.TestCase):
         self.assertEqual(len(crys.basis), 1)  # one chemistry
         self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
         self.assertTrue(np.allclose(crys.basis[0][0], np.array([0, 0, 0])))
+
+    def testsquareReduce(self):
+        """If we start with a supercell, does it get reduced back to our start?"""
+        nsuper = np.array([[2, 0], [0, 2]], dtype=int)
+        doublebasis = [self.basis2d[0], np.array([0.5, 0]) + self.basis2d[0],
+                       np.array([0, 0.5]) + self.basis2d[0], np.array([0.5, 0.5]) + self.basis2d[0]]
+        crys = crystal.Crystal(np.dot(self.squarelatt, nsuper), doublebasis)
+        self.issquareMetric(crys)
+        self.assertEqual(len(crys.basis), 1)  # one chemistry
+        self.assertEqual(len(crys.basis[0]), 1)  # one atom in the unit cell
 
     def testhcp(self):
         """If we start with a supercell, does it get reduced back to our start?"""
@@ -475,6 +506,15 @@ class CrystalClassTests(unittest.TestCase):
         crys = crystal.Crystal(self.fcclatt, self.basis)
         for g in crys.G:
             self.assertIn(g, crys.pointG[0][0])
+
+    def testsquaregroupops(self):
+        """Do we have 8 space group operations?"""
+        crys = crystal.Crystal(self.squarelatt, self.basis2d)
+        self.assertEqual(len(crys.G), 8)
+        self.isspacegroup(crys)
+        # for g in crys.G:
+        #     print g.rot, g.trans, g.indexmap
+        #     print g.cartrot, g.carttrans
 
     def testomegagroupops(self):
         """Build the omega lattice; make sure the space group is correct"""
@@ -868,6 +908,8 @@ class KPTgentest(unittest.TestCase):
         self.basis = [np.array([0., 0., 0.])]
         self.crys = crystal.Crystal(self.sclatt, self.basis)
         self.N = (4, 4, 4)
+        self.squarelatt = self.a0 * np.eye(2)
+        self.basis2d = [np.array([0., 0.])]
 
     def testKPTreciprocallattice(self):
         """Have we correctly constructed the reciprocal lattice vectors?"""
@@ -948,3 +990,22 @@ class KPTgentest(unittest.TestCase):
         # due to numerical error.
         self.assertNotAlmostEqual(sum(wtfull * [sum(k) ** 2 for k in kptfull]), 9.8696044010893586188)
         self.assertNotAlmostEqual(sum(wts * [sum(k) ** 2 for k in kpts]), 9.8696044010893586188)
+
+    def test2DKPT_integration(self):
+        """Do we get integral values that we expect? 1/(2pi)^2 int cos(kx+ky)^2 = 1/2"""
+        crys = crystal.Crystal(self.squarelatt, self.basis2d)
+        N = self.N[:2]
+        Nkpt = np.prod(N)
+        kptfull = crys.fullkptmesh(N)
+        wtfull = np.array((1 / Nkpt,) * Nkpt)
+        kpts, wts = crys.reducekptmesh(kptfull)  # self.crys.fullkptmesh(self.N)
+        self.assertAlmostEqual(sum(wtfull * [np.cos(sum(k)) ** 2 for k in kptfull]), 0.5)
+        self.assertAlmostEqual(sum(wts * [np.cos(sum(k)) ** 2 for k in kpts]), 0.5)
+        self.assertAlmostEqual(sum(wtfull * [np.cos(k[0])*np.cos(k[1]) for k in kptfull]), 0)
+        self.assertAlmostEqual(sum(wts * [np.cos(k[0])*np.cos(k[1]) for k in kpts]), 0)
+        self.assertAlmostEqual(sum(wtfull * [np.cos(k[0])**2*np.cos(k[1])**2 for k in kptfull]), 0.25)
+        self.assertAlmostEqual(sum(wts * [np.cos(k[0])**2*np.cos(k[1])**2 for k in kpts]), 0.25)
+        # Note: below we have the true values of the integral, but these should disagree
+        # due to numerical error.
+        self.assertNotAlmostEqual(sum(wtfull * [sum(k) ** 2 for k in kptfull]), 6.579736267392905)
+        self.assertNotAlmostEqual(sum(wts * [sum(k) ** 2 for k in kpts]), 6.579736267392905)

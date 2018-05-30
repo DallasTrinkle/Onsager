@@ -169,4 +169,20 @@ class HDF5ParsingTests(unittest.TestCase):
         for L0, Lcopy in zip(B2diffuser.Lij(*B2diffuser.preene2betafree(1.0, **tdef)),
                              B2diffuser_copy.Lij(*B2diffuser_copy.preene2betafree(1.0, **tdef))):
             self.assertTrue(np.allclose(L0, Lcopy), msg='{}\n!=\n{}'.format(L0, Lcopy))
-
+        # Test with displaced triangle (2D "B2" example):
+        tria2 = crystal.Crystal(np.array([[1.,0.], [0.,np.sqrt(3.)]]),
+                                [np.zeros(2),np.array([0.5, 0.4])])
+        tria2diffuser = OnsagerCalc.VacancyMediated(tria2, 0, tria2.sitelist(0),
+                                                    tria2.jumpnetwork(0, 1.2), 1)
+        tria2diffuser.addhdf5(self.f.create_group('tria'))
+        tria2diffuser_copy = OnsagerCalc.VacancyMediated.loadhdf5(self.f['tria'])
+        Nsites, Njumps = len(tria2diffuser.sitelist), len(tria2diffuser.om0_jn)
+        tdef2 = {'preV': np.ones(Nsites), 'eneV': np.zeros(Njumps),
+                'preT0': np.ones(Njumps), 'eneT0': np.zeros(Njumps)}
+        tdef2.update(tria2diffuser.maketracerpreene(**tdef2))
+        for L0, Lcopy in zip(tria2diffuser.Lij(*tria2diffuser.preene2betafree(1.0, **tdef2)),
+                             tria2diffuser_copy.Lij(*tria2diffuser_copy.preene2betafree(1.0, **tdef2))):
+            self.assertTrue(np.allclose(L0, Lcopy), msg='{}\n!=\n{}'.format(L0, Lcopy))
+        # compare tags
+        for k in tria2diffuser.tags.keys():
+            self.assertEqual(tria2diffuser.tags[k], tria2diffuser_copy.tags[k])

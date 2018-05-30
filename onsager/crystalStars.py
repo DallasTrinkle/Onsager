@@ -47,9 +47,9 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
     """
 
     @classmethod
-    def zero(cls, n=0):
+    def zero(cls, n=0, dim=3):
         """Return a "zero" state"""
-        return cls(i=n, j=n, R=np.zeros(3, dtype=int), dx=np.zeros(3))
+        return cls(i=n, j=n, R=np.zeros(dim, dtype=int), dx=np.zeros(dim))
 
     @classmethod
     def fromcrys(cls, crys, chem, ij, dx):
@@ -91,7 +91,7 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
     def __hash__(self):
         """Hash, so that we can make sets of states"""
         # return self.i ^ (self.j << 1) ^ (self.R[0] << 2) ^ (self.R[1] << 3) ^ (self.R[2] << 4)
-        return hash((self.i, self.j, self.R[0], self.R[1], self.R[2]))
+        return hash((self.i, self.j) + tuple(self.R))
 
     def __add__(self, other):
         """Add two states: works if and only if self.j == other.i
@@ -147,16 +147,21 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         :param g: group operation (from crys)
         :return g*PairState: corresponding to group operation applied to self
         """
-        gRi, (c, gi) = crys.g_pos(g, np.zeros(3, dtype=int), (chem, self.i))
+        gRi, (c, gi) = crys.g_pos(g, np.zeros(len(self.R), dtype=int), (chem, self.i))
         gRj, (c, gj) = crys.g_pos(g, self.R, (chem, self.j))
         gdx = crys.g_direc(g, self.dx)
         return self.__class__(i=gi, j=gj, R=gRj - gRi, dx=gdx)
 
     def __str__(self):
         """Human readable version"""
-        return "{}.[0,0,0]:{}.[{},{},{}] (dx=[{},{},{}])".format(self.i, self.j,
-                                                                 self.R[0], self.R[1], self.R[2],
-                                                                 self.dx[0], self.dx[1], self.dx[2])
+        if len(self.R) == 3:
+            return "{}.[0,0,0]:{}.[{},{},{}] (dx=[{},{},{}])".format(self.i, self.j,
+                                                                     self.R[0], self.R[1], self.R[2],
+                                                                     self.dx[0], self.dx[1], self.dx[2])
+        else:
+            return "{}.[0,0]:{}.[{},{}] (dx=[{},{}])".format(self.i, self.j,
+                                                             self.R[0], self.R[1],
+                                                             self.dx[0], self.dx[1])
 
     @classmethod
     def sortkey(cls, entry):
@@ -192,8 +197,9 @@ def PSlist2array(PSlist):
     """
     N = len(PSlist)
     ij = np.zeros((N, 2), dtype=int)
-    R = np.zeros((N, 3), dtype=int)
-    dx = np.zeros((N, 3))
+    dim = len(PSlist[0].R)
+    R = np.zeros((N, dim), dtype=int)
+    dx = np.zeros((N, dim))
     for n, PS in enumerate(PSlist):
         ij[n, 0], ij[n, 1], R[n, :], dx[n, :] = PS.i, PS.j, PS.R, PS.dx
     return ij, R, dx
@@ -324,7 +330,7 @@ class StarSet(object):
         lastshell = stateset.copy()
         if originstates:
             for i in range(len(self.crys.basis[self.chem])):
-                stateset.add(PairState.zero(i))
+                stateset.add(PairState.zero(i, self.crys.dim))
         for i in range(Nshells - 1):
             # add all NNvect to last shell produced, always excluding 0
             # lastshell = [v1+v2 for v1 in lastshell for v2 in self.NNvect if not all(abs(v1 + v2) < threshold)]
@@ -772,6 +778,7 @@ class VectorStarSet(object):
         if starset.Nshells == 0: return
         if starset == self.starset: return
         self.starset = starset
+        dim = starset.crys.dim
         self.vecpos = []
         self.vecvec = []
         states = starset.states
@@ -800,14 +807,20 @@ class VectorStarSet(object):
                 self.vecpos.append(s.copy())
                 self.vecvec.append([states[si].dx * scale for si in s])
                 # next, try to generate perpendicular star-vectors, if present:
-                v0 = np.cross(vpara, np.array([0, 0, 1.]))
-                if np.dot(v0, v0) < threshold:
-                    v0 = np.cross(vpara, np.array([1., 0, 0]))
-                v1 = np.cross(vpara, v0)
-                # normalization:
-                v0 /= np.sqrt(np.dot(v0, v0))
-                v1 /= np.sqrt(np.dot(v1, v1))
-                Nvect = 2
+                if dim == 3:
+                    v0 = np.cross(vpara, np.array([0, 0, 1.]))
+                    if np.dot(v0, v0) < threshold:
+                        v0 = np.cross(vpara, np.array([1., 0, 0]))
+                    v1 = np.cross(vpara, v0)
+                    # normalization:
+                    v0 /= np.sqrt(np.dot(v0, v0))
+                    v1 /= np.sqrt(np.dot(v1, v1))
+                    Nvect = 2
+                else:
+                    # 2d is very simple...
+                    v0 = np.array([vpara[1], -vpara[0]])
+                    v0 /= np.sqrt(np.dot(v0, v0))
+                    Nvect = 1
                 # run over the invariant group operations for state PS0
                 for g in self.starset.crys.G:
                     if Nvect == 0: continue
@@ -843,9 +856,9 @@ class VectorStarSet(object):
                 # so... do we have any vectors to add?
                 if Nvect > 0:
                     v0 /= np.sqrt(len(s) * np.dot(v0, v0))
-                    v1 /= np.sqrt(len(s) * np.dot(v1, v1))
                     vlist = [v0]
                     if Nvect > 1:
+                        v1 /= np.sqrt(len(s) * np.dot(v1, v1))
                         vlist.append(v1)
                     # add the positions
                     for v in vlist:
@@ -867,9 +880,11 @@ class VectorStarSet(object):
         :return outer: array [3, 3, Nvstars, Nvstars]
             outer[:, :, i, j] is the 3x3 tensor outer product for two vector-stars vs[i] and vs[j]
         """
-        outer = np.zeros((3, 3, self.Nvstars, self.Nvstars))
-        for i, (sR0, sv0) in enumerate(zip(self.vecpos, self.vecvec)):
-            for j, (sR1, sv1) in enumerate(zip(self.vecpos, self.vecvec)):
+        # dim = len(self.vecvec[0][0])
+        dim = self.starset.crys.dim
+        outer = np.zeros((dim, dim, self.Nvstars, self.Nvstars))
+        for i, sR0, sv0 in zip(itertools.count(), self.vecpos, self.vecvec):
+            for j, sR1, sv1 in zip(itertools.count(), self.vecpos, self.vecvec):
                 if sR0[0] == sR1[0]:
                     outer[:, :, i, j] = sum([np.outer(v0, v1) for v0, v1 in zip(sv0, sv1)])
         return zeroclean(outer)
@@ -990,7 +1005,8 @@ class VectorStarSet(object):
                                         rate1expansion[i, j, k] += np.dot(vi, vj)
                             if omega2:
                                 # find the "origin state" corresponding to the solute; "remove" those rates
-                                OSindex = self.starset.stateindex(PairState.zero(self.starset.states[IS].i))
+                                OSindex = self.starset.stateindex(PairState.zero(self.starset.states[IS].i,
+                                                                                 self.starset.crys.dim))
                                 if OSindex is not None:
                                     for j in range(self.Nvstars):
                                         for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
@@ -1042,7 +1058,8 @@ class VectorStarSet(object):
                         bias0expansion[i, jt] += geom_bias
                 if omega2:
                     # find the "origin state" corresponding to the solute; incorporate the change in bias
-                    OSindex = self.starset.stateindex(PairState.zero(self.starset.states[IS].i))
+                    OSindex = self.starset.stateindex(PairState.zero(self.starset.states[IS].i,
+                                                                     self.starset.crys.dim))
                     if OSindex is not None:
                         for j in range(self.Nvstars):
                             for Rj, vj in zip(self.vecpos[j], self.vecvec[j]):
@@ -1080,8 +1097,10 @@ class VectorStarSet(object):
             the D1[a,b,k] = sum(D1expansion[a,b, k] * sqrt(probfactor[PS[k][0]]*probfactor[PS[k][1]) * omega[k])
         """
         if self.Nvstars == 0: return None
-        D0expansion = np.zeros((3, 3, len(self.starset.jumpnetwork_index)))
-        D1expansion = np.zeros((3, 3, len(jumpnetwork)))
+        # dim = len(jumpnetwork[0][0][1])
+        dim = self.starset.crys.dim
+        D0expansion = np.zeros((dim, dim, len(self.starset.jumpnetwork_index)))
+        D1expansion = np.zeros((dim, dim, len(jumpnetwork)))
         for k, jt, jumplist in zip(itertools.count(), jumptype, jumpnetwork):
             d0 = np.sum(0.5 * np.outer(dx, dx) for ISFS, dx in jumplist)  # we don't need initial/final state
             D0expansion[:, :, jt] += d0
@@ -1103,7 +1122,9 @@ class VectorStarSet(object):
         OSindices = [n for n in range(self.Nvstars) if self.starset.states[self.vecpos[n][0]].iszero()]
         NOS, Nsites = len(OSindices), len(self.starset.crys.basis[self.starset.chem])
         folddown = np.zeros((NOS, self.Nvstars))
-        OS_VB = np.zeros((NOS, Nsites, 3))
+        # dim = len(self.vecvec[0][0])
+        dim = self.starset.crys.dim
+        OS_VB = np.zeros((NOS, Nsites, dim))
         if NOS==0:
             return OSindices, folddown, OS_VB
         for i, ni in enumerate(OSindices):
