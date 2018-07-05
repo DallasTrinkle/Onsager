@@ -1429,7 +1429,7 @@ class Crystal(object):
             return any(tup == ij and self.__isclose__(dx, v) for translist in lis for ij, v in translist)
 
         r2 = cutoff * cutoff
-        nmax = [int(np.round(np.sqrt(self.metric[i, i]))) + 1
+        nmax = [int(np.round(np.sqrt(r2/self.metric[i, i]))) + 1
                 for i in range(self.dim)]
         nranges = [range(-n, n+1) for n in nmax]
         supervect = [np.array(ntup) for ntup in itertools.product(*nranges)]
