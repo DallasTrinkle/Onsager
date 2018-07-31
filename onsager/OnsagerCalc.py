@@ -633,7 +633,13 @@ class ConcentratedInterstitial(Interstitial):
         self.jumpnetwork = jumpnetwork
         self.TS = []
         for jn in self.jumpnetwork:
-            self.TS.append([stars.PairState.fromcrys(crys, chem, ij, dx) for ij, dx in jn])
+            # self.TS.append([stars.PairState.fromcrys(crys, chem, ij, dx) for ij, dx in jn])
+            TSset = set()
+            for ij, dx in jn:
+                PS = stars.PairState.fromcrys(crys, chem, ij, dx)
+                if -PS not in TSset:
+                    TSset.add(PS)
+            self.TS.append(TSset)
         self.SVS = self.generateStateVectorStars(self.sitelist)
         self.TVS = self.generateTSVectorStars(self.TS)
         self.VectorBasis, self.VV = self.crys.FullVectorBasis(self.chem)
@@ -695,7 +701,7 @@ class ConcentratedInterstitial(Interstitial):
         """
         TVS = []
         for TSs in TSlist:
-            TS = TSs[0]
+            TS = next(iter(TSs)) # grab one item from the set
             d, v = self.dim, np.zeros(self.dim)
             for g in self.crys.G:
                 TSn = TS.g(self.crys, self.chem, g)
@@ -706,7 +712,9 @@ class ConcentratedInterstitial(Interstitial):
                 VB = {TS: v}
                 for g in self.crys.G:
                     TSn = TS.g(self.crys, self.chem, g)
-                    if TSn not in VB and -TSn not in VB:
+                    if TSn not in TSs:
+                        TSn = -TSn
+                    if TSn not in VB:
                         VB[TSn] = self.crys.g_direc(g, v)
                 TVS.append(VB)
         return TVS
