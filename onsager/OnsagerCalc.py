@@ -625,7 +625,7 @@ class ConcentratedInterstitial(Interstitial):
         self.dim = crys.dim
         self.chem = chem
         self.sitelist = sitelist
-        self.N = sum(1 for w in sitelist for i in w)
+        self.N = sum(len(w) for w in sitelist)
         self.invmap = [0 for w in sitelist for i in w]
         for ind, w in enumerate(sitelist):
             for i in w:
@@ -755,6 +755,19 @@ class ConcentratedInterstitial(Interstitial):
         fs = np.zeros(len(self.sitelist))
         hs = np.zeros(len(self.sitelist))
         omegat = np.zeros(len(self.TS))
+        hole_equil = (invc < conc)
+        if not hole_equil:
+            bFmin = min(betaene-np.log(pre))  # log(pre) optional...
+            pbElist = pre*np.exp(bFmin-betaene)
+            Nc = self.N*conc
+        else:
+            bFmin = max(betaene-np.log(pre))
+            pbElist = 1/pre * np.exp(betaene-bFmin)
+            Nc = self.N*invc
+        # this looks crazy, but: it creates an array whose length is the total number of sites, of
+        # factors ys, sorted from largest to smallest
+        ylist = np.array(sorted(sum(([pbE]*len(s) for pbE, s in zip(pbElist, self.sitelist)), []),
+                                reverse=True))
         return fs, hs, omegat
 
     def diffusivity(self, pre, betaene, preT, betaeneT, conc, invc = 1.):
