@@ -1632,23 +1632,35 @@ class ConcentratedInterstitialTests(unittest.TestCase):
         self.HCP_intercrys = crystal.Crystal(self.hexlatt, self.hcpbasis, chemistry=['Mg', 'O'])
         self.HCP_jumpnetwork = self.HCP_intercrys.jumpnetwork(1, self.a0 * 0.7)  # tuned to avoid t->t in basal plane
         self.HCP_sitelist = self.HCP_intercrys.sitelist(1)
-        # self.Dhcp = OnsagerCalc.Interstitial(self.HCP_intercrys, 1, self.HCP_sitelist, self.HCP_jumpnetwork)
+        self.Dhcp = OnsagerCalc.ConcentratedInterstitial(self.HCP_intercrys, 1, self.HCP_sitelist, self.HCP_jumpnetwork)
         self.FCC_intercrys = crystal.Crystal(self.fcclatt, self.fccbasis, chemistry=['Pd', 'H'])
         self.FCC_jumpnetwork = self.FCC_intercrys.jumpnetwork(1, self.a0 * 0.48)
         self.FCC_sitelist = self.FCC_intercrys.sitelist(1)
-        # self.Dfcc = OnsagerCalc.Interstitial(self.FCC_intercrys, 1, self.FCC_sitelist, self.FCC_jumpnetwork)
+        self.Dfcc = OnsagerCalc.ConcentratedInterstitial(self.FCC_intercrys, 1, self.FCC_sitelist, self.FCC_jumpnetwork)
 
     def testVectorBasis(self):
-        """Do we correctly analyze our crystals regarding their symmetry?"""
-        Dfcc = OnsagerCalc.ConcentratedInterstitial(self.FCC_intercrys, 1, self.FCC_sitelist, self.FCC_jumpnetwork)
-        self.assertIsNotNone(Dfcc)
-        self.assertEqual(len(Dfcc.SVS), 0)
-        self.assertEqual(len(Dfcc.TVS), 1)
-        # self.assertEqual(self.Dhcp.NV, 1)
-        # self.assertTrue(self.Dhcp.omega_invertible)
-        # self.assertTrue(np.allclose(self.Dhcp.VV[:, :, 0, 0], np.array([[0, 0, 0], [0, 0, 0], [0, 0, 1]])))
-        # self.assertEqual(self.Dfcc.NV, 0)
-        # self.assertTrue(self.Dfcc.omega_invertible)
+        """Do we correctly construct vector bases for concentrated diffuser?"""
+        for diffuser, (NSVS, NTVS) in zip((self.Dfcc, self.Dhcp), ((0,1), (1,3))):
+            # FCC: no state vector bases, one transition state vector basis
+            # HCP: one state vector basis (tet), three transition state vector bases (t-t, 2 o-t)
+            self.assertIsNotNone(diffuser)
+            self.assertEqual(NSVS, len(diffuser.SVS))
+            self.assertEqual(NTVS, len(diffuser.TVS))
+            # check that the transition states are the same ones that we agreed to use.
+            # make a flattened version of the transition states
+            TSset = set()
+            for TS in diffuser.TS:
+                TSset.update(TS)
+            for TVS in diffuser.TVS:
+                for TS in TVS.keys():
+                    self.assertIn(TS, TSset)
+            # check normalization:
+            for VS in diffuser.SVS:
+                norm = sum(np.dot(v,v) for v in VS.values())
+                self.assertAlmostEqual(1., norm)
+            for VS in diffuser.TVS:
+                norm = sum(np.dot(v,v) for v in VS.values())
+                self.assertAlmostEqual(1., norm)
 
     def testInverseMap(self):
         """Do we correctly construct the inverse map?"""

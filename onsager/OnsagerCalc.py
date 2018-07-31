@@ -637,7 +637,7 @@ class ConcentratedInterstitial(Interstitial):
             TSset = set()
             for ij, dx in jn:
                 PS = stars.PairState.fromcrys(crys, chem, ij, dx)
-                if -PS not in TSset:
+                if -PS not in TSset: # only add *one* representative for each TS.
                     TSset.add(PS)
             self.TS.append(TSset)
         self.SVS = self.generateStateVectorStars(self.sitelist)
@@ -690,6 +690,10 @@ class ConcentratedInterstitial(Interstitial):
                     j = self.crys.g_pos(g, zero, (self.chem, i))[1][1]
                     if j not in VB:
                         VB[j] = self.crys.g_direc(g, v)
+                # normalization:
+                norm = np.sqrt(1./len(VB))
+                for k in VB.keys():
+                    VB[k] *= norm
                 SVS.append(VB)
         return SVS
 
@@ -712,10 +716,13 @@ class ConcentratedInterstitial(Interstitial):
                 VB = {TS: v}
                 for g in self.crys.G:
                     TSn = TS.g(self.crys, self.chem, g)
-                    if TSn not in TSs:
-                        TSn = -TSn
+                    if TSn not in TSs: TSn = -TSn  # choose the correct representation
                     if TSn not in VB:
                         VB[TSn] = self.crys.g_direc(g, v)
+                # normalization:
+                norm = np.sqrt(1./len(VB))
+                for k in VB.keys():
+                    VB[k] *= norm
                 TVS.append(VB)
         return TVS
 
