@@ -778,10 +778,11 @@ class ConcentratedInterstitial(Interstitial):
                                 reverse=True))
         if Nc < 1:
             x0 = 1/Nc # "dilute" limit
+            x = x0
         else:
             m = np.int(np.floor(Nc)-1)
             x0 = 0.5*(ylist[m] + ylist[min(m+1, self.N-1)])
-        x = newton(focc, fprime=foccp, fprime2=foccpp, x0=x0, args=(Nc, ylist))
+            x = newton(focc, fprime=foccp, fprime2=foccpp, x0=x0, args=(Nc, ylist))
         dcdu = 0  # inverse of du/dc
         for n, ys in enumerate(pbElist):
             h = x/(x+ys)
@@ -791,9 +792,10 @@ class ConcentratedInterstitial(Interstitial):
         dcdu /= self.N
         # Now to compute the omegat values
         if hole_equil: x = 1./x
+        prefact = 1/(x*dcdu)
         for n, pbET in enumerate(preT*np.exp(bFmin-betaeneT)):
             tp, tm = self.TSendpoint[n]
-            omegat[n] = pbET/(hs[tp]*hs[tm]*x*dcdu)
+            omegat[n] = pbET*hs[tp]*hs[tm]*prefact
         return fs, hs, omegat
 
     def diffusivity(self, pre, betaene, preT, betaeneT, conc, invc = 1.):

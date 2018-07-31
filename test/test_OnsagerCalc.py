@@ -1665,7 +1665,7 @@ class ConcentratedInterstitialTests(unittest.TestCase):
     def testThermofactors(self):
         """Do we correctly construct the thermodynamic factors?"""
         # run through a range of concentrations...
-        conclist = [1e-12, 1e-8, 1e-4, 1e-2, 1e-1, 1/4, 1/3, 1/2]
+        conclist = [1e-16, 1e-12, 1e-8, 1e-4, 1e-2, 1e-1, 1/4, 1/3, 1/2]
         invconclist = [1-c for c in conclist]
         for c in reversed(conclist):
             if c==0.5: continue
@@ -1684,8 +1684,15 @@ class ConcentratedInterstitialTests(unittest.TestCase):
                 fs, hs, omegat = diffuser.thermofactors(pre, betaene, preT, betaeneT, conc, invc)
                 conc_eval = sum(f*len(slist) for f, slist in zip(fs, diffuser.sitelist))/diffuser.N
                 invc_eval = sum(h*len(slist) for h, slist in zip(hs, diffuser.sitelist))/diffuser.N
-                self.assertAlmostEqual(conc, conc_eval)
-                self.assertAlmostEqual(invc, invc_eval)
+                self.assertAlmostEqual(1., conc_eval/conc, msg='c failure for c={} 1-c={}'.format(conc, invc))
+                self.assertAlmostEqual(1., invc_eval/invc, msg='1-c failure for c={} 1-c={}'.format(conc, invc))
+
+        sclatt = crystal.Crystal(np.eye(3), [np.zeros(3)])
+        Dsc = OnsagerCalc.ConcentratedInterstitial(sclatt, 0, sclatt.sitelist(0), sclatt.jumpnetwork(0, 1.01))
+        for conc, invc in zip(conclist, invconclist):
+            fs, hs, omegat = Dsc.thermofactors(np.ones(1), np.zeros(1), np.ones(1), np.zeros(1),
+                                               conc, invc)
+            self.assertAlmostEqual(1., omegat[0], msg='Failure for c={} 1-c={}'.format(conc, invc))
 
     def testInverseMap(self):
         """Do we correctly construct the inverse map?"""
