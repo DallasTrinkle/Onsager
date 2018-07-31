@@ -777,12 +777,15 @@ class ConcentratedInterstitial(Interstitial):
         ylist = np.array(sorted(sum(([pbE]*len(s) for pbE, s in zip(pbElist, self.sitelist)), []),
                                 reverse=True))
         if Nc < 1:
-            x0 = 1/Nc # "dilute" limit
-            x = x0
+            x0 = np.sum(ylist)/Nc
+            # x0 = 0.5*(np.sum(ylist)+np.sqrt((np.sum(ylist)**2-4*Nc*np.sum(ylist**2))))/Nc # "dilute" limit
         else:
             m = np.int(np.floor(Nc)-1)
             x0 = 0.5*(ylist[m] + ylist[min(m+1, self.N-1)])
+        if np.abs(np.sum(ylist/(x0+ylist))/Nc - 1) > 1e-8:
             x = newton(focc, fprime=foccp, fprime2=foccpp, x0=x0, args=(Nc, ylist))
+        else:
+            x = x0
         dcdu = 0  # inverse of du/dc
         for n, ys in enumerate(pbElist):
             h = x/(x+ys)
