@@ -1608,6 +1608,65 @@ class InternalFrictionTests(unittest.TestCase):
                 self.assertAlmostEqual(L[0,0,1,1], -(1/9)*(Ppara-Pperp)**2)
                 self.assertAlmostEqual(L[0,1,0,1], 0)
 
+
+class ConcentratedInterstitialTests(unittest.TestCase):
+    """Tests for our concentrated interstitial diffusion calculator"""
+
+    def setUp(self):
+        # Both HCP and FCC diffusion networks with octahedral and tetrahedral sites
+        self.a0 = 3
+        self.c_a = np.sqrt(8. / 3.)
+        self.fcclatt = self.a0 * np.array([[0, 0.5, 0.5],
+                                           [0.5, 0, 0.5],
+                                           [0.5, 0.5, 0]])
+        self.fccbasis = [[np.zeros(3)], [np.array([0.5, 0.5, -0.5]),
+                                         np.array([0.25, 0.25, 0.25]),
+                                         np.array([0.75, 0.75, 0.75])]]
+        self.hexlatt = self.a0 * np.array([[0.5, 0.5, 0],
+                                           [-np.sqrt(0.75), np.sqrt(0.75), 0],
+                                           [0, 0, self.c_a]])
+        self.hcpbasis = [[np.array([1. / 3., 2. / 3., 0.25]), np.array([2. / 3., 1. / 3., 0.75])],
+                         [np.array([0., 0., 0.]), np.array([0., 0., 0.5]),
+                          np.array([1. / 3., 2. / 3., 0.625]), np.array([1. / 3., 2. / 3., 0.875]),
+                          np.array([2. / 3., 1. / 3., 0.125]), np.array([2. / 3., 1. / 3., 0.375])]]
+        self.HCP_intercrys = crystal.Crystal(self.hexlatt, self.hcpbasis, chemistry=['Mg', 'O'])
+        self.HCP_jumpnetwork = self.HCP_intercrys.jumpnetwork(1, self.a0 * 0.7)  # tuned to avoid t->t in basal plane
+        self.HCP_sitelist = self.HCP_intercrys.sitelist(1)
+        # self.Dhcp = OnsagerCalc.Interstitial(self.HCP_intercrys, 1, self.HCP_sitelist, self.HCP_jumpnetwork)
+        self.FCC_intercrys = crystal.Crystal(self.fcclatt, self.fccbasis, chemistry=['Pd', 'H'])
+        self.FCC_jumpnetwork = self.FCC_intercrys.jumpnetwork(1, self.a0 * 0.48)
+        self.FCC_sitelist = self.FCC_intercrys.sitelist(1)
+        # self.Dfcc = OnsagerCalc.Interstitial(self.FCC_intercrys, 1, self.FCC_sitelist, self.FCC_jumpnetwork)
+
+    def assertOrderingSuperEqual(self, s0, s1, msg=""):
+        if s0 != s1:
+            failmsg = msg + '\n'
+            for line0, line1 in itertools.zip_longest(s0.__str__().splitlines(),
+                                                      s1.__str__().splitlines(),
+                                                      fillvalue=' - '):
+                failmsg += line0 + '\t' + line1 + '\n'
+            self.fail(msg=failmsg)
+
+    def testVectorBasis(self):
+        """Do we correctly analyze our crystals regarding their symmetry?"""
+        self.assertEqual(self.Dhcp.NV, 1)
+        self.assertTrue(self.Dhcp.omega_invertible)
+        self.assertTrue(np.allclose(self.Dhcp.VV[:, :, 0, 0], np.array([[0, 0, 0], [0, 0, 0], [0, 0, 1]])))
+        self.assertEqual(self.Dfcc.NV, 0)
+        self.assertTrue(self.Dfcc.omega_invertible)
+
+    def testInverseMap(self):
+        """Do we correctly construct the inverse map?"""
+        for D in [self.Dhcp, self.Dfcc]:
+            for i, w in enumerate(D.invmap):
+                self.assertTrue(any(i == j for j in D.sitelist[w]))
+        self.assertEqual(len(self.HCP_sitelist), 2)
+        self.assertEqual(len(self.FCC_sitelist), 2)
+        self.assertEqual(len(self.HCP_jumpnetwork), 2)
+        self.assertEqual(len(self.FCC_jumpnetwork), 1)
+
+
+
 if __name__ == '__main__':
     # check our command line options for "verbose" to set the logging level higher
     import sys
