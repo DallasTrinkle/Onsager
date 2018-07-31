@@ -666,6 +666,22 @@ class ConcentratedInterstitial(Interstitial):
             s += '\n'.join([taglist[0] for taglist in self.tags[t]]) + '\n'
         return s
 
+    def generateStateVectorStars(self, TSlist):
+        """
+        Makes the transition state Vector Star basis
+        :param TSlist: list of lists of PairStates representing our transition states
+        :return: TransitionStateVectorStars, which is a list of dictionaries, with TS and vectors
+        """
+        return []
+
+    def generateTSVectorStars(self, sitelist):
+        """
+        Makes the state (site) Vector Star basis
+        :param sitelist: list of lists of sites
+        :return: StateVectorStars, which is a list of dictionaries, with sites and vectors
+        """
+        return []
+
     def diffusivity(self, pre, betaene, preT, betaeneT, conc, invc = 1.):
         """
         Computes the diffusivity for our element given prefactors and energies/kB T.
