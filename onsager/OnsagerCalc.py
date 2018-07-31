@@ -631,6 +631,11 @@ class ConcentratedInterstitial(Interstitial):
             for i in w:
                 self.invmap[i] = ind
         self.jumpnetwork = jumpnetwork
+        self.TS = []
+        for jn in self.jumpnetwork:
+            self.TS.append([stars.PairState.fromcrys(crys, chem, ij, dx) for ij, dx in jn])
+        self.SVS = self.generateStateVectorStars(self.sitelist)
+        self.TVS = self.generateTSVectorStars(self.TS)
         self.VectorBasis, self.VV = self.crys.FullVectorBasis(self.chem)
         self.NV = len(self.VectorBasis)
         # quick check to see if our projected omega matrix will be invertible

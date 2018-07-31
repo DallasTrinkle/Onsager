@@ -1642,6 +1642,8 @@ class ConcentratedInterstitialTests(unittest.TestCase):
         """Do we correctly analyze our crystals regarding their symmetry?"""
         Dfcc = OnsagerCalc.ConcentratedInterstitial(self.FCC_intercrys, 1, self.FCC_sitelist, self.FCC_jumpnetwork)
         self.assertIsNotNone(Dfcc)
+        self.assertEqual(len(Dfcc.SVS), 0)
+        self.assertEqual(len(Dfcc.TVS), 1)
         # self.assertEqual(self.Dhcp.NV, 1)
         # self.assertTrue(self.Dhcp.omega_invertible)
         # self.assertTrue(np.allclose(self.Dhcp.VV[:, :, 0, 0], np.array([[0, 0, 0], [0, 0, 0], [0, 0, 1]])))
