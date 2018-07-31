@@ -22,6 +22,7 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 from scipy.linalg import pinv2, solve
+from scipy.optimize import newton
 import copy, collections, itertools, warnings
 from functools import reduce
 from onsager import GFcalc
@@ -752,6 +753,10 @@ class ConcentratedInterstitial(Interstitial):
         :return hs: hole occupancy for unique sites
         :return omegat: scaled transition rate for unique transition states
         """
+        def focc(x, Nc, ylist): return Nc - np.sum(ylist/(ylist+x))
+        def foccp(x, Nc, ylist): return np.sum(ylist/((ylist+x)**2))
+        def foccpp(x, Nc, ylist): return -2*np.sum(ylist/((ylist+x)**3))
+
         fs = np.zeros(len(self.sitelist))
         hs = np.zeros(len(self.sitelist))
         omegat = np.zeros(len(self.TS))
@@ -768,6 +773,16 @@ class ConcentratedInterstitial(Interstitial):
         # factors ys, sorted from largest to smallest
         ylist = np.array(sorted(sum(([pbE]*len(s) for pbE, s in zip(pbElist, self.sitelist)), []),
                                 reverse=True))
+        if Nc < 1:
+            x0 = 1/Nc # "dilute" limit
+        else:
+            m = np.int(np.floor(Nc)-1)
+            x0 = 0.5*(ylist[m] + ylist[min(m+1, self.N-1)])
+        x = newton(focc, fprime=foccp, fprime2=foccpp, x0=x0, args=(Nc, ylist))
+        for n, ys in enumerate(pbElist):
+            h = x/(x+ys)
+            f = ys/(x+ys)
+            fs[n], hs[n] = (f, h) if not hole_equil else (h, f)
         return fs, hs, omegat
 
     def diffusivity(self, pre, betaene, preT, betaeneT, conc, invc = 1.):
