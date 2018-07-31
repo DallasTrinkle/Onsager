@@ -666,21 +666,50 @@ class ConcentratedInterstitial(Interstitial):
             s += '\n'.join([taglist[0] for taglist in self.tags[t]]) + '\n'
         return s
 
-    def generateStateVectorStars(self, TSlist):
-        """
-        Makes the transition state Vector Star basis
-        :param TSlist: list of lists of PairStates representing our transition states
-        :return: TransitionStateVectorStars, which is a list of dictionaries, with TS and vectors
-        """
-        return []
-
-    def generateTSVectorStars(self, sitelist):
+    def generateStateVectorStars(self, sitelist):
         """
         Makes the state (site) Vector Star basis
         :param sitelist: list of lists of sites
         :return: StateVectorStars, which is a list of dictionaries, with sites and vectors
         """
-        return []
+        SVS = []
+        zero = np.zeros(self.dim, dtype=int)
+        for sites in sitelist:
+            i = sites[0]
+            d, v = self.crys.VectorBasis((self.chem, i))
+            if d == 0: continue
+            for v in self.crys.vectlist((d, v)):
+                VB = {i: v}
+                for g in self.crys.G:
+                    j = self.crys.g_pos(g, zero, (self.chem, i))[1][1]
+                    if j not in VB:
+                        VB[j] = self.crys.g_direc(g, v)
+                SVS.append(VB)
+        return SVS
+
+    def generateTSVectorStars(self, TSlist):
+        """
+        Makes the transition state Vector Star basis
+        :param TSlist: list of lists of PairStates representing our transition states
+        :return: TransitionStateVectorStars, which is a list of dictionaries, with TS and vectors
+        """
+        TVS = []
+        for TSs in TSlist:
+            TS = TSs[0]
+            d, v = self.dim, np.zeros(self.dim)
+            for g in self.crys.G:
+                TSn = TS.g(self.crys, self.chem, g)
+                if TSn == TS:
+                    d, v = crystal.CombineVectorBasis((d,v), crystal.VectorBasis(*g.eigen()))
+            if d == 0: continue
+            for v in self.crys.vectlist((d, v)):
+                VB = {TS: v}
+                for g in self.crys.G:
+                    TSn = TS.g(self.crys, self.chem, g)
+                    if TSn not in VB and -TSn not in VB:
+                        VB[TSn] = self.crys.g_direc(g, v)
+                TVS.append(VB)
+        return TVS
 
     def diffusivity(self, pre, betaene, preT, betaeneT, conc, invc = 1.):
         """
