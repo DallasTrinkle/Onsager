@@ -726,6 +726,37 @@ class ConcentratedInterstitial(Interstitial):
                 TVS.append(VB)
         return TVS
 
+    def thermofactors(self, pre, betaene, preT, betaeneT, conc, invc = 1.):
+        """
+        Computes the thermodynamic factors. This requires the computation of the chemical potential
+        (or, rather, x = exp(-beta*mu)). With the Arrhenius factors y_s := pre*exp(-betaene), we can
+        compute all of the quantities we need:
+
+        * particle occupancy f_s = ys/(x+ys) = x^-1/(x^-1+ys^-1)
+        * hole occupancy h_s = x/(x+ys) = ys^-1/(x^-1+ys^-1)
+        * transition rates omega_t dmu/dc = preT*exp(-betaeneT)/(x ht+ ht- <hs fs>)
+
+        where <hs fs> = 1/Nsite * sum(hs*fs) over all of the sites. We solve the problem using
+        particle equilibrium if conc < invc, and use hole equilibrium if conc > invc. Ideally,
+        conc + invc = 1, but there can be roundoff considerations. We also use a different solution
+        approach for the dilute limit cases.
+
+        :param pre: list of prefactors for unique sites
+        :param betaene: list of site energies divided by kB T
+        :param preT: list of prefactors for transition states
+        :param betaeneT: list of transition state energies divided by kB T
+        :param conc: concentration as a fractional occupancy of `chem` per *unit cell*
+        :param invc: 1-conc (only needed if 1-conc is sufficiently small for roundoff to be an issue)
+
+        :return fs: particle occupancy for unique sites
+        :return hs: hole occupancy for unique sites
+        :return omegat: scaled transition rate for unique transition states
+        """
+        fs = np.zeros(len(self.sitelist))
+        hs = np.zeros(len(self.sitelist))
+        omegat = np.zeros(len(self.TS))
+        return fs, hs, omegat
+
     def diffusivity(self, pre, betaene, preT, betaeneT, conc, invc = 1.):
         """
         Computes the diffusivity for our element given prefactors and energies/kB T.
@@ -750,6 +781,7 @@ class ConcentratedInterstitial(Interstitial):
                 "length of prefactor {} doesn't match jump network".format(preT))
             if len(betaeneT) != len(self.jumpnetwork): raise IndexError(
                 "length of energies {} doesn't match jump network".format(betaeneT))
+        fs, hs, omegat = self.thermofactors(pre, betaene, preT, betaeneT, conc, invc)
         rho = self.siteprob(pre, betaene)
         sqrtrho = np.sqrt(rho)
         ratelist = self.ratelist(pre, betaene, preT, betaeneT)

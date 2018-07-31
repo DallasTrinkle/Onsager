@@ -1662,6 +1662,31 @@ class ConcentratedInterstitialTests(unittest.TestCase):
                 norm = sum(np.dot(v,v) for v in VS.values())
                 self.assertAlmostEqual(1., norm)
 
+    def testThermofactors(self):
+        """Do we correctly construct the thermodynamic factors?"""
+        # run through a range of concentrations...
+        conclist = [1e-8, 1e-4, 1e-2, 1e-1, 1/4, 1/3, 1/2]
+        invconclist = [1-c for c in conclist]
+        for c in reversed(conclist):
+            if c==0.5: continue
+            conclist.append(1-c)
+            invconclist.append(c)
+
+        for diffuser in (self.Dfcc, self.Dhcp):
+            # generate some random energies / prefactors:
+            Ns = len(diffuser.sitelist)
+            pre = np.random.lognormal(0., 1., size=Ns)
+            betaene = np.random.uniform(0., 1., size=Ns)
+            preT = np.random.lognormal(1., 1., size=len(diffuser.jumpnetwork))
+            betaeneT = np.random.uniform(1., 2., size=len(diffuser.jumpnetwork))
+
+            for conc, invc in zip(conclist, invconclist):
+                fs, hs, omegat = diffuser.thermofactors(pre, betaene, preT, betaeneT, conc, invc)
+                conc_eval = sum(f*len(slist) for f, slist in zip(fs, diffuser.sitelist))
+                invc_eval = sum(h*len(slist) for h, slist in zip(hs, diffuser.sitelist))
+                self.assertAlmostEqual(conc, conc_eval)
+                self.assertAlmostEqual(invc, invc_eval)
+
     def testInverseMap(self):
         """Do we correctly construct the inverse map?"""
         # for D in [self.Dhcp, self.Dfcc]:
