@@ -595,6 +595,145 @@ class Interstitial(object):
         return lambdaL
 
 
+class ConcentratedInterstitial(Interstitial):
+    """
+    A class to compute interstitial diffusivity for concentrated cases; uses structure of
+    crystal to do most of the heavy lifting in terms of symmetry. The underlying model is
+    that of a random interstitial alloy, with blocking interactions only. So the inputs
+    are *very* similar to Interstitial.
+
+    Takes in a crystal that contains the interstitial as one of the chemical elements,
+    to be specified by ``chem``, the sitelist (list of symmetry equivalent sites), and
+    jumpnetwork. Both of the latter can be computed automatically from ``crys`` methods,
+    but as they are lists, can also be editted or constructed by hand.
+    """
+
+    def __init__(self, crys, chem, sitelist, jumpnetwork):
+        """
+        Initialization; takes an underlying crystal, a choice of atomic chemistry,
+        a corresponding Wyckoff site list and jump network.
+
+        :param crys: Crystal object
+        :param chem: integer, index into the basis of crys, corresponding to the chemical element that hops
+        :param sitelist: list of lists of indices, site indices where the atom may hop;
+          grouped by symmetry equivalency
+        :param jumpnetwork: list of lists of tuples: ( (i, j), dx )
+            symmetry unique transitions; each list is all of the possible transitions
+            from site i to site j with jump vector dx; includes i->j and j->i
+        """
+        self.crys = crys
+        self.dim = crys.dim
+        self.chem = chem
+        self.sitelist = sitelist
+        self.N = sum(1 for w in sitelist for i in w)
+        self.invmap = [0 for w in sitelist for i in w]
+        for ind, w in enumerate(sitelist):
+            for i in w:
+                self.invmap[i] = ind
+        self.jumpnetwork = jumpnetwork
+        self.VectorBasis, self.VV = self.crys.FullVectorBasis(self.chem)
+        self.NV = len(self.VectorBasis)
+        # quick check to see if our projected omega matrix will be invertible
+        # only really needed if we have a non-empty vector basis
+        self.omega_invertible = True
+        if self.NV > 0:
+            # invertible if inversion is present
+            self.omega_invertible = any(np.allclose(g.cartrot, -np.eye(self.dim)) for g in crys.G)
+        if self.omega_invertible:
+            # invertible, so just use solve for speed (omega is technically *negative* definite)
+            self.bias_solver = lambda omega, b: -solve(-omega, b, sym_pos=True)
+        else:
+            # pseudoinverse required:
+            self.bias_solver = lambda omega, b: np.dot(pinv2(omega), b)
+        # these pieces are needed in order to compute the elastodiffusion tensor
+        self.sitegroupops = self.generateSiteGroupOps()  # list of group ops to take first rep. into whole list
+        self.jumpgroupops = self.generateJumpGroupOps()  # list of group ops to take first rep. into whole list
+        self.siteSymmTensorBasis = self.generateSiteSymmTensorBasis()  # projections for *first rep. only*
+        self.jumpSymmTensorBasis = self.generateJumpSymmTensorBasis()  # projections for *first rep. only*
+        self.tags, self.tagdict, self.tagdicttype = self.generatetags()  # now with tags!
+
+    def __str__(self):
+        """Human readable version of diffuser"""
+        s = "Concentrated diffuser for atom {} ({})\n".format(self.chem, self.crys.chemistry[self.chem])
+        s += self.crys.__str__() + '\n'
+        for t in ('states', 'transitions'):
+            s += t + ':\n'
+            s += '\n'.join([taglist[0] for taglist in self.tags[t]]) + '\n'
+        return s
+
+    def diffusivity(self, pre, betaene, preT, betaeneT, conc, invc = 1.):
+        """
+        Computes the diffusivity for our element given prefactors and energies/kB T.
+        Also returns the negative derivative of diffusivity with respect to beta (used to compute
+        the activation barrier tensor) if CalcDeriv = True
+        The input list order corresponds to the sitelist and jumpnetwork
+
+        :param pre: list of prefactors for unique sites
+        :param betaene: list of site energies divided by kB T
+        :param preT: list of prefactors for transition states
+        :param betaeneT: list of transition state energies divided by kB T
+        :param conc: concentration as a fractional occupancy of `chem` per *unit cell*
+        :param invc: 1-conc (only needed if 1-conc is sufficiently small for roundoff to be an issue)
+        :return D[3,3]: diffusivity as a 3x3 tensor
+        """
+        if __debug__:
+            if len(pre) != len(self.sitelist): raise IndexError(
+                "length of prefactor {} doesn't match sitelist".format(pre))
+            if len(betaene) != len(self.sitelist): raise IndexError(
+                "length of energies {} doesn't match sitelist".format(betaene))
+            if len(preT) != len(self.jumpnetwork): raise IndexError(
+                "length of prefactor {} doesn't match jump network".format(preT))
+            if len(betaeneT) != len(self.jumpnetwork): raise IndexError(
+                "length of energies {} doesn't match jump network".format(betaeneT))
+        rho = self.siteprob(pre, betaene)
+        sqrtrho = np.sqrt(rho)
+        ratelist = self.ratelist(pre, betaene, preT, betaeneT)
+        symmratelist = self.symmratelist(pre, betaene, preT, betaeneT)
+        omega_ij = np.zeros((self.N, self.N))
+        domega_ij = np.zeros((self.N, self.N))
+        bias_i = np.zeros((self.N, self.dim))
+        dbias_i = np.zeros((self.N, self.dim))
+        D0 = np.zeros((self.dim, self.dim))
+        Dcorrection = np.zeros((self.dim, self.dim))
+        Db = np.zeros((self.dim, self.dim))
+        # bookkeeping for energies:
+        siteene = np.array([betaene[w] for w in self.invmap])
+        # transene = [ [ bET for (i,j), dx in t ] for t, bET in zip(self.jumpnetwork, betaeneT)]
+        Eave = np.dot(rho, siteene)
+
+        for transitionset, rates, symmrates, bET in zip(self.jumpnetwork, ratelist, symmratelist, betaeneT):
+            for ((i, j), dx), rate, symmrate in zip(transitionset, rates, symmrates):
+                # symmrate = sqrtrho[i]*invsqrtrho[j]*rate
+                omega_ij[i, j] += symmrate
+                omega_ij[i, i] -= rate
+                domega_ij[i, j] += symmrate * (bET - 0.5 * (siteene[i] + siteene[j]))
+                domega_ij[i, i] -= rate * (bET - siteene[i])
+                bias_i[i] += sqrtrho[i] * rate * dx
+                dbias_i[i] += sqrtrho[i] * rate * dx * (bET - 0.5 * (siteene[i] + Eave))
+                D0 += 0.5 * np.outer(dx, dx) * rho[i] * rate
+                Db += 0.5 * np.outer(dx, dx) * rho[i] * rate * (bET - Eave)
+        if self.NV > 0:
+            # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
+            omega_v = np.zeros((self.NV, self.NV))
+            domega_v = np.zeros((self.NV, self.NV))
+            bias_v = np.zeros(self.NV)
+            dbias_v = np.zeros(self.NV)
+            for a, va in enumerate(self.VectorBasis):
+                bias_v[a] = np.trace(np.dot(bias_i.T, va))
+                dbias_v[a] = np.trace(np.dot(dbias_i.T, va))
+                for b, vb in enumerate(self.VectorBasis):
+                    omega_v[a, b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
+                    domega_v[a, b] = np.trace(np.dot(va.T, np.dot(domega_ij, vb)))
+            gamma_v = self.bias_solver(omega_v, bias_v)
+            dgamma_v = np.dot(domega_v, gamma_v)
+            Dcorrection = np.dot(np.dot(self.VV, bias_v), gamma_v)
+            Db += np.dot(np.dot(self.VV, dbias_v), gamma_v) \
+                  + np.dot(np.dot(self.VV, gamma_v), dbias_v) \
+                  - np.dot(np.dot(self.VV, gamma_v), dgamma_v)
+
+        return D0 + Dcorrection
+
+
 # YAML tags
 VACANCYTHERMOKINETICS_YAMLTAG = '!VacancyThermoKinetics'
 
