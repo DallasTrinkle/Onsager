@@ -1665,7 +1665,7 @@ class ConcentratedInterstitialTests(unittest.TestCase):
     def testThermofactors(self):
         """Do we correctly construct the thermodynamic factors?"""
         # run through a range of concentrations...
-        conclist = [1e-16, 1e-12, 1e-8, 1e-4, 1e-2, 1e-1, 1/4, 1/3, 1/2]
+        conclist = [1e-12, 1e-8, 1e-4, 1e-2, 1e-1, 1/4, 1/3, 1/2]
         invconclist = [1-c for c in conclist]
         for c in reversed(conclist):
             if c==0.5: continue

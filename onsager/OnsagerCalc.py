@@ -633,8 +633,11 @@ class ConcentratedInterstitial(Interstitial):
                 self.invmap[i] = ind
         self.jumpnetwork = jumpnetwork
         self.TS = []
+        self.TSendpoint = []
         for jn in self.jumpnetwork:
             # self.TS.append([stars.PairState.fromcrys(crys, chem, ij, dx) for ij, dx in jn])
+            (i, j) = jn[0][0]
+            self.TSendpoint.append((self.invmap[i], self.invmap[j]))
             TSset = set()
             for ij, dx in jn:
                 PS = stars.PairState.fromcrys(crys, chem, ij, dx)
@@ -779,10 +782,18 @@ class ConcentratedInterstitial(Interstitial):
             m = np.int(np.floor(Nc)-1)
             x0 = 0.5*(ylist[m] + ylist[min(m+1, self.N-1)])
         x = newton(focc, fprime=foccp, fprime2=foccpp, x0=x0, args=(Nc, ylist))
+        dcdu = 0  # inverse of du/dc
         for n, ys in enumerate(pbElist):
             h = x/(x+ys)
             f = ys/(x+ys)
             fs[n], hs[n] = (f, h) if not hole_equil else (h, f)
+            dcdu += h*f*len(self.sitelist[n])
+        dcdu /= self.N
+        # Now to compute the omegat values
+        if hole_equil: x = 1./x
+        for n, pbET in enumerate(preT*np.exp(bFmin-betaeneT)):
+            tp, tm = self.TSendpoint[n]
+            omegat[n] = pbET/(hs[tp]*hs[tm]*x*dcdu)
         return fs, hs, omegat
 
     def diffusivity(self, pre, betaene, preT, betaeneT, conc, invc = 1.):
