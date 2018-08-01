@@ -1661,6 +1661,10 @@ class ConcentratedInterstitialTests(unittest.TestCase):
             for VS in diffuser.TVS:
                 norm = sum(np.dot(v,v) for v in VS.values())
                 self.assertAlmostEqual(1., norm)
+        for diffuser, jumpnetwork in zip((self.Dfcc, self.Dhcp),
+                                         (self.FCC_jumpnetwork, self.HCP_jumpnetwork)):
+            for TSset, jn in zip(diffuser.TS, jumpnetwork):
+                self.assertEqual(len(jn), 2*len(TSset))
 
     def testThermofactors(self):
         """Do we correctly construct the thermodynamic factors?"""
@@ -1696,13 +1700,21 @@ class ConcentratedInterstitialTests(unittest.TestCase):
 
     def testInverseMap(self):
         """Do we correctly construct the inverse map?"""
-        # for D in [self.Dhcp, self.Dfcc]:
-        #     for i, w in enumerate(D.invmap):
-        #         self.assertTrue(any(i == j for j in D.sitelist[w]))
-        # self.assertEqual(len(self.HCP_sitelist), 2)
-        # self.assertEqual(len(self.FCC_sitelist), 2)
-        # self.assertEqual(len(self.HCP_jumpnetwork), 2)
-        # self.assertEqual(len(self.FCC_jumpnetwork), 1)
+        for diffuser in (self.Dhcp, self.Dfcc):
+            for i, w in enumerate(diffuser.invmap):
+                self.assertTrue(any(i == j for j in diffuser.sitelist[w]))
+        self.assertEqual(len(self.HCP_sitelist), 2)
+        self.assertEqual(len(self.FCC_sitelist), 2)
+        self.assertEqual(len(self.HCP_jumpnetwork), 2)
+        self.assertEqual(len(self.FCC_jumpnetwork), 1)
+
+    def testEndpoints(self):
+        """Do we construct consistent endpoints for our transition states?"""
+        for diffuser in (self.Dfcc, self.Dhcp):
+            invmap = diffuser.invmap
+            for endpoints, TSset in zip(diffuser.TSendpoint, diffuser.TS):
+                for TS in TSset:
+                    self.assertEqual(endpoints, (invmap[TS.i], invmap[TS.j]))
 
 
 

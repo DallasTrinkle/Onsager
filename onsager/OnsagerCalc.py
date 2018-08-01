@@ -637,34 +637,19 @@ class ConcentratedInterstitial(Interstitial):
         for jn in self.jumpnetwork:
             # self.TS.append([stars.PairState.fromcrys(crys, chem, ij, dx) for ij, dx in jn])
             (i, j) = jn[0][0]
-            self.TSendpoint.append((self.invmap[i], self.invmap[j]))
+            endpoints = (self.invmap[i], self.invmap[j])
+            self.TSendpoint.append(endpoints)
             TSset = set()
             for ij, dx in jn:
+                # we want the t+ and t- to be consistent for all TS in our set:
+                if (self.invmap[ij[0]], self.invmap[ij[1]]) != endpoints: continue
                 PS = stars.PairState.fromcrys(crys, chem, ij, dx)
                 if -PS not in TSset: # only add *one* representative for each TS.
                     TSset.add(PS)
             self.TS.append(TSset)
         self.SVS = self.generateStateVectorStars(self.sitelist)
         self.TVS = self.generateTSVectorStars(self.TS)
-        self.VectorBasis, self.VV = self.crys.FullVectorBasis(self.chem)
-        self.NV = len(self.VectorBasis)
-        # quick check to see if our projected omega matrix will be invertible
-        # only really needed if we have a non-empty vector basis
-        self.omega_invertible = True
-        if self.NV > 0:
-            # invertible if inversion is present
-            self.omega_invertible = any(np.allclose(g.cartrot, -np.eye(self.dim)) for g in crys.G)
-        if self.omega_invertible:
-            # invertible, so just use solve for speed (omega is technically *negative* definite)
-            self.bias_solver = lambda omega, b: -solve(-omega, b, sym_pos=True)
-        else:
-            # pseudoinverse required:
-            self.bias_solver = lambda omega, b: np.dot(pinv2(omega), b)
-        # these pieces are needed in order to compute the elastodiffusion tensor
-        self.sitegroupops = self.generateSiteGroupOps()  # list of group ops to take first rep. into whole list
-        self.jumpgroupops = self.generateJumpGroupOps()  # list of group ops to take first rep. into whole list
-        self.siteSymmTensorBasis = self.generateSiteSymmTensorBasis()  # projections for *first rep. only*
-        self.jumpSymmTensorBasis = self.generateJumpSymmTensorBasis()  # projections for *first rep. only*
+
         self.tags, self.tagdict, self.tagdicttype = self.generatetags()  # now with tags!
 
     def __str__(self):
@@ -730,7 +715,31 @@ class ConcentratedInterstitial(Interstitial):
                 TVS.append(VB)
         return TVS
 
-    def thermofactors(self, pre, betaene, preT, betaeneT, conc, invc = 1.):
+    def generateExpansions(self):
+        """
+        Constructs all of the linear expansions necessary to construct our average bias and rate
+        matrices from omega_t, fs, and hs.
+
+        :return expansiondict: dictionary of expansions.
+        """
+        Nrates = len(self.jumpnetwork)
+        Ns, Nt = len(self.SVS), len(self.TVS)
+        D0 = np.zeros((self.dim, self.dim, Nrates))
+        bs = np.zeros((Ns, Nrates))
+        bt_ftp, bt_ftm = np.zeros((Nt, Nrates)), np.zeros((Nt, Nrates))
+        bt_htp, bt_htm = np.zeros((Nt, Nrates)), np.zeros((Nt, Nrates))
+        for n, TSset in enumerate(self.TS):
+            for TS in TSset:
+                D0[:,:,n] += np.outer(TS.dx, TS.dx)
+                for d, SVS in enumerate(self.SVS):
+                    if TS.i in SVS: bs[d, n] += np.dot(TS.dx, SVS[TS.i])
+                    if TS.j in SVS: bs[d, n] -= np.dot(TS.dx, SVS[TS.j])
+                for d, TVS in enumerate(self.TVS):
+                    if TS in TVS:
+                        bt_ftp[d, n] -= 2.*np.dot(TS.dx, TVS[TS])
+                        bt_ftm[d, n] += 2.*np.dot(TS.dx, TVS[TS])
+
+    def thermofactors(self, pre, betaene, preT, betaeneT, conc, invc = 1., tol=1e-8):
         """
         Computes the thermodynamic factors. This requires the computation of the chemical potential
         (or, rather, x = exp(-beta*mu)). With the Arrhenius factors y_s := pre*exp(-betaene), we can
@@ -782,8 +791,9 @@ class ConcentratedInterstitial(Interstitial):
         else:
             m = np.int(np.floor(Nc)-1)
             x0 = 0.5*(ylist[m] + ylist[min(m+1, self.N-1)])
-        if np.abs(np.sum(ylist/(x0+ylist))/Nc - 1) > 1e-8:
-            x = newton(focc, fprime=foccp, fprime2=foccpp, x0=x0, args=(Nc, ylist))
+        if np.abs(np.sum(ylist/(x0+ylist))/Nc - 1) > tol:
+            # note: tolerance is in the *step size* of x, so its scaled to x0.
+            x = newton(focc, fprime=foccp, fprime2=foccpp, x0=x0, args=(Nc, ylist), tol=0.1*tol*x0)
         else:
             x = x0
         dcdu = 0  # inverse of du/dc
