@@ -724,7 +724,10 @@ class ConcentratedInterstitial(Interstitial):
         """
         Nrates = len(self.jumpnetwork)
         Ns, Nt = len(self.SVS), len(self.TVS)
+        Wbarss = np.zeros((Ns, Nrates))  # overall (negative) escape rate
+        # bare diffusivity expansion:
         D0 = np.zeros((self.dim, self.dim, Nrates))
+        # bias expansions:
         bs = np.zeros((Ns, Nrates))
         bt_ftp, bt_ftm = np.zeros((Nt, Nrates)), np.zeros((Nt, Nrates))
         bt_htp, bt_htm = np.zeros((Nt, Nrates)), np.zeros((Nt, Nrates))
@@ -738,6 +741,46 @@ class ConcentratedInterstitial(Interstitial):
                     if TS in TVS:
                         bt_ftp[d, n] -= 2.*np.dot(TS.dx, TVS[TS])
                         bt_ftm[d, n] += 2.*np.dot(TS.dx, TVS[TS])
+                    for TSp, v in TVS.items():
+                        dx = 0
+                        if TS.i == TSp.i: dx = TS.dx
+                        if TS.j == TSp.i: dx = -TS.dx
+                        if dx != 0:
+                            bt_htm[d, n] += np.dot(dx, v)
+                            bt_ftm[d, n] -= np.dot(dx, v)
+                        dx = 0
+                        if TS.i == TSp.j: dx = -TS.dx
+                        if TS.j == TSp.j: dx = TS.dx
+                        if dx != 0:
+                            bt_htp[d, n] += np.dot(dx, v)
+                            bt_ftp[d, n] -= np.dot(dx, v)
+                # if we have jumps into / out of our representative element, then accumulate:
+                s = self.invmap[TS.i]
+                if TS.i == self.sitelist[s][0]:
+                    Wbarss[s, n] -= 1.
+                s = self.invmap[TS.j]
+                if TS.j == self.sitelist[s][0]:
+                    Wbarss[s, n] -= 1.
+        # rate expansions:
+        Wss = np.zeros((Ns, Ns, Nrates))
+        Wst_fs, Wst_hs = np.zeros((Ns, Nt, Nrates)), np.zeros((Ns, Nt, Nrates))
+        Wst_ftp, Wst_htp = np.zeros((Ns, Nt, Nrates)), np.zeros((Ns, Nt, Nrates))
+        Wst_ftm, Wst_htm = np.zeros((Ns, Nt, Nrates)), np.zeros((Ns, Nt, Nrates))
+        Wtt_ftp, Wtt_htp = np.zeros((Nt, Nt, Nrates)), np.zeros((Nt, Nt, Nrates))
+        Wtt_ftm, Wtt_htm = np.zeros((Nt, Nt, Nrates)), np.zeros((Nt, Nt, Nrates))
+        Wtt = np.zeros((Nt, Nt, Nrates))
+        for d, SVS in enumerate(self.SVS):
+            s = self.invmap[next(iter(SVS))] # which state does our SVS correspond to?
+            Wss[d, d, :] += Wbarss[s]
+        for n, TSset in enumerate(self.TS):
+            for TS in TSset:
+                for d1, SVS1 in enumerate(self.SVS):
+                    for d2, SVS2 in enumerate(self.SVS):
+                        if (TS.i in SVS1 and TS.j in SVS2):
+                            Wss[d1, d2, n] += np.dot(SVS1[TS.i], SVS2[TS.j])
+                        elif (TS.i in SVS2 and TS.j in SVS1):
+                            Wss[d1, d2, n] += np.dot(SVS1[TS.j], SVS2[TS.i])
+
 
     def thermofactors(self, pre, betaene, preT, betaeneT, conc, invc = 1., tol=1e-8):
         """
