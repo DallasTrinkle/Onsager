@@ -724,7 +724,8 @@ class ConcentratedInterstitial(Interstitial):
         """
         Nrates = len(self.jumpnetwork)
         Ns, Nt = len(self.SVS), len(self.TVS)
-        Wbarss = np.zeros((Ns, Nrates))  # overall (negative) escape rate
+        Wbarss = np.zeros((self.N, self.N, Nrates))  # summed rates between states
+        Wbar_esc = np.zeros((self.N, Nrates))  # negative escape rate
         # bare diffusivity expansion:
         D0 = np.zeros((self.dim, self.dim, Nrates))
         # bias expansions:
@@ -754,13 +755,11 @@ class ConcentratedInterstitial(Interstitial):
                         if dx != 0:
                             bt_htp[d, n] += np.dot(dx, v)
                             bt_ftp[d, n] -= np.dot(dx, v)
-                # if we have jumps into / out of our representative element, then accumulate:
-                s = self.invmap[TS.i]
-                if TS.i == self.sitelist[s][0]:
-                    Wbarss[s, n] -= 1.
-                s = self.invmap[TS.j]
-                if TS.j == self.sitelist[s][0]:
-                    Wbarss[s, n] -= 1.
+                # accumulate all of the jumps between states, and total escapes:
+                Wbarss[TS.i, TS.j, n] += 1.
+                Wbarss[TS.j, TS.i, n] += 1.
+                Wbar_esc[TS.i, n] -= 1.
+                Wbar_esc[TS.j, n] -= 1.
         # rate expansions:
         Wss = np.zeros((Ns, Ns, Nrates))
         Wst_fs, Wst_hs = np.zeros((Ns, Nt, Nrates)), np.zeros((Ns, Nt, Nrates))
@@ -770,8 +769,8 @@ class ConcentratedInterstitial(Interstitial):
         Wtt_ftm, Wtt_htm = np.zeros((Nt, Nt, Nrates)), np.zeros((Nt, Nt, Nrates))
         Wtt = np.zeros((Nt, Nt, Nrates))
         for d, SVS in enumerate(self.SVS):
-            s = self.invmap[next(iter(SVS))] # which state does our SVS correspond to?
-            Wss[d, d, :] += Wbarss[s]
+            s = next(iter(SVS)) # which state does our SVS correspond to?
+            Wss[d, d, :] += Wbar_esc[s]
         for n, TSset in enumerate(self.TS):
             for TS in TSset:
                 for d1, SVS1 in enumerate(self.SVS):
