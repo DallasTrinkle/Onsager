@@ -760,17 +760,58 @@ class ConcentratedInterstitial(Interstitial):
                 Wbarss[TS.j, TS.i, n] += 1.
                 Wbar_esc[TS.i, n] -= 1.
                 Wbar_esc[TS.j, n] -= 1.
-        # rate expansions:
+        # rate expansions: [s,s]
         Wss = np.zeros((Ns, Ns, Nrates))
+        for i, SVS1 in enumerate(self.SVS):
+            s = next(iter(SVS1)) # which state does our SVS correspond to? Just grab one...
+            Wss[i, i, :] += Wbar_esc[s]
+            for j, SVS2 in enumerate(self.SVS):
+                for s1, v1 in SVS1.items():
+                    for s2, v2 in SVS2.items():
+                        Wss[i, j] += np.dot(v1, v2)*Wbarss[s1, s2]
+        # rate expansions: [s,t] (and [t,s])
         Wst_fs, Wst_hs = np.zeros((Ns, Nt, Nrates)), np.zeros((Ns, Nt, Nrates))
         Wst_ftp, Wst_htp = np.zeros((Ns, Nt, Nrates)), np.zeros((Ns, Nt, Nrates))
         Wst_ftm, Wst_htm = np.zeros((Ns, Nt, Nrates)), np.zeros((Ns, Nt, Nrates))
+        for i, SVS in enumerate(self.SVS):
+            for j, TVS in enumerate(self.TVS):
+                for s1, v1 in SVS.items():
+                    for t1, v2 in TVS.items():
+                        tp, tm = t1.i, t1.j
+                        n = ... # need to do invmap on t1!
+                        v1v2 = np.dot(v1, v2)
+                        # NEED TO THINK ABOUT THIS NEXT PIECE!!
+                        if s1 != tp and s1 != tm:
+                            # s \notin t
+                            # t+ first:
+                            Wst_htm[i, j] += v1v2*Wbarss[s1, tp]
+                            Wst_ftm[i, j] -= v1v2*Wbarss[s1, tp]
+                            # t- next:
+                            Wst_htp[i, j] += v1v2*Wbarss[s1, tm]
+                            Wst_ftp[i, j] -= v1v2*Wbarss[s1, tm]
+
+                        else:
+                            if s1 == tp:
+                                # sbar = tm
+                                Wst_fs[i, j, n] += v1v2
+                                Wst_ftm[i, j, n] -= 2*v1v2
+                                Wst_htm[i, j, n] += v1v2
+                                Wst_htm[i, j] += v1v2*Wbar_esc[s1]
+                                Wst_ftm[i, j] -= v1v2*Wbar_esc[s1]
+                            if s1 == tm:
+                                # sbar = tp
+                                Wst_fs[i, j, n] += v1v2
+                                Wst_ftp[i, j, n] -= 2*v1v2
+                                Wst_htp[i, j, n] += v1v2
+                                Wst_htp[i, j] += v1v2*Wbar_esc[s1]
+                                Wst_ftp[i, j] -= v1v2*Wbar_esc[s1]
+
+
+
+        # rate expansions: [t,t]
         Wtt_ftp, Wtt_htp = np.zeros((Nt, Nt, Nrates)), np.zeros((Nt, Nt, Nrates))
         Wtt_ftm, Wtt_htm = np.zeros((Nt, Nt, Nrates)), np.zeros((Nt, Nt, Nrates))
         Wtt = np.zeros((Nt, Nt, Nrates))
-        for d, SVS in enumerate(self.SVS):
-            s = next(iter(SVS)) # which state does our SVS correspond to?
-            Wss[d, d, :] += Wbar_esc[s]
         for n, TSset in enumerate(self.TS):
             for TS in TSset:
                 for d1, SVS1 in enumerate(self.SVS):
