@@ -652,6 +652,13 @@ class ConcentratedInterstitial(Interstitial):
         self.TSinvmap = {PS: n for n, TSset in enumerate(self.TS) for PS in TSset}
         self.SVS = self.generateStateVectorStars(self.sitelist)
         self.TVS = self.generateTSVectorStars(self.TS)
+        self.TVSinvmap = {}
+        for n, TVS in enumerate(self.TVS):
+            for TS in TVS.keys():
+                if TS in self.TVSinvmap:
+                    self.TVSinvmap[TS].append(n)
+                else:
+                    self.TVSinvmap[TS] = [n]
 
         self.tags, self.tagdict, self.tagdicttype = self.generatetags()  # now with tags!
 

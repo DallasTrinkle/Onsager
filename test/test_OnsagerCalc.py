@@ -1710,6 +1710,10 @@ class ConcentratedInterstitialTests(unittest.TestCase):
             for i, TSlist in enumerate(diffuser.statejumps):
                 for TS in TSlist:
                     self.assertEqual(i, TS.i)
+            for t, TVS in enumerate(diffuser.TVS):
+                for TS in TVS.keys():
+                    self.assertIn(t, diffuser.TVSinvmap[TS])
+
         self.assertEqual(len(self.HCP_sitelist), 2)
         self.assertEqual(len(self.FCC_sitelist), 2)
         self.assertEqual(len(self.HCP_jumpnetwork), 2)
