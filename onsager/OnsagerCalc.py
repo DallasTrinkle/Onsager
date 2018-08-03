@@ -824,7 +824,7 @@ class ConcentratedInterstitial(Interstitial):
             diag = 2.*Wbar_esc[TS1.i] + 2.*Wbar_esc[TS1.j]
             diag[self.TSinvmap[TS1]] += 4.
             for i in ilist:
-                Wtt[i, i] += diag
+                Wtt[i, i] += diag/len(self.TVS[i])
             # next, we build all the transition states that share *one* vertex, then
             # all those that share none:
             # states originating from t+ = TS1.i
