@@ -848,6 +848,29 @@ class ConcentratedInterstitial(Interstitial):
                         v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][-TS2])
                         Wtt_t1mt2p[i,j] += v1v2*Wbar_esc[TS.i]
                     if n is not None: Wtt[i, j, n] += 2*v1v2
+                # now try the transition states leaving from TS2.j:
+                try:
+                    n = self.TSinvmap[TS2]
+                except KeyError:
+                    n = self.TSinvmap[-TS2]
+                for TS3 in self.statejumps[TS2.j]:
+                    # exclude two cases: (1) reverse jump of TS2, (2) jump that lands back at TS1.j
+                    if TS3 == -TS2: continue
+                    if TS3 == TSp: continue
+                    forward = True
+                    try:
+                        jlist = self.TVSinvmap[TS3]
+                    except KeyError:
+                        jlist = self.TVSinvmap[-TS3]
+                        forward = False
+                    for j in jlist:
+                        if forward:
+                            v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][TS3])
+                            Wtt_t1mt2m[i,j,n] += v1v2
+                        else:
+                            v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][-TS3])
+                            Wtt_t1mt2p[i,j,n] += v1v2
+
             for TS2 in self.statejumps[TS1.j]:
                 if -TS2 == TS1: continue
                 TSp = TS1 + TS2 # this is the state that connects the unmatched endpoints between TS1 & TS2
@@ -868,17 +891,34 @@ class ConcentratedInterstitial(Interstitial):
                         v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][-TS2])
                         Wtt_t1pt2p[i,j] += v1v2*Wbar_esc[TS.i]
                     if n is not None: Wtt[i, j, n] += 2*v1v2
+                # now try the transition states leaving from TS2.j:
+                try:
+                    n = self.TSinvmap[TS2]
+                except KeyError:
+                    n = self.TSinvmap[-TS2]
+                for TS3 in self.statejumps[TS2.j]:
+                    # exclude two cases: (1) reverse jump of TS2, (2) jump that lands back at TS1.i (-TS')
+                    if TS3 == -TS2: continue
+                    if TS3 == -TSp: continue
+                    forward = True
+                    try:
+                        jlist = self.TVSinvmap[TS3]
+                    except KeyError:
+                        jlist = self.TVSinvmap[-TS3]
+                        forward = False
+                    for j in jlist:
+                        if forward:
+                            v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][TS3])
+                            Wtt_t1pt2m[i,j,n] += v1v2
+                        else:
+                            v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][-TS3])
+                            Wtt_t1pt2p[i,j,n] += v1v2
 
-
-        for n, TSset in enumerate(self.TS):
-            for TS in TSset:
-                for d1, SVS1 in enumerate(self.SVS):
-                    for d2, SVS2 in enumerate(self.SVS):
-                        if (TS.i in SVS1 and TS.j in SVS2):
-                            Wss[d1, d2, n] += np.dot(SVS1[TS.i], SVS2[TS.j])
-                        elif (TS.i in SVS2 and TS.j in SVS1):
-                            Wss[d1, d2, n] += np.dot(SVS1[TS.j], SVS2[TS.i])
-
+        return {'bs': bs, 'bt_ft+': bt_ftp, 'bt_ft-': bt_ftm, 'bt_ht+': bt_htp, 'bt_ht-': bt_htm,
+                'Wss': Wss, 'Wst_fs': Wst_fs, 'Wst_hs': Wst_hs,
+                'Wst_ft+': Wst_ftp, 'Wst_ht+': Wst_htp, 'Wst_ft-': Wst_ftm, 'Wst_ht-': Wst_htm,
+                'Wtt_t1+t2+': Wtt_t1pt2p, 'Wtt_t1+t2-': Wtt_t1pt2m,
+                'Wtt_t1-t2+': Wtt_t1mt2p, 'Wtt_t1-t2-': Wtt_t1mt2m, 'Wtt': Wtt}
 
     def thermofactors(self, pre, betaene, preT, betaeneT, conc, invc = 1., tol=1e-8):
         """
