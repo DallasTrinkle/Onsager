@@ -790,7 +790,7 @@ class ConcentratedInterstitial(Interstitial):
                         tp, tm = t1.i, t1.j
                         n = ... # need to do invmap on t1!
                         v1v2 = np.dot(v1, v2)
-                        # NEED TO THINK ABOUT THIS NEXT PIECE!!
+                        # Now corrected...
                         if s1 != tp and s1 != tm:
                             # s \notin t
                             # t+ first:
@@ -804,15 +804,15 @@ class ConcentratedInterstitial(Interstitial):
                             if s1 == tp:
                                 # sbar = tm
                                 Wst_fs[i, j, n] += v1v2
-                                Wst_ftm[i, j, n] -= 2*v1v2
-                                Wst_htm[i, j, n] += v1v2
+                                Wst_ftm[i, j, n] -= v1v2  # 2*v1v2
+                                # Wst_htm[i, j, n] += v1v2
                                 Wst_htm[i, j] += v1v2*Wbar_esc[s1]
                                 Wst_ftm[i, j] -= v1v2*Wbar_esc[s1]
                             if s1 == tm:
                                 # sbar = tp
                                 Wst_fs[i, j, n] += v1v2
-                                Wst_ftp[i, j, n] -= 2*v1v2
-                                Wst_htp[i, j, n] += v1v2
+                                Wst_ftp[i, j, n] -= v1v2  # 2*v1v2
+                                # Wst_htp[i, j, n] += v1v2
                                 Wst_htp[i, j] += v1v2*Wbar_esc[s1]
                                 Wst_ftp[i, j] -= v1v2*Wbar_esc[s1]
         # rate expansions: [t,t]
@@ -865,11 +865,9 @@ class ConcentratedInterstitial(Interstitial):
                         forward = False
                     for j in jlist:
                         if forward:
-                            v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][TS3])
-                            Wtt_t1mt2m[i,j,n] += v1v2
+                            Wtt_t1mt2m[i,j,n] += np.dot(self.TVS[i][TS1], self.TVS[j][TS3])
                         else:
-                            v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][-TS3])
-                            Wtt_t1mt2p[i,j,n] += v1v2
+                            Wtt_t1mt2p[i,j,n] += np.dot(self.TVS[i][TS1], self.TVS[j][-TS3])
 
             for TS2 in self.statejumps[TS1.j]:
                 if -TS2 == TS1: continue
@@ -908,11 +906,9 @@ class ConcentratedInterstitial(Interstitial):
                         forward = False
                     for j in jlist:
                         if forward:
-                            v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][TS3])
-                            Wtt_t1pt2m[i,j,n] += v1v2
+                            Wtt_t1pt2m[i,j,n] += np.dot(self.TVS[i][TS1], self.TVS[j][TS3])
                         else:
-                            v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][-TS3])
-                            Wtt_t1pt2p[i,j,n] += v1v2
+                            Wtt_t1pt2p[i,j,n] += np.dot(self.TVS[i][TS1], self.TVS[j][-TS3])
 
         return {'bs': bs, 'bt_ft+': bt_ftp, 'bt_ft-': bt_ftm, 'bt_ht+': bt_htp, 'bt_ht-': bt_htm,
                 'Wss': Wss, 'Wst_fs': Wst_fs, 'Wst_hs': Wst_hs,

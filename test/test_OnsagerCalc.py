@@ -1614,7 +1614,7 @@ class ConcentratedInterstitialTests(unittest.TestCase):
 
     def setUp(self):
         # Both HCP and FCC diffusion networks with octahedral and tetrahedral sites
-        self.a0 = 3
+        self.a0 = 1.
         self.c_a = np.sqrt(8. / 3.)
         self.fcclatt = self.a0 * np.array([[0, 0.5, 0.5],
                                            [0.5, 0, 0.5],
@@ -1730,7 +1730,9 @@ class ConcentratedInterstitialTests(unittest.TestCase):
     def testGenerateExpansions(self):
         """Do we construct our linear expansions correctly?"""
         for diffuser in (self.Dfcc, self.Dhcp):
-            diffuser.generateExpansions()
+            for name, matrix in diffuser.generateExpansions().items():
+                print(name)
+                print(matrix)
 
 
 
