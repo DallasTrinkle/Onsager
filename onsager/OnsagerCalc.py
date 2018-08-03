@@ -753,16 +753,16 @@ class ConcentratedInterstitial(Interstitial):
                         bt_ftp[d, n] -= 2.*np.dot(TS.dx, TVS[TS])
                         bt_ftm[d, n] += 2.*np.dot(TS.dx, TVS[TS])
                     for TSp, v in TVS.items():
-                        dx = 0
+                        dx = None
                         if TS.i == TSp.i: dx = TS.dx
                         if TS.j == TSp.i: dx = -TS.dx
-                        if dx != 0:
+                        if dx is not None:
                             bt_htm[d, n] += np.dot(dx, v)
                             bt_ftm[d, n] -= np.dot(dx, v)
-                        dx = 0
+                        dx = None
                         if TS.i == TSp.j: dx = -TS.dx
                         if TS.j == TSp.j: dx = TS.dx
-                        if dx != 0:
+                        if dx is not None:
                             bt_htp[d, n] += np.dot(dx, v)
                             bt_ftp[d, n] -= np.dot(dx, v)
                 # accumulate all of the jumps between states, and total escapes:
@@ -815,13 +815,61 @@ class ConcentratedInterstitial(Interstitial):
                                 Wst_htp[i, j, n] += v1v2
                                 Wst_htp[i, j] += v1v2*Wbar_esc[s1]
                                 Wst_ftp[i, j] -= v1v2*Wbar_esc[s1]
-
-
-
         # rate expansions: [t,t]
-        Wtt_ftp, Wtt_htp = np.zeros((Nt, Nt, Nrates)), np.zeros((Nt, Nt, Nrates))
-        Wtt_ftm, Wtt_htm = np.zeros((Nt, Nt, Nrates)), np.zeros((Nt, Nt, Nrates))
+        Wtt_t1pt2p, Wtt_t1pt2m = np.zeros((Nt, Nt, Nrates)), np.zeros((Nt, Nt, Nrates))
+        Wtt_t1mt2p, Wtt_t1mt2m = np.zeros((Nt, Nt, Nrates)), np.zeros((Nt, Nt, Nrates))
         Wtt = np.zeros((Nt, Nt, Nrates))
+        for TS1, ilist in self.TVSinvmap.items():
+            # t1 = t2 contribution: 2*Wbar[t+,t+] + 2*Wbar[t-,t-] + 4*omega_t
+            diag = 2.*Wbar_esc[TS1.i] + 2.*Wbar_esc[TS1.j]
+            diag[self.TSinvmap[TS1]] += 4.
+            for i in ilist:
+                Wtt[i, i] += diag
+            # next, we build all the transition states that share *one* vertex, then
+            # all those that share none:
+            # states originating from t+ = TS1.i
+            for TS2 in self.statejumps[TS1.i]:
+                if TS2 == TS1: continue
+                TSp = TS1 ^ TS2 # this is the state that connects the unmatched endpoints between TS1 & TS2
+                if TSp in self.TSinvmap: n = self.TSinvmap[TSp]
+                elif -TSp in self.TSinvmap: n = self.TSinvmap[-TSp]
+                else: n = None
+                forward = True
+                try:
+                    jlist = self.TVSinvmap[TS2]
+                except KeyError:
+                    jlist = self.TVSinvmap[-TS2]
+                    forward = False
+                for j in jlist:
+                    if forward:
+                        v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][TS2])
+                        Wtt_t1mt2m[i,j] += v1v2*Wbar_esc[TS.i]
+                    else:
+                        v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][-TS2])
+                        Wtt_t1mt2p[i,j] += v1v2*Wbar_esc[TS.i]
+                    if n is not None: Wtt[i, j, n] += 2*v1v2
+            for TS2 in self.statejumps[TS1.j]:
+                if -TS2 == TS1: continue
+                TSp = TS1 + TS2 # this is the state that connects the unmatched endpoints between TS1 & TS2
+                if TSp in self.TSinvmap: n = self.TSinvmap[TSp]
+                elif -TSp in self.TSinvmap: n = self.TSinvmap[-TSp]
+                else: n = None
+                forward = True
+                try:
+                    jlist = self.TVSinvmap[TS2]
+                except KeyError:
+                    jlist = self.TVSinvmap[-TS2]
+                    forward = False
+                for j in jlist:
+                    if forward:
+                        v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][TS2])
+                        Wtt_t1pt2m[i,j] += v1v2*Wbar_esc[TS.i]
+                    else:
+                        v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][-TS2])
+                        Wtt_t1pt2p[i,j] += v1v2*Wbar_esc[TS.i]
+                    if n is not None: Wtt[i, j, n] += 2*v1v2
+
+
         for n, TSset in enumerate(self.TS):
             for TS in TSset:
                 for d1, SVS1 in enumerate(self.SVS):

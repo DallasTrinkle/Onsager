@@ -1727,6 +1727,11 @@ class ConcentratedInterstitialTests(unittest.TestCase):
                 for TS in TSset:
                     self.assertEqual(endpoints, (invmap[TS.i], invmap[TS.j]))
 
+    def testGenerateExpansions(self):
+        """Do we construct our linear expansions correctly?"""
+        for diffuser in (self.Dfcc, self.Dhcp):
+            diffuser.generateExpansions()
+
 
 
 if __name__ == '__main__':
