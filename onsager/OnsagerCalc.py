@@ -634,7 +634,8 @@ class ConcentratedInterstitial(Interstitial):
         self.jumpnetwork = jumpnetwork
         self.TS = []
         self.TSendpoint = []
-        for jn in self.jumpnetwork:
+        self.statejumps = [[] for s in range(self.N)]
+        for n, jn in enumerate(self.jumpnetwork):
             # self.TS.append([stars.PairState.fromcrys(crys, chem, ij, dx) for ij, dx in jn])
             (i, j) = jn[0][0]
             endpoints = (self.invmap[i], self.invmap[j])
@@ -642,11 +643,13 @@ class ConcentratedInterstitial(Interstitial):
             TSset = set()
             for ij, dx in jn:
                 # we want the t+ and t- to be consistent for all TS in our set:
-                if (self.invmap[ij[0]], self.invmap[ij[1]]) != endpoints: continue
                 PS = stars.PairState.fromcrys(crys, chem, ij, dx)
+                self.statejumps[ij[0]].append(PS)
+                if (self.invmap[ij[0]], self.invmap[ij[1]]) != endpoints: continue
                 if -PS not in TSset: # only add *one* representative for each TS.
                     TSset.add(PS)
             self.TS.append(TSset)
+        self.TSinvmap = {PS: n for n, TSset in enumerate(self.TS) for PS in TSset}
         self.SVS = self.generateStateVectorStars(self.sitelist)
         self.TVS = self.generateTSVectorStars(self.TS)
 

@@ -1678,18 +1678,19 @@ class ConcentratedInterstitialTests(unittest.TestCase):
 
         for diffuser in (self.Dfcc, self.Dhcp):
             # generate some random energies / prefactors:
-            Ns = len(diffuser.sitelist)
-            pre = np.random.lognormal(0., 1., size=Ns)
-            betaene = np.random.uniform(0., 1., size=Ns)
-            preT = np.random.lognormal(1., 1., size=len(diffuser.jumpnetwork))
-            betaeneT = np.random.uniform(1., 2., size=len(diffuser.jumpnetwork))
+            for nrand in range(64):
+                Ns = len(diffuser.sitelist)
+                pre = np.random.lognormal(0., 1., size=Ns)
+                betaene = np.random.uniform(0., 1., size=Ns)
+                preT = np.random.lognormal(1., 1., size=len(diffuser.jumpnetwork))
+                betaeneT = np.random.uniform(1., 2., size=len(diffuser.jumpnetwork))
 
-            for conc, invc in zip(conclist, invconclist):
-                fs, hs, omegat = diffuser.thermofactors(pre, betaene, preT, betaeneT, conc, invc)
-                conc_eval = sum(f*len(slist) for f, slist in zip(fs, diffuser.sitelist))/diffuser.N
-                invc_eval = sum(h*len(slist) for h, slist in zip(hs, diffuser.sitelist))/diffuser.N
-                self.assertAlmostEqual(1., conc_eval/conc, msg='c failure for c={} 1-c={}'.format(conc, invc))
-                self.assertAlmostEqual(1., invc_eval/invc, msg='1-c failure for c={} 1-c={}'.format(conc, invc))
+                for conc, invc in zip(conclist, invconclist):
+                    fs, hs, omegat = diffuser.thermofactors(pre, betaene, preT, betaeneT, conc, invc)
+                    conc_eval = sum(f*len(slist) for f, slist in zip(fs, diffuser.sitelist))/diffuser.N
+                    invc_eval = sum(h*len(slist) for h, slist in zip(hs, diffuser.sitelist))/diffuser.N
+                    self.assertAlmostEqual(1., conc_eval/conc, msg='c failure for c={} 1-c={}'.format(conc, invc))
+                    self.assertAlmostEqual(1., invc_eval/invc, msg='1-c failure for c={} 1-c={}'.format(conc, invc))
 
         sclatt = crystal.Crystal(np.eye(3), [np.zeros(3)])
         Dsc = OnsagerCalc.ConcentratedInterstitial(sclatt, 0, sclatt.sitelist(0), sclatt.jumpnetwork(0, 1.01))
@@ -1703,6 +1704,12 @@ class ConcentratedInterstitialTests(unittest.TestCase):
         for diffuser in (self.Dhcp, self.Dfcc):
             for i, w in enumerate(diffuser.invmap):
                 self.assertTrue(any(i == j for j in diffuser.sitelist[w]))
+            for n, TSset in enumerate(diffuser.TS):
+                for TS in TSset:
+                    self.assertEqual(n, diffuser.TSinvmap[TS])
+            for i, TSlist in enumerate(diffuser.statejumps):
+                for TS in TSlist:
+                    self.assertEqual(i, TS.i)
         self.assertEqual(len(self.HCP_sitelist), 2)
         self.assertEqual(len(self.FCC_sitelist), 2)
         self.assertEqual(len(self.HCP_jumpnetwork), 2)
