@@ -1738,6 +1738,7 @@ class ConcentratedInterstitialTests(unittest.TestCase):
     def constructMatrices(self, D, f, h, omega):
         """Takes the sites and TS of a diffuser and builds up the bias vectors and rate matrices"""
         supervects = set([R for R in itertools.product(range(-2,3), repeat=D.dim)])
+        t_index = {TS: n for n, TS in enumerate(D.TSinvmap.keys())} # makes us a list of TS
         Ns, Nt = D.N, len(D.TSinvmap)
         # identify states and TS as: (s, n) where n is a tuple corresponding to the supercell
         # need: (1) dictionnary of all transitions between states, and (2) endpoints of TS's.
@@ -1751,9 +1752,11 @@ class ConcentratedInterstitialTests(unittest.TestCase):
                 if Rp in supervects:
                     try:
                         n = D.TSinvmap[TS]
+                        t = t_index[TS]
                     except KeyError:
                         n = D.TSinvmap[-TS]
-                    i_transdict[j, Rp] = (n, TS.dx)
+                        t = t_index[-TS]
+                    i_transdict[j, Rp] = (n, TS.dx, t)
             transdict[i, R] = i_transdict
         # note: transdict[i, Ri][j, Rj] = (index of transition, dx) *if* there is one
         endpointdict = {}
@@ -1763,14 +1766,45 @@ class ConcentratedInterstitialTests(unittest.TestCase):
                 endpointdict[TS, R] = ((TS.i, Ri), (TS.j, Rj))
         # We're going to build up the bias vectors, and matrices, with transl. invariance:
         bias_s, bias_t = np.zeros((Ns, D.dim)), np.zeros((Nt, D.dim))
-        W_ss, W_st, W_tt = np.zeros((Ns, Ns)), np.zeros((Ns, Nt))), np.zeros((Nt, Nt))t
+        W_ss, W_st, W_tt = np.zeros((Ns, Ns)), np.zeros((Ns, Nt)), np.zeros((Nt, Nt))
+        escape_s = np.zero(Ns)
+        zero = (0,)*D.dim
         for i in range(Ns):
-            ...
-        for t in range(Nt):
-            ...
-
+            for (j, Rj), (n, dx, t) in transdict[i, zero].items():
+                bias_s[i] += omega[n]*dx
+                W_ss[i, j] += omega[n]
+                W_ss[i, i] -= omega[n]
+                escape_s[i] -= omega[n]
+        for TS, t in t_index.items():
+            (ip, Rp), (im, Rm) = endpointdict[TS, zero]
+            ftp, htp, ftm, htm = f[D.invmap[ip]], h[D.invmap[ip]], f[D.invmap[im]], h[D.invmap[im]]
+            omega_t = omega[D.TSinvmap[TS]]
+            bias_t[t] += bias_s[ip]*(htm-ftm) + bias_s[im]*(htp-ftp)
+            bias_t[t] -= 2*omega_t*(ftp-ftm)*TS.dx
+            # now, let's build some matrices!
+            W_st[ip, t] += omega_t*(ftp+htm-2*ftm) + escape_s[ip]*(htm-ftm)
+            W_st[im, t] += omega_t*(ftm+htp-2*ftp) + escape_s[im]*(htp-ftp)
+            for (j, Rj), (n, dx, tp) in transdict[ip, Rp].items():
+                if (j, Rj) == (im, Rm): continue
+                W_st[j, t] += omega[n]*(htm-ftm)
+                W_tt[t, tp] += escape_s[ip]*(ftm-htm)*(f[D.invmap[j]]-h[D.invmap[j]])
+                try:
+                    (n, dx, tpp) = transdict[im, Rm][j, Rj]
+                    W_tt[t, tp] += 2*omega[n]
+                except KeyError:
+                    pass
+            for (j, Rj), (n, dx, tp) in transdict[im, Rm].items():
+                if (j, Rj) == (ip, Rp): continue
+                W_st[j, t] += omega[n]*(htp-ftp)
+                W_tt[t, tp] += escape_s[im] * (ftp - htp) * (f[D.invmap[j]] - h[D.invmap[j]])
+                try:
+                    (n, dx, tpp) = transdict[ip, Rp][j, Rj]
+                    W_tt[t, tp] += 2 * omega[n]
+                except KeyError:
+                    pass
+            # finally, t,t matrix:
+            W_tt[t, t] += 2*escape_s[ip]+2*escape_s[im]+4*omega_t
         return bias_s, bias_t, W_ss, W_st, W_tt
-
 
 
 
