@@ -1733,6 +1733,44 @@ class ConcentratedInterstitialTests(unittest.TestCase):
             for name, matrix in diffuser.generateExpansions().items():
                 print(name)
                 print(matrix)
+            # Let's build some supercells, and see if we can't test...
+
+    def constructMatrices(self, D, f, h, omega):
+        """Takes the sites and TS of a diffuser and builds up the bias vectors and rate matrices"""
+        supervects = set([R for R in itertools.product(range(-2,3), repeat=D.dim)])
+        Ns, Nt = D.N, len(D.TSinvmap)
+        # identify states and TS as: (s, n) where n is a tuple corresponding to the supercell
+        # need: (1) dictionnary of all transitions between states, and (2) endpoints of TS's.
+        transdict = {}
+        for i, R in itertools.product(range(Ns), supervects):
+            i_transdict = {}
+            Rv = np.array(R)
+            for TS in D.statejumps[i]:
+                j = TS.j
+                Rp = tuple(Rv+TS.R)
+                if Rp in supervects:
+                    try:
+                        n = D.TSinvmap[TS]
+                    except KeyError:
+                        n = D.TSinvmap[-TS]
+                    i_transdict[j, Rp] = (n, TS.dx)
+            transdict[i, R] = i_transdict
+        # note: transdict[i, Ri][j, Rj] = (index of transition, dx) *if* there is one
+        endpointdict = {}
+        for TS, Ri in itertools.product(D.TSinvmap.keys(), supervects):
+            Rj = tuple(Ri+TS.R)
+            if Rj in supervects:
+                endpointdict[TS, R] = ((TS.i, Ri), (TS.j, Rj))
+        # We're going to build up the bias vectors, and matrices, with transl. invariance:
+        bias_s, bias_t = np.zeros((Ns, D.dim)), np.zeros((Nt, D.dim))
+        W_ss, W_st, W_tt = np.zeros((Ns, Ns)), np.zeros((Ns, Nt))), np.zeros((Nt, Nt))t
+        for i in range(Ns):
+            ...
+        for t in range(Nt):
+            ...
+
+        return bias_s, bias_t, W_ss, W_st, W_tt
+
 
 
 
