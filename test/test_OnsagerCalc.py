@@ -1730,7 +1730,8 @@ class ConcentratedInterstitialTests(unittest.TestCase):
     def testGenerateExpansions(self):
         """Do we construct our linear expansions correctly?"""
         for diffuser in (self.Dfcc, self.Dhcp):
-            for name, matrix in diffuser.generateExpansions().items():
+            expansiondict = diffuser.generateExpansions()
+            for name, matrix in expansiondict.items():
                 print(name)
                 print(matrix)
             # Let's build some supercells, and see if we can't test...
@@ -1742,12 +1743,34 @@ class ConcentratedInterstitialTests(unittest.TestCase):
             conc = 0.25
             invc = 1-conc
             fs, hs, omegat = diffuser.thermofactors(pre, betaene, preT, betaeneT, conc, invc)
+            TVSendpoint = []
+            for TVS in diffuser.TVS:
+                TS = next(iter(TVS))
+                TVSendpoint.append((diffuser.invmap[TS.i], diffuser.invmap[TS.j]))
+            ftp = np.array([fs[i] for (i,j) in TVSendpoint])
+            htp = np.array([hs[i] for (i,j) in TVSendpoint])
+            ftm = np.array([fs[j] for (i,j) in TVSendpoint])
+            htm = np.array([hs[j] for (i,j) in TVSendpoint])
             bias_s, bias_t, Wss, Wst, Wtt, t_index = self.constructMatrices(diffuser, fs, hs, omegat)
             print(bias_s)
             print(bias_t)
             print(Wss)
             print(Wst)
             print(Wtt)
+            bias_SVS = np.array([sum(np.dot(bias_s[s], v) for s, v in SVS.items())
+                                 for SVS in diffuser.SVS])
+            bs = np.dot(expansiondict['bs'], omegat)
+            self.assertTrue(np.allclose(bias_SVS, bs))
+            bias_TVS = np.array([sum(np.dot(bias_t[t_index[TS]], v) for TS, v in TVS.items())
+                                for TVS in diffuser.TVS])
+            bt = np.dot(expansiondict['bt_ft+'], omegat)*ftp + \
+                 np.dot(expansiondict['bt_ht+'], omegat)*htp + \
+                 np.dot(expansiondict['bt_ft-'], omegat)*ftm + \
+                 np.dot(expansiondict['bt_ht-'], omegat)*htm
+            print('bt:', bias_TVS)
+            print('bt:', bt)
+            self.assertTrue(np.allclose(bias_TVS, bt))
+
 
     def constructMatrices(self, D, f, h, omega):
         """Takes the sites and TS of a diffuser and builds up the bias vectors and rate matrices"""
