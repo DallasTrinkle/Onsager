@@ -760,8 +760,8 @@ class ConcentratedInterstitial(Interstitial):
                             bt_htm[d, n] += np.dot(dx, v)
                             bt_ftm[d, n] -= np.dot(dx, v)
                         dx = None
-                        if TS.i == TSp.j: dx = -TS.dx
-                        if TS.j == TSp.j: dx = TS.dx
+                        if TS.i == TSp.j: dx = TS.dx
+                        if TS.j == TSp.j: dx = -TS.dx
                         if dx is not None:
                             bt_htp[d, n] += np.dot(dx, v)
                             bt_ftp[d, n] -= np.dot(dx, v)

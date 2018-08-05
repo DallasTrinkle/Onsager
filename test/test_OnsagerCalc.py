@@ -1751,6 +1751,8 @@ class ConcentratedInterstitialTests(unittest.TestCase):
             htp = np.array([hs[i] for (i,j) in TVSendpoint])
             ftm = np.array([fs[j] for (i,j) in TVSendpoint])
             htm = np.array([hs[j] for (i,j) in TVSendpoint])
+            fSVS = np.array([fs[diffuser.invmap[next(iter(SVS))]] for SVS in diffuser.SVS])
+            hSVS = np.array([hs[diffuser.invmap[next(iter(SVS))]] for SVS in diffuser.SVS])
             bias_s, bias_t, Wss, Wst, Wtt, t_index = self.constructMatrices(diffuser, fs, hs, omegat)
             print(bias_s)
             print(bias_t)
@@ -1767,10 +1769,30 @@ class ConcentratedInterstitialTests(unittest.TestCase):
                  np.dot(expansiondict['bt_ht+'], omegat)*htp + \
                  np.dot(expansiondict['bt_ft-'], omegat)*ftm + \
                  np.dot(expansiondict['bt_ht-'], omegat)*htm
-            print('bt:', bias_TVS)
-            print('bt:', bt)
             self.assertTrue(np.allclose(bias_TVS, bt))
-
+            W_SVS_SVS = np.zeros((len(diffuser.SVS), len(diffuser.SVS)))
+            for i, SVS1 in enumerate(diffuser.SVS):
+                for j, SVS2 in enumerate(diffuser.SVS):
+                    for s1, v1 in SVS1.items():
+                        for s2, v2 in SVS2.items():
+                            W_SVS_SVS[i,j] += np.dot(v1, v2)*Wss[s1, s2]
+            W_ss = np.dot(expansiondict['Wss'], omegat)
+            self.assertTrue(np.allclose(W_SVS_SVS, W_ss))
+            W_SVS_TVS = np.zeros((len(diffuser.SVS), len(diffuser.TVS)))
+            for i, SVS1 in enumerate(diffuser.SVS):
+                for j, TVS2 in enumerate(diffuser.TVS):
+                    for s, v1 in SVS1.items():
+                        for TS, v2 in TVS2.items():
+                            W_SVS_TVS[i,j] += np.dot(v1, v2)*Wst[s, t_index[TS]]
+            W_st = (np.dot(expansiondict['Wst_fs'], omegat).T * fSVS).T + \
+                   (np.dot(expansiondict['Wst_hs'], omegat).T * hSVS).T + \
+                   np.dot(expansiondict['Wst_ft+'], omegat)*ftp + \
+                   np.dot(expansiondict['Wst_ft-'], omegat)*ftm + \
+                   np.dot(expansiondict['Wst_ht+'], omegat)*htp + \
+                   np.dot(expansiondict['Wst_ht-'], omegat)*htm
+            print('Wst:', W_SVS_TVS)
+            print('Wst:', W_st)
+            self.assertTrue(np.allclose(W_SVS_TVS, W_st))
 
     def constructMatrices(self, D, f, h, omega):
         """Takes the sites and TS of a diffuser and builds up the bias vectors and rate matrices"""
