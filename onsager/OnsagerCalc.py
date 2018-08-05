@@ -780,7 +780,7 @@ class ConcentratedInterstitial(Interstitial):
                     for s2, v2 in SVS2.items():
                         Wss[i, j] += np.dot(v1, v2)*Wbarss[s1, s2]
         # rate expansions: [s,t] (and [t,s])
-        Wst_fs, Wst_hs = np.zeros((Ns, Nt, Nrates)), np.zeros((Ns, Nt, Nrates))
+        # Wst_fs, Wst_hs = np.zeros((Ns, Nt, Nrates)), np.zeros((Ns, Nt, Nrates))
         Wst_ftp, Wst_htp = np.zeros((Ns, Nt, Nrates)), np.zeros((Ns, Nt, Nrates))
         Wst_ftm, Wst_htm = np.zeros((Ns, Nt, Nrates)), np.zeros((Ns, Nt, Nrates))
         for i, SVS in enumerate(self.SVS):
@@ -790,31 +790,28 @@ class ConcentratedInterstitial(Interstitial):
                         tp, tm = t1.i, t1.j
                         n = self.TSinvmap[t1] # need to do invmap on t1!
                         v1v2 = np.dot(v1, v2)
-                        # Now corrected...
-                        if s1 != tp and s1 != tm:
-                            # s \notin t
-                            # t+ first:
-                            Wst_htm[i, j] += v1v2*Wbarss[s1, tp]
-                            Wst_ftm[i, j] -= v1v2*Wbarss[s1, tp]
-                            # t- next:
-                            Wst_htp[i, j] += v1v2*Wbarss[s1, tm]
-                            Wst_ftp[i, j] -= v1v2*Wbarss[s1, tm]
-
-                        else:
-                            if s1 == tp:
-                                # sbar = tm
-                                Wst_fs[i, j, n] += v1v2
-                                Wst_ftm[i, j, n] -= v1v2  # 2*v1v2
-                                # Wst_htm[i, j, n] += v1v2
-                                Wst_htm[i, j] += v1v2*Wbar_esc[s1]
-                                Wst_ftm[i, j] -= v1v2*Wbar_esc[s1]
-                            if s1 == tm:
-                                # sbar = tp
-                                Wst_fs[i, j, n] += v1v2
-                                Wst_ftp[i, j, n] -= v1v2  # 2*v1v2
-                                # Wst_htp[i, j, n] += v1v2
-                                Wst_htp[i, j] += v1v2*Wbar_esc[s1]
-                                Wst_ftp[i, j] -= v1v2*Wbar_esc[s1]
+                        # t+ first:
+                        Wst_htm[i, j] += v1v2*Wbarss[s1, tp]
+                        Wst_ftm[i, j] -= v1v2*Wbarss[s1, tp]
+                        # t- next:
+                        Wst_htp[i, j] += v1v2*Wbarss[s1, tm]
+                        Wst_ftp[i, j] -= v1v2*Wbarss[s1, tm]
+                        if s1 == tp:
+                            # sbar = tm
+                            Wst_ftp[i, j, n] += 2*v1v2
+                            Wst_htp[i, j, n] -= v1v2
+                            Wst_ftm[i, j, n] -= 2*v1v2
+                            Wst_htm[i, j, n] += v1v2
+                            Wst_htm[i, j] += v1v2*Wbar_esc[s1]
+                            Wst_ftm[i, j] -= v1v2*Wbar_esc[s1]
+                        if s1 == tm:
+                            # sbar = tp
+                            Wst_ftm[i, j, n] += 2*v1v2
+                            Wst_htm[i, j, n] -= v1v2
+                            Wst_ftp[i, j, n] -= 2*v1v2
+                            Wst_htp[i, j, n] += v1v2
+                            Wst_htp[i, j] += v1v2*Wbar_esc[s1]
+                            Wst_ftp[i, j] -= v1v2*Wbar_esc[s1]
         # rate expansions: [t,t]
         Wtt_t1pt2p, Wtt_t1pt2m = np.zeros((Nt, Nt, Nrates)), np.zeros((Nt, Nt, Nrates))
         Wtt_t1mt2p, Wtt_t1mt2m = np.zeros((Nt, Nt, Nrates)), np.zeros((Nt, Nt, Nrates))
@@ -911,7 +908,7 @@ class ConcentratedInterstitial(Interstitial):
                             Wtt_t1pt2p[i,j,n] += np.dot(self.TVS[i][TS1], self.TVS[j][-TS3])
 
         return {'bs': bs, 'bt_ft+': bt_ftp, 'bt_ft-': bt_ftm, 'bt_ht+': bt_htp, 'bt_ht-': bt_htm,
-                'Wss': Wss, 'Wst_fs': Wst_fs, 'Wst_hs': Wst_hs,
+                'Wss': Wss, # 'Wst_fs': Wst_fs, 'Wst_hs': Wst_hs,
                 'Wst_ft+': Wst_ftp, 'Wst_ht+': Wst_htp, 'Wst_ft-': Wst_ftm, 'Wst_ht-': Wst_htm,
                 'Wtt_t1+t2+': Wtt_t1pt2p, 'Wtt_t1+t2-': Wtt_t1pt2m,
                 'Wtt_t1-t2+': Wtt_t1mt2p, 'Wtt_t1-t2-': Wtt_t1mt2m, 'Wtt': Wtt}

@@ -1784,12 +1784,12 @@ class ConcentratedInterstitialTests(unittest.TestCase):
                     for s, v1 in SVS1.items():
                         for TS, v2 in TVS2.items():
                             W_SVS_TVS[i,j] += np.dot(v1, v2)*Wst[s, t_index[TS]]
-            W_st = (np.dot(expansiondict['Wst_fs'], omegat).T * fSVS).T + \
-                   (np.dot(expansiondict['Wst_hs'], omegat).T * hSVS).T + \
-                   np.dot(expansiondict['Wst_ft+'], omegat)*ftp + \
+            W_st = np.dot(expansiondict['Wst_ft+'], omegat)*ftp + \
                    np.dot(expansiondict['Wst_ft-'], omegat)*ftm + \
                    np.dot(expansiondict['Wst_ht+'], omegat)*htp + \
-                   np.dot(expansiondict['Wst_ht-'], omegat)*htm
+                   np.dot(expansiondict['Wst_ht-'], omegat)*htm #
+                   # + (np.dot(expansiondict['Wst_fs'], omegat).T * fSVS).T + \
+                   # (np.dot(expansiondict['Wst_hs'], omegat).T * hSVS).T
             print('Wst:', W_SVS_TVS)
             print('Wst:', W_st)
             self.assertTrue(np.allclose(W_SVS_TVS, W_st))
