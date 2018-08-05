@@ -837,13 +837,13 @@ class ConcentratedInterstitial(Interstitial):
                 except KeyError:
                     jlist = self.TVSinvmap[-TS2]
                     forward = False
-                for j in jlist:
+                for i, j in itertools.product(ilist, jlist):
                     if forward:
                         v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][TS2])
-                        Wtt_t1mt2m[i,j] += v1v2*Wbar_esc[TS.i]
+                        Wtt_t1mt2m[i,j] += v1v2*Wbar_esc[TS1.i]
                     else:
                         v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][-TS2])
-                        Wtt_t1mt2p[i,j] += v1v2*Wbar_esc[TS.i]
+                        Wtt_t1mt2p[i,j] += v1v2*Wbar_esc[TS1.i]
                     if n is not None: Wtt[i, j, n] += 2*v1v2
                 # now try the transition states leaving from TS2.j:
                 try:
@@ -860,7 +860,7 @@ class ConcentratedInterstitial(Interstitial):
                     except KeyError:
                         jlist = self.TVSinvmap[-TS3]
                         forward = False
-                    for j in jlist:
+                    for i, j in itertools.product(ilist, jlist):
                         if forward:
                             Wtt_t1mt2m[i,j,n] += np.dot(self.TVS[i][TS1], self.TVS[j][TS3])
                         else:
@@ -878,13 +878,13 @@ class ConcentratedInterstitial(Interstitial):
                 except KeyError:
                     jlist = self.TVSinvmap[-TS2]
                     forward = False
-                for j in jlist:
+                for i, j in itertools.product(ilist, jlist):
                     if forward:
                         v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][TS2])
-                        Wtt_t1pt2m[i,j] += v1v2*Wbar_esc[TS.i]
+                        Wtt_t1pt2m[i,j] += v1v2*Wbar_esc[TS1.j]
                     else:
                         v1v2 = np.dot(self.TVS[i][TS1], self.TVS[j][-TS2])
-                        Wtt_t1pt2p[i,j] += v1v2*Wbar_esc[TS.i]
+                        Wtt_t1pt2p[i,j] += v1v2*Wbar_esc[TS1.j]
                     if n is not None: Wtt[i, j, n] += 2*v1v2
                 # now try the transition states leaving from TS2.j:
                 try:
@@ -901,7 +901,7 @@ class ConcentratedInterstitial(Interstitial):
                     except KeyError:
                         jlist = self.TVSinvmap[-TS3]
                         forward = False
-                    for j in jlist:
+                    for i, j in itertools.product(ilist, jlist):
                         if forward:
                             Wtt_t1pt2m[i,j,n] += np.dot(self.TVS[i][TS1], self.TVS[j][TS3])
                         else:

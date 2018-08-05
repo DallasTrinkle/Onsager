@@ -1790,9 +1790,19 @@ class ConcentratedInterstitialTests(unittest.TestCase):
                    np.dot(expansiondict['Wst_ht-'], omegat)*htm #
                    # + (np.dot(expansiondict['Wst_fs'], omegat).T * fSVS).T + \
                    # (np.dot(expansiondict['Wst_hs'], omegat).T * hSVS).T
-            print('Wst:', W_SVS_TVS)
-            print('Wst:', W_st)
             self.assertTrue(np.allclose(W_SVS_TVS, W_st))
+            W_TVS_TVS = np.zeros((len(diffuser.TVS), len(diffuser.TVS)))
+            for i, TVS1 in enumerate(diffuser.TVS):
+                for j, TVS2 in enumerate(diffuser.TVS):
+                    for TS1, v1 in TVS1.items():
+                        for TS2, v2 in TVS2.items():
+                            W_TVS_TVS[i,j] += np.dot(v1, v2)*Wtt[t_index[TS1], t_index[TS2]]
+            W_tt = np.dot(expansiondict['Wtt'], omegat) + \
+                   np.dot(expansiondict['Wtt_t1+t2+'], omegat)*np.outer(ftp-htp, ftp-htp) + \
+                   np.dot(expansiondict['Wtt_t1+t2-'], omegat)*np.outer(ftp-htp, ftm-htm) + \
+                   np.dot(expansiondict['Wtt_t1-t2+'], omegat)*np.outer(ftm-htm, ftp-htp) + \
+                   np.dot(expansiondict['Wtt_t1-t2-'], omegat)*np.outer(ftm-htm, ftm-htm)
+            self.assertTrue(np.allclose(W_TVS_TVS, W_tt))
 
     def constructMatrices(self, D, f, h, omega):
         """Takes the sites and TS of a diffuser and builds up the bias vectors and rate matrices"""
@@ -1846,7 +1856,7 @@ class ConcentratedInterstitialTests(unittest.TestCase):
             for (k, Rk), (n, dx, tp) in transdict[i, Ri].items():
                 if (k, Rk) == (j, Rj): continue
                 W_st[k, t] += omega[n]*(htm-ftm)
-                W_tt[t, tp] += escape_s[k]*(ftm-htm)*(f[D.invmap[k]]-h[D.invmap[k]])
+                W_tt[t, tp] += escape_s[i]*(ftm-htm)*(f[D.invmap[k]]-h[D.invmap[k]])
                 try:
                     (n, dx, tpp) = transdict[j, Rj][k, Rk]
                     W_tt[t, tp] += 2*omega[n]
@@ -1854,7 +1864,7 @@ class ConcentratedInterstitialTests(unittest.TestCase):
             for (k, Rk), (n, dx, tp) in transdict[j, Rj].items():
                 if (k, Rk) == (i, Ri): continue
                 W_st[k, t] += omega[n]*(htp-ftp)
-                W_tt[t, tp] += escape_s[k] * (ftp - htp) * (f[D.invmap[k]] - h[D.invmap[k]])
+                W_tt[t, tp] += escape_s[j] * (ftp - htp) * (f[D.invmap[k]] - h[D.invmap[k]])
                 try:
                     (n, dx, tpp) = transdict[i, Ri][k, Rk]
                     W_tt[t, tp] += 2 * omega[n]
