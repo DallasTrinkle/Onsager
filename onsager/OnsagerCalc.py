@@ -788,7 +788,7 @@ class ConcentratedInterstitial(Interstitial):
                 for s1, v1 in SVS.items():
                     for t1, v2 in TVS.items():
                         tp, tm = t1.i, t1.j
-                        n = ... # need to do invmap on t1!
+                        n = self.TSinvmap[t1] # need to do invmap on t1!
                         v1v2 = np.dot(v1, v2)
                         # Now corrected...
                         if s1 != tp and s1 != tm:
