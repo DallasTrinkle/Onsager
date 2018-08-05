@@ -1729,80 +1729,75 @@ class ConcentratedInterstitialTests(unittest.TestCase):
 
     def testGenerateExpansions(self):
         """Do we construct our linear expansions correctly?"""
+        conclist = [1e-2, 1e-1, 1/4, 1/3, 1/2]
+        invconclist = [1-c for c in conclist]
         for diffuser in (self.Dfcc, self.Dhcp):
             expansiondict = diffuser.generateExpansions()
-            for name, matrix in expansiondict.items():
-                print(name)
-                print(matrix)
+            # for name, matrix in expansiondict.items():
+            #     print(name)
+            #     print(matrix)
             # Let's build some supercells, and see if we can't test...
             Ns = len(diffuser.sitelist)
-            pre = np.random.lognormal(0., 1., size=Ns)
-            betaene = np.random.uniform(0., 1., size=Ns)
-            preT = np.random.lognormal(1., 1., size=len(diffuser.jumpnetwork))
-            betaeneT = np.random.uniform(1., 2., size=len(diffuser.jumpnetwork))
-            conc = 0.25
-            invc = 1-conc
-            fs, hs, omegat = diffuser.thermofactors(pre, betaene, preT, betaeneT, conc, invc)
-            TVSendpoint = []
-            for TVS in diffuser.TVS:
-                TS = next(iter(TVS))
-                TVSendpoint.append((diffuser.invmap[TS.i], diffuser.invmap[TS.j]))
-            ftp = np.array([fs[i] for (i,j) in TVSendpoint])
-            htp = np.array([hs[i] for (i,j) in TVSendpoint])
-            ftm = np.array([fs[j] for (i,j) in TVSendpoint])
-            htm = np.array([hs[j] for (i,j) in TVSendpoint])
-            fSVS = np.array([fs[diffuser.invmap[next(iter(SVS))]] for SVS in diffuser.SVS])
-            hSVS = np.array([hs[diffuser.invmap[next(iter(SVS))]] for SVS in diffuser.SVS])
-            bias_s, bias_t, Wss, Wst, Wtt, t_index = self.constructMatrices(diffuser, fs, hs, omegat)
-            print(bias_s)
-            print(bias_t)
-            print(Wss)
-            print(Wst)
-            print(Wtt)
-            bias_SVS = np.array([sum(np.dot(bias_s[s], v) for s, v in SVS.items())
-                                 for SVS in diffuser.SVS])
-            bs = np.dot(expansiondict['bs'], omegat)
-            self.assertTrue(np.allclose(bias_SVS, bs))
-            bias_TVS = np.array([sum(np.dot(bias_t[t_index[TS]], v) for TS, v in TVS.items())
-                                for TVS in diffuser.TVS])
-            bt = np.dot(expansiondict['bt_ft+'], omegat)*ftp + \
-                 np.dot(expansiondict['bt_ht+'], omegat)*htp + \
-                 np.dot(expansiondict['bt_ft-'], omegat)*ftm + \
-                 np.dot(expansiondict['bt_ht-'], omegat)*htm
-            self.assertTrue(np.allclose(bias_TVS, bt))
-            W_SVS_SVS = np.zeros((len(diffuser.SVS), len(diffuser.SVS)))
-            for i, SVS1 in enumerate(diffuser.SVS):
-                for j, SVS2 in enumerate(diffuser.SVS):
-                    for s1, v1 in SVS1.items():
-                        for s2, v2 in SVS2.items():
-                            W_SVS_SVS[i,j] += np.dot(v1, v2)*Wss[s1, s2]
-            W_ss = np.dot(expansiondict['Wss'], omegat)
-            self.assertTrue(np.allclose(W_SVS_SVS, W_ss))
-            W_SVS_TVS = np.zeros((len(diffuser.SVS), len(diffuser.TVS)))
-            for i, SVS1 in enumerate(diffuser.SVS):
-                for j, TVS2 in enumerate(diffuser.TVS):
-                    for s, v1 in SVS1.items():
-                        for TS, v2 in TVS2.items():
-                            W_SVS_TVS[i,j] += np.dot(v1, v2)*Wst[s, t_index[TS]]
-            W_st = np.dot(expansiondict['Wst_ft+'], omegat)*ftp + \
-                   np.dot(expansiondict['Wst_ft-'], omegat)*ftm + \
-                   np.dot(expansiondict['Wst_ht+'], omegat)*htp + \
-                   np.dot(expansiondict['Wst_ht-'], omegat)*htm #
-                   # + (np.dot(expansiondict['Wst_fs'], omegat).T * fSVS).T + \
-                   # (np.dot(expansiondict['Wst_hs'], omegat).T * hSVS).T
-            self.assertTrue(np.allclose(W_SVS_TVS, W_st))
-            W_TVS_TVS = np.zeros((len(diffuser.TVS), len(diffuser.TVS)))
-            for i, TVS1 in enumerate(diffuser.TVS):
-                for j, TVS2 in enumerate(diffuser.TVS):
-                    for TS1, v1 in TVS1.items():
-                        for TS2, v2 in TVS2.items():
-                            W_TVS_TVS[i,j] += np.dot(v1, v2)*Wtt[t_index[TS1], t_index[TS2]]
-            W_tt = np.dot(expansiondict['Wtt'], omegat) + \
-                   np.dot(expansiondict['Wtt_t1+t2+'], omegat)*np.outer(ftp-htp, ftp-htp) + \
-                   np.dot(expansiondict['Wtt_t1+t2-'], omegat)*np.outer(ftp-htp, ftm-htm) + \
-                   np.dot(expansiondict['Wtt_t1-t2+'], omegat)*np.outer(ftm-htm, ftp-htp) + \
-                   np.dot(expansiondict['Wtt_t1-t2-'], omegat)*np.outer(ftm-htm, ftm-htm)
-            self.assertTrue(np.allclose(W_TVS_TVS, W_tt))
+            for nrand in range(8):
+                pre = np.random.lognormal(0., 1., size=Ns)
+                betaene = np.random.uniform(0., 1., size=Ns)
+                preT = np.random.lognormal(1., 1., size=len(diffuser.jumpnetwork))
+                betaeneT = np.random.uniform(1., 2., size=len(diffuser.jumpnetwork))
+                for conc, invc in zip(conclist, invconclist):
+                    fs, hs, omegat = diffuser.thermofactors(pre, betaene, preT, betaeneT, conc, invc)
+                    TVSendpoint = []
+                    for TVS in diffuser.TVS:
+                        TS = next(iter(TVS))
+                        TVSendpoint.append((diffuser.invmap[TS.i], diffuser.invmap[TS.j]))
+                    ftp = np.array([fs[i] for (i,j) in TVSendpoint])
+                    htp = np.array([hs[i] for (i,j) in TVSendpoint])
+                    ftm = np.array([fs[j] for (i,j) in TVSendpoint])
+                    htm = np.array([hs[j] for (i,j) in TVSendpoint])
+                    bias_s, bias_t, Wss, Wst, Wtt, t_index = self.constructMatrices(diffuser, fs, hs, omegat)
+                    bias_SVS = np.array([sum(np.dot(bias_s[s], v) for s, v in SVS.items())
+                                         for SVS in diffuser.SVS])
+                    bs = np.dot(expansiondict['bs'], omegat)
+                    self.assertTrue(np.allclose(bias_SVS, bs))
+                    bias_TVS = np.array([sum(np.dot(bias_t[t_index[TS]], v) for TS, v in TVS.items())
+                                        for TVS in diffuser.TVS])
+                    bt = np.dot(expansiondict['bt_ft+'], omegat)*ftp + \
+                         np.dot(expansiondict['bt_ht+'], omegat)*htp + \
+                         np.dot(expansiondict['bt_ft-'], omegat)*ftm + \
+                         np.dot(expansiondict['bt_ht-'], omegat)*htm
+                    self.assertTrue(np.allclose(bias_TVS, bt))
+                    W_SVS_SVS = np.zeros((len(diffuser.SVS), len(diffuser.SVS)))
+                    for i, SVS1 in enumerate(diffuser.SVS):
+                        for j, SVS2 in enumerate(diffuser.SVS):
+                            for s1, v1 in SVS1.items():
+                                for s2, v2 in SVS2.items():
+                                    W_SVS_SVS[i,j] += np.dot(v1, v2)*Wss[s1, s2]
+                    W_ss = np.dot(expansiondict['Wss'], omegat)
+                    self.assertTrue(np.allclose(W_SVS_SVS, W_ss))
+                    W_SVS_TVS = np.zeros((len(diffuser.SVS), len(diffuser.TVS)))
+                    for i, SVS1 in enumerate(diffuser.SVS):
+                        for j, TVS2 in enumerate(diffuser.TVS):
+                            for s, v1 in SVS1.items():
+                                for TS, v2 in TVS2.items():
+                                    W_SVS_TVS[i,j] += np.dot(v1, v2)*Wst[s, t_index[TS]]
+                    W_st = np.dot(expansiondict['Wst_ft+'], omegat)*ftp + \
+                           np.dot(expansiondict['Wst_ft-'], omegat)*ftm + \
+                           np.dot(expansiondict['Wst_ht+'], omegat)*htp + \
+                           np.dot(expansiondict['Wst_ht-'], omegat)*htm #
+                           # + (np.dot(expansiondict['Wst_fs'], omegat).T * fSVS).T + \
+                           # (np.dot(expansiondict['Wst_hs'], omegat).T * hSVS).T
+                    self.assertTrue(np.allclose(W_SVS_TVS, W_st))
+                    W_TVS_TVS = np.zeros((len(diffuser.TVS), len(diffuser.TVS)))
+                    for i, TVS1 in enumerate(diffuser.TVS):
+                        for j, TVS2 in enumerate(diffuser.TVS):
+                            for TS1, v1 in TVS1.items():
+                                for TS2, v2 in TVS2.items():
+                                    W_TVS_TVS[i,j] += np.dot(v1, v2)*Wtt[t_index[TS1], t_index[TS2]]
+                    W_tt = np.dot(expansiondict['Wtt'], omegat) + \
+                           np.dot(expansiondict['Wtt_t1+t2+'], omegat)*np.outer(ftp-htp, ftp-htp) + \
+                           np.dot(expansiondict['Wtt_t1+t2-'], omegat)*np.outer(ftp-htp, ftm-htm) + \
+                           np.dot(expansiondict['Wtt_t1-t2+'], omegat)*np.outer(ftm-htm, ftp-htp) + \
+                           np.dot(expansiondict['Wtt_t1-t2-'], omegat)*np.outer(ftm-htm, ftm-htm)
+                    self.assertTrue(np.allclose(W_TVS_TVS, W_tt))
 
     def constructMatrices(self, D, f, h, omega):
         """Takes the sites and TS of a diffuser and builds up the bias vectors and rate matrices"""
