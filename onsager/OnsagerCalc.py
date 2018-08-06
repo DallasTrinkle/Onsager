@@ -651,6 +651,13 @@ class ConcentratedInterstitial(Interstitial):
             self.TS.append(TSset)
         self.TSinvmap = {PS: n for n, TSset in enumerate(self.TS) for PS in TSset}
         self.SVS = self.generateStateVectorStars(self.sitelist)
+        self.SVSinvmap = {}
+        for n, SVS in enumerate(self.SVS):
+            for s in SVS.keys():
+                if s in self.SVSinvmap:
+                    self.SVSinvmap[s].append(n)
+                else:
+                    self.SVSinvmap[s] = [n]
         self.TVS = self.generateTSVectorStars(self.TS)
         self.TVSinvmap = {}
         for n, TVS in enumerate(self.TVS):
@@ -659,6 +666,8 @@ class ConcentratedInterstitial(Interstitial):
                     self.TVSinvmap[TS].append(n)
                 else:
                     self.TVSinvmap[TS] = [n]
+        self.VV = self.generateVV()
+        self.expansiondict = self.generateExpansions()
 
         self.tags, self.tagdict, self.tagdicttype = self.generatetags()  # now with tags!
 
@@ -724,6 +733,26 @@ class ConcentratedInterstitial(Interstitial):
                     VB[k] *= norm
                 TVS.append(VB)
         return TVS
+
+    def generateVV(self):
+        """Makes the outer product pieces of our vector basis"""
+        Ns, Nt = len(self.SVS), len(self.TVS)
+        VV = np.zeros((self.dim, self.dim, Ns+Nt, Ns+Nt))
+        for i, SVS1 in enumerate(self.SVS):
+            for j, SVS2 in enumerate(self.SVS):
+                for s, v1 in SVS1.items():
+                    try:
+                        v2 = SVS2[s]
+                        VV[:,:,i,j] += np.outer(v1, v2)
+                    except KeyError: pass
+        for i, TVS1 in enumerate(self.TVS):
+            for j, TVS2 in enumerate(self.TVS):
+                for TS, v1 in TVS1.items():
+                    try:
+                        v2 = TVS2[TS]
+                        VV[:,:,i+Ns,j+Ns] += np.outer(v1, v2)
+                    except KeyError: pass
+        return VV
 
     def generateExpansions(self):
         """
@@ -907,7 +936,8 @@ class ConcentratedInterstitial(Interstitial):
                         else:
                             Wtt_t1pt2p[i,j,n] += np.dot(self.TVS[i][TS1], self.TVS[j][-TS3])
 
-        return {'bs': bs, 'bt_ft+': bt_ftp, 'bt_ft-': bt_ftm, 'bt_ht+': bt_htp, 'bt_ht-': bt_htm,
+        return {'D0': D0, 'bs': bs,
+                'bt_ft+': bt_ftp, 'bt_ft-': bt_ftm, 'bt_ht+': bt_htp, 'bt_ht-': bt_htm,
                 'Wss': Wss, # 'Wst_fs': Wst_fs, 'Wst_hs': Wst_hs,
                 'Wst_ft+': Wst_ftp, 'Wst_ht+': Wst_htp, 'Wst_ft-': Wst_ftm, 'Wst_ht-': Wst_htm,
                 'Wtt_t1+t2+': Wtt_t1pt2p, 'Wtt_t1+t2-': Wtt_t1pt2m,
@@ -1010,52 +1040,33 @@ class ConcentratedInterstitial(Interstitial):
             if len(betaeneT) != len(self.jumpnetwork): raise IndexError(
                 "length of energies {} doesn't match jump network".format(betaeneT))
         fs, hs, omegat = self.thermofactors(pre, betaene, preT, betaeneT, conc, invc)
-        rho = self.siteprob(pre, betaene)
-        sqrtrho = np.sqrt(rho)
-        ratelist = self.ratelist(pre, betaene, preT, betaeneT)
-        symmratelist = self.symmratelist(pre, betaene, preT, betaeneT)
-        omega_ij = np.zeros((self.N, self.N))
-        domega_ij = np.zeros((self.N, self.N))
-        bias_i = np.zeros((self.N, self.dim))
-        dbias_i = np.zeros((self.N, self.dim))
-        D0 = np.zeros((self.dim, self.dim))
-        Dcorrection = np.zeros((self.dim, self.dim))
-        Db = np.zeros((self.dim, self.dim))
-        # bookkeeping for energies:
-        siteene = np.array([betaene[w] for w in self.invmap])
-        # transene = [ [ bET for (i,j), dx in t ] for t, bET in zip(self.jumpnetwork, betaeneT)]
-        Eave = np.dot(rho, siteene)
-
-        for transitionset, rates, symmrates, bET in zip(self.jumpnetwork, ratelist, symmratelist, betaeneT):
-            for ((i, j), dx), rate, symmrate in zip(transitionset, rates, symmrates):
-                # symmrate = sqrtrho[i]*invsqrtrho[j]*rate
-                omega_ij[i, j] += symmrate
-                omega_ij[i, i] -= rate
-                domega_ij[i, j] += symmrate * (bET - 0.5 * (siteene[i] + siteene[j]))
-                domega_ij[i, i] -= rate * (bET - siteene[i])
-                bias_i[i] += sqrtrho[i] * rate * dx
-                dbias_i[i] += sqrtrho[i] * rate * dx * (bET - 0.5 * (siteene[i] + Eave))
-                D0 += 0.5 * np.outer(dx, dx) * rho[i] * rate
-                Db += 0.5 * np.outer(dx, dx) * rho[i] * rate * (bET - Eave)
-        if self.NV > 0:
-            # NOTE: there's probably a SUPER clever way to do this with higher dimensional arrays and dot...
-            omega_v = np.zeros((self.NV, self.NV))
-            domega_v = np.zeros((self.NV, self.NV))
-            bias_v = np.zeros(self.NV)
-            dbias_v = np.zeros(self.NV)
-            for a, va in enumerate(self.VectorBasis):
-                bias_v[a] = np.trace(np.dot(bias_i.T, va))
-                dbias_v[a] = np.trace(np.dot(dbias_i.T, va))
-                for b, vb in enumerate(self.VectorBasis):
-                    omega_v[a, b] = np.trace(np.dot(va.T, np.dot(omega_ij, vb)))
-                    domega_v[a, b] = np.trace(np.dot(va.T, np.dot(domega_ij, vb)))
-            gamma_v = self.bias_solver(omega_v, bias_v)
-            dgamma_v = np.dot(domega_v, gamma_v)
-            Dcorrection = np.dot(np.dot(self.VV, bias_v), gamma_v)
-            Db += np.dot(np.dot(self.VV, dbias_v), gamma_v) \
-                  + np.dot(np.dot(self.VV, gamma_v), dbias_v) \
-                  - np.dot(np.dot(self.VV, gamma_v), dgamma_v)
-
+        ftp = np.array([fs[i] for (i, j) in TVSendpoint])
+        htp = np.array([hs[i] for (i, j) in TVSendpoint])
+        ftm = np.array([fs[j] for (i, j) in TVSendpoint])
+        htm = np.array([hs[j] for (i, j) in TVSendpoint])
+        D0 = np.dot(self.expansiondict['D0'], omegat)
+        bs = np.dot(self.expansiondict['bs'], omegat)
+        bt = np.dot(self.expansiondict['bt_ft+'], omegat) * ftp + \
+             np.dot(self.expansiondict['bt_ht+'], omegat) * htp + \
+             np.dot(self.expansiondict['bt_ft-'], omegat) * ftm + \
+             np.dot(self.expansiondict['bt_ht-'], omegat) * htm
+        Wss = np.dot(self.expansiondict['Wss'], omegat)
+        Wst = np.dot(self.expansiondict['Wst_ft+'], omegat) * ftp + \
+              np.dot(self.expansiondict['Wst_ft-'], omegat) * ftm + \
+              np.dot(self.expansiondict['Wst_ht+'], omegat) * htp + \
+              np.dot(self.expansiondict['Wst_ht-'], omegat) * htm
+        Wtt = np.dot(self.expansiondict['Wtt'], omegat) + \
+              np.dot(self.expansiondict['Wtt_t1+t2+'], omegat) * np.outer(ftp - htp, ftp - htp) + \
+              np.dot(self.expansiondict['Wtt_t1+t2-'], omegat) * np.outer(ftp - htp, ftm - htm) + \
+              np.dot(self.expansiondict['Wtt_t1-t2+'], omegat) * np.outer(ftm - htm, ftp - htp) + \
+              np.dot(self.expansiondict['Wtt_t1-t2-'], omegat) * np.outer(ftm - htm, ftm - htm)
+        bbar = np.bmat([bs, bt])
+        Wbar = np.bmat([[Wss, Wst], [Wst.T, Wtt]])
+        if len(bbar) > 0:
+            etabar = np.dot(pinv2(Wbar), bbar)
+            Dcorrection = np.dot(np.dot(self.VV, bbar), etabar)
+        else:
+            Dcorrection = 0.
         return D0 + Dcorrection
 
 
