@@ -1889,6 +1889,19 @@ class ConcentratedInterstitialTests(unittest.TestCase):
                 except KeyError: pass
         return bias_s, bias_t, W_ss, W_st, W_tt, t_index
 
+    def testDiffusivity(self):
+        """Some basic tests on FCC oct-tet diffuser"""
+        D = self.Dfcc
+        Eoct, Etet, ET = 0., 10., 10.
+        pre = np.ones(2)
+        betaene = np.zeros(2)
+        preT = np.ones(1)
+        betaeneT = np.array([ET])
+        betaene[D.tagdict['i:+0.500,+0.500,+0.500']] = Eoct
+        betaene[D.tagdict['i:+0.250,+0.250,+0.250']] = Etet
+        print(D.diffusivity(pre, betaene, preT, betaeneT, 1e-12))
+
+
 
 
 if __name__ == '__main__':

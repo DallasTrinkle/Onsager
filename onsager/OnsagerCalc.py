@@ -660,12 +660,14 @@ class ConcentratedInterstitial(Interstitial):
                     self.SVSinvmap[s] = [n]
         self.TVS = self.generateTSVectorStars(self.TS)
         self.TVSinvmap = {}
+        self.TVSendpoint = []
         for n, TVS in enumerate(self.TVS):
             for TS in TVS.keys():
                 if TS in self.TVSinvmap:
                     self.TVSinvmap[TS].append(n)
                 else:
                     self.TVSinvmap[TS] = [n]
+            self.TVSendpoint.append(self.TSendpoint[self.TSinvmap[TS]])
         self.VV = self.generateVV()
         self.expansiondict = self.generateExpansions()
 
@@ -1040,10 +1042,10 @@ class ConcentratedInterstitial(Interstitial):
             if len(betaeneT) != len(self.jumpnetwork): raise IndexError(
                 "length of energies {} doesn't match jump network".format(betaeneT))
         fs, hs, omegat = self.thermofactors(pre, betaene, preT, betaeneT, conc, invc)
-        ftp = np.array([fs[i] for (i, j) in TVSendpoint])
-        htp = np.array([hs[i] for (i, j) in TVSendpoint])
-        ftm = np.array([fs[j] for (i, j) in TVSendpoint])
-        htm = np.array([hs[j] for (i, j) in TVSendpoint])
+        ftp = np.array([fs[i] for (i, j) in self.TVSendpoint])
+        htp = np.array([hs[i] for (i, j) in self.TVSendpoint])
+        ftm = np.array([fs[j] for (i, j) in self.TVSendpoint])
+        htm = np.array([hs[j] for (i, j) in self.TVSendpoint])
         D0 = np.dot(self.expansiondict['D0'], omegat)
         bs = np.dot(self.expansiondict['bs'], omegat)
         bt = np.dot(self.expansiondict['bt_ft+'], omegat) * ftp + \
@@ -1060,7 +1062,7 @@ class ConcentratedInterstitial(Interstitial):
               np.dot(self.expansiondict['Wtt_t1+t2-'], omegat) * np.outer(ftp - htp, ftm - htm) + \
               np.dot(self.expansiondict['Wtt_t1-t2+'], omegat) * np.outer(ftm - htm, ftp - htp) + \
               np.dot(self.expansiondict['Wtt_t1-t2-'], omegat) * np.outer(ftm - htm, ftm - htm)
-        bbar = np.bmat([bs, bt])
+        bbar = np.concatenate([bs, bt])
         Wbar = np.bmat([[Wss, Wst], [Wst.T, Wtt]])
         if len(bbar) > 0:
             etabar = np.dot(pinv2(Wbar), bbar)
