@@ -999,13 +999,18 @@ class ConcentratedInterstitial(Interstitial):
             x0 = np.sum(ylist)/Nc
             # x0 = 0.5*(np.sum(ylist)+np.sqrt((np.sum(ylist)**2-4*Nc*np.sum(ylist**2))))/Nc # "dilute" limit
         else:
-            m = np.int(np.floor(Nc)-1)
-            x0 = 0.5*(ylist[m] + ylist[min(m+1, self.N-1)])
+            m = np.int(np.floor(Nc))
+            # x0 = 0.5*(ylist[m] + ylist[min(m+1, self.N-1)])
+            ysum = np.sum(ylist[m:])
+            yinvsum = np.sum(1/(ylist[:m]))
+            x0 = (np.sqrt(4*ysum*yinvsum+(Nc-m)**2) - (Nc-m))/(2*yinvsum)
         if np.abs(np.sum(ylist/(x0+ylist))/Nc - 1) > tol:
             # note: tolerance is in the *step size* of x, so its scaled to x0.
             x = newton(focc, fprime=foccp, fprime2=foccpp, x0=x0, args=(Nc, ylist), tol=0.1*tol*x0)
         else:
             x = x0
+        if (x<0):
+            raise ArithmeticError('Unable to find solution in thermofactor')
         dcdu = 0  # inverse of du/dc
         for n, ys in enumerate(pbElist):
             h = x/(x+ys)
