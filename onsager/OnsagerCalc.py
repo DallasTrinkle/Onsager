@@ -784,16 +784,20 @@ class ConcentratedInterstitial(Interstitial):
                         bt_ftp[d, n] -= 2.*np.dot(TS.dx, TVS[TS])
                         bt_ftm[d, n] += 2.*np.dot(TS.dx, TVS[TS])
                     for TSp, v in TVS.items():
-                        dx = None
-                        if TS.i == TSp.i: dx = TS.dx
-                        if TS.j == TSp.i: dx = -TS.dx
-                        if dx is not None:
+                        if TS.i == TSp.i:
+                            dx = TS.dx
                             bt_htm[d, n] += np.dot(dx, v)
                             bt_ftm[d, n] -= np.dot(dx, v)
-                        dx = None
-                        if TS.i == TSp.j: dx = TS.dx
-                        if TS.j == TSp.j: dx = -TS.dx
-                        if dx is not None:
+                        if TS.j == TSp.i:
+                            dx = -TS.dx
+                            bt_htm[d, n] += np.dot(dx, v)
+                            bt_ftm[d, n] -= np.dot(dx, v)
+                        if TS.i == TSp.j:
+                            dx = TS.dx
+                            bt_htp[d, n] += np.dot(dx, v)
+                            bt_ftp[d, n] -= np.dot(dx, v)
+                        if TS.j == TSp.j:
+                            dx = -TS.dx
                             bt_htp[d, n] += np.dot(dx, v)
                             bt_ftp[d, n] -= np.dot(dx, v)
                 # accumulate all of the jumps between states, and total escapes:

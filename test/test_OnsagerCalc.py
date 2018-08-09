@@ -1681,9 +1681,9 @@ class ConcentratedInterstitialTests(unittest.TestCase):
             for nrand in range(64):
                 Ns = len(diffuser.sitelist)
                 pre = np.random.lognormal(0., 1., size=Ns)
-                betaene = np.random.uniform(0., 1., size=Ns)
+                betaene = np.random.uniform(0., 4., size=Ns)
                 preT = np.random.lognormal(1., 1., size=len(diffuser.jumpnetwork))
-                betaeneT = np.random.uniform(1., 2., size=len(diffuser.jumpnetwork))
+                betaeneT = np.random.uniform(1., 4., size=len(diffuser.jumpnetwork))
 
                 for conc, invc in zip(conclist, invconclist):
                     fs, hs, omegat = diffuser.thermofactors(pre, betaene, preT, betaeneT, conc, invc)
@@ -1691,6 +1691,8 @@ class ConcentratedInterstitialTests(unittest.TestCase):
                     invc_eval = sum(h*len(slist) for h, slist in zip(hs, diffuser.sitelist))/diffuser.N
                     self.assertAlmostEqual(1., conc_eval/conc, msg='c failure for c={} 1-c={}'.format(conc, invc))
                     self.assertAlmostEqual(1., invc_eval/invc, msg='1-c failure for c={} 1-c={}'.format(conc, invc))
+                    self.assertTrue(np.all(fs>=0), msg='f not positive for c={} 1-c={}'.format(conc, invc))
+                    self.assertTrue(np.all(hs>=0), msg='h not positive for c={} 1-c={}'.format(conc, invc))
 
         sclatt = crystal.Crystal(np.eye(3), [np.zeros(3)])
         Dsc = OnsagerCalc.ConcentratedInterstitial(sclatt, 0, sclatt.sitelist(0), sclatt.jumpnetwork(0, 1.01))
@@ -1731,7 +1733,11 @@ class ConcentratedInterstitialTests(unittest.TestCase):
         """Do we construct our linear expansions correctly?"""
         conclist = [1e-2, 1e-1, 1/4, 1/3, 1/2]
         invconclist = [1-c for c in conclist]
-        for diffuser in (self.Dfcc, self.Dhcp):
+        fcc = crystal.Crystal.FCC(1.)
+        Dvac = OnsagerCalc.ConcentratedInterstitial(fcc, 0,
+                                                    fcc.sitelist(0),
+                                                    fcc.jumpnetwork(0, 0.8))
+        for diffuser in (self.Dfcc, self.Dhcp, Dvac):
             expansiondict = diffuser.generateExpansions()
             # for name, matrix in expansiondict.items():
             #     print(name)
@@ -1797,7 +1803,8 @@ class ConcentratedInterstitialTests(unittest.TestCase):
                            np.dot(expansiondict['Wtt_t1+t2-'], omegat)*np.outer(ftp-htp, ftm-htm) + \
                            np.dot(expansiondict['Wtt_t1-t2+'], omegat)*np.outer(ftm-htm, ftp-htp) + \
                            np.dot(expansiondict['Wtt_t1-t2-'], omegat)*np.outer(ftm-htm, ftm-htm)
-                    self.assertTrue(np.allclose(W_TVS_TVS, W_tt))
+                    self.assertTrue(np.allclose(W_TVS_TVS, W_tt),
+                                    msg='W_TVS_TVS =\n{}\nW_tt =\n{}'.format(W_TVS_TVS, W_tt))
 
     def constructMatrices(self, D, f, h, omega):
         """Takes the sites and TS of a diffuser and builds up the bias vectors and rate matrices"""
