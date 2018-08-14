@@ -866,6 +866,8 @@ class ConcentratedInterstitial(Interstitial):
                 if TSp in self.TSinvmap: n = self.TSinvmap[TSp]
                 elif -TSp in self.TSinvmap: n = self.TSinvmap[-TSp]
                 else: n = None
+                # test:
+                # n = None
                 forward = True
                 try:
                     jlist = self.TVSinvmap[TS2]
@@ -907,6 +909,8 @@ class ConcentratedInterstitial(Interstitial):
                 if TSp in self.TSinvmap: n = self.TSinvmap[TSp]
                 elif -TSp in self.TSinvmap: n = self.TSinvmap[-TSp]
                 else: n = None
+                # test:
+                # n = None
                 forward = True
                 try:
                     jlist = self.TVSinvmap[TS2]

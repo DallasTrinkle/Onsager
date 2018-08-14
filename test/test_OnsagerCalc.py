@@ -1737,7 +1737,13 @@ class ConcentratedInterstitialTests(unittest.TestCase):
         Dvac = OnsagerCalc.ConcentratedInterstitial(fcc, 0,
                                                     fcc.sitelist(0),
                                                     fcc.jumpnetwork(0, 0.8))
-        for diffuser in (self.Dfcc, self.Dhcp, Dvac):
+        delta = 0.01
+        fcc4 = crystal.Crystal(np.eye(3), [np.array([0.,0.,0.]), np.array([delta,1/2,1/2]),
+                                            np.array([1/2,delta,1/2]), np.array([1/2,1/2,delta])])
+        Dvac4 = OnsagerCalc.ConcentratedInterstitial(fcc4, 0, fcc4.sitelist(0),
+                                                     fcc4.jumpnetwork(0, 0.85))
+        for diffuser in (self.Dfcc, self.Dhcp, Dvac4, Dvac):
+            print(diffuser)
             expansiondict = diffuser.generateExpansions()
             # for name, matrix in expansiondict.items():
             #     print(name)
