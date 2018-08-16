@@ -659,14 +659,11 @@ class ConcentratedInterstitial(Interstitial):
                 else:
                     self.SVSinvmap[s] = [n]
         self.TVS = self.generateTSVectorStars(self.TS)
-        self.TVSinvmap = {}
+        self.TVSinvmap = {PS: [] for PS in self.TSinvmap.keys()}  # now we index everybody, though some are empty
         self.TVSendpoint = []
         for n, TVS in enumerate(self.TVS):
             for TS in TVS.keys():
-                if TS in self.TVSinvmap:
-                    self.TVSinvmap[TS].append(n)
-                else:
-                    self.TVSinvmap[TS] = [n]
+                self.TVSinvmap[TS].append(n)
             self.TVSendpoint.append(self.TSendpoint[self.TSinvmap[TS]])
         self.VV = self.generateVV()
         self.expansiondict = self.generateExpansions()
@@ -719,7 +716,7 @@ class ConcentratedInterstitial(Interstitial):
             d, v = self.dim, np.zeros(self.dim)
             for g in self.crys.G:
                 TSn = TS.g(self.crys, self.chem, g)
-                if TSn == TS:
+                if TSn == TS or TSn == -TS:
                     d, v = crystal.CombineVectorBasis((d,v), crystal.VectorBasis(*g.eigen()))
             if d == 0: continue
             for v in self.crys.vectlist((d, v)):

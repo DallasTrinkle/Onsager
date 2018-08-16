@@ -1640,9 +1640,9 @@ class ConcentratedInterstitialTests(unittest.TestCase):
 
     def testVectorBasis(self):
         """Do we correctly construct vector bases for concentrated diffuser?"""
-        for diffuser, (NSVS, NTVS) in zip((self.Dfcc, self.Dhcp), ((0,1), (1,3))):
+        for diffuser, (NSVS, NTVS) in zip((self.Dfcc, self.Dhcp), ((0,1), (1,2))):
             # FCC: no state vector bases, one transition state vector basis
-            # HCP: one state vector basis (tet), three transition state vector bases (t-t, 2 o-t)
+            # HCP: one state vector basis (tet), two transition state vector bases (2 o-t)
             self.assertIsNotNone(diffuser)
             self.assertEqual(NSVS, len(diffuser.SVS))
             self.assertEqual(NTVS, len(diffuser.TVS))
@@ -1743,7 +1743,6 @@ class ConcentratedInterstitialTests(unittest.TestCase):
         Dvac4 = OnsagerCalc.ConcentratedInterstitial(fcc4, 0, fcc4.sitelist(0),
                                                      fcc4.jumpnetwork(0, 0.85))
         for diffuser in (self.Dfcc, self.Dhcp, Dvac4, Dvac):
-            print(diffuser)
             expansiondict = diffuser.generateExpansions()
             # for name, matrix in expansiondict.items():
             #     print(name)
@@ -1818,7 +1817,7 @@ class ConcentratedInterstitialTests(unittest.TestCase):
         t_index = {TS: n for n, TS in enumerate(D.TSinvmap.keys())} # makes us a list of TS
         Ns, Nt = D.N, len(D.TSinvmap)
         # identify states and TS as: (s, n) where n is a tuple corresponding to the supercell
-        # need: (1) dictionnary of all transitions between states, and (2) endpoints of TS's.
+        # need: (1) dictionary of all transitions between states, and (2) endpoints of TS's.
         transdict = {}
         for i, R in itertools.product(range(Ns), supervects):
             i_transdict = {}
@@ -1920,7 +1919,7 @@ class ConcentratedInterstitialTests(unittest.TestCase):
             invconclist.append(c)
         for conc, invc in zip(conclist, invconclist):
             Dc = D.diffusivity(pre, betaene, preT, betaeneT, conc, invc)
-            print(conc, Dc[0,0])
+            self.assertGreater(Dc[0,0], 0, msg='Negative diffusivity? c={} D={}'.format(conc, Dc[0,0]))
 
 
 
