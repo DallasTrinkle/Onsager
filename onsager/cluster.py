@@ -43,6 +43,16 @@ class ClusterSite(collections.namedtuple('ClusterSite', 'ci R')):
         """Negation of site"""
         return self.__class__(ci=self.ci, R=-self.R)
 
+    def __add__(self, other):
+        """Add a vector to a site; other *must* be a vector
+        """
+        if len(other) != len(self.R):
+            raise ArithmeticError('Dimensionality problem? Adding {} to {}'.format(other, self))
+        return self.__class__(ci=self.ci, R=self.R + np.array(other))
+
+    def __sub__(self, other):
+        return self.__add__(-np.array(other))
+
     def g(self, crys, g):
         """
         Apply group operation.
@@ -77,3 +87,41 @@ class ClusterSite(collections.namedtuple('ClusterSite', 'ci R')):
 
 crystal.yaml.add_representer(ClusterSite, ClusterSite.ClusterSite_representer)
 crystal.yaml.add_constructor(CLUSTERSITE_YAMLTAG, ClusterSite.ClusterSite_constructor)
+
+
+class Cluster(object):
+    """
+    Class to define (arbitrary) cluster interactions. A cluster is defined as
+    a set of ClusterSites. We don't implement this using sets, however, because
+    we make a choice of a "reference" site in each cluster, which has a lattice
+    vector of 0, to account for translational invariance.
+    """
+
+    def __init__(self, iterable):
+        """
+        Cluster interaction, from an iterable of ClusterSites
+        :param iterable: set of ClusterSites
+        """
+        # this sorting is a *little* hacked together, but as long as we don't have
+        # more than 2^32 sites in our crystal, we're good to go:
+        def sortkey(cs): return cs[0]*(2**32)+cs[1]
+        # first, dump contents of iterable into a list to manipulate:
+        lis = [cs for cs in iterable]
+        lis.sort(key=sortkey)
+        R0 = lis[0].R
+        self.sites = tuple([cs-R0 for cs in lis])
+
+    def g(self, crys, g):
+        """
+        Apply group operation.
+
+        :param crys: crystal
+        :param g: group operation (from crys)
+        :return g*cluster: corresponding to group operation applied to self
+        """
+        return self.__class__([cs.g(crys, g) for cs in self.sites])
+
+    def __str__(self):
+        """Human readable version"""
+        s = "{} order: ".format(len(self.sites))
+        return s + " ".join([str(cs) for cs in self.sites])
