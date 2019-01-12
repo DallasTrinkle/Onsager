@@ -22,6 +22,12 @@ class ClusterSiteTests(unittest.TestCase):
         site = cluster.ClusterSite((0,0), np.array([0,0,0]))
         self.assertIsInstance(site, cluster.ClusterSite)
 
+    def testNegation(self):
+        """Can we negate (and equate) cluster sites?"""
+        s1 = cluster.ClusterSite((0,0), np.array([1,0,0]))
+        s2 = cluster.ClusterSite((0,0), np.array([-1,0,0]))
+        self.assertNotEqual(s1, s2)
+        self.assertEqual(s1, -s2)
 
 
 if __name__ == '__main__':
