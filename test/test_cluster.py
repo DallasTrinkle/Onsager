@@ -77,6 +77,21 @@ class ClusterTests(unittest.TestCase):
         c3 = cluster.Cluster([s2, s1])
         self.assertEqual(c2, c3)
 
+    def testHash(self):
+        """Can we make a set of clusters?"""
+        s1 = cluster.ClusterSite((0,0), np.array([0,0,0]))
+        s2 = cluster.ClusterSite((0,0), np.array([1,0,0]))
+        c1 = cluster.Cluster([s1])
+        c2 = cluster.Cluster([s2])
+        c3 = c1 + s2
+        set1 = set([c1])
+        set2 = set([c1, c2])
+        set3 = set([c1, c3])
+        set4 = set([c2, c3])
+        self.assertEqual(set1, set2)
+        self.assertNotEqual(set1, set3)
+        self.assertEqual(set3, set4)
+
 
 if __name__ == '__main__':
     unittest.main()

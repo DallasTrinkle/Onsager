@@ -118,13 +118,16 @@ class Cluster(object):
         self.__equalitymap__ = {}
         hashcache = 0
         for cs in self.sites:
-            shiftpos = tuple(cs.R*self.Norder - self.__center__)
+            shiftpos = self.__shift_pos__(cs)  # our tuple representation of site
             hashcache ^= hash(cs.ci + shiftpos)
             if cs.ci not in self.__equalitymap__:
                 self.__equalitymap__[cs.ci] = set([shiftpos])
             else:
                 self.__equalitymap__[cs.ci].add(shiftpos)
         self.__hashcache__ = hashcache
+
+    def __shift_pos__(self, cs):
+        return tuple(cs.R*self.Norder - self.__center__)
 
     def __eq__(self, other):
         """
@@ -145,7 +148,7 @@ class Cluster(object):
 
     def __contains__(self, elem):
         if elem.ci not in self.__equalitymap__: return False
-        return tuple(elem.R*self.Norder - self.__center__) in self.__equalitymap__[elem.ci]
+        return self.__shift_pos__(elem) in self.__equalitymap__[elem.ci]
 
     def __getitem__(self, item):
         return self.sites[item]
