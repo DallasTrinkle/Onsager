@@ -110,6 +110,58 @@ class Cluster(object):
         if not NOSORT: lis.sort(key=sortkey)
         R0 = lis[0].R
         self.sites = tuple([cs-R0 for cs in lis])
+        self.Norder = len(self.sites)
+        # a little mapping of the positions into sets to make equality checking faster,
+        # and explicit evaluation of hash function one time using XOR of individual values
+        # so that it respects permutations
+        self.__center__ = sum(cs.R for cs in self.sites)
+        self.__equalitymap__ = {}
+        hashcache = 0
+        for cs in self.sites:
+            shiftpos = tuple(cs.R*self.Norder - self.__center__)
+            hashcache ^= hash(cs.ci + shiftpos)
+            if cs.ci not in self.__equalitymap__:
+                self.__equalitymap__[cs.ci] = set([shiftpos])
+            else:
+                self.__equalitymap__[cs.ci].add(shiftpos)
+        self.__hashcache__ = hashcache
+
+    def __eq__(self, other):
+        """
+        Test for equality of two clusters. This is a bit trickier than one would expect, since
+        clusters are essentially sets where all of the lattice vectors are shifted by the
+        center of mass of the sites.
+        """
+        if not isinstance(other, self.__class__): return False
+        if self.Norder != other.Norder: return False
+        if self.__equalitymap__.keys() != other.__equalitymap__.keys(): return False
+        for k, v in self.__equalitymap__.items():
+            if other.__equalitymap__[k] != v: return False
+        return True
+
+    def __hash__(self):
+        """Return our hash value, precomputed"""
+        return self.__hashcache__
+
+    def __contains__(self, elem):
+        if elem.ci not in self.__equalitymap__: return False
+        return tuple(elem.R*self.Norder - self.__center__) in self.__equalitymap__[elem.ci]
+
+    def __getitem__(self, item):
+        return self.sites[item]
+
+    def __add__(self, other):
+        """Add a clustersite to a cluster expansion"""
+        if other not in self:
+            return self.__class__(self.sites + (other,))
+        else:
+            return self
+
+    def __radd__(self, other):
+        return self.__add__(self, other)
+
+    def __len__(self):
+        return self.Norder
 
     def g(self, crys, g):
         """
@@ -123,5 +175,5 @@ class Cluster(object):
 
     def __str__(self):
         """Human readable version"""
-        s = "{} order: ".format(len(self.sites))
+        s = "{} order: ".format(self.Norder)
         return s + " ".join([str(cs) for cs in self.sites])

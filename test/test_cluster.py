@@ -62,7 +62,20 @@ class ClusterTests(unittest.TestCase):
         s2 = cluster.ClusterSite((0,0), np.array([1,0,0]))
         c1 = cluster.Cluster([s1])
         c2 = cluster.Cluster([s2])
+        c3 = cluster.Cluster([s1, s2])
+        c4 = cluster.Cluster([s2, s1])
         self.assertEqual(c1, c2)
+        self.assertNotEqual(c1, c3)
+        self.assertEqual(c3, c4)
+
+    def testAddition(self):
+        """Making a cluster via addition"""
+        s1 = cluster.ClusterSite((0,0), np.array([0,0,0]))
+        s2 = cluster.ClusterSite((0,0), np.array([1,0,0]))
+        c1 = cluster.Cluster([s1])
+        c2 = c1 + s2
+        c3 = cluster.Cluster([s2, s1])
+        self.assertEqual(c2, c3)
 
 
 if __name__ == '__main__':
