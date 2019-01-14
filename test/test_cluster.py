@@ -92,6 +92,39 @@ class ClusterTests(unittest.TestCase):
         self.assertNotEqual(set1, set3)
         self.assertEqual(set3, set4)
 
+    def testHCPGroupOp(self):
+        """Testing group operations on our clusters (HCP)"""
+        HCP = crystal.Crystal.HCP(1., chemistry='HCP')
+        s1 = cluster.ClusterSite((0, 0), np.array([0, 0, 0]))
+        s2 = cluster.ClusterSite((0, 1), np.array([0, 0, 0]))
+        s3 = cluster.ClusterSite((0, 0), np.array([1, 0, 0]))
+
+        cl = cluster.Cluster([s1])
+        clusterset = set([cl.g(HCP, g) for g in HCP.G])
+        self.assertEqual(len(clusterset), 2)
+
+        cl = cluster.Cluster([s1, s2])
+        clusterset = set([cl.g(HCP, g) for g in HCP.G])
+        self.assertEqual(len(clusterset), 6)
+
+        cl = cluster.Cluster([s1, s3])
+        clusterset = set([cl.g(HCP, g) for g in HCP.G])
+        self.assertEqual(len(clusterset), 6)
+
+    def testFCCGroupOp(self):
+        """Testing group operations on our clusters (FCC)"""
+        FCC = crystal.Crystal.FCC(1., chemistry='FCC')
+        s1 = cluster.ClusterSite((0, 0), np.array([0, 0, 0]))
+        s2 = cluster.ClusterSite((0, 0), np.array([1, 0, 0]))
+
+        cl = cluster.Cluster([s1])
+        clusterset = set([cl.g(FCC, g) for g in FCC.G])
+        self.assertEqual(len(clusterset), 1)
+
+        cl = cluster.Cluster([s1, s2])
+        clusterset = set([cl.g(FCC, g) for g in FCC.G])
+        self.assertEqual(len(clusterset), 6)
+
 
 if __name__ == '__main__':
     unittest.main()
