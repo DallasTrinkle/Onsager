@@ -97,17 +97,17 @@ class Cluster(object):
     vector of 0, to account for translational invariance.
     """
 
-    def __init__(self, iterable):
+    def __init__(self, clustersitelist, NOSORT=False):
         """
         Cluster interaction, from an iterable of ClusterSites
-        :param iterable: set of ClusterSites
+        :param clustersitelist: iterable of ClusterSites
         """
         # this sorting is a *little* hacked together, but as long as we don't have
         # more than 2^32 sites in our crystal, we're good to go:
-        def sortkey(cs): return cs[0]*(2**32)+cs[1]
+        def sortkey(cs): return cs.ci[0]*(2**32)+cs.ci[1]
         # first, dump contents of iterable into a list to manipulate:
-        lis = [cs for cs in iterable]
-        lis.sort(key=sortkey)
+        lis = [cs for cs in clustersitelist]
+        if not NOSORT: lis.sort(key=sortkey)
         R0 = lis[0].R
         self.sites = tuple([cs-R0 for cs in lis])
 

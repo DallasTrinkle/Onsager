@@ -42,6 +42,28 @@ class ClusterSiteTests(unittest.TestCase):
         self.assertEqual(s1-v1, s3)
         self.assertNotEqual(s1+v1, s3)
 
+class ClusterTests(unittest.TestCase):
+    """Tests of the Cluster class"""
+    longMessage = False
+
+    def testMakeCluster(self):
+        """Can we make a cluster?"""
+        s = cluster.ClusterSite((0,0), np.array([0,0,0]))
+        cl = cluster.Cluster([s])
+        self.assertIsInstance(cl, cluster.Cluster)
+        Rlist = [np.array([0,0,0]), np.array([1,0,0]), np.array([-1,0,0])]
+        cl = cluster.Cluster(cluster.ClusterSite((0, n), R)
+                             for n, R in enumerate(Rlist))
+        self.assertIsInstance(cl, cluster.Cluster)
+
+    def testEquality(self):
+        """Equality tests"""
+        s1 = cluster.ClusterSite((0,0), np.array([0,0,0]))
+        s2 = cluster.ClusterSite((0,0), np.array([1,0,0]))
+        c1 = cluster.Cluster([s1])
+        c2 = cluster.Cluster([s2])
+        self.assertEqual(c1, c2)
+
 
 if __name__ == '__main__':
     unittest.main()
