@@ -82,7 +82,7 @@ class ClusterSite(collections.namedtuple('ClusterSite', 'ci R')):
     def ClusterSite_constructor(loader, node):
         """Construct a ClusterSite from YAML"""
         # ** turns the dictionary into parameters for ClusterSite constructor
-        return self.__class__(**loader.construct_mapping(node, deep=True))
+        return ClusterSite(**loader.construct_mapping(node, deep=True))
 
 
 crystal.yaml.add_representer(ClusterSite, ClusterSite.ClusterSite_representer)
