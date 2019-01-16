@@ -25,6 +25,18 @@ class ClusterSite(collections.namedtuple('ClusterSite', 'ci R')):
         """Return a proper dict"""
         return {'ci': self.ci, 'R': self.R}
 
+    @classmethod
+    def fromcryscart(cls, crys, cart_pos):
+        """Return a ClusterSite corresponding to Cartesian position `cart_pos` in crystal `crys`"""
+        R, ci = crys.cart2pos(cart_pos)
+        return cls(ci=ci, R=R)
+
+    @classmethod
+    def fromcrysunit(cls, crys, unit_pos):
+        """Return a ClusterSite corresponding to unit cell position `unit_pos` in crystal `crys`"""
+        cart_pos = crys.unit2cart(np.zeros(crys.dim, dtype=int), unit_pos)
+        return cls.fromcryscart(cart_pos)
+
     def __eq__(self, other):
         """Test for equality--we don't bother checking dx"""
         return isinstance(other, self.__class__) and \

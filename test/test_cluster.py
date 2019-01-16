@@ -114,16 +114,36 @@ class ClusterTests(unittest.TestCase):
     def testFCCGroupOp(self):
         """Testing group operations on our clusters (FCC)"""
         FCC = crystal.Crystal.FCC(1., chemistry='FCC')
-        s1 = cluster.ClusterSite((0, 0), np.array([0, 0, 0]))
-        s2 = cluster.ClusterSite((0, 0), np.array([1, 0, 0]))
+        s1 = cluster.ClusterSite.fromcryscart(FCC, np.array([0, 0, 0]))
+        s2 = cluster.ClusterSite.fromcryscart(FCC, np.array([0., 0.5, 0.5]))
+        s3 = cluster.ClusterSite.fromcryscart(FCC, np.array([0.5, 0., 0.5]))
+        s4 = cluster.ClusterSite.fromcryscart(FCC, np.array([0.5, 0.5, 0.]))
+        s5 = cluster.ClusterSite.fromcryscart(FCC, np.array([0., 0.5, -0.5]))
 
+        # only one way to make a single site:
         cl = cluster.Cluster([s1])
         clusterset = set([cl.g(FCC, g) for g in FCC.G])
-        self.assertEqual(len(clusterset), 1)
+        self.assertEqual(1, len(clusterset), msg='Failure on single site')
 
+        # six ways to make a NN pair: multiplicity of <110>, divided by 2
         cl = cluster.Cluster([s1, s2])
         clusterset = set([cl.g(FCC, g) for g in FCC.G])
-        self.assertEqual(len(clusterset), 6)
+        self.assertEqual(6, len(clusterset), msg='Failure on NN pair')
+
+        # eight ways to make a NN triplet: multiplicity of <111> (the plane normal of the face)
+        cl = cluster.Cluster([s1, s2, s3])
+        clusterset = set([cl.g(FCC, g) for g in FCC.G])
+        self.assertEqual(8, len(clusterset), msg='Failure on NN triplet')
+
+        # twelve ways to make a "wide" triplet: multiplicity of <100> times two
+        cl = cluster.Cluster([s1, s2, s5])
+        clusterset = set([cl.g(FCC, g) for g in FCC.G])
+        self.assertEqual(12, len(clusterset), msg='Failure on wide NN triplet')
+
+        # two ways to make our tetrahedron
+        cl = cluster.Cluster([s1, s2, s3, s4])
+        clusterset = set([cl.g(FCC, g) for g in FCC.G])
+        self.assertEqual(2, len(clusterset), msg='Failure on NN quad')
 
 
 if __name__ == '__main__':
