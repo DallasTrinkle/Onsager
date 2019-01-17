@@ -501,3 +501,53 @@ class Supercell(object):
 
         if mapping is None: return None, mapping
         return g, mapping
+
+
+class ClusterSupercell(object):
+    """
+    A class that defines a Supercell of a crystal for purposes of evaluating a cluster expansion.
+    We intend to use this with Monte Carlo sampling.
+
+    Takes in a crystal, a supercell (3x3 integer matrix). We can identify sites
+    as spectator sites (that is, they can have different occupancies, but we do not intend
+    for those to change during a Monte Carlo simulation.
+    """
+
+    def __init__(self, crys, super, spectator=()):
+        """
+        Initialize our supercell to an empty supercell.
+
+        :param crys: crystal object
+        :param super: 3x3 integer matrix
+        :param spectator: list of indices of chemistries that will be considered "spectators"
+        """
+        self.crys = crys
+        self.super = super.copy()
+        self.spectator = [c for c in set(spectator)] # only keep unique values
+        self.spectator.sort()
+        self.mobile = [c for c in range(len(crys.Nchem)) if c not in self.spectator]
+        self.Nchem = crys.Nchem - len(self.spectator)
+        # everything else that follows is "derived" from those initial parameters
+        self.lattice = np.dot(self.crys.lattice, self.super)
+        self.spectatorindices = [(c, i) for c in self.spectator for i in range(len(crys.basis[c]))]
+        self.mobileindices = [(c, i) for c in self.mobile for i in range(len(crys.basis[c]))]
+        self.indexspectator = {ci: n for n, ci in enumerate(self.spectatorindices)}
+        self.indexmobile = {ci: n for n, ci in enumerate(self.mobileindices)}
+        self.Nspec, self.Nmobile = len(self.spectatorindices), len(self.mobileindices)
+        self.size, self.invsuper, self.translist, self.transdict = Supercell.maketrans(self.super)
+        self.specpos, self.mobilepos = self.makesites()
+        # self.pos, self.occ = self.makesites(), -1 * np.ones(self.N * self.size, dtype=int)
+
+    def makesites(self):
+        """
+        Generate the array corresponding to the sites; the indexing is based on the translations
+        and the atomindices in crys. These may not all be filled when the supercell is finished.
+
+        :return pos: array [N*size, 3] of supercell positions in direct coordinates
+        """
+        invsize = 1 / self.size
+        specbasislist = [np.dot(self.invsuper, self.crys.basis[c][i]) for (c, i) in self.spectatorindices]
+        mobilebasislist = [np.dot(self.invsuper, self.crys.basis[c][i]) for (c, i) in self.mobileindices]
+        return np.array([crystal.incell((t + u) * invsize) for t in self.translist for u in specbasislist]), \
+               np.array([crystal.incell((t + u) * invsize) for t in self.translist for u in mobilebasislist])
+
