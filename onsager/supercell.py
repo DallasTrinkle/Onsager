@@ -525,7 +525,7 @@ class ClusterSupercell(object):
         self.super = super.copy()
         self.spectator = [c for c in set(spectator)] # only keep unique values
         self.spectator.sort()
-        self.mobile = [c for c in range(len(crys.Nchem)) if c not in self.spectator]
+        self.mobile = [c for c in range(crys.Nchem) if c not in self.spectator]
         self.Nchem = crys.Nchem - len(self.spectator)
         # everything else that follows is "derived" from those initial parameters
         self.lattice = np.dot(self.crys.lattice, self.super)

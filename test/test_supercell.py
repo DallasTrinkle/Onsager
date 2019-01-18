@@ -355,3 +355,17 @@ class InterstitialSuperTests(HCPSuperTests):
         superYAML = crystal.yaml.load(YAMLstring)
         self.assertOrderingSuperEqual(sup, superYAML, msg='YAML write/read fail?')
         # print(YAMLstring)
+
+
+class SupercellClusterTests(unittest.TestCase):
+    """Tests of the Supercell Cluster class"""
+    longMessage = False
+
+    def setUp(self):
+        self.crys = crystal.Crystal.FCC(1., chemistry='FCC')
+        self.one = np.eye(3, dtype=int)
+
+    def testClusterSupercellCreation(self):
+        """Can we make a cluster supercell?"""
+        sup = supercell.ClusterSupercell(self.crys, 3*self.one)
+        self.assertIsInstance(sup, supercell.ClusterSupercell)
