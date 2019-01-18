@@ -357,7 +357,7 @@ class InterstitialSuperTests(HCPSuperTests):
         # print(YAMLstring)
 
 
-class SupercellClusterTests(unittest.TestCase):
+class ClusterSupercellTests(unittest.TestCase):
     """Tests of the Supercell Cluster class"""
     longMessage = False
 
@@ -369,3 +369,42 @@ class SupercellClusterTests(unittest.TestCase):
         """Can we make a cluster supercell?"""
         sup = supercell.ClusterSupercell(self.crys, 3*self.one)
         self.assertIsInstance(sup, supercell.ClusterSupercell)
+
+    def testIndexingSimple(self):
+        """Check that the indexing behaves as we expect: FCC"""
+        super = np.array([[3,2,0], [-2, 3, 1], [2, -1, 4]])
+        # R1, R2, R3 = super[:,0], super[:,1], super[:,2]
+        sup = supercell.ClusterSupercell(self.crys, super)
+        for n, Rv in enumerate(sup.Rveclist):
+            m, mob = sup.index(Rv, (0,0))
+            self.assertTrue(mob)
+            self.assertEqual(n, m,
+                             msg='Failure to match {} in supercell'.format(Rv))
+            for Rext in super.T:
+                m, mob = sup.index(Rv+Rext, (0, 0))
+                self.assertTrue(mob)
+                self.assertEqual(n, m,
+                                 msg='Failure to match {} in supercell'.format(Rv+Rext))
+
+    def testIndexingComplex(self):
+        """Check that the indexing behaves as we expect: HCP"""
+        Ti = crystal.Crystal.HCP(1., chemistry='Ti')
+        TiO= Ti.addbasis(Ti.Wyckoffpos(np.array([0., 0., 0.5])), chemistry=['O'])
+        super = np.array([[3,2,0], [-2, 3, 1], [2, -1, 4]])
+        superinv = np.linalg.inv(super)
+        # R1, R2, R3 = super[:,0], super[:,1], super[:,2]
+        sup = supercell.ClusterSupercell(TiO, super, spectator=[0])
+        for c, mob in zip([0, 1], [False, True]):
+            for i in range(len(TiO.basis[c])):
+                ci = (c,i)
+                for n, Rv in enumerate(sup.Rveclist):
+                    m, mobile = sup.index(Rv, ci)
+                    self.assertEqual(mob, mobile)
+                    # positions in unit cell coordinates of our supercell:
+                    pos = np.dot(superinv, TiO.basis[c][i] + Rv)
+                    poscompare = sup.mobilepos[m] if mobile else sup.specpos[m]
+                    # are we within a lattice vector *for the supercell* for our position?
+                    posdiff = pos - poscompare
+                    posdiff -= np.round(posdiff)
+                    self.assertTrue(np.allclose(posdiff, 0),
+                                    msg='Failure to match {} {}:\nindex: {} and {}, {} != {}'.format(ci, Rv, n, m, pos, poscompare))

@@ -567,9 +567,9 @@ class ClusterSupercell(object):
         :return mobile: boolean; True if mobile, False if spectator
         """
         if ci in self.mobileindices:
-            return self.transdict[tuple(self.incell(R))]*self.Nmobile + self.mobileindices[ci], True
+            return self.transdict[tuple(self.incell(R))]*self.Nmobile + self.indexmobile[ci], True
         else:
-            return self.transdict[tuple(self.incell(R))]*self.Nspec + self.spectatorindices[ci], False
+            return self.transdict[tuple(self.incell(R))]*self.Nspec + self.indexspectator[ci], False
 
     def indexpos(self, pos, threshold=1.):
         """
