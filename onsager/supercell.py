@@ -536,6 +536,7 @@ class ClusterSupercell(object):
         self.Nspec, self.Nmobile = len(self.spectatorindices), len(self.mobileindices)
         self.size, self.invsuper, self.translist, self.transdict = Supercell.maketrans(self.super)
         self.specpos, self.mobilepos = self.makesites()
+        self.Rveclist = [np.dot(self.super, t)//self.size for t in self.translist]
         # self.pos, self.occ = self.makesites(), -1 * np.ones(self.N * self.size, dtype=int)
 
     def makesites(self):
@@ -550,4 +551,47 @@ class ClusterSupercell(object):
         mobilebasislist = [np.dot(self.invsuper, self.crys.basis[c][i]) for (c, i) in self.mobileindices]
         return np.array([crystal.incell((t + u) * invsize) for t in self.translist for u in specbasislist]), \
                np.array([crystal.incell((t + u) * invsize) for t in self.translist for u in mobilebasislist])
+
+    def incell(self, R):
+        """Map a lattice vector into a translation vector in the cell"""
+        return np.dot(self.invsuper, R) % self.size
+
+    def index(self, R, ci):
+        """
+        Return the index that corresponds to a position specified by a lattice vector R and
+        a chem/index (c,i). We also need to specify if its in the spectator basis or mobile basis.
+
+        :param R: lattice vector
+        :param ci: (c, i) index
+        :return ind: index of site in our position
+        :return mobile: boolean; True if mobile, False if spectator
+        """
+        if ci in self.mobileindices:
+            return self.transdict[tuple(self.incell(R))]*self.Nmobile + self.mobileindices[ci], True
+        else:
+            return self.transdict[tuple(self.incell(R))]*self.Nspec + self.spectatorindices[ci], False
+
+    def indexpos(self, pos, threshold=1.):
+        """
+        Return the index that corresponds to the position *closest* to pos in the supercell.
+        Done in direct coordinates of the supercell, using periodic boundary conditions.
+
+        :param pos: 3-vector
+        :param threshold: (optional) minimum squared "distance" in supercell for a match; default=1.
+        :return index: index of closest position
+        :return mobile: boolean; True if mobile, False if spectator
+        """
+        index, dist2 = None, threshold
+        for ind, u in enumerate(self.specpos):
+            delta = crystal.inhalf(pos - u)
+            d2 = np.sum(delta * delta)
+            if d2 < dist2: index, dist2 = ind, d2
+        dspec_min = dist2
+        for ind, u in enumerate(self.mobilepos):
+            delta = crystal.inhalf(pos - u)
+            d2 = np.sum(delta * delta)
+            if d2 < dist2: index, dist2 = ind, d2
+        # if dist2 is smaller than dspec_min, it's mobile:
+        return index, (dist2 < dspec_min)
+
 
