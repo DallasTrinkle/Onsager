@@ -411,7 +411,7 @@ class ClusterSupercellTests(unittest.TestCase):
     def testClusterEvalSimple(self):
         """Check that we can evaluate a cluster expansion"""
         FCC = self.crys
-        sup = supercell.ClusterSupercell(FCC, 16*self.one)
+        sup = supercell.ClusterSupercell(FCC, 4*self.one)
         # build some sites...
         s1 = cluster.ClusterSite.fromcryscart(FCC, np.array([0, 0, 0]))
         s2 = cluster.ClusterSite.fromcryscart(FCC, np.array([0., 0.5, 0.5]))
@@ -429,3 +429,7 @@ class ClusterSupercellTests(unittest.TestCase):
         mocc, socc = np.zeros(sup.size), np.zeros(0)
         clustercount = sup.evalcluster(mocc, socc, clusterexp)
         self.assertTrue(np.all(np.array([0,]*5 + [sup.size]) == clustercount))
+
+        mocc, socc = np.ones(sup.size), np.zeros(0)
+        clustercount = sup.evalcluster(mocc, socc, clusterexp)
+        self.assertTrue(np.all(np.array([1, 6, 8, 12, 2, 1])*sup.size == clustercount))
