@@ -7,8 +7,7 @@ __author__ = 'Dallas R. Trinkle'
 import unittest
 import itertools, copy
 import numpy as np
-import onsager.crystal as crystal
-import onsager.supercell as supercell
+from onsager import crystal, supercell, cluster
 
 
 class FCCSuperTests(unittest.TestCase):
@@ -408,3 +407,25 @@ class ClusterSupercellTests(unittest.TestCase):
                     posdiff -= np.round(posdiff)
                     self.assertTrue(np.allclose(posdiff, 0),
                                     msg='Failure to match {} {}:\nindex: {} and {}, {} != {}'.format(ci, Rv, n, m, pos, poscompare))
+
+    def testClusterEvalSimple(self):
+        """Check that we can evaluate a cluster expansion"""
+        FCC = self.crys
+        sup = supercell.ClusterSupercell(FCC, 16*self.one)
+        # build some sites...
+        s1 = cluster.ClusterSite.fromcryscart(FCC, np.array([0, 0, 0]))
+        s2 = cluster.ClusterSite.fromcryscart(FCC, np.array([0., 0.5, 0.5]))
+        s3 = cluster.ClusterSite.fromcryscart(FCC, np.array([0.5, 0., 0.5]))
+        s4 = cluster.ClusterSite.fromcryscart(FCC, np.array([0.5, 0.5, 0.]))
+        s5 = cluster.ClusterSite.fromcryscart(FCC, np.array([0., 0.5, -0.5]))
+        # build some base clusters...
+        c1 = cluster.Cluster([s1])
+        c2 = cluster.Cluster([s1, s2])
+        c3 = cluster.Cluster([s1, s2, s3])
+        c3w = cluster.Cluster([s1, s2, s5])
+        c4 = cluster.Cluster([s1, s2, s3, s4])
+        # expand out into symmetric sets...
+        clusterexp = [set([cl.g(FCC, g) for g in FCC.G]) for cl in [c1, c2, c3, c3w, c4]]
+        mocc, socc = np.zeros(sup.size), np.zeros(0)
+        clustercount = sup.evalcluster(mocc, socc, clusterexp)
+        self.assertTrue(np.all(np.array([0,]*5 + [sup.size]) == clustercount))

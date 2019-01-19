@@ -15,7 +15,6 @@ import numpy as np
 import collections, copy, itertools, warnings
 from numbers import Integral
 from onsager import crystal
-from functools import reduce
 
 # TODO: add "parser"--read CONTCAR file, create Supercell
 # TODO: output PairState from Supercell
@@ -594,4 +593,32 @@ class ClusterSupercell(object):
         # if dist2 is smaller than dspec_min, it's mobile:
         return index, (dist2 < dspec_min)
 
+    def evalcluster(self, mocc, socc, clusters):
+        """
+        Evaluate a cluster expansion for a given mobile occupancy and spectator occupancy.
+        Indexing corresponds to `mobilepos` and `specpos`. The clusters are input as a
+        list of lists of clusters (where it is assumed that all of the clusters in a given
+        sublist have equal coefficients (i.e., grouped by symmetry). We return a vector
+        of length Nclusters + 1; each entry is the number of times each cluster appears,
+        and the *last* entry is equal to the size of the supercell (which would be an
+        "empty" cluster). This can then be dotted into the vector of values to get the
+        cluster expansion value.
+
+        :param mocc: mobile occupancy vector (0 or 1 only)
+        :param socc: spectator occupancy vector (0 or 1 only)
+        :param clusters: list of lists (or sets) of Cluster objects
+        :return clustercount: count of how many of each cluster is in this supercell.
+        """
+        def isocc(R, ci):
+            n, mob = self.index(R, ci)
+            if mob: return mocc[n] == 1
+            else: return socc[n] == 1
+        clustercount = np.zeros(len(clusters)+1, dtype=int)
+        clustercount[-1] = self.size
+        for mc, clusterlist in enumerate(clusters):
+            for cluster in clusterlist:
+                for nR, R in enumerate(self.Rveclist):
+                    if all(isocc(R+site.R, site.ci) for site in cluster):
+                        clustercount[mc] += 1
+        return clustercount
 
