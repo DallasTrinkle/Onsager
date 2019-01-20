@@ -411,7 +411,11 @@ class ClusterSupercellTests(unittest.TestCase):
     def testClusterEvalSimple(self):
         """Check that we can evaluate a cluster expansion"""
         FCC = self.crys
-        sup = supercell.ClusterSupercell(FCC, 4*self.one)
+        Nsuper = 4
+        A1 = FCC.cart2unit(np.array([Nsuper,0.,0.]))[0]
+        A2 = FCC.cart2unit(np.array([0.,Nsuper,0.]))[0]
+        A3 = FCC.cart2unit(np.array([0.,0.,Nsuper]))[0]
+        sup = supercell.ClusterSupercell(FCC, np.array([A1, A2, A3]))
         # build some sites...
         s1 = cluster.ClusterSite.fromcryscart(FCC, np.array([0, 0, 0]))
         s2 = cluster.ClusterSite.fromcryscart(FCC, np.array([0., 0.5, 0.5]))
@@ -433,3 +437,23 @@ class ClusterSupercellTests(unittest.TestCase):
         mocc, socc = np.ones(sup.size), np.zeros(0)
         clustercount = sup.evalcluster(mocc, socc, clusterexp)
         self.assertTrue(np.all(np.array([1, 6, 8, 12, 2, 1])*sup.size == clustercount))
+
+        socc = np.zeros(0)
+        for u1, u2, u3 in itertools.product([-0.5/Nsuper, 0.5/Nsuper], repeat=3):
+            mocc = np.zeros(sup.size)
+            # make a tetrahedron...
+            for x in [(0., 0., 0.), (0., u2, u3), (u1, 0, u3), (u1, u2, 0)]:
+                mocc[sup.indexpos(np.array(x))] = 1
+            clustercount = sup.evalcluster(mocc, socc, clusterexp)
+            self.assertTrue(np.all(np.array([4, 6, 4, 0, 1, sup.size]) == clustercount))
+
+        for u in [-0.5/Nsuper, 0.5/Nsuper]:
+            mocc = np.zeros(sup.size)
+            # make an octahedron...
+            for x in [(0., 0., 0.), (u, 0, u), (u, 0, -u), (u, u, 0), (u, -u, 0), (2*u, 0, 0)]:
+                mocc[sup.indexpos(np.array(x))] = 1
+            clustercount = sup.evalcluster(mocc, socc, clusterexp)
+            self.assertTrue(np.all(np.array([6, 12, 8, 12, 0, sup.size]) == clustercount))
+
+
+

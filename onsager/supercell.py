@@ -570,7 +570,7 @@ class ClusterSupercell(object):
         else:
             return self.transdict[tuple(self.incell(R))]*self.Nspec + self.indexspectator[ci], False
 
-    def indexpos(self, pos, threshold=1.):
+    def indexpos(self, pos, threshold=1., CARTESIAN = False):
         """
         Return the index that corresponds to the position *closest* to pos in the supercell.
         Done in direct coordinates of the supercell, using periodic boundary conditions.
