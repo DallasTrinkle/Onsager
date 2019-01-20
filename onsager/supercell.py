@@ -622,3 +622,46 @@ class ClusterSupercell(object):
                         clustercount[mc] += 1
         return clustercount
 
+    def clusterevaluator(self, socc, clusters, values):
+        """
+        Construct the information necessary for an (efficient) cluster evaluator,
+        for a given spectator occupancy, set of clusters, and values for those clusters.
+
+        :param socc: spectator occupancy vector (0 or 1 only)
+        :param clusters: list of lists (or sets) of Cluster objects
+        :param values: vector of values for the clusters; if it is longer than the
+          list of clusters by one, the last values is assumed to be the constant value.
+        :return siteinteract: list of lists of interactions for each site
+        :return interact: list of interaction values
+        """
+        E0 = 0
+        if len(values) > len(clusters):
+            E0 = values[-1]
+        Ninteract = 0
+        interact, interdict = [[] for n in range(self.Nmobile*self.size)], {}
+        siteinteract = []
+        for clusterlist, value in zip(clusters, values):
+            for cluster in clusterlist:
+                # split into mobile and spectator
+                mobilesites = [site for site in cluster if site.ci in self.indexmobile]
+                specsites = [site for site in cluster if site.ci in self.indexspectator]
+                for nR, R in enumerate(self.Rveclist):
+                    if all(socc[self.index(R+site.R, site.ci)[0]] == 1 for site in specsites):
+                        if len(mobilesites) == 0:
+                            # spectator only == constant
+                            E0 += value
+                        else:
+                            intertuple = tuple(sorted([self.index(R+site.R, site.ci)[0] for site in mobilesites]))
+                            if intertuple in interdict:
+                                # if we've already seen this particular interaction, add to the value
+                                interact[interdict[intertuple]] += value
+                            else:
+                                # new interaction!
+                                interact.append(value)
+                                interdict[intertuple] = Ninteract
+                                for n in intertuple:
+                                    siteinteract[n].append(Ninteract)
+                                Ninteract += 1
+        # add on our constant term
+        interact.append(E0)
+        return siteinteract, interact
