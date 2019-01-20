@@ -636,10 +636,10 @@ class ClusterSupercell(object):
         """
         E0 = 0
         if len(values) > len(clusters):
-            E0 = values[-1]
+            E0 = self.size*values[-1]
         Ninteract = 0
-        interact, interdict = [[] for n in range(self.Nmobile*self.size)], {}
-        siteinteract = []
+        interact, interdict = [], {}
+        siteinteract = [[] for n in range(self.Nmobile*self.size)]
         for clusterlist, value in zip(clusters, values):
             for cluster in clusterlist:
                 # split into mobile and spectator

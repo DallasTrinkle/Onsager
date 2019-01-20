@@ -483,3 +483,43 @@ class ClusterSupercellTests(unittest.TestCase):
         mocc, socc = np.ones(sup.size), np.ones(sup.size)
         clustercount = sup.evalcluster(mocc, socc, clusterexp)
         self.assertTrue(np.all(np.array([1, 1, 8, 3, 3, 1])*sup.size == clustercount))
+
+    def testClusterEvaluator(self):
+        """Check that our cluster evaluator works"""
+        B2 = crystal.Crystal(np.eye(3), [[np.array([0., 0., 0.])],
+                                         [np.array([0.5, 0.5, 0.5])]], ['A', 'B'])
+        Nsuper = 4
+        # build a supercell, but call the "A" atoms spectators to the "B" atoms
+        sup = supercell.ClusterSupercell(B2, Nsuper*self.one, spectator=[0])
+        # build some sites...
+        sA1 = cluster.ClusterSite.fromcryscart(B2, np.array([0, 0, 0]))
+        sB1 = cluster.ClusterSite.fromcryscart(B2, np.array([0.5, 0.5, 0.5]))
+        sA2 = cluster.ClusterSite.fromcryscart(B2, np.array([1., 0., 0.]))
+        sB2 = cluster.ClusterSite.fromcryscart(B2, np.array([-0.5, 0.5, 0.5]))
+        # build some base clusters...
+        cA = cluster.Cluster([sA1])
+        cB = cluster.Cluster([sB1])
+        cAB = cluster.Cluster([sA1, sB1])
+        cAA = cluster.Cluster([sA1, sA2])
+        cBB = cluster.Cluster([sB1, sB2])
+        cABB = cluster.Cluster([sA1, sB1, sB2])
+        # expand out into symmetric sets...
+        clusterexp = [set([cl.g(B2, g) for g in B2.G]) for cl in [cA, cB, cAB, cAA, cBB, cABB]]
+        # ene = np.zeros(len(clusterexp)+1)
+        ene = np.random.normal(size=len(clusterexp) + 1) # random interactions
+        # work with a random spectator occupancy, then try out some mobile occupancies.
+        # mocc, socc = np.zeros(sup.size), np.zeros(sup.size)
+        for spec_try in range(10):
+            socc = np.random.choice((0,1), size=sup.size)
+            siteinteract, interact = sup.clusterevaluator(socc, clusterexp, ene)
+            for mobile_try in range(10):
+                mocc = np.random.choice((0,1), size=sup.size)
+                clustercount = sup.evalcluster(mocc, socc, clusterexp)
+                ene_direct = np.dot(ene, clustercount)
+                interact_count = np.zeros(len(interact), dtype=int)
+                for s, interlist in zip(mocc, siteinteract):
+                    if s==0:
+                        for m in interlist:
+                            interact_count[m] += 1
+                ene_count = sum(E for E, c in zip(interact, interact_count) if c==0)
+                self.assertAlmostEqual(ene_direct, ene_count)
