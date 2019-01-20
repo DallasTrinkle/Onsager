@@ -409,7 +409,7 @@ class ClusterSupercellTests(unittest.TestCase):
                                     msg='Failure to match {} {}:\nindex: {} and {}, {} != {}'.format(ci, Rv, n, m, pos, poscompare))
 
     def testClusterEvalSimple(self):
-        """Check that we can evaluate a cluster expansion"""
+        """Check that we can evaluate a cluster expansion: FCC"""
         FCC = self.crys
         Nsuper = 4
         A1 = FCC.cart2unit(np.array([Nsuper,0.,0.]))[0]
@@ -455,5 +455,31 @@ class ClusterSupercellTests(unittest.TestCase):
             clustercount = sup.evalcluster(mocc, socc, clusterexp)
             self.assertTrue(np.all(np.array([6, 12, 8, 12, 0, sup.size]) == clustercount))
 
+    def testClusterEvalSimple2(self):
+        """Check that we can evaluate a cluster expansion: B2"""
+        B2 = crystal.Crystal(np.eye(3), [[np.array([0., 0., 0.])],
+                                         [np.array([0.5, 0.5, 0.5])]], ['A', 'B'])
+        Nsuper = 4
+        # build a supercell, but call the "A" atoms spectators to the "B" atoms
+        sup = supercell.ClusterSupercell(B2, Nsuper*self.one, spectator=[0])
+        # build some sites...
+        sA1 = cluster.ClusterSite.fromcryscart(B2, np.array([0, 0, 0]))
+        sB1 = cluster.ClusterSite.fromcryscart(B2, np.array([0.5, 0.5, 0.5]))
+        sA2 = cluster.ClusterSite.fromcryscart(B2, np.array([1., 0., 0.]))
+        sB2 = cluster.ClusterSite.fromcryscart(B2, np.array([-0.5, 0.5, 0.5]))
+        # build some base clusters...
+        cA = cluster.Cluster([sA1])
+        cB = cluster.Cluster([sB1])
+        cAB = cluster.Cluster([sA1, sB1])
+        cAA = cluster.Cluster([sA1, sA2])
+        cBB = cluster.Cluster([sB1, sB2])
+        cABB = cluster.Cluster([sA1, sB1, sB2])
+        # expand out into symmetric sets...
+        clusterexp = [set([cl.g(B2, g) for g in B2.G]) for cl in [cA, cB, cAB, cAA, cBB]]
+        mocc, socc = np.zeros(sup.size), np.zeros(sup.size)
+        clustercount = sup.evalcluster(mocc, socc, clusterexp)
+        self.assertTrue(np.all(np.array([0,]*5 + [sup.size]) == clustercount))
 
-
+        mocc, socc = np.ones(sup.size), np.ones(sup.size)
+        clustercount = sup.evalcluster(mocc, socc, clusterexp)
+        self.assertTrue(np.all(np.array([1, 1, 8, 3, 3, 1])*sup.size == clustercount))
