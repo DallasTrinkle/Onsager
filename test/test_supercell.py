@@ -94,8 +94,8 @@ class FCCSuperTests(unittest.TestCase):
         """Do we correctly generate group operations inside the supercell?"""
         for nmat in self.groupsupers:
             sup = supercell.Supercell(self.crys, nmat)
-            # print(super)
-            # for g in super.G: if np.all(g.rot==self.one): print(g)
+            # print(superlatt)
+            # for g in superlatt.G: if np.all(g.rot==self.one): print(g)
             self.assertEqual(len(sup.G), len(self.crys.G) * sup.size)
             invlatt = np.linalg.inv(sup.lattice)
             superposcart = [np.dot(sup.lattice, u) for u in sup.pos]
@@ -371,15 +371,15 @@ class ClusterSupercellTests(unittest.TestCase):
 
     def testIndexingSimple(self):
         """Check that the indexing behaves as we expect: FCC"""
-        super = np.array([[3,2,0], [-2, 3, 1], [2, -1, 4]])
-        # R1, R2, R3 = super[:,0], super[:,1], super[:,2]
-        sup = supercell.ClusterSupercell(self.crys, super)
+        superlatt = np.array([[3,2,0], [-2, 3, 1], [2, -1, 4]])
+        # R1, R2, R3 = superlatt[:,0], superlatt[:,1], superlatt[:,2]
+        sup = supercell.ClusterSupercell(self.crys, superlatt)
         for n, Rv in enumerate(sup.Rveclist):
             m, mob = sup.index(Rv, (0,0))
             self.assertTrue(mob)
             self.assertEqual(n, m,
                              msg='Failure to match {} in supercell'.format(Rv))
-            for Rext in super.T:
+            for Rext in superlatt.T:
                 m, mob = sup.index(Rv+Rext, (0, 0))
                 self.assertTrue(mob)
                 self.assertEqual(n, m,
@@ -389,10 +389,10 @@ class ClusterSupercellTests(unittest.TestCase):
         """Check that the indexing behaves as we expect: HCP"""
         Ti = crystal.Crystal.HCP(1., chemistry='Ti')
         TiO= Ti.addbasis(Ti.Wyckoffpos(np.array([0., 0., 0.5])), chemistry=['O'])
-        super = np.array([[3,2,0], [-2, 3, 1], [2, -1, 4]])
-        superinv = np.linalg.inv(super)
-        # R1, R2, R3 = super[:,0], super[:,1], super[:,2]
-        sup = supercell.ClusterSupercell(TiO, super, spectator=[0])
+        superlatt = np.array([[3,2,0], [-2, 3, 1], [2, -1, 4]])
+        superinv = np.linalg.inv(superlatt)
+        # R1, R2, R3 = superlatt[:,0], superlatt[:,1], superlatt[:,2]
+        sup = supercell.ClusterSupercell(TiO, superlatt, spectator=[0])
         for c, mob in zip([0, 1], [False, True]):
             for i in range(len(TiO.basis[c])):
                 ci = (c,i)

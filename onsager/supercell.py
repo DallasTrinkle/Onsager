@@ -27,24 +27,24 @@ class Supercell(object):
     as interstitial sites, and specify if we'll have solutes.
     """
 
-    def __init__(self, crys, super, interstitial=(), Nsolute=0, empty=False, NOSYM=False):
+    def __init__(self, crys, superlatt, interstitial=(), Nsolute=0, empty=False, NOSYM=False):
         """
         Initialize our supercell to an empty supercell.
 
         :param crys: crystal object
-        :param super: 3x3 integer matrix
+        :param superlatt: 3x3 integer matrix
         :param interstitial: (optional) list/tuple of indices that correspond to interstitial sites
         :param Nsolute: (optional) number of substitutional solute elements to consider; default=0
         :param empty: (optional) designed to allow "copy" to work--skips all derived info
         :param NOSYM: (optional) does not do symmetry analysis (intended ONLY for testing purposes)
         """
         self.crys = crys
-        self.super = super.copy()
+        self.superlatt = superlatt.copy()
         self.interstitial = copy.deepcopy(interstitial)
         self.Nchem = crys.Nchem + Nsolute if Nsolute > 0 else crys.Nchem
         if empty: return
         # everything else that follows is "derived" from those initial parameters
-        self.lattice = np.dot(self.crys.lattice, self.super)
+        self.lattice = np.dot(self.crys.lattice, self.superlatt)
         self.N = self.crys.N
         self.atomindices, self.indexatom = self.crys.atomindices, \
                                            {ci: n for n, ci in enumerate(self.crys.atomindices)}
@@ -59,7 +59,7 @@ class Supercell(object):
                 indexset = next((iset for iset in self.crys.Wyckoff if (c, i) in iset), None)
                 self.Wyckofflist.append(frozenset([self.indexatom[ci] for ci in indexset]))
                 self.Wyckoffchem.append(self.crys.chemistry[c])
-        self.size, self.invsuper, self.translist, self.transdict = self.maketrans(self.super)
+        self.size, self.invsuper, self.translist, self.transdict = self.maketrans(self.superlatt)
         # self.transdict = {tuple(t):n for n,t in enumerate(self.translist)}
         self.pos, self.occ = self.makesites(), -1 * np.ones(self.N * self.size, dtype=int)
         self.chemorder = [[] for n in range(self.Nchem)]
@@ -80,7 +80,7 @@ class Supercell(object):
 
         :return: new supercell object, copy of the original
         """
-        supercopy = self.__class__(self.crys, self.super, self.interstitial, self.Nchem - self.crys.Nchem,
+        supercopy = self.__class__(self.crys, self.superlatt, self.interstitial, self.Nchem - self.crys.Nchem,
                                    empty=True)
         for attr in self.__copyattr__: setattr(supercopy, attr, copy.deepcopy(getattr(self, attr)))
         for attr in self.__eqattr__: setattr(supercopy, attr, getattr(self, attr))
@@ -94,7 +94,7 @@ class Supercell(object):
         :param other: supercell for comparison
         :return: True if same crystal, supercell, occupancy, and ordering; False otherwise
         """
-        return isinstance(other, self.__class__) and np.all(self.super == other.super) and \
+        return isinstance(other, self.__class__) and np.all(self.superlatt == other.superlatt) and \
                self.interstitial == other.interstitial and np.allclose(self.pos, other.pos) and \
                np.all(self.occ == other.occ) and self.chemorder == other.chemorder
 
@@ -114,7 +114,7 @@ class Supercell(object):
     def __str__(self):
         """Human readable version of supercell"""
         str = "Supercell of crystal:\n{crys}\n".format(crys=self.crys)
-        str += "Supercell vectors:\n{}\nChemistry: ".format(self.super.T)
+        str += "Supercell vectors:\n{}\nChemistry: ".format(self.superlatt.T)
         str += self.stoichiometry()
         str += '\nKroger-Vink: ' + self.KrogerVink()
         str += '\nPositions:\n'
@@ -219,22 +219,22 @@ class Supercell(object):
         return True
 
     @staticmethod
-    def maketrans(super):
+    def maketrans(superlatt):
         """
         Takes in a supercell matrix, and returns a list of all translations of the unit
         cell that remain inside the supercell
 
-        :param super: 3x3 integer matrix
+        :param superlatt: 3x3 integer matrix
         :return size: integer, corresponding to number of unit cells
         :return invsuper: integer matrix inverse of supercell (needs to be divided by size)
         :return translist: list of integer vectors (to be divided by ``size``) corresponding
             to unit cell positions
         :return transdict: dictionary of tuples and their corresponding index (inverse of trans)
         """
-        size = abs(int(np.round(np.linalg.det(super))))
+        size = abs(int(np.round(np.linalg.det(superlatt))))
         if size==0: raise ZeroDivisionError('Tried to use a singular supercell.')
-        invsuper = np.round(np.linalg.inv(super) * size).astype(int)
-        maxN = abs(super).max()
+        invsuper = np.round(np.linalg.inv(superlatt) * size).astype(int)
+        maxN = abs(superlatt).max()
         translist, transdict = [], {}
         for nvect in [np.array((n0, n1, n2))
                       for n0 in range(-maxN, maxN + 1)
@@ -268,10 +268,10 @@ class Supercell(object):
         :return G: set of GroupOps
         """
         Glist = []
-        unittranslist = [np.dot(self.super, t) // self.size for t in self.translist]
+        unittranslist = [np.dot(self.superlatt, t) // self.size for t in self.translist]
         invsize = 1 / self.size
         for g0 in self.crys.G:
-            Rsuper = np.dot(self.invsuper, np.dot(g0.rot, self.super))
+            Rsuper = np.dot(self.invsuper, np.dot(g0.rot, self.superlatt))
             if not np.all(Rsuper % self.size == 0):
                 warnings.warn(
                     'Broken symmetry? GroupOp:\n{}\nnot a symmetry operation of supercell?\nRsuper=\n{}'.format(g0,
@@ -279,7 +279,7 @@ class Supercell(object):
                     RuntimeWarning, stacklevel=2)
                 continue
             else:
-                # divide out the size (in inverse super). Should still be an integer matrix (and hence, a symmetry)
+                # divide out the size (in inverse superlatt). Should still be an integer matrix (and hence, a symmetry)
                 Rsuper //= self.size
             for u in unittranslist:
                 # first, make the corresponding group operation by adding the unit cell translation:
@@ -453,7 +453,7 @@ class Supercell(object):
 
     def equivalencemap(self, other):
         """
-        Given the super ``other`` we want to find a group operation that transforms ``self``
+        Given the superlatt ``other`` we want to find a group operation that transforms ``self``
         into other. This is a GroupOp *along* with an index mapping of chemorder. The index
         mapping is to get the occposlist to match up:
         ``(g*self).occposlist()[c][mapping[c][i]] == other.occposlist()[c][i]``
@@ -512,30 +512,30 @@ class ClusterSupercell(object):
     for those to change during a Monte Carlo simulation.
     """
 
-    def __init__(self, crys, super, spectator=()):
+    def __init__(self, crys, superlatt, spectator=()):
         """
         Initialize our supercell to an empty supercell.
 
         :param crys: crystal object
-        :param super: 3x3 integer matrix
+        :param superlatt: 3x3 integer matrix
         :param spectator: list of indices of chemistries that will be considered "spectators"
         """
         self.crys = crys
-        self.super = super.copy()
+        self.superlatt = superlatt.copy()
         self.spectator = [c for c in set(spectator)] # only keep unique values
         self.spectator.sort()
         self.mobile = [c for c in range(crys.Nchem) if c not in self.spectator]
         self.Nchem = crys.Nchem - len(self.spectator)
         # everything else that follows is "derived" from those initial parameters
-        self.lattice = np.dot(self.crys.lattice, self.super)
+        self.lattice = np.dot(self.crys.lattice, self.superlatt)
         self.spectatorindices = [(c, i) for c in self.spectator for i in range(len(crys.basis[c]))]
         self.mobileindices = [(c, i) for c in self.mobile for i in range(len(crys.basis[c]))]
         self.indexspectator = {ci: n for n, ci in enumerate(self.spectatorindices)}
         self.indexmobile = {ci: n for n, ci in enumerate(self.mobileindices)}
         self.Nspec, self.Nmobile = len(self.spectatorindices), len(self.mobileindices)
-        self.size, self.invsuper, self.translist, self.transdict = Supercell.maketrans(self.super)
+        self.size, self.invsuper, self.translist, self.transdict = Supercell.maketrans(self.superlatt)
         self.specpos, self.mobilepos = self.makesites()
-        self.Rveclist = [np.dot(self.super, t)//self.size for t in self.translist]
+        self.Rveclist = [np.dot(self.superlatt, t) // self.size for t in self.translist]
         # self.pos, self.occ = self.makesites(), -1 * np.ones(self.N * self.size, dtype=int)
 
     def makesites(self):
