@@ -145,6 +145,14 @@ class ClusterTests(unittest.TestCase):
         clusterset = set([cl.g(FCC, g) for g in FCC.G])
         self.assertEqual(2, len(clusterset), msg='Failure on NN quad')
 
+    def testmakeclustersFCC(self):
+        """Does makeclusters perform as expected? FCC"""
+        FCC = crystal.Crystal.FCC(1., chemistry='FCC')
+        clusterexp = cluster.makeclusters(FCC, 0.8, 4)
+        self.assertEqual(4, len(clusterexp))
+        self.assertEqual([1, 6, 8, 2], [len(clset) for clset in clusterexp])
+
+
 
 if __name__ == '__main__':
     unittest.main()

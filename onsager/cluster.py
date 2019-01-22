@@ -192,3 +192,69 @@ class Cluster(object):
         """Human readable version"""
         s = "{} order: ".format(self.Norder)
         return s + " ".join([str(cs) for cs in self.sites])
+
+
+def makeclusters(crys, cutoff, maxorder, exclude=()):
+    """
+    Function to make clusters up to a maximum order involving all sites within a cutoff
+    distance. We can exclude certain chemistries; default is to use all.
+
+    :param crys: crystal to construct our clusters for
+    :param cutoff: distance between sites; all sites in a cluster must
+      have this mutual distance
+    :param maxorder: maximum order of our clusters
+    :param exclude: list of chemistries to exclude
+    :return clusterexp: list of sets of clusters
+    """
+    sitelist = [ci for ci in crys.atomindices if ci not in exclude]
+    # We construct our clusters in increasing order for maximum efficiency
+    # 1st order (sites) is slightly different than the rest.
+    clusterexp = []
+    clusters = set()
+    for ci in sitelist:
+        # single sites:
+        cl = Cluster([ClusterSite(ci, np.zeros(crys.dim, dtype=int))])
+        if cl not in clusters:
+            clset = set([cl.g(crys, g) for g in crys.G])
+            clusterexp.append(clset)
+            clusters.update(clset)
+    if maxorder < 2:
+        return clusterexp
+    # now, we can proceed to higher and higher orders...
+    # first, make lists of all our pairs within a given nn distance
+    # we could modify this to use different cutoff between different chemistries...
+    r2 = cutoff * cutoff
+    nmax = [int(np.round(np.sqrt(crys.metric[i, i]))) + 1
+            for i in range(crys.dim)]
+    nranges = [range(-n, n+1) for n in nmax]
+    supervect = [np.array(ntup) for ntup in itertools.product(*nranges)]
+    nndict = {}
+    for ci0 in sitelist:
+        u0 = crys.basis[ci0[0]][ci0[1]]
+        nnset = set()
+        for ci1 in sitelist:
+            u1 = crys.basis[ci1[0]][ci1[1]]
+            du = u1 - u0
+            for R in supervect:
+                dx = crys.unit2cart(R, du)
+                if 0 < np.dot(dx, dx) < r2:
+                    nnset.add(ClusterSite(ci1, R))
+        nndict[ci0] = nnset
+    for K in range(maxorder-1):
+        # we build based on our lower order clusters:
+        prevclusters, clusters = clusters, set()
+        for clprev in prevclusters:
+            for neigh in nndict[clprev[0].ci]:
+                # if this neighbor is already in our cluster, move on
+                if neigh in clprev: continue
+                # now check that all of the sites in the cluster are also neighbors:
+                neighlist = nndict[neigh.ci]
+                R0 = neigh.R
+                if all(ClusterSite(cl.ci, cl.R-R0) in neighlist for cl in clprev):
+                    # new cluster!
+                    clnew = clprev + neigh
+                    if clnew not in clusters:
+                        clset = set([clnew.g(crys, g) for g in crys.G])
+                        clusterexp.append(clset)
+                        clusters.update(clset)
+    return clusterexp
