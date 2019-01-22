@@ -152,6 +152,29 @@ class ClusterTests(unittest.TestCase):
         self.assertEqual(4, len(clusterexp))
         self.assertEqual([1, 6, 8, 2], [len(clset) for clset in clusterexp])
 
+    def testmakeclustersB2(self):
+        """Does makeclusters perform as expected? B2"""
+        B2 = crystal.Crystal(np.eye(3), [[np.zeros(3)], [0.5*np.ones(3)]], chemistry=['A', 'B'])
+        clusterexp = cluster.makeclusters(B2, 1.01, 4)
+        # now, we should have the following types of clusters:
+        # 2 1st order (A, B)
+        # 3 2nd order (AA, BB, AB)
+        # 2 3rd order (AAB, BBA)
+        # 1 4th order (AABB)
+        self.assertEqual(2+3+2+1, len(clusterexp))
+        for clset in clusterexp[0:2]:
+            self.assertEqual(1, len(clset))
+        for clset in clusterexp[2:5]:
+            cl = next(iter(clset))
+            if cl[0].ci == cl[1].ci:
+                self.assertEqual(3, len(clset))
+            else:
+                self.assertEqual(8, len(clset))
+        for clset in clusterexp[5:7]:
+            self.assertEqual(12, len(clset))
+        for clset in clusterexp[7:8]:
+            self.assertEqual(12, len(clset))
+
 
 
 if __name__ == '__main__':
