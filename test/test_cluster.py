@@ -92,6 +92,19 @@ class ClusterTests(unittest.TestCase):
         self.assertNotEqual(set1, set3)
         self.assertEqual(set3, set4)
 
+    def testTS(self):
+        """Test the creation of transition state clusters"""
+        s1 = cluster.ClusterSite((0,0), np.array([0,0,0]))
+        s2 = cluster.ClusterSite((0,0), np.array([1,0,0]))
+        s3 = cluster.ClusterSite((0,0), np.array([0,1,0]))
+        c0 = cluster.Cluster([s1, s2, s3])
+        c1 = cluster.Cluster([s1, s2, s3], transition=True)
+        c2 = cluster.Cluster([s2, s1, s3], transition=True)
+        c3 = cluster.Cluster([s1, s3, s2], transition=True)
+        self.assertNotEqual(c0, c1, msg='Clusters should not be equal:\n{} ==\n{}'.format(c0, c1))
+        self.assertEqual(c1, c2, msg='Clusters should be equal:\n{} !=\n{}'.format(c1, c2))
+        self.assertNotEqual(c1, c3, msg='Clusters should not be equal:\n{} ==\n{}'.format(c1, c3))
+
     def testHCPGroupOp(self):
         """Testing group operations on our clusters (HCP)"""
         HCP = crystal.Crystal.HCP(1., chemistry='HCP')

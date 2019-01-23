@@ -107,22 +107,34 @@ class Cluster(object):
     a set of ClusterSites. We don't implement this using sets, however, because
     we make a choice of a "reference" site in each cluster, which has a lattice
     vector of 0, to account for translational invariance.
+
+    The flag transition dictates whether the cluster is a transition state cluster
+    or not. The difference with a transition state cluster is that the first two
+    states in the cluster are the initial and final states of the transition, while
+    all of the remaining parts are the cluster.
     """
 
-    def __init__(self, clustersitelist, NOSORT=False):
+    def __init__(self, clustersitelist, transition=False, NOSORT=False):
         """
         Cluster interaction, from an iterable of ClusterSites
         :param clustersitelist: iterable of ClusterSites
+        :param transition: True if a transition state cluster; cl[0] = initial, cl[1] = final
         """
         # this sorting is a *little* hacked together, but as long as we don't have
         # more than 2^32 sites in our crystal, we're good to go:
         def sortkey(cs): return cs.ci[0]*(2**32)+cs.ci[1]
         # first, dump contents of iterable into a list to manipulate:
         lis = [cs for cs in clustersitelist]
-        if not NOSORT: lis.sort(key=sortkey)
+        if not NOSORT:
+            if not transition:
+                lis.sort(key=sortkey)
+            else:
+                lis = lis[0:2] + sorted(lis[2:], key=sortkey)
         R0 = lis[0].R
         self.sites = tuple([cs-R0 for cs in lis])
         self.Norder = len(self.sites)
+        if transition:
+            self.Norder -= 2
         # a little mapping of the positions into sets to make equality checking faster,
         # and explicit evaluation of hash function one time using XOR of individual values
         # so that it respects permutations
@@ -137,9 +149,10 @@ class Cluster(object):
             else:
                 self.__equalitymap__[cs.ci].add(shiftpos)
         self.__hashcache__ = hashcache
+        self.__transition__ = transition
 
     def __shift_pos__(self, cs):
-        return tuple(cs.R*self.Norder - self.__center__)
+        return tuple(cs.R*len(self.sites) - self.__center__)
 
     def __eq__(self, other):
         """
@@ -148,10 +161,17 @@ class Cluster(object):
         center of mass of the sites.
         """
         if not isinstance(other, self.__class__): return False
+        if self.__transition__ != other.__transition__: return False
         if self.Norder != other.Norder: return False
         if self.__equalitymap__.keys() != other.__equalitymap__.keys(): return False
         for k, v in self.__equalitymap__.items():
             if other.__equalitymap__[k] != v: return False
+        if self.__transition__:
+            TSself, TSother = self.transitionstate(), other.transitionstate()
+            if TSself != TSother:
+                R0 = TSother[1].R
+                if TSself != (TSother[1] - R0, TSother[0] - R0):
+                    return False
         return True
 
     def __hash__(self):
@@ -163,12 +183,19 @@ class Cluster(object):
         return self.__shift_pos__(elem) in self.__equalitymap__[elem.ci]
 
     def __getitem__(self, item):
-        return self.sites[item]
+        if self.__transition__:
+            return self.sites[item-2]
+        else:
+            return self.sites[item]
+
+    def transitionstate(self):
+        if not self.__transition__: return None
+        return self.sites[0], self.sites[1]
 
     def __add__(self, other):
         """Add a clustersite to a cluster expansion"""
         if other not in self:
-            return self.__class__(self.sites + (other,))
+            return self.__class__(self.sites + (other,), transition=self.__transition__)
         else:
             return self
 
@@ -186,12 +213,17 @@ class Cluster(object):
         :param g: group operation (from crys)
         :return g*cluster: corresponding to group operation applied to self
         """
-        return self.__class__([cs.g(crys, g) for cs in self.sites])
+        return self.__class__([cs.g(crys, g) for cs in self.sites], transition=self.__transition__)
 
     def __str__(self):
         """Human readable version"""
         s = "{} order: ".format(self.Norder)
-        return s + " ".join([str(cs) for cs in self.sites])
+        if self.__transition__:
+            s += str(self.sites[0]) + " -> " + str(self.sites[1]) + " : "
+            s += " ".join([str(cs) for cs in self.sites[2:]])
+        else:
+            s += " ".join([str(cs) for cs in self.sites])
+        return s
 
 
 def makeclusters(crys, cutoff, maxorder, exclude=()):
