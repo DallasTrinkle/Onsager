@@ -158,6 +158,13 @@ class ClusterTests(unittest.TestCase):
         clusterset = set([cl.g(FCC, g) for g in FCC.G])
         self.assertEqual(2, len(clusterset), msg='Failure on NN quad')
 
+        # test out transition state cluster:
+        # [110] transition, with two neighbors occupied... 6 different directions x 2 pairs
+        # as 110 is a 2-fold rotation axis
+        cl = cluster.Cluster([s1, s2, s3, s4], transition=True)
+        clusterset = set([cl.g(FCC, g) for g in FCC.G])
+        self.assertEqual(12, len(clusterset), msg='Failure on transition state cluster')
+
     def testmakeclustersFCC(self):
         """Does makeclusters perform as expected? FCC"""
         FCC = crystal.Crystal.FCC(1., chemistry='FCC')
