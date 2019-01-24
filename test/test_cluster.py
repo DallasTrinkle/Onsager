@@ -199,17 +199,62 @@ class MonteCarloTests(unittest.TestCase):
     """Tests of the MonteCarloSampler class"""
     longMessage = False
 
+    def setUp(self):
+        self.FCC = crystal.Crystal.FCC(1., 'FCC')
+        self.superlatt = 4*np.eye(3, dtype=int)
+        self.sup = supercell.ClusterSupercell(self.FCC, self.superlatt)
+        self.clusterexp = cluster.makeclusters(self.FCC, 0.8, 4)
+        self.Evalues = np.random.normal(size=len(self.clusterexp) + 1)
+        self.MC = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues)
+
     def testMakeSampler(self):
         """Can we make a MonteCarlo sampler for an FCC lattice?"""
-        FCC = crystal.Crystal.FCC(1., 'FCC')
-        superlatt = 4*np.eye(3, dtype=int)
-        sup = supercell.ClusterSupercell(FCC, superlatt)
-        clusterexp = cluster.makeclusters(FCC, 0.8, 4)
-        Evalues = np.random.normal(size=len(clusterexp) + 1)
-        MC = cluster.MonteCarloSampler(sup, np.zeros(0), clusterexp, Evalues)
-        self.assertIsInstance(MC, cluster.MonteCarloSampler)
-        occ = np.random.choice((0,1), size=sup.size)
-        MC.start(occ)
+        self.assertIsInstance(self.MC, cluster.MonteCarloSampler)
+
+    def testStart(self):
+        """Does start() perform as expected?"""
+        occ = np.random.choice((0,1), size=self.sup.size)
+        self.MC.start(occ)
+        for i, occ_i in enumerate(occ):
+            if occ_i == 1:
+                self.assertIn(i, self.MC.occupied_set)
+                self.assertNotIn(i, self.MC.unoccupied_set)
+            else:
+                self.assertIn(i, self.MC.unoccupied_set)
+                self.assertNotIn(i, self.MC.occupied_set)
+
+    def testE(self):
+        """Does our energy evaluator perform correctly?"""
+        occ = np.random.choice((0,1), size=self.sup.size)
+        self.MC.start(occ)
+        for nchanges in range(16):
+            EMC = self.MC.E()
+            Ecluster = np.dot(self.Evalues, self.sup.evalcluster(occ, np.zeros(0), self.clusterexp))
+            self.assertAlmostEqual(Ecluster, EMC, msg='MC evaluation {} != {} cluster evaluation?'.format(EMC, Ecluster))
+            # randomly occupy or unoccupy a site:
+            if np.random.choice((True, False)):
+                self.MC.update([np.random.choice(list(self.MC.unoccupied_set))], ())
+            else:
+                self.MC.update((), [np.random.choice(list(self.MC.occupied_set))])
+
+
+    def testdeltaE(self):
+        """Does our trial energy change work?"""
+        occ = np.random.choice((0,1), size=self.sup.size)
+        self.MC.start(occ)
+        EMC = self.MC.E()
+        for nchanges in range(64):
+            # select multiple sites to swap (between 1 and 4 sites):
+            nswap = np.random.choice(4)+1
+            iocc = np.random.choice(list(self.MC.unoccupied_set), size=nswap, replace=False)
+            iunocc = np.random.choice(list(self.MC.occupied_set), size=nswap, replace=False)
+            dE = self.MC.deltaE_trial(iocc, iunocc)
+            # now, update and see if we correctly computed the change in energy:
+            self.MC.update(iocc, iunocc)
+            EMC_new = self.MC.E()
+            self.assertAlmostEqual(EMC_new - EMC, dE, msg='Trial energy change wrong? {} != {}-{}'.format(dE, EMC_new, EMC))
+            EMC = EMC_new
+
 
 
 if __name__ == '__main__':
