@@ -7,7 +7,7 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 import copy, collections, itertools, warnings
-from onsager import crystal
+from onsager import crystal, supercell
 
 # YAML tags
 CLUSTERSITE_YAMLTAG = '!ClusterSite'
@@ -290,3 +290,127 @@ def makeclusters(crys, cutoff, maxorder, exclude=()):
                         clusterexp.append(clset)
                         clusters.update(clset)
     return clusterexp
+
+
+class MonteCarloSampler(object):
+    """
+    An object to maintain state in a supercell, evaluate energies efficiently including
+    "trial" moves. Built from cluster expansions and using a cluster supercell.
+    """
+    def __init__(self, supercell, spectator_occ, clusterexp, enevalues):
+        """
+        Setup a MonteCarloSampler using a supercell, with a given spectator occupancy,
+        cluster expansion, and energy values for the clusters.
+
+        :param supercell: should be a ClusterSupercell
+        :param spectator_occ: vector of occupancies for spectator species (0 or 1),
+          consistent with our supercell
+        :param clusterexp: list of sets of cluster interactions
+        :param enevalues: energy values corresponding to each cluster
+        """
+        self.supercell = supercell
+        siteinteract, interactvalue = supercell.clusterevaluator(spectator_occ, clusterexp, enevalues)
+        # convert from lists to arrays:
+        self.Ninteract = np.array([len(inter) for inter in siteinteract])
+        # see https://stackoverflow.com/questions/38619143/convert-python-sequence-to-numpy-array-filling-missing-values
+        self.siteinteract = np.array(list(itertools.zip_longest(*siteinteract, fillvalue=-1))).T
+        self.interactvalue = np.array(interactvalue)
+        self.Nenergy = len(self.interactvalue)
+        # to be initialized with start()
+        self.occ, self.clustercount, self.occupied_set, self.unoccupied_set = None, None, None, None
+
+    def start(self, occ):
+        """
+        Initialize with an occupancy, and prepare for future calculations.
+
+        :param occ: occupancy of sites in supercell; assumed to be 0 or 1
+        """
+        # NOTE: we don't do this with a copy() operation...
+        self.occ = occ
+        self.clustercount = np.zeros_like(self.interactvalue)
+        self.occupied_set = set()
+        self.unoccupied_set = set()
+        for i, occ_i, interact, Ninteract in zip(itertools.count(), self.occ, self.siteinteract, self.Ninteract):
+            if occ_i == 0:
+                self.unoccupied_set.add(i)
+                for n in range(Ninteract):
+                    self.clustercount[interact[n]] += 1
+            else:
+                self.occupied_set.add(i)
+
+    def E(self):
+        """
+        Compute the energy.
+
+        :return E: total of all interactions
+        """
+        E = 0
+        for ccount, Evalue in zip(self.clustercount, self.interactvalue):
+            if ccount == 0:
+                E += Evalue
+        return E
+
+    def deltaE_trial(self, occsites=(), unoccsites=()):
+        """
+        Compute the energy change if the sites in occsites are occupied, and the sites in
+        unoccsites are unoccupied.
+
+        A few notes: the algorithm does not check whether the same site appears in
+        either iterable multiple times; it trusts that the user has provided it with
+        a meaningful trial change.
+
+        :param occsites: iterable of sites to attempt occupying
+        :param unoccsites: iterable of sites to attempt unoccupying
+        :return deltaE: change in energy
+        """
+        # we're going to keep track just of the interactions that we change;
+        # this change will be kept in a dictionary, and will be the *negative* of the
+        # clustercount change that would occur with the trial move
+        dclustercount = {}
+        for i in occsites:
+            if self.occ[i] == 0:
+                for inter in self.siteinteract[i][:self.Ninteract[i]]:
+                    if inter in dclustercount:
+                        dclustercount[inter] += 1
+                    else:
+                        dclustercount[inter] = 1
+        for i in unoccsites:
+            if self.occ[i] == 1:
+                for inter in self.siteinteract[i][:self.Ninteract[i]]:
+                    if inter in dclustercount:
+                        dclustercount[inter] -= 1
+                    else:
+                        dclustercount[inter] = -1
+        dE = 0
+        for interact, dcount in dclustercount.items():
+            # no change?
+            if dcount == 0: continue
+            # are we turning off an interaction?
+            if self.clustercount[interact] == 0:
+                dE -= self.interactvalue[interact]
+            # are we turning on an interaction?
+            elif self.clustercount[interact] == dcount:
+                dE += self.interactvalue[interact]
+        return dE
+
+    def update(self, occsites=(), unoccsites=()):
+        """
+        Update the state to occupy the sites in occsites and un-occupy the sites in unoccsites.
+
+        :param occsites: iterable of sites to occupy
+        :param unoccsites: iterable of sites to unoccupy
+        """
+        for i in occsites:
+            if self.occ[i] == 0:
+                self.occ[i] = 1
+                self.unoccupied_set.remove(i)
+                self.occupied_set.add(i)
+                for inter in self.siteinteract[i][:self.Ninteract[i]]:
+                    self.clustercount[inter] -= 1
+        for i in unoccsites:
+            if self.occ[i] == 1:
+                self.occ[i] = 0
+                self.unoccupied_set.add(i)
+                self.occupied_set.remove(i)
+                for inter in self.siteinteract[i][:self.Ninteract[i]]:
+                    self.clustercount[inter] += 1

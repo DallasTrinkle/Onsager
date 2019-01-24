@@ -8,9 +8,8 @@ __author__ = 'Dallas R. Trinkle'
 #
 
 import unittest
-import onsager.crystal as crystal
 import numpy as np
-import onsager.cluster as cluster
+from onsager import crystal, cluster, supercell
 
 
 class ClusterSiteTests(unittest.TestCase):
@@ -195,6 +194,22 @@ class ClusterTests(unittest.TestCase):
         for clset in clusterexp[7:8]:
             self.assertEqual(12, len(clset))
 
+
+class MonteCarloTests(unittest.TestCase):
+    """Tests of the MonteCarloSampler class"""
+    longMessage = False
+
+    def testMakeSampler(self):
+        """Can we make a MonteCarlo sampler for an FCC lattice?"""
+        FCC = crystal.Crystal.FCC(1., 'FCC')
+        superlatt = 4*np.eye(3, dtype=int)
+        sup = supercell.ClusterSupercell(FCC, superlatt)
+        clusterexp = cluster.makeclusters(FCC, 0.8, 4)
+        Evalues = np.random.normal(size=len(clusterexp) + 1)
+        MC = cluster.MonteCarloSampler(sup, np.zeros(0), clusterexp, Evalues)
+        self.assertIsInstance(MC, cluster.MonteCarloSampler)
+        occ = np.random.choice((0,1), size=sup.size)
+        MC.start(occ)
 
 
 if __name__ == '__main__':
