@@ -665,3 +665,30 @@ class ClusterSupercell(object):
         # add on our constant term
         interact.append(E0)
         return siteinteract, interact
+
+    def jumpnetworkevaluator(self, socc, clusters, values, chem, jumpnetwork, ETvalues,
+                             siteinteract=(), interact=()):
+        """
+        Build out an efficient jump network evaluator. Similar inputs to `clusterevaluator`,
+        with the addition of a jumpnetwork and energies. The interactions can be appended
+        onto existing interactions, if included. The information about all of the
+        transitions is: initial state, final state, delta x.
+
+        :param socc: spectator occupancy vector (0 or 1 only)
+        :param clusters: list of lists (or sets) of Cluster objects
+        :param values: vector of values for the clusters; if it is longer than the
+          list of clusters by one, the last values is assumed to be the constant value.
+        :param chem: index of species that transitions
+        :param jumpnetwork: list of lists of jumps; each is ((i, j), dx) where `i` and `j` are
+          unit cell indices for species `chem`
+        :param ETvalues: can be a list of transition state energies for each jump *or* a cluster
+          expansion for the transition state energies with values (TBD)
+        :param siteinteract: (optional) list of lists of interactions for each site, to append
+        :param interact: (optional) list of interaction values, to append
+
+        :return siteinteract: list of lists of interactions for each site
+        :return interact: list of interaction values
+        :return jumps: list of ((initial, final), dx)
+        :return interactrange: range of indices to count in interact for each jump
+        """
+

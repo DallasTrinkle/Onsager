@@ -237,7 +237,6 @@ class MonteCarloTests(unittest.TestCase):
             else:
                 self.MC.update((), [np.random.choice(list(self.MC.occupied_set))])
 
-
     def testdeltaE(self):
         """Does our trial energy change work?"""
         occ = np.random.choice((0,1), size=self.sup.size)
