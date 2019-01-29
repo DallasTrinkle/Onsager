@@ -76,6 +76,23 @@ class ClusterTests(unittest.TestCase):
         c3 = cluster.Cluster([s2, s1])
         self.assertEqual(c2, c3)
 
+    def testSubtraction(self):
+        """Removal of a state via subtraction"""
+        s1 = cluster.ClusterSite((0,0), np.array([0,0,0]))
+        s2 = cluster.ClusterSite((0,0), np.array([1,0,0]))
+        s3 = cluster.ClusterSite((0,0), np.array([0,1,0]))
+        c1 = cluster.Cluster([s1])
+        c2 = cluster.Cluster([s1, s2])
+        c3 = cluster.Cluster([s1, s2, s3])
+        self.assertEqual([], c1-s1)
+        # we can subtract a cluster site then "add" it back in.
+        for cl in [c2, c3]:
+            for cs in cl:
+                cs0 = cluster.ClusterSite(ci=cs.ci, R=np.zeros(3, dtype=int))
+                self.assertEqual(cl, cluster.Cluster((cl - cs) + [cs0]))
+        with self.assertRaises(ArithmeticError):
+            lis = c2 - s3
+
     def testHash(self):
         """Can we make a set of clusters?"""
         s1 = cluster.ClusterSite((0,0), np.array([0,0,0]))

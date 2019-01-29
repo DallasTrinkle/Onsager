@@ -570,7 +570,7 @@ class ClusterSupercell(object):
         else:
             return self.transdict[tuple(self.incell(R))]*self.Nspec + self.indexspectator[ci], False
 
-    def indexpos(self, pos, threshold=1., CARTESIAN = False):
+    def indexpos(self, pos, threshold=1., CARTESIAN=False):
         """
         Return the index that corresponds to the position *closest* to pos in the supercell.
         Done in direct coordinates of the supercell, using periodic boundary conditions.
@@ -645,7 +645,7 @@ class ClusterSupercell(object):
                 # split into mobile and spectator
                 mobilesites = [site for site in cluster if site.ci in self.indexmobile]
                 specsites = [site for site in cluster if site.ci in self.indexspectator]
-                for nR, R in enumerate(self.Rveclist):
+                for R in self.Rveclist:
                     if all(socc[self.index(R+site.R, site.ci)[0]] == 1 for site in specsites):
                         if len(mobilesites) == 0:
                             # spectator only == constant
@@ -691,4 +691,39 @@ class ClusterSupercell(object):
         :return jumps: list of ((initial, final), dx)
         :return interactrange: range of indices to count in interact for each jump
         """
+        siteinteract = list(siteinteract)
+        interact = list(interact)
+        Ninteract = len(interact)
+        invlatt = np.linalg.inv(self.lattice)
+        # "flatten" the clusters for more efficient operations:
+        clusterinteract = {}
+        for clusterlist, value in zip(clusters, values):
+            for cluster in clusterlist:
+                for cl in cluster:
+                    if cl.ci in self.mobileindices:
+                        if cl.ci in clusterinteract:
+                            pass
+        # we need to proceed one transition at a time
+        Njumps, interactrange = 0, []
+        jumps = ()
+        for jn in jumpnetwork:
+            for (i0, j0), deltax in jn:
+                ci0, cj0 = (chem, i0), (chem, j0)
+                # now, run through all lattice sites...
+                for R in self.Rveclist:
+                    i = self.index(R, (chem, i0))[0]
+                    # to get final position, it's a bit more complex... need to use dx:
+                    dR, cj = self.crys.cart2pos(self.crys.pos2cart(np.zeros(self.crys.dim), (chem, i0)) + deltax)
+                    j = self.index(R+dR, cj)[0]
+                    if cj != cj0:
+                        raise ArithmeticError('Transition ({},{}), {} did not land at correct site?\n{} != P{'.format(i0, j0, deltax, cj, cj0))
+                    jumps.append(((i, j), deltax))
+                    # now, to run through our clusters, adding interactions as appropriate:
+                    for clusterlist, value in zip(clusters, values):
+                        for cluster in clusterlist:
+                            # split into mobile and spectator
+                            mobilesites = [site for site in cluster if site.ci in self.indexmobile]
+                            specsites = [site for site in cluster if site.ci in self.indexspectator]
+                            # need ci xor cj in mobilespecies...
+
 

@@ -202,6 +202,21 @@ class Cluster(object):
     def __radd__(self, other):
         return self.__add__(self, other)
 
+    def __sub__(self, other):
+        """Subtract a site from a cluster. Had a very specific meaning: if the
+        site is in the cluster, it returns a list of all the *other* sites, shifted
+        so that the `other` site is at the origin.
+
+        Needs to be clarified for the case of a transition state.
+
+        :param other: needs to be a cluster site *in* the cluster.
+        """
+        if self.__transition__:
+            raise NotImplemented('Subtraction not currently implemented for TS clusters')
+        if other not in self:
+            raise ArithmeticError('{} not in {}'.format(other, self))
+        return [cs-other.R for cs in self.sites if cs != other]
+
     def __len__(self):
         return self.Norder
 
