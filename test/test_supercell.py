@@ -531,17 +531,18 @@ class ClusterSupercellTests(unittest.TestCase):
         Nsuper = 4
         # build a supercell, but call the "A" atoms spectators to the "B" atoms
         sup = supercell.ClusterSupercell(B2, Nsuper*self.one, spectator=[0])
+        chem = 1 # other atom is the spectator, so...
         clusterexp = cluster.makeclusters(B2, 1.01, 4)
         ene = np.random.normal(size=len(clusterexp) + 1)  # random interactions
-        jumpnetwork = B2.jumpnetwork(1, 1.01)
+        jumpnetwork = B2.jumpnetwork(chem, 1.01)
         eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
-        for spec_try in range(1):
+        for spec_try in range(5):
             socc = np.random.choice((0,1), size=sup.size)
             siteinteract, interact = sup.clusterevaluator(socc, clusterexp, ene)
             # make copies before we start modifying these in place...
             siteinteract0 = siteinteract.copy()
             interact0 = interact.copy()
-            siteinteract, interact, jumps, interactrange = sup.jumpnetworkevaluator(socc, clusterexp, ene, 1,
+            siteinteract, interact, jumps, interactrange = sup.jumpnetworkevaluator(socc, clusterexp, ene, chem,
                                                                                     jumpnetwork, eneT,
                                                                                     siteinteract, interact)
             # first, test that we have a reasonable setup...
@@ -549,7 +550,21 @@ class ClusterSupercellTests(unittest.TestCase):
             self.assertEqual(sum(len(jn) for jn in jumpnetwork)*sup.size, len(jumps))
             self.assertEqual(len(jumps)+1, len(interactrange))
             self.assertEqual(interact0, interact[:len(interact0)])
-            # for mobile_try in range(10):
-            #     mocc = np.random.choice((0,1), size=sup.size)
+            for sint0, sint in zip(siteinteract0, siteinteract):
+                self.assertEqual(sint0, sint[:len(sint0)])
+            # now, let's make a mobile species distribution, and evaluate all possible transition
+            # energies, and make sure that they agree with what our evaluator provides.
+            mocc = np.random.choice((0,1), size=sup.size)
+            interact_count = np.zeros(len(interact), dtype=int)
+            for s, interlist in zip(mocc, siteinteract):
+                if s == 0:
+                    for m in interlist:
+                        interact_count[m] += 1
+            Nene, Njumps = interactrange[-1], len(jumps)
+            ene_count = sum(E for E, c in zip(interact[:Nene], interact_count[:Nene]) if c == 0)
+            ET = np.zeros(Njumps)
+            for n in range(Njumps):
+                ran = slice(interactrange[n-1], interactrange[n])
+                ET[n] = sum(E for E, c in zip(interact[ran], interact_count[ran]) if c == 0)
 
 
