@@ -616,9 +616,9 @@ class ClusterSupercell(object):
         clustercount = np.zeros(len(clusters)+1, dtype=int)
         clustercount[-1] = self.size
         for mc, clusterlist in enumerate(clusters):
-            for cluster in clusterlist:
+            for clust in clusterlist:
                 for nR, R in enumerate(self.Rveclist):
-                    if all(isocc(R+site.R, site.ci) for site in cluster):
+                    if all(isocc(R+site.R, site.ci) for site in clust):
                         clustercount[mc] += 1
         return clustercount
 
@@ -641,10 +641,10 @@ class ClusterSupercell(object):
         interact, interdict = [], {}
         siteinteract = [[] for n in range(self.Nmobile*self.size)]
         for clusterlist, value in zip(clusters, values):
-            for cluster in clusterlist:
+            for clust in clusterlist:
                 # split into mobile and spectator
-                mobilesites = [site for site in cluster if site.ci in self.indexmobile]
-                specsites = [site for site in cluster if site.ci in self.indexspectator]
+                mobilesites = [site for site in clust if site.ci in self.indexmobile]
+                specsites = [site for site in clust if site.ci in self.indexspectator]
                 for R in self.Rveclist:
                     if all(socc[self.index(R+site.R, site.ci)[0]] == 1 for site in specsites):
                         if len(mobilesites) == 0:
@@ -702,11 +702,11 @@ class ClusterSupercell(object):
         # initial and final states, so we go ahead and multiply by 0.5 here for efficiency.
         clusterinteract = {}
         for clusterlist, value in zip(clusters, values):
-            for cluster in clusterlist:
-                for cs in cluster:
+            for clust in clusterlist:
+                for cs in clust:
                     if cs.ci in self.mobileindices:
                         # get the list of other sites, and split into mobile and spectator:
-                        cllist = cluster - cs
+                        cllist = clust - cs
                         mobilesites = [site for site in cllist if site.ci in self.mobileindices]
                         specsites = [site for site in cllist if site.ci in self.spectatorindices]
                         if cs.ci in clusterinteract:
@@ -715,7 +715,7 @@ class ClusterSupercell(object):
                             clusterinteract[cs.ci] = [(mobilesites, specsites, 0.5*value)]
         # we need to proceed one transition at a time
         Njumps, interactrange = 0, []
-        jumps = ()
+        jumps = []
         for jn, E0 in zip(jumpnetwork, ETvalues):
             for (i0, j0), deltax in jn:
                 ci0, cj0 = (chem, i0), (chem, j0)

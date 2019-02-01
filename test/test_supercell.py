@@ -523,3 +523,33 @@ class ClusterSupercellTests(unittest.TestCase):
                             interact_count[m] += 1
                 ene_count = sum(E for E, c in zip(interact, interact_count) if c==0)
                 self.assertAlmostEqual(ene_direct, ene_count)
+
+    def testJumpNetworkEvaluator(self):
+        """Can we construct an efficient jump network evaluator?"""
+        B2 = crystal.Crystal(np.eye(3), [[np.array([0., 0., 0.])],
+                                         [np.array([0.5, 0.5, 0.5])]], ['A', 'B'])
+        Nsuper = 4
+        # build a supercell, but call the "A" atoms spectators to the "B" atoms
+        sup = supercell.ClusterSupercell(B2, Nsuper*self.one, spectator=[0])
+        clusterexp = cluster.makeclusters(B2, 1.01, 4)
+        ene = np.random.normal(size=len(clusterexp) + 1)  # random interactions
+        jumpnetwork = B2.jumpnetwork(1, 1.01)
+        eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
+        for spec_try in range(1):
+            socc = np.random.choice((0,1), size=sup.size)
+            siteinteract, interact = sup.clusterevaluator(socc, clusterexp, ene)
+            # make copies before we start modifying these in place...
+            siteinteract0 = siteinteract.copy()
+            interact0 = interact.copy()
+            siteinteract, interact, jumps, interactrange = sup.jumpnetworkevaluator(socc, clusterexp, ene, 1,
+                                                                                    jumpnetwork, eneT,
+                                                                                    siteinteract, interact)
+            # first, test that we have a reasonable setup...
+            self.assertEqual(len(interact0), interactrange[-1])
+            self.assertEqual(sum(len(jn) for jn in jumpnetwork)*sup.size, len(jumps))
+            self.assertEqual(len(jumps)+1, len(interactrange))
+            self.assertEqual(interact0, interact[:len(interact0)])
+            # for mobile_try in range(10):
+            #     mocc = np.random.choice((0,1), size=sup.size)
+
+
