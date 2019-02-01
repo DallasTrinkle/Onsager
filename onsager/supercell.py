@@ -14,7 +14,7 @@ __author__ = 'Dallas R. Trinkle'
 import numpy as np
 import collections, copy, itertools, warnings
 from numbers import Integral
-from onsager import crystal
+from onsager import crystal, cluster
 
 # TODO: add "parser"--read CONTCAR file, create Supercell
 # TODO: output PairState from Supercell
@@ -689,41 +689,103 @@ class ClusterSupercell(object):
         :return siteinteract: list of lists of interactions for each site
         :return interact: list of interaction values
         :return jumps: list of ((initial, final), dx)
-        :return interactrange: range of indices to count in interact for each jump
+        :return interactrange: range of indices to count in interact for each jump; for the nth
+          jump, sum over interactrange[n-1]:interactrange[n]; interactrange[-1] == range for energy
         """
         siteinteract = list(siteinteract)
         interact = list(interact)
         Ninteract = len(interact)
-        invlatt = np.linalg.inv(self.lattice)
+        Ninteract0 = Ninteract # we store this now, so that we can make interactrange[-1] = Ninteract0
         # "flatten" the clusters for more efficient operations:
+        # clusterinteract[(c,i)] = list of ([cs list], value) of interactions centered on (c, i)
+        # NOTE: in order to maintain detailed balance, we use half the energy difference of the
+        # initial and final states, so we go ahead and multiply by 0.5 here for efficiency.
         clusterinteract = {}
         for clusterlist, value in zip(clusters, values):
             for cluster in clusterlist:
-                for cl in cluster:
-                    if cl.ci in self.mobileindices:
-                        if cl.ci in clusterinteract:
-                            pass
+                for cs in cluster:
+                    if cs.ci in self.mobileindices:
+                        # get the list of other sites, and split into mobile and spectator:
+                        cllist = cluster - cs
+                        mobilesites = [site for site in cllist if site.ci in self.mobileindices]
+                        specsites = [site for site in cllist if site.ci in self.spectatorindices]
+                        if cs.ci in clusterinteract:
+                            clusterinteract[cs.ci].append((mobilesites, specsites, 0.5*value))
+                        else:
+                            clusterinteract[cs.ci] = [(mobilesites, specsites, 0.5*value)]
         # we need to proceed one transition at a time
         Njumps, interactrange = 0, []
         jumps = ()
-        for jn in jumpnetwork:
+        for jn, E0 in zip(jumpnetwork, ETvalues):
             for (i0, j0), deltax in jn:
                 ci0, cj0 = (chem, i0), (chem, j0)
+                # to get final position, it's a bit more complex... need to use dx:
+                dR, cj = self.crys.cart2pos(self.crys.pos2cart(np.zeros(self.crys.dim), (chem, i0)) + deltax)
+                if cj != cj0:
+                    raise ArithmeticError(
+                        'Transition ({},{}), {} did not land at correct site?\n{} != P{'.format(i0, j0, deltax, cj, cj0))
+                # NOTE: we will need the *reverse* endpoint for the initial state...
+                cs_i = cluster.ClusterSite(ci0, -dR)
+                cs_j = cluster.ClusterSite(cj0, dR)
                 # now, run through all lattice sites...
-                for R in self.Rveclist:
-                    i = self.index(R, (chem, i0))[0]
-                    # to get final position, it's a bit more complex... need to use dx:
-                    dR, cj = self.crys.cart2pos(self.crys.pos2cart(np.zeros(self.crys.dim), (chem, i0)) + deltax)
-                    j = self.index(R+dR, cj)[0]
-                    if cj != cj0:
-                        raise ArithmeticError('Transition ({},{}), {} did not land at correct site?\n{} != P{'.format(i0, j0, deltax, cj, cj0))
+                for Ri in self.Rveclist:
+                    # each possible *transition* is treated like its own mini-cluster expansion:
+                    interdict = {}
+                    i = self.index(Ri, ci0)[0]
+                    Rj = Ri + dR
+                    j = self.index(Rj, cj0)[0]
                     jumps.append(((i, j), deltax))
                     # now, to run through our clusters, adding interactions as appropriate:
-                    for clusterlist, value in zip(clusters, values):
-                        for cluster in clusterlist:
-                            # split into mobile and spectator
-                            mobilesites = [site for site in cluster if site.ci in self.indexmobile]
-                            specsites = [site for site in cluster if site.ci in self.indexspectator]
-                            # need ci xor cj in mobilespecies...
+                    # -0.5*Einitial
+                    for mobilesites, specsites, value in clusterinteract[ci0]:
+                        # if our endpoint is also in our cluster, kick out now:
+                        if cs_j in mobilesites: continue
+                        # check that all of the spectator sites are occupied:
+                        if all(socc[self.index(Ri + site.R, site.ci)[0]] == 1 for site in specsites):
+                            if len(mobilesites) == 0:
+                                # spectator only == constant
+                                E0 -= value
+                            else:
+                                intertuple = tuple(sorted([self.index(Ri + site.R, site.ci)[0] for site in mobilesites]))
+                                if intertuple in interdict:
+                                    # if we've already seen this particular interaction, add to the value
+                                    interact[interdict[intertuple]] -= value
+                                else:
+                                    # new interaction!
+                                    interact.append(-value)
+                                    interdict[intertuple] = Ninteract
+                                    for n in intertuple:
+                                        siteinteract[n].append(Ninteract)
+                                    Ninteract += 1
+                    # +0.5*Efinal
+                    for mobilesites, specsites, value in clusterinteract[cj0]:
+                        # if our initial point is also in our cluster, kick out now:
+                        if cs_i in mobilesites: continue
+                        # check that all of the spectator sites are occupied:
+                        if all(socc[self.index(Rj + site.R, site.ci)[0]] == 1 for site in specsites):
+                            if len(mobilesites) == 0:
+                                # spectator only == constant
+                                E0 += value
+                            else:
+                                intertuple = tuple(sorted([self.index(Rj + site.R, site.ci)[0] for site in mobilesites]))
+                                if intertuple in interdict:
+                                    # if we've already seen this particular interaction, add to the value
+                                    interact[interdict[intertuple]] += value
+                                else:
+                                    # new interaction!
+                                    interact.append(value)
+                                    interdict[intertuple] = Ninteract
+                                    for n in intertuple:
+                                        siteinteract[n].append(Ninteract)
+                                    Ninteract += 1
+                    # finally, here is where we'd put the code to include the KRA expansion... TBD
+                    # now add on our constant value...
+                    interact.append(E0)
+                    Ninteract += 1
+                    interactrange.append(Ninteract)
+                    Njumps += 1
+        interactrange.append(Ninteract0)
+        return siteinteract, interact, jumps, interactrange
+
 
 
