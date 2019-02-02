@@ -544,9 +544,11 @@ class ClusterSupercellTests(unittest.TestCase):
         sup = supercell.ClusterSupercell(B2, Nsuper*self.one, spectator=[0])
         chem = 1 # other atom is the spectator, so...
         clusterexp = cluster.makeclusters(B2, 1.01, 4)
-        ene = np.random.normal(size=len(clusterexp) + 1)  # random interactions
+        # ene = np.random.normal(size=len(clusterexp) + 1)  # random interactions
+        ene = np.ones(len(clusterexp)+1)
         jumpnetwork = B2.jumpnetwork(chem, 1.01)
-        eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
+        # eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
+        eneT = np.zeros(len(jumpnetwork))
         for spec_try in range(5):
             socc = np.random.choice((0,1), size=sup.size)
             MCsamp = cluster.MonteCarloSampler(sup, socc, clusterexp, ene)
@@ -579,10 +581,24 @@ class ClusterSupercellTests(unittest.TestCase):
                 ran = slice(interactrange[n-1], interactrange[n])
                 ET[n] = sum(E for E, c in zip(interact[ran], interact_count[ran]) if c == 0)
             # now, to compare all of the jumps!
+            print(ET)
             for ((i, j), dx), Etrans in zip(jumps, ET):
                 if mocc[i] == 0 or mocc[j] == 1: continue
-                # we have a valid jump; we need to back out which particular jump this would be:
-                pass
-
-
-
+                print(Etrans)
+                # we have a valid jump; now we need to back out which particular jump this would be:
+                ci0, cj0 = sup.ciR(i)[0], sup.ciR(j)[0]
+                E0 = 0
+                for jn, ET_trial in zip(jumpnetwork, eneT):
+                    for (i0, j0), dx0 in jn:
+                        if ci0[1] == i0 and cj0[1] == j0 and np.allclose(dx, dx0):
+                            E0 = ET_trial
+                # now, we need to get the "LIMB" part of the barrier:
+                # compute the interaction count after deoccupying i and occupyibg j:
+                new_interact_count = interact_count.copy()
+                for m in siteinteract[i]:
+                    new_interact_count[m] += 1
+                for m in siteinteract[j]:
+                    new_interact_count[m] -= 1
+                new_ene_count = sum(E for E, c in zip(interact[:Nene], new_interact_count[:Nene]) if c == 0)
+                E0 += 0.5*(new_ene_count - ene_count)
+                self.assertAlmostEqual(E0, Etrans)
