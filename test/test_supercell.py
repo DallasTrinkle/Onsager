@@ -537,13 +537,14 @@ class ClusterSupercellTests(unittest.TestCase):
 
     def testJumpNetworkEvaluator(self):
         """Can we construct an efficient jump network evaluator?"""
+        # *displaced* B2, to break symmetry
         B2 = crystal.Crystal(np.eye(3), [[np.array([0., 0., 0.])],
-                                         [np.array([0.5, 0.5, 0.5])]], ['A', 'B'])
+                                         [np.array([0.55, 0.55, 0.55])]], ['A', 'B'])
         Nsuper = 4
         # build a supercell, but call the "A" atoms spectators to the "B" atoms
         sup = supercell.ClusterSupercell(B2, Nsuper*self.one, spectator=[0])
         chem = 1 # other atom is the spectator, so...
-        clusterexp = cluster.makeclusters(B2, 1.01, 4)
+        clusterexp = cluster.makeclusters(B2, 1.2, 4)
         ene = np.random.normal(size=len(clusterexp) + 1)  # random interactions
         # ene = np.ones(len(clusterexp)+1)
         jumpnetwork = B2.jumpnetwork(chem, 1.01)
