@@ -408,6 +408,17 @@ class ClusterSupercellTests(unittest.TestCase):
                     self.assertTrue(np.allclose(posdiff, 0),
                                     msg='Failure to match {} {}:\nindex: {} and {}, {} != {}'.format(ci, Rv, n, m, pos, poscompare))
 
+    def testIndexingReverse(self):
+        """Check that the ciR evaluates to index properly: HCP"""
+        Ti = crystal.Crystal.HCP(1., chemistry='Ti')
+        TiO= Ti.addbasis(Ti.Wyckoffpos(np.array([0., 0., 0.5])), chemistry=['O'])
+        superlatt = np.array([[3,2,0], [-2, 3, 1], [2, -1, 4]])
+        sup = supercell.ClusterSupercell(TiO, superlatt, spectator=[0])
+        for N, mob in zip((sup.Nmobile, sup.Nspec), (True, False)):
+            for n in range(sup.size*N):
+                ci, R = sup.ciR(n, mob)
+                self.assertEqual((n, mob), sup.index(R, ci))
+
     def testClusterEvalSimple(self):
         """Check that we can evaluate a cluster expansion: FCC"""
         FCC = self.crys
@@ -538,8 +549,9 @@ class ClusterSupercellTests(unittest.TestCase):
         eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
         for spec_try in range(5):
             socc = np.random.choice((0,1), size=sup.size)
+            MCsamp = cluster.MonteCarloSampler(sup, socc, clusterexp, ene)
             siteinteract, interact = sup.clusterevaluator(socc, clusterexp, ene)
-            # make copies before we start modifying these in place...
+            # make copies for testing comparisons...
             siteinteract0 = siteinteract.copy()
             interact0 = interact.copy()
             siteinteract, interact, jumps, interactrange = sup.jumpnetworkevaluator(socc, clusterexp, ene, chem,
@@ -566,5 +578,11 @@ class ClusterSupercellTests(unittest.TestCase):
             for n in range(Njumps):
                 ran = slice(interactrange[n-1], interactrange[n])
                 ET[n] = sum(E for E, c in zip(interact[ran], interact_count[ran]) if c == 0)
+            # now, to compare all of the jumps!
+            for ((i, j), dx), Etrans in zip(jumps, ET):
+                if mocc[i] == 0 or mocc[j] == 1: continue
+                # we have a valid jump; we need to back out which particular jump this would be:
+                pass
+
 
 

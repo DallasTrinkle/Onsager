@@ -555,6 +555,20 @@ class ClusterSupercell(object):
         """Map a lattice vector into a translation vector in the cell"""
         return np.dot(self.invsuper, R) % self.size
 
+    def ciR(self, ind, mobile=True):
+        """
+        Return the chem/index and lattice vector for a specific indexed position
+        :param ind: index of site
+        :param mobile: True if mobile; false if spectator
+        :return ci: (c, i) index
+        :return R: lattice vector
+        """
+        if mobile:
+            N, indices = self.Nmobile, self.mobileindices
+        else:
+            N, indices = self.Nspec, self.spectatorindices
+        return indices[ind%N], self.Rveclist[ind//N]
+
     def index(self, R, ci):
         """
         Return the index that corresponds to a position specified by a lattice vector R and
