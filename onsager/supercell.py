@@ -730,7 +730,7 @@ class ClusterSupercell(object):
         # we need to proceed one transition at a time
         Njumps, interactrange = 0, []
         jumps = []
-        for jn, E0 in zip(jumpnetwork, ETvalues):
+        for jn, Etrans in zip(jumpnetwork, ETvalues):
             for (i0, j0), deltax in jn:
                 ci0, cj0 = (chem, i0), (chem, j0)
                 # to get final position, it's a bit more complex... need to use dx:
@@ -744,6 +744,7 @@ class ClusterSupercell(object):
                 # now, run through all lattice sites...
                 for Ri in self.Rveclist:
                     # each possible *transition* is treated like its own mini-cluster expansion:
+                    E0 = Etrans
                     interdict = {}
                     i = self.index(Ri, ci0)[0]
                     Rj = Ri + dR

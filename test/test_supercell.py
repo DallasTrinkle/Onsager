@@ -544,11 +544,11 @@ class ClusterSupercellTests(unittest.TestCase):
         sup = supercell.ClusterSupercell(B2, Nsuper*self.one, spectator=[0])
         chem = 1 # other atom is the spectator, so...
         clusterexp = cluster.makeclusters(B2, 1.01, 4)
-        # ene = np.random.normal(size=len(clusterexp) + 1)  # random interactions
-        ene = np.ones(len(clusterexp)+1)
+        ene = np.random.normal(size=len(clusterexp) + 1)  # random interactions
+        # ene = np.ones(len(clusterexp)+1)
         jumpnetwork = B2.jumpnetwork(chem, 1.01)
-        # eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
-        eneT = np.zeros(len(jumpnetwork))
+        eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
+        # eneT = np.zeros(len(jumpnetwork))
         for spec_try in range(5):
             socc = np.random.choice((0,1), size=sup.size)
             MCsamp = cluster.MonteCarloSampler(sup, socc, clusterexp, ene)
@@ -581,10 +581,8 @@ class ClusterSupercellTests(unittest.TestCase):
                 ran = slice(interactrange[n-1], interactrange[n])
                 ET[n] = sum(E for E, c in zip(interact[ran], interact_count[ran]) if c == 0)
             # now, to compare all of the jumps!
-            print(ET)
             for ((i, j), dx), Etrans in zip(jumps, ET):
                 if mocc[i] == 0 or mocc[j] == 1: continue
-                print(Etrans)
                 # we have a valid jump; now we need to back out which particular jump this would be:
                 ci0, cj0 = sup.ciR(i)[0], sup.ciR(j)[0]
                 E0 = 0
