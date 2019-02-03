@@ -133,6 +133,7 @@ class Cluster(object):
         R0 = lis[0].R
         self.sites = tuple([cs-R0 for cs in lis])
         self.Norder = len(self.sites)
+        self.Nsites = len(self.sites)
         if transition:
             self.Norder -= 2
         # a little mapping of the positions into sets to make equality checking faster,
@@ -152,7 +153,7 @@ class Cluster(object):
         self.__transition__ = transition
 
     def __shift_pos__(self, cs):
-        return tuple(cs.R*len(self.sites) - self.__center__)
+        return tuple(cs.R*self.Nsites - self.__center__)
 
     def __eq__(self, other):
         """
@@ -305,6 +306,44 @@ def makeclusters(crys, cutoff, maxorder, exclude=()):
                         clusterexp.append(clset)
                         clusters.update(clset)
     return clusterexp
+
+def makeTSclusters(crys, chem, jumpnetwork, clusterexp):
+    """
+    Function to make TS clusters based on an existing cluster expansion corresponding
+    to a given jump network.
+
+    :param crys: crystal to construct our clusters for
+    :param chem: index of mobile species
+    :param jumpnetwork: list of lists of ((i, j), dx) transitions
+    :param clusterexp: list of sets of clusters to base TS cluster expansion
+    :return TSclusterexp: list of sets of TS clusters
+    """
+    # convert the entire chem / jumpnetwork into pairs of sites:
+    jumppairs = []
+    for jn in jumpnetwork:
+        for ((i, j), dx) in jn:
+            R = np.round(np.dot(crys.invlatt, dx) - crys.basis[chem][j] + crys.basis[chem][i]).astype(int)
+            jumppairs.append((ClusterSite((chem, i), np.zeros(crys.dim)), ClusterSite((chem, j), R)))
+    TSclusterexp = []
+    TSclusters = set()
+    for clustlist in clusterexp:
+        # cl0 = next(iter(clustlist))
+        if sum(1 for site in next(iter(clustlist)) if site.ci[0] == chem) < 2: continue
+        # we can only use clusters that have at least two mobile sites
+        for clust in clustlist:
+            for cs_i, cs_j in jumppairs:
+                for site in clust:
+                    if site.ci == cs_i.ci:
+                        cl_list = clust - site
+                        if cs_j in cl_list:
+                            cl_list.remove(cs_j) # remove in place
+                            TSclust = Cluster([cs_i, cs_j] + cl_list, transition=True)
+                            if TSclust not in TSclusters:
+                                # new transition state cluster
+                                TSclset = set([TSclust.g(crys, g) for g in crys.G])
+                                TSclusterexp.append(TSclset)
+                                TSclusters.update(TSclset)
+    return TSclusterexp
 
 
 class MonteCarloSampler(object):

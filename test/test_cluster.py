@@ -211,6 +211,15 @@ class ClusterTests(unittest.TestCase):
         for clset in clusterexp[7:8]:
             self.assertEqual(12, len(clset))
 
+    def testmakeTSclustersFCC(self):
+        """Does makeTSclusters perform as expected? FCC"""
+        FCC = crystal.Crystal.FCC(1., chemistry='FCC')
+        clusterexp = cluster.makeclusters(FCC, 0.8, 4)
+        chem = 0
+        jumpnetwork = FCC.jumpnetwork(chem, 0.8)
+        TSclusterexp = cluster.makeTSclusters(FCC, chem, jumpnetwork, clusterexp)
+        self.assertGreater(len(TSclusterexp), 0)
+
 
 class MonteCarloTests(unittest.TestCase):
     """Tests of the MonteCarloSampler class"""
