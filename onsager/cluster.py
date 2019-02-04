@@ -6,7 +6,7 @@ quantities based on crystals.
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-import copy, collections, itertools, warnings
+import copy, collections, itertools
 from onsager import crystal, supercell
 
 # YAML tags
@@ -168,11 +168,12 @@ class Cluster(object):
         for k, v in self.__equalitymap__.items():
             if other.__equalitymap__[k] != v: return False
         if self.__transition__:
-            TSself, TSother = self.transitionstate(), other.transitionstate()
-            if TSself != TSother:
-                R0 = TSother[1].R
-                if TSself != (TSother[1] - R0, TSother[0] - R0):
-                    return False
+            # TSself, TSother = self.transitionstate(), other.transitionstate()
+            # if TSself != TSother:
+            #     R0 = TSother[1].R
+            #     if TSself != (TSother[1] - R0, TSother[0] - R0):
+            if not self.istransition(*other.transitionstate()):
+                return False
         return True
 
     def __hash__(self):
@@ -190,8 +191,22 @@ class Cluster(object):
             return self.sites[item]
 
     def transitionstate(self):
-        if not self.__transition__: return None
+        """Return the two sites of the transition state"""
+        if not self.__transition__:
+            raise ValueError('Not a TS cluster')
         return self.sites[0], self.sites[1]
+
+    def istransition(self, site0, site1):
+        """Check whether two sites correspond to the transition state"""
+        if not self.__transition__:
+            raise ValueError('Not a TS cluster')
+        R0 = site0.R
+        if self.sites[0] == site0 - R0 and self.sites[1] == site1 - R0:
+            return True
+        R1 = site1.R
+        if self.sites[0] == site1 - R1 and self.sites[1] == site0 - R1:
+            return True
+        return False
 
     def __add__(self, other):
         """Add a clustersite to a cluster expansion"""
@@ -201,7 +216,7 @@ class Cluster(object):
             return self
 
     def __radd__(self, other):
-        return self.__add__(self, other)
+        return self.__add__(other)
 
     def __sub__(self, other):
         """Subtract a site from a cluster. Had a very specific meaning: if the

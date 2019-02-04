@@ -806,7 +806,10 @@ class ClusterSupercell(object):
                                     for n in intertuple:
                                         siteinteract[n].append(Ninteract)
                                     Ninteract += 1
-                    # finally, here is where we'd put the code to include the KRA expansion... TBD
+                    # finally, here is where we'd put the code to include the KRA expansion...
+                    for TSclustset, TSvalue in zip(TSclusters, TSvalues):
+                        for TSclust in TSclustset:
+                            pass
                     # now add on our constant value...
                     interact.append(E0)
                     Ninteract += 1
