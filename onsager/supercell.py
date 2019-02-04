@@ -740,6 +740,28 @@ class ClusterSupercell(object):
                             clusterinteract[cs.ci].append((mobilesites, specsites, 0.5*value))
                         else:
                             clusterinteract[cs.ci] = [(mobilesites, specsites, 0.5*value)]
+        # "flatten" the TS clusters. To simplify, we put in both forward and backward jumps
+        TSclusterinteract = {}
+        for TSclusterlist, value in zip(TSclusters, TSvalues):
+            for TSclust in TSclusterlist:
+                TS = TSclust.transitionstate()
+                if TS[0].ci in self.mobileindices and TS[1].ci in self.mobileindices:
+                    R0 = TS[0].R
+                    TS0 = (TS[0]-R0, TS[1]-R0)
+                    mobilesites = [site-R0 for site in TSclust if site.ci in self.mobileindices]
+                    specsites = [site-R0 for site in TSclust if site.ci in self.spectatorindices]
+                    if TS0 in TSclusterinteract:
+                        TSclusterinteract[TS0].append((mobilesites, specsites, value))
+                    else:
+                        TSclusterinteract[TS0] = [(mobilesites, specsites, value)]
+                    R1 = TS[1].R
+                    mobilesites = [site-R1 for site in TSclust if site.ci in self.mobileindices]
+                    specsites = [site-R1 for site in TSclust if site.ci in self.spectatorindices]
+                    TS1 = (TS[1]-R1, TS[0]-R1)
+                    if TS1 in TSclusterinteract:
+                        TSclusterinteract[TS1].append((mobilesites, specsites, value))
+                    else:
+                        TSclusterinteract[TS1] = [(mobilesites, specsites, value)]
         # we need to proceed one transition at a time
         Njumps, interactrange = 0, []
         jumps = []
@@ -751,6 +773,7 @@ class ClusterSupercell(object):
                 if cj != cj0:
                     raise ArithmeticError(
                         'Transition ({},{}), {} did not land at correct site?\n{} != P{'.format(i0, j0, deltax, cj, cj0))
+                cs_i0 = cluster.ClusterSite(ci0, np.zeros(self.crys.dim, dtype=int))
                 # NOTE: we will need the *reverse* endpoint for the initial state...
                 cs_i = cluster.ClusterSite(ci0, -dR)
                 cs_j = cluster.ClusterSite(cj0, dR)
@@ -807,9 +830,24 @@ class ClusterSupercell(object):
                                         siteinteract[n].append(Ninteract)
                                     Ninteract += 1
                     # finally, here is where we'd put the code to include the KRA expansion...
-                    for TSclustset, TSvalue in zip(TSclusters, TSvalues):
-                        for TSclust in TSclustset:
-                            pass
+                    if (cs_i0, cs_j) in TSclusterinteract:
+                        for mobilesites, specsites, value in TSclusterinteract[cs_i0, cs_j]:
+                            if all(socc[self.index(Ri + site.R, site.ci)[0]] == 1 for site in specsites):
+                                if len(mobilesites) == 0:
+                                    # spectator only == constant
+                                    E0 += value
+                                else:
+                                    intertuple = tuple(sorted([self.index(Ri + site.R, site.ci)[0] for site in mobilesites]))
+                                    if intertuple in interdict:
+                                        # if we've already seen this particular interaction, add to the value
+                                        interact[interdict[intertuple]] += value
+                                    else:
+                                        # new interaction!
+                                        interact.append(value)
+                                        interdict[intertuple] = Ninteract
+                                        for n in intertuple:
+                                            siteinteract[n].append(Ninteract)
+                                        Ninteract += 1
                     # now add on our constant value...
                     interact.append(E0)
                     Ninteract += 1

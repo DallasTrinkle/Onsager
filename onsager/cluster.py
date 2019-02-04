@@ -185,8 +185,9 @@ class Cluster(object):
         return self.__shift_pos__(elem) in self.__equalitymap__[elem.ci]
 
     def __getitem__(self, item):
+        if item >= self.Norder: raise IndexError
         if self.__transition__:
-            return self.sites[item-2]
+            return self.sites[(item+2)%self.Norder]
         else:
             return self.sites[item]
 
@@ -338,7 +339,7 @@ def makeTSclusters(crys, chem, jumpnetwork, clusterexp):
     for jn in jumpnetwork:
         for ((i, j), dx) in jn:
             R = np.round(np.dot(crys.invlatt, dx) - crys.basis[chem][j] + crys.basis[chem][i]).astype(int)
-            jumppairs.append((ClusterSite((chem, i), np.zeros(crys.dim)), ClusterSite((chem, j), R)))
+            jumppairs.append((ClusterSite((chem, i), np.zeros(crys.dim, dtype=int)), ClusterSite((chem, j), R)))
     TSclusterexp = []
     TSclusters = set()
     # we run through the clusters in the order they appear in the cluster expansion,
@@ -397,7 +398,7 @@ class MonteCarloSampler(object):
         """
         # NOTE: we don't do this with a copy() operation...
         self.occ = occ
-        self.clustercount = np.zeros_like(self.interactvalue)
+        self.clustercount = np.zeros_like(self.interactvalue, dtype=int)
         self.occupied_set = set()
         self.unoccupied_set = set()
         for i, occ_i, interact, Ninteract in zip(itertools.count(), self.occ, self.siteinteract, self.Ninteract):
