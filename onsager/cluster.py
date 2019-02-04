@@ -326,8 +326,9 @@ def makeTSclusters(crys, chem, jumpnetwork, clusterexp):
             jumppairs.append((ClusterSite((chem, i), np.zeros(crys.dim)), ClusterSite((chem, j), R)))
     TSclusterexp = []
     TSclusters = set()
+    # we run through the clusters in the order they appear in the cluster expansion,
+    # so that if clusters are in increasing order, then they will be when returned
     for clustlist in clusterexp:
-        # cl0 = next(iter(clustlist))
         if sum(1 for site in next(iter(clustlist)) if site.ci[0] == chem) < 2: continue
         # we can only use clusters that have at least two mobile sites
         for clust in clustlist:

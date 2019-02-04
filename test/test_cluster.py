@@ -218,7 +218,18 @@ class ClusterTests(unittest.TestCase):
         chem = 0
         jumpnetwork = FCC.jumpnetwork(chem, 0.8)
         TSclusterexp = cluster.makeTSclusters(FCC, chem, jumpnetwork, clusterexp)
-        self.assertGreater(len(TSclusterexp), 0)
+        self.assertEqual(3, len(TSclusterexp))
+        self.assertEqual([6, 24, 12], [len(csset) for csset in TSclusterexp])
+
+    def testmakeTSclustersB2(self):
+        """Does makeTSclusters perform as expected? B2"""
+        B2 = crystal.Crystal(np.eye(3), [[np.zeros(3)], [0.5*np.ones(3)]], chemistry=['A', 'B'])
+        clusterexp = cluster.makeclusters(B2, 1.01, 4)
+        chem = 0
+        jumpnetwork = B2.jumpnetwork(chem, 1.01)
+        TSclusterexp = cluster.makeTSclusters(B2, chem, jumpnetwork, clusterexp)
+        self.assertEqual(3, len(TSclusterexp))
+        self.assertEqual([3, 12, 12], [len(csset) for csset in TSclusterexp])
 
 
 class MonteCarloTests(unittest.TestCase):
