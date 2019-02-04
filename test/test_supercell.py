@@ -557,9 +557,9 @@ class ClusterSupercellTests(unittest.TestCase):
             # make copies for testing comparisons...
             siteinteract0 = siteinteract.copy()
             interact0 = interact.copy()
-            siteinteract, interact, jumps, interactrange = sup.jumpnetworkevaluator(socc, clusterexp, ene, chem,
-                                                                                    jumpnetwork, eneT,
-                                                                                    siteinteract, interact)
+            siteinteract, interact, jumps, interactrange = \
+                sup.jumpnetworkevaluator(socc, clusterexp, ene, chem, jumpnetwork, eneT,
+                                         siteinteract=siteinteract, interact=interact)
             # first, test that we have a reasonable setup...
             self.assertEqual(len(interact0), interactrange[-1])
             self.assertEqual(sum(len(jn) for jn in jumpnetwork)*sup.size, len(jumps))

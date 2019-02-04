@@ -680,7 +680,8 @@ class ClusterSupercell(object):
         interact.append(E0)
         return siteinteract, interact
 
-    def jumpnetworkevaluator(self, socc, clusters, values, chem, jumpnetwork, ETvalues,
+    def jumpnetworkevaluator(self, socc, clusters, values, chem, jumpnetwork, KRAvalues=0,
+                             TSclusters=(), TSvalues=(),
                              siteinteract=(), interact=()):
         """
         Build out an efficient jump network evaluator. Similar inputs to `clusterevaluator`,
@@ -695,8 +696,11 @@ class ClusterSupercell(object):
         :param chem: index of species that transitions
         :param jumpnetwork: list of lists of jumps; each is ((i, j), dx) where `i` and `j` are
           unit cell indices for species `chem`
-        :param ETvalues: can be a list of transition state energies for each jump *or* a cluster
-          expansion for the transition state energies with values (TBD)
+        :param KRAvalues: list of "KRA" values for barriers (relative to average energy of endpoints);
+          if `TSclusters` are used, choosing 0 is more straightforward.
+        :param TSclusters: (optional) list of transition state cluster expansion terms; this is
+          always added on to KRAvalues (thus using 0 is recommended if TSclusters are also used)
+        :param TSvalues: (optional) values for TS cluster expansion entries
         :param siteinteract: (optional) list of lists of interactions for each site, to append
         :param interact: (optional) list of interaction values, to append
 
@@ -706,6 +710,15 @@ class ClusterSupercell(object):
         :return interactrange: range of indices to count in interact for each jump; for the nth
           jump, sum over interactrange[n-1]:interactrange[n]; interactrange[-1] == range for energy
         """
+        if hasattr(KRAvalues, '__len__'):
+            if len(KRAvalues) != len(jumpnetwork):
+                raise ValueError('Incorrect length for KRAvalues: {}'.format(KRAvalues))
+        else:
+            KRAvalues = KRAvalues*np.ones(len(jumpnetwork))
+        if len(clusters) != len(values) != len(clusters)+1:
+            raise ValueError('Incorrect length for values: {}'.format(values))
+        if len(TSclusters) != len(TSvalues):
+            raise ValueError('Incorrect length for TSvalues: {}'.format(TSvalues))
         siteinteract = list(siteinteract)
         interact = list(interact)
         Ninteract = len(interact)
@@ -730,7 +743,7 @@ class ClusterSupercell(object):
         # we need to proceed one transition at a time
         Njumps, interactrange = 0, []
         jumps = []
-        for jn, Etrans in zip(jumpnetwork, ETvalues):
+        for jn, Etrans in zip(jumpnetwork, KRAvalues):
             for (i0, j0), deltax in jn:
                 ci0, cj0 = (chem, i0), (chem, j0)
                 # to get final position, it's a bit more complex... need to use dx:
