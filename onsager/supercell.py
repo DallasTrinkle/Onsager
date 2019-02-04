@@ -636,6 +636,52 @@ class ClusterSupercell(object):
                         clustercount[mc] += 1
         return clustercount
 
+    def evalTScluster(self, mocc, socc, TSclusters, initial, final, dx):
+        """
+        Evaluate a TS cluster expansion for a given mobile occupancy and spectator occupancy.
+        Indexing corresponds to `mobilepos` and `specpos`. The clusters are input as a
+        list of lists of clusters (where it is assumed that all of the clusters in a given
+        sublist have equal coefficients (i.e., grouped by symmetry). We return a vector
+        of length Nclusters; each entry is the number of times each cluster appears.
+        This can then be dotted into the vector of values to get the cluster expansion value.
+        This is evaluated for the transition where the mobile species at `initial` jumps
+        to the position at `final`. Requires mocc[initial] == 1 and mocc[final] == 0
+
+        :param mocc: mobile occupancy vector (0 or 1 only)
+        :param socc: spectator occupancy vector (0 or 1 only)
+        :param TSclusters: list of lists (or sets) of (transition state) Cluster objects
+        :param initial: index of initial state
+        :param final: index of final state
+        :param dx: displacement vector (necessary to deal with PBC)
+        :return clustercount: count of how many of each cluster is in this supercell.
+        """
+        def isocc(R, ci):
+            n, mob = self.index(R, ci)
+            if mob: return mocc[n] == 1
+            else: return socc[n] == 1
+        clustercount = np.zeros(len(TSclusters), dtype=int)
+        if mocc[initial] == 0 or mocc[final] == 1:
+            return clustercount  # trivial result...
+        ci_i, Ri = self.ciR(initial)
+        ci_j, Rj = self.ciR(final)
+        # need to fix this so that it matches dx!!
+        # dR = Rj - Ri
+        chem, i, j = ci_i[0], ci_i[1], ci_j[1]
+        dR = np.round(np.dot(self.crys.invlatt, dx) - self.crys.basis[chem][j] + self.crys.basis[chem][i]).astype(int)
+        cs_i0 = cluster.ClusterSite(ci_i, np.zeros(self.crys.dim))
+        cs_j0 = cluster.ClusterSite(ci_j, dR)
+        cs_i1 = cluster.ClusterSite(ci_i, -dR)
+        cs_j1 = cluster.ClusterSite(ci_j, np.zeros(self.crys.dim))
+        for mc, clusterlist in enumerate(TSclusters):
+            for clust in clusterlist:
+                if (cs_i0, cs_j0) == clust.transitionstate():
+                    if all(isocc(Ri+site.R, site.ci) for site in clust):
+                        clustercount[mc] += 1
+                elif (cs_j1, cs_i1) == clust.transitionstate():
+                    if all(isocc(Rj+site.R, site.ci) for site in clust):
+                        clustercount[mc] += 1
+        return clustercount
+
     def clusterevaluator(self, socc, clusters, values):
         """
         Construct the information necessary for an (efficient) cluster evaluator,

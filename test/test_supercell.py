@@ -575,7 +575,7 @@ class ClusterSupercellTests(unittest.TestCase):
             # now, let's make a mobile species distribution, and evaluate all possible transition
             # energies, and make sure that they agree with what our evaluator provides.
             mocc = np.random.choice((0,1), size=sup.size)
-            interact_count = np.zeros(len(interact), dtype=int)
+            interact_count = np.ones(len(interact), dtype=int)
             for s, interlist in zip(mocc, siteinteract):
                 if s == 0:
                     for m in interlist:
@@ -597,7 +597,7 @@ class ClusterSupercellTests(unittest.TestCase):
                         if ci0[1] == i0 and cj0[1] == j0 and np.allclose(dx, dx0):
                             E0 = ET_trial
                 # now, we need to get the "LIMB" part of the barrier:
-                # compute the interaction count after deoccupying i and occupyibg j:
+                # compute the interaction count after deoccupying i and occupying j:
                 new_interact_count = interact_count.copy()
                 for m in siteinteract[i]:
                     new_interact_count[m] += 1
@@ -605,4 +605,5 @@ class ClusterSupercellTests(unittest.TestCase):
                     new_interact_count[m] -= 1
                 new_ene_count = sum(E for E, c in zip(interact[:Nene], new_interact_count[:Nene]) if c == 0)
                 E0 += 0.5*(new_ene_count - ene_count)
+                E0 += np.dot(TSvalues, sup.evalTScluster(mocc, socc, TSclusterexp, i, j, dx))
                 self.assertAlmostEqual(E0, Etrans)
