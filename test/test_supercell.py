@@ -538,10 +538,10 @@ class ClusterSupercellTests(unittest.TestCase):
     def testJumpNetworkEvaluator(self):
         """Can we construct an efficient jump network evaluator?"""
         # *displaced* B2, to break symmetry
-        B2 = crystal.Crystal(np.eye(3), [[np.array([0., 0., 0.])],
-                                         [np.array([0.5, 0.5, 0.5])]], ['A', 'B'])
         # B2 = crystal.Crystal(np.eye(3), [[np.array([0., 0., 0.])],
-        #                                  [np.array([0.55, 0.55, 0.55])]], ['A', 'B'])
+        #                                  [np.array([0.5, 0.5, 0.5])]], ['A', 'B'])
+        B2 = crystal.Crystal(np.eye(3), [[np.array([0., 0., 0.])],
+                                         [np.array([0.55, 0.55, 0.55])]], ['A', 'B'])
         Nsuper = 4
         # build a supercell, but call the "A" atoms spectators to the "B" atoms
         sup = supercell.ClusterSupercell(B2, Nsuper*self.one, spectator=[0])
@@ -552,7 +552,7 @@ class ClusterSupercellTests(unittest.TestCase):
         jumpnetwork = B2.jumpnetwork(chem, 1.01)
         eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
         TSclusterexp = cluster.makeTSclusters(B2, chem, jumpnetwork, clusterexp)
-        TSvalues = np.ones(len(TSclusterexp))
+        TSvalues = np.random.normal(size=len(TSclusterexp))
         # eneT = np.zeros(len(jumpnetwork))
         for spec_try in range(5):
             socc = np.random.choice((0,1), size=sup.size)
