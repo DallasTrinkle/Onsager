@@ -213,11 +213,11 @@ class GFCrystalcalc(object):
         GFcalc.crys = crys
         GFcalc.chem = HDF5group.attrs['chem']
         for internal in cls.__HDF5list__:
-            setattr(GFcalc, internal, HDF5group[internal].value)
+            setattr(GFcalc, internal, HDF5group[internal][()])
         GFcalc.Taylorjumps = []
         Taylor = T3D if crys.dim == 3 else T2D
         TaylorTag = 'T3D' if crys.dim == 3 else 'T2D'
-        for i in range(HDF5group['N' + TaylorTag + 'jumps'].value):
+        for i in range(HDF5group['N' + TaylorTag + 'jumps'][()]):
             coeffstr = TaylorTag + 'jump-{}'.format(i)
             GFcalc.Taylorjumps.append(Taylor.loadhdf5(HDF5group[coeffstr]))
         # construct sitelist and jumppairs

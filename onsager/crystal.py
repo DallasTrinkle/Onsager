@@ -542,7 +542,7 @@ def FourthRankIsotropic(F):
     :return average: average value = (F11+2F12)/3, orientationally averaged
     :return shear: shear value = F44, orientationally averaged
     """
-    average = np.sum(F[a,a,b,b] for a in range(3) for b in range(3))/9
+    average = sum(F[a,a,b,b] for a in range(3) for b in range(3))/9
     shear = ((F[0,0,0,0] + F[1,1,1,1] + F[2,2,2,2] - F[0,0,1,1] - F[0,0,2,2] - F[1,1,2,2])/3 +
              F[0,1,0,1] + F[0,2,0,2] + F[1,2,1,2])/5
     return average, shear
