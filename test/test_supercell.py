@@ -605,5 +605,5 @@ class ClusterSupercellTests(unittest.TestCase):
                     new_interact_count[m] -= 1
                 new_ene_count = sum(E for E, c in zip(interact[:Nene], new_interact_count[:Nene]) if c == 0)
                 E0 += 0.5*(new_ene_count - ene_count)
-                # E0 += np.dot(TSvalues, sup.evalTScluster(mocc, socc, TSclusterexp, i, j, dx))
+                E0 += np.dot(TSvalues, sup.evalTScluster(mocc, socc, TSclusterexp, i, j, dx))
                 self.assertAlmostEqual(E0, Etrans)

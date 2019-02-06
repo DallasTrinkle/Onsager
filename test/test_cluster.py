@@ -220,6 +220,9 @@ class ClusterTests(unittest.TestCase):
         TSclusterexp = cluster.makeTSclusters(FCC, chem, jumpnetwork, clusterexp)
         self.assertEqual(3, len(TSclusterexp))
         self.assertEqual([6, 24, 12], [len(csset) for csset in TSclusterexp])
+        for TSclustset in TSclusterexp:
+            for TSclust in TSclustset:
+                self.assertTrue(np.all(np.zeros(3, dtype=int)==TSclust.transitionstate()[0].R))
 
     def testmakeTSclustersB2(self):
         """Does makeTSclusters perform as expected? B2"""
@@ -230,6 +233,9 @@ class ClusterTests(unittest.TestCase):
         TSclusterexp = cluster.makeTSclusters(B2, chem, jumpnetwork, clusterexp)
         self.assertEqual(3, len(TSclusterexp))
         self.assertEqual([3, 12, 12], [len(csset) for csset in TSclusterexp])
+        for TSclustset in TSclusterexp:
+            for TSclust in TSclustset:
+                self.assertTrue(np.all(np.zeros(3, dtype=int)==TSclust.transitionstate()[0].R))
 
 
 class MonteCarloTests(unittest.TestCase):
