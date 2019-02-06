@@ -552,7 +552,7 @@ class ClusterSupercellTests(unittest.TestCase):
         jumpnetwork = B2.jumpnetwork(chem, 1.01)
         eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
         TSclusterexp = cluster.makeTSclusters(B2, chem, jumpnetwork, clusterexp)
-        TSvalues = np.zeros(len(TSclusterexp))
+        TSvalues = np.ones(len(TSclusterexp))
         # eneT = np.zeros(len(jumpnetwork))
         for spec_try in range(5):
             socc = np.random.choice((0,1), size=sup.size)
@@ -575,7 +575,7 @@ class ClusterSupercellTests(unittest.TestCase):
             # now, let's make a mobile species distribution, and evaluate all possible transition
             # energies, and make sure that they agree with what our evaluator provides.
             mocc = np.random.choice((0,1), size=sup.size)
-            interact_count = np.ones(len(interact), dtype=int)
+            interact_count = np.zeros(len(interact), dtype=int)
             for s, interlist in zip(mocc, siteinteract):
                 if s == 0:
                     for m in interlist:
@@ -605,5 +605,5 @@ class ClusterSupercellTests(unittest.TestCase):
                     new_interact_count[m] -= 1
                 new_ene_count = sum(E for E, c in zip(interact[:Nene], new_interact_count[:Nene]) if c == 0)
                 E0 += 0.5*(new_ene_count - ene_count)
-                E0 += np.dot(TSvalues, sup.evalTScluster(mocc, socc, TSclusterexp, i, j, dx))
+                # E0 += np.dot(TSvalues, sup.evalTScluster(mocc, socc, TSclusterexp, i, j, dx))
                 self.assertAlmostEqual(E0, Etrans)
