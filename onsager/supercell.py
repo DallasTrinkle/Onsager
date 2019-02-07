@@ -567,7 +567,7 @@ class ClusterSupercell(object):
             N, indices = self.Nmobile, self.mobileindices
         else:
             N, indices = self.Nspec, self.spectatorindices
-        return indices[ind%N], self.Rveclist[ind//N]
+        return indices[ind % N], self.Rveclist[ind//N]
 
     def index(self, R, ci):
         """

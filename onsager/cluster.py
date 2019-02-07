@@ -368,25 +368,46 @@ class MonteCarloSampler(object):
     An object to maintain state in a supercell, evaluate energies efficiently including
     "trial" moves. Built from cluster expansions and using a cluster supercell.
     """
-    def __init__(self, supercell, spectator_occ, clusterexp, enevalues):
+    def __init__(self, supercell, spectator_occ, clusterexp, enevalues,
+                 chem=None, jumpnetwork=(), KRAvalues=0, TSclusters=(), TSvalues=()):
         """
         Setup a MonteCarloSampler using a supercell, with a given spectator occupancy,
-        cluster expansion, and energy values for the clusters.
+        cluster expansion, and energy values for the clusters. Now includes the ability to
+        evaluate a jumpnetwork, which is optional. Because we need to be consistent with
+        our cluster expansion, can only be done at initialization.
 
         :param supercell: should be a ClusterSupercell
         :param spectator_occ: vector of occupancies for spectator species (0 or 1),
           consistent with our supercell
         :param clusterexp: list of sets of cluster interactions
         :param enevalues: energy values corresponding to each cluster
+
+        :param chem: (optional) index of species that transitions
+        :param jumpnetwork: (optional) list of lists of jumps; each is ((i, j), dx) where `i` and `j` are
+          unit cell indices for species `chem`
+        :param KRAvalues: (optional) list of "KRA" values for barriers (relative to average energy of endpoints);
+          if `TSclusters` are used, choosing 0 is more straightforward.
+        :param TSclusters: (optional) list of transition state cluster expansion terms; this is
+          always added on to KRAvalues (thus using 0 is recommended if TSclusters are also used)
+        :param TSvalues: (optional) values for TS cluster expansion entries
         """
         self.supercell = supercell
         siteinteract, interactvalue = supercell.clusterevaluator(spectator_occ, clusterexp, enevalues)
+        self.Nenergy = len(interactvalue)
+        # to be initialized via `jumpnetwork_init()`
+        self.jumps = None  # indicates no jump network...
+        if chem is not None:
+            # quick check that `chem` is a mobile species:
+            if (chem, 0) not in self.supercell.indexmobile:
+                raise ValueError('Chemical species {} is a spectator in supercell?'.format(chem))
+            siteinteract, interactvalue, self.jumps, self.interactrange = \
+                self.supercell.jumpnetworkevaluator(spectator_occ, clusterexp, enevalues, chem, jumpnetwork,
+                                                    KRAvalues, TSclusters, TSvalues, siteinteract, interactvalue)
         # convert from lists to arrays:
         self.Ninteract = np.array([len(inter) for inter in siteinteract])
         # see https://stackoverflow.com/questions/38619143/convert-python-sequence-to-numpy-array-filling-missing-values
         self.siteinteract = np.array(list(itertools.zip_longest(*siteinteract, fillvalue=-1))).T
         self.interactvalue = np.array(interactvalue)
-        self.Nenergy = len(self.interactvalue)
         # to be initialized with start()
         self.occ, self.clustercount, self.occupied_set, self.unoccupied_set = None, None, None, None
 
@@ -416,7 +437,7 @@ class MonteCarloSampler(object):
         :return E: total of all interactions
         """
         E = 0
-        for ccount, Evalue in zip(self.clustercount, self.interactvalue):
+        for ccount, Evalue in zip(self.clustercount[:self.Nenergy], self.interactvalue[:self.Nenergy]):
             if ccount == 0:
                 E += Evalue
         return E
@@ -456,6 +477,8 @@ class MonteCarloSampler(object):
         for interact, dcount in dclustercount.items():
             # no change?
             if dcount == 0: continue
+            # not an *energy* interaction?
+            if interact >= self.Nenergy: continue
             # are we turning off an interaction?
             if self.clustercount[interact] == 0:
                 dE -= self.interactvalue[interact]
