@@ -249,58 +249,77 @@ class MonteCarloTests(unittest.TestCase):
         self.clusterexp = cluster.makeclusters(self.FCC, 0.8, 4)
         self.Evalues = np.random.normal(size=len(self.clusterexp) + 1)
         self.MC = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues)
+        self.chem = 0
+        self.jumpnetwork = self.FCC.jumpnetwork(self.chem, 0.8)
+        self.TSclusterexp = cluster.makeTSclusters(self.FCC, self.chem, self.jumpnetwork, self.clusterexp)
+        self.TSvalues = np.random.normal(size=len(self.TSclusterexp))
+        self.MCjn = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues,
+                                              self.chem, self.jumpnetwork,
+                                              TSclusters=self.TSclusterexp, TSvalues=self.TSvalues)
 
     def testMakeSampler(self):
         """Can we make a MonteCarlo sampler for an FCC lattice?"""
         self.assertIsInstance(self.MC, cluster.MonteCarloSampler)
-        chem = 0
-        jumpnetwork = self.FCC.jumpnetwork(chem, 0.8)
-        MCnew = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues,
-                                          chem, jumpnetwork)
-        self.assertIsInstance(MCnew, cluster.MonteCarloSampler)
+        self.assertIsInstance(self.MCjn, cluster.MonteCarloSampler)
 
     def testStart(self):
         """Does start() perform as expected?"""
-        occ = np.random.choice((0,1), size=self.sup.size)
-        self.MC.start(occ)
-        for i, occ_i in enumerate(occ):
-            if occ_i == 1:
-                self.assertIn(i, self.MC.occupied_set)
-                self.assertNotIn(i, self.MC.unoccupied_set)
-            else:
-                self.assertIn(i, self.MC.unoccupied_set)
-                self.assertNotIn(i, self.MC.occupied_set)
+        for MCsampler in (self.MC, self.MCjn):
+            occ = np.random.choice((0, 1), size=self.sup.size)
+            MCsampler.start(occ)
+            for i, occ_i in enumerate(occ):
+                if occ_i == 1:
+                    self.assertIn(i, MCsampler.occupied_set)
+                    self.assertNotIn(i, MCsampler.unoccupied_set)
+                else:
+                    self.assertIn(i, MCsampler.unoccupied_set)
+                    self.assertNotIn(i, MCsampler.occupied_set)
 
     def testE(self):
         """Does our energy evaluator perform correctly?"""
         occ = np.random.choice((0,1), size=self.sup.size)
         self.MC.start(occ)
+        self.MCjn.start(occ.copy())  # necessary because sampler *does not* make a copy.
         for nchanges in range(16):
             EMC = self.MC.E()
+            EMCjn = self.MCjn.E()
             Ecluster = np.dot(self.Evalues, self.sup.evalcluster(occ, np.zeros(0), self.clusterexp))
             self.assertAlmostEqual(Ecluster, EMC, msg='MC evaluation {} != {} cluster evaluation?'.format(EMC, Ecluster))
+            self.assertAlmostEqual(EMC, EMCjn, msg='MC evaluation {} != {} MC jn evaluation?'.format(EMC, EMCjn))
             # randomly occupy or unoccupy a site:
             if np.random.choice((True, False)):
-                self.MC.update([np.random.choice(list(self.MC.unoccupied_set))], ())
+                change = [np.random.choice(list(self.MC.unoccupied_set))]
+                self.MC.update(change, ())
+                self.MCjn.update(change, ())
             else:
-                self.MC.update((), [np.random.choice(list(self.MC.occupied_set))])
+                change = [np.random.choice(list(self.MC.occupied_set))]
+                self.MC.update((), change)
+                self.MCjn.update((), change)
 
     def testdeltaE(self):
         """Does our trial energy change work?"""
         occ = np.random.choice((0,1), size=self.sup.size)
         self.MC.start(occ)
+        self.MCjn.start(occ.copy())  # necessary because sampler *does not* make a copy.
         EMC = self.MC.E()
+        EMCjn = self.MCjn.E()
         for nchanges in range(64):
             # select multiple sites to swap (between 1 and 4 sites):
             nswap = np.random.choice(4)+1
             iocc = np.random.choice(list(self.MC.unoccupied_set), size=nswap, replace=False)
             iunocc = np.random.choice(list(self.MC.occupied_set), size=nswap, replace=False)
             dE = self.MC.deltaE_trial(iocc, iunocc)
+            dEjn = self.MCjn.deltaE_trial(iocc, iunocc)
             # now, update and see if we correctly computed the change in energy:
             self.MC.update(iocc, iunocc)
+            self.MCjn.update(iocc, iunocc)
             EMC_new = self.MC.E()
+            EMCjn_new = self.MCjn.E()
             self.assertAlmostEqual(EMC_new - EMC, dE, msg='Trial energy change wrong? {} != {}-{}'.format(dE, EMC_new, EMC))
+            self.assertAlmostEqual(EMCjn_new - EMCjn, dEjn, msg='Trial energy change wrong (jn)? {} != {}-{}'.format(dEjn, EMCjn_new, EMCjn))
+            self.assertAlmostEqual(dE, dEjn, msg='Trial energy change differs (without/with jn)? {} != {}'.format(dE, dEjn))
             EMC = EMC_new
+            EMCjn = EMCjn_new
 
 
 
