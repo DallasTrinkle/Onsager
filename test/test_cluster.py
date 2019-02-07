@@ -253,6 +253,11 @@ class MonteCarloTests(unittest.TestCase):
     def testMakeSampler(self):
         """Can we make a MonteCarlo sampler for an FCC lattice?"""
         self.assertIsInstance(self.MC, cluster.MonteCarloSampler)
+        chem = 0
+        jumpnetwork = self.FCC.jumpnetwork(chem, 0.8)
+        MCnew = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues,
+                                          chem, jumpnetwork)
+        self.assertIsInstance(MCnew, cluster.MonteCarloSampler)
 
     def testStart(self):
         """Does start() perform as expected?"""
