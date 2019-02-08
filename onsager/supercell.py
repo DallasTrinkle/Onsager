@@ -553,7 +553,7 @@ class ClusterSupercell(object):
 
     def incell(self, R):
         """Map a lattice vector into a translation vector in the cell"""
-        return np.dot(self.invsuper, R) % self.size
+        return tuple(np.dot(self.invsuper, R) % self.size)
 
     def ciR(self, ind, mobile=True):
         """
@@ -579,10 +579,10 @@ class ClusterSupercell(object):
         :return ind: index of site in our position
         :return mobile: boolean; True if mobile, False if spectator
         """
-        if ci in self.mobileindices:
-            return self.transdict[tuple(self.incell(R))]*self.Nmobile + self.indexmobile[ci], True
+        if ci in self.indexmobile:
+            return self.transdict[self.incell(R)]*self.Nmobile + self.indexmobile[ci], True
         else:
-            return self.transdict[tuple(self.incell(R))]*self.Nspec + self.indexspectator[ci], False
+            return self.transdict[self.incell(R)]*self.Nspec + self.indexspectator[ci], False
 
     def indexpos(self, pos, threshold=1., CARTESIAN=False):
         """
@@ -711,7 +711,7 @@ class ClusterSupercell(object):
                             # spectator only == constant
                             E0 += value
                         else:
-                            intertuple = tuple(sorted([self.index(R+site.R, site.ci)[0] for site in mobilesites]))
+                            intertuple = tuple(sorted(self.index(R+site.R, site.ci)[0] for site in mobilesites))
                             if intertuple in interdict:
                                 # if we've already seen this particular interaction, add to the value
                                 interact[interdict[intertuple]] += value
@@ -846,7 +846,7 @@ class ClusterSupercell(object):
                                 # spectator only == constant
                                 E0 -= value
                             else:
-                                intertuple = tuple(sorted([self.index(Ri + site.R, site.ci)[0] for site in mobilesites]))
+                                intertuple = tuple(sorted(self.index(Ri + site.R, site.ci)[0] for site in mobilesites))
                                 if intertuple in interdict:
                                     # if we've already seen this particular interaction, add to the value
                                     interact[interdict[intertuple]] -= value
@@ -867,7 +867,7 @@ class ClusterSupercell(object):
                                 # spectator only == constant
                                 E0 += value
                             else:
-                                intertuple = tuple(sorted([self.index(Rj + site.R, site.ci)[0] for site in mobilesites]))
+                                intertuple = tuple(sorted(self.index(Rj + site.R, site.ci)[0] for site in mobilesites))
                                 if intertuple in interdict:
                                     # if we've already seen this particular interaction, add to the value
                                     interact[interdict[intertuple]] += value
@@ -886,7 +886,7 @@ class ClusterSupercell(object):
                                     # spectator only == constant
                                     E0 += value
                                 else:
-                                    intertuple = tuple(sorted([self.index(Ri + site.R, site.ci)[0] for site in mobilesites]))
+                                    intertuple = tuple(sorted(self.index(Ri + site.R, site.ci)[0] for site in mobilesites))
                                     if intertuple in interdict:
                                         # if we've already seen this particular interaction, add to the value
                                         interact[interdict[intertuple]] += value
