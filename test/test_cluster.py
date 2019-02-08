@@ -331,6 +331,16 @@ class MonteCarloTests(unittest.TestCase):
         self.assertEqual(len(ijlist), len(Qlist))
         self.assertEqual(len(ijlist), len(dxlist))
         self.assertLessEqual(len(Qlist), len(self.MCjn.jumps))
+        for (i, j), Q, dx in zip(ijlist, Qlist, dxlist):
+            dE = self.MCjn.deltaE_trial((j,), (i,))
+            self.MCjn.update((j,), (i,)) # select the transition
+            ijlistnew, Qlistnew, dxlistnew = self.MCjn.transitions()
+            self.assertIn((j, i), ijlistnew)
+            self.assertNotIn((i, j), ijlistnew)
+            m = ijlistnew.index((j, i))
+            self.assertTrue(np.allclose(dxlistnew[m] + dx, 0))
+            self.assertAlmostEqual(Q-dE, Qlistnew[m])
+            self.MCjn.update((i,), (j,)) # put state back
 
 
 

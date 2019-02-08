@@ -446,7 +446,7 @@ class MonteCarloSampler(object):
         """
         Compute all transitions.
 
-        :return ijlist: vector of [initial, final] states
+        :return ijlist: list of (initial, final) tuples for each transition
         :return Qlist: vector of energy barriers for each transition
         :return dxlist: vector of displacements for each transition
         """
@@ -461,7 +461,7 @@ class MonteCarloSampler(object):
             dxlist.append(dx)
             ran = slice(self.interactrange[n - 1], self.interactrange[n])
             Qlist.append(sum(E for E, c in zip(self.interactvalue[ran], self.clustercount[ran]) if c == 0))
-        return np.array(ijlist), np.array(Qlist), np.array(dxlist)
+        return ijlist, np.array(Qlist), np.array(dxlist)
 
     def deltaE_trial(self, occsites=(), unoccsites=()):
         """
