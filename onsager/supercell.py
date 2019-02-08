@@ -777,11 +777,11 @@ class ClusterSupercell(object):
         for clusterlist, value in zip(clusters, values):
             for clust in clusterlist:
                 for cs in clust:
-                    if cs.ci in self.mobileindices:
+                    if cs.ci in self.indexmobile:
                         # get the list of other sites, and split into mobile and spectator:
                         cllist = clust - cs
-                        mobilesites = [site for site in cllist if site.ci in self.mobileindices]
-                        specsites = [site for site in cllist if site.ci in self.spectatorindices]
+                        mobilesites = [site for site in cllist if site.ci in self.indexmobile]
+                        specsites = [site for site in cllist if site.ci in self.indexspectator]
                         if cs.ci in clusterinteract:
                             clusterinteract[cs.ci].append((mobilesites, specsites, 0.5*value))
                         else:
@@ -791,18 +791,18 @@ class ClusterSupercell(object):
         for TSclusterlist, value in zip(TSclusters, TSvalues):
             for TSclust in TSclusterlist:
                 TS = TSclust.transitionstate()
-                if TS[0].ci in self.mobileindices and TS[1].ci in self.mobileindices:
+                if TS[0].ci in self.indexmobile and TS[1].ci in self.indexmobile:
                     R0 = TS[0].R
                     TS0 = (TS[0]-R0, TS[1]-R0)
-                    mobilesites = [site-R0 for site in TSclust if site.ci in self.mobileindices]
-                    specsites = [site-R0 for site in TSclust if site.ci in self.spectatorindices]
+                    mobilesites = [site-R0 for site in TSclust if site.ci in self.indexmobile]
+                    specsites = [site-R0 for site in TSclust if site.ci in self.indexspectator]
                     if TS0 in TSclusterinteract:
                         TSclusterinteract[TS0].append((mobilesites, specsites, value))
                     else:
                         TSclusterinteract[TS0] = [(mobilesites, specsites, value)]
                     R1 = TS[1].R
-                    mobilesites = [site-R1 for site in TSclust if site.ci in self.mobileindices]
-                    specsites = [site-R1 for site in TSclust if site.ci in self.spectatorindices]
+                    mobilesites = [site-R1 for site in TSclust if site.ci in self.indexmobile]
+                    specsites = [site-R1 for site in TSclust if site.ci in self.indexspectator]
                     TS1 = (TS[1]-R1, TS[0]-R1)
                     if TS1 in TSclusterinteract:
                         TSclusterinteract[TS1].append((mobilesites, specsites, value))
@@ -823,6 +823,9 @@ class ClusterSupercell(object):
                 # NOTE: we will need the *reverse* endpoint for the initial state...
                 cs_i = cluster.ClusterSite(ci0, -dR)
                 cs_j = cluster.ClusterSite(cj0, dR)
+                # construct sublists of cluster expansions that explicitly *exclude* our endpoints:
+                clusterinteract_ci0 = [(ms, ss, val) for (ms, ss, val) in clusterinteract[ci0] if cs_j not in ms]
+                clusterinteract_cj0 = [(ms, ss, val) for (ms, ss, val) in clusterinteract[cj0] if cs_i not in ms]
                 # now, run through all lattice sites...
                 for Ri in self.Rveclist:
                     # each possible *transition* is treated like its own mini-cluster expansion:
@@ -834,9 +837,9 @@ class ClusterSupercell(object):
                     jumps.append(((i, j), deltax))
                     # now, to run through our clusters, adding interactions as appropriate:
                     # -0.5*Einitial
-                    for mobilesites, specsites, value in clusterinteract[ci0]:
+                    for mobilesites, specsites, value in clusterinteract_ci0:
                         # if our endpoint is also in our cluster, kick out now:
-                        if cs_j in mobilesites: continue
+                        # if cs_j in mobilesites: continue
                         # check that all of the spectator sites are occupied:
                         if all(socc[self.index(Ri + site.R, site.ci)[0]] == 1 for site in specsites):
                             if len(mobilesites) == 0:
@@ -855,9 +858,9 @@ class ClusterSupercell(object):
                                         siteinteract[n].append(Ninteract)
                                     Ninteract += 1
                     # +0.5*Efinal
-                    for mobilesites, specsites, value in clusterinteract[cj0]:
+                    for mobilesites, specsites, value in clusterinteract_cj0:
                         # if our initial point is also in our cluster, kick out now:
-                        if cs_i in mobilesites: continue
+                        # if cs_i in mobilesites: continue
                         # check that all of the spectator sites are occupied:
                         if all(socc[self.index(Rj + site.R, site.ci)[0]] == 1 for site in specsites):
                             if len(mobilesites) == 0:

@@ -420,15 +420,18 @@ class MonteCarloSampler(object):
         # NOTE: we don't do this with a copy() operation...
         self.occ = occ
         self.clustercount = np.zeros_like(self.interactvalue, dtype=int)
-        self.occupied_set = set()
-        self.unoccupied_set = set()
+        occ_list, unocc_list = [], []
         for i, occ_i, interact, Ninteract in zip(itertools.count(), self.occ, self.siteinteract, self.Ninteract):
             if occ_i == 0:
-                self.unoccupied_set.add(i)
-                for n in range(Ninteract):
-                    self.clustercount[interact[n]] += 1
+                unocc_list.append(i)
+                for m in interact[:Ninteract]:
+                    self.clustercount[m] += 1
+                # for n in range(Ninteract):
+                #     self.clustercount[interact[n]] += 1
             else:
-                self.occupied_set.add(i)
+                occ_list.append(i)
+        self.occupied_set = set(occ_list)
+        self.unoccupied_set = set(unocc_list)
 
     def E(self):
         """
