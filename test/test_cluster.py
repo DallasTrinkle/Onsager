@@ -260,6 +260,8 @@ class MonteCarloTests(unittest.TestCase):
     def testMakeSampler(self):
         """Can we make a MonteCarlo sampler for an FCC lattice?"""
         self.assertIsInstance(self.MC, cluster.MonteCarloSampler)
+        with self.assertRaises(ValueError):
+            self.MC.transitions()
         self.assertIsInstance(self.MCjn, cluster.MonteCarloSampler)
 
     def testStart(self):
@@ -320,6 +322,15 @@ class MonteCarloTests(unittest.TestCase):
             self.assertAlmostEqual(dE, dEjn, msg='Trial energy change differs (without/with jn)? {} != {}'.format(dE, dEjn))
             EMC = EMC_new
             EMCjn = EMCjn_new
+
+    def testDetailedBalance(self):
+        """Does our jump network evaluator obey detailed balance?"""
+        occ = np.random.choice((0,1), size=self.sup.size)
+        self.MCjn.start(occ)
+        ijlist, Qlist, dxlist = self.MCjn.transitions()
+        self.assertEqual(len(ijlist), len(Qlist))
+        self.assertEqual(len(ijlist), len(dxlist))
+        self.assertLessEqual(len(Qlist), len(self.MCjn.jumps))
 
 
 

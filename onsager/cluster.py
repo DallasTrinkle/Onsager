@@ -442,6 +442,27 @@ class MonteCarloSampler(object):
                 E += Evalue
         return E
 
+    def transitions(self):
+        """
+        Compute all transitions.
+
+        :return ijlist: vector of [initial, final] states
+        :return Qlist: vector of energy barriers for each transition
+        :return dxlist: vector of displacements for each transition
+        """
+        if self.jumps is None:
+            raise ValueError('No jump network in sampler.')
+        ijlist, Qlist, dxlist = [], [], []
+
+        for n, ((i, j), dx) in enumerate(self.jumps):
+            if self.occ[i] == 0 or self.occ[j] == 1:
+                continue
+            ijlist.append((i, j))
+            dxlist.append(dx)
+            ran = slice(self.interactrange[n - 1], self.interactrange[n])
+            Qlist.append(sum(E for E, c in zip(self.interactvalue[ran], self.clustercount[ran]) if c == 0))
+        return np.array(ijlist), np.array(Qlist), np.array(dxlist)
+
     def deltaE_trial(self, occsites=(), unoccsites=()):
         """
         Compute the energy change if the sites in occsites are occupied, and the sites in
