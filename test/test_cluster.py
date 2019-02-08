@@ -120,6 +120,22 @@ class ClusterTests(unittest.TestCase):
         self.assertNotEqual(c0, c1, msg='Clusters should not be equal:\n{} ==\n{}'.format(c0, c1))
         self.assertEqual(c1, c2, msg='Clusters should be equal:\n{} !=\n{}'.format(c1, c2))
         self.assertNotEqual(c1, c3, msg='Clusters should not be equal:\n{} ==\n{}'.format(c1, c3))
+        # check TS and indexing...
+        self.assertEqual(1, len(c1))
+        self.assertEqual(1, c1.Norder)
+        self.assertEqual((s1, s2), c1.transitionstate())
+        l = [site for site in c1]
+        self.assertEqual(1, len(l))
+        self.assertEqual([s3], l)
+        self.assertEqual(s3, c1[0])
+        self.assertEqual(s3, c1[-1])
+
+        self.assertEqual((s1, s3), c3.transitionstate())
+        l = [site for site in c3]
+        self.assertEqual(1, len(l))
+        self.assertEqual([s2], l)
+        self.assertEqual(s2, c3[0])
+        self.assertEqual(s2, c3[-1])
 
     def testHCPGroupOp(self):
         """Testing group operations on our clusters (HCP)"""
@@ -248,13 +264,17 @@ class MonteCarloTests(unittest.TestCase):
         self.sup = supercell.ClusterSupercell(self.FCC, self.superlatt)
         self.clusterexp = cluster.makeclusters(self.FCC, 0.8, 4)
         self.Evalues = np.random.normal(size=len(self.clusterexp) + 1)
+        # self.Evalues = np.zeros(len(self.clusterexp) + 1)
         self.MC = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues)
         self.chem = 0
         self.jumpnetwork = self.FCC.jumpnetwork(self.chem, 0.8)
         self.TSclusterexp = cluster.makeTSclusters(self.FCC, self.chem, self.jumpnetwork, self.clusterexp)
+        self.KRAvalues = np.zeros(len(self.jumpnetwork))
         self.TSvalues = np.random.normal(size=len(self.TSclusterexp))
+        # self.TSvalues = np.ones(len(self.TSclusterexp))
+        # self.TSvalues = np.zeros(len(self.TSclusterexp))
         self.MCjn = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues,
-                                              self.chem, self.jumpnetwork,
+                                              self.chem, self.jumpnetwork, KRAvalues=self.KRAvalues,
                                               TSclusters=self.TSclusterexp, TSvalues=self.TSvalues)
 
     def testMakeSampler(self):
@@ -333,13 +353,14 @@ class MonteCarloTests(unittest.TestCase):
         self.assertLessEqual(len(Qlist), len(self.MCjn.jumps))
         for (i, j), Q, dx in zip(ijlist, Qlist, dxlist):
             dE = self.MCjn.deltaE_trial((j,), (i,))
+            # print(i, j, Q, dE, dx)
             self.MCjn.update((j,), (i,)) # select the transition
             ijlistnew, Qlistnew, dxlistnew = self.MCjn.transitions()
             self.assertIn((j, i), ijlistnew)
             self.assertNotIn((i, j), ijlistnew)
             m = ijlistnew.index((j, i))
             self.assertTrue(np.allclose(dxlistnew[m] + dx, 0))
-            self.assertAlmostEqual(Q-dE, Qlistnew[m])
+            self.assertAlmostEqual(Q, Qlistnew[m] + dE)
             self.MCjn.update((i,), (j,)) # put state back
 
 

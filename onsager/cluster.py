@@ -187,7 +187,7 @@ class Cluster(object):
     def __getitem__(self, item):
         if item >= self.Norder: raise IndexError
         if self.__transition__:
-            return self.sites[(item+2)%self.Norder]
+            return self.sites[2:][item]
         else:
             return self.sites[item]
 
