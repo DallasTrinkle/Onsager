@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Onsager &mdash; Onsager 1.3.1 documentation</title>
+  <title>Onsager &mdash; Onsager 1.3.2 documentation</title>
   
 
   
@@ -24,27 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Onsager 1.3.1 documentation" href="index.html"/>
-        <link rel="next" title="Input and output for Onsager transport calculation" href="InputOutput.html"/>
-        <link rel="prev" title="Onsager: Automated diffusion calculation" href="index.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Input and output for Onsager transport calculation" href="InputOutput.html" />
+    <link rel="prev" title="Onsager: Automated diffusion calculation" href="index.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -112,7 +104,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Onsager</a>
@@ -120,9 +112,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -228,6 +221,7 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
 <li>1.2.2 New internal friction calculator for interstitial diffuser; improvement in <cite>Crystal</cite> class symmetry to handle larger error in unit cell.</li>
 <li>1.3 Two-dimensional lattice support added; new notebooks for variational calculations.</li>
 <li>1.3.1 Bug fix in <cite>crystal.Crystal.jumpnetwork</cite> for search range.</li>
+<li>1.3.2 Bug fix in <cite>OnsagerCalc.VacancyMediated</cite> for cases with non-zero bias vector (caused unusual occasional test failures).</li>
 </ul>
 </div>
 <div class="section" id="references">
@@ -261,9 +255,7 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -285,7 +277,7 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -303,7 +295,8 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.3.1',
+            VERSION:'1.3.2',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -313,23 +306,18 @@ The vacancy-mediated diffuser can be stored as an HDF5 file (which internally st
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>
