@@ -1102,7 +1102,7 @@ class VectorStarSet(object):
         D0expansion = np.zeros((dim, dim, len(self.starset.jumpnetwork_index)))
         D1expansion = np.zeros((dim, dim, len(jumpnetwork)))
         for k, jt, jumplist in zip(itertools.count(), jumptype, jumpnetwork):
-            d0 = np.sum(0.5 * np.outer(dx, dx) for ISFS, dx in jumplist)  # we don't need initial/final state
+            d0 = sum(0.5 * np.outer(dx, dx) for ISFS, dx in jumplist)  # we don't need initial/final state
             D0expansion[:, :, jt] += d0
             D1expansion[:, :, k] += d0
         # cleanup on return
