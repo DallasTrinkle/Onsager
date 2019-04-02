@@ -661,7 +661,7 @@ class CrystalOnsagerTestsB2(DiffusionTestCase):
         self.solutebinding = 3.
 
     def testtracer(self):
-        """Test that BCC mapped onto B2 match exactly"""
+        """Test that high symmetry mapped onto low symmetry match exactly (tracer)"""
         self.logger = logging.getLogger(__name__ + '.' +
                                         self.__class__.__name__ + '.' +
                                         inspect.currentframe().f_code.co_name)
@@ -679,7 +679,7 @@ class CrystalOnsagerTestsB2(DiffusionTestCase):
                                     diffuserargs2={'large_om2': 0}, msg='large omega test fail')
 
     def testsolute(self):
-        """Test that BCC mapped onto B2 match exactly"""
+        """Test that high symmetry mapped onto low symmetry match exactly (solute)"""
         self.logger = logging.getLogger(__name__ + '.' +
                                         self.__class__.__name__ + '.' +
                                         inspect.currentframe().f_code.co_name)
