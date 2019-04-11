@@ -227,6 +227,24 @@ class ClusterTests(unittest.TestCase):
         for clset in clusterexp[7:8]:
             self.assertEqual(12, len(clset))
 
+    def testmakeclustersB2_exclude(self):
+        """Does makeclusters perform as expected? B2 with exclusion"""
+        B2 = crystal.Crystal(np.eye(3), [[np.zeros(3)], [0.5*np.ones(3)]], chemistry=['A', 'B'])
+        clusterexp = cluster.makeclusters(B2, 1.01, 4, exclude=[1])
+        # now, we should have the following types of clusters:
+        # 1 1st order (A)
+        # 1 2nd order (AA)
+        # 0 3rd order ()
+        # 0 4th order ()
+        self.assertEqual(1+1+0+0, len(clusterexp))
+        for clset in clusterexp[0:1]:
+            self.assertEqual(1, len(clset))
+        for clset in clusterexp[1:2]:
+            self.assertEqual(3, len(clset))
+            for cl in clset:
+                for clsite in cl:
+                    self.assertNotEqual(clsite.ci[0], 1, msg='Did not properly exclude chemistry 1')
+
     def testmakeTSclustersFCC(self):
         """Does makeTSclusters perform as expected? FCC"""
         FCC = crystal.Crystal.FCC(1., chemistry='FCC')

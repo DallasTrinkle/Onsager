@@ -270,7 +270,7 @@ def makeclusters(crys, cutoff, maxorder, exclude=()):
     :param exclude: list of chemistries to exclude
     :return clusterexp: list of sets of clusters
     """
-    sitelist = [ci for ci in crys.atomindices if ci not in exclude]
+    sitelist = [ci for ci in crys.atomindices if ci[0] not in exclude]
     # We construct our clusters in increasing order for maximum efficiency
     # 1st order (sites) is slightly different than the rest.
     clusterexp = []
