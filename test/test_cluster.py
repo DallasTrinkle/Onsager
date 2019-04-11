@@ -245,6 +245,69 @@ class ClusterTests(unittest.TestCase):
                 for clsite in cl:
                     self.assertNotEqual(clsite.ci[0], 1, msg='Did not properly exclude chemistry 1')
 
+    def testpairdistancesFCC(self):
+        """Does pairdistances perform as expected? FCC"""
+        FCC = crystal.Crystal.FCC(1., chemistry='FCC')
+        cutoff = 0.8
+        clusterexp = cluster.makeclusters(FCC, 0.8, 4)
+        for clset in clusterexp:
+            clrep = next(iter(clset))
+            dist_dict_base = clrep.pairdistances(FCC)
+            norder = len(clrep)
+            if norder == 1:
+                self.assertEqual(len(dist_dict_base), 0)
+                continue
+            self.assertEqual(len(dist_dict_base), 1)
+            self.assertEqual(len(dist_dict_base[0,0]), norder*(norder-1)//2)
+            for d in dist_dict_base[0,0]:
+                self.assertLess(d, cutoff)
+            for cl in clset:
+                self.assertTrue(np.allclose(dist_dict_base[0,0], cl.pairdistances(FCC)[0,0]))
+
+    def testpairdistancesB2(self):
+        """Does pairdistances perform as expected? B2"""
+        B2 = crystal.Crystal(np.eye(3), [[np.zeros(3)], [0.5*np.ones(3)]], chemistry=['A', 'B'])
+        cutoff = 1.01
+        clusterexp = cluster.makeclusters(B2, cutoff, 4)
+        d_homo, d_hetero = 1., np.sqrt(0.75)
+        for clset in clusterexp:
+            clrep = next(iter(clset))
+            dist_dict_base = clrep.pairdistances(B2)
+            norder = len(clrep)
+            if norder == 1:
+                self.assertEqual(len(dist_dict_base), 0)
+                continue
+            elif norder == 2:
+                for dlist in dist_dict_base.values():
+                    self.assertEqual(len(dlist), 1)
+            elif norder == 3:
+                for (c0, c1), dlist in dist_dict_base.items():
+                    if c0==c1:
+                        self.assertEqual(len(dlist), 1)
+                    else:
+                        self.assertEqual(len(dlist), 2)
+            elif norder == 4:
+                for (c0, c1), dlist in dist_dict_base.items():
+                    if c0 == c1:
+                        self.assertEqual(len(dlist), 1)
+                    else:
+                        self.assertEqual(len(dlist), 4)
+            for dlist in dist_dict_base.values():
+                for d in dlist:
+                    self.assertLess(d, cutoff)
+            for tup in ((0,0), (1,1)):
+                if tup in dist_dict_base:
+                    for d in dist_dict_base[tup]:
+                        self.assertAlmostEqual(d_homo, d)
+            for tup in ((0,1), (1,0)):
+                if tup in dist_dict_base:
+                    for d in dist_dict_base[tup]:
+                        self.assertAlmostEqual(d_hetero, d)
+            for cl in clset:
+                for tup in ((0,0), (0,1), (1,0), (1,1)):
+                    if tup in dist_dict_base:
+                        self.assertTrue(np.allclose(dist_dict_base[tup], cl.pairdistances(B2)[tup]))
+
     def testmakeTSclustersFCC(self):
         """Does makeTSclusters perform as expected? FCC"""
         FCC = crystal.Crystal.FCC(1., chemistry='FCC')

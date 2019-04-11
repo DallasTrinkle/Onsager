@@ -247,6 +247,33 @@ class Cluster(object):
         """
         return self.__class__([cs.g(crys, g) for cs in self.sites], transition=self.__transition__)
 
+    def pairdistances(self, crys):
+        """
+        Return a dictionary of all the pair distances between the chemistries in the cluster.
+        For simplicity, we include both (c1,c2) and (c2,c1).
+
+        :param crys: crystal
+        :return dist_dict: dist_dict[c1][c2] = sorted list of distances between chemistry c1 and c2
+        """
+        chem_cart = [(cs.ci[0], crys.pos2cart(cs.R, cs.ci)) for cs in self.sites]
+        dist_dict = {}
+        for n0, (c0, x0) in enumerate(chem_cart):
+            for (c1, x1) in chem_cart[:n0]:
+                d = np.sqrt(np.dot(x1-x0, x1-x0))
+                tup = (c0, c1) if c0 <= c1 else (c1, c0)
+                if tup in dist_dict:
+                    dist_dict[tup].append(d)
+                else:
+                    dist_dict[tup] = [d]
+        # sort:
+        for dlist in dist_dict.values():
+            dlist.sort()
+        # put (c1,c0) in place: (needs a list comprehension to avoid runtime error about adding keys while iterating]
+        for (c0, c1) in [tup for tup in dist_dict.keys()]:
+            if (c1, c0) not in dist_dict:
+                dist_dict[c1, c0] = dist_dict[c0, c1]
+        return dist_dict
+
     def __str__(self):
         """Human readable version"""
         s = "{} order: ".format(self.Norder)
