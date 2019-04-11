@@ -36,6 +36,7 @@ Releases
 * 1.2.2 New internal friction calculator for interstitial diffuser; improvement in `Crystal` class symmetry to handle larger error in unit cell.
 * 1.3 Two-dimensional lattice support added; new notebooks for variational calculations.
 * 1.3.1 Bug fix in `crystal.Crystal.jumpnetwork` for search range.
+* 1.3.2 Bug fix in `OnsagerCalc.VacancyMediated` for cases with non-zero bias vector (caused unusual occasional test failures).
 
 
 References

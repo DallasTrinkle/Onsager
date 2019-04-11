@@ -67,6 +67,7 @@ class Interstitial(object):
             from site i to site j with jump vector dx; includes i->j and j->i
         """
         self.crys = crys
+        self.threshold = self.crys.threshold
         self.dim = crys.dim
         self.chem = chem
         self.sitelist = sitelist
@@ -244,10 +245,10 @@ class Interstitial(object):
                     # AND against the possibility that we are looking at the reverse jump too
                     if (g.indexmap[self.chem][i0] == i
                         and g.indexmap[self.chem][j0] == j
-                        and np.allclose(dx, np.dot(g.cartrot, dx0))) or \
+                        and np.allclose(dx, np.dot(g.cartrot, dx0), atol=self.threshold)) or \
                             (g.indexmap[self.chem][i0] == j
                              and g.indexmap[self.chem][j0] == i
-                             and np.allclose(dx, -np.dot(g.cartrot, dx0))):
+                             and np.allclose(dx, -np.dot(g.cartrot, dx0), atol=self.threshold)):
                         oplist.append(g)
                         break
             groupops.append(oplist)
@@ -281,10 +282,10 @@ class Interstitial(object):
                                for g in self.crys.G
                                if (g.indexmap[self.chem][i] == i and
                                    g.indexmap[self.chem][j] == j and
-                                   np.allclose(dx, np.dot(g.cartrot, dx))) or
+                                   np.allclose(dx, np.dot(g.cartrot, dx), atol=self.threshold)) or
                                (g.indexmap[self.chem][i] == j and
                                 g.indexmap[self.chem][j] == i and
-                                np.allclose(dx, -np.dot(g.cartrot, dx)))]))
+                                np.allclose(dx, -np.dot(g.cartrot, dx), atol=self.threshold))]))
         return lis
 
     def siteprob(self, pre, betaene):
@@ -713,6 +714,7 @@ class VacancyMediated(object):
         """
         if all(x is None for x in (crys, chem, sitelist, jumpnetwork)): return  # blank object
         self.crys = crys
+        self.threshold = self.crys.threshold
         self.dim = crys.dim
         self.chem = chem
         self.sitelist = copy.deepcopy(sitelist)
@@ -929,12 +931,12 @@ class VacancyMediated(object):
         invlatt = np.linalg.inv(basesupercell.lattice)
         for PS in self.kinetic.states:
             dxmap = np.dot(basesupercell.lattice, crystal.inhalf(np.dot(invlatt, PS.dx)))
-            if not np.allclose(PS.dx, dxmap):
+            if not np.allclose(PS.dx, dxmap, atol=self.threshold):
                 if PS in self.thermo:
                     failstate = 'thermodynamic range'
                 else:
                     failstate = 'escape endpoint'
-                if np.allclose(np.dot(PS.dx, PS.dx), np.dot(dxmap, dxmap)):
+                if np.allclose(np.dot(PS.dx, PS.dx), np.dot(dxmap, dxmap), atol=self.threshold):
                     failtype = 'multiplicity issue'
                 else:
                     failtype = 'mapping error'

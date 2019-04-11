@@ -418,12 +418,12 @@ class GFCrystalcalc(object):
             if n < 0: raise ValueError("Taylor expansion has terms below n=0?")
             if n == 0:
                 if l != 0: raise ValueError("n=0 term has angular dependence? l != 0")
-                gammacoeff = -coeff[0]
+                gammacoeff = -coeff[0].real
                 break
         if gammacoeff is None:
             # missing onsite term--indicates that it's been reduced to 0
             # should ONLY happen if we have a Bravais lattice, e.g.
-            gammacoeff = np.zeros((self.N, self.N), dtype=complex)
+            gammacoeff = np.zeros((self.N, self.N)) #, dtype=complex)
         r, vr = LA.eigh(gammacoeff)
         return -r, vr
 
@@ -464,6 +464,9 @@ class GFCrystalcalc(object):
         :return eta: [N,3] array
         """
         if etav is None: return self.eta
+        # a little bit of a hack: we keep the implicit vr[:,0] part, that's the square root of
+        # probability that comes from the diagonalization at q=0, but it might be negative!
+        rhosign = [1. if sum(self.vr[:, n0])>0 else -1. for n0 in range(self.Ndiff)]
         Taylor = T3D if self.crys.dim == 3 else T2D
         d_ind_list = [(d, Taylor.pow2ind[(0,)*d + (1,) + (0,)*(self.crys.dim-1-d)])
                        for d in range(self.crys.dim)]
@@ -474,8 +477,8 @@ class GFCrystalcalc(object):
             if n == 1:
                 if l >= 1:
                     for d, ind in d_ind_list:
-                        eta[:, d] += sum(np.dot(self.vr[:, self.Ndiff:], c[ind, :])[:, n].imag
-                                         for n in range(self.Ndiff))/self.Ndiff
+                        eta[:, d] -= sum(rhosign[n0]*np.dot(self.vr[:, self.Ndiff:], c[ind, :])[:, n0].imag
+                                         for n0 in range(self.Ndiff)) / self.Ndiff
         return eta
 
     def BlockRotateOmegaTaylor(self, omega_Taylor_rotate):
@@ -483,11 +486,12 @@ class GFCrystalcalc(object):
         Returns block partitioned Taylor expansion of a rotated omega Taylor expansion.
 
         :param omega_Taylor_rotate: rotated into diffusive [0] / relaxive [1:] basis
-        :param dd: diffusive/diffusive block (upper left)
-        :param dr: diffusive/relaxive block (lower left)
-        :param rd: relaxive/diffusive block (upper right)
-        :param rr: relaxive/relaxive block (lower right)
-        :param D: :math:`dd - dr (rr)^{-1} rd` (diffusion)
+        :return dd: diffusive/diffusive block (upper left)
+        :return dr: diffusive/relaxive block (lower left)
+        :return rd: relaxive/diffusive block (upper right)
+        :return rr: relaxive/relaxive block (lower right)
+        :return D: :math:`dd - dr (rr)^{-1} rd` (diffusion)
+        :return etav: :math:`(rr)^{-1} rd` (relaxation vector)
         """
         Taylor = T3D if self.crys.dim == 3 else T2D
         ND = self.Ndiff  # previously had been 1.
