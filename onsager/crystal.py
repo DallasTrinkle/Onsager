@@ -1394,7 +1394,7 @@ class Crystal(object):
         :return nnlist: list of nearest neighbor vectors
         """
         r2 = cutoff * cutoff
-        nmax = [int(np.round(np.sqrt(self.metric[i, i]))) + 1
+        nmax = [int(np.round(np.sqrt(r2/self.metric[i, i]))) + 1
                 for i in range(self.dim)]
         nranges = [range(-n, n+1) for n in nmax]
         supervect = [np.array(ntup) for ntup in itertools.product(*nranges)]

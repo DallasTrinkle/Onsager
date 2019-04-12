@@ -315,7 +315,7 @@ def makeclusters(crys, cutoff, maxorder, exclude=()):
     # first, make lists of all our pairs within a given nn distance
     # we could modify this to use different cutoff between different chemistries...
     r2 = cutoff * cutoff
-    nmax = [int(np.round(np.sqrt(crys.metric[i, i]))) + 1
+    nmax = [int(np.round(np.sqrt(r2/crys.metric[i, i]))) + 1
             for i in range(crys.dim)]
     nranges = [range(-n, n+1) for n in nmax]
     supervect = [np.array(ntup) for ntup in itertools.product(*nranges)]
