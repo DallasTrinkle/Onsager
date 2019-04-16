@@ -678,13 +678,6 @@ class ClusterSupercell(object):
         # if dist2 is smaller than dspec_min, it's mobile:
         return index, (dist2 < dspec_min)
 
-    #TODO: ClusterSupercell() --maybe here, maybe in ClusterSupercell? Need some way to go
-    #    from a Supercell into a ClusterSupercell? Or even just pass on the occupancies?
-    #    ... that might make more sense: a "setoccupancy" function in ClusterSupercell
-    #    to deal with this. Meed to identify how to map vacancies and substitutional solutes.
-    #    I think the right answer is to output occupancy vectors. We need to know how to map
-    #    chemical identities into occupancy values, too.
-
     def Supercell_occ(self, sup, chemmapping=None):
         """
         Takes in a Supercell object (that is assumed to be consistent with this supercell!)
