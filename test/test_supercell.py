@@ -432,6 +432,38 @@ class SupercellParsing(unittest.TestCase):
                 else:
                     self.assertEqual(1, chemmapping[csite][cocc])
 
+    def testSuperIntoOccupancies(self):
+        """Can we construct our mobile and spectator occupancy vectors? (B2)"""
+        B2 = crystal.Crystal(np.eye(3), [[np.array([0.,0.,0.])], [np.array([0.5,0.5,0.5])]], ['A', 'B'])
+        nsuper = 4*self.one
+        sup = supercell.Supercell(B2, nsuper, Nsolute=1)
+        sup.definesolute(2, 'C')
+        sup_c = supercell.ClusterSupercell(B2, nsuper, spectator=(1,))
+        # make up some random occupancies, and see how we do...
+        Ntests = sup.size*sup.N
+        for _ in range(16):
+            for c, ind in zip(np.random.randint(-1, sup.Nchem, size=Ntests),
+                              np.random.randint(sup.size * sup.N, size=Ntests)):
+                sup.setocc(ind, c)
+            mocc, socc = sup_c.Supercell_occ(sup)
+            # Now... to check that it all makes sense.
+            for ind, n in enumerate(mocc):
+                ci, pos = sup_c.ciR(ind, mobile=True)
+                csite = ci[0]
+                cocc = sup[pos]
+                if csite == cocc:
+                    self.assertEqual(0, n, msg='Mobile failure at {}'.format(ind))
+                else:
+                    self.assertEqual(1, n, msg='Mobile failure at {}'.format(ind))
+            for ind, n in enumerate(socc):
+                ci, pos = sup_c.ciR(ind, mobile=False)
+                csite = ci[0]
+                cocc = sup[pos]
+                if csite == cocc:
+                    self.assertEqual(0, n, msg='Spectator failure at {}'.format(ind))
+                else:
+                    self.assertEqual(1, n, msg='Spectator failure at {}'.format(ind))
+
 
 
 class ClusterSupercellTests(unittest.TestCase):

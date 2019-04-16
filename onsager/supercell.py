@@ -427,7 +427,7 @@ class Supercell(object):
         chemlist = (POSCAR_list.pop(0)).split()
         # this optional (?) line may specify the chemical element ordering, or it may
         # just be the element numbers; if it's the former, we need to parse:
-        if '0' < chemlist[0][0] < '9':
+        if '0' <= chemlist[0][0] <= '9':
             chemident = [n for n in range(len(chemlist))]
         else:
             chemident = [self.chemistry.index(elem) for elem in chemlist]
@@ -628,6 +628,7 @@ class ClusterSupercell(object):
     def ciR(self, ind, mobile=True):
         """
         Return the chem/index and lattice vector for a specific indexed position
+
         :param ind: index of site
         :param mobile: True if mobile; false if spectator
         :return ci: (c, i) index
@@ -700,14 +701,29 @@ class ClusterSupercell(object):
 
         If the ``chemmapping`` is None, we use a default "defect" occupancy mapping; namely,
         if ``csite`` != Interstitial, then we use 0 when ``csite==cocc``, 1 otherwise; and
-        if ``csite`` == Interstitial, we use 0 when ``csite==-1``, 1 otherwise.
+        if ``csite`` == Interstitial, we use 0 when ``csite==-1``, 1 otherwise. See
+        ``Supercell.defect_chemmapping()``
 
         :param sup: Supercell object, with appropriate chemical occupancies
         :param chemmapping: mapping of chemical identities to occupancy variables.
         :return mocc: mobile occupancy vector
         :return socc: spectator occupancy vector
         """
-
+        if chemmapping is None:
+            chemmapping = sup.defect_chemmapping()
+        mocc = np.zeros(self.Nmobile*self.size, dtype=int)
+        socc = np.zeros(self.Nspec*self.size, dtype=int)
+        # now, we just run through the positions in *this* supercell, and get the occupancy
+        # in the other supercell. Consistency is key!
+        for ind, pos in enumerate(self.mobilepos):
+            csite = self.mobileindices[ind%self.Nmobile][0] # get the site chemistry
+            cocc = sup[pos]  # get the occupancy chemistry
+            mocc[ind] = chemmapping[csite][cocc]
+        for ind, pos in enumerate(self.specpos):
+            csite = self.spectatorindices[ind%self.Nspec][0] # get the site chemistry
+            cocc = sup[pos]  # get the occupancy chemistry
+            socc[ind] = chemmapping[csite][cocc]
+        return mocc, socc
 
     def evalcluster(self, mocc, socc, clusters):
         """
