@@ -5,7 +5,7 @@ Unit tests for supercell class
 __author__ = 'Dallas R. Trinkle'
 
 import unittest
-import itertools, copy
+import itertools, copy, textwrap
 import numpy as np
 from onsager import crystal, supercell, cluster
 
@@ -365,7 +365,7 @@ class SupercellParsing(unittest.TestCase):
         self.one = np.eye(3, dtype=int)
 
     def testReadPOSCAR(self):
-        """Can we read what we write?"""
+        """Can we read what we write? (simple FCC)"""
         sup = supercell.Supercell(self.crys, 4 * self.one)
         sup2 = sup.copy()
         sup.fillperiodic((0,0))
@@ -377,6 +377,46 @@ class SupercellParsing(unittest.TestCase):
             self.assertEqual(occ, occ2, msg='Failure at {}'.format(n))
         POSCAR_str2 = sup2.POSCAR(testname)
         self.assertEqual(POSCAR_str, POSCAR_str2)
+
+    def testReadB2POSCAR(self):
+        """Can we read what we write? (B2)"""
+        B2 = crystal.Crystal(np.eye(3), [[np.array([0.,0.,0.])], [np.array([0.5,0.5,0.5])]], ['A', 'B'])
+        nsuper = 4*self.one
+        sup = supercell.Supercell(B2, nsuper, Nsolute=1)
+        sup.definesolute(2, 'C')
+        # make up some random occupancies, and see how we do...
+        sup2 = sup.copy()
+        Ntests = sup.size*sup.N
+        for _ in range(16):
+            for c, ind in zip(np.random.randint(-1, sup.Nchem, size=Ntests),
+                              np.random.randint(sup.size * sup.N, size=Ntests)):
+                sup.setocc(ind, c)
+            sup2.POSCAR_occ(sup.POSCAR())
+            for n, occ, occ2 in zip(itertools.count(), sup.occ, sup2.occ):
+                self.assertEqual(occ, occ2, msg='Failure at {}'.format(n))
+
+    def testReadPOSCAR_hand(self):
+        """Can we read a simple example POSCAR?"""
+        nsuper = np.array([[-1,1,1], [1,-1,1], [1,1,-1]]) # 4 atom cubic unit cell, FCC
+        poslist = [np.array([0., 0., 0.]), np.array([0.5, 0.5, 0.]), np.array([0.0, 0.5, 0.5])]
+        vaclist = [np.array([0.5, 0., 0.5])]
+        POSCAR_str = textwrap.dedent("""\
+        Test supercell (written by hand!)
+        1.0
+        1.0 0.0 0.0
+        0.0 1.0 0.0
+        0.0 0.0 1.0
+        3
+        Direct
+        """)
+        for pos in poslist:
+            POSCAR_str += "{} {} {}\n".format(pos[0], pos[1], pos[2])
+        sup = supercell.Supercell(self.crys, nsuper)
+        sup.POSCAR_occ(POSCAR_str)
+        for pos in poslist:
+            self.assertEqual(0, sup[pos])
+        for vac in vaclist:
+            self.assertEqual(-1, sup[vac])
 
 
 
