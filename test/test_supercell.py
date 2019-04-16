@@ -356,6 +356,30 @@ class InterstitialSuperTests(HCPSuperTests):
         # print(YAMLstring)
 
 
+class SupercellParsing(unittest.TestCase):
+    """Tests to make sure we can read a POSCAR into a Supercell object, and manipulate."""
+    longMessage = False
+
+    def setUp(self):
+        self.crys = crystal.Crystal.FCC(1., 'Al')
+        self.one = np.eye(3, dtype=int)
+
+    def testReadPOSCAR(self):
+        """Can we read what we write?"""
+        sup = supercell.Supercell(self.crys, 4 * self.one)
+        sup2 = sup.copy()
+        sup.fillperiodic((0,0))
+        testname = 'test'
+        POSCAR_str = sup.POSCAR(testname)
+        name = sup2.POSCAR_occ(POSCAR_str)
+        self.assertEqual(testname + ' {}({})'.format(self.crys.chemistry[0], sup.N*sup.size), name)
+        for n, occ, occ2 in zip(itertools.count(), sup.occ, sup2.occ):
+            self.assertEqual(occ, occ2, msg='Failure at {}'.format(n))
+        POSCAR_str2 = sup2.POSCAR(testname)
+        self.assertEqual(POSCAR_str, POSCAR_str2)
+
+
+
 class ClusterSupercellTests(unittest.TestCase):
     """Tests of the Supercell Cluster class"""
     longMessage = False

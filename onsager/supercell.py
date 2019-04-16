@@ -382,6 +382,69 @@ class Supercell(object):
         # needs a trailing newline
         return POSCAR + '\n'
 
+    #TODO: POSCAR_occ() -- a parser that reads a POSCAR file and sets the occupancies
+    #    ... maybe include the option to use the positions as read for reordering?
+    #    ... I can see needing that for (a) testing (write -> read), and (b) transitions
+    #    ... needs to check that the lattice is reasonable, deal with the VASP parsing weirdness...
+    #TODO: ClusterSupercell() --maybe here, maybe in ClusterSupercell? Need some way to go
+    #    from a Supercell into a ClusterSupercell? Or even just pass on the occupancies?
+    #    ... that might make more sense: a "setoccupancy" function in ClusterSupercell
+    #    to deal with this. Meed to identify how to map vacancies and substitutional solutes.
+    #    I think the right answer is to output occupancy vectors. We need to know how to map
+    #    chemical identities into occupancy values, too.
+
+    def POSCAR_occ(self, POSCAR_str, EMPTY_SUPER=True):
+        """
+        Takes in a POSCAR_str, and sets the occupancy of the supercell accordingly.
+        Note: if we want to read a POSCAR from a file instead, the proper usage is
+
+        ::
+
+            with open(POSCAR_filename, "r") as f:
+                sup.from_POSCAR(f.read())
+
+        :param POSCAR_str: string form of a POSCAR
+        :param EMPTY_SUPER: initial supercell by emptying it first (default=True)
+        :return: name from the POSCAR
+        """
+        POSCAR_list = POSCAR_str.split('\n') # break into lines
+        name = POSCAR_list.pop(0)
+        a0 = float(POSCAR_list.pop(0))
+        alist = []
+        for _ in range(3):
+            alist.append(a0*np.array([float(astr) for astr in (POSCAR_list.pop(0)).split()]))
+        super_latt = np.array(alist).T
+        super_inv = np.linalg.inv(super_latt)
+        # we should probably do a sanity check: are we trying to occupy with a sensible
+        # supercell? for now, we'll skip this.
+        chemlist = (POSCAR_list.pop(0)).split()
+        # this optional (?) line may specify the chemical element ordering, or it may
+        # just be the element numbers; if it's the former, we need to parse:
+        if '0' < chemlist[0][0] < '9':
+            chemident = [n for n in range(len(chemlist))]
+        else:
+            chemident = [self.chemistry.index(elem) for elem in chemlist]
+            chemlist = (POSCAR_list.pop(0)).split()
+        Nspecies = [int(s) for s in chemlist]
+        coord_type = (POSCAR_list.pop(0)).strip()
+        # check for "selective dynamics" switch
+        if coord_type[0] in {'s', 'S'}:
+            coord_type = (POSCAR_list.pop(0)).strip()
+        cart_coord = coord_type[0] in {'c', 'C', 'k', 'K'}
+        if EMPTY_SUPER:
+            for n in range(self.N*self.size):
+                self.setocc(n, -1)
+        # finally, read all of the entries...
+        for N, c in zip(Nspecies, chemident):
+            for _ in range(N):
+                ustr = (POSCAR_list.pop(0)).split()
+                uvec = np.array([float(u) for u in ustr[:3]])
+                if cart_coord:
+                    uvec = np.dot(super_inv, uvec)
+                i = self.index(uvec)
+                self.setocc(i, c)
+        return name
+
     __vacancyformat__ = "v_{sitechem}"
     __interstitialformat__ = "{chem}_i"
     __antisiteformat__ = "{chem}_{sitechem}"
