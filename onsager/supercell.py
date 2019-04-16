@@ -359,6 +359,20 @@ class Supercell(object):
         """
         return [[self.pos[ind] for ind in clist] for clist in self.chemorder]
 
+    def defect_chemmapping(self):
+        """Returns a ``chemmapping`` dictionary corresponding to defects"""
+        chemmapping = {}
+        for n in range(self.crys.Nchem):
+            # start with anything on a site being "occupied"
+            cmap = {i: 1 for i in range(-1, self.Nchem)}
+            # if it's an interstitial, vacancy == unoccupied; if its native, native chem == unoccupied
+            if n in self.interstitial:
+                cmap[-1] = 0  # vacancies are "unoccupied"
+            else:
+                cmap[n] = 0  # "correct" site
+            chemmapping[n] = cmap
+        return chemmapping
+
     def POSCAR(self, name=None, stoichiometry=True):
         """
         Return a VASP-style POSCAR, returned as a string.
@@ -382,17 +396,6 @@ class Supercell(object):
         # needs a trailing newline
         return POSCAR + '\n'
 
-    #TODO: POSCAR_occ() -- a parser that reads a POSCAR file and sets the occupancies
-    #    ... maybe include the option to use the positions as read for reordering?
-    #    ... I can see needing that for (a) testing (write -> read), and (b) transitions
-    #    ... needs to check that the lattice is reasonable, deal with the VASP parsing weirdness...
-    #TODO: ClusterSupercell() --maybe here, maybe in ClusterSupercell? Need some way to go
-    #    from a Supercell into a ClusterSupercell? Or even just pass on the occupancies?
-    #    ... that might make more sense: a "setoccupancy" function in ClusterSupercell
-    #    to deal with this. Meed to identify how to map vacancies and substitutional solutes.
-    #    I think the right answer is to output occupancy vectors. We need to know how to map
-    #    chemical identities into occupancy values, too.
-
     def POSCAR_occ(self, POSCAR_str, EMPTY_SUPER=True):
         """
         Takes in a POSCAR_str, and sets the occupancy of the supercell accordingly.
@@ -403,8 +406,12 @@ class Supercell(object):
             with open(POSCAR_filename, "r") as f:
                 sup.from_POSCAR(f.read())
 
+        Warning: there is nearly no validity checking; it makes a strong assumption
+        that a reasonable POSCAR file is being given, and that the sites should correspond
+        to the supercell object. Should that not be the case, the behavior is unspecified.
+
         :param POSCAR_str: string form of a POSCAR
-        :param EMPTY_SUPER: initial supercell by emptying it first (default=True)
+        :param EMPTY_SUPER: initialize supercell by emptying it first (default=True)
         :return: name from the POSCAR
         """
         POSCAR_list = POSCAR_str.split('\n') # break into lines
@@ -670,10 +677,42 @@ class ClusterSupercell(object):
         # if dist2 is smaller than dspec_min, it's mobile:
         return index, (dist2 < dspec_min)
 
+    #TODO: ClusterSupercell() --maybe here, maybe in ClusterSupercell? Need some way to go
+    #    from a Supercell into a ClusterSupercell? Or even just pass on the occupancies?
+    #    ... that might make more sense: a "setoccupancy" function in ClusterSupercell
+    #    to deal with this. Meed to identify how to map vacancies and substitutional solutes.
+    #    I think the right answer is to output occupancy vectors. We need to know how to map
+    #    chemical identities into occupancy values, too.
+
+    def Supercell_occ(self, sup, chemmapping=None):
+        """
+        Takes in a Supercell object (that is assumed to be consistent with this supercell!)
+        and produces the corresponding occupancy vectors for *this* supercell, using a
+        specific chemical mapping (described below).
+
+        In a Supercell object, each *site* has a "native" chemistry; moreover, those sites
+        may be occupied by everything from a vacancy (-1) to a different chemical element (>=0).
+        We need to define how that happens, since ClusterSupercells only have occupancies of 0 or 1.
+
+        ``chemmapping`` is a dictionary of dictionaries. ``chemmapping[csite][cocc]`` = 0 or 1
+        to dictate what the occupancy for a site *should* be if chemistry of type ``cocc`` occurs
+        on a site with native chemistry ``csite``.
+
+        If the ``chemmapping`` is None, we use a default "defect" occupancy mapping; namely,
+        if ``csite`` != Interstitial, then we use 0 when ``csite==cocc``, 1 otherwise; and
+        if ``csite`` == Interstitial, we use 0 when ``csite==-1``, 1 otherwise.
+
+        :param sup: Supercell object, with appropriate chemical occupancies
+        :param chemmapping: mapping of chemical identities to occupancy variables.
+        :return mocc: mobile occupancy vector
+        :return socc: spectator occupancy vector
+        """
+
+
     def evalcluster(self, mocc, socc, clusters):
         """
         Evaluate a cluster expansion for a given mobile occupancy and spectator occupancy.
-        Indexing corresponds to `mobilepos` and `specpos`. The clusters are input as a
+        Indexing corresponds to ``mobilepos`` and ``specpos``. The clusters are input as a
         list of lists of clusters (where it is assumed that all of the clusters in a given
         sublist have equal coefficients (i.e., grouped by symmetry). We return a vector
         of length Nclusters + 1; each entry is the number of times each cluster appears,
@@ -702,13 +741,13 @@ class ClusterSupercell(object):
     def evalTScluster(self, mocc, socc, TSclusters, initial, final, dx):
         """
         Evaluate a TS cluster expansion for a given mobile occupancy and spectator occupancy.
-        Indexing corresponds to `mobilepos` and `specpos`. The clusters are input as a
+        Indexing corresponds to ``mobilepos`` and ``specpos``. The clusters are input as a
         list of lists of clusters (where it is assumed that all of the clusters in a given
         sublist have equal coefficients (i.e., grouped by symmetry). We return a vector
         of length Nclusters; each entry is the number of times each cluster appears.
         This can then be dotted into the vector of values to get the cluster expansion value.
-        This is evaluated for the transition where the mobile species at `initial` jumps
-        to the position at `final`. Requires mocc[initial] == 1 and mocc[final] == 0
+        This is evaluated for the transition where the mobile species at ``initial`` jumps
+        to the position at ``final``. Requires mocc[initial] == 1 and mocc[final] == 0
 
         :param mocc: mobile occupancy vector (0 or 1 only)
         :param socc: spectator occupancy vector (0 or 1 only)
@@ -793,7 +832,7 @@ class ClusterSupercell(object):
                              TSclusters=(), TSvalues=(),
                              siteinteract=(), interact=()):
         """
-        Build out an efficient jump network evaluator. Similar inputs to `clusterevaluator`,
+        Build out an efficient jump network evaluator. Similar inputs to ``clusterevaluator``,
         with the addition of a jumpnetwork and energies. The interactions can be appended
         onto existing interactions, if included. The information about all of the
         transitions is: initial state, final state, delta x.
@@ -803,10 +842,10 @@ class ClusterSupercell(object):
         :param values: vector of values for the clusters; if it is longer than the
           list of clusters by one, the last values is assumed to be the constant value.
         :param chem: index of species that transitions
-        :param jumpnetwork: list of lists of jumps; each is ((i, j), dx) where `i` and `j` are
-          unit cell indices for species `chem`
+        :param jumpnetwork: list of lists of jumps; each is ((i, j), dx) where ``i`` and ``j`` are
+          unit cell indices for species ``chem``
         :param KRAvalues: list of "KRA" values for barriers (relative to average energy of endpoints);
-          if `TSclusters` are used, choosing 0 is more straightforward.
+          if ``TSclusters`` are used, choosing 0 is more straightforward.
         :param TSclusters: (optional) list of transition state cluster expansion terms; this is
           always added on to KRAvalues (thus using 0 is recommended if TSclusters are also used)
         :param TSvalues: (optional) values for TS cluster expansion entries

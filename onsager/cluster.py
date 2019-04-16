@@ -27,13 +27,13 @@ class ClusterSite(collections.namedtuple('ClusterSite', 'ci R')):
 
     @classmethod
     def fromcryscart(cls, crys, cart_pos):
-        """Return a ClusterSite corresponding to Cartesian position `cart_pos` in crystal `crys`"""
+        """Return a ClusterSite corresponding to Cartesian position ``cart_pos`` in crystal ``crys``"""
         R, ci = crys.cart2pos(cart_pos)
         return cls(ci=ci, R=R)
 
     @classmethod
     def fromcrysunit(cls, crys, unit_pos):
-        """Return a ClusterSite corresponding to unit cell position `unit_pos` in crystal `crys`"""
+        """Return a ClusterSite corresponding to unit cell position ``unit_pos`` in crystal ``crys``"""
         cart_pos = crys.unit2cart(np.zeros(crys.dim, dtype=int), unit_pos)
         return cls.fromcryscart(cart_pos)
 
@@ -222,7 +222,7 @@ class Cluster(object):
     def __sub__(self, other):
         """Subtract a site from a cluster. Had a very specific meaning: if the
         site is in the cluster, it returns a list of all the *other* sites, shifted
-        so that the `other` site is at the origin.
+        so that the ``other`` site is at the origin.
 
         Needs to be clarified for the case of a transition state.
 
@@ -410,10 +410,10 @@ class MonteCarloSampler(object):
         :param enevalues: energy values corresponding to each cluster
 
         :param chem: (optional) index of species that transitions
-        :param jumpnetwork: (optional) list of lists of jumps; each is ((i, j), dx) where `i` and `j` are
-          unit cell indices for species `chem`
+        :param jumpnetwork: (optional) list of lists of jumps; each is ((i, j), dx) where ``i`` and ``j`` are
+          unit cell indices for species ``chem``
         :param KRAvalues: (optional) list of "KRA" values for barriers (relative to average energy of endpoints);
-          if `TSclusters` are used, choosing 0 is more straightforward.
+          if ``TSclusters`` are used, choosing 0 is more straightforward.
         :param TSclusters: (optional) list of transition state cluster expansion terms; this is
           always added on to KRAvalues (thus using 0 is recommended if TSclusters are also used)
         :param TSvalues: (optional) values for TS cluster expansion entries
@@ -421,10 +421,10 @@ class MonteCarloSampler(object):
         self.supercell = supercell
         siteinteract, interactvalue = supercell.clusterevaluator(spectator_occ, clusterexp, enevalues)
         self.Nenergy = len(interactvalue)
-        # to be initialized via `jumpnetwork_init()`
+        # to be initialized via jumpnetwork_init()
         self.jumps = None  # indicates no jump network...
         if chem is not None:
-            # quick check that `chem` is a mobile species:
+            # quick check that chem is a mobile species:
             if (chem, 0) not in self.supercell.indexmobile:
                 raise ValueError('Chemical species {} is a spectator in supercell?'.format(chem))
             siteinteract, interactvalue, self.jumps, self.interactrange = \

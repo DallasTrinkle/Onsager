@@ -418,6 +418,20 @@ class SupercellParsing(unittest.TestCase):
         for vac in vaclist:
             self.assertEqual(-1, sup[vac])
 
+    def test_chemmapping(self):
+        """Does the chemmapping function behave logically?"""
+        B2 = crystal.Crystal(np.eye(3), [[np.array([0.,0.,0.])], [np.array([0.5,0.5,0.5])]], ['A', 'B'])
+        nsuper = 1*self.one
+        sup = supercell.Supercell(B2, nsuper, Nsolute=1)
+        sup.definesolute(2, 'C')
+        chemmapping = sup.defect_chemmapping()
+        for csite in range(B2.Nchem):
+            for cocc in range(-1, sup.Nchem):
+                if csite == cocc:
+                    self.assertEqual(0, chemmapping[csite][cocc])
+                else:
+                    self.assertEqual(1, chemmapping[csite][cocc])
+
 
 
 class ClusterSupercellTests(unittest.TestCase):
