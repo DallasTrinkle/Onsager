@@ -16,8 +16,6 @@ import collections, copy, itertools, warnings
 from numbers import Integral
 from onsager import crystal, cluster
 
-# TODO: add "parser"--read CONTCAR file, create Supercell
-# TODO: output PairState from Supercell
 
 class Supercell(object):
     """
@@ -232,7 +230,7 @@ class Supercell(object):
         :return transdict: dictionary of tuples and their corresponding index (inverse of trans)
         """
         size = abs(int(np.round(np.linalg.det(superlatt))))
-        if size==0: raise ZeroDivisionError('Tried to use a singular supercell.')
+        if size == 0: raise ZeroDivisionError('Tried to use a singular supercell.')
         invsuper = np.round(np.linalg.inv(superlatt) * size).astype(int)
         maxN = abs(superlatt).max()
         translist, transdict = [], {}
@@ -396,7 +394,7 @@ class Supercell(object):
         # needs a trailing newline
         return POSCAR + '\n'
 
-    def POSCAR_occ(self, POSCAR_str, EMPTY_SUPER=True):
+    def POSCAR_occ(self, POSCAR_str, EMPTY_SUPER=True, disp_threshold=-1, latt_threshold=-1):
         """
         Takes in a POSCAR_str, and sets the occupancy of the supercell accordingly.
         Note: if we want to read a POSCAR from a file instead, the proper usage is
@@ -406,22 +404,40 @@ class Supercell(object):
             with open(POSCAR_filename, "r") as f:
                 sup.from_POSCAR(f.read())
 
-        Warning: there is nearly no validity checking; it makes a strong assumption
+        Warning: there is only minimal validity checking; it makes a strong assumption
         that a reasonable POSCAR file is being given, and that the sites should correspond
         to the supercell object. Should that not be the case, the behavior is unspecified.
 
         :param POSCAR_str: string form of a POSCAR
         :param EMPTY_SUPER: initialize supercell by emptying it first (default=True)
+        :param disp_threshold: threshold for difference in position to raise an error, in
+            unit cell coordinates. For a negative value, we compute a value that is ~0.1A.
+            If you do *not* want this check to be meaningful, choose a value >sqrt(3)=1.733
+        :param latt_threshold: threshold for supercell lattice check, in units of strain.
+            For a negative values **do not check**.
         :return: name from the POSCAR
         """
-        POSCAR_list = POSCAR_str.split('\n') # break into lines
+        POSCAR_list = POSCAR_str.split('\n')  # break into lines
         name = POSCAR_list.pop(0)
         a0 = float(POSCAR_list.pop(0))
         alist = []
         for _ in range(3):
-            alist.append(a0*np.array([float(astr) for astr in (POSCAR_list.pop(0)).split()]))
+            alist.append(a0 * np.array([float(astr) for astr in (POSCAR_list.pop(0)).split()]))
         super_latt = np.array(alist).T
         super_inv = np.linalg.inv(super_latt)
+        if latt_threshold > 0:
+            metric = np.dot(super_latt.T, super_latt)  # metric tensor
+            super_metric = np.dot(self.lattice.T, self.lattice)  # supercell metric tensor
+            max_diff = max(abs(metric[i][j] - super_metric[i][j])/np.sqrt(super_metric[i]*super_metric[j])
+                           for i in range(3) for j in range(3))
+            if max_diff > latt_threshold*latt_threshold:
+                msg = '{}\n (supercell) and\n{}\n (POSCAR)\ndiffer by {} > {}'.format(self.lattice.T, super_latt.T,
+                                                                                      np.sqrt(max_diff), latt_threshold)
+                raise ValueError(msg)
+        if disp_threshold < 0:
+            # try to make a fairly liberal choice, based on the dimensions of the
+            # supercell; essentially, this is ~0.1A
+            disp_threshold = 0.1/np.sqrt(np.max(np.diag(np.dot(super_latt.T, super_latt))))
         # we should probably do a sanity check: are we trying to occupy with a sensible
         # supercell? for now, we'll skip this.
         chemlist = (POSCAR_list.pop(0)).split()
@@ -439,7 +455,7 @@ class Supercell(object):
             coord_type = (POSCAR_list.pop(0)).strip()
         cart_coord = coord_type[0] in {'c', 'C', 'k', 'K'}
         if EMPTY_SUPER:
-            for n in range(self.N*self.size):
+            for n in range(self.N * self.size):
                 self.setocc(n, -1)
         # finally, read all of the entries...
         for N, c in zip(Nspecies, chemident):
@@ -448,7 +464,10 @@ class Supercell(object):
                 uvec = np.array([float(u) for u in ustr[:3]])
                 if cart_coord:
                     uvec = np.dot(super_inv, uvec)
-                i = self.index(uvec)
+                i = self.index(uvec, threshold=disp_threshold)
+                if i is None:
+                    msg = 'Unable to map {} into supercell'.format(uvec)
+                    raise ValueError(msg)
                 self.setocc(i, c)
         return name
 
@@ -592,7 +611,7 @@ class ClusterSupercell(object):
         """
         self.crys = crys
         self.superlatt = superlatt.copy()
-        self.spectator = [c for c in set(spectator)] # only keep unique values
+        self.spectator = [c for c in set(spectator)]  # only keep unique values
         self.spectator.sort()
         self.mobile = [c for c in range(crys.Nchem) if c not in self.spectator]
         self.Nchem = crys.Nchem - len(self.spectator)
@@ -638,7 +657,7 @@ class ClusterSupercell(object):
             N, indices = self.Nmobile, self.mobileindices
         else:
             N, indices = self.Nspec, self.spectatorindices
-        return indices[ind % N], self.Rveclist[ind//N]
+        return indices[ind % N], self.Rveclist[ind // N]
 
     def index(self, R, ci):
         """
@@ -651,9 +670,9 @@ class ClusterSupercell(object):
         :return mobile: boolean; True if mobile, False if spectator
         """
         if ci in self.indexmobile:
-            return self.transdict[self.incell(R)]*self.Nmobile + self.indexmobile[ci], True
+            return self.transdict[self.incell(R)] * self.Nmobile + self.indexmobile[ci], True
         else:
-            return self.transdict[self.incell(R)]*self.Nspec + self.indexspectator[ci], False
+            return self.transdict[self.incell(R)] * self.Nspec + self.indexspectator[ci], False
 
     def indexpos(self, pos, threshold=1., CARTESIAN=False):
         """
@@ -704,16 +723,16 @@ class ClusterSupercell(object):
         """
         if chemmapping is None:
             chemmapping = sup.defect_chemmapping()
-        mocc = np.zeros(self.Nmobile*self.size, dtype=int)
-        socc = np.zeros(self.Nspec*self.size, dtype=int)
+        mocc = np.zeros(self.Nmobile * self.size, dtype=int)
+        socc = np.zeros(self.Nspec * self.size, dtype=int)
         # now, we just run through the positions in *this* supercell, and get the occupancy
         # in the other supercell. Consistency is key!
         for ind, pos in enumerate(self.mobilepos):
-            csite = self.mobileindices[ind%self.Nmobile][0] # get the site chemistry
+            csite = self.mobileindices[ind % self.Nmobile][0]  # get the site chemistry
             cocc = sup[pos]  # get the occupancy chemistry
             mocc[ind] = chemmapping[csite][cocc]
         for ind, pos in enumerate(self.specpos):
-            csite = self.spectatorindices[ind%self.Nspec][0] # get the site chemistry
+            csite = self.spectatorindices[ind % self.Nspec][0]  # get the site chemistry
             cocc = sup[pos]  # get the occupancy chemistry
             socc[ind] = chemmapping[csite][cocc]
         return mocc, socc
@@ -734,16 +753,20 @@ class ClusterSupercell(object):
         :param clusters: list of lists (or sets) of Cluster objects
         :return clustercount: count of how many of each cluster is in this supercell.
         """
+
         def isocc(R, ci):
             n, mob = self.index(R, ci)
-            if mob: return mocc[n] == 1
-            else: return socc[n] == 1
-        clustercount = np.zeros(len(clusters)+1, dtype=int)
+            if mob:
+                return mocc[n] == 1
+            else:
+                return socc[n] == 1
+
+        clustercount = np.zeros(len(clusters) + 1, dtype=int)
         clustercount[-1] = self.size
         for mc, clusterlist in enumerate(clusters):
             for clust in clusterlist:
                 for nR, R in enumerate(self.Rveclist):
-                    if all(isocc(R+site.R, site.ci) for site in clust):
+                    if all(isocc(R + site.R, site.ci) for site in clust):
                         clustercount[mc] += 1
         return clustercount
 
@@ -766,10 +789,14 @@ class ClusterSupercell(object):
         :param dx: displacement vector (necessary to deal with PBC)
         :return clustercount: count of how many of each cluster is in this supercell.
         """
+
         def isocc(R, ci):
             n, mob = self.index(R, ci)
-            if mob: return mocc[n] == 1
-            else: return socc[n] == 1
+            if mob:
+                return mocc[n] == 1
+            else:
+                return socc[n] == 1
+
         clustercount = np.zeros(len(TSclusters), dtype=int)
         if mocc[initial] == 0 or mocc[final] == 1:
             return clustercount  # trivial result...
@@ -786,10 +813,10 @@ class ClusterSupercell(object):
         for mc, clusterlist in enumerate(TSclusters):
             for clust in clusterlist:
                 if (cs_i0, cs_j0) == clust.transitionstate():
-                    if all(isocc(Ri+site.R, site.ci) for site in clust):
+                    if all(isocc(Ri + site.R, site.ci) for site in clust):
                         clustercount[mc] += 1
                 elif (cs_j1, cs_i1) == clust.transitionstate():
-                    if all(isocc(Rj+site.R, site.ci) for site in clust):
+                    if all(isocc(Rj + site.R, site.ci) for site in clust):
                         clustercount[mc] += 1
         return clustercount
 
@@ -807,22 +834,22 @@ class ClusterSupercell(object):
         """
         E0 = 0
         if len(values) > len(clusters):
-            E0 = self.size*values[-1]
+            E0 = self.size * values[-1]
         Ninteract = 0
         interact, interdict = [], {}
-        siteinteract = [[] for n in range(self.Nmobile*self.size)]
+        siteinteract = [[] for n in range(self.Nmobile * self.size)]
         for clusterlist, value in zip(clusters, values):
             for clust in clusterlist:
                 # split into mobile and spectator
                 mobilesites = [site for site in clust if site.ci in self.indexmobile]
                 specsites = [site for site in clust if site.ci in self.indexspectator]
                 for R in self.Rveclist:
-                    if all(socc[self.index(R+site.R, site.ci)[0]] == 1 for site in specsites):
+                    if all(socc[self.index(R + site.R, site.ci)[0]] == 1 for site in specsites):
                         if len(mobilesites) == 0:
                             # spectator only == constant
                             E0 += value
                         else:
-                            intertuple = tuple(sorted(self.index(R+site.R, site.ci)[0] for site in mobilesites))
+                            intertuple = tuple(sorted(self.index(R + site.R, site.ci)[0] for site in mobilesites))
                             if intertuple in interdict:
                                 # if we've already seen this particular interaction, add to the value
                                 interact[interdict[intertuple]] += value
@@ -871,15 +898,15 @@ class ClusterSupercell(object):
             if len(KRAvalues) != len(jumpnetwork):
                 raise ValueError('Incorrect length for KRAvalues: {}'.format(KRAvalues))
         else:
-            KRAvalues = KRAvalues*np.ones(len(jumpnetwork))
-        if len(clusters) != len(values) != len(clusters)+1:
+            KRAvalues = KRAvalues * np.ones(len(jumpnetwork))
+        if len(clusters) != len(values) != len(clusters) + 1:
             raise ValueError('Incorrect length for values: {}'.format(values))
         if len(TSclusters) != len(TSvalues):
             raise ValueError('Incorrect length for TSvalues: {}'.format(TSvalues))
         siteinteract = list(siteinteract)
         interact = list(interact)
         Ninteract = len(interact)
-        Ninteract0 = Ninteract # we store this now, so that we can make interactrange[-1] = Ninteract0
+        Ninteract0 = Ninteract  # we store this now, so that we can make interactrange[-1] = Ninteract0
         # "flatten" the clusters for more efficient operations:
         # clusterinteract[(c,i)] = list of ([cs list], value) of interactions centered on (c, i)
         # NOTE: in order to maintain detailed balance, we use half the energy difference of the
@@ -894,9 +921,9 @@ class ClusterSupercell(object):
                         mobilesites = [site for site in cllist if site.ci in self.indexmobile]
                         specsites = [site for site in cllist if site.ci in self.indexspectator]
                         if cs.ci in clusterinteract:
-                            clusterinteract[cs.ci].append((mobilesites, specsites, 0.5*value))
+                            clusterinteract[cs.ci].append((mobilesites, specsites, 0.5 * value))
                         else:
-                            clusterinteract[cs.ci] = [(mobilesites, specsites, 0.5*value)]
+                            clusterinteract[cs.ci] = [(mobilesites, specsites, 0.5 * value)]
         # "flatten" the TS clusters. To simplify, we put in both forward and backward jumps
         TSclusterinteract = {}
         for TSclusterlist, value in zip(TSclusters, TSvalues):
@@ -904,17 +931,17 @@ class ClusterSupercell(object):
                 TS = TSclust.transitionstate()
                 if TS[0].ci in self.indexmobile and TS[1].ci in self.indexmobile:
                     R0 = TS[0].R
-                    TS0 = (TS[0]-R0, TS[1]-R0)
-                    mobilesites = [site-R0 for site in TSclust if site.ci in self.indexmobile]
-                    specsites = [site-R0 for site in TSclust if site.ci in self.indexspectator]
+                    TS0 = (TS[0] - R0, TS[1] - R0)
+                    mobilesites = [site - R0 for site in TSclust if site.ci in self.indexmobile]
+                    specsites = [site - R0 for site in TSclust if site.ci in self.indexspectator]
                     if TS0 in TSclusterinteract:
                         TSclusterinteract[TS0].append((mobilesites, specsites, value))
                     else:
                         TSclusterinteract[TS0] = [(mobilesites, specsites, value)]
                     R1 = TS[1].R
-                    mobilesites = [site-R1 for site in TSclust if site.ci in self.indexmobile]
-                    specsites = [site-R1 for site in TSclust if site.ci in self.indexspectator]
-                    TS1 = (TS[1]-R1, TS[0]-R1)
+                    mobilesites = [site - R1 for site in TSclust if site.ci in self.indexmobile]
+                    specsites = [site - R1 for site in TSclust if site.ci in self.indexspectator]
+                    TS1 = (TS[1] - R1, TS[0] - R1)
                     if TS1 in TSclusterinteract:
                         TSclusterinteract[TS1].append((mobilesites, specsites, value))
                     else:
@@ -929,7 +956,8 @@ class ClusterSupercell(object):
                 dR, cj = self.crys.cart2pos(self.crys.pos2cart(np.zeros(self.crys.dim), (chem, i0)) + deltax)
                 if cj != cj0:
                     raise ArithmeticError(
-                        'Transition ({},{}), {} did not land at correct site?\n{} != P{'.format(i0, j0, deltax, cj, cj0))
+                        'Transition ({},{}), {} did not land at correct site?\n{} != P{'.format(i0, j0, deltax, cj,
+                                                                                                cj0))
                 cs_i0 = cluster.ClusterSite(ci0, np.zeros(self.crys.dim, dtype=int))
                 # NOTE: we will need the *reverse* endpoint for the initial state...
                 cs_i = cluster.ClusterSite(ci0, -dR)
@@ -997,7 +1025,8 @@ class ClusterSupercell(object):
                                     # spectator only == constant
                                     E0 += value
                                 else:
-                                    intertuple = tuple(sorted(self.index(Ri + site.R, site.ci)[0] for site in mobilesites))
+                                    intertuple = tuple(
+                                        sorted(self.index(Ri + site.R, site.ci)[0] for site in mobilesites))
                                     if intertuple in interdict:
                                         # if we've already seen this particular interaction, add to the value
                                         interact[interdict[intertuple]] += value
@@ -1015,6 +1044,3 @@ class ClusterSupercell(object):
                     Njumps += 1
         interactrange.append(Ninteract0)
         return siteinteract, interact, jumps, interactrange
-
-
-
