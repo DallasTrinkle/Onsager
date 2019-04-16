@@ -460,6 +460,26 @@ class SupercellParsing(unittest.TestCase):
                 self.assertEqual(0 if csite==cocc else 1, n,
                                  msg="Spectator failure: {}, {} has occupancy {}".format(pos, csite, cocc))
 
+    def testThresholds(self):
+        """Do our thresholds function as expected?"""
+        crys_strained = self.crys.strain(crystal.Voigtstrain(0.1, 0., -0.1, 0., 0., 0.))
+        sup = supercell.Supercell(self.crys, 2*self.one)
+        sup2 = supercell.Supercell(crys_strained, 2*self.one)
+        sup2.fillperiodic((0,0), 0)
+        POSCAR_str = sup2.POSCAR()
+        # first, the safe operation:
+        sup.POSCAR_occ(POSCAR_str)
+        # now, with our threshold, which should raise a ValueError
+        with self.assertRaises(ValueError):
+            sup.POSCAR_occ(POSCAR_str, latt_threshold=1e-2)
+        # now, let's make some displacements:
+        sup2.pos += np.random.uniform(-0.1, 0.1, size=(sup2.size, 3))
+        POSCAR_str = sup2.POSCAR()
+        # first, the safe operation:
+        sup.POSCAR_occ(POSCAR_str)
+        # now, with our threshold, which should raise a ValueError
+        with self.assertRaises(ValueError):
+            sup.POSCAR_occ(POSCAR_str, disp_threshold=1e-5)
 
 
 class ClusterSupercellTests(unittest.TestCase):
