@@ -448,21 +448,17 @@ class SupercellParsing(unittest.TestCase):
             mocc, socc = sup_c.Supercell_occ(sup)
             # Now... to check that it all makes sense.
             for ind, n in enumerate(mocc):
-                ci, pos = sup_c.ciR(ind, mobile=True)
-                csite = ci[0]
+                csite = sup_c.ciR(ind, mobile=True)[0][0]
+                pos = sup_c.mobilepos[ind]
                 cocc = sup[pos]
-                if csite == cocc:
-                    self.assertEqual(0, n, msg='Mobile failure at {}'.format(ind))
-                else:
-                    self.assertEqual(1, n, msg='Mobile failure at {}'.format(ind))
+                self.assertEqual(0 if csite==cocc else 1, n,
+                                 msg="Mobile failure: {}, {} has occupancy {}".format(pos, csite, cocc))
             for ind, n in enumerate(socc):
-                ci, pos = sup_c.ciR(ind, mobile=False)
-                csite = ci[0]
+                csite = sup_c.ciR(ind, mobile=False)[0][0]
+                pos = sup_c.specpos[ind]
                 cocc = sup[pos]
-                if csite == cocc:
-                    self.assertEqual(0, n, msg='Spectator failure at {}'.format(ind))
-                else:
-                    self.assertEqual(1, n, msg='Spectator failure at {}'.format(ind))
+                self.assertEqual(0 if csite==cocc else 1, n,
+                                 msg="Spectator failure: {}, {} has occupancy {}".format(pos, csite, cocc))
 
 
 
