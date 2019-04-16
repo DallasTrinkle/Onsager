@@ -428,7 +428,7 @@ class Supercell(object):
         if latt_threshold > 0:
             metric = np.dot(super_latt.T, super_latt)  # metric tensor
             super_metric = np.dot(self.lattice.T, self.lattice)  # supercell metric tensor
-            max_diff = max(abs(metric[i][j] - super_metric[i][j])/np.sqrt(super_metric[i]*super_metric[j])
+            max_diff = max(abs(metric[i,j] - super_metric[i,j])/np.sqrt(super_metric[i,i]*super_metric[j,j])
                            for i in range(3) for j in range(3))
             if max_diff > latt_threshold*latt_threshold:
                 msg = '{}\n (supercell) and\n{}\n (POSCAR)\ndiffer by {} > {}'.format(self.lattice.T, super_latt.T,

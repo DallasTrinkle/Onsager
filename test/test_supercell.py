@@ -412,7 +412,7 @@ class SupercellParsing(unittest.TestCase):
         for pos in poslist:
             POSCAR_str += "{} {} {}\n".format(pos[0], pos[1], pos[2])
         sup = supercell.Supercell(self.crys, nsuper)
-        sup.POSCAR_occ(POSCAR_str)
+        sup.POSCAR_occ(POSCAR_str, disp_threshold=1e-2, latt_threshold=1e-2)
         for pos in poslist:
             self.assertEqual(0, sup[pos])
         for vac in vaclist:
