@@ -23,9 +23,7 @@ The big changes are:
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-import collections
-import copy
-import itertools
+import collections, copy, itertools, yaml
 from onsager import crystal
 
 # YAML tags
@@ -181,8 +179,8 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         return PairState(**loader.construct_mapping(node, deep=True))
 
 
-crystal.yaml.add_representer(PairState, PairState.PairState_representer)
-crystal.yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
+yaml.add_representer(PairState, PairState.PairState_representer)
+yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
 
 
 # HDF5 conversion routines: PairState, and list-of-list structures
@@ -428,18 +426,18 @@ class StarSet(object):
         SSet = cls(None, None, None)  # initialize
         SSet.crys = crys
         SSet.chem = HDF5group.attrs['chem']
-        SSet.Nshells = HDF5group['Nshells'].value
-        SSet.jumplist = array2PSlist(HDF5group['jumplist_ij'].value,
-                                     HDF5group['jumplist_R'].value,
-                                     HDF5group['jumplist_dx'].value)
-        SSet.jumpnetwork_index = [[] for n in range(HDF5group['jumplist_Nunique'].value)]
-        for i, jump in enumerate(HDF5group['jumplist_invmap'].value):
+        SSet.Nshells = HDF5group['Nshells'][()]
+        SSet.jumplist = array2PSlist(HDF5group['jumplist_ij'][()],
+                                     HDF5group['jumplist_R'][()],
+                                     HDF5group['jumplist_dx'][()])
+        SSet.jumpnetwork_index = [[] for n in range(HDF5group['jumplist_Nunique'][()])]
+        for i, jump in enumerate(HDF5group['jumplist_invmap'][()]):
             SSet.jumpnetwork_index[jump].append(i)
-        SSet.states = array2PSlist(HDF5group['states_ij'].value,
-                                   HDF5group['states_R'].value,
-                                   HDF5group['states_dx'].value)
+        SSet.states = array2PSlist(HDF5group['states_ij'][()],
+                                   HDF5group['states_R'][()],
+                                   HDF5group['states_dx'][()])
         SSet.Nstates = len(SSet.states)
-        SSet.index = HDF5group['states_index'].value
+        SSet.index = HDF5group['states_index'][()]
         # construct the states, and the index dictionary:
         SSet.Nstars = max(SSet.index) + 1
         SSet.stars = [[] for n in range(SSet.Nstars)]
@@ -916,12 +914,12 @@ class VectorStarSet(object):
         """
         VSSet = cls(None)  # initialize
         VSSet.starset = SSet
-        VSSet.Nvstars = HDF5group['Nvstars'].value
-        VSSet.vecpos = flatlistindex2doublelist(HDF5group['vecposlist'].value,
-                                                HDF5group['vecposindex'].value)
-        VSSet.vecvec = flatlistindex2doublelist(HDF5group['vecveclist'].value,
-                                                HDF5group['vecvecindex'].value)
-        VSSet.outer = HDF5group['outer'].value
+        VSSet.Nvstars = HDF5group['Nvstars'][()]
+        VSSet.vecpos = flatlistindex2doublelist(HDF5group['vecposlist'][()],
+                                                HDF5group['vecposindex'][()])
+        VSSet.vecvec = flatlistindex2doublelist(HDF5group['vecveclist'][()],
+                                                HDF5group['vecvecindex'][()])
+        VSSet.outer = HDF5group['outer'][()]
         return VSSet
 
     def GFexpansion(self):

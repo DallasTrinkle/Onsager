@@ -18,7 +18,7 @@ atomic-scale transition state calculations. This includes:
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-import collections, copy, itertools, warnings
+import collections, copy, itertools, warnings, yaml
 from onsager import crystal, supercell
 import tarfile, time, io, json
 import pkg_resources
@@ -280,4 +280,4 @@ def supercelltar(tar, superdict, filemode=0o664, directmode=0o775, timestamp=Non
     # JSON dictionary connecting directories and tags: (needs a trailing newline?)
     addfile(JSONdict, json.dumps(tagmapping, indent=4, sort_keys=True) + '\n')
     # YAML representation of supercell:
-    if YAMLdef is not None: addfile(YAMLdef, crystal.yaml.dump(superdict))
+    if YAMLdef is not None: addfile(YAMLdef, yaml.dump(superdict))

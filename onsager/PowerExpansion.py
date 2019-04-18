@@ -12,8 +12,8 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 from numbers import Number
-from scipy.special import factorial
-from scipy.misc import comb
+from scipy.special import factorial, comb
+# from scipy.misc import comb
 
 
 class Taylor3D(object):
@@ -425,7 +425,7 @@ class Taylor3D(object):
             l = HDF5group[k].attrs['l']
             if l > t3d.Lmax or l < 0:
                 raise ValueError('HDF5 group data contains illegal l = {} for {}'.format(l, k))
-            t3d.coefflist.append((n, l, c.value))
+            t3d.coefflist.append((n, l, c[()]))
         return t3d
 
     def dumpinternalsHDF5(self, HDF5group):
