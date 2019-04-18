@@ -1115,18 +1115,18 @@ class VacancyMediated(object):
         :return VacancyMediated: new VacancyMediated diffuser object from HDF5
         """
         diffuser = cls(None, None, None, None)  # initialize
-        diffuser.crys = yaml.load(HDF5group['crystal_yaml'].value)
+        diffuser.crys = yaml.load(HDF5group['crystal_yaml'][()])
         diffuser.dim = diffuser.crys.dim
         for internal in cls.__HDF5list__:
-            setattr(diffuser, internal, HDF5group[internal].value)
+            setattr(diffuser, internal, HDF5group[internal][()])
         diffuser.sitelist = [[] for i in range(max(diffuser.invmap) + 1)]
         for i, site in enumerate(diffuser.invmap):
             diffuser.sitelist[site].append(i)
 
         # convert jumplist:
         diffuser.jumpnetwork = stars.flatlistindex2doublelist([((ij[0], ij[1]), dx) for ij, dx in \
-                                                               zip(HDF5group['jump_ij'].value,
-                                                                   HDF5group['jump_dx'].value)],
+                                                               zip(HDF5group['jump_ij'][()],
+                                                                   HDF5group['jump_dx'][()])],
                                                               HDF5group['jump_index'])
         diffuser.om0_jn = copy.deepcopy(diffuser.jumpnetwork)
 
@@ -1140,11 +1140,11 @@ class VacancyMediated(object):
 
         # jump networks:
         diffuser.om1_jn = stars.flatlistindex2doublelist([((ij[0], ij[1]), dx) for ij, dx in \
-                                                          zip(HDF5group['omega1_ij'].value,
-                                                              HDF5group['omega1_dx'].value)], HDF5group['omega1_index'])
+                                                          zip(HDF5group['omega1_ij'][()],
+                                                              HDF5group['omega1_dx'][()])], HDF5group['omega1_index'])
         diffuser.om2_jn = stars.flatlistindex2doublelist([((ij[0], ij[1]), dx) for ij, dx in \
-                                                          zip(HDF5group['omega2_ij'].value,
-                                                              HDF5group['omega2_dx'].value)], HDF5group['omega2_index'])
+                                                          zip(HDF5group['omega2_ij'][()],
+                                                              HDF5group['omega2_dx'][()])], HDF5group['omega2_index'])
 
         diffuser.kin2vstar = stars.flatlistindex2doublelist(HDF5group['kin2vstar_array'],
                                                             HDF5group['kin2vstar_index'])
@@ -1164,7 +1164,7 @@ class VacancyMediated(object):
         diffuser.tags, diffuser.tagdict, diffuser.tagdicttype = {}, {}, {}
         for tag in cls.__taglist__:
             # needed because of how HDF5 stores strings...
-            utf8list = [str(data, encoding='utf-8') for data in HDF5group[tag + '_taglist'].value]
+            utf8list = [str(data, encoding='utf-8') for data in HDF5group[tag + '_taglist'][()]]
             diffuser.tags[tag] = stars.flatlistindex2doublelist(utf8list, HDF5group[tag + '_tagindex'])
         for tagtype, taglist in diffuser.tags.items():
             for i, tags in enumerate(taglist):
