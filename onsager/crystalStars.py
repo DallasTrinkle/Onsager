@@ -23,9 +23,7 @@ The big changes are:
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-import collections
-import copy
-import itertools
+import collections, copy, itertools, yaml
 from onsager import crystal
 
 # YAML tags
@@ -181,8 +179,8 @@ class PairState(collections.namedtuple('PairState', 'i j R dx')):
         return PairState(**loader.construct_mapping(node, deep=True))
 
 
-crystal.yaml.add_representer(PairState, PairState.PairState_representer)
-crystal.yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
+yaml.add_representer(PairState, PairState.PairState_representer)
+yaml.add_constructor(PAIRSTATE_YAMLTAG, PairState.PairState_constructor)
 
 
 # HDF5 conversion routines: PairState, and list-of-list structures

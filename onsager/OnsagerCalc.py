@@ -22,7 +22,7 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 from scipy.linalg import pinv2, solve
-import copy, collections, itertools, warnings
+import copy, collections, itertools, warnings, yaml
 from functools import reduce
 from onsager import GFcalc
 from onsager import crystal
@@ -101,7 +101,7 @@ class Interstitial(object):
     @staticmethod
     def sitelistYAML(sitelist, dim=3):
         """Dumps a "sample" YAML formatted version of the sitelist with data to be entered"""
-        return crystal.yaml.dump({'Dipole': [np.zeros((dim, dim)) for w in sitelist],
+        return yaml.dump({'Dipole': [np.zeros((dim, dim)) for w in sitelist],
                                   'Energy': [0 for w in sitelist],
                                   'Prefactor': [1 for w in sitelist],
                                   'sitelist': sitelist})
@@ -109,7 +109,7 @@ class Interstitial(object):
     @staticmethod
     def jumpnetworkYAML(jumpnetwork, dim=3):
         """Dumps a "sample" YAML formatted version of the jumpnetwork with data to be entered"""
-        return crystal.yaml.dump({'DipoleT': [np.zeros((dim, dim)) for t in jumpnetwork],
+        return yaml.dump({'DipoleT': [np.zeros((dim, dim)) for t in jumpnetwork],
                                   'EnergyT': [0 for t in jumpnetwork],
                                   'PrefactorT': [1 for t in jumpnetwork],
                                   'jumpnetwork': jumpnetwork})
@@ -1049,7 +1049,7 @@ class VacancyMediated(object):
         :param HDF5group: HDF5 group
         """
         HDF5group.attrs['type'] = self.__class__.__name__
-        HDF5group['crystal_yaml'] = crystal.yaml.dump(self.crys)
+        HDF5group['crystal_yaml'] = yaml.dump(self.crys)
         HDF5group['crystal_yaml'].attrs['pythonrep'] = self.crys.__repr__()
         HDF5group['crystal_lattice'] = self.crys.lattice.T
         basislist, basisindex = stars.doublelist2flatlistindex(self.crys.basis)
@@ -1115,7 +1115,7 @@ class VacancyMediated(object):
         :return VacancyMediated: new VacancyMediated diffuser object from HDF5
         """
         diffuser = cls(None, None, None, None)  # initialize
-        diffuser.crys = crystal.yaml.load(HDF5group['crystal_yaml'].value)
+        diffuser.crys = yaml.load(HDF5group['crystal_yaml'].value)
         diffuser.dim = diffuser.crys.dim
         for internal in cls.__HDF5list__:
             setattr(diffuser, internal, HDF5group[internal].value)
@@ -1601,5 +1601,5 @@ class VacancyMediated(object):
         return L0vv, D0ss + L1ss, D0sv + L1sv, D0vv + D2vv + L1vv
 
 
-crystal.yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
-crystal.yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)
+yaml.add_representer(vacancyThermoKinetics, vacancyThermoKinetics.vacancyThermoKinetics_representer)
+yaml.add_constructor(VACANCYTHERMOKINETICS_YAMLTAG, vacancyThermoKinetics.vacancyThermoKinetics_constructor)
