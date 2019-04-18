@@ -5,8 +5,7 @@ Unit tests for supercell class
 __author__ = 'Dallas R. Trinkle'
 
 import unittest
-import itertools, copy, yaml
-import itertools, copy, textwrap
+import itertools, copy, textwrap, yaml
 import numpy as np
 from onsager import crystal, supercell, cluster
 
