@@ -5,6 +5,7 @@ Unit tests for supercell class
 __author__ = 'Dallas R. Trinkle'
 
 import unittest
+import itertools, copy, yaml
 import itertools, copy, textwrap
 import numpy as np
 from onsager import crystal, supercell, cluster
@@ -350,8 +351,8 @@ class InterstitialSuperTests(HCPSuperTests):
     def testYAML(self):
         """Can we read/write YAML representation of a supercell?"""
         sup = supercell.Supercell(self.crys, 3 * self.one, interstitial=[1])
-        YAMLstring = crystal.yaml.dump(sup)
-        superYAML = crystal.yaml.load(YAMLstring)
+        YAMLstring = yaml.dump(sup)
+        superYAML = yaml.load(YAMLstring)
         self.assertOrderingSuperEqual(sup, superYAML, msg='YAML write/read fail?')
         # print(YAMLstring)
 

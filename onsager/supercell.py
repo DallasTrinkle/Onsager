@@ -12,7 +12,7 @@ periodically repeating unit cells. In that framework we can
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-import collections, copy, itertools, warnings
+import collections, copy, itertools, warnings, yaml
 from numbers import Integral
 from onsager import crystal, cluster
 
