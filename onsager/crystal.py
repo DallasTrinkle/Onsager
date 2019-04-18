@@ -14,7 +14,7 @@ import numpy as np
 import collections, copy, itertools
 from numbers import Number
 from math import gcd
-import yaml  # use crystal.yaml to call--may need to change in the future
+import yaml
 from functools import reduce
 
 # YAML tags:
