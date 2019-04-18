@@ -6,11 +6,12 @@ quantities based on crystals.
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-import copy, collections, itertools
+import copy, collections, itertools, yaml
 from onsager import crystal, supercell
 
 # YAML tags
 CLUSTERSITE_YAMLTAG = '!ClusterSite'
+CLUSTER_YAMLTAG = '!Cluster'
 
 
 class ClusterSite(collections.namedtuple('ClusterSite', 'ci R')):
@@ -97,8 +98,8 @@ class ClusterSite(collections.namedtuple('ClusterSite', 'ci R')):
         return ClusterSite(**loader.construct_mapping(node, deep=True))
 
 
-crystal.yaml.add_representer(ClusterSite, ClusterSite.ClusterSite_representer)
-crystal.yaml.add_constructor(CLUSTERSITE_YAMLTAG, ClusterSite.ClusterSite_constructor)
+yaml.add_representer(ClusterSite, ClusterSite.ClusterSite_representer)
+yaml.add_constructor(CLUSTERSITE_YAMLTAG, ClusterSite.ClusterSite_constructor)
 
 
 class Cluster(object):
@@ -190,6 +191,13 @@ class Cluster(object):
             return self.sites[2:][item]
         else:
             return self.sites[item]
+
+    def _asdict(self):
+        """Return a proper dict"""
+        if self.__transition__:
+            return {'clustersitelist': self.sites, 'transition': self.__transition__}
+        else:
+            return {'clustersitelist': self.sites}
 
     def transitionstate(self):
         """Return the two sites of the transition state"""
@@ -283,6 +291,22 @@ class Cluster(object):
         else:
             s += " ".join([str(cs) for cs in self.sites])
         return s
+
+    @staticmethod
+    def Cluster_representer(dumper, data):
+        """Output a ClusterSite"""
+        # asdict() returns an OrderedDictionary, so pass through dict()
+        # had to rewrite _asdict() for some reason...?
+        return dumper.represent_mapping(CLUSTER_YAMLTAG, data._asdict())
+
+    @staticmethod
+    def Cluster_constructor(loader, node):
+        """Construct a ClusterSite from YAML"""
+        # ** turns the dictionary into parameters for ClusterSite constructor
+        return Cluster(**loader.construct_mapping(node, deep=True))
+
+yaml.add_representer(Cluster, Cluster.Cluster_representer)
+yaml.add_constructor(CLUSTER_YAMLTAG, Cluster.Cluster_constructor)
 
 
 def makeclusters(crys, cutoff, maxorder, exclude=()):

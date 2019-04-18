@@ -9,6 +9,7 @@ __author__ = 'Dallas R. Trinkle'
 
 import unittest
 import numpy as np
+import yaml
 from onsager import crystal, cluster, supercell
 
 
@@ -40,6 +41,17 @@ class ClusterSiteTests(unittest.TestCase):
         self.assertNotEqual(s1-v1, s2)
         self.assertEqual(s1-v1, s3)
         self.assertNotEqual(s1+v1, s3)
+
+    def testYAML(self):
+        """Can we write out a cluster site in YAML?"""
+        s1 = cluster.ClusterSite((0,0), np.array([0,0,0]))
+        s2 = cluster.ClusterSite((0,0), np.array([1,0,0]))
+        s3 = cluster.ClusterSite((0,0), np.array([-1,0,0]))
+        for s in (s1, s2, s3):
+            yamlstr = yaml.dump(s)
+            scopy = yaml.load(yamlstr)
+            self.assertEqual(s, scopy)
+
 
 class ClusterTests(unittest.TestCase):
     """Tests of the Cluster class"""
@@ -333,6 +345,25 @@ class ClusterTests(unittest.TestCase):
         for TSclustset in TSclusterexp:
             for TSclust in TSclustset:
                 self.assertTrue(np.all(np.zeros(3, dtype=int)==TSclust.transitionstate()[0].R))
+
+    def testYAML(self):
+        """Can we write out a clusters in YAML?"""
+        FCC = crystal.Crystal.FCC(1., chemistry='FCC')
+        cutoff = 0.8
+        clusterexp = cluster.makeclusters(FCC, cutoff, 4)
+        for clset in clusterexp:
+            for cl in clset:
+                yamlstr = yaml.dump(cl)
+                clcopy = yaml.load(yamlstr)
+                self.assertEqual(cl, clcopy)
+        chem = 0
+        jumpnetwork = FCC.jumpnetwork(chem, cutoff)
+        TSclusterexp = cluster.makeTSclusters(FCC, chem, jumpnetwork, clusterexp)
+        for clset in TSclusterexp:
+            for cl in clset:
+                yamlstr = yaml.dump(cl)
+                clcopy = yaml.load(yamlstr)
+                self.assertEqual(cl, clcopy)
 
 
 class MonteCarloTests(unittest.TestCase):
