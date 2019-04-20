@@ -583,3 +583,206 @@ class MonteCarloSampler(object):
                 self.occupied_set.remove(i)
                 for inter in self.siteinteract[i][:self.Ninteract[i]]:
                     self.clustercount[inter] += 1
+
+from numba import jitclass          # import the decorator
+from numba import int64, float64    # import the types
+
+# our signature for our object
+MonteCarloSamplerSpec = [
+    ('Nenergy', int64),
+    ('jump_ij', int64[:, :]),
+    ('jump_dx', float64[:, :]),
+    ('interactrange', int64[:]),
+    ('Ninteract', int64[:]),
+    ('siteinteract', int64[:, :]),
+    ('interactvalue', float64[:]),
+    ('occ', int64[:]),
+    ('clustercount', int64[:]),
+    ('Nocc', int64),
+    ('Nunocc', int64),
+    ('occupied_set', int64[:]),
+    ('unoccupied_set', int64[:]),
+    ('index', int64[:])
+]
+
+@jitclass(MonteCarloSamplerSpec)
+class MonteCarloSampler_jit(object):
+    """
+    An object to maintain state in a supercell, evaluate energies efficiently including
+    "trial" moves. Built from cluster expansions and using a cluster supercell.
+    """
+    def __init__(self, supercell, spectator_occ, clusterexp, enevalues,
+                 chem=None, jumpnetwork=(), KRAvalues=0, TSclusters=(), TSvalues=()):
+        """
+        Setup a MonteCarloSampler using a supercell, with a given spectator occupancy,
+        cluster expansion, and energy values for the clusters. Now includes the ability to
+        evaluate a jumpnetwork, which is optional. Because we need to be consistent with
+        our cluster expansion, can only be done at initialization.
+
+        :param supercell: should be a ClusterSupercell
+        :param spectator_occ: vector of occupancies for spectator species (0 or 1),
+          consistent with our supercell
+        :param clusterexp: list of sets of cluster interactions
+        :param enevalues: energy values corresponding to each cluster
+
+        :param chem: (optional) index of species that transitions
+        :param jumpnetwork: (optional) list of lists of jumps; each is ((i, j), dx) where ``i`` and ``j`` are
+          unit cell indices for species ``chem``
+        :param KRAvalues: (optional) list of "KRA" values for barriers (relative to average energy of endpoints);
+          if ``TSclusters`` are used, choosing 0 is more straightforward.
+        :param TSclusters: (optional) list of transition state cluster expansion terms; this is
+          always added on to KRAvalues (thus using 0 is recommended if TSclusters are also used)
+        :param TSvalues: (optional) values for TS cluster expansion entries
+        """
+        siteinteract, interactvalue = supercell.clusterevaluator(spectator_occ, clusterexp, enevalues)
+        self.Nenergy = len(interactvalue)
+        # to be initialized via jumpnetwork_init()
+        self.jump_ij = np.zeros((0,2), dtype=int)  # indicates no jump network...
+        self.jump_dx = np.zeros((0,3), dtype=float)
+        self.interactrange = np.zeros(0, dtype=int)
+        if chem is not None:
+            # quick check that chem is a mobile species:
+            if (chem, 0) not in self.supercell.indexmobile:
+                raise ValueError('Chemical species {} is a spectator in supercell?'.format(chem))
+            siteinteract, interactvalue, jumps, interactrange = \
+                self.supercell.jumpnetworkevaluator(spectator_occ, clusterexp, enevalues, chem, jumpnetwork,
+                                                    KRAvalues, TSclusters, TSvalues, siteinteract, interactvalue)
+            # split jumps into two arrays:
+            self.jump_ij = np.array([[i,j] for (i, j), _ in jumps])
+            self.jump_dx = np.array([dx for _, dx in jumps])
+            self.interactrange = np.array(interactrange)
+        # convert from lists to arrays:
+        self.Ninteract = np.array([len(inter) for inter in siteinteract])
+        # see https://stackoverflow.com/questions/38619143/convert-python-sequence-to-numpy-array-filling-missing-values
+        self.siteinteract = np.array(list(itertools.zip_longest(*siteinteract, fillvalue=-1))).T
+        self.interactvalue = np.array(interactvalue)
+        # to be initialized with start()
+        self.occ = np.ones(supercell.size*supercell.Nmobile, dtype=int)
+        self.clustercount = np.zeros_like(self.interactvalue, dtype=int)
+        self.Nocc = len(self.occ)
+        self.Nunocc = 0
+        self.occupied_set = np.arange(self.Nocc)
+        self.unoccupied_set = np.zeros(self.Nocc, dtype=int)
+        self.index = np.arange(self.Nocc)
+
+    def start(self, occ):
+        """
+        Initialize with an occupancy, and prepare for future calculations.
+
+        :param occ: occupancy of sites in supercell; assumed to be 0 or 1
+        """
+        # NOTE: we don't do this with a copy() operation...
+        self.occ = occ
+        self.clustercount = np.zeros_like(self.interactvalue, dtype=int)
+        occ_list, unocc_list = [], []
+        for i, occ_i, interact, Ninteract in zip(itertools.count(), self.occ, self.siteinteract, self.Ninteract):
+            if occ_i == 0:
+                unocc_list.append(i)
+                for m in interact[:Ninteract]:
+                    self.clustercount[m] += 1
+                # for n in range(Ninteract):
+                #     self.clustercount[interact[n]] += 1
+            else:
+                occ_list.append(i)
+        self.occupied_set = set(occ_list)
+        self.unoccupied_set = set(unocc_list)
+
+    def E(self):
+        """
+        Compute the energy.
+
+        :return E: total of all interactions
+        """
+        E = 0
+        for ccount, Evalue in zip(self.clustercount[:self.Nenergy], self.interactvalue[:self.Nenergy]):
+            if ccount == 0:
+                E += Evalue
+        return E
+
+    def transitions(self):
+        """
+        Compute all transitions.
+
+        :return ijlist: list of (initial, final) tuples for each transition
+        :return Qlist: vector of energy barriers for each transition
+        :return dxlist: vector of displacements for each transition
+        """
+        if self.jumps is None:
+            raise ValueError('No jump network in sampler.')
+        ijlist, Qlist, dxlist = [], [], []
+
+        for n, ((i, j), dx) in enumerate(self.jumps):
+            if self.occ[i] == 0 or self.occ[j] == 1:
+                continue
+            ijlist.append((i, j))
+            dxlist.append(dx)
+            ran = slice(self.interactrange[n - 1], self.interactrange[n])
+            Qlist.append(sum(E for E, c in zip(self.interactvalue[ran], self.clustercount[ran]) if c == 0))
+        return ijlist, np.array(Qlist), np.array(dxlist)
+
+    def deltaE_trial(self, occsites=(), unoccsites=()):
+        """
+        Compute the energy change if the sites in occsites are occupied, and the sites in
+        unoccsites are unoccupied.
+
+        A few notes: the algorithm does not check whether the same site appears in
+        either iterable multiple times; it trusts that the user has provided it with
+        a meaningful trial change.
+
+        :param occsites: iterable of sites to attempt occupying
+        :param unoccsites: iterable of sites to attempt unoccupying
+        :return deltaE: change in energy
+        """
+        # we're going to keep track just of the interactions that we change;
+        # this change will be kept in a dictionary, and will be the *negative* of the
+        # clustercount change that would occur with the trial move
+        dclustercount = {}
+        for i in occsites:
+            if self.occ[i] == 0:
+                for inter in self.siteinteract[i][:self.Ninteract[i]]:
+                    if inter in dclustercount:
+                        dclustercount[inter] += 1
+                    else:
+                        dclustercount[inter] = 1
+        for i in unoccsites:
+            if self.occ[i] == 1:
+                for inter in self.siteinteract[i][:self.Ninteract[i]]:
+                    if inter in dclustercount:
+                        dclustercount[inter] -= 1
+                    else:
+                        dclustercount[inter] = -1
+        dE = 0
+        for interact, dcount in dclustercount.items():
+            # no change?
+            if dcount == 0: continue
+            # not an *energy* interaction?
+            if interact >= self.Nenergy: continue
+            # are we turning off an interaction?
+            if self.clustercount[interact] == 0:
+                dE -= self.interactvalue[interact]
+            # are we turning on an interaction?
+            elif self.clustercount[interact] == dcount:
+                dE += self.interactvalue[interact]
+        return dE
+
+    def update(self, occsites=(), unoccsites=()):
+        """
+        Update the state to occupy the sites in occsites and un-occupy the sites in unoccsites.
+
+        :param occsites: iterable of sites to occupy
+        :param unoccsites: iterable of sites to unoccupy
+        """
+        for i in occsites:
+            if self.occ[i] == 0:
+                self.occ[i] = 1
+                self.unoccupied_set.remove(i)
+                self.occupied_set.add(i)
+                for inter in self.siteinteract[i][:self.Ninteract[i]]:
+                    self.clustercount[inter] -= 1
+        for i in unoccsites:
+            if self.occ[i] == 1:
+                self.occ[i] = 0
+                self.unoccupied_set.add(i)
+                self.occupied_set.remove(i)
+                for inter in self.siteinteract[i][:self.Ninteract[i]]:
+                    self.clustercount[inter] += 1
