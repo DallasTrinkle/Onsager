@@ -612,68 +612,51 @@ MonteCarloSamplerSpec = [
 @jitclass(MonteCarloSamplerSpec)
 class MonteCarloSampler_jit(object):
     """
-    An object to maintain state in a supercell, evaluate energies efficiently including
-    "trial" moves. Built from cluster expansions and using a cluster supercell.
+    Numba jit wrapper on a MonteCarloSampler.
     """
-    def __init__(self, supercell, spectator_occ, clusterexp, enevalues,
-                 chem=None, jumpnetwork=(), KRAvalues=0, TSclusters=(), TSvalues=()):
+    def __init__(self, MCsampler):
         """
-        Setup a MonteCarloSampler using a supercell, with a given spectator occupancy,
-        cluster expansion, and energy values for the clusters. Now includes the ability to
-        evaluate a jumpnetwork, which is optional. Because we need to be consistent with
-        our cluster expansion, can only be done at initialization.
+        Setup a jit-version of a MonteCarloSampler from an existing one.
 
-        :param supercell: should be a ClusterSupercell
-        :param spectator_occ: vector of occupancies for spectator species (0 or 1),
-          consistent with our supercell
-        :param clusterexp: list of sets of cluster interactions
-        :param enevalues: energy values corresponding to each cluster
-
-        :param chem: (optional) index of species that transitions
-        :param jumpnetwork: (optional) list of lists of jumps; each is ((i, j), dx) where ``i`` and ``j`` are
-          unit cell indices for species ``chem``
-        :param KRAvalues: (optional) list of "KRA" values for barriers (relative to average energy of endpoints);
-          if ``TSclusters`` are used, choosing 0 is more straightforward.
-        :param TSclusters: (optional) list of transition state cluster expansion terms; this is
-          always added on to KRAvalues (thus using 0 is recommended if TSclusters are also used)
-        :param TSvalues: (optional) values for TS cluster expansion entries
+        :param MCsampler: Monte Carlo sampler to extract all of the current information from.
         """
-        siteinteract, interactvalue = supercell.clusterevaluator(spectator_occ, clusterexp, enevalues)
-        self.Nenergy = len(interactvalue)
+        self.Nenergy = MCsampler.Nenergy
         # to be initialized via jumpnetwork_init()
         self.Njumps = 0
         self.jump_ij = np.zeros((self.Njumps,2), dtype=int)  # indicates no jump network...
         self.jump_dx = np.zeros((self.Njumps,3), dtype=float)
         self.jump_Q = np.zeros(self.Njumps, dtype=float)
         self.interactrange = np.zeros(0, dtype=int)
-        if chem is not None:
-            # quick check that chem is a mobile species:
-            if (chem, 0) not in self.supercell.indexmobile:
-                raise ValueError('Chemical species {} is a spectator in supercell?'.format(chem))
-            siteinteract, interactvalue, jumps, interactrange = \
-                self.supercell.jumpnetworkevaluator(spectator_occ, clusterexp, enevalues, chem, jumpnetwork,
-                                                    KRAvalues, TSclusters, TSvalues, siteinteract, interactvalue)
-            # split jumps into two arrays:
-            self.Njumps = len(jumps)
-            self.jump_ij = np.array([[i,j] for (i, j), _ in jumps])
-            self.jump_dx = np.array([dx for _, dx in jumps])
+        if MCsampler.jumps is not None:
+            self.Njumps = len(MCsampler.jumps)
+            self.jump_ij = np.array([[i,j] for (i, j), _ in MCsampler.jumps])
+            self.jump_dx = np.array([dx for _, dx in MCsampler.jumps])
             self.jump_Q = np.zeros(self.Njumps)
-            self.interactrange = np.array(interactrange)
+            self.interactrange = np.array(MCsampler.interactrange)
         # convert from lists to arrays:
-        self.Ninteract = np.array([len(inter) for inter in siteinteract])
+        self.Ninteract = MCsampler.Ninteract
         # see https://stackoverflow.com/questions/38619143/convert-python-sequence-to-numpy-array-filling-missing-values
-        self.siteinteract = np.array(list(itertools.zip_longest(*siteinteract, fillvalue=-1))).T
-        self.interactvalue = np.array(interactvalue)
+        self.siteinteract = MCsampler.siteinteract
+        self.interactvalue = MCsampler.interactvalue
         # to be initialized with start()
-        self.Nsites = supercell.size*supercell.Nmobile
-        self.occ = np.ones(self.Nsites, dtype=int)
-        self.clustercount = np.zeros_like(self.interactvalue, dtype=int)
+        self.Nsites = MCsampler.supercell.size*MCsampler.supercell.Nmobile
+        self.occ = MCsampler.occ.copy()
+        self.clustercount = MCsampler.clustercount.copy()
         self.dcluster = np.zeros(self.Nenergy, dtype=int)
-        self.Nocc = len(self.occ)
+        self.Nocc = 0
         self.Nunocc = 0
-        self.occupied_set = np.arange(self.Nocc)
-        self.unoccupied_set = np.zeros(self.Nocc, dtype=int)
-        self.index = np.arange(self.Nocc)
+        self.occupied_set = np.zeros(len(self.occ), dtype=int)
+        self.unoccupied_set = np.zeros(len(self.occ), dtype=int)
+        self.index = np.zeros(len(self.occ), dtype=int)
+        for i in range(len(self.occ)):
+            if self.occ[i] == 1:
+                self.occupied_set[self.Nocc] = i
+                self.index[i] = self.Nocc
+                self.Nocc += 1
+            else:
+                self.unoccupied_set[self.Nunocc] = i
+                self.index[i] = self.Nunocc
+                self.Nunocc += 1
 
     def start(self, occ):
         """

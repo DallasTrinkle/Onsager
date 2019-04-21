@@ -479,10 +479,8 @@ class MonteCarloTests(unittest.TestCase):
         """Does our jit version of the sampler function the same as the non-jit?"""
         occ = np.random.choice((0,1), size=self.sup.size)
         self.MCjn.start(occ)
-        MCjn_jit = cluster.MonteCarloSampler_jit(self.sup, np.zeros(0), self.clusterexp, self.Evalues,
-                                                 self.chem, self.jumpnetwork, KRAvalues=self.KRAvalues,
-                                                 TSclusters=self.TSclusterexp, TSvalues=self.TSvalues)
-        MCjn_jit.start(occ)
+        MCjn_jit = cluster.MonteCarloSampler_jit(self.MCjn)
+        # MCjn_jit.start(occ)
         self.assertAlmostEqual(self.MCjn.E(), MCjn_jit.E())
 
 
