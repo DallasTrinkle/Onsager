@@ -482,9 +482,22 @@ class MonteCarloTests(unittest.TestCase):
         MCjn_jit = cluster.MonteCarloSampler_jit(**cluster.MonteCarloSampler_param(self.MCjn))
         # MCjn_jit.start(occ)
         self.assertAlmostEqual(self.MCjn.E(), MCjn_jit.E())
-
-
-
+        for nchanges in range(64):
+            occ_s = np.random.choice(list(self.MCjn.unoccupied_set))
+            unocc_s = np.random.choice(list(self.MCjn.occupied_set))
+            self.assertAlmostEqual(self.MCjn.deltaE_trial(occsites=(occ_s,), unoccsites=(unocc_s,)),
+                                   MCjn_jit.deltaE_trial(occ_s, unocc_s))
+            self.MCjn.update((occ_s,), (unocc_s,))
+            MCjn_jit.update(occ_s, unocc_s)
+            self.assertAlmostEqual(self.MCjn.E(), MCjn_jit.E())
+            ijlist, Qlist, dxlist = self.MCjn.transitions()
+            ijarray, Qarray, dxarray = MCjn_jit.transitions()
+            ijlistnew = [(ij[0], ij[1]) for ij, Q in zip(ijarray, Qarray) if Q != np.Inf]
+            Qlistnew = np.array([Q for Q in Qarray if Q != np.Inf])
+            dxlistnew = np.array([dx for dx, Q in zip(dxarray, Qarray) if Q != np.Inf])
+            self.assertEqual(ijlist, ijlistnew)
+            self.assertTrue(np.allclose(Qlist, Qlistnew))
+            self.assertTrue(np.allclose(dxlist, dxlistnew))
 
 
 if __name__ == '__main__':

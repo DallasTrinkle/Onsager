@@ -613,7 +613,7 @@ def MonteCarloSampler_param(MCsampler):
     """Takes in a MCsampler, returns a dictionary of all the parameters for the jit-version"""
     param = {}
     param['Nenergy'] = MCsampler.Nenergy
-    # to be initialized via jumpnetwork_init()
+    # to be changed if there are jumps
     param['Njumps'] = 0
     param['jump_ij'] = np.zeros((0, 2), dtype=int)  # indicates no jump network...
     param['jump_dx'] = np.zeros((0, 3), dtype=float)
