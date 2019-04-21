@@ -609,54 +609,86 @@ MonteCarloSamplerSpec = [
     ('index', int64[:])
 ]
 
+def MonteCarloSampler_param(MCsampler):
+    """Takes in a MCsampler, returns a dictionary of all the parameters for the jit-version"""
+    param = {}
+    param['Nenergy'] = MCsampler.Nenergy
+    # to be initialized via jumpnetwork_init()
+    param['Njumps'] = 0
+    param['jump_ij'] = np.zeros((0, 2), dtype=int)  # indicates no jump network...
+    param['jump_dx'] = np.zeros((0, 3), dtype=float)
+    param['jump_Q'] = np.zeros(0, dtype=float)
+    param['interactrange'] = np.zeros(0, dtype=int)
+    if MCsampler.jumps is not None:
+        Njumps = len(MCsampler.jumps)
+        param['Njumps'] = Njumps
+        param['jump_ij'] = np.array([[i, j] for (i, j), _ in MCsampler.jumps])
+        param['jump_dx'] = np.array([dx for _, dx in MCsampler.jumps])
+        param['jump_Q'] = np.zeros(Njumps)
+        param['interactrange'] = np.array(MCsampler.interactrange)
+    # convert from lists to arrays:
+    param['Ninteract'] = MCsampler.Ninteract
+    param['siteinteract'] = MCsampler.siteinteract
+    param['interactvalue'] = MCsampler.interactvalue
+    # to be initialized with start()
+    param['Nsites'] = MCsampler.supercell.size * MCsampler.supercell.Nmobile
+    param['occ'] = MCsampler.occ.copy()
+    param['clustercount'] = MCsampler.clustercount.copy()
+    param['dcluster'] = np.zeros(param['Nenergy'], dtype=int)
+    occ = MCsampler.occ
+    Nocc = 0
+    Nunocc = 0
+    occupied_set = np.zeros(len(occ), dtype=int)
+    unoccupied_set = np.zeros(len(occ), dtype=int)
+    index = np.zeros(len(occ), dtype=int)
+    for i in range(len(occ)):
+        if occ[i] == 1:
+            occupied_set[Nocc] = i
+            index[i] = Nocc
+            Nocc += 1
+        else:
+            unoccupied_set[Nunocc] = i
+            index[i] = Nunocc
+            Nunocc += 1
+    param['Nocc'] = Nocc
+    param['Nunocc'] = Nunocc
+    param['occupied_set'] = occupied_set
+    param['unoccupied_set'] = unoccupied_set
+    param['index'] = index
+    return param
+
+
 @jitclass(MonteCarloSamplerSpec)
 class MonteCarloSampler_jit(object):
     """
     Numba jit wrapper on a MonteCarloSampler.
     """
-    def __init__(self, MCsampler):
+    def __init__(self, Nenergy, Njumps, jump_ij, jump_dx, jump_Q, interactrange,
+                 Ninteract, siteinteract, interactvalue, Nsites, occ, clustercount,
+                 dcluster, Nocc, Nunocc, occupied_set, unoccupied_set, index):
         """
         Setup a jit-version of a MonteCarloSampler from an existing one.
 
-        :param MCsampler: Monte Carlo sampler to extract all of the current information from.
+        :param ...: all of the parameters to be used
         """
-        self.Nenergy = MCsampler.Nenergy
-        # to be initialized via jumpnetwork_init()
-        self.Njumps = 0
-        self.jump_ij = np.zeros((self.Njumps,2), dtype=int)  # indicates no jump network...
-        self.jump_dx = np.zeros((self.Njumps,3), dtype=float)
-        self.jump_Q = np.zeros(self.Njumps, dtype=float)
-        self.interactrange = np.zeros(0, dtype=int)
-        if MCsampler.jumps is not None:
-            self.Njumps = len(MCsampler.jumps)
-            self.jump_ij = np.array([[i,j] for (i, j), _ in MCsampler.jumps])
-            self.jump_dx = np.array([dx for _, dx in MCsampler.jumps])
-            self.jump_Q = np.zeros(self.Njumps)
-            self.interactrange = np.array(MCsampler.interactrange)
-        # convert from lists to arrays:
-        self.Ninteract = MCsampler.Ninteract
-        # see https://stackoverflow.com/questions/38619143/convert-python-sequence-to-numpy-array-filling-missing-values
-        self.siteinteract = MCsampler.siteinteract
-        self.interactvalue = MCsampler.interactvalue
-        # to be initialized with start()
-        self.Nsites = MCsampler.supercell.size*MCsampler.supercell.Nmobile
-        self.occ = MCsampler.occ.copy()
-        self.clustercount = MCsampler.clustercount.copy()
-        self.dcluster = np.zeros(self.Nenergy, dtype=int)
-        self.Nocc = 0
-        self.Nunocc = 0
-        self.occupied_set = np.zeros(len(self.occ), dtype=int)
-        self.unoccupied_set = np.zeros(len(self.occ), dtype=int)
-        self.index = np.zeros(len(self.occ), dtype=int)
-        for i in range(len(self.occ)):
-            if self.occ[i] == 1:
-                self.occupied_set[self.Nocc] = i
-                self.index[i] = self.Nocc
-                self.Nocc += 1
-            else:
-                self.unoccupied_set[self.Nunocc] = i
-                self.index[i] = self.Nunocc
-                self.Nunocc += 1
+        self.Nenergy = Nenergy
+        self.Njumps = Njumps
+        self.jump_ij = jump_ij
+        self.jump_dx = jump_dx
+        self.jump_Q = jump_Q
+        self.interactrange = interactrange
+        self.Ninteract = Ninteract
+        self.siteinteract = siteinteract
+        self.interactvalue = interactvalue
+        self.Nsites = Nsites
+        self.occ = occ
+        self.clustercount = clustercount
+        self.dcluster = dcluster
+        self.Nocc = Nocc
+        self.Nunocc = Nunocc
+        self.occupied_set = occupied_set
+        self.unoccupied_set = unoccupied_set
+        self.index = index
 
     def start(self, occ):
         """
