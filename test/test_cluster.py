@@ -498,6 +498,11 @@ class MonteCarloTests(unittest.TestCase):
             self.assertEqual(ijlist, ijlistnew)
             self.assertTrue(np.allclose(Qlist, Qlistnew))
             self.assertTrue(np.allclose(dxlist, dxlistnew))
+        Nmoves, kT = 128, 1.
+        occchoices = np.random.choice(MCjn_jit.Nunocc, size=Nmoves)
+        unoccchoices = np.random.choice(MCjn_jit.Nocc, size=Nmoves)
+        kTlogu = -kT*np.log(np.random.uniform(size=Nmoves))
+        MCjn_jit.MCmoves(occchoices, unoccchoices, kTlogu)
 
 
 if __name__ == '__main__':

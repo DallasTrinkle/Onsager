@@ -801,3 +801,23 @@ class MonteCarloSampler_jit(object):
         self.unoccupied_set[i] = unoccsite
         self.index[occsite] = j  # index of occsite in occupied_set
         self.index[unoccsite] = i  # index of unoccsite in unoccupied_set
+
+    def MCmoves(self, occchoices, unoccchoices, kTlogu):
+        """
+        Code that runs a length of MC choices, and does the updates. Makes
+        no changes to the occupancies. Needs three random vectors.
+
+        occchoices[i] \in (0,Nunocc-1) - index in unoccupied_set to occupy
+        unoccchoices[i] \in (0,Nocc-1) - index in occupied_set to unoccupy
+        kTlogu[i] >= 0 - value of -kT * ln(u) for u \in (0,1)
+
+        :param occchoices: int[:] of indices into unoccupied_set to occupy
+        :param unoccchoices: int[:] of indices into occupied_set to unoccupy
+        :param kTlogu: float[:] of -kT ln(u) for uniformly distributed u
+        """
+        for i in range(len(occchoices)):
+            occ_trial = self.unoccupied_set[occchoices[i]]
+            unocc_trial = self.occupied_set[unoccchoices[i]]
+            dE = self.deltaE_trial(occ_trial, unocc_trial)
+            if dE < kTlogu[i]:
+                self.update(occ_trial, unocc_trial)
