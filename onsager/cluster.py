@@ -631,15 +631,16 @@ def MonteCarloSampler_param(MCsampler):
     param['siteinteract'] = MCsampler.siteinteract
     param['interactvalue'] = MCsampler.interactvalue
     # to be initialized with start()
-    param['Nsites'] = MCsampler.supercell.size * MCsampler.supercell.Nmobile
+    Nsites = MCsampler.supercell.size * MCsampler.supercell.Nmobile
+    param['Nsites'] = Nsites
     param['occ'] = MCsampler.occ.copy()
     param['clustercount'] = MCsampler.clustercount.copy()
     param['dcluster'] = np.zeros(param['Nenergy'], dtype=int)
     occ = MCsampler.occ
     Nocc = 0
     Nunocc = 0
-    occupied_set = np.zeros(len(occ), dtype=int)
-    unoccupied_set = np.zeros(len(occ), dtype=int)
+    occupied_set = np.zeros(Nsites, dtype=int)
+    unoccupied_set = np.zeros(Nsites, dtype=int)
     index = np.zeros(len(occ), dtype=int)
     for i in range(len(occ)):
         if occ[i] == 1:
