@@ -584,6 +584,7 @@ class MonteCarloSampler(object):
                 for inter in self.siteinteract[i][:self.Ninteract[i]]:
                     self.clustercount[inter] += 1
 
+
 from numba import jitclass          # import the decorator
 from numba import int64, float64    # import the types
 
@@ -609,6 +610,7 @@ MonteCarloSamplerSpec = [
     ('index', int64[:])
 ]
 
+# needed to convert internals of a MonteCarloSampler into the form that can be used by our jit version:
 def MonteCarloSampler_param(MCsampler):
     """Takes in a MCsampler, returns a dictionary of all the parameters for the jit-version"""
     param = {}
@@ -633,24 +635,37 @@ def MonteCarloSampler_param(MCsampler):
     # to be initialized with start()
     Nsites = MCsampler.supercell.size * MCsampler.supercell.Nmobile
     param['Nsites'] = Nsites
-    param['occ'] = MCsampler.occ.copy()
-    param['clustercount'] = MCsampler.clustercount.copy()
     param['dcluster'] = np.zeros(param['Nenergy'], dtype=int)
-    occ = MCsampler.occ
-    Nocc = 0
-    Nunocc = 0
-    occupied_set = np.zeros(Nsites, dtype=int)
-    unoccupied_set = np.zeros(Nsites, dtype=int)
-    index = np.zeros(len(occ), dtype=int)
-    for i in range(len(occ)):
-        if occ[i] == 1:
-            occupied_set[Nocc] = i
-            index[i] = Nocc
-            Nocc += 1
-        else:
-            unoccupied_set[Nunocc] = i
-            index[i] = Nunocc
-            Nunocc += 1
+    if MCsampler.occ is None:
+        # has not been initialized yet...
+        occ = np.ones(Nsites, dtype=int)
+        clustercount = np.zeros_like(MCsampler.interactvalue, dtype=int)
+        Nocc = Nsites
+        Nunocc = 0
+        index = np.arange(Nsites, dtype=int)
+        occupied_set = np.arange(Nsites, dtype=int)
+        unoccupied_set = np.zeros(Nsites, dtype=int)
+    else:
+        # has been initialized...
+        occ = MCsampler.occ.copy()
+        clustercount = MCsampler.clustercount.copy()
+        occ = MCsampler.occ
+        Nocc = 0
+        Nunocc = 0
+        occupied_set = np.zeros(Nsites, dtype=int)
+        unoccupied_set = np.zeros(Nsites, dtype=int)
+        index = np.zeros(len(occ), dtype=int)
+        for i in range(len(occ)):
+            if occ[i] == 1:
+                occupied_set[Nocc] = i
+                index[i] = Nocc
+                Nocc += 1
+            else:
+                unoccupied_set[Nunocc] = i
+                index[i] = Nunocc
+                Nunocc += 1
+    param['occ'] = occ
+    param['clustercount'] = clustercount
     param['Nocc'] = Nocc
     param['Nunocc'] = Nunocc
     param['occupied_set'] = occupied_set
@@ -669,6 +684,10 @@ class MonteCarloSampler_jit(object):
                  dcluster, Nocc, Nunocc, occupied_set, unoccupied_set, index):
         """
         Setup a jit-version of a MonteCarloSampler from an existing one.
+
+        ::
+
+            MonteCarloSampler_jit(**MonteCarloSampler_param(MCsampler))
 
         :param ...: all of the parameters to be used
         """
@@ -690,6 +709,15 @@ class MonteCarloSampler_jit(object):
         self.occupied_set = occupied_set
         self.unoccupied_set = unoccupied_set
         self.index = index
+
+    def copy(self):
+        """Return a copy of the sampler"""
+        return MonteCarloSampler_jit(self.Nenergy, self.Njumps, self.jump_ij.copy(),
+                                     self.jump_dx.copy(), self.jump_Q.copy(), self.interactrange.copy(),
+                                     self.Ninteract, self.siteinteract, self.interactvalue, self.Nsites,
+                                     self.occ.copy(), self.clustercount.copy(), self.dcluster.copy(),
+                                     self.Nocc, self.Nunocc, self.occupied_set.copy(),
+                                     self.unoccupied_set.copy(), self.index.copy())
 
     def start(self, occ):
         """

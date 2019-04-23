@@ -475,7 +475,24 @@ class MonteCarloTests(unittest.TestCase):
             self.assertAlmostEqual(Q, Qlistnew[m] + dE)
             self.MCjn.update((i,), (j,)) # put state back
 
-    def testSampler_jit(self):
+    def testSampler_Create_jit(self):
+        """Can we create our jit version of the sampler function the same as the non-jit?"""
+        occ = np.random.choice((0,1), size=self.sup.size)
+        MCjn1_jit = cluster.MonteCarloSampler_jit(**cluster.MonteCarloSampler_param(self.MCjn))
+        MCjn1_jit.start(occ)
+        self.MCjn.start(occ)
+        MCjn2_jit = cluster.MonteCarloSampler_jit(**cluster.MonteCarloSampler_param(self.MCjn))
+        self.assertTrue(np.allclose(MCjn1_jit.occ, MCjn2_jit.occ))
+        self.assertEqual(MCjn1_jit.Nocc, MCjn2_jit.Nocc)
+        self.assertEqual(MCjn1_jit.Nunocc, MCjn2_jit.Nunocc)
+        self.assertTrue(np.allclose(MCjn1_jit.index, MCjn2_jit.index))
+        self.assertTrue(np.allclose(MCjn1_jit.occupied_set[:MCjn1_jit.Nocc],
+                                    MCjn2_jit.occupied_set[:MCjn2_jit.Nocc]))
+        self.assertTrue(np.allclose(MCjn1_jit.unoccupied_set[:MCjn1_jit.Nunocc],
+                                    MCjn2_jit.unoccupied_set[:MCjn2_jit.Nunocc]))
+        self.assertTrue(np.allclose(MCjn1_jit.clustercount, MCjn2_jit.clustercount))
+
+    def testSampler_Run_jit(self):
         """Does our jit version of the sampler function the same as the non-jit?"""
         occ = np.random.choice((0,1), size=self.sup.size)
         self.MCjn.start(occ)
@@ -525,6 +542,19 @@ class MonteCarloTests(unittest.TestCase):
                 self.assertEqual(i, MCjn_jit.occupied_set[ind])
             else:
                 self.assertEqual(i, MCjn_jit.unoccupied_set[ind])
+        # test out the MC moves
+        occchoices = np.random.choice(MCjn_jit.Nunocc, size=Nmoves)
+        unoccchoices = np.random.choice(MCjn_jit.Nocc, size=Nmoves)
+        u = np.random.uniform(size=Nmoves)
+        kTlogu = -kT*np.log(u)
+        MCjn2_jit = MCjn_jit.copy()
+        for n in range(Nmoves):
+            i, j = MCjn_jit.unoccupied_set[occchoices[n]],  MCjn_jit.occupied_set[unoccchoices[n]]
+            dE = MCjn_jit.deltaE_trial(i, j)
+            if dE < 0 or (np.exp(-dE/kT) > u[n]):
+                MCjn_jit.update(i, j)
+            MCjn2_jit.MCmoves(occchoices[n:n+1], unoccchoices[n:n+1], kTlogu[n:n+1])
+            self.assertTrue(np.allclose(MCjn_jit.occ, MCjn2_jit.occ))
 
 
 if __name__ == '__main__':
