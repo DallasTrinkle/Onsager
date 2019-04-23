@@ -583,3 +583,270 @@ class MonteCarloSampler(object):
                 self.occupied_set.remove(i)
                 for inter in self.siteinteract[i][:self.Ninteract[i]]:
                     self.clustercount[inter] += 1
+
+
+from numba import jitclass          # import the decorator
+from numba import int64, float64    # import the types
+
+# our signature for our object
+MonteCarloSamplerSpec = [
+    ('Nenergy', int64),
+    ('Njumps', int64),
+    ('jump_ij', int64[:, :]),
+    ('jump_dx', float64[:, :]),
+    ('jump_Q', float64[:]),
+    ('interactrange', int64[:]),
+    ('Ninteract', int64[:]),
+    ('siteinteract', int64[:, :]),
+    ('interactvalue', float64[:]),
+    ('Nsites', int64),
+    ('occ', int64[:]),
+    ('clustercount', int64[:]),
+    ('dcluster', int64[:]),
+    ('Nocc', int64),
+    ('Nunocc', int64),
+    ('occupied_set', int64[:]),
+    ('unoccupied_set', int64[:]),
+    ('index', int64[:])
+]
+
+# needed to convert internals of a MonteCarloSampler into the form that can be used by our jit version:
+def MonteCarloSampler_param(MCsampler):
+    """Takes in a MCsampler, returns a dictionary of all the parameters for the jit-version"""
+    param = {}
+    param['Nenergy'] = MCsampler.Nenergy
+    # to be changed if there are jumps
+    param['Njumps'] = 0
+    param['jump_ij'] = np.zeros((0, 2), dtype=int)  # indicates no jump network...
+    param['jump_dx'] = np.zeros((0, 3), dtype=float)
+    param['jump_Q'] = np.zeros(0, dtype=float)
+    param['interactrange'] = np.zeros(0, dtype=int)
+    if MCsampler.jumps is not None:
+        Njumps = len(MCsampler.jumps)
+        param['Njumps'] = Njumps
+        param['jump_ij'] = np.array([[i, j] for (i, j), _ in MCsampler.jumps])
+        param['jump_dx'] = np.array([dx for _, dx in MCsampler.jumps])
+        param['jump_Q'] = np.zeros(Njumps)
+        param['interactrange'] = np.array(MCsampler.interactrange)
+    # convert from lists to arrays:
+    param['Ninteract'] = MCsampler.Ninteract
+    param['siteinteract'] = MCsampler.siteinteract
+    param['interactvalue'] = MCsampler.interactvalue
+    # to be initialized with start()
+    Nsites = MCsampler.supercell.size * MCsampler.supercell.Nmobile
+    param['Nsites'] = Nsites
+    param['dcluster'] = np.zeros(param['Nenergy'], dtype=int)
+    if MCsampler.occ is None:
+        # has not been initialized yet...
+        occ = np.ones(Nsites, dtype=int)
+        clustercount = np.zeros_like(MCsampler.interactvalue, dtype=int)
+        Nocc = Nsites
+        Nunocc = 0
+        index = np.arange(Nsites, dtype=int)
+        occupied_set = np.arange(Nsites, dtype=int)
+        unoccupied_set = np.zeros(Nsites, dtype=int)
+    else:
+        # has been initialized...
+        occ = MCsampler.occ.copy()
+        clustercount = MCsampler.clustercount.copy()
+        occ = MCsampler.occ
+        Nocc = 0
+        Nunocc = 0
+        occupied_set = np.zeros(Nsites, dtype=int)
+        unoccupied_set = np.zeros(Nsites, dtype=int)
+        index = np.zeros(len(occ), dtype=int)
+        for i in range(len(occ)):
+            if occ[i] == 1:
+                occupied_set[Nocc] = i
+                index[i] = Nocc
+                Nocc += 1
+            else:
+                unoccupied_set[Nunocc] = i
+                index[i] = Nunocc
+                Nunocc += 1
+    param['occ'] = occ
+    param['clustercount'] = clustercount
+    param['Nocc'] = Nocc
+    param['Nunocc'] = Nunocc
+    param['occupied_set'] = occupied_set
+    param['unoccupied_set'] = unoccupied_set
+    param['index'] = index
+    return param
+
+
+@jitclass(MonteCarloSamplerSpec)
+class MonteCarloSampler_jit(object):
+    """
+    Numba jit wrapper on a MonteCarloSampler.
+    """
+    def __init__(self, Nenergy, Njumps, jump_ij, jump_dx, jump_Q, interactrange,
+                 Ninteract, siteinteract, interactvalue, Nsites, occ, clustercount,
+                 dcluster, Nocc, Nunocc, occupied_set, unoccupied_set, index):
+        """
+        Setup a jit-version of a MonteCarloSampler from an existing one.
+
+        ::
+
+            MonteCarloSampler_jit(**MonteCarloSampler_param(MCsampler))
+
+        :param ...: all of the parameters to be used
+        """
+        self.Nenergy = Nenergy
+        self.Njumps = Njumps
+        self.jump_ij = jump_ij
+        self.jump_dx = jump_dx
+        self.jump_Q = jump_Q
+        self.interactrange = interactrange
+        self.Ninteract = Ninteract
+        self.siteinteract = siteinteract
+        self.interactvalue = interactvalue
+        self.Nsites = Nsites
+        self.occ = occ
+        self.clustercount = clustercount
+        self.dcluster = dcluster
+        self.Nocc = Nocc
+        self.Nunocc = Nunocc
+        self.occupied_set = occupied_set
+        self.unoccupied_set = unoccupied_set
+        self.index = index
+
+    def copy(self):
+        """Return a copy of the sampler"""
+        return MonteCarloSampler_jit(self.Nenergy, self.Njumps, self.jump_ij.copy(),
+                                     self.jump_dx.copy(), self.jump_Q.copy(), self.interactrange.copy(),
+                                     self.Ninteract, self.siteinteract, self.interactvalue, self.Nsites,
+                                     self.occ.copy(), self.clustercount.copy(), self.dcluster.copy(),
+                                     self.Nocc, self.Nunocc, self.occupied_set.copy(),
+                                     self.unoccupied_set.copy(), self.index.copy())
+
+    def start(self, occ):
+        """
+        Initialize with an occupancy, and prepare for future calculations.
+
+        :param occ: occupancy of sites in supercell; assumed to be 0 or 1
+        """
+        # start from scratch:
+        self.clustercount[:] = 0
+        self.Nocc = 0
+        self.Nunocc = 0
+        # Note: now we keep our own copy of occ internally
+        for i in range(self.Nsites):
+            self.occ[i] = occ[i]
+            if occ[i] == 1:
+                self.occupied_set[self.Nocc] = i
+                self.index[i] = self.Nocc
+                self.Nocc += 1
+            else:
+                self.unoccupied_set[self.Nunocc] = i
+                self.index[i] = self.Nunocc
+                self.Nunocc += 1
+                for n in range(self.Ninteract[i]):
+                    self.clustercount[self.siteinteract[i, n]] += 1
+
+    def E(self):
+        """
+        Compute the energy.
+
+        :return E: total of all interactions
+        """
+        E = 0
+        for n in range(self.Nenergy):
+            if self.clustercount[n] == 0:
+                E += self.interactvalue[n]
+        return E
+
+    def transitions(self):
+        """
+        Compute all transitions.
+
+        :return ijlist: vector of (initial, final) tuples for each transition
+        :return Qlist: vector of energy barriers for each transition (Inf == forbidden)
+        :return dxlist: vector of displacements for each transition
+        """
+        for n in range(self.Njumps):
+            if self.occ[self.jump_ij[n][0]] == 0 or self.occ[self.jump_ij[n][1]] == 1:
+                self.jump_Q[n] = np.Inf
+            else:
+                self.jump_Q[n] = 0.
+                for m in range(self.interactrange[n - 1], self.interactrange[n]):
+                    if self.clustercount[m] == 0:
+                        self.jump_Q[n] += self.interactvalue[m]
+        return self.jump_ij, self.jump_Q, self.jump_dx
+
+    def deltaE_trial(self, occsite, unoccsite):
+        """
+        Compute the energy change for swapping two sites.
+
+        Note: this is less general than our non-jit version, to see if we can be
+        more efficient. Note also: it does NOT check if the two sites are currently
+        occupied or not. The behavior is unspecified for incorrect inputs.
+
+        :param occsite: single site to occupy
+        :param unoccsite: single site to unoccupy
+        :return deltaE: change in energy
+        """
+        # we're going to keep track just of the interactions that we change;
+        # this change will be kept in a dictionary, and will be the *negative* of the
+        # clustercount change that would occur with the trial move
+        self.dcluster[:] = 0
+        for m in range(self.Ninteract[occsite]):
+            n = self.siteinteract[occsite, m]
+            if n >= self.Nenergy: break
+            self.dcluster[n] += 1
+        for m in range(self.Ninteract[unoccsite]):
+            n = self.siteinteract[unoccsite, m]
+            if n >= self.Nenergy: break
+            self.dcluster[n] -= 1
+        dE = 0
+        for n in range(self.Nenergy):
+            if self.dcluster[n] == 0: continue
+            # are we turning off an interaction?
+            if self.clustercount[n] == 0:
+                dE -= self.interactvalue[n]
+            # are we turning on an interaction?
+            elif self.clustercount[n] == self.dcluster[n]:
+                dE += self.interactvalue[n]
+        return dE
+
+    def update(self, occsite, unoccsite):
+        """
+        Update the state to occupy the site in occsite and un-occupy the site in unoccsite.
+
+        :param occsite: site to occupy
+        :param unoccsite: site to unoccupy
+        """
+        # change the occupancies:
+        self.occ[occsite] = 1
+        self.occ[unoccsite] = 0
+        # change the cluster counts:
+        for m in range(self.Ninteract[occsite]):
+            self.clustercount[self.siteinteract[occsite, m]] -= 1
+        for m in range(self.Ninteract[unoccsite]):
+            self.clustercount[self.siteinteract[unoccsite, m]] += 1
+        # change the "sets":
+        i = self.index[occsite]  # index of occsite in unoccupied_set
+        j = self.index[unoccsite]  # index of unoccsite in occupied_set
+        self.occupied_set[j] = occsite
+        self.unoccupied_set[i] = unoccsite
+        self.index[occsite] = j  # index of occsite in occupied_set
+        self.index[unoccsite] = i  # index of unoccsite in unoccupied_set
+
+    def MCmoves(self, occchoices, unoccchoices, kTlogu):
+        """
+        Code that runs a length of MC choices, and does the updates. Makes
+        no changes to the occupancies. Needs three random vectors.
+
+        occchoices[i] \in (0,Nunocc-1) - index in unoccupied_set to occupy
+        unoccchoices[i] \in (0,Nocc-1) - index in occupied_set to unoccupy
+        kTlogu[i] >= 0 - value of -kT * ln(u) for u \in (0,1)
+
+        :param occchoices: int[:] of indices into unoccupied_set to occupy
+        :param unoccchoices: int[:] of indices into occupied_set to unoccupy
+        :param kTlogu: float[:] of -kT ln(u) for uniformly distributed u
+        """
+        for i in range(len(occchoices)):
+            occ_trial = self.unoccupied_set[occchoices[i]]
+            unocc_trial = self.occupied_set[unoccchoices[i]]
+            dE = self.deltaE_trial(occ_trial, unocc_trial)
+            if dE < kTlogu[i]:
+                self.update(occ_trial, unocc_trial)
