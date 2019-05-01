@@ -615,8 +615,9 @@ class Crystal(object):
         else:
             self.spins = None
         self.threshold = threshold
-        if not noreduce: self.reduce()  # clean up basis as needed
-        self.minlattice()  # clean up lattice vectors as needed
+        if not noreduce:
+            self.reduce()  # clean up basis as needed
+            self.minlattice()  # clean up lattice vectors as needed
         self.invlatt = np.linalg.inv(self.lattice)
         # this lets us, in a flat list, enumerate over indices of atoms as needed
         self.atomindices = [(atomtype, atomindex)
@@ -664,12 +665,13 @@ class Crystal(object):
         return str_rep
 
     @classmethod
-    def fromdict(cls, yamldict):
+    def fromdict(cls, yamldict, noreduce=True):
         """
         Creates a Crystal object from a *very simple* YAML-created dictionary
 
         :param yamldict: dictionary; must contain 'lattice' (using *row* vectors!) and 'basis';
             can contain optional 'lattice_constant'
+        :param noreduce: should we pass on lattice and basis as is? (default=True)
         :return Crystal(lattice.T, basis): new crystal object
         """
         if 'lattice' not in yamldict: raise IndexError('{} does not contain "lattice"'.format(yamldict))
@@ -679,7 +681,8 @@ class Crystal(object):
         return cls((lattice_constant * yamldict['lattice']).T, yamldict['basis'],
                    chemistry=(yamldict['chemistry'] if 'chemistry' in yamldict else None),
                    spins=(yamldict['spins'] if 'spins' in yamldict else None),
-                   threshold=(yamldict['threshold'] if 'threshold' in yamldict else 1e-8))
+                   threshold=(yamldict['threshold'] if 'threshold' in yamldict else 1e-8),
+                   noreduce=noreduce)
 
     def simpleYAML(self, a0=1.0):
         """
@@ -719,7 +722,8 @@ class Crystal(object):
             chem = chemistry
         else:
             chem = [chemistry]
-        return cls(np.array([[0., 0.5, 0.5], [0.5, 0., 0.5], [0.5, 0.5, 0.]]) * a0, [np.zeros(3)], chem)
+        return cls(np.array([[0., 0.5, 0.5], [0.5, 0., 0.5], [0.5, 0.5, 0.]]) * a0, [np.zeros(3)],
+                   chem, noreduce=True)
 
     @classmethod
     def BCC(cls, a0, chemistry=None):
@@ -733,7 +737,8 @@ class Crystal(object):
             chem = chemistry
         else:
             chem = [chemistry]
-        return cls(np.array([[-0.5, 0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, -0.5]]) * a0, [np.zeros(3)], chem)
+        return cls(np.array([[-0.5, 0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, -0.5]]) * a0, [np.zeros(3)],
+                   chem, noreduce=True)
 
     @classmethod
     def HCP(cls, a0, c_a=np.sqrt(8. / 3.), chemistry=None):
@@ -752,7 +757,7 @@ class Crystal(object):
                              [-np.sqrt(0.75), np.sqrt(0.75), 0.],
                              [0., 0., c_a]]) * a0,
                    [np.array([1. / 3., 2. / 3., 1. / 4.]),
-                    np.array([2. / 3., 1. / 3., 3. / 4])], chem)
+                    np.array([2. / 3., 1. / 3., 3. / 4])], chem, noreduce=True)
 
     def __iszero__(self, v):
         return np.allclose(v, 0, atol=self.threshold)
