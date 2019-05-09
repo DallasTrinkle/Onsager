@@ -149,6 +149,27 @@ class ClusterTests(unittest.TestCase):
         self.assertEqual(s2, c3[0])
         self.assertEqual(s2, c3[-1])
 
+    def testVacancy(self):
+        """Test the creation of vacancy state clusters"""
+        s1 = cluster.ClusterSite((0,0), np.array([0,0,0]))
+        s2 = cluster.ClusterSite((0,0), np.array([1,0,0]))
+        s3 = cluster.ClusterSite((0,0), np.array([0,1,0]))
+        c0 = cluster.Cluster([s1, s2, s3])
+        c1 = cluster.Cluster([s1, s2, s3], vacancy=True)
+        c2 = cluster.Cluster([s2, s1, s3], vacancy=True)
+        c3 = cluster.Cluster([s1, s3, s2], vacancy=True)
+        self.assertNotEqual(c0, c1, msg='Clusters should not be equal:\n{} ==\n{}'.format(c0, c1))
+        self.assertNotEqual(c1, c2, msg='Clusters should not be equal:\n{} ==\n{}'.format(c1, c2))
+        self.assertEqual(c1, c3, msg='Clusters should be equal:\n{} ==\n{}'.format(c1, c3))
+        # check indexing
+        self.assertEqual(2, len(c1))
+        self.assertEqual(2, c1.Norder)
+        self.assertEqual(s1, c1.vacancy())
+        l = [site for site in c1]
+        self.assertEqual(2, len(l))
+        self.assertIn(s2, l)
+        self.assertIn(s3, l)
+
     def testHCPGroupOp(self):
         """Testing group operations on our clusters (HCP)"""
         HCP = crystal.Crystal.HCP(1., chemistry='HCP')
