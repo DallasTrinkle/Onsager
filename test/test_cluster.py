@@ -230,6 +230,12 @@ class ClusterTests(unittest.TestCase):
         clusterset = set([cl.g(FCC, g) for g in FCC.G])
         self.assertEqual(12, len(clusterset), msg='Failure on transition state cluster')
 
+        # test out vacancy clusters:
+        # if we set one corner as our vacancy, then the other three lie on {111} planes = 8 options
+        cl = cluster.Cluster([s1, s2, s3, s4], vacancy=True)
+        clusterset = set([cl.g(FCC, g) for g in FCC.G])
+        self.assertEqual(8, len(clusterset), msg='Failure on vacancy cluster')
+
     def testmakeclustersFCC(self):
         """Does makeclusters perform as expected? FCC"""
         FCC = crystal.Crystal.FCC(1., chemistry='FCC')
@@ -366,6 +372,18 @@ class ClusterTests(unittest.TestCase):
         for TSclustset in TSclusterexp:
             for TSclust in TSclustset:
                 self.assertTrue(np.all(np.zeros(3, dtype=int)==TSclust.transitionstate()[0].R))
+
+    def testmakeVacclustersFCC(self):
+        """Does makeVacclusters perform as expected? FCC"""
+        FCC = crystal.Crystal.FCC(1., chemistry='FCC')
+        clusterexp = cluster.makeclusters(FCC, 0.8, 4)
+        chem = 0
+        Vacclusterexp = cluster.makeVacancyClusters(FCC, chem, clusterexp)
+        self.assertEqual(4, len(Vacclusterexp))
+        self.assertEqual([1, 12, 24, 8], [len(csset) for csset in Vacclusterexp])
+        for Vacclustset in Vacclusterexp:
+            for Vacclust in Vacclustset:
+                self.assertTrue(np.all(np.zeros(3, dtype=int)==Vacclust.vacancy().R))
 
     def testYAML(self):
         """Can we write out a clusters in YAML?"""

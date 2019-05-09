@@ -420,7 +420,7 @@ def makeTSclusters(crys, chem, jumpnetwork, clusterexp):
     :param chem: index of mobile species
     :param jumpnetwork: list of lists of ((i, j), dx) transitions
     :param clusterexp: list of sets of clusters to base TS cluster expansion
-    :return TSclusterexp: list of sets of TS clusters
+    :return: TSclusterexp: list of sets of TS clusters
     """
     # convert the entire chem / jumpnetwork into pairs of sites:
     jumppairs = []
@@ -449,6 +449,38 @@ def makeTSclusters(crys, chem, jumpnetwork, clusterexp):
                                 TSclusterexp.append(TSclset)
                                 TSclusters.update(TSclset)
     return TSclusterexp
+
+def makeVacancyClusters(crys, chem, clusterexp):
+    """
+    Function to make vacancy clusters based on an existing cluster expansion where
+    the vacancies live on a particular sublattice.
+
+    :param crys: crystal to construct our clusters for
+    :param chem: index of the sublattice to contain a vacancy
+    :param clusterexp: list of sets of clusters to base vacancy cluster expansion
+    :return: VacClusterexp: list of sets of vacancy clusters
+    """
+    Vacclusterexp = []
+    Vacclusters =set()
+    # make all of our sites centered at the origin:
+    site_zero = {ci: ClusterSite(ci, np.zeros(crys.dim, dtype=int)) for ci in crys.atomindices if ci[0] == chem}
+    for clustlist in clusterexp:
+        if sum(1 for site in next(iter(clustlist)) if site.ci[0] == chem) < 1: continue
+        # we can only use clusters that have at least one sublattice to check for vacancies
+        for clust in clustlist:
+            for site in clust:
+                if site.ci[0] == chem:
+                    # a little strange, but: remove site from the cluster, and put it at the front
+                    # we can't append the *site*, because we need to shift back to the origin
+                    # hence the use of site_zero[]
+                    Vacclust = Cluster([site_zero[site.ci]] + (clust - site), vacancy=True)
+                    if Vacclust not in Vacclusters:
+                        # new transition state cluster
+                        Vacclset = set([Vacclust.g(crys, g) for g in crys.G])
+                        Vacclusterexp.append(Vacclset)
+                        Vacclusters.update(Vacclset)
+    return Vacclusterexp
+
 
 
 class MonteCarloSampler(object):
