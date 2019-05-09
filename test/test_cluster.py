@@ -403,6 +403,12 @@ class ClusterTests(unittest.TestCase):
                 yamlstr = yaml.dump(cl)
                 clcopy = yaml.load(yamlstr)
                 self.assertEqual(cl, clcopy)
+        Vacclusterexp = cluster.makeVacancyClusters(FCC, chem, clusterexp)
+        for clset in Vacclusterexp:
+            for cl in clset:
+                yamlstr = yaml.dump(cl)
+                clcopy = yaml.load(yamlstr)
+                self.assertEqual(cl, clcopy)
 
 
 class MonteCarloTests(unittest.TestCase):
