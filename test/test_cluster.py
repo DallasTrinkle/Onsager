@@ -160,7 +160,7 @@ class ClusterTests(unittest.TestCase):
         c3 = cluster.Cluster([s1, s3, s2], vacancy=True)
         self.assertNotEqual(c0, c1, msg='Clusters should not be equal:\n{} ==\n{}'.format(c0, c1))
         self.assertNotEqual(c1, c2, msg='Clusters should not be equal:\n{} ==\n{}'.format(c1, c2))
-        self.assertEqual(c1, c3, msg='Clusters should be equal:\n{} ==\n{}'.format(c1, c3))
+        self.assertEqual(c1, c3, msg='Clusters should be equal:\n{} !=\n{}'.format(c1, c3))
         # check indexing
         self.assertEqual(2, len(c1))
         self.assertEqual(2, c1.Norder)

@@ -115,7 +115,7 @@ class Cluster(object):
     all of the remaining parts are the cluster.
     """
 
-    def __init__(self, clustersitelist, transition=False, NOSORT=False):
+    def __init__(self, clustersitelist, transition=False, vacancy=False, NOSORT=False):
         """
         Cluster interaction, from an iterable of ClusterSites
         :param clustersitelist: iterable of ClusterSites
@@ -127,31 +127,45 @@ class Cluster(object):
         # first, dump contents of iterable into a list to manipulate:
         lis = [cs for cs in clustersitelist]
         if not NOSORT:
-            if not transition:
-                lis.sort(key=sortkey)
-            else:
+            if transition:
                 lis = lis[0:2] + sorted(lis[2:], key=sortkey)
+            elif vacancy:
+                lis = lis[0:1] + sorted(lis[1:], key=sortkey)
+            else:
+                lis.sort(key=sortkey)
         R0 = lis[0].R
         self.sites = tuple([cs-R0 for cs in lis])
         self.Norder = len(self.sites)
         self.Nsites = len(self.sites)
         if transition:
             self.Norder -= 2
+        elif vacancy:
+            self.Norder -= 1
         # a little mapping of the positions into sets to make equality checking faster,
         # and explicit evaluation of hash function one time using XOR of individual values
         # so that it respects permutations
         self.__center__ = sum(cs.R for cs in self.sites)
         self.__equalitymap__ = {}
         hashcache = 0
-        for cs in self.sites:
-            shiftpos = self.__shift_pos__(cs)  # our tuple representation of site
-            hashcache ^= hash(cs.ci + shiftpos)
-            if cs.ci not in self.__equalitymap__:
-                self.__equalitymap__[cs.ci] = set([shiftpos])
+        Nvac = 0 # how many of our sites are "vacancies" (to be treated differently on the sublattice)?
+        if vacancy:
+            if transition:
+                Nvac = 2
             else:
-                self.__equalitymap__[cs.ci].add(shiftpos)
+                Nvac = 1
+        for i, cs in enumerate(self.sites):
+            shiftpos = self.__shift_pos__(cs)  # our tuple representation of site
+            r = cs.ci  # currently does NOT have an "alpha" value on it... could be ci[0]?
+            if i<Nvac:
+                r += (-1,)
+            hashcache ^= hash(r + shiftpos)
+            if r not in self.__equalitymap__:
+                self.__equalitymap__[r] = set([shiftpos])
+            else:
+                self.__equalitymap__[r].add(shiftpos)
         self.__hashcache__ = hashcache
         self.__transition__ = transition
+        self.__vacancy__ = vacancy
 
     def __shift_pos__(self, cs):
         return tuple(cs.R*self.Nsites - self.__center__)
@@ -164,6 +178,7 @@ class Cluster(object):
         """
         if not isinstance(other, self.__class__): return False
         if self.__transition__ != other.__transition__: return False
+        if self.__vacancy__ != other.__vacancy__: return False
         if self.Norder != other.Norder: return False
         if self.__equalitymap__.keys() != other.__equalitymap__.keys(): return False
         for k, v in self.__equalitymap__.items():
@@ -175,6 +190,10 @@ class Cluster(object):
             #     if TSself != (TSother[1] - R0, TSother[0] - R0):
             if not self.istransition(*other.transitionstate()):
                 return False
+        # with the new indexing, I don't believe this check is required:
+        # elif self.__vacancy__:
+        #     if self.vacancy() != other.vacancy():
+        #         return False
         return True
 
     def __hash__(self):
@@ -182,6 +201,9 @@ class Cluster(object):
         return self.__hashcache__
 
     def __contains__(self, elem):
+        """Returns whether a cluster site is in our cluster expansion"""
+        # elem is a cluster site
+        # NOTE: this will FAIL to find the "vacancy" in the cluster by default.
         if elem.ci not in self.__equalitymap__: return False
         return self.__shift_pos__(elem) in self.__equalitymap__[elem.ci]
 
@@ -189,21 +211,31 @@ class Cluster(object):
         if item >= self.Norder: raise IndexError
         if self.__transition__:
             return self.sites[2:][item]
+        elif self.__vacancy__:
+            return self.sites[1:][item]
         else:
             return self.sites[item]
 
     def _asdict(self):
         """Return a proper dict"""
+        d = {'clustersitelist': self.sites}
         if self.__transition__:
-            return {'clustersitelist': self.sites, 'transition': self.__transition__}
-        else:
-            return {'clustersitelist': self.sites}
+            d['transition'] = self.__transition__
+        if self.__vacancy__:
+            d['vacancy'] = self.__vacancy__
+        return d
 
     def transitionstate(self):
         """Return the two sites of the transition state"""
         if not self.__transition__:
             raise ValueError('Not a TS cluster')
         return self.sites[0], self.sites[1]
+
+    def vacancy(self):
+        """Return the two sites of the transition state"""
+        if not self.__vacancy__:
+            raise ValueError('Not a vacancy cluster')
+        return self.sites[0]
 
     def istransition(self, site0, site1):
         """Check whether two sites correspond to the transition state"""
@@ -220,7 +252,7 @@ class Cluster(object):
     def __add__(self, other):
         """Add a clustersite to a cluster expansion"""
         if other not in self:
-            return self.__class__(self.sites + (other,), transition=self.__transition__)
+            return self.__class__(self.sites + (other,), transition=self.__transition__, vacancy=self.__vacancy__)
         else:
             return self
 
@@ -238,6 +270,8 @@ class Cluster(object):
         """
         if self.__transition__:
             raise NotImplemented('Subtraction not currently implemented for TS clusters')
+        if self.__vacancy__:
+            raise NotImplemented('Subtraction not currently implemented for vacancy clusters')
         if other not in self:
             raise ArithmeticError('{} not in {}'.format(other, self))
         return [cs-other.R for cs in self.sites if cs != other]
@@ -253,7 +287,7 @@ class Cluster(object):
         :param g: group operation (from crys)
         :return g*cluster: corresponding to group operation applied to self
         """
-        return self.__class__([cs.g(crys, g) for cs in self.sites], transition=self.__transition__)
+        return self.__class__([cs.g(crys, g) for cs in self.sites], transition=self.__transition__, vacancy=self.__vacancy__)
 
     def pairdistances(self, crys):
         """
@@ -288,6 +322,9 @@ class Cluster(object):
         if self.__transition__:
             s += str(self.sites[0]) + " -> " + str(self.sites[1]) + " : "
             s += " ".join([str(cs) for cs in self.sites[2:]])
+        elif self.__vacancy__:
+            s += str(self.sites[0]) + " (V): "
+            s += " ".join([str(cs) for cs in self.sites[1:]])
         else:
             s += " ".join([str(cs) for cs in self.sites])
         return s
