@@ -625,7 +625,15 @@ class ClusterSupercell(object):
         self.size, self.invsuper, self.translist, self.transdict = Supercell.maketrans(self.superlatt)
         self.specpos, self.mobilepos = self.makesites()
         self.Rveclist = [np.dot(self.superlatt, t) // self.size for t in self.translist]
+        self.vacancy = None # assume there no vacancy
         # self.pos, self.occ = self.makesites(), -1 * np.ones(self.N * self.size, dtype=int)
+
+    def addvacancy(self, ind):
+        """Adds a vacancy into the mobile species at a specific index"""
+        i_ind = int(ind)
+        if i_ind < 0 or i_ind >= self.Nmobile*self.size:
+            raise IndexError('{} is out of range; should be between 0 and {}'.format(ind, self.Nmobile*self.size))
+        self.vacancy = i_ind
 
     def makesites(self):
         """
