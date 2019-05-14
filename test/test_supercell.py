@@ -643,23 +643,32 @@ class ClusterSupercellTests(unittest.TestCase):
         s4 = cluster.ClusterSite.fromcryscart(FCC, np.array([0.5, 0.5, 0.]))
         s5 = cluster.ClusterSite.fromcryscart(FCC, np.array([0., 0.5, -0.5]))
         # build some base clusters...
-        c1 = cluster.Cluster([s1], vacancy=True)
-        c2 = cluster.Cluster([s1, s2], vacancy=True)
-        c3 = cluster.Cluster([s1, s2, s3], vacancy=True)
-        c3w = cluster.Cluster([s1, s2, s5], vacancy=True)
-        c4 = cluster.Cluster([s1, s2, s3, s4], vacancy=True)
-        # expand out into symmetric sets...
-        clusterexp = [set([cl.g(FCC, g) for g in FCC.G]) for cl in [c1, c2, c3, c3w, c4]]
+        c1 = cluster.Cluster([s1])
+        c2 = cluster.Cluster([s1, s2])
+        c3 = cluster.Cluster([s1, s2, s3])
+        c3w = cluster.Cluster([s1, s2, s5])
+        c4 = cluster.Cluster([s1, s2, s3, s4])
+        c1v = cluster.Cluster([s1], vacancy=True)
+        c2v = cluster.Cluster([s1, s2], vacancy=True)
+        c3v = cluster.Cluster([s1, s2, s3], vacancy=True)
+        c3wv = cluster.Cluster([s1, s2, s5], vacancy=True)
+        c4v = cluster.Cluster([s1, s2, s3, s4], vacancy=True)
+        # expand out into symmetric sets... includes both regular *and* vacancy clusters
+        clusterexp = [set([cl.g(FCC, g) for g in FCC.G]) for cl in [c1, c2, c3, c3w, c4,
+                                                                    c1v, c2v, c3v, c3wv, c4v]]
         mocc, socc = np.zeros(sup.size), np.zeros(0)
         mocc[0] = -1  # put in the vacancy
         clustercount = sup.evalcluster(mocc, socc, clusterexp)
-        self.assertTrue(np.all(np.array([1, 0, 0, 0, 0, sup.size]) == clustercount),
+        self.assertTrue(np.all(np.array([0, 0, 0, 0, 0,
+                                         1, 0, 0, 0, 0, sup.size]) == clustercount),
                         msg='Cluster count = {}'.format(clustercount))
 
         mocc, socc = np.ones(sup.size), np.zeros(0)
         mocc[0] = -1  # put in the vacancy
         clustercount = sup.evalcluster(mocc, socc, clusterexp)
-        self.assertTrue(np.all(np.array([1, 12, 24, 12, 8, sup.size]) == clustercount),
+        # our count for our "regular" sites are from our previous test, without the vacancy:
+        self.assertTrue(np.all(np.array([sup.size-1, 6*(sup.size-2), 8*(sup.size-3), 12*(sup.size-3), 2*(sup.size-4),
+                                         1, 12, 24, 12, 8, sup.size]) == clustercount),
                         msg='Cluster count = {}'.format(clustercount))
 
     def testClusterEvaluator(self):
