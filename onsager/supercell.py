@@ -784,10 +784,8 @@ class ClusterSupercell(object):
         for mc, clusterlist in enumerate(clusters):
             for clust in clusterlist:
                 if clust.__vacancy__:
-                    if self.vacancy is None:
-                        continue
-                    elif clust.vacancy().ci != ci_vac:
-                        continue
+                    if self.vacancy is None: continue
+                    elif clust.vacancy().ci != ci_vac: continue
                     Rveclist = [R_vac]
                 else:
                     Rveclist = self.Rveclist
@@ -872,10 +870,8 @@ class ClusterSupercell(object):
             for clust in clusterlist:
                 if clust.__vacancy__:
                     # do we have a vacancy in the right place?
-                    if self.vacancy is None:
-                        continue
-                    elif clust.vacancy().ci != ci_vac:
-                        continue
+                    if self.vacancy is None: continue
+                    elif clust.vacancy().ci != ci_vac: continue
                     # now, set it up!
                     Rveclist = [R_vac]
                 else:
@@ -1084,5 +1080,210 @@ class ClusterSupercell(object):
                     Ninteract += 1
                     interactrange.append(Ninteract)
                     Njumps += 1
+        interactrange.append(Ninteract0)
+        return siteinteract, interact, jumps, interactrange
+
+    def jumpnetworkevaluator_vacancy(self, socc, clusters, values, chem, jumpnetwork, KRAvalues=0,
+                                     TSclusters=(), TSvalues=(),
+                                     siteinteract=(), interact=()):
+        """
+        Build out an efficient jump network evaluator for a vacancy. Similar inputs to
+        ``jumpnetworkevaluator``. This is designed for a "stationary" vacancy, where we'll
+        just look at its jumps in the supercell.
+
+        :param socc: spectator occupancy vector (0 or 1 only)
+        :param clusters: list of lists (or sets) of Cluster objects
+        :param values: vector of values for the clusters; if it is longer than the
+          list of clusters by one, the last values is assumed to be the constant value.
+        :param chem: index of species that transitions
+        :param jumpnetwork: list of lists of jumps; each is ((i, j), dx) where ``i`` and ``j`` are
+          unit cell indices for species ``chem``
+        :param KRAvalues: list of "KRA" values for barriers (relative to average energy of endpoints);
+          if ``TSclusters`` are used, choosing 0 is more straightforward.
+        :param TSclusters: (optional) list of transition state cluster expansion terms; this is
+          always added on to KRAvalues (thus using 0 is recommended if TSclusters are also used)
+        :param TSvalues: (optional) values for TS cluster expansion entries
+        :param siteinteract: (optional) list of lists of interactions for each site, to append
+        :param interact: (optional) list of interaction values, to append
+
+        :return siteinteract: list of lists of interactions for each site
+        :return interact: list of interaction values
+        :return jumps: list of ((initial, final), dx)
+        :return interactrange: range of indices to count in interact for each jump; for the nth
+          jump, sum over interactrange[n-1]:interactrange[n]; interactrange[-1] == range for energy
+        """
+        if self.vacancy is None:
+            raise RuntimeError('Supercell does not contain a vacancy; use `addvacancy()` first')
+        ci_vac, R_vac = self.ciR(self.vacancy)
+        if ci_vac[0] != chem:
+            raise RuntimeError('Vacancy {} has chemistry {} not {}'.format(self.vacancy, ci_vac[0], chem))
+        if hasattr(KRAvalues, '__len__'):
+            if len(KRAvalues) != len(jumpnetwork):
+                raise ValueError('Incorrect length for KRAvalues: {}'.format(KRAvalues))
+        else:
+            KRAvalues = KRAvalues * np.ones(len(jumpnetwork))
+        if len(clusters) != len(values) != len(clusters) + 1:
+            raise ValueError('Incorrect length for values: {}'.format(values))
+        if len(TSclusters) != len(TSvalues):
+            raise ValueError('Incorrect length for TSvalues: {}'.format(TSvalues))
+        siteinteract = list(siteinteract)
+        interact = list(interact)
+        Ninteract = len(interact)
+        Ninteract0 = Ninteract  # we store this now, so that we can make interactrange[-1] = Ninteract0
+        # "flatten" the clusters for more efficient operations:
+        # clusterinteract[(c,i)] = list of ([cs list], value) of interactions centered on (c, i)
+        # NOTE: in order to maintain detailed balance, we use half the energy difference of the
+        # initial and final states, so we go ahead and multiply by 0.5 here for efficiency.
+        clusterinteract = {}
+        vacclusterinteract = {}
+        for clusterlist, value in zip(clusters, values):
+            for clust in clusterlist:
+                if clust.__vacancy__:
+                    civ = clust.vacancy().ci
+                    mobilesites = [site for site in clust if site.ci in self.indexmobile]
+                    specsites = [site for site in clust if site.ci in self.indexspectator]
+                    if civ in vacclusterinteract:
+                        vacclusterinteract[civ].append((mobilesites, specsites, 0.5 * value))
+                    else:
+                        vacclusterinteract[civ] = [(mobilesites, specsites, 0.5 * value)]
+                else:
+                    for cs in clust:
+                        if cs.ci in self.indexmobile:
+                            # get the list of other sites, and split into mobile and spectator:
+                            cllist = clust - cs
+                            mobilesites = [site for site in cllist if site.ci in self.indexmobile]
+                            specsites = [site for site in cllist if site.ci in self.indexspectator]
+                            if cs.ci in clusterinteract:
+                                clusterinteract[cs.ci].append((mobilesites, specsites, 0.5 * value))
+                            else:
+                                clusterinteract[cs.ci] = [(mobilesites, specsites, 0.5 * value)]
+        # "flatten" the TS clusters. To simplify, we put in both forward and backward jumps
+        TSclusterinteract = {}
+        for TSclusterlist, value in zip(TSclusters, TSvalues):
+            for TSclust in TSclusterlist:
+                # just check that we're dealing with vacancies, with the right chemistry
+                if not TSclust.__vacancy__: continue
+                TS = TSclust.transitionstate()
+                if TS[0].ci[0] != chem or TS[1].ci != chem: continue
+                R0 = TS[0].R
+                TS0 = (TS[0] - R0, TS[1] - R0)
+                mobilesites = [site - R0 for site in TSclust if site.ci in self.indexmobile]
+                specsites = [site - R0 for site in TSclust if site.ci in self.indexspectator]
+                if TS0 in TSclusterinteract:
+                    TSclusterinteract[TS0].append((mobilesites, specsites, value))
+                else:
+                    TSclusterinteract[TS0] = [(mobilesites, specsites, value)]
+                R1 = TS[1].R
+                mobilesites = [site - R1 for site in TSclust if site.ci in self.indexmobile]
+                specsites = [site - R1 for site in TSclust if site.ci in self.indexspectator]
+                TS1 = (TS[1] - R1, TS[0] - R1)
+                if TS1 in TSclusterinteract:
+                    TSclusterinteract[TS1].append((mobilesites, specsites, value))
+                else:
+                    TSclusterinteract[TS1] = [(mobilesites, specsites, value)]
+        # we need to proceed one transition at a time
+        Njumps, interactrange = 0, []
+        jumps = []
+        for jn, Etrans in zip(jumpnetwork, KRAvalues):
+            for (i0, j0), deltax in jn:
+                ci0, cj0 = (chem, i0), (chem, j0)
+                if ci0 != ci_vac: continue
+                # to get final position, it's a bit more complex... need to use dx:
+                dR, cj = self.crys.cart2pos(self.crys.pos2cart(np.zeros(self.crys.dim), (chem, i0)) + deltax)
+                if cj != cj0:
+                    raise ArithmeticError(
+                        'Transition ({},{}), {} did not land at correct site?\n{} != P{'.format(i0, j0, deltax, cj,
+                                                                                                cj0))
+                cs_i0 = cluster.ClusterSite(ci0, np.zeros(self.crys.dim, dtype=int))
+                # NOTE: we will need the *reverse* endpoint for the initial state...
+                cs_i = cluster.ClusterSite(ci0, -dR)
+                cs_j = cluster.ClusterSite(cj0, dR)
+                # construct sublists of cluster expansions that explicitly *exclude* our *vacancy*:
+                # NOTE: this looks backwards, because it has to do with the site that will exchange with the
+                # vacancy, and ensuring that the vacancy is not in the cluster interaction
+                clusterinteract_ci0 = [(ms, ss, val) for (ms, ss, val) in clusterinteract[cj0] if cs_i not in ms]
+                clusterinteract_cj0 = [(ms, ss, val) for (ms, ss, val) in clusterinteract[ci0] if cs_j not in ms]
+                # vacancy cluster expansions for our initial and final state get appended:
+                clusterinteract_ci0 += [(ms, ss, val) for (ms, ss, val) in vacclusterinteract[ci0]]
+                clusterinteract_cj0 += [(ms, ss, val) for (ms, ss, val) in vacclusterinteract[cj0]]
+                # Ri = R_vac
+                # each possible *transition* is treated like its own mini-cluster expansion:
+                E0 = Etrans
+                interdict = {}
+                R_vac = 0
+                i = self.index(R_vac, ci0)[0]
+                if i != self.vacancy:
+                    raise RuntimeError('Somehow did not correctly map to the vacancy? Should never happen')
+                Rj = R_vac + dR
+                j = self.index(Rj, cj0)[0]
+                jumps.append(((i, j), deltax))
+                # now, to run through our clusters, adding interactions as appropriate:
+                # -0.5*Einitial
+                for mobilesites, specsites, value in clusterinteract_ci0:
+                    # if our endpoint is also in our cluster, kick out now:
+                    # if cs_j in mobilesites: continue
+                    # check that all of the spectator sites are occupied:
+                    if all(socc[self.index(R_vac + site.R, site.ci)[0]] == 1 for site in specsites):
+                        if len(mobilesites) == 0:
+                            # spectator only == constant
+                            E0 -= value
+                        else:
+                            intertuple = tuple(sorted(self.index(R_vac + site.R, site.ci)[0] for site in mobilesites))
+                            if intertuple in interdict:
+                                # if we've already seen this particular interaction, add to the value
+                                interact[interdict[intertuple]] -= value
+                            else:
+                                # new interaction!
+                                interact.append(-value)
+                                interdict[intertuple] = Ninteract
+                                for n in intertuple:
+                                    siteinteract[n].append(Ninteract)
+                                Ninteract += 1
+                # +0.5*Efinal
+                for mobilesites, specsites, value in clusterinteract_cj0:
+                    # if our initial point is also in our cluster, kick out now:
+                    # if cs_i in mobilesites: continue
+                    # check that all of the spectator sites are occupied:
+                    if all(socc[self.index(Rj + site.R, site.ci)[0]] == 1 for site in specsites):
+                        if len(mobilesites) == 0:
+                            # spectator only == constant
+                            E0 += value
+                        else:
+                            intertuple = tuple(sorted(self.index(Rj + site.R, site.ci)[0] for site in mobilesites))
+                            if intertuple in interdict:
+                                # if we've already seen this particular interaction, add to the value
+                                interact[interdict[intertuple]] += value
+                            else:
+                                # new interaction!
+                                interact.append(value)
+                                interdict[intertuple] = Ninteract
+                                for n in intertuple:
+                                    siteinteract[n].append(Ninteract)
+                                Ninteract += 1
+                # finally, here is where we'd put the code to include the KRA expansion...
+                if (cs_i0, cs_j) in TSclusterinteract:
+                    for mobilesites, specsites, value in TSclusterinteract[cs_i0, cs_j]:
+                        if all(socc[self.index(R_vac + site.R, site.ci)[0]] == 1 for site in specsites):
+                            if len(mobilesites) == 0:
+                                # spectator only == constant
+                                E0 += value
+                            else:
+                                intertuple = tuple(
+                                    sorted(self.index(R_vac + site.R, site.ci)[0] for site in mobilesites))
+                                if intertuple in interdict:
+                                    # if we've already seen this particular interaction, add to the value
+                                    interact[interdict[intertuple]] += value
+                                else:
+                                    # new interaction!
+                                    interact.append(value)
+                                    interdict[intertuple] = Ninteract
+                                    for n in intertuple:
+                                        siteinteract[n].append(Ninteract)
+                                    Ninteract += 1
+                # now add on our constant value...
+                interact.append(E0)
+                Ninteract += 1
+                interactrange.append(Ninteract)
+                Njumps += 1
         interactrange.append(Ninteract0)
         return siteinteract, interact, jumps, interactrange
