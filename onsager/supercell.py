@@ -836,6 +836,8 @@ class ClusterSupercell(object):
         cs_i1 = cluster.ClusterSite(ci_i, -dR)
         cs_j1 = cluster.ClusterSite(ci_j, np.zeros(self.crys.dim))
         for mc, clusterlist in enumerate(TSclusters):
+            if next(iter(clusterlist)).__vacancy__:
+                raise NotImplementedError('TS cluster evaluation for vacancy jumps not currently implemented')
             for clust in clusterlist:
                 if (cs_i0, cs_j0) == clust.transitionstate():
                     if all(isocc(Ri + site.R, site.ci) for site in clust):
@@ -863,18 +865,32 @@ class ClusterSupercell(object):
         Ninteract = 0
         interact, interdict = [], {}
         siteinteract = [[] for n in range(self.Nmobile * self.size)]
+        if self.vacancy is not None:
+            ci_vac, R_vac = self.ciR(self.vacancy)
         for clusterlist, value in zip(clusters, values):
             for clust in clusterlist:
+                if clust.__vacancy__:
+                    # do we have a vacancy in the right place?
+                    if self.vacancy is None:
+                        continue
+                    elif clust.vacancy().ci != ci_vac:
+                        continue
+                    # now, set it up!
+                    Rveclist = [R_vac]
+                else:
+                    Rveclist = self.Rveclist
                 # split into mobile and spectator
                 mobilesites = [site for site in clust if site.ci in self.indexmobile]
                 specsites = [site for site in clust if site.ci in self.indexspectator]
-                for R in self.Rveclist:
+                for R in Rveclist:
                     if all(socc[self.index(R + site.R, site.ci)[0]] == 1 for site in specsites):
                         if len(mobilesites) == 0:
                             # spectator only == constant
                             E0 += value
                         else:
                             intertuple = tuple(sorted(self.index(R + site.R, site.ci)[0] for site in mobilesites))
+                            if self.vacancy in intertuple:
+                                continue
                             if intertuple in interdict:
                                 # if we've already seen this particular interaction, add to the value
                                 interact[interdict[intertuple]] += value
