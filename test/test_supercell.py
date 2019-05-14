@@ -495,6 +495,12 @@ class ClusterSupercellTests(unittest.TestCase):
         sup = supercell.ClusterSupercell(self.crys, 3*self.one)
         self.assertIsInstance(sup, supercell.ClusterSupercell)
 
+    def testClusterVacancy(self):
+        """Can we put a vacancy into a supercell?"""
+        sup = supercell.ClusterSupercell(self.crys, 3*self.one)
+        sup.addvacancy(0)
+        self.assertEqual(0, sup.vacancy)
+
     def testIndexingSimple(self):
         """Check that the indexing behaves as we expect: FCC"""
         superlatt = np.array([[3,2,0], [-2, 3, 1], [2, -1, 4]])
