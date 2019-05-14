@@ -772,13 +772,27 @@ class ClusterSupercell(object):
             else:
                 return socc[n] == 1
 
+        # sanity check:
+        if self.vacancy is not None:
+            if mocc[self.vacancy] == 1:
+                raise RuntimeWarning('Supercell contains a vacancy at {} but mobile occupancy == 1?'.format(self.vacancy))
+
         clustercount = np.zeros(len(clusters) + 1, dtype=int)
         clustercount[-1] = self.size
         for mc, clusterlist in enumerate(clusters):
-            for clust in clusterlist:
-                for nR, R in enumerate(self.Rveclist):
-                    if all(isocc(R + site.R, site.ci) for site in clust):
-                        clustercount[mc] += 1
+            if next(iter(clusterlist)).__vacancy__:
+                # treatment for vacancy clusters...
+                if self.vacancy is not None:
+                    ci_vac, R_vac = self.ciR(self.vacancy)
+                    for clust in clusterlist:
+                        if clust.vacancy().ci == ci_vac:
+                            if all(isocc(R_vac + site.R, site.ci) for site in clust):
+                                clustercount[mc] += 1
+            else:
+                for clust in clusterlist:
+                    for nR, R in enumerate(self.Rveclist):
+                        if all(isocc(R + site.R, site.ci) for site in clust):
+                            clustercount[mc] += 1
         return clustercount
 
     def evalTScluster(self, mocc, socc, TSclusters, initial, final, dx):
