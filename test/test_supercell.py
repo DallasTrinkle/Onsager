@@ -635,6 +635,7 @@ class ClusterSupercellTests(unittest.TestCase):
         A2 = FCC.cart2unit(np.array([0.,Nsuper,0.]))[0]
         A3 = FCC.cart2unit(np.array([0.,0.,Nsuper]))[0]
         sup = supercell.ClusterSupercell(FCC, np.array([A1, A2, A3]))
+        sup.addvacancy(0)  # put in a vacancy at the origin
         # build some sites...
         s1 = cluster.ClusterSite.fromcryscart(FCC, np.array([0, 0, 0]))
         s2 = cluster.ClusterSite.fromcryscart(FCC, np.array([0., 0.5, 0.5]))
@@ -650,12 +651,16 @@ class ClusterSupercellTests(unittest.TestCase):
         # expand out into symmetric sets...
         clusterexp = [set([cl.g(FCC, g) for g in FCC.G]) for cl in [c1, c2, c3, c3w, c4]]
         mocc, socc = np.zeros(sup.size), np.zeros(0)
+        mocc[0] = -1  # put in the vacancy
         clustercount = sup.evalcluster(mocc, socc, clusterexp)
-        self.assertTrue(np.all(np.array([0,]*5 + [sup.size]) == clustercount))
+        self.assertTrue(np.all(np.array([1, 0, 0, 0, 0, sup.size]) == clustercount),
+                        msg='Cluster count = {}'.format(clustercount))
 
         mocc, socc = np.ones(sup.size), np.zeros(0)
+        mocc[0] = -1  # put in the vacancy
         clustercount = sup.evalcluster(mocc, socc, clusterexp)
-        self.assertTrue(np.all(np.array([1, 6, 8, 12, 2, 1])*sup.size == clustercount))
+        self.assertTrue(np.all(np.array([1, 12, 24, 12, 8, sup.size]) == clustercount),
+                        msg='Cluster count = {}'.format(clustercount))
 
     def testClusterEvaluator(self):
         """Check that our cluster evaluator works"""
