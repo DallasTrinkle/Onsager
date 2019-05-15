@@ -1239,6 +1239,10 @@ class ClusterSupercell(object):
                                 for n in intertuple:
                                     siteinteract[n].append(Ninteract)
                                 Ninteract += 1
+                # we need to make an index mapping for our end-point state (the two sites that are switched!)
+                rev_map = np.array(range(self.Nmobile*self.size))
+                rev_map[i] = j
+                rev_map[j] = i
                 # +0.5*Efinal
                 for mobilesites, specsites, value in clusterinteract_cj0:
                     # if our initial point is also in our cluster, kick out now:
@@ -1249,7 +1253,8 @@ class ClusterSupercell(object):
                             # spectator only == constant
                             E0 += value
                         else:
-                            intertuple = tuple(sorted(self.index(Rj + site.R, site.ci)[0] for site in mobilesites))
+                            intertuple = tuple(sorted(rev_map[self.index(Rj + site.R, site.ci)[0]]
+                                                      for site in mobilesites))
                             if intertuple in interdict:
                                 # if we've already seen this particular interaction, add to the value
                                 interact[interdict[intertuple]] += value
