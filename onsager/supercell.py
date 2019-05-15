@@ -1198,14 +1198,6 @@ class ClusterSupercell(object):
                 # NOTE: we will need the *reverse* endpoint for the initial state...
                 cs_i = cluster.ClusterSite(ci0, -dR)
                 cs_j = cluster.ClusterSite(cj0, dR)
-                # construct sublists of cluster expansions that explicitly *exclude* our *vacancy*:
-                # NOTE: this looks backwards, because it has to do with the site that will exchange with the
-                # vacancy, and ensuring that the vacancy is not in the cluster interaction
-                clusterinteract_ci0 = [(ms, ss, val) for (ms, ss, val) in clusterinteract[cj0] if cs_i not in ms]
-                clusterinteract_cj0 = [(ms, ss, val) for (ms, ss, val) in clusterinteract[ci0] if cs_j not in ms]
-                # vacancy cluster expansions for our initial and final state get appended:
-                clusterinteract_ci0 += [(ms, ss, val) for (ms, ss, val) in vacclusterinteract[ci0]]
-                clusterinteract_cj0 += [(ms, ss, val) for (ms, ss, val) in vacclusterinteract[cj0]]
                 # Ri = R_vac
                 # each possible *transition* is treated like its own mini-cluster expansion:
                 E0 = Etrans
@@ -1217,50 +1209,44 @@ class ClusterSupercell(object):
                 Rj = R_vac + dR
                 j = self.index(Rj, cj0)[0]
                 jumps.append(((i, j), deltax))
-                # now, to run through our clusters, adding interactions as appropriate:
-                # -0.5*Einitial
-                for mobilesites, specsites, value in clusterinteract_ci0:
+
+                # construct sublists of cluster expansions based on the "i" site and the "j" site
+                # half of these are for the initial, and half are for the final. For simplicity, we do
+                # the vacancy based ones first.
+                # clusterinteract_ci0 = [(ms, ss, val) for (ms, ss, val) in vacclusterinteract[ci0]]
+                # clusterinteract_cj0 = [(ms, ss, val) for (ms, ss, val) in vacclusterinteract[cj0]]
+                # clusterinteract_ci0 += [(ms, ss, -val) for (ms, ss, val) in clusterinteract[ci0] if cs_j not in ms]
+                # clusterinteract_cj0 += [(ms, ss, -val) for (ms, ss, val) in clusterinteract[cj0] if cs_i not in ms]
+
+                # we need to make an index mapping for our end-point state (the two sites that are switched!)
+                init_map = np.array(range(self.Nmobile*self.size))
+                rev_map = init_map.copy()
+                rev_map[i] = j
+                rev_map[j] = i
+                # -0.5*Einitial + 0.5*Efinal: vac(initial), vac(final), solute(initial), solute(final)
+                clusterinteract_map = [(ms, ss, -val, R_vac, init_map) for (ms, ss, val) in vacclusterinteract[ci0]] + \
+                                      [(ms, ss, +val, Rj, rev_map) for (ms, ss, val) in vacclusterinteract[cj0]] + \
+                                      [(ms, ss, -val, Rj, init_map) for (ms, ss, val) in clusterinteract[cj0]
+                                       if cs_i not in ms] + \
+                                      [(ms, ss, +val, R_vac, rev_map) for (ms, ss, val) in clusterinteract[ci0]
+                                       if cs_j not in ms]
+                for mobilesites, specsites, value, Rsite, mapping in clusterinteract_map:
                     # if our endpoint is also in our cluster, kick out now:
                     # if cs_j in mobilesites: continue
                     # check that all of the spectator sites are occupied:
                     if all(socc[self.index(R_vac + site.R, site.ci)[0]] == 1 for site in specsites):
                         if len(mobilesites) == 0:
                             # spectator only == constant
-                            E0 -= value
-                        else:
-                            intertuple = tuple(sorted(self.index(R_vac + site.R, site.ci)[0] for site in mobilesites))
-                            if intertuple in interdict:
-                                # if we've already seen this particular interaction, add to the value
-                                interact[interdict[intertuple]] -= value
-                            else:
-                                # new interaction!
-                                interact.append(-value)
-                                interdict[intertuple] = Ninteract
-                                for n in intertuple:
-                                    siteinteract[n].append(Ninteract)
-                                Ninteract += 1
-                # we need to make an index mapping for our end-point state (the two sites that are switched!)
-                rev_map = np.array(range(self.Nmobile*self.size))
-                rev_map[i] = j
-                rev_map[j] = i
-                # +0.5*Efinal
-                for mobilesites, specsites, value in clusterinteract_cj0:
-                    # if our initial point is also in our cluster, kick out now:
-                    # if cs_i in mobilesites: continue
-                    # check that all of the spectator sites are occupied:
-                    if all(socc[self.index(Rj + site.R, site.ci)[0]] == 1 for site in specsites):
-                        if len(mobilesites) == 0:
-                            # spectator only == constant
                             E0 += value
                         else:
-                            intertuple = tuple(sorted(rev_map[self.index(Rj + site.R, site.ci)[0]]
+                            intertuple = tuple(sorted(mapping[self.index(R_vac + site.R, site.ci)[0]]
                                                       for site in mobilesites))
                             if intertuple in interdict:
                                 # if we've already seen this particular interaction, add to the value
                                 interact[interdict[intertuple]] += value
                             else:
                                 # new interaction!
-                                interact.append(value)
+                                interact.append(+value)
                                 interdict[intertuple] = Ninteract
                                 for n in intertuple:
                                     siteinteract[n].append(Ninteract)
