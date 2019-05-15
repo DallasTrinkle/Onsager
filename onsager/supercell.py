@@ -1001,7 +1001,7 @@ class ClusterSupercell(object):
                 cs_i = cluster.ClusterSite(ci0, -dR)
                 cs_j = cluster.ClusterSite(cj0, dR)
                 # construct sublists of cluster expansions that explicitly *exclude* our endpoints:
-                clusterinteract_ci0 = [(ms, ss, val) for (ms, ss, val) in clusterinteract[ci0] if cs_j not in ms]
+                clusterinteract_ci0 = [(ms, ss, -val) for (ms, ss, val) in clusterinteract[ci0] if cs_j not in ms]
                 clusterinteract_cj0 = [(ms, ss, val) for (ms, ss, val) in clusterinteract[cj0] if cs_i not in ms]
                 # now, run through all lattice sites...
                 for Ri in self.Rveclist:
@@ -1013,38 +1013,19 @@ class ClusterSupercell(object):
                     j = self.index(Rj, cj0)[0]
                     jumps.append(((i, j), deltax))
                     # now, to run through our clusters, adding interactions as appropriate:
-                    # -0.5*Einitial
-                    for mobilesites, specsites, value in clusterinteract_ci0:
-                        # if our endpoint is also in our cluster, kick out now:
-                        # if cs_j in mobilesites: continue
-                        # check that all of the spectator sites are occupied:
-                        if all(socc[self.index(Ri + site.R, site.ci)[0]] == 1 for site in specsites):
-                            if len(mobilesites) == 0:
-                                # spectator only == constant
-                                E0 -= value
-                            else:
-                                intertuple = tuple(sorted(self.index(Ri + site.R, site.ci)[0] for site in mobilesites))
-                                if intertuple in interdict:
-                                    # if we've already seen this particular interaction, add to the value
-                                    interact[interdict[intertuple]] -= value
-                                else:
-                                    # new interaction!
-                                    interact.append(-value)
-                                    interdict[intertuple] = Ninteract
-                                    for n in intertuple:
-                                        siteinteract[n].append(Ninteract)
-                                    Ninteract += 1
-                    # +0.5*Efinal
-                    for mobilesites, specsites, value in clusterinteract_cj0:
+                    # -0.5*Einitial +0.5*Efinal
+                    for mobilesites, specsites, value, Rsite in [msssval + (Ri,) for msssval in clusterinteract_ci0] + \
+                                                                [msssval + (Rj,) for msssval in clusterinteract_cj0]:
                         # if our initial point is also in our cluster, kick out now:
                         # if cs_i in mobilesites: continue
                         # check that all of the spectator sites are occupied:
-                        if all(socc[self.index(Rj + site.R, site.ci)[0]] == 1 for site in specsites):
+                        if all(socc[self.index(Rsite + site.R, site.ci)[0]] == 1 for site in specsites):
                             if len(mobilesites) == 0:
                                 # spectator only == constant
                                 E0 += value
                             else:
-                                intertuple = tuple(sorted(self.index(Rj + site.R, site.ci)[0] for site in mobilesites))
+                                intertuple = tuple(sorted(self.index(Rsite + site.R, site.ci)[0]
+                                                          for site in mobilesites))
                                 if intertuple in interdict:
                                     # if we've already seen this particular interaction, add to the value
                                     interact[interdict[intertuple]] += value
@@ -1234,12 +1215,12 @@ class ClusterSupercell(object):
                     # if our endpoint is also in our cluster, kick out now:
                     # if cs_j in mobilesites: continue
                     # check that all of the spectator sites are occupied:
-                    if all(socc[self.index(R_vac + site.R, site.ci)[0]] == 1 for site in specsites):
+                    if all(socc[self.index(Rsite + site.R, site.ci)[0]] == 1 for site in specsites):
                         if len(mobilesites) == 0:
                             # spectator only == constant
                             E0 += value
                         else:
-                            intertuple = tuple(sorted(mapping[self.index(R_vac + site.R, site.ci)[0]]
+                            intertuple = tuple(sorted(mapping[self.index(Rsite + site.R, site.ci)[0]]
                                                       for site in mobilesites))
                             if intertuple in interdict:
                                 # if we've already seen this particular interaction, add to the value
