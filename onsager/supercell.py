@@ -1183,7 +1183,6 @@ class ClusterSupercell(object):
                 # each possible *transition* is treated like its own mini-cluster expansion:
                 E0 = Etrans
                 interdict = {}
-                R_vac = 0
                 i = self.index(R_vac, ci0)[0]
                 if i != self.vacancy:
                     raise RuntimeError('Somehow did not correctly map to the vacancy? Should never happen')
