@@ -526,9 +526,10 @@ class MonteCarloTests(unittest.TestCase):
 
     def testDetailedBalance(self):
         """Does our jump network evaluator obey detailed balance?"""
+        # this test is too different
+        # a new version is implemented below for checking detailed balance for a vacancy
+        if self.vacancy >= 0: return
         occ = np.random.choice((0,1), size=self.sup.size)
-        if self.vacancy >= 0:
-            occ[self.vacancy] = -1
         self.MCjn.start(occ)
         ijlist, Qlist, dxlist = self.MCjn.transitions()
         self.assertEqual(len(ijlist), len(Qlist))
@@ -664,6 +665,45 @@ class VacancyMonteCarloTests(MonteCarloTests):
         self.MCjn = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues,
                                               self.chem, self.jumpnetwork, KRAvalues=self.KRAvalues,
                                               TSclusters=self.TSclusterexp, TSvalues=self.TSvalues)
+
+    def testError(self):
+        """Do we raise proper runtime warnings?"""
+        occ = np.random.choice((0,1), size=self.sup.size)
+        with self.assertRaises(RuntimeWarning):
+            self.MCjn.start(occ)
+
+    def testDetailedBalance(self):
+        """Does our jump network evaluator obey detailed balance?"""
+        sup2 = supercell.ClusterSupercell(self.FCC, self.superlatt)  # .copy() ?
+        occ = np.random.choice((0,1), size=self.sup.size)
+        occ[self.vacancy] = -1
+        self.MCjn.start(occ)
+        self.assertNotIn(self.vacancy, self.MCjn.occupied_set)
+        self.assertNotIn(self.vacancy, self.MCjn.unoccupied_set)
+        ijlist, Qlist, dxlist = self.MCjn.transitions()
+        self.assertEqual(len(ijlist), len(Qlist))
+        self.assertEqual(len(ijlist), len(dxlist))
+        self.assertEqual(len(Qlist), len(self.MCjn.jumps))
+        E0 = self.MCjn.E()
+        for (i, j), Q, dx in zip(ijlist, Qlist, dxlist):
+            print(i, j, Q, dx, E0)
+            self.assertEqual(self.vacancy, i)
+            sup2.addvacancy(j)
+            MCjn2 = cluster.MonteCarloSampler(sup2, np.zeros(0), self.clusterexp, self.Evalues,
+                                              self.chem, self.jumpnetwork, KRAvalues=self.KRAvalues,
+                                              TSclusters=self.TSclusterexp, TSvalues=self.TSvalues)
+            occ2 = occ.copy()
+            occ2[i], occ2[j] = occ[j], occ[i]
+            MCjn2.start(occ2)
+            E2 = MCjn2.E()
+            found = False
+            for (j0, i0), Q2, dx2 in zip(*MCjn2.transitions()):
+                if i0 == i and j0 == j and np.allclose(dx, -dx2):
+                    found = True
+                    break
+            print(i0, j0, Q2, dx2, E2)
+            self.assertTrue(found)
+            self.assertAlmostEqual(E0 + Q, E2 + Q2)
 
 
 if __name__ == '__main__':
