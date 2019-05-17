@@ -850,6 +850,7 @@ class ClusterSupercellTests(unittest.TestCase):
         vacclusterexp = cluster.makeVacancyClusters(B2, 1, clusterexp)
         fullexp = clusterexp + vacclusterexp
         ene = np.random.normal(size=len(fullexp) + 1)  # random interactions
+        # ene[:len(clusterexp)] = 0.
         # ene = np.ones(len(clusterexp)+1)
         jumpnetwork = B2.jumpnetwork(chem, 1.01)
         eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
@@ -884,7 +885,6 @@ class ClusterSupercellTests(unittest.TestCase):
                         interact_count[m] += 1
             Nene, Njumps = interactrange[-1], len(jumps)
             ene_count = sum(E for E, c in zip(interact[:Nene], interact_count[:Nene]) if c == 0)
-            print(interactrange)
             ET = np.zeros(Njumps)
             for n in range(Njumps):
                 ran = slice(interactrange[n-1], interactrange[n])
@@ -898,14 +898,12 @@ class ClusterSupercellTests(unittest.TestCase):
                 for jn, ET_trial in zip(jumpnetwork, eneT):
                     for (i0, j0), dx0 in jn:
                         if ci0[1] == i0 and cj0[1] == j0 and np.allclose(dx, dx0):
-                            print('match: {} {} {} {}'.format(i0, j0, dx0, ET_trial))
                             E0 = ET_trial
                 # now, we need to get the "LIMB" part of the barrier:
                 # compute the interaction count after moving the vacancy to j and the solute to i.
                 sup2.addvacancy(j)
                 mocc2 = mocc.copy()
                 mocc2[i], mocc2[j] = mocc[j], mocc[i]
-                print(i, j, mocc[j], mocc2[i])
                 siteinteract2, interact2 = sup2.clusterevaluator(socc, fullexp, ene)
                 self.assertEqual(0, len(siteinteract2[j]))
                 new_interact_count = np.zeros(len(interact2), dtype=int)

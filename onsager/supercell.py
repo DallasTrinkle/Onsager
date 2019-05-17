@@ -1093,6 +1093,7 @@ class ClusterSupercell(object):
         :return interactrange: range of indices to count in interact for each jump; for the nth
           jump, sum over interactrange[n-1]:interactrange[n]; interactrange[-1] == range for energy
         """
+        zerovec = np.zeros(self.crys.dim, dtype=int)
         if self.vacancy is None:
             raise RuntimeError('Supercell does not contain a vacancy; use `addvacancy()` first')
         ci_vac, R_vac = self.ciR(self.vacancy)
@@ -1131,8 +1132,9 @@ class ClusterSupercell(object):
                     for cs in clust:
                         if cs.ci in self.indexmobile:
                             # get the list of other sites, and split into mobile and spectator:
+                            cs0 = cluster.ClusterSite(cs.ci, zerovec)
                             cllist = clust - cs
-                            mobilesites = [site for site in cllist if site.ci in self.indexmobile]
+                            mobilesites = [cs0] + [site for site in cllist if site.ci in self.indexmobile]
                             specsites = [site for site in cllist if site.ci in self.indexspectator]
                             if cs.ci in clusterinteract:
                                 clusterinteract[cs.ci].append((mobilesites, specsites, 0.5 * value))
@@ -1145,7 +1147,7 @@ class ClusterSupercell(object):
                 # just check that we're dealing with vacancies, with the right chemistry
                 if not TSclust.__vacancy__: continue
                 TS = TSclust.transitionstate()
-                if TS[0].ci[0] != chem or TS[1].ci != chem: continue
+                if TS[0].ci[0] != chem or TS[1].ci[0] != chem: continue
                 R0 = TS[0].R
                 TS0 = (TS[0] - R0, TS[1] - R0)
                 mobilesites = [site - R0 for site in TSclust if site.ci in self.indexmobile]
@@ -1170,12 +1172,12 @@ class ClusterSupercell(object):
                 ci0, cj0 = (chem, i0), (chem, j0)
                 if ci0 != ci_vac: continue
                 # to get final position, it's a bit more complex... need to use dx:
-                dR, cj = self.crys.cart2pos(self.crys.pos2cart(np.zeros(self.crys.dim), (chem, i0)) + deltax)
+                dR, cj = self.crys.cart2pos(self.crys.pos2cart(zerovec, (chem, i0)) + deltax)
                 if cj != cj0:
                     raise ArithmeticError(
                         'Transition ({},{}), {} did not land at correct site?\n{} != P{'.format(i0, j0, deltax, cj,
                                                                                                 cj0))
-                cs_i0 = cluster.ClusterSite(ci0, np.zeros(self.crys.dim, dtype=int))
+                cs_i0 = cluster.ClusterSite(ci0, zerovec)
                 # NOTE: we will need the *reverse* endpoint for the initial state...
                 cs_i = cluster.ClusterSite(ci0, -dR)
                 cs_j = cluster.ClusterSite(cj0, dR)
