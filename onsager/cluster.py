@@ -511,6 +511,8 @@ class MonteCarloSampler(object):
     """
     An object to maintain state in a supercell, evaluate energies efficiently including
     "trial" moves. Built from cluster expansions and using a cluster supercell.
+
+    Now is able to handle supercells that contain a single vacancy.
     """
     def __init__(self, supercell, spectator_occ, clusterexp, enevalues,
                  chem=None, jumpnetwork=(), KRAvalues=0, TSclusters=(), TSvalues=()):
@@ -540,13 +542,21 @@ class MonteCarloSampler(object):
         self.Nenergy = len(interactvalue)
         # to be initialized via jumpnetwork_init()
         self.jumps = None  # indicates no jump network...
+        self.vacancy = supercell.vacancy
+        if self.vacancy is None:
+            self.vacancy = -1
         if chem is not None:
             # quick check that chem is a mobile species:
             if (chem, 0) not in self.supercell.indexmobile:
                 raise ValueError('Chemical species {} is a spectator in supercell?'.format(chem))
-            siteinteract, interactvalue, self.jumps, self.interactrange = \
-                self.supercell.jumpnetworkevaluator(spectator_occ, clusterexp, enevalues, chem, jumpnetwork,
-                                                    KRAvalues, TSclusters, TSvalues, siteinteract, interactvalue)
+            if self.vacancy < 0:
+                siteinteract, interactvalue, self.jumps, self.interactrange = \
+                    supercell.jumpnetworkevaluator(spectator_occ, clusterexp, enevalues, chem, jumpnetwork,
+                                                   KRAvalues, TSclusters, TSvalues, siteinteract, interactvalue)
+            else:
+                siteinteract, interactvalue, self.jumps, self.interactrange = \
+                    supercell.jumpnetworkevaluator_vacancy(spectator_occ, clusterexp, enevalues, chem, jumpnetwork,
+                                                           KRAvalues, TSclusters, TSvalues, siteinteract, interactvalue)
         # convert from lists to arrays:
         self.Ninteract = np.array([len(inter) for inter in siteinteract])
         # see https://stackoverflow.com/questions/38619143/convert-python-sequence-to-numpy-array-filling-missing-values
@@ -562,6 +572,10 @@ class MonteCarloSampler(object):
         :param occ: occupancy of sites in supercell; assumed to be 0 or 1
         """
         # NOTE: we don't do this with a copy() operation...
+        if self.vacancy >= 0:
+            if occ[self.vacancy] != -1:
+                raise RuntimeWarning('Supercell has a vacancy but occ[{}] = {}'.format(self.vacancy,
+                                                                                       occ[self.vacancy]))
         self.occ = occ
         self.clustercount = np.zeros_like(self.interactvalue, dtype=int)
         occ_list, unocc_list = [], []
@@ -573,7 +587,8 @@ class MonteCarloSampler(object):
                 # for n in range(Ninteract):
                 #     self.clustercount[interact[n]] += 1
             else:
-                occ_list.append(i)
+                if i != self.vacancy:
+                    occ_list.append(i)
         self.occupied_set = set(occ_list)
         self.unoccupied_set = set(unocc_list)
 
@@ -602,8 +617,9 @@ class MonteCarloSampler(object):
         ijlist, Qlist, dxlist = [], [], []
 
         for n, ((i, j), dx) in enumerate(self.jumps):
-            if self.occ[i] == 0 or self.occ[j] == 1:
-                continue
+            if self.vacancy < 0:
+                if self.occ[i] == 0 or self.occ[j] == 1:
+                    continue
             ijlist.append((i, j))
             dxlist.append(dx)
             ran = slice(self.interactrange[n - 1], self.interactrange[n])
@@ -627,6 +643,8 @@ class MonteCarloSampler(object):
         # this change will be kept in a dictionary, and will be the *negative* of the
         # clustercount change that would occur with the trial move
         dclustercount = {}
+        if self.vacancy in occsites: raise ValueError('Cannot occupy vacancy')
+        if self.vacancy in unoccsites: raise ValueError('Cannot unoccupy vacancy')
         for i in occsites:
             if self.occ[i] == 0:
                 for inter in self.siteinteract[i][:self.Ninteract[i]]:
@@ -662,6 +680,8 @@ class MonteCarloSampler(object):
         :param occsites: iterable of sites to occupy
         :param unoccsites: iterable of sites to unoccupy
         """
+        if self.vacancy in occsites: raise ValueError('Cannot occupy vacancy')
+        if self.vacancy in unoccsites: raise ValueError('Cannot unoccupy vacancy')
         for i in occsites:
             if self.occ[i] == 0:
                 self.occ[i] = 1
@@ -742,7 +762,6 @@ def MonteCarloSampler_param(MCsampler):
         # has been initialized...
         occ = MCsampler.occ.copy()
         clustercount = MCsampler.clustercount.copy()
-        occ = MCsampler.occ
         Nocc = 0
         Nunocc = 0
         occupied_set = np.zeros(Nsites, dtype=int)

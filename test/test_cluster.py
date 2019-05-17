@@ -446,6 +446,7 @@ class MonteCarloTests(unittest.TestCase):
         self.TSvalues = np.random.normal(size=len(self.TSclusterexp))
         # self.TSvalues = np.ones(len(self.TSclusterexp))
         # self.TSvalues = np.zeros(len(self.TSclusterexp))
+        self.vacancy = -1
         self.MCjn = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues,
                                               self.chem, self.jumpnetwork, KRAvalues=self.KRAvalues,
                                               TSclusters=self.TSclusterexp, TSvalues=self.TSvalues)
@@ -461,8 +462,11 @@ class MonteCarloTests(unittest.TestCase):
         """Does start() perform as expected?"""
         for MCsampler in (self.MC, self.MCjn):
             occ = np.random.choice((0, 1), size=self.sup.size)
+            if self.vacancy >= 0:
+                occ[self.vacancy] = -1
             MCsampler.start(occ)
             for i, occ_i in enumerate(occ):
+                if i==self.vacancy: continue
                 if occ_i == 1:
                     self.assertIn(i, MCsampler.occupied_set)
                     self.assertNotIn(i, MCsampler.unoccupied_set)
@@ -473,6 +477,8 @@ class MonteCarloTests(unittest.TestCase):
     def testE(self):
         """Does our energy evaluator perform correctly?"""
         occ = np.random.choice((0,1), size=self.sup.size)
+        if self.vacancy >= 0:
+            occ[self.vacancy] = -1
         self.MC.start(occ)
         self.MCjn.start(occ.copy())  # necessary because sampler *does not* make a copy.
         for nchanges in range(16):
@@ -494,6 +500,8 @@ class MonteCarloTests(unittest.TestCase):
     def testdeltaE(self):
         """Does our trial energy change work?"""
         occ = np.random.choice((0,1), size=self.sup.size)
+        if self.vacancy >= 0:
+            occ[self.vacancy] = -1
         self.MC.start(occ)
         self.MCjn.start(occ.copy())  # necessary because sampler *does not* make a copy.
         EMC = self.MC.E()
@@ -519,6 +527,8 @@ class MonteCarloTests(unittest.TestCase):
     def testDetailedBalance(self):
         """Does our jump network evaluator obey detailed balance?"""
         occ = np.random.choice((0,1), size=self.sup.size)
+        if self.vacancy >= 0:
+            occ[self.vacancy] = -1
         self.MCjn.start(occ)
         ijlist, Qlist, dxlist = self.MCjn.transitions()
         self.assertEqual(len(ijlist), len(Qlist))
@@ -539,6 +549,8 @@ class MonteCarloTests(unittest.TestCase):
     def testSampler_Create_jit(self):
         """Can we create our jit version of the sampler function the same as the non-jit?"""
         occ = np.random.choice((0,1), size=self.sup.size)
+        if self.vacancy >= 0:
+            occ[self.vacancy] = -1
         MCjn1_jit = cluster.MonteCarloSampler_jit(**cluster.MonteCarloSampler_param(self.MCjn))
         MCjn1_jit.start(occ)
         self.MCjn.start(occ)
@@ -556,6 +568,8 @@ class MonteCarloTests(unittest.TestCase):
     def testSampler_Run_jit(self):
         """Does our jit version of the sampler function the same as the non-jit?"""
         occ = np.random.choice((0,1), size=self.sup.size)
+        if self.vacancy >= 0:
+            occ[self.vacancy] = -1
         self.MCjn.start(occ)
         MCjn_jit = cluster.MonteCarloSampler_jit(**cluster.MonteCarloSampler_param(self.MCjn))
         # MCjn_jit.start(occ)  # not needed
@@ -577,14 +591,20 @@ class MonteCarloTests(unittest.TestCase):
             self.assertTrue(np.allclose(Qlist, Qlistnew))
             self.assertTrue(np.allclose(dxlist, dxlistnew))
         occ = np.random.choice((0,1), size=self.sup.size)
+        if self.vacancy >= 0:
+            occ[self.vacancy] = -1
         MCjn_jit.start(occ)
-        self.assertEqual(np.sum(occ), MCjn_jit.Nocc)
-        self.assertEqual(self.sup.size, MCjn_jit.Nocc + MCjn_jit.Nunocc)
+        if self.vacancy < 0:
+            self.assertEqual(np.sum(occ), MCjn_jit.Nocc)
+            self.assertEqual(self.sup.size, MCjn_jit.Nocc + MCjn_jit.Nunocc)
+        else:
+            self.assertEqual(np.sum(occ)+1, MCjn_jit.Nocc)
+            self.assertEqual(self.sup.size-1, MCjn_jit.Nocc + MCjn_jit.Nunocc)
         for i, nocc in enumerate(occ):
             ind = MCjn_jit.index[i]
             if nocc == 1:
                 self.assertEqual(i, MCjn_jit.occupied_set[ind])
-            else:
+            elif nocc == 0:
                 self.assertEqual(i, MCjn_jit.unoccupied_set[ind])
         # these calls are simply to ensure that they don't raise errors; it is how
         # we run our MC:
@@ -616,6 +636,34 @@ class MonteCarloTests(unittest.TestCase):
                 MCjn_jit.update(i, j)
             MCjn2_jit.MCmoves(occchoices[n:n+1], unoccchoices[n:n+1], kTlogu[n:n+1])
             self.assertTrue(np.allclose(MCjn_jit.occ, MCjn2_jit.occ))
+
+
+class VacancyMonteCarloTests(MonteCarloTests):
+    """Tests of the MonteCarloSampler class with a vacancy"""
+    longMessage = False
+
+    def setUp(self):
+        self.FCC = crystal.Crystal.FCC(1., 'FCC')
+        self.superlatt = 4*np.eye(3, dtype=int)
+        self.sup = supercell.ClusterSupercell(self.FCC, self.superlatt)
+        self.vacancy = 0  # make this random?
+        self.sup.addvacancy(self.vacancy)
+        clusterexp = cluster.makeclusters(self.FCC, 0.8, 4)
+        vac_clusterexp = cluster.makeVacancyClusters(self.FCC, 0, clusterexp)
+        self.clusterexp = clusterexp + vac_clusterexp
+        self.Evalues = np.random.normal(size=len(self.clusterexp) + 1)
+        # self.Evalues = np.zeros(len(self.clusterexp) + 1)
+        self.MC = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues)
+        self.chem = 0
+        self.jumpnetwork = self.FCC.jumpnetwork(self.chem, 0.8)
+        self.TSclusterexp = cluster.makeTSclusters(self.FCC, self.chem, self.jumpnetwork, vac_clusterexp)
+        self.KRAvalues = np.zeros(len(self.jumpnetwork))
+        self.TSvalues = np.random.normal(size=len(self.TSclusterexp))
+        # self.TSvalues = np.ones(len(self.TSclusterexp))
+        # self.TSvalues = np.zeros(len(self.TSclusterexp))
+        self.MCjn = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues,
+                                              self.chem, self.jumpnetwork, KRAvalues=self.KRAvalues,
+                                              TSclusters=self.TSclusterexp, TSvalues=self.TSvalues)
 
 
 if __name__ == '__main__':
