@@ -385,6 +385,22 @@ class ClusterTests(unittest.TestCase):
             for Vacclust in Vacclustset:
                 self.assertTrue(np.all(np.zeros(3, dtype=int)==Vacclust.vacancy().R))
 
+    def testmakeVacTSclustersFCC(self):
+        """Does makeVacTSclusters perform as expected? FCC"""
+        FCC = crystal.Crystal.FCC(1., chemistry='FCC')
+        clusterexp = cluster.makeclusters(FCC, 0.8, 4)
+        chem = 0
+        Vacclusterexp = cluster.makeVacancyClusters(FCC, chem, clusterexp)
+        jumpnetwork = FCC.jumpnetwork(chem, 0.8)
+        TSclusterexp = cluster.makeTSclusters(FCC, chem, jumpnetwork, Vacclusterexp)
+        self.assertEqual(6, len(TSclusterexp))
+        self.assertEqual([6, 12, 24, 48, 12, 24], [len(csset) for csset in TSclusterexp])
+        for TSclustset in TSclusterexp:
+            for TSclust in TSclustset:
+                self.assertTrue(TSclust.__vacancy__)
+                self.assertTrue(TSclust.__transition__)
+                self.assertTrue(np.all(np.zeros(3, dtype=int)==TSclust.transitionstate()[0].R))
+
     def testYAML(self):
         """Can we write out a clusters in YAML?"""
         FCC = crystal.Crystal.FCC(1., chemistry='FCC')

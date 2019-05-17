@@ -850,12 +850,10 @@ class ClusterSupercellTests(unittest.TestCase):
         vacclusterexp = cluster.makeVacancyClusters(B2, 1, clusterexp)
         fullexp = clusterexp + vacclusterexp
         ene = np.random.normal(size=len(fullexp) + 1)  # random interactions
-        # ene[:len(clusterexp)] = 0.
-        # ene = np.ones(len(clusterexp)+1)
         jumpnetwork = B2.jumpnetwork(chem, 1.01)
         eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
-        # TSclusterexp = cluster.makeTSclusters(B2, chem, jumpnetwork, vacclusterexp)
-        # TSvalues = np.random.normal(size=len(TSclusterexp))
+        TSclusterexp = cluster.makeTSclusters(B2, chem, jumpnetwork, vacclusterexp)
+        TSvalues = np.random.normal(size=len(TSclusterexp))
         # eneT = np.zeros(len(jumpnetwork))
         for spec_try in range(5):
             socc = np.random.choice((0,1), size=sup.size)
@@ -865,8 +863,8 @@ class ClusterSupercellTests(unittest.TestCase):
             interact0 = interact.copy()
             siteinteract, interact, jumps, interactrange = \
                 sup.jumpnetworkevaluator_vacancy(socc, fullexp, ene, chem, jumpnetwork, eneT,
+                                                 TSclusterexp, TSvalues,
                                                  siteinteract=siteinteract, interact=interact)
-            # TSclusterexp, TSvalues,  # took these out for now.
             # first, test that we have a reasonable setup...
             self.assertEqual(len(interact0), interactrange[-1])
             self.assertEqual(sum(sum(1 for (i, j), dx in jn if i == 0) for jn in jumpnetwork), len(jumps))
@@ -913,5 +911,5 @@ class ClusterSupercellTests(unittest.TestCase):
                             new_interact_count[m] += 1
                 new_ene_count = sum(E for E, c in zip(interact2, new_interact_count) if c == 0)
                 E0 += 0.5*(new_ene_count - ene_count)
-                # E0 += np.dot(TSvalues, sup.evalTScluster(mocc, socc, TSclusterexp, i, j, dx))
+                E0 += np.dot(TSvalues, sup.evalTScluster(mocc, socc, TSclusterexp, i, j, dx))
                 self.assertAlmostEqual(E0, Etrans)
