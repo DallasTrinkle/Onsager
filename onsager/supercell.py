@@ -822,7 +822,11 @@ class ClusterSupercell(object):
                 return socc[n] == 1
 
         clustercount = np.zeros(len(TSclusters), dtype=int)
-        if mocc[initial] == 0 or mocc[final] == 1:
+        vacancy = (self.vacancy is not None)
+        if vacancy:
+            if initial != self.vacancy:
+                return clustercount  # we can only evaluate this meaningfully for our vacancy
+        elif (mocc[initial] == 0 or mocc[final] == 1):
             return clustercount  # trivial result...
         ci_i, Ri = self.ciR(initial)
         ci_j, Rj = self.ciR(final)
@@ -835,13 +839,13 @@ class ClusterSupercell(object):
         cs_i1 = cluster.ClusterSite(ci_i, -dR)
         cs_j1 = cluster.ClusterSite(ci_j, np.zeros(self.crys.dim))
         for mc, clusterlist in enumerate(TSclusters):
-            if next(iter(clusterlist)).__vacancy__:
-                raise NotImplementedError('TS cluster evaluation for vacancy jumps not currently implemented')
+            # if next(iter(clusterlist)).__vacancy__:
+            #     raise NotImplementedError('TS cluster evaluation for vacancy jumps not currently implemented')
             for clust in clusterlist:
                 if (cs_i0, cs_j0) == clust.transitionstate():
                     if all(isocc(Ri + site.R, site.ci) for site in clust):
                         clustercount[mc] += 1
-                elif (cs_j1, cs_i1) == clust.transitionstate():
+                elif not vacancy and (cs_j1, cs_i1) == clust.transitionstate():
                     if all(isocc(Rj + site.R, site.ci) for site in clust):
                         clustercount[mc] += 1
         return clustercount
@@ -1156,14 +1160,7 @@ class ClusterSupercell(object):
                     TSclusterinteract[TS0].append((mobilesites, specsites, value))
                 else:
                     TSclusterinteract[TS0] = [(mobilesites, specsites, value)]
-                R1 = TS[1].R
-                mobilesites = [site - R1 for site in TSclust if site.ci in self.indexmobile]
-                specsites = [site - R1 for site in TSclust if site.ci in self.indexspectator]
-                TS1 = (TS[1] - R1, TS[0] - R1)
-                if TS1 in TSclusterinteract:
-                    TSclusterinteract[TS1].append((mobilesites, specsites, value))
-                else:
-                    TSclusterinteract[TS1] = [(mobilesites, specsites, value)]
+                # NOTE: no reverse jumps to consider in our TS expansions.
         # we need to proceed one transition at a time
         Njumps, interactrange = 0, []
         jumps = []
