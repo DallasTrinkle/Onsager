@@ -781,7 +781,7 @@ class ClusterSupercellTests(unittest.TestCase):
         # eneT = np.zeros(len(jumpnetwork))
         for spec_try in range(5):
             socc = np.random.choice((0,1), size=sup.size)
-            MCsamp = cluster.MonteCarloSampler(sup, socc, clusterexp, ene)
+            # MCsamp = cluster.MonteCarloSampler(sup, socc, clusterexp, ene)
             siteinteract, interact = sup.clusterevaluator(socc, clusterexp, ene)
             # make copies for testing comparisons...
             siteinteract0 = siteinteract.copy()
@@ -834,83 +834,87 @@ class ClusterSupercellTests(unittest.TestCase):
                 self.assertAlmostEqual(E0, Etrans)
 
     def testJumpNetworkVacancyEvaluator(self):
-        """Can we construct an efficient jump network evaluator (vacancy)?"""
+        """Can we construct an efficient jump network evaluator (vacancy: FCC and B2)?"""
         # *displaced* B2, to break symmetry
         # B2 = crystal.Crystal(np.eye(3), [[np.array([0., 0., 0.])],
         #                                  [np.array([0.5, 0.5, 0.5])]], ['A', 'B'])
         B2 = crystal.Crystal(np.eye(3), [[np.array([0., 0., 0.])],
                                          [np.array([0.55, 0.55, 0.55])]], ['A', 'B'])
+        FCC = crystal.Crystal.FCC(1.0, 'A')
         Nsuper = 4
-        # build a supercell, but call the "A" atoms spectators to the "B" atoms
-        sup = supercell.ClusterSupercell(B2, Nsuper*self.one, spectator=[0])
-        sup2 = supercell.ClusterSupercell(B2, Nsuper*self.one, spectator=[0])  # .copy() ??
-        sup.addvacancy(0)  # put in a vacancy
-        chem = 1 # other atom is the spectator, so...
-        clusterexp = cluster.makeclusters(B2, 1.2, 4)
-        vacclusterexp = cluster.makeVacancyClusters(B2, 1, clusterexp)
-        fullexp = clusterexp + vacclusterexp
-        ene = np.random.normal(size=len(fullexp) + 1)  # random interactions
-        jumpnetwork = B2.jumpnetwork(chem, 1.01)
-        eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
-        TSclusterexp = cluster.makeTSclusters(B2, chem, jumpnetwork, vacclusterexp)
-        TSvalues = np.random.normal(size=len(TSclusterexp))
-        # eneT = np.zeros(len(jumpnetwork))
-        for spec_try in range(5):
-            socc = np.random.choice((0,1), size=sup.size)
-            siteinteract, interact = sup.clusterevaluator(socc, fullexp, ene)
-            # make copies for testing comparisons...
-            siteinteract0 = siteinteract.copy()
-            interact0 = interact.copy()
-            siteinteract, interact, jumps, interactrange = \
-                sup.jumpnetworkevaluator_vacancy(socc, fullexp, ene, chem, jumpnetwork, eneT,
-                                                 TSclusterexp, TSvalues,
-                                                 siteinteract=siteinteract, interact=interact)
-            # first, test that we have a reasonable setup...
-            self.assertEqual(len(interact0), interactrange[-1])
-            self.assertEqual(sum(sum(1 for (i, j), dx in jn if i == 0) for jn in jumpnetwork), len(jumps))
-            self.assertEqual(len(jumps)+1, len(interactrange))
-            self.assertEqual(interact0, interact[:len(interact0)])
-            for sint0, sint in zip(siteinteract0, siteinteract):
-                self.assertEqual(sint0, sint[:len(sint0)])
-            # now, let's make a mobile species distribution, and evaluate all possible transition
-            # energies, and make sure that they agree with what our evaluator provides.
-            mocc = np.random.choice((0,1), size=sup.size)
-            mocc[0] = -1
-            interact_count = np.zeros(len(interact), dtype=int)
-            for s, interlist in zip(mocc, siteinteract):
-                if s == 0:
-                    for m in interlist:
-                        interact_count[m] += 1
-            Nene, Njumps = interactrange[-1], len(jumps)
-            ene_count = sum(E for E, c in zip(interact[:Nene], interact_count[:Nene]) if c == 0)
-            ET = np.zeros(Njumps)
-            for n in range(Njumps):
-                ran = slice(interactrange[n-1], interactrange[n])
-                ET[n] = sum(E for E, c in zip(interact[ran], interact_count[ran]) if c == 0)
-            # now, to compare all of the jumps!
-            for ((i, j), dx), Etrans in zip(jumps, ET):
-                # we have a valid jump; now we need to back out which particular jump this would be:
-                self.assertEqual(0, i, msg='Vacancy on wrong site?')
-                ci0, cj0 = sup.ciR(i)[0], sup.ciR(j)[0]
-                E0 = 0
-                for jn, ET_trial in zip(jumpnetwork, eneT):
-                    for (i0, j0), dx0 in jn:
-                        if ci0[1] == i0 and cj0[1] == j0 and np.allclose(dx, dx0):
-                            E0 = ET_trial
-                # now, we need to get the "LIMB" part of the barrier:
-                # compute the interaction count after moving the vacancy to j and the solute to i.
-                sup2.addvacancy(j)
-                mocc2 = mocc.copy()
-                mocc2[i], mocc2[j] = mocc[j], mocc[i]
-                siteinteract2, interact2 = sup2.clusterevaluator(socc, fullexp, ene)
-                self.assertEqual(0, len(siteinteract2[j]))
-                new_interact_count = np.zeros(len(interact2), dtype=int)
-                for s, interlist in zip(mocc2, siteinteract2):
+        for crys, chem, djump, speclist in zip([B2, FCC], [1,0], [1.01, 0.8], [[0], []]):
+            # build a supercell, but call the "A" atoms spectators to the "B" atoms
+            sup = supercell.ClusterSupercell(crys, Nsuper*self.one, spectator=speclist)
+            sup2 = supercell.ClusterSupercell(crys, Nsuper*self.one, spectator=speclist)  # .copy() ??
+            sup.addvacancy(0)  # put in a vacancy
+            clusterexp = cluster.makeclusters(crys, 1.2*djump, 4)
+            vacclusterexp = cluster.makeVacancyClusters(crys, chem, clusterexp)
+            fullexp = clusterexp + vacclusterexp
+            ene = np.random.normal(size=len(fullexp) + 1)  # random interactions
+            jumpnetwork = crys.jumpnetwork(chem, djump)
+            eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
+            TSclusterexp = cluster.makeTSclusters(crys, chem, jumpnetwork, vacclusterexp)
+            TSvalues = np.random.normal(size=len(TSclusterexp))
+            # eneT = np.zeros(len(jumpnetwork))
+            for spec_try in range(5):
+                if speclist == []:
+                    socc = np.zeros(0, dtype=int)
+                else:
+                    socc = np.random.choice((0,1), size=sup.size)
+                siteinteract, interact = sup.clusterevaluator(socc, fullexp, ene)
+                # make copies for testing comparisons...
+                siteinteract0 = siteinteract.copy()
+                interact0 = interact.copy()
+                siteinteract, interact, jumps, interactrange = \
+                    sup.jumpnetworkevaluator_vacancy(socc, fullexp, ene, chem, jumpnetwork, eneT,
+                                                     TSclusterexp, TSvalues,
+                                                     siteinteract=siteinteract, interact=interact)
+                # first, test that we have a reasonable setup...
+                self.assertEqual(len(interact0), interactrange[-1])
+                self.assertEqual(sum(sum(1 for (i, j), dx in jn if i == 0) for jn in jumpnetwork), len(jumps))
+                self.assertEqual(len(jumps)+1, len(interactrange))
+                self.assertEqual(interact0, interact[:len(interact0)])
+                for sint0, sint in zip(siteinteract0, siteinteract):
+                    self.assertEqual(sint0, sint[:len(sint0)])
+                # now, let's make a mobile species distribution, and evaluate all possible transition
+                # energies, and make sure that they agree with what our evaluator provides.
+                mocc = np.random.choice((0,1), size=sup.size)
+                mocc[0] = -1
+                interact_count = np.zeros(len(interact), dtype=int)
+                for s, interlist in zip(mocc, siteinteract):
                     if s == 0:
                         for m in interlist:
-                            new_interact_count[m] += 1
-                new_ene_count = sum(E for E, c in zip(interact2, new_interact_count) if c == 0)
-                E0 += 0.5*(new_ene_count - ene_count)
-                TSccount = sup.evalTScluster(mocc, socc, TSclusterexp, i, j, dx)
-                E0 += np.dot(TSvalues, TSccount)
-                self.assertAlmostEqual(E0, Etrans)
+                            interact_count[m] += 1
+                Nene, Njumps = interactrange[-1], len(jumps)
+                ene_count = sum(E for E, c in zip(interact[:Nene], interact_count[:Nene]) if c == 0)
+                ET = np.zeros(Njumps)
+                for n in range(Njumps):
+                    ran = slice(interactrange[n-1], interactrange[n])
+                    ET[n] = sum(E for E, c in zip(interact[ran], interact_count[ran]) if c == 0)
+                # now, to compare all of the jumps!
+                for ((i, j), dx), Etrans in zip(jumps, ET):
+                    # we have a valid jump; now we need to back out which particular jump this would be:
+                    self.assertEqual(0, i, msg='Vacancy on wrong site?')
+                    ci0, cj0 = sup.ciR(i)[0], sup.ciR(j)[0]
+                    E0 = 0
+                    for jn, ET_trial in zip(jumpnetwork, eneT):
+                        for (i0, j0), dx0 in jn:
+                            if ci0[1] == i0 and cj0[1] == j0 and np.allclose(dx, dx0):
+                                E0 = ET_trial
+                    # now, we need to get the "LIMB" part of the barrier:
+                    # compute the interaction count after moving the vacancy to j and the solute to i.
+                    sup2.addvacancy(j)
+                    mocc2 = mocc.copy()
+                    mocc2[i], mocc2[j] = mocc[j], mocc[i]
+                    siteinteract2, interact2 = sup2.clusterevaluator(socc, fullexp, ene)
+                    self.assertEqual(0, len(siteinteract2[j]))
+                    new_interact_count = np.zeros(len(interact2), dtype=int)
+                    for s, interlist in zip(mocc2, siteinteract2):
+                        if s == 0:
+                            for m in interlist:
+                                new_interact_count[m] += 1
+                    new_ene_count = sum(E for E, c in zip(interact2, new_interact_count) if c == 0)
+                    E0 += 0.5*(new_ene_count - ene_count)
+                    TSccount = sup.evalTScluster(mocc, socc, TSclusterexp, i, j, dx)
+                    E0 += np.dot(TSvalues, TSccount)
+                    self.assertAlmostEqual(E0, Etrans)
