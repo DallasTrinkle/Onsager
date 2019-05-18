@@ -485,8 +485,10 @@ class MonteCarloTests(unittest.TestCase):
             EMC = self.MC.E()
             EMCjn = self.MCjn.E()
             Ecluster = np.dot(self.Evalues, self.sup.evalcluster(occ, np.zeros(0), self.clusterexp))
-            self.assertAlmostEqual(Ecluster, EMC, msg='MC evaluation {} != {} cluster evaluation?'.format(EMC, Ecluster))
-            self.assertAlmostEqual(EMC, EMCjn, msg='MC evaluation {} != {} MC jn evaluation?'.format(EMC, EMCjn))
+            self.assertAlmostEqual(Ecluster, EMC, msg='MC evaluation '
+                                                      '{} != {} cluster evaluation?'.format(EMC, Ecluster))
+            self.assertAlmostEqual(EMC, EMCjn, msg='MC evaluation '
+                                                   '{} != {} MC jn evaluation?'.format(EMC, EMCjn))
             # randomly occupy or unoccupy a site:
             if np.random.choice((True, False)):
                 change = [np.random.choice(list(self.MC.unoccupied_set))]
@@ -518,9 +520,12 @@ class MonteCarloTests(unittest.TestCase):
             self.MCjn.update(iocc, iunocc)
             EMC_new = self.MC.E()
             EMCjn_new = self.MCjn.E()
-            self.assertAlmostEqual(EMC_new - EMC, dE, msg='Trial energy change wrong? {} != {}-{}'.format(dE, EMC_new, EMC))
-            self.assertAlmostEqual(EMCjn_new - EMCjn, dEjn, msg='Trial energy change wrong (jn)? {} != {}-{}'.format(dEjn, EMCjn_new, EMCjn))
-            self.assertAlmostEqual(dE, dEjn, msg='Trial energy change differs (without/with jn)? {} != {}'.format(dE, dEjn))
+            self.assertAlmostEqual(EMC_new - EMC, dE, msg='Trial energy change wrong? '
+                                                          '{} != {}-{}'.format(dE, EMC_new, EMC))
+            self.assertAlmostEqual(EMCjn_new - EMCjn, dEjn, msg='Trial energy change wrong (jn)? '
+                                                                '{} != {}-{}'.format(dEjn, EMCjn_new, EMCjn))
+            self.assertAlmostEqual(dE, dEjn, msg='Trial energy change differs (without/with jn)? '
+                                                 '{} != {}'.format(dE, dEjn))
             EMC = EMC_new
             EMCjn = EMCjn_new
 
@@ -645,23 +650,24 @@ class VacancyMonteCarloTests(MonteCarloTests):
 
     def setUp(self):
         self.FCC = crystal.Crystal.FCC(1., 'FCC')
+        self.chem = 0
         self.superlatt = 4*np.eye(3, dtype=int)
         self.sup = supercell.ClusterSupercell(self.FCC, self.superlatt)
         self.vacancy = 0  # make this random?
         self.sup.addvacancy(self.vacancy)
-        clusterexp = cluster.makeclusters(self.FCC, 0.8, 4)
-        vac_clusterexp = cluster.makeVacancyClusters(self.FCC, 0, clusterexp)
-        self.clusterexp = clusterexp + vac_clusterexp
+        bare_clusterexp = cluster.makeclusters(self.FCC, 0.8, 4)
+        vac_clusterexp = cluster.makeVacancyClusters(self.FCC, self.chem, bare_clusterexp)
+        self.clusterexp = bare_clusterexp + vac_clusterexp
         self.Evalues = np.random.normal(size=len(self.clusterexp) + 1)
         # self.Evalues = np.zeros(len(self.clusterexp) + 1)
         self.MC = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues)
-        self.chem = 0
         self.jumpnetwork = self.FCC.jumpnetwork(self.chem, 0.8)
         self.TSclusterexp = cluster.makeTSclusters(self.FCC, self.chem, self.jumpnetwork, vac_clusterexp)
-        self.KRAvalues = np.zeros(len(self.jumpnetwork))
+        self.KRAvalues = np.random.normal(size=len(self.jumpnetwork))
+        # self.KRAvalues = np.zeros(len(self.jumpnetwork))
         self.TSvalues = np.random.normal(size=len(self.TSclusterexp))
         # self.TSvalues = np.ones(len(self.TSclusterexp))
-        # self.TSvalues = np.zeros(len(self.TSclusterexp))
+        self.TSvalues = np.zeros(len(self.TSclusterexp))
         self.MCjn = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues,
                                               self.chem, self.jumpnetwork, KRAvalues=self.KRAvalues,
                                               TSclusters=self.TSclusterexp, TSvalues=self.TSvalues)

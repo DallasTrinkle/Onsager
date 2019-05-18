@@ -574,8 +574,8 @@ class MonteCarloSampler(object):
         # NOTE: we don't do this with a copy() operation...
         if self.vacancy >= 0:
             if occ[self.vacancy] != -1:
-                raise RuntimeWarning('Supercell has a vacancy but occ[{}] = {}'.format(self.vacancy,
-                                                                                       occ[self.vacancy]))
+                raise RuntimeWarning('Supercell has a vacancy but '
+                                     'occ[{}] = {}'.format(self.vacancy, occ[self.vacancy]))
         self.occ = occ
         self.clustercount = np.zeros_like(self.interactvalue, dtype=int)
         occ_list, unocc_list = [], []
@@ -584,11 +584,12 @@ class MonteCarloSampler(object):
                 unocc_list.append(i)
                 for m in interact[:Ninteract]:
                     self.clustercount[m] += 1
-                # for n in range(Ninteract):
-                #     self.clustercount[interact[n]] += 1
-            else:
-                if i != self.vacancy:
-                    occ_list.append(i)
+            elif occ_i == 1:
+                occ_list.append(i)
+            # occ_i == -1
+            elif i != self.vacancy:
+                raise RuntimeError('Vacancy occupancy at site'
+                                   ' {} not matching supercell vacancy {}'.format(i, self.vacancy))
         self.occupied_set = set(occ_list)
         self.unoccupied_set = set(unocc_list)
 
