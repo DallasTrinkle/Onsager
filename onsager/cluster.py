@@ -156,6 +156,7 @@ class Cluster(object):
         for i, cs in enumerate(self.sites):
             shiftpos = self.__shift_pos__(cs)  # our tuple representation of site
             r = cs.ci  # currently does NOT have an "alpha" value on it... could be ci[0]?
+            # for equality mapping, we have to differentiate the vacancy sites from the rest:
             if i<Nvac:
                 r += (-1,)
             hashcache ^= hash(r + shiftpos)
@@ -446,20 +447,18 @@ def makeTSclusters(crys, chem, jumpnetwork, clusterexp):
                     # now we have a cluster with (1) the correct vacancy, and (2) containing our endpoint
                     # so we make two different TS clusters: one with the endpoint, and one without.
                     cl_list = [cs for cs in clust if cs != cs_j] # exclude endpoint, but no shift.
-                    # TS cluster *without* endpoint:
-                    TSclust = Cluster([cs_i, cs_j] + cl_list, transition=True, vacancy=True)
-                    if TSclust not in TSclusters:
-                        # new transition state cluster
-                        TSclset = set([TSclust.g(crys, g) for g in crys.G])
-                        TSclusterexp.append(TSclset)
-                        TSclusters.update(TSclset)
-                    # TS cluster *with* endpoint:
-                    TSclust = Cluster([cs_i, cs_j, cs_j] + cl_list, transition=True, vacancy=True)
-                    if TSclust not in TSclusters:
-                        # new transition state cluster
-                        TSclset = set([TSclust.g(crys, g) for g in crys.G])
-                        TSclusterexp.append(TSclset)
-                        TSclusters.update(TSclset)
+                    # There are *4* types of clusters we need to add for a vacancy:
+                    # cs_i->cs_j *without* endpoint, cs_j->cs_i *without* endpoint
+                    # cs_i->cs_j *with* endpoint (cs_j), cs_j->cs_i *with* endpoint (cs_i):
+                    for TSclust in [Cluster([cs_i, cs_j] + cl_list, transition=True, vacancy=True),
+                                    Cluster([cs_j, cs_i] + cl_list, transition=True, vacancy=True),
+                                    Cluster([cs_i, cs_j, cs_j] + cl_list, transition=True, vacancy=True),
+                                    Cluster([cs_j, cs_i, cs_i] + cl_list, transition=True, vacancy=True)]:
+                        if TSclust not in TSclusters:
+                            # new transition state cluster
+                            TSclset = set([TSclust.g(crys, g) for g in crys.G])
+                            TSclusterexp.append(TSclset)
+                            TSclusters.update(TSclset)
                 else:
                     for site in clust:
                         if site.ci == cs_i.ci:

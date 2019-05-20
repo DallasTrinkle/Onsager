@@ -762,7 +762,7 @@ class ClusterSupercell(object):
         :param mocc: mobile occupancy vector (0 or 1 only)
         :param socc: spectator occupancy vector (0 or 1 only)
         :param clusters: list of lists (or sets) of Cluster objects
-        :return clustercount: count of how many of each cluster is in this supercell.
+        :return: clustercount: count of how many of each cluster is in this supercell.
         """
 
         def isocc(R, ci):
@@ -811,7 +811,7 @@ class ClusterSupercell(object):
         :param initial: index of initial state
         :param final: index of final state
         :param dx: displacement vector (necessary to deal with PBC)
-        :return clustercount: count of how many of each cluster is in this supercell.
+        :return: clustercount: count of how many of each cluster is in this supercell.
         """
 
         def isocc(R, ci):
@@ -825,7 +825,9 @@ class ClusterSupercell(object):
         vacancy = (self.vacancy is not None)
         if vacancy:
             if initial != self.vacancy:
-                return clustercount  # we can only evaluate this meaningfully for our vacancy
+                raise RuntimeWarning('Attempting to evaluate in cell with vacancy at '
+                                     '{} but TS= {}->{}'.format(self.vacancy, initial, final))
+                # return clustercount  # we can only evaluate this meaningfully for our vacancy
         elif (mocc[initial] == 0 or mocc[final] == 1):
             return clustercount  # trivial result...
         ci_i, Ri = self.ciR(initial)
@@ -845,7 +847,8 @@ class ClusterSupercell(object):
                 if (cs_i0, cs_j0) == clust.transitionstate():
                     if all(isocc(Ri + site.R, site.ci) for site in clust):
                         clustercount[mc] += 1
-                elif not vacancy and (cs_j1, cs_i1) == clust.transitionstate():
+                # elif not vacancy and (cs_j1, cs_i1) == clust.transitionstate():
+                elif (cs_j1, cs_i1) == clust.transitionstate():
                     if all(isocc(Rj + site.R, site.ci) for site in clust):
                         clustercount[mc] += 1
         return clustercount

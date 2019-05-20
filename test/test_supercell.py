@@ -671,6 +671,39 @@ class ClusterSupercellTests(unittest.TestCase):
                                          1, 12, 24, 12, 8, sup.size]) == clustercount),
                         msg='Cluster count = {}'.format(clustercount))
 
+    def testClusterEvalTSVacancy(self):
+        """Check that we can evaluate a TS cluster expansion with vacancies: FCC"""
+        FCC = self.crys
+        Nsuper = 4
+        A1 = FCC.cart2unit(np.array([Nsuper,0.,0.]))[0]
+        A2 = FCC.cart2unit(np.array([0.,Nsuper,0.]))[0]
+        A3 = FCC.cart2unit(np.array([0.,0.,Nsuper]))[0]
+        sup = supercell.ClusterSupercell(FCC, np.array([A1, A2, A3]))
+        sup2 = supercell.ClusterSupercell(FCC, np.array([A1, A2, A3]))  # .copy() ?
+        vac0 = 0
+        sup.addvacancy(vac0)  # put in a vacancy at the origin
+        # takes three steps to build up our TS clusterexpansion!
+        clusterexp = cluster.makeclusters(FCC, 0.8, 4)
+        vacclusterexp = cluster.makeVacancyClusters(FCC, 0, clusterexp)
+        jumpnetwork = FCC.jumpnetwork(0, 0.8)
+        TSclusterexp = cluster.makeTSclusters(FCC, 0, jumpnetwork, vacclusterexp)
+        # for clset in TSclusterexp:
+        #     print('==== {}'.format(len(clset)))
+        #     for clust in clset:
+        #         print(clust)
+        mocc, socc = np.random.choice((0, 1), size=sup.size), np.zeros(0)
+        mocc[0] = -1  # put in the vacancy
+        for jn in jumpnetwork:
+            for (i0, j0), dx in jn:
+                du = np.dot(sup.invsuper, dx)/sup.size
+                vac1, mobile = sup.indexpos(sup.mobilepos[vac0] + du)
+                self.assertTrue(mobile)
+                clustercount = sup.evalTScluster(mocc, socc, TSclusterexp, vac0, vac1, dx)
+                sup2.addvacancy(vac1)
+                clustercount2 = sup2.evalTScluster(mocc, socc, TSclusterexp, vac1, vac0, -dx)
+                self.assertTrue(np.all(clustercount==clustercount2),
+                                msg='{} !=\n{}'.format(clustercount, clustercount2))
+
     def testClusterEvaluator(self):
         """Check that our cluster evaluator works"""
         B2 = crystal.Crystal(np.eye(3), [[np.array([0., 0., 0.])],
