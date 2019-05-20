@@ -887,7 +887,8 @@ class ClusterSupercellTests(unittest.TestCase):
             jumpnetwork = crys.jumpnetwork(chem, djump)
             eneT = np.random.normal(size=len(jumpnetwork))  # random barriers
             TSclusterexp = cluster.makeTSclusters(crys, chem, jumpnetwork, vacclusterexp)
-            TSvalues = np.random.normal(size=len(TSclusterexp))
+            # TSvalues = np.random.normal(size=len(TSclusterexp))
+            TSvalues = np.ones(len(TSclusterexp))
             # eneT = np.zeros(len(jumpnetwork))
             for spec_try in range(5):
                 if speclist == []:

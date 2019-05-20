@@ -817,6 +817,8 @@ class ClusterSupercell(object):
         def isocc(R, ci):
             n, mob = self.index(R, ci)
             if mob:
+                if n == self.vacancy:
+                    raise RuntimeError('Checked the occupancy for the vacancy?')
                 return mocc[n] == 1
             else:
                 return socc[n] == 1
@@ -1163,7 +1165,15 @@ class ClusterSupercell(object):
                     TSclusterinteract[TS0].append((mobilesites, specsites, value))
                 else:
                     TSclusterinteract[TS0] = [(mobilesites, specsites, value)]
-                # NOTE: no reverse jumps to consider in our TS expansions.
+                # Need to add "reverse" jumps to consider in our TS expansions (proper consideration of trans. state)
+                R1 = TS[1].R
+                TS1 = (TS[1] - R1, TS[0] - R1)
+                mobilesites = [site - R1 for site in TSclust if site.ci in self.indexmobile]
+                specsites = [site - R1 for site in TSclust if site.ci in self.indexspectator]
+                if TS1 in TSclusterinteract:
+                    TSclusterinteract[TS1].append((mobilesites, specsites, value))
+                else:
+                    TSclusterinteract[TS1] = [(mobilesites, specsites, value)]
         # we need to proceed one transition at a time
         Njumps, interactrange = 0, []
         jumps = []
