@@ -687,22 +687,22 @@ class ClusterSupercellTests(unittest.TestCase):
         vacclusterexp = cluster.makeVacancyClusters(FCC, 0, clusterexp)
         jumpnetwork = FCC.jumpnetwork(0, 0.8)
         TSclusterexp = cluster.makeTSclusters(FCC, 0, jumpnetwork, vacclusterexp)
-        # for clset in TSclusterexp:
-        #     print('==== {}'.format(len(clset)))
-        #     for clust in clset:
-        #         print(clust)
-        mocc, socc = np.random.choice((0, 1), size=sup.size), np.zeros(0)
-        mocc[0] = -1  # put in the vacancy
-        for jn in jumpnetwork:
-            for (i0, j0), dx in jn:
-                du = np.dot(sup.invsuper, dx)/sup.size
-                vac1, mobile = sup.indexpos(sup.mobilepos[vac0] + du)
-                self.assertTrue(mobile)
-                clustercount = sup.evalTScluster(mocc, socc, TSclusterexp, vac0, vac1, dx)
-                sup2.addvacancy(vac1)
-                clustercount2 = sup2.evalTScluster(mocc, socc, TSclusterexp, vac1, vac0, -dx)
-                self.assertTrue(np.all(clustercount==clustercount2),
-                                msg='{} !=\n{}'.format(clustercount, clustercount2))
+        for _ in range(10):
+            mocc, socc = np.random.choice((0, 1), size=sup.size), np.zeros(0)
+            mocc[vac0] = -1  # put in the vacancy
+            for jn in jumpnetwork:
+                for (i0, j0), dx in jn:
+                    # note: we don't do anything with i0 and j0 here...
+                    du = np.dot(sup.invsuper, np.dot(FCC.invlatt, dx))/sup.size
+                    vac1, mobile = sup.indexpos(sup.mobilepos[vac0] + du)
+                    self.assertTrue(mobile)
+                    clustercount = sup.evalTScluster(mocc, socc, TSclusterexp, vac0, vac1, dx)
+                    sup2.addvacancy(vac1)
+                    mocc2 = mocc.copy()
+                    mocc2[vac0], mocc2[vac1] = mocc[vac1], mocc[vac0]
+                    clustercount2 = sup2.evalTScluster(mocc2, socc, TSclusterexp, vac1, vac0, -dx)
+                    self.assertTrue(np.all(clustercount == clustercount2),
+                                    msg='\n{} !=\n{}'.format(clustercount, clustercount2))
 
     def testClusterEvaluator(self):
         """Check that our cluster evaluator works"""

@@ -692,7 +692,6 @@ class VacancyMonteCarloTests(MonteCarloTests):
         self.assertEqual(len(Qlist), len(self.MCjn.jumps))
         E0 = self.MCjn.E()
         for (i, j), Q, dx in zip(ijlist, Qlist, dxlist):
-            print(i, j, Q, dx, E0, E0+Q)
             self.assertEqual(self.vacancy, i)
             sup2.addvacancy(j)
             MCjn2 = cluster.MonteCarloSampler(sup2, np.zeros(0), self.clusterexp, self.Evalues,
@@ -707,7 +706,6 @@ class VacancyMonteCarloTests(MonteCarloTests):
                 if i0 == i and j0 == j and np.allclose(dx, -dx2):
                     found = True
                     break
-            print(i0, j0, Q2, -dx2, E2, E2+Q2)
             self.assertTrue(found)
             self.assertAlmostEqual(E0 + Q, E2 + Q2)
 

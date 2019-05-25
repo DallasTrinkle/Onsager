@@ -849,8 +849,8 @@ class ClusterSupercell(object):
                 if (cs_i0, cs_j0) == clust.transitionstate():
                     if all(isocc(Ri + site.R, site.ci) for site in clust):
                         clustercount[mc] += 1
-                # elif not vacancy and (cs_j1, cs_i1) == clust.transitionstate():
-                elif (cs_j1, cs_i1) == clust.transitionstate():
+                elif not vacancy and (cs_j1, cs_i1) == clust.transitionstate():
+                # elif (cs_j1, cs_i1) == clust.transitionstate():
                     if all(isocc(Rj + site.R, site.ci) for site in clust):
                         clustercount[mc] += 1
         return clustercount
@@ -1166,14 +1166,14 @@ class ClusterSupercell(object):
                 else:
                     TSclusterinteract[TS0] = [(mobilesites, specsites, value)]
                 # Need to add "reverse" jumps to consider in our TS expansions (proper consideration of trans. state)
-                R1 = TS[1].R
-                TS1 = (TS[1] - R1, TS[0] - R1)
-                mobilesites = [site - R1 for site in TSclust if site.ci in self.indexmobile]
-                specsites = [site - R1 for site in TSclust if site.ci in self.indexspectator]
-                if TS1 in TSclusterinteract:
-                    TSclusterinteract[TS1].append((mobilesites, specsites, value))
-                else:
-                    TSclusterinteract[TS1] = [(mobilesites, specsites, value)]
+                # R1 = TS[1].R
+                # TS1 = (TS[1] - R1, TS[0] - R1)
+                # mobilesites = [site - R1 for site in TSclust if site.ci in self.indexmobile]
+                # specsites = [site - R1 for site in TSclust if site.ci in self.indexspectator]
+                # if TS1 in TSclusterinteract:
+                #     TSclusterinteract[TS1].append((mobilesites, specsites, value))
+                # else:
+                #     TSclusterinteract[TS1] = [(mobilesites, specsites, value)]
         # we need to proceed one transition at a time
         Njumps, interactrange = 0, []
         jumps = []

@@ -158,7 +158,8 @@ class Cluster(object):
             r = cs.ci  # currently does NOT have an "alpha" value on it... could be ci[0]?
             # for equality mapping, we have to differentiate the vacancy sites from the rest:
             if i<Nvac:
-                r += (-1,)
+                if i == 0: r += (-1,)  # add the "vacancy" indexing
+                else: r += (r[0],)  # add the native chemistry
             hashcache ^= hash(r + shiftpos)
             if r not in self.__equalitymap__:
                 self.__equalitymap__[r] = set([shiftpos])
@@ -245,6 +246,9 @@ class Cluster(object):
         R0 = site0.R
         if self.sites[0] == site0 - R0 and self.sites[1] == site1 - R0:
             return True
+        elif self.__vacancy__:
+            # we need to short-circuit out of the next test...
+            return False
         R1 = site1.R
         if self.sites[0] == site1 - R1 and self.sites[1] == site0 - R1:
             return True
@@ -450,13 +454,14 @@ def makeTSclusters(crys, chem, jumpnetwork, clusterexp):
                     # There are *4* types of clusters we need to add for a vacancy:
                     # cs_i->cs_j *without* endpoint, cs_j->cs_i *without* endpoint
                     # cs_i->cs_j *with* endpoint (cs_j), cs_j->cs_i *with* endpoint (cs_i):
-                    for TSclust in [Cluster([cs_i, cs_j] + cl_list, transition=True, vacancy=True),
-                                    Cluster([cs_j, cs_i] + cl_list, transition=True, vacancy=True),
-                                    Cluster([cs_i, cs_j, cs_j] + cl_list, transition=True, vacancy=True),
-                                    Cluster([cs_j, cs_i, cs_i] + cl_list, transition=True, vacancy=True)]:
+                    for TS_pair, TS_revpair in zip([[cs_i, cs_j], [cs_i, cs_j, cs_j]],
+                                                   [[cs_j, cs_i], [cs_j, cs_i, cs_i]]):
+                        TSclust = Cluster(TS_pair + cl_list, transition=True, vacancy=True)
                         if TSclust not in TSclusters:
                             # new transition state cluster
                             TSclset = set([TSclust.g(crys, g) for g in crys.G])
+                            TSrev = Cluster(TS_revpair + cl_list, transition=True, vacancy=True)
+                            for g in crys.G: TSclset.add(TSrev.g(crys, g))
                             TSclusterexp.append(TSclset)
                             TSclusters.update(TSclset)
                 else:
