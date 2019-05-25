@@ -383,7 +383,7 @@ class ClusterTests(unittest.TestCase):
         self.assertEqual([1, 12, 24, 8], [len(csset) for csset in Vacclusterexp])
         for Vacclustset in Vacclusterexp:
             for Vacclust in Vacclustset:
-                self.assertTrue(np.all(np.zeros(3, dtype=int)==Vacclust.vacancy().R))
+                self.assertTrue(np.all(np.zeros(3, dtype=int) == Vacclust.vacancy().R))
 
     def testmakeVacTSclustersFCC(self):
         """Does makeVacTSclusters perform as expected? FCC"""
@@ -392,14 +392,18 @@ class ClusterTests(unittest.TestCase):
         chem = 0
         Vacclusterexp = cluster.makeVacancyClusters(FCC, chem, clusterexp)
         jumpnetwork = FCC.jumpnetwork(chem, 0.8)
-        TSclusterexp = cluster.makeTSclusters(FCC, chem, jumpnetwork, Vacclusterexp)
-        self.assertEqual(6, len(TSclusterexp))
-        self.assertEqual([6, 12, 24, 48, 12, 24], [len(csset) for csset in TSclusterexp])
-        for TSclustset in TSclusterexp:
+        vacTSclusterexp = cluster.makeTSclusters(FCC, chem, jumpnetwork, Vacclusterexp)
+        TSclusterexp = cluster.makeTSclusters(FCC, chem, jumpnetwork, clusterexp)
+        self.assertEqual(2*len(TSclusterexp), len(vacTSclusterexp))
+        # goofy little list comprehension: cluster expansion should be twice as long
+        # *and* have twice the length.
+        self.assertEqual([2*len(csset) for csset in TSclusterexp for _ in range(2)],
+                         [len(csset) for csset in vacTSclusterexp])
+        for TSclustset in vacTSclusterexp:
             for TSclust in TSclustset:
                 self.assertTrue(TSclust.__vacancy__)
                 self.assertTrue(TSclust.__transition__)
-                self.assertTrue(np.all(np.zeros(3, dtype=int)==TSclust.transitionstate()[0].R))
+                self.assertTrue(np.all(np.zeros(3, dtype=int) == TSclust.transitionstate()[0].R))
 
     def testYAML(self):
         """Can we write out a clusters in YAML?"""
