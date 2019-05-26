@@ -763,6 +763,14 @@ def MonteCarloSampler_param(MCsampler):
         index = np.arange(Nsites, dtype=int)
         occupied_set = np.arange(Nsites, dtype=int)
         unoccupied_set = np.zeros(Nsites, dtype=int)
+        if MCsampler.vacancy >= 0:
+            # special circumstances for a vacancy:
+            occ[MCsampler.vacancy] = -1
+            Nocc -= 1
+            # shift the occupied set, and shift the indices
+            occupied_set[MCsampler.vacancy:-1] = occupied_set[MCsampler.vacancy+1:]
+            index[MCsampler.vacancy+1:] = index[MCsampler.vacancy:-1]
+            index[MCsampler.vacancy] = -1
     else:
         # has been initialized...
         occ = MCsampler.occ.copy()
@@ -777,10 +785,12 @@ def MonteCarloSampler_param(MCsampler):
                 occupied_set[Nocc] = i
                 index[i] = Nocc
                 Nocc += 1
-            else:
+            elif occ[i] == 0:
                 unoccupied_set[Nunocc] = i
                 index[i] = Nunocc
                 Nunocc += 1
+            else:
+                index[i] = -1
     param['occ'] = occ
     param['clustercount'] = clustercount
     param['Nocc'] = Nocc
@@ -853,12 +863,14 @@ class MonteCarloSampler_jit(object):
                 self.occupied_set[self.Nocc] = i
                 self.index[i] = self.Nocc
                 self.Nocc += 1
-            else:
+            elif occ[i] == 0:
                 self.unoccupied_set[self.Nunocc] = i
                 self.index[i] = self.Nunocc
                 self.Nunocc += 1
                 for n in range(self.Ninteract[i]):
                     self.clustercount[self.siteinteract[i, n]] += 1
+            else:
+                self.index[i] = -1
 
     def E(self):
         """

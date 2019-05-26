@@ -671,7 +671,7 @@ class VacancyMonteCarloTests(MonteCarloTests):
         # self.KRAvalues = np.zeros(len(self.jumpnetwork))
         self.TSvalues = np.random.normal(size=len(self.TSclusterexp))
         # self.TSvalues = np.ones(len(self.TSclusterexp))
-        self.TSvalues = np.zeros(len(self.TSclusterexp))
+        # self.TSvalues = np.zeros(len(self.TSclusterexp))
         self.MCjn = cluster.MonteCarloSampler(self.sup, np.zeros(0), self.clusterexp, self.Evalues,
                                               self.chem, self.jumpnetwork, KRAvalues=self.KRAvalues,
                                               TSclusters=self.TSclusterexp, TSvalues=self.TSvalues)
