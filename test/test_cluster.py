@@ -625,8 +625,9 @@ class MonteCarloTests(unittest.TestCase):
         MCjn_jit.MCmoves(occchoices, unoccchoices, kTlogu)
         # check that everything is still correct...
         occ = MCjn_jit.occ
-        self.assertEqual(np.sum(occ), MCjn_jit.Nocc)
-        self.assertEqual(self.sup.size, MCjn_jit.Nocc + MCjn_jit.Nunocc)
+        count_check = 0 if self.vacancy == -1 else -1
+        self.assertEqual(np.sum(occ), MCjn_jit.Nocc + count_check)
+        self.assertEqual(self.sup.size + count_check, MCjn_jit.Nocc + MCjn_jit.Nunocc)
         for i, nocc in enumerate(occ):
             ind = MCjn_jit.index[i]
             if nocc == 1:

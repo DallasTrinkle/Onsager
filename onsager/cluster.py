@@ -893,13 +893,15 @@ class MonteCarloSampler_jit(object):
         :return dxlist: vector of displacements for each transition
         """
         for n in range(self.Njumps):
-            if self.occ[self.jump_ij[n][0]] == 0 or self.occ[self.jump_ij[n][1]] == 1:
-                self.jump_Q[n] = np.Inf
-            else:
+            if self.occ[self.jump_ij[n][0]] == -1 or \
+                    (self.occ[self.jump_ij[n][0]] == 1 and self.occ[self.jump_ij[n][1]] == 0):
                 self.jump_Q[n] = 0.
                 for m in range(self.interactrange[n - 1], self.interactrange[n]):
                     if self.clustercount[m] == 0:
                         self.jump_Q[n] += self.interactvalue[m]
+            else:
+                # forbidden jump:
+                self.jump_Q[n] = np.Inf
         return self.jump_ij, self.jump_Q, self.jump_dx
 
     def deltaE_trial(self, occsite, unoccsite):
