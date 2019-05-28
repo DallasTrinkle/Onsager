@@ -708,6 +708,22 @@ class ClusterSupercell(object):
         # if dist2 is smaller than dspec_min, it's mobile:
         return index, (dist2 < dspec_min)
 
+    def expiqx(self):
+        """
+        Construct a Fourier transform matrix for our mobile species
+
+        :return: exp( I q[i] . x[j]) as a matrix
+        :return: gamma_index of the gamma point (0)
+        """
+        # we need to get the rlv this way:
+        size, _, qtranslist, transdict = Supercell.maketrans(self.superlatt.T)
+        invsize = 1./size
+        phase = 2j*np.pi
+        return np.array([[np.exp(phase*np.dot(np.dot(self.superlatt, u), q*invsize))
+                          for u in self.mobilepos]
+                         for q in qtranslist]), \
+               transdict[(0,)*self.crys.dim]
+
     def Supercell_occ(self, sup, chemmapping=None):
         """
         Takes in a Supercell object (that is assumed to be consistent with this supercell!)

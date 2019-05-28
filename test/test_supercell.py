@@ -551,6 +551,28 @@ class ClusterSupercellTests(unittest.TestCase):
                 ci, R = sup.ciR(n, mob)
                 self.assertEqual((n, mob), sup.index(R, ci))
 
+    def testExpIqx(self):
+        """Do we construct a reasonable phase matrix?"""
+        FCC = self.crys
+        nmax = 5
+        for _ in range(16):
+            det = 0
+            while det < 1.5:
+                superlatt = np.random.choice(range(-nmax, nmax+1), size=(3,3))
+                det = np.linalg.det(superlatt)
+            sup = supercell.ClusterSupercell(FCC, superlatt)
+            zeroind = sup.indexpos(np.zeros(3))[0]
+            expiqx, gammaind = sup.expiqx()
+            self.assertEqual((sup.size, sup.size), expiqx.shape)
+            for n in range(sup.size):
+                sumvalue = 0 if n != gammaind else sup.size
+                self.assertAlmostEqual(sumvalue, np.sum(expiqx[n]))
+            for n in range(sup.size):
+                sumvalue = 0 if n != zeroind else sup.size
+                self.assertAlmostEqual(sumvalue, np.sum(expiqx[:,n]))
+            self.assertTrue(np.allclose(sup.size*np.eye(sup.size),
+                                        np.dot(expiqx.T.conj(), expiqx)))
+
     def testClusterEvalSimple(self):
         """Check that we can evaluate a cluster expansion: FCC"""
         FCC = self.crys
