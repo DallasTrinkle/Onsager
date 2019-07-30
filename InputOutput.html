@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Input and output for Onsager transport calculation &mdash; Onsager 1.3.2 documentation</title>
+  <title>Input and output for Onsager transport calculation &mdash; Onsager 1.3.3 documentation</title>
   
 
   
@@ -17,34 +17,38 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Example Notebooks" href="notebooks.html" />
     <link rel="prev" title="Onsager" href="includeme.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -244,18 +248,18 @@ div.nblast {
 
 /* input prompt */
 div.nbinput div.prompt pre {
-    color: #303F9F;
+    color: #307FC1;
 }
 
 /* output prompt */
 div.nboutput div.prompt pre {
-    color: #D84315;
+    color: #BF5B3D;
 }
 
 /* all prompts */
 div.nbinput div.prompt,
 div.nboutput div.prompt {
-    min-width: 8ex;
+    min-width: 5ex;
     padding-top: 0.4em;
     padding-right: 0.4em;
     text-align: right;
@@ -295,9 +299,9 @@ div.nboutput div.output_area {
 
 /* input area */
 div.nbinput div.input_area {
-    border: 1px solid #cfcfcf;
+    border: 1px solid #e0e0e0;
     border-radius: 2px;
-    background: #f7f7f7;
+    background: #f5f5f5;
 }
 
 /* override MathJax center alignment in output cells */
@@ -305,7 +309,7 @@ div.nboutput div[class*=MathJax] {
     text-align: left !important;
 }
 
-/* override sphinx.ext.pngmath center alignment in output cells */
+/* override sphinx.ext.imgmath center alignment in output cells */
 div.nboutput div.math p {
     text-align: left;
 }
@@ -355,6 +359,40 @@ div.nboutput div.output_area.stderr {
 .ansi-bold { font-weight: bold; }
 .ansi-underline { text-decoration: underline; }
 
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
 /* CSS overrides for sphinx_rtd_theme */
 
 /* 24px margin */
@@ -368,196 +406,72 @@ div.nboutput div.output_area.stderr {
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="Input-and-output-for-Onsager-transport-calculation">
 <h1>Input and output for Onsager transport calculation<a class="headerlink" href="#Input-and-output-for-Onsager-transport-calculation" title="Permalink to this headline">¶</a></h1>
-<p>The Onsager calculators currently include two computational approaches
-to determining transport coefficients: an “interstitial” calculation,
-and a “vacancy-mediated” calculator. Below we describe the</p>
+<p>The Onsager calculators currently include two computational approaches to determining transport coefficients: an “interstitial” calculation, and a “vacancy-mediated” calculator. Below we describe the</p>
 <ol class="arabic simple" start="0">
-<li><strong>Assumptions used in transport model</strong> that are necessary to
-understand the data to be input, and the limitations of the results;</li>
-<li><strong>Crystal class setup</strong> needed to initiate a calculation;</li>
-<li><strong>Interstitial calculator setup</strong> needed for an single mobile species
-calculation, or,</li>
-<li><strong>Vacancy-mediated calculator setup</strong> needed for a vacancy-mediated
-substitutional solute calculation;</li>
-<li>the creation of <strong>VASP-style input files</strong> to be run to generate
-input data;</li>
-<li>proper <strong>Formatting of input data</strong> to be compatible with the
-calculators; and</li>
-<li><strong>Interpretation of output</strong> which includes how to convert output
-into transport coefficients.</li>
+<li><p><strong>Assumptions used in transport model</strong> that are necessary to understand the data to be input, and the limitations of the results;</p></li>
+<li><p><strong>Crystal class setup</strong> needed to initiate a calculation;</p></li>
+<li><p><strong>Interstitial calculator setup</strong> needed for an single mobile species calculation, or,</p></li>
+<li><p><strong>Vacancy-mediated calculator setup</strong> needed for a vacancy-mediated substitutional solute calculation;</p></li>
+<li><p>the creation of <strong>VASP-style input files</strong> to be run to generate input data;</p></li>
+<li><p>proper <strong>Formatting of input data</strong> to be compatible with the calculators; and</p></li>
+<li><p><strong>Interpretation of output</strong> which includes how to convert output into transport coefficients.</p></li>
 </ol>
-<p>This follows the overall structure of a transport coefficient
-calculation. Broadly speaking, these are the steps necessary to compute
-transport coefficients:</p>
+<p>This follows the overall structure of a transport coefficient calculation. Broadly speaking, these are the steps necessary to compute transport coefficients:</p>
 <ol class="arabic simple">
-<li>Identify the crystal to be considered; this requires mapping whatever
-defects are to be considered mobile onto appropriate Wyckoff sites in
-the crystal, even if those exact sites are not occupied by true
-atoms.</li>
-<li>Generate lists of symmetry unrelated “defect states” and “defect
-state transitions,” along with the appropriate “calculator object.”</li>
-<li>Construct input files for total energy calculations to be run outside
-of the Onsager codebase; extract appropriate energy and frequency
-information from those runs.</li>
-<li>Input the data in a format that the calculator can understand, and
-transform those energies and frequencies into rates at a given
-temperature assuming Arrhenius behavior.</li>
-<li>Transform the output into physically relevant quantities (Onsager
-coefficients, solute diffusivities, mobilities, or drag ratios) with
-appropriate units.</li>
+<li><p>Identify the crystal to be considered; this requires mapping whatever defects are to be considered mobile onto appropriate Wyckoff sites in the crystal, even if those exact sites are not occupied by true atoms.</p></li>
+<li><p>Generate lists of symmetry unrelated “defect states” and “defect state transitions,” along with the appropriate “calculator object.”</p></li>
+<li><p>Construct input files for total energy calculations to be run outside of the Onsager codebase; extract appropriate energy and frequency information from those runs.</p></li>
+<li><p>Input the data in a format that the calculator can understand, and transform those energies and frequencies into rates at a given temperature assuming Arrhenius behavior.</p></li>
+<li><p>Transform the output into physically relevant quantities (Onsager coefficients, solute diffusivities, mobilities, or drag ratios) with appropriate units.</p></li>
 </ol>
 <div class="section" id="Assumptions-used-in-Onsager">
 <h2>Assumptions used in Onsager<a class="headerlink" href="#Assumptions-used-in-Onsager" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">Onsager</span></code> code computes transport of defects on an infinite
-crystalline lattice. Currently, the code requires that the particular
-defects can be mapped onto Wyckoff positions in a crystal. This does not
-<em>require</em> that the defect be an atom occupying various Wyckoff positions
-(though that obviously is captured), but merely that the defect have the
-symmetry and transitions that can be equivalently described by an
-“object” that occupies Wyckoff positions. Simple examples include
-vacancies, substitutional solutes, simple interstitial atoms, as well as
-more complex cases such as split vacancy defects (e.g.: a
-V-O<span class="math notranslate nohighlight">\(_\text{i}\)</span>-V split double vacancy with oxygen interstitial
-in a closed-packed crystal; the entire defect complex can be mapped on
-to the Wyckoff position of the oxygen interstitial). In order to
-calculate diffusion, a few assumptions are made:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Onsager</span></code> code computes transport of defects on an infinite crystalline lattice. Currently, the code requires that the particular defects can be mapped onto Wyckoff positions in a crystal. This does not <em>require</em> that the defect be an atom occupying various Wyckoff positions (though that obviously is captured), but merely that the defect have the symmetry and transitions that can be equivalently described by an “object” that occupies Wyckoff positions. Simple examples include vacancies,
+substitutional solutes, simple interstitial atoms, as well as more complex cases such as split vacancy defects (e.g.: a V-O<span class="math notranslate nohighlight">\(_\text{i}\)</span>-V split double vacancy with oxygen interstitial in a closed-packed crystal; the entire defect complex can be mapped on to the Wyckoff position of the oxygen interstitial). In order to calculate diffusion, a few assumptions are made:</p>
 <ul class="simple">
-<li><strong>defects are dilute:</strong> we never consider more than one defect at a
-time in an “infinite” periodic crystal; the vacancy-mediated diffuser
-uses one vacancy and one solute.</li>
-<li><strong>defects diffuse via a Markovian process</strong>: defect states are
-well-defined, and the transition time from state-to-state is much
-longer than the equilibration time in a state, so that the evolution
-of the system is described by the Master equation with
-time-independent rates.</li>
-<li><strong>defects do not alter the underlying symmetry of the crystal</strong>:
-while the defect itself can have a lower symmetry (according to its
-Wyckoff position), the presence of a defect does not lead to a global
-phase transformation to a different crystal; moreover, the crystal
-maintains translational invariance so that the energy of the system
-with defect(s) is unchanged under translations.</li>
+<li><p><strong>defects are dilute:</strong> we never consider more than one defect at a time in an “infinite” periodic crystal; the vacancy-mediated diffuser uses one vacancy and one solute.</p></li>
+<li><p><strong>defects diffuse via a Markovian process</strong>: defect states are well-defined, and the transition time from state-to-state is much longer than the equilibration time in a state, so that the evolution of the system is described by the Master equation with time-independent rates.</p></li>
+<li><p><strong>defects do not alter the underlying symmetry of the crystal</strong>: while the defect itself can have a lower symmetry (according to its Wyckoff position), the presence of a defect does not lead to a global phase transformation to a different crystal; moreover, the crystal maintains translational invariance so that the energy of the system with defect(s) is unchanged under translations.</p></li>
 </ul>
-<p>All of these assumptions are usually good: the dilute limit is valid
-without strong interactions (such as site blocking), Markovian processes
-are valid as long as barriers are a few times <span class="math notranslate nohighlight">\(k_\text{B}T\)</span>, and
-we are not currently aware of any (simple) defects that induce phase
-transformations.</p>
-<p>Furthermore, relaxation around a defect (or defect cluster) is allowed,
-but the assumption is that all of the atomic positions can be easily
-mapped back to “perfect” crystal lattice sites. This is an “off-lattice”
-model. In some cases, it can be possible to incorporate “new” states,
-especially metastable states, that are only accessible by a defect.</p>
-<p>Finally, the code requires that all diffusion happens on a single
-sublattice. This sublattice is defined by a single chemical species; it
-can include multiple Wyckoff positions. But the current algorithms
-assume that transitions do not result in the creation of <em>antisite
-defects</em> (where a chemical species is on an “incorrect” sublattice).</p>
+<p>All of these assumptions are usually good: the dilute limit is valid without strong interactions (such as site blocking), Markovian processes are valid as long as barriers are a few times <span class="math notranslate nohighlight">\(k_\text{B}T\)</span>, and we are not currently aware of any (simple) defects that induce phase transformations.</p>
+<p>Furthermore, relaxation around a defect (or defect cluster) is allowed, but the assumption is that all of the atomic positions can be easily mapped back to “perfect” crystal lattice sites. This is an “off-lattice” model. In some cases, it can be possible to incorporate “new” states, especially metastable states, that are only accessible by a defect.</p>
+<p>Finally, the code requires that all diffusion happens on a single sublattice. This sublattice is defined by a single chemical species; it can include multiple Wyckoff positions. But the current algorithms assume that transitions do not result in the creation of <em>antisite defects</em> (where a chemical species is on an “incorrect” sublattice).</p>
 </div>
 <div class="section" id="Crystal-class-setup">
 <h2>Crystal class setup<a class="headerlink" href="#Crystal-class-setup" title="Permalink to this headline">¶</a></h2>
-<p>The assumption of translational invariance of our defects is captured by
-the use of a <code class="docutils literal notranslate"><span class="pre">Crystal</span></code> object. Following the standard definition of a
-crystal, we need to specify (a) three lattice vectors, and (b) at least
-one basis position, corresponding to at least one site. The crystal
-needs to contain <em>at least</em> the Wyckoff positions on a single sublattice
-corresponding to the diffusing defects. It can be useful for it to
-contain <em>more</em> atoms that act as “spectator” atoms: they do not
-participate in diffusion, but define both the underlying symmetry of the
-crystal, and if atomic-scale calculations will be used to compute
-configuration and transition-state energies, are necessary to define the
-energy landscape of diffusion.</p>
-<p>The lattice vectors of the underlying crystal set the units of <em>length</em>
-in the transport coefficients. Hence, if the vectors are entered in
-units of nm, this corresponds to a factor of <span class="math notranslate nohighlight">\(10^{-18}\text{ m}^2\)</span>
-in the transport coefficients. This should also be considered when
-including factors of volume per atom as well.</p>
+<p>The assumption of translational invariance of our defects is captured by the use of a <code class="docutils literal notranslate"><span class="pre">Crystal</span></code> object. Following the standard definition of a crystal, we need to specify (a) three lattice vectors, and (b) at least one basis position, corresponding to at least one site. The crystal needs to contain <em>at least</em> the Wyckoff positions on a single sublattice corresponding to the diffusing defects. It can be useful for it to contain <em>more</em> atoms that act as “spectator” atoms: they do not participate
+in diffusion, but define both the underlying symmetry of the crystal, and if atomic-scale calculations will be used to compute configuration and transition-state energies, are necessary to define the energy landscape of diffusion.</p>
+<p>The lattice vectors of the underlying crystal set the units of <em>length</em> in the transport coefficients. Hence, if the vectors are entered in units of nm, this corresponds to a factor of <span class="math notranslate nohighlight">\(10^{-18}\text{ m}^2\)</span> in the transport coefficients. This should also be considered when including factors of volume per atom as well.</p>
 <ul class="simple">
-<li>The <em>lattice vectors</em> are given by three vectors,
-<span class="math notranslate nohighlight">\(\mathbf{a}_1\)</span>, <span class="math notranslate nohighlight">\(\mathbf{a}_2\)</span>, <span class="math notranslate nohighlight">\(\mathbf{a}_3\)</span> in
-Cartesian coordinates. In python, these are input when creating a
-Crystal either as a list of three <code class="docutils literal notranslate"><span class="pre">numpy</span></code> vectors, <em>or</em> as a square
-<code class="docutils literal notranslate"><span class="pre">numpy</span></code> matrix. <strong>Note:</strong> if you enter the three vectors as a
-matrix, remember that <strong>it assumes the vectors are column vectors</strong>.
-That is, if <code class="docutils literal notranslate"><span class="pre">amat</span></code> is the matrix, then <code class="docutils literal notranslate"><span class="pre">amat[:,0]</span></code> is
-<span class="math notranslate nohighlight">\(\mathbf{a}_1\)</span>, <code class="docutils literal notranslate"><span class="pre">amat[:,1]</span></code> is <span class="math notranslate nohighlight">\(\mathbf{a}_2\)</span>, and
-<code class="docutils literal notranslate"><span class="pre">amat[:,2]</span></code> is <span class="math notranslate nohighlight">\(\mathbf{a}_3\)</span>. <strong>This may not be what you’re
-expecting.</strong> The main recommendation is to enter the lattice vectors
-as a list (or tuple) of three <code class="docutils literal notranslate"><span class="pre">numpy</span></code> vectors.</li>
-<li>The <em>atomic basis</em> is given by a <em>list</em> of <em>lists</em> of <code class="docutils literal notranslate"><span class="pre">numpy</span></code>
-vectors of positions in <em>unit cell coordinates</em>. For a given
-<code class="docutils literal notranslate"><span class="pre">basis</span></code>, then <code class="docutils literal notranslate"><span class="pre">basis[0]</span></code> is a list of all positions for the first
-chemical element in the crystal, <code class="docutils literal notranslate"><span class="pre">basis[1]</span></code> is the second chemical
-element, and so on. <strong>If you only have a single chemical element, you
-may enter a list of ``numpy`` vectors.</strong></li>
-<li>An optional <em>spin</em> degree of freedom can be included. This is a list
-of objects, with one for each chemical element. These can be either
-scalar or vectors, with the assumption that they transform as those
-objects under group operations. If not included, the spins are all
-assumed to be equal to 0. Inclusion of these additional degrees of
-freedom (currently) only impacts the reduction of the unit cell, and
-the construction of the space group operations.</li>
-<li>We also take in, strictly for bookkeeping purposes, a list of names
-for the chemical elements. <em>This is an optional input</em>, but
-recommended for readability.</li>
+<li><p>The <em>lattice vectors</em> are given by three vectors, <span class="math notranslate nohighlight">\(\mathbf{a}_1\)</span>, <span class="math notranslate nohighlight">\(\mathbf{a}_2\)</span>, <span class="math notranslate nohighlight">\(\mathbf{a}_3\)</span> in Cartesian coordinates. In python, these are input when creating a Crystal either as a list of three <code class="docutils literal notranslate"><span class="pre">numpy</span></code> vectors, <em>or</em> as a square <code class="docutils literal notranslate"><span class="pre">numpy</span></code> matrix. <strong>Note:</strong> if you enter the three vectors as a matrix, remember that <strong>it assumes the vectors are column vectors</strong>. That is, if <code class="docutils literal notranslate"><span class="pre">amat</span></code> is the matrix, then <code class="docutils literal notranslate"><span class="pre">amat[:,0]</span></code> is <span class="math notranslate nohighlight">\(\mathbf{a}_1\)</span>, <code class="docutils literal notranslate"><span class="pre">amat[:,1]</span></code> is
+<span class="math notranslate nohighlight">\(\mathbf{a}_2\)</span>, and <code class="docutils literal notranslate"><span class="pre">amat[:,2]</span></code> is <span class="math notranslate nohighlight">\(\mathbf{a}_3\)</span>. <strong>This may not be what you’re expecting.</strong> The main recommendation is to enter the lattice vectors as a list (or tuple) of three <code class="docutils literal notranslate"><span class="pre">numpy</span></code> vectors.</p></li>
+<li><p>The <em>atomic basis</em> is given by a <em>list</em> of <em>lists</em> of <code class="docutils literal notranslate"><span class="pre">numpy</span></code> vectors of positions in <em>unit cell coordinates</em>. For a given <code class="docutils literal notranslate"><span class="pre">basis</span></code>, then <code class="docutils literal notranslate"><span class="pre">basis[0]</span></code> is a list of all positions for the first chemical element in the crystal, <code class="docutils literal notranslate"><span class="pre">basis[1]</span></code> is the second chemical element, and so on. <strong>If you only have a single chemical element, you may enter a list of ``numpy`` vectors.</strong></p></li>
+<li><p>An optional <em>spin</em> degree of freedom can be included. This is a list of objects, with one for each chemical element. These can be either scalar or vectors, with the assumption that they transform as those objects under group operations. If not included, the spins are all assumed to be equal to 0. Inclusion of these additional degrees of freedom (currently) only impacts the reduction of the unit cell, and the construction of the space group operations.</p></li>
+<li><p>We also take in, strictly for bookkeeping purposes, a list of names for the chemical elements. <em>This is an optional input</em>, but recommended for readability.</p></li>
 </ul>
 <p>Once initialized, two main internal operations take place:</p>
 <ol class="arabic simple">
-<li>The unit cell is <em>reduced</em> and <em>optimized</em>. Reduction is a process
-where we try to find the smallest unit cell representation for the
-<code class="docutils literal notranslate"><span class="pre">Crystal</span></code>. This means that the four-atom “simple cubic” unit cell
-of face-centered cubic can be input, and the code will reduce it to
-the standard single-atom primitive cell. The reduction algorithm can
-end up with “unusual” choices of lattice vectors, so we also optimize
-the lattice vectors so that they are as close to orthogonal as
-possible, and ordered from smallest to largest. The atomic basis may
-be shifted uniformly so that <em>if</em> an inversion operation is present,
-then the inversion center is the origin. Neither choice changes the
-representation of the crystal; however, the <em>reduction</em> operation can
-be skipped by including the option <code class="docutils literal notranslate"><span class="pre">noreduce=True</span></code>.</li>
-<li>Full symmetry analysis is performed, including: automated
-construction of space group generator operators, partitioning of
-basis sites into symmetry related Wyckoff positions, and
-determination of point group operations for every basis site. All of
-these operations are automated, and make no reference to
-crystallographic tables. The algorithm cannot identify which space
-group it has generated, nor which Wyckoff positions are present. The
-algorithm respects both <em>chemistry</em> and <em>spin</em>; this also makes spin
-a useful manipulation tool to artificially lower symmetry for testing
-purposes as needed.</li>
+<li><p>The unit cell is <em>reduced</em> and <em>optimized</em>. Reduction is a process where we try to find the smallest unit cell representation for the <code class="docutils literal notranslate"><span class="pre">Crystal</span></code>. This means that the four-atom “simple cubic” unit cell of face-centered cubic can be input, and the code will reduce it to the standard single-atom primitive cell. The reduction algorithm can end up with “unusual” choices of lattice vectors, so we also optimize the lattice vectors so that they are as close to orthogonal as possible, and ordered
+from smallest to largest. The atomic basis may be shifted uniformly so that <em>if</em> an inversion operation is present, then the inversion center is the origin. Neither choice changes the representation of the crystal; however, the <em>reduction</em> operation can be skipped by including the option <code class="docutils literal notranslate"><span class="pre">noreduce=True</span></code>.</p></li>
+<li><p>Full symmetry analysis is performed, including: automated construction of space group generator operators, partitioning of basis sites into symmetry related Wyckoff positions, and determination of point group operations for every basis site. All of these operations are automated, and make no reference to crystallographic tables. The algorithm cannot identify which space group it has generated, nor which Wyckoff positions are present. The algorithm respects both <em>chemistry</em> and <em>spin</em>; this
+also makes spin a useful manipulation tool to artificially lower symmetry for testing purposes as needed.</p></li>
 </ol>
-<p><strong>Note</strong>: <code class="docutils literal notranslate"><span class="pre">Crystal</span></code>s can also be constructed by manipulating
-existing <code class="docutils literal notranslate"><span class="pre">Crystal</span></code> objects. A useful case is for the interstitial
-diffuser: when working “interactively,” it is often easier to first make
-the underlying “spectator” crystal, and then have that <code class="docutils literal notranslate"><span class="pre">Crystal</span></code>
-construct the set of Wyckoff positions for a single site in the crystal,
-and then add that to the basis. <code class="docutils literal notranslate"><span class="pre">Crystal</span></code> objects are intended to be
-read-only, so these manipulations result in the creation of a new
-<code class="docutils literal notranslate"><span class="pre">Crystal</span></code> object.</p>
+<p><strong>Note</strong>: <code class="docutils literal notranslate"><span class="pre">Crystal</span></code>s can also be constructed by manipulating existing <code class="docutils literal notranslate"><span class="pre">Crystal</span></code> objects. A useful case is for the interstitial diffuser: when working “interactively,” it is often easier to first make the underlying “spectator” crystal, and then have that <code class="docutils literal notranslate"><span class="pre">Crystal</span></code> construct the set of Wyckoff positions for a single site in the crystal, and then add that to the basis. <code class="docutils literal notranslate"><span class="pre">Crystal</span></code> objects are intended to be read-only, so these manipulations result in the creation of a new <code class="docutils literal notranslate"><span class="pre">Crystal</span></code>
+object.</p>
 <p>A few quick examples:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -570,11 +484,9 @@ read-only, so these manipulations result in the creation of a new
 </div>
 <div class="section" id="Face-centered-cubic-crystal,-vacancy-diffusion">
 <h3>Face-centered cubic crystal, vacancy-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-diffusion" title="Permalink to this headline">¶</a></h3>
-<p>Face-centered cubic crystals could be created either by entering the
-primitive basis:</p>
+<p>Face-centered cubic crystals could be created either by entering the primitive basis:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -602,8 +514,7 @@ primitive basis:</p>
 </div>
 <p>or by entering the simple cubic unit cell with four atoms:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -628,11 +539,9 @@ primitive basis:</p>
   (fcc) 0.0 = [ 0.  0.  0.]
 </pre></div></div>
 </div>
-<p>The effect of <code class="docutils literal notranslate"><span class="pre">noreduce</span></code> can be seen by regenerating the FCC crystal
-using the simple cubic unit cell:</p>
+<p>The effect of <code class="docutils literal notranslate"><span class="pre">noreduce</span></code> can be seen by regenerating the FCC crystal using the simple cubic unit cell:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -663,12 +572,9 @@ using the simple cubic unit cell:</p>
 </div>
 <div class="section" id="Rocksalt-crystal,-vacancy-diffusion">
 <h3>Rocksalt crystal, vacancy-diffusion<a class="headerlink" href="#Rocksalt-crystal,-vacancy-diffusion" title="Permalink to this headline">¶</a></h3>
-<p>Two chemical species, with interpenetrating FCC lattices. In MgO, we
-would allow for V<span class="math notranslate nohighlight">\(_\text{O}\)</span> (oxygen vacancies) to diffuse, with
-Mg as a “spectator species”:</p>
+<p>Two chemical species, with interpenetrating FCC lattices. In MgO, we would allow for V<span class="math notranslate nohighlight">\(_\text{O}\)</span> (oxygen vacancies) to diffuse, with Mg as a “spectator species”:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -698,14 +604,9 @@ Mg as a “spectator species”:</p>
 </div>
 <div class="section" id="Face-centered-cubic-crystal,-interstitial-diffusion">
 <h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Permalink to this headline">¶</a></h3>
-<p>Interstitials in FCC crystals usually diffuse through a network of
-octahedral and tetrahedral sites. We can use the <code class="docutils literal notranslate"><span class="pre">Wyckoffpos(u)</span></code>
-function in a crystal to generate a list of equivalent sites
-corresponding to the interstitial positions, and the <code class="docutils literal notranslate"><span class="pre">addbasis()</span></code>
-function to create a new crystal with these interstitial sites.</p>
+<p>Interstitials in FCC crystals usually diffuse through a network of octahedral and tetrahedral sites. We can use the <code class="docutils literal notranslate"><span class="pre">Wyckoffpos(u)</span></code> function in a crystal to generate a list of equivalent sites corresponding to the interstitial positions, and the <code class="docutils literal notranslate"><span class="pre">addbasis()</span></code> function to create a new crystal with these interstitial sites.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -740,72 +641,26 @@ function to create a new crystal with these interstitial sites.</p>
 </div>
 <div class="section" id="Interstitial-calculator-setup">
 <h2>Interstitial calculator setup<a class="headerlink" href="#Interstitial-calculator-setup" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">Interstitial</span></code> calculator is designed for systems where we have a
-<strong>single defect species</strong> that diffuses throughout the crystal. This
-includes single vacancy diffusion, and interstitial solute diffusivity.
-As for any diffusion calculator, we need to define the configurations
-that the defect will sample, and the transition states of the defect. In
-the case of a single defect species,</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Interstitial</span></code> calculator is designed for systems where we have a <strong>single defect species</strong> that diffuses throughout the crystal. This includes single vacancy diffusion, and interstitial solute diffusivity. As for any diffusion calculator, we need to define the configurations that the defect will sample, and the transition states of the defect. In the case of a single defect species,</p>
 <ul class="simple">
-<li>configurations are simply the Wyckoff positions of the particular
-sublattice (specified by a <code class="docutils literal notranslate"><span class="pre">chemistry</span></code> index);</li>
-<li>transition states are pairs of configurations with a displacement
-vector that connects the initial to the final system.</li>
+<li><p>configurations are simply the Wyckoff positions of the particular sublattice (specified by a <code class="docutils literal notranslate"><span class="pre">chemistry</span></code> index);</p></li>
+<li><p>transition states are pairs of configurations with a displacement vector that connects the initial to the final system.</p></li>
 </ul>
-<p>We use the <code class="docutils literal notranslate"><span class="pre">sitelist(chemistry)</span></code> function to construct a <em>list</em> of
-<em>lists</em> of indices for a given <code class="docutils literal notranslate"><span class="pre">chemistry</span></code>; the lists of indices are
-all symmetrically equivalent crystal basis indices, and each list is
-symmetrically inequivalent: this is a space group partitioning into
-equivalent Wyckoff positions.</p>
-<p>The transition states are stored as a <code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code>, which is a <em>list</em>
-of <em>lists</em> of <em>tuples</em> of transitions:
-<code class="docutils literal notranslate"><span class="pre">(initial</span> <span class="pre">index,</span> <span class="pre">final</span> <span class="pre">index,</span> <span class="pre">deltax)</span></code> where the indices are
-self-explanatory, and <code class="docutils literal notranslate"><span class="pre">deltax</span></code> is a Cartesian vector corresponding to
-the translation from the initial state to the final state. The
-transitions in each list is equivalent by symmetry, and the separate
-lists are symmetrically inequivalent. Note also that <em>reverse</em>
-transitions are included: <code class="docutils literal notranslate"><span class="pre">(final</span> <span class="pre">index,</span> <span class="pre">initial</span> <span class="pre">index,</span> <span class="pre">-deltax)</span></code>.
-While the jumpnetwork can be constructed “by hand,” it is recommended to
-use the <code class="docutils literal notranslate"><span class="pre">jumpnetwork()</span></code> function inside of a crystal to automate the
-generation, and then remove “spurious” transitions that are identified.</p>
-<p>The algorithm in <code class="docutils literal notranslate"><span class="pre">jumpnetwork()</span></code> is rather simple: a transition is
-included if</p>
+<p>We use the <code class="docutils literal notranslate"><span class="pre">sitelist(chemistry)</span></code> function to construct a <em>list</em> of <em>lists</em> of indices for a given <code class="docutils literal notranslate"><span class="pre">chemistry</span></code>; the lists of indices are all symmetrically equivalent crystal basis indices, and each list is symmetrically inequivalent: this is a space group partitioning into equivalent Wyckoff positions.</p>
+<p>The transition states are stored as a <code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code>, which is a <em>list</em> of <em>lists</em> of <em>tuples</em> of transitions: <code class="docutils literal notranslate"><span class="pre">(initial</span> <span class="pre">index,</span> <span class="pre">final</span> <span class="pre">index,</span> <span class="pre">deltax)</span></code> where the indices are self-explanatory, and <code class="docutils literal notranslate"><span class="pre">deltax</span></code> is a Cartesian vector corresponding to the translation from the initial state to the final state. The transitions in each list is equivalent by symmetry, and the separate lists are symmetrically inequivalent. Note also that <em>reverse</em> transitions are included:
+<code class="docutils literal notranslate"><span class="pre">(final</span> <span class="pre">index,</span> <span class="pre">initial</span> <span class="pre">index,</span> <span class="pre">-deltax)</span></code>. While the jumpnetwork can be constructed “by hand,” it is recommended to use the <code class="docutils literal notranslate"><span class="pre">jumpnetwork()</span></code> function inside of a crystal to automate the generation, and then remove “spurious” transitions that are identified.</p>
+<p>The algorithm in <code class="docutils literal notranslate"><span class="pre">jumpnetwork()</span></code> is rather simple: a transition is included if</p>
 <ul class="simple">
-<li>the distance between the initial and final state is less than a
-cutoff distance, and</li>
-<li>the line segment between the initial and final state does not come
-within a minimum distance of other defect states, and</li>
-<li>the line segment between the initial and final state does not come
-within a minimum distance of <em>any</em> atomic site in the crystal.</li>
+<li><p>the distance between the initial and final state is less than a cutoff distance, and</p></li>
+<li><p>the line segment between the initial and final state does not come within a minimum distance of other defect states, and</p></li>
+<li><p>the line segment between the initial and final state does not come within a minimum distance of <em>any</em> atomic site in the crystal.</p></li>
 </ul>
-<p>The first criterion identifies “close” jumps, while the second criterion
-eliminates “long” transitions between states when an intermediate
-configuration may be possible (i.e., <span class="math notranslate nohighlight">\(\text{A}\to\text{B}\)</span> when
-<span class="math notranslate nohighlight">\(\text{A}\to\text{C}\to\text{B}\)</span> would be more likely as the state
-C is “close” to the line connecting A to B), and the final criterion
-elimates transitions that takes the defect too close to a “spectator”
-atom in the crystal.</p>
-<p>The interstitial diffuser also identifies unique <strong>tags</strong> for all
-configurations and transition states. The interstitial tags for
-<em>configurations</em> are strings with <code class="docutils literal notranslate"><span class="pre">i:</span></code> followed by unit cell
-coordinates of site to three decimal digits. The interstitial tags for
-<em>transition states</em> are strings with <code class="docutils literal notranslate"><span class="pre">i:</span></code> followed by the unit cell
-coordinates of the initial state, a <code class="docutils literal notranslate"><span class="pre">^</span></code>, and the unit cell coordinates
-of the final state. When one pretty-prints the interstitial diffuser
-object, the symmetry unique tags are printed. Note that all of the
-symmetry equivalent tags are stored in the object, and can be used to
-identify configurations and transition states, and this is the preferred
-method for indexing, rather than relying on the particular index into
-the corresponding lists. The interstitial diffuser calculator contains
-dictionaries that can be used to convert from tags to indices and vice
-versa.</p>
-<p>Finally, <code class="docutils literal notranslate"><span class="pre">YAML</span></code> interfaces to output the <code class="docutils literal notranslate"><span class="pre">sitelist</span></code> and
-<code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code> for an interstitial diffuser are includes; combined with
-the <code class="docutils literal notranslate"><span class="pre">YAML</span></code> output of the Crystal, this allows for a <code class="docutils literal notranslate"><span class="pre">YAML</span></code>
-serialized representation of the diffusion object.</p>
+<p>The first criterion identifies “close” jumps, while the second criterion eliminates “long” transitions between states when an intermediate configuration may be possible (i.e., <span class="math notranslate nohighlight">\(\text{A}\to\text{B}\)</span> when <span class="math notranslate nohighlight">\(\text{A}\to\text{C}\to\text{B}\)</span> would be more likely as the state C is “close” to the line connecting A to B), and the final criterion elimates transitions that takes the defect too close to a “spectator” atom in the crystal.</p>
+<p>The interstitial diffuser also identifies unique <strong>tags</strong> for all configurations and transition states. The interstitial tags for <em>configurations</em> are strings with <code class="docutils literal notranslate"><span class="pre">i:</span></code> followed by unit cell coordinates of site to three decimal digits. The interstitial tags for <em>transition states</em> are strings with <code class="docutils literal notranslate"><span class="pre">i:</span></code> followed by the unit cell coordinates of the initial state, a <code class="docutils literal notranslate"><span class="pre">^</span></code>, and the unit cell coordinates of the final state. When one pretty-prints the interstitial diffuser object, the symmetry
+unique tags are printed. Note that all of the symmetry equivalent tags are stored in the object, and can be used to identify configurations and transition states, and this is the preferred method for indexing, rather than relying on the particular index into the corresponding lists. The interstitial diffuser calculator contains dictionaries that can be used to convert from tags to indices and vice versa.</p>
+<p>Finally, <code class="docutils literal notranslate"><span class="pre">YAML</span></code> interfaces to output the <code class="docutils literal notranslate"><span class="pre">sitelist</span></code> and <code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code> for an interstitial diffuser are includes; combined with the <code class="docutils literal notranslate"><span class="pre">YAML</span></code> output of the Crystal, this allows for a <code class="docutils literal notranslate"><span class="pre">YAML</span></code> serialized representation of the diffusion object.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -817,8 +672,7 @@ serialized representation of the diffusion object.</p>
 <h3>Face-centered cubic crystal, vacancy-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-diffusion" title="Permalink to this headline">¶</a></h3>
 <p>We identify the vacancy sites with the crystal sites in the lattice.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -837,8 +691,7 @@ serialized representation of the diffusion object.</p>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -872,8 +725,7 @@ Jump type 0
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -905,12 +757,9 @@ i:+0.000,+0.000,+0.000^i:-1.000,+0.000,+0.000
 </div>
 <div class="section" id="Rocksalt-crystal,-vacancy-diffusion">
 <h3>Rocksalt crystal, vacancy-diffusion<a class="headerlink" href="#Rocksalt-crystal,-vacancy-diffusion" title="Permalink to this headline">¶</a></h3>
-<p>Two chemical species, with interpenetrating FCC lattices. In MgO, we
-would allow for V<span class="math notranslate nohighlight">\(_\text{O}\)</span> (oxygen vacancies) to diffuse, with
-Mg as a “spectator species”.</p>
+<p>Two chemical species, with interpenetrating FCC lattices. In MgO, we would allow for V<span class="math notranslate nohighlight">\(_\text{O}\)</span> (oxygen vacancies) to diffuse, with Mg as a “spectator species”.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -929,8 +778,7 @@ Mg as a “spectator species”.</p>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -964,8 +812,7 @@ Jump type 0
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -998,13 +845,9 @@ i:+0.500,+0.500,+0.500^i:+0.500,-0.500,+1.500
 </div>
 <div class="section" id="Face-centered-cubic-crystal,-interstitial-diffusion">
 <h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Permalink to this headline">¶</a></h3>
-<p>Interstitials in FCC crystals usually diffuse through a network of
-octahedral and tetrahedral sites. Nominally, diffusion should occur
-through an octahedral-tetrahedral jumps, but we can extend the cutoff
-distance to find additinoal jumps between tetrahedrals.</p>
+<p>Interstitials in FCC crystals usually diffuse through a network of octahedral and tetrahedral sites. Nominally, diffusion should occur through an octahedral-tetrahedral jumps, but we can extend the cutoff distance to find additinoal jumps between tetrahedrals.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1023,8 +866,7 @@ distance to find additinoal jumps between tetrahedrals.</p>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1075,8 +917,7 @@ Jump type 1
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1111,18 +952,10 @@ i:+0.250,+0.250,+0.250^i:+0.750,+0.750,-0.250
 
 </pre></div></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">YAML</span></code> representation is intended to combine both the structural
-information necessary to construct the (1) crystal, (2) chemistry index
-of the diffusing defect, (3) sitelist, and (4) jumpnetwork; <strong>and</strong> the
-energies, prefactors, and elastic dipoles (derivative of energy with
-respect to strain) for the symmetry representatives of configurations
-and jumps. This will become input for the diffuser when computing
-transport coefficients as a function of temperature, as well as
-derivatives with respect to strain (elastodiffusion tensor, activation
-volume tensor).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">YAML</span></code> representation is intended to combine both the structural information necessary to construct the (1) crystal, (2) chemistry index of the diffusing defect, (3) sitelist, and (4) jumpnetwork; <strong>and</strong> the energies, prefactors, and elastic dipoles (derivative of energy with respect to strain) for the symmetry representatives of configurations and jumps. This will become input for the diffuser when computing transport coefficients as a function of temperature, as well as derivatives with
+respect to strain (elastodiffusion tensor, activation volume tensor).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1269,94 +1102,47 @@ jumpnetwork:
 </div>
 <div class="section" id="Vacancy-mediated-calculator-setup">
 <h2>Vacancy-mediated calculator setup<a class="headerlink" href="#Vacancy-mediated-calculator-setup" title="Permalink to this headline">¶</a></h2>
-<p>For the vacancy mediated diffuser, the configurations and transition
-states are more complicated. First, we have three types of
-configurations:</p>
+<p>For the vacancy mediated diffuser, the configurations and transition states are more complicated. First, we have three types of configurations:</p>
 <ol class="arabic simple">
-<li>Vacancy, sufficiently far away from the solute to have zero
-interaction energy.</li>
-<li>Solute, sufficiently far away from the vacancy to have zero
-interaction energy.</li>
-<li>Vacancy-solute complexes.</li>
+<li><p>Vacancy, sufficiently far away from the solute to have zero interaction energy.</p></li>
+<li><p>Solute, sufficiently far away from the vacancy to have zero interaction energy.</p></li>
+<li><p>Vacancy-solute complexes.</p></li>
 </ol>
-<p>The vacancies and solutes are assumed to be able to occupy the <em>same</em>
-sites in the crystal, and that neither the vacancy or solute lowers the
-underlying symmetry of the site. This is a rephrasing of our previous
-assumption that the symmetry of the defect can be mapped onto the
-symmetry of the crystal Wyckoff position. There are cases where <em>this is
-not true</em>: that is, some solutes, when substituted into a crystal, will
-relax in a way that <em>breaks symmetry</em>. While mathematically this can be
+<p>The vacancies and solutes are assumed to be able to occupy the <em>same</em> sites in the crystal, and that neither the vacancy or solute lowers the underlying symmetry of the site. This is a rephrasing of our previous assumption that the symmetry of the defect can be mapped onto the symmetry of the crystal Wyckoff position. There are cases where <em>this is not true</em>: that is, some solutes, when substituted into a crystal, will relax in a way that <em>breaks symmetry</em>. While mathematically this can be
 treated, we do not currently have an implementation that supports this.</p>
-<p>The complexes are only considered out to a finite distance; this is
-called the “thermodynamic range.” It is defined in terms of “shells,”
-which is the number of “jumps” from the solute in order to reach the
-vacancy. We include one more shell out, called the “kinetic range,”
-which are complexes that include transitions to complexes in the
-thermodynamic range.</p>
-<p>When we consider transition states, we have three types of transition
-states:</p>
+<p>The complexes are only considered out to a finite distance; this is called the “thermodynamic range.” It is defined in terms of “shells,” which is the number of “jumps” from the solute in order to reach the vacancy. We include one more shell out, called the “kinetic range,” which are complexes that include transitions to complexes in the thermodynamic range.</p>
+<p>When we consider transition states, we have three types of transition states:</p>
 <ol class="arabic simple">
-<li>Vacancy transitions, sufficiently far away from the solute to have
-zero interaction energy.</li>
-<li>Vacancy-solute complex transitions, where only the vacancy changes
-position (both between complexes in the thermodynamic range, and
-between the kinetic and thermodynamic range).</li>
-<li>Vacancy-solute complex transitions, where the vacancy and solute
-exchange place.</li>
+<li><p>Vacancy transitions, sufficiently far away from the solute to have zero interaction energy.</p></li>
+<li><p>Vacancy-solute complex transitions, where only the vacancy changes position (both between complexes in the thermodynamic range, and between the kinetic and thermodynamic range).</p></li>
+<li><p>Vacancy-solute complex transitions, where the vacancy and solute exchange place.</p></li>
 </ol>
-<p>These are called, in the “five-frequency framework”, omega-0, omega-1,
-and omega-2 jumps, respectively. The five-frequency model technically
-identifies omega-1 jumps as <em>only</em> between complexes in the
-thermodynamic range, while the two “additional” jump types, omega-3 and
-omega-4, connect complexes in the kinetic range to the thermodynamic
-range. Operationally, we combine omega-1, -3, and -4 into a single set.</p>
+<p>These are called, in the “five-frequency framework”, omega-0, omega-1, and omega-2 jumps, respectively. The five-frequency model technically identifies omega-1 jumps as <em>only</em> between complexes in the thermodynamic range, while the two “additional” jump types, omega-3 and omega-4, connect complexes in the kinetic range to the thermodynamic range. Operationally, we combine omega-1, -3, and -4 into a single set.</p>
 <p>To make a diffuser, we need to</p>
 <ol class="arabic simple">
-<li>Identify the <code class="docutils literal notranslate"><span class="pre">sitelist</span></code> of the vacancies (and hence, solutes),</li>
-<li>Identify the <code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code> of the vacancies</li>
-<li>Determine the thermodynamic range</li>
+<li><p>Identify the <code class="docutils literal notranslate"><span class="pre">sitelist</span></code> of the vacancies (and hence, solutes),</p></li>
+<li><p>Identify the <code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code> of the vacancies</p></li>
+<li><p>Determine the thermodynamic range</p></li>
 </ol>
-<p>then, the diffuser automatically constructs the complexes out to the
-thermodynamic range, and the full jumpnetworks.</p>
-<p>The vacancy-mediated diffuser also identifies unique <strong>tags</strong> for all
-configurations and transition states. The tags for <em>configurations</em> are
-strings with</p>
+<p>then, the diffuser automatically constructs the complexes out to the thermodynamic range, and the full jumpnetworks.</p>
+<p>The vacancy-mediated diffuser also identifies unique <strong>tags</strong> for all configurations and transition states. The tags for <em>configurations</em> are strings with</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">v:</span></code> followed by unit cell coordinates of site to three decimal
-digits for the vacancy;</li>
-<li><code class="docutils literal notranslate"><span class="pre">s:</span></code> followed by unit cell coordinates of site to three decimal
-digits for the solute;</li>
-<li><code class="docutils literal notranslate"><span class="pre">s:...-v:...</span></code> for a solute-vacancy complex.</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">v:</span></code> followed by unit cell coordinates of site to three decimal digits for the vacancy;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">s:</span></code> followed by unit cell coordinates of site to three decimal digits for the solute;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">s:...-v:...</span></code> for a solute-vacancy complex.</p></li>
 </ul>
 <p>The <em>transition states</em> are strings with</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">omega0:</span></code> + (initial vacancy configuration) + <code class="docutils literal notranslate"><span class="pre">^</span></code> + (final
-vacancy configuration);</li>
-<li><code class="docutils literal notranslate"><span class="pre">omega1:</span></code> + (initial solute-vacancy configuration) + <code class="docutils literal notranslate"><span class="pre">^</span></code> + (final
-vacancy configuration);</li>
-<li><code class="docutils literal notranslate"><span class="pre">omega2:</span></code> + (initial solute-vacancy configuration) + <code class="docutils literal notranslate"><span class="pre">^</span></code> + (final
-solute-vacancy configuration).</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">omega0:</span></code> + (initial vacancy configuration) + <code class="docutils literal notranslate"><span class="pre">^</span></code> + (final vacancy configuration);</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">omega1:</span></code> + (initial solute-vacancy configuration) + <code class="docutils literal notranslate"><span class="pre">^</span></code> + (final vacancy configuration);</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">omega2:</span></code> + (initial solute-vacancy configuration) + <code class="docutils literal notranslate"><span class="pre">^</span></code> + (final solute-vacancy configuration).</p></li>
 </ul>
-<p>When one pretty-prints the vacancy-mediated diffuser object, the
-symmetry unique tags are printed. Note that all of the symmetry
-equivalent tags are stored in the object, and can be used to identify
-configurations and transition states, and this is the preferred method
-for indexing, rather than relying on the particular index into the
-corresponding lists. The vacancy-mediated diffuser calculator contains
-dictionaries that can be used to convert from tags to indices and vice
-versa.</p>
+<p>When one pretty-prints the vacancy-mediated diffuser object, the symmetry unique tags are printed. Note that all of the symmetry equivalent tags are stored in the object, and can be used to identify configurations and transition states, and this is the preferred method for indexing, rather than relying on the particular index into the corresponding lists. The vacancy-mediated diffuser calculator contains dictionaries that can be used to convert from tags to indices and vice versa.</p>
 <div class="section" id="Face-centered-cubic-crystal,-vacancy-mediated-diffusion">
 <h3>Face-centered cubic crystal, vacancy mediated-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion" title="Permalink to this headline">¶</a></h3>
-<p>We construct the <code class="docutils literal notranslate"><span class="pre">Onsager</span></code> equivalent of the classic five-frequency
-model. We can use the sitelist and jumpnetwork that we <em>already
-constructed for the vacancy by itself</em>. Note that the omega-1 list
-contains four jumps: one that is the normally identified “omega-1”, and
-three others that correspond to vacancy “escapes” from the first
-neighbor complex: to the second, third, and fourth neighbors. In the
-classic five-frequency model, these rates are all forced to be equal.</p>
+<p>We construct the <code class="docutils literal notranslate"><span class="pre">Onsager</span></code> equivalent of the classic five-frequency model. We can use the sitelist and jumpnetwork that we <em>already constructed for the vacancy by itself</em>. Note that the omega-1 list contains four jumps: one that is the normally identified “omega-1”, and three others that correspond to vacancy “escapes” from the first neighbor complex: to the second, third, and fourth neighbors. In the classic five-frequency model, these rates are all forced to be equal.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1397,15 +1183,9 @@ omega2:s:+0.000,+0.000,+0.000-v:+1.000,+0.000,+0.000^s:+0.000,+0.000,+0.000-v:-1
 
 </pre></div></div>
 </div>
-<p>An <code class="docutils literal notranslate"><span class="pre">HDF5</span></code> representation of the diffusion calculator can be stored for
-efficient reconstruction of the object, as well as passing between
-machines. The <code class="docutils literal notranslate"><span class="pre">HDF5</span></code> representation includes <em>everything</em>: the
-underlying <code class="docutils literal notranslate"><span class="pre">Crystal</span></code>, the <code class="docutils literal notranslate"><span class="pre">sitelist</span></code> and <code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code>s, all of
-the precalculation and analysis needed for diffusion. This greatly
-speeds up the construction of the calculator.</p>
+<p>An <code class="docutils literal notranslate"><span class="pre">HDF5</span></code> representation of the diffusion calculator can be stored for efficient reconstruction of the object, as well as passing between machines. The <code class="docutils literal notranslate"><span class="pre">HDF5</span></code> representation includes <em>everything</em>: the underlying <code class="docutils literal notranslate"><span class="pre">Crystal</span></code>, the <code class="docutils literal notranslate"><span class="pre">sitelist</span></code> and <code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code>s, all of the precalculation and analysis needed for diffusion. This greatly speeds up the construction of the calculator.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1456,32 +1236,12 @@ omega2:s:+0.000,+0.000,+0.000-v:+1.000,+0.000,+0.000^s:+0.000,+0.000,+0.000-v:-1
 </div>
 <div class="section" id="VASP-style-input-files">
 <h2>VASP-style input files<a class="headerlink" href="#VASP-style-input-files" title="Permalink to this headline">¶</a></h2>
-<p>At this stage, we have the diffusion “calculator” necessary to compute
-diffusion, but we need to determine appropriate atomic-scale data to act
-as input into our calculators. There are two primary steps: (1)
-constructing appropriate “supercells” containing defect configurations
-and transition states to be computed, and (2) extracting the appropriate
-information from those calculations to use in the diffuser. This section
-deals with the former; the next section will deal with the latter.</p>
-<p>The tags are the most straightforward way to identify structures as they
-are computed, and hence they serve as the mechanism for communicating
-data into the calculators. To make supercells with defects, we take
-advantage of the <code class="docutils literal notranslate"><span class="pre">supercell</span></code> module in <code class="docutils literal notranslate"><span class="pre">Onsager</span></code>; both calculators
-contain a <code class="docutils literal notranslate"><span class="pre">makesupercell()</span></code> function that returns dictionaries of
-supercells, tags, and appropriate information. Currently, to transform
-these into usable input files, the <code class="docutils literal notranslate"><span class="pre">automator</span></code> module can convert such
-dictionaries into tarballs with an appropriate directory structure,
-files containing information about appropriate tags for the different
-configurations, a <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> that converts <code class="docutils literal notranslate"><span class="pre">CONTCAR</span></code> output into
-appropriate <code class="docutils literal notranslate"><span class="pre">POS</span></code> input for the nudged-elastic band calculation.</p>
-<p>Both <code class="docutils literal notranslate"><span class="pre">makesupercell()</span></code> commands require an input supercell definition,
-which is a <span class="math notranslate nohighlight">\(3\times3\)</span> integer matrix of column vectors; if <code class="docutils literal notranslate"><span class="pre">N</span></code>
-is such a matrix, then the supercell vectors are the columns of
-<code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">=</span> <span class="pre">np.dot(a,</span> <span class="pre">N)</span></code>, so that <span class="math notranslate nohighlight">\(\mathbf A_1\)</span> has components
-<code class="docutils literal notranslate"><span class="pre">N[:,0]</span></code> in direct coordinates.</p>
+<p>At this stage, we have the diffusion “calculator” necessary to compute diffusion, but we need to determine appropriate atomic-scale data to act as input into our calculators. There are two primary steps: (1) constructing appropriate “supercells” containing defect configurations and transition states to be computed, and (2) extracting the appropriate information from those calculations to use in the diffuser. This section deals with the former; the next section will deal with the latter.</p>
+<p>The tags are the most straightforward way to identify structures as they are computed, and hence they serve as the mechanism for communicating data into the calculators. To make supercells with defects, we take advantage of the <code class="docutils literal notranslate"><span class="pre">supercell</span></code> module in <code class="docutils literal notranslate"><span class="pre">Onsager</span></code>; both calculators contain a <code class="docutils literal notranslate"><span class="pre">makesupercell()</span></code> function that returns dictionaries of supercells, tags, and appropriate information. Currently, to transform these into usable input files, the <code class="docutils literal notranslate"><span class="pre">automator</span></code> module can convert such
+dictionaries into tarballs with an appropriate directory structure, files containing information about appropriate tags for the different configurations, a <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> that converts <code class="docutils literal notranslate"><span class="pre">CONTCAR</span></code> output into appropriate <code class="docutils literal notranslate"><span class="pre">POS</span></code> input for the nudged-elastic band calculation.</p>
+<p>Both <code class="docutils literal notranslate"><span class="pre">makesupercell()</span></code> commands require an input supercell definition, which is a <span class="math notranslate nohighlight">\(3\times3\)</span> integer matrix of column vectors; if <code class="docutils literal notranslate"><span class="pre">N</span></code> is such a matrix, then the supercell vectors are the columns of <code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">=</span> <span class="pre">np.dot(a,</span> <span class="pre">N)</span></code>, so that <span class="math notranslate nohighlight">\(\mathbf A_1\)</span> has components <code class="docutils literal notranslate"><span class="pre">N[:,0]</span></code> in direct coordinates.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1492,11 +1252,9 @@ is such a matrix, then the supercell vectors are the columns of
 </div>
 <div class="section" id="Face-centered-cubic-crystal,-interstitial-diffusion">
 <h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Permalink to this headline">¶</a></h3>
-<p>We will need to construct (and relax) appropriate intersitial sites, and
-the transition states between them.</p>
+<p>We will need to construct (and relax) appropriate intersitial sites, and the transition states between them.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1527,8 +1285,7 @@ makesupercells(super_n) method of onsager.OnsagerCalc.Interstitial instance
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1549,8 +1306,7 @@ makesupercells(super_n) method of onsager.OnsagerCalc.Interstitial instance
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1607,8 +1363,7 @@ supercelltar(tar, superdict, filemode=436, directmode=509, timestamp=None, INCAR
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1618,8 +1373,7 @@ supercelltar(tar, superdict, filemode=436, directmode=509, timestamp=None, INCAR
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1628,8 +1382,7 @@ supercelltar(tar, superdict, filemode=436, directmode=509, timestamp=None, INCAR
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1687,8 +1440,7 @@ supercelltar(tar, superdict, filemode=436, directmode=509, timestamp=None, INCAR
 </div>
 <p>Contents of the <code class="docutils literal notranslate"><span class="pre">Makefile</span></code>:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1746,8 +1498,7 @@ neb.01/POSCAR.final: neb.01/trans.final relax.00/CONTCAR
 </div>
 <p>Contents of the <code class="docutils literal notranslate"><span class="pre">tags.json</span></code> file:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1772,8 +1523,7 @@ neb.01/POSCAR.final: neb.01/trans.final relax.00/CONTCAR
 </div>
 <p>Contents of one <code class="docutils literal notranslate"><span class="pre">POSCAR</span></code> file for relaxation of a configuration:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1831,8 +1581,7 @@ Direct
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1843,13 +1592,9 @@ Direct
 </div>
 <div class="section" id="Face-centered-cubic-crystal,-vacancy-mediated-diffusion">
 <h3>Face-centered cubic crystal, vacancy mediated-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion" title="Permalink to this headline">¶</a></h3>
-<p>We will need to construct (and relax) appropriate vacancy, solute, and
-solute-vacancy complexes, and the transition states between them. The
-commands are nearly identical to the interstitial diffuser; the primary
-difference is the larger number of configurations and files.</p>
+<p>We will need to construct (and relax) appropriate vacancy, solute, and solute-vacancy complexes, and the transition states between them. The commands are nearly identical to the interstitial diffuser; the primary difference is the larger number of configurations and files.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1899,8 +1644,7 @@ makesupercells(super_n) method of onsager.OnsagerCalc.VacancyMediated instance
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1921,8 +1665,7 @@ makesupercells(super_n) method of onsager.OnsagerCalc.VacancyMediated instance
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1932,8 +1675,7 @@ makesupercells(super_n) method of onsager.OnsagerCalc.VacancyMediated instance
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1942,8 +1684,7 @@ makesupercells(super_n) method of onsager.OnsagerCalc.VacancyMediated instance
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2041,8 +1782,7 @@ makesupercells(super_n) method of onsager.OnsagerCalc.VacancyMediated instance
 </div>
 <p>Contents of <code class="docutils literal notranslate"><span class="pre">Makefile</span></code>:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2105,8 +1845,7 @@ neb.05/POSCAR.final: neb.05/trans.final relax.01/CONTCAR
 </div>
 <p>Contents of the <code class="docutils literal notranslate"><span class="pre">tags.json</span></code> file:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2136,8 +1875,7 @@ neb.05/POSCAR.final: neb.05/trans.final relax.01/CONTCAR
 </div>
 <p>Contents of one <code class="docutils literal notranslate"><span class="pre">POSCAR</span></code> file for relaxation of a configuration:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2269,8 +2007,7 @@ Direct
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2282,65 +2019,30 @@ Direct
 </div>
 <div class="section" id="Formatting-of-input-data">
 <h2>Formatting of input data<a class="headerlink" href="#Formatting-of-input-data" title="Permalink to this headline">¶</a></h2>
-<p>Once the atomic-scale data from an appropriate total energy calculation
-is finished, the data needs to be input into formats that the
-appropriate diffusion calculator can understand. There are some common
-definitions between the two, but some differences as well.</p>
-<p>In all cases, we work with the assumption that our states are thermally
-occupied, and our rates are Arrhenius. That means that the (relative)
-probability of any state can be written as</p>
+<p>Once the atomic-scale data from an appropriate total energy calculation is finished, the data needs to be input into formats that the appropriate diffusion calculator can understand. There are some common definitions between the two, but some differences as well.</p>
+<p>In all cases, we work with the assumption that our states are thermally occupied, and our rates are Arrhenius. That means that the (relative) probability of any state can be written as</p>
 <div class="math notranslate nohighlight">
 \[\rho = Z^{-1}\rho^0 \exp(-E/k_\text{B}T)\]</div>
-<p>for the partition function <span class="math notranslate nohighlight">\(Z\)</span>, a site entropic term
-<span class="math notranslate nohighlight">\(\rho^0 = \exp(S/k_\text{B})\)</span>, and energy <span class="math notranslate nohighlight">\(E\)</span>. The
-transition rate from state A to state B is given by</p>
+<p>for the partition function <span class="math notranslate nohighlight">\(Z\)</span>, a site entropic term <span class="math notranslate nohighlight">\(\rho^0 = \exp(S/k_\text{B})\)</span>, and energy <span class="math notranslate nohighlight">\(E\)</span>. The transition rate from state A to state B is given by</p>
 <div class="math notranslate nohighlight">
 \[\lambda(\text{A}\to\text{B}) = \frac{\nu^\text{T}_{\text{A}-\text{B}}}{\rho^0_A} \exp(-(E^\text{T}_{\text{A}-\text{B}} - E_\text{A})/k_\text{B}T)\]</div>
-<p>where <span class="math notranslate nohighlight">\(E^\text{T}_{\text{A}-\text{B}}\)</span> is the energy of the
-transition state between A and B, and
-<span class="math notranslate nohighlight">\(\nu^\text{T}_{\text{A}-\text{B}}\)</span> is the prefactor for the
-transition state.</p>
-<p>If we assume harmonic transition state theory, then we can write the
-site entropic term <span class="math notranslate nohighlight">\(\rho^0\)</span> as</p>
+<p>where <span class="math notranslate nohighlight">\(E^\text{T}_{\text{A}-\text{B}}\)</span> is the energy of the transition state between A and B, and <span class="math notranslate nohighlight">\(\nu^\text{T}_{\text{A}-\text{B}}\)</span> is the prefactor for the transition state.</p>
+<p>If we assume harmonic transition state theory, then we can write the site entropic term <span class="math notranslate nohighlight">\(\rho^0\)</span> as</p>
 <div class="math notranslate nohighlight">
 \[\rho^0 = \frac{\prod \nu^{\text{perfect-supercell}}}{\prod \nu^{\text{defect-supercell}}}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\nu\)</span> are the vibrational eigenvalues of the corresponding
-supercells, and the prefactor for the transition state is</p>
+<p>where <span class="math notranslate nohighlight">\(\nu\)</span> are the vibrational eigenvalues of the corresponding supercells, and the prefactor for the transition state is</p>
 <div class="math notranslate nohighlight">
 \[\nu^\text{T} = \frac{\prod \nu^{\text{perfect-supercell}}}{\prod_{\nu^2&gt;0} \nu^{\text{transition state}}}\]</div>
-<p>where we take the product over the real vibrational frequencies in the
-transition state (there should be one imaginary mode). From a practical
-point of view, the perfect-supercell cancels out; we will often set
-<span class="math notranslate nohighlight">\(\rho^0\)</span> to 1 for a single state (so that the other <span class="math notranslate nohighlight">\(\rho^0\)</span>
-are relative probabilities), and then <span class="math notranslate nohighlight">\(\nu^\text{T}\)</span> becomes more
-similar to the attempt frequency for the particular jumps. The
-definitions above map most simply onto a “hopping atom” approximation
-for the jump rates: the <span class="math notranslate nohighlight">\(3\times3\)</span> force-constant matrix is
-computed for the atom that is moving in the transition, and its
-eigenvalues are used to determine the modes <span class="math notranslate nohighlight">\(\nu\)</span>.</p>
-<p>Note the units: <span class="math notranslate nohighlight">\(\rho^0\)</span> is unitless, while <span class="math notranslate nohighlight">\(\nu^\text{T}\)</span>
-has units of inverse time; this means that the inverse time unit in the
-computed transport coefficients will come from <span class="math notranslate nohighlight">\(\nu^\text{T}\)</span>
-values. If they are entered in THz, that contributes
-<span class="math notranslate nohighlight">\(10^{12}\text{ s}^{-1}\)</span>.</p>
-<p>Because we normalize our probabilities, our energies and transition
-state energies are relative to each other. In all of our calculations,
-we will multiply energies by <span class="math notranslate nohighlight">\(\beta=(k_\text{B}T)^{-1}\)</span> to get a
-unitless values as inputs for our diffusion calculators. This means that
-the diffusers <em>do not have direct information about temperature</em>;
-explicit temperature factors that appear in the Onsager coefficients
-must be included by hand from the output transport coefficients. It also
-means that the calculators do not have a “unit” of energy; rather,
-<span class="math notranslate nohighlight">\(k_\text{B}T\)</span> and the energies must be in the same units.</p>
+<p>where we take the product over the real vibrational frequencies in the transition state (there should be one imaginary mode). From a practical point of view, the perfect-supercell cancels out; we will often set <span class="math notranslate nohighlight">\(\rho^0\)</span> to 1 for a single state (so that the other <span class="math notranslate nohighlight">\(\rho^0\)</span> are relative probabilities), and then <span class="math notranslate nohighlight">\(\nu^\text{T}\)</span> becomes more similar to the attempt frequency for the particular jumps. The definitions above map most simply onto a “hopping atom” approximation for the
+jump rates: the <span class="math notranslate nohighlight">\(3\times3\)</span> force-constant matrix is computed for the atom that is moving in the transition, and its eigenvalues are used to determine the modes <span class="math notranslate nohighlight">\(\nu\)</span>.</p>
+<p>Note the units: <span class="math notranslate nohighlight">\(\rho^0\)</span> is unitless, while <span class="math notranslate nohighlight">\(\nu^\text{T}\)</span> has units of inverse time; this means that the inverse time unit in the computed transport coefficients will come from <span class="math notranslate nohighlight">\(\nu^\text{T}\)</span> values. If they are entered in THz, that contributes <span class="math notranslate nohighlight">\(10^{12}\text{ s}^{-1}\)</span>.</p>
+<p>Because we normalize our probabilities, our energies and transition state energies are relative to each other. In all of our calculations, we will multiply energies by <span class="math notranslate nohighlight">\(\beta=(k_\text{B}T)^{-1}\)</span> to get a unitless values as inputs for our diffusion calculators. This means that the diffusers <em>do not have direct information about temperature</em>; explicit temperature factors that appear in the Onsager coefficients must be included by hand from the output transport coefficients. It also means
+that the calculators do not have a “unit” of energy; rather, <span class="math notranslate nohighlight">\(k_\text{B}T\)</span> and the energies must be in the same units.</p>
 <div class="section" id="Face-centered-cubic-crystal,-interstitial-diffusion">
 <h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Permalink to this headline">¶</a></h3>
-<p>We need to compute prefactors and energies for our interstitial
-diffuser. We can <em>also</em> include information about elastic dipoles
-(derivatives of energy with respect to strain) in order to compute
-derivatives of diffusivity with respect to strain (elastodiffusion).</p>
+<p>We need to compute prefactors and energies for our interstitial diffuser. We can <em>also</em> include information about elastic dipoles (derivatives of energy with respect to strain) in order to compute derivatives of diffusivity with respect to strain (elastodiffusion).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2370,19 +2072,10 @@ diffusivity(pre, betaene, preT, betaeneT, CalcDeriv=False) method of onsager.Ons
 
 </pre></div></div>
 </div>
-<p>The ordering in the lists <code class="docutils literal notranslate"><span class="pre">pre</span></code>, <code class="docutils literal notranslate"><span class="pre">beteene</span></code>, <code class="docutils literal notranslate"><span class="pre">preT</span></code> and
-<code class="docutils literal notranslate"><span class="pre">betaeneT</span></code> corresponds to the <code class="docutils literal notranslate"><span class="pre">sitelist</span></code> and <code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code> lists.
-The tags can be used to determine the proper indices. The most
-straightforward way to store this in python is a dictionary, where the
-key is the tag, and the value is a list of <code class="docutils literal notranslate"><span class="pre">[prefactor,</span> <span class="pre">energy]</span></code>. The
-advantage of this is that it can be easily transformed to and from
-<code class="docutils literal notranslate"><span class="pre">JSON</span></code> for simple serialization.</p>
-<p>To see a full list of all tags in the dictionary, the <code class="docutils literal notranslate"><span class="pre">tags</span></code> member of
-a diffuser gives a dictionary of all tags, ordered to match the
-structure of <code class="docutils literal notranslate"><span class="pre">sitelist</span></code> and <code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code>.</p>
+<p>The ordering in the lists <code class="docutils literal notranslate"><span class="pre">pre</span></code>, <code class="docutils literal notranslate"><span class="pre">beteene</span></code>, <code class="docutils literal notranslate"><span class="pre">preT</span></code> and <code class="docutils literal notranslate"><span class="pre">betaeneT</span></code> corresponds to the <code class="docutils literal notranslate"><span class="pre">sitelist</span></code> and <code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code> lists. The tags can be used to determine the proper indices. The most straightforward way to store this in python is a dictionary, where the key is the tag, and the value is a list of <code class="docutils literal notranslate"><span class="pre">[prefactor,</span> <span class="pre">energy]</span></code>. The advantage of this is that it can be easily transformed to and from <code class="docutils literal notranslate"><span class="pre">JSON</span></code> for simple serialization.</p>
+<p>To see a full list of all tags in the dictionary, the <code class="docutils literal notranslate"><span class="pre">tags</span></code> member of a diffuser gives a dictionary of all tags, ordered to match the structure of <code class="docutils literal notranslate"><span class="pre">sitelist</span></code> and <code class="docutils literal notranslate"><span class="pre">jumpnetwork</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2391,8 +2084,7 @@ structure of <code class="docutils literal notranslate"><span class="pre">siteli
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="output_area highlight-none notranslate"><div class="highlight"><pre>
@@ -2429,15 +2121,9 @@ structure of <code class="docutils literal notranslate"><span class="pre">siteli
 </pre></div>
 </div>
 </div>
-<p>In this example, the energy of the octahedral site is 0, with a base
-prefactor of 1. The tetrahedral site has an energy of 0.5 (eV) above,
-with a higher relative vibrational degeneracy of 2. The transition state
-energy from octahedral to tetrahedral is 1.0 (eV) with a prefactor of 10
-(THz); and the transition state energy from tetrahedral to tetrahedral
-is 2.0 (eV) with a prefactor of 50 (THz).</p>
+<p>In this example, the energy of the octahedral site is 0, with a base prefactor of 1. The tetrahedral site has an energy of 0.5 (eV) above, with a higher relative vibrational degeneracy of 2. The transition state energy from octahedral to tetrahedral is 1.0 (eV) with a prefactor of 10 (THz); and the transition state energy from tetrahedral to tetrahedral is 2.0 (eV) with a prefactor of 50 (THz).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2451,8 +2137,7 @@ is 2.0 (eV) with a prefactor of 50 (THz).</p>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [43]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2483,8 +2168,7 @@ is 2.0 (eV) with a prefactor of 50 (THz).</p>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [44]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2510,18 +2194,10 @@ is 2.0 (eV) with a prefactor of 50 (THz).</p>
 </div>
 <div class="section" id="Face-centered-cubic-crystal,-vacancy-mediated-diffusion">
 <h3>Face-centered cubic crystal, vacancy mediated-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion" title="Permalink to this headline">¶</a></h3>
-<p>We will need to compute prefactors and energies for our vacancy, solute,
-and solute-vacancy complexes, and the transition states between them.
-The difference compared with the interstitial case is that complex
-prefactors and energies are <em>excess</em> quantities. That means for a
-complex, its <span class="math notranslate nohighlight">\(\rho^0\)</span> is the product of <span class="math notranslate nohighlight">\(\rho^0\)</span> for the
-solute state, the vacancy state, <em>and</em> the excess; the energy <span class="math notranslate nohighlight">\(E\)</span>
-is the sum of the energy of the solute state, the vacancy state, <em>and</em>
-the excess. <strong>However</strong> for the <em>transition states</em>, the prefactors and
-energies are “absolute”.</p>
+<p>We will need to compute prefactors and energies for our vacancy, solute, and solute-vacancy complexes, and the transition states between them. The difference compared with the interstitial case is that complex prefactors and energies are <em>excess</em> quantities. That means for a complex, its <span class="math notranslate nohighlight">\(\rho^0\)</span> is the product of <span class="math notranslate nohighlight">\(\rho^0\)</span> for the solute state, the vacancy state, <em>and</em> the excess; the energy <span class="math notranslate nohighlight">\(E\)</span> is the sum of the energy of the solute state, the vacancy state, <em>and</em> the excess.
+<strong>However</strong> for the <em>transition states</em>, the prefactors and energies are “absolute”.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2556,15 +2232,9 @@ Lij(bFV, bFS, bFSV, bFT0, bFT1, bFT2, large_om2=100000000.0) method of onsager.O
 
 </pre></div></div>
 </div>
-<p>The vacancy-mediated diffuser expects combined
-<span class="math notranslate nohighlight">\(\beta F := (E - TS)/k_\text{B}T\)</span>, so that our probabilities and
-rates are proportional to <span class="math notranslate nohighlight">\(\exp(-\beta F)\)</span>. This is complicated to
-directly construct, so we have the intermediate function
-<code class="docutils literal notranslate"><span class="pre">preene2betafree()</span></code>, which is best used by feeding a <em>dictionary</em> of
-arrays:</p>
+<p>The vacancy-mediated diffuser expects combined <span class="math notranslate nohighlight">\(\beta F := (E - TS)/k_\text{B}T\)</span>, so that our probabilities and rates are proportional to <span class="math notranslate nohighlight">\(\exp(-\beta F)\)</span>. This is complicated to directly construct, so we have the intermediate function <code class="docutils literal notranslate"><span class="pre">preene2betafree()</span></code>, which is best used by feeding a <em>dictionary</em> of arrays:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [46]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2609,11 +2279,9 @@ preene2betafree(kT, preV, eneV, preS, eneS, preSV, eneSV, preT0, eneT0, preT1, e
 
 </pre></div></div>
 </div>
-<p>Even this is a bit complicated; so we use an additional function that
-maps the tags into the appropriate lists, <code class="docutils literal notranslate"><span class="pre">tags2preene()</span></code>:</p>
+<p>Even this is a bit complicated; so we use an additional function that maps the tags into the appropriate lists, <code class="docutils literal notranslate"><span class="pre">tags2preene()</span></code>:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [47]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2641,16 +2309,9 @@ tags2preene(usertagdict, VERBOSE=False) method of onsager.OnsagerCalc.VacancyMed
 
 </pre></div></div>
 </div>
-<p>In this example, we have a vacancy-solute binding energy of -0.25 (eV),
-a vacancy jump barrier of 1.0 (eV) with a prefactor of 10 (THz), an
-“omega-1” activation barrier of 0.75 (eV) which is a transition state
-energy of 0.75-0.25 = 0.5, an omega-2 activation barrier of 0.5 (eV)
-which is a transition state energy of 0.5-0.25 = 0.25, and all of the
-“omega-3/-4” escape jumps with a transition state energy of 1-0.25/2 =
-0.875 (eV).</p>
+<p>In this example, we have a vacancy-solute binding energy of -0.25 (eV), a vacancy jump barrier of 1.0 (eV) with a prefactor of 10 (THz), an “omega-1” activation barrier of 0.75 (eV) which is a transition state energy of 0.75-0.25 = 0.5, an omega-2 activation barrier of 0.5 (eV) which is a transition state energy of 0.5-0.25 = 0.25, and all of the “omega-3/-4” escape jumps with a transition state energy of 1-0.25/2 = 0.875 (eV).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [48]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2670,8 +2331,7 @@ which is a transition state energy of 0.5-0.25 = 0.25, and all of the
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [49]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2709,97 +2369,50 @@ which is a transition state energy of 0.5-0.25 = 0.25, and all of the
 </div>
 <div class="section" id="Interpretation-of-output">
 <h2>Interpretation of output<a class="headerlink" href="#Interpretation-of-output" title="Permalink to this headline">¶</a></h2>
-<p>The final step is to take the output from the diffuser calculator, and
-convert this into physical quantities: solute diffusivity,
-elastodiffusivity, Onsager coefficients, drag ratios, and so on.</p>
-<p>There are two underlying definitions that we use to define our transport
-coefficients:</p>
+<p>The final step is to take the output from the diffuser calculator, and convert this into physical quantities: solute diffusivity, elastodiffusivity, Onsager coefficients, drag ratios, and so on.</p>
+<p>There are two underlying definitions that we use to define our transport coefficients:</p>
 <div class="math notranslate nohighlight">
 \[\mathbf j = -\underline D \nabla c\]</div>
-<p>defines the <em>solute diffusivity</em> as the tensorial transport coefficient
-that relates defect concentration gradients to defect fluxes, and</p>
+<p>defines the <em>solute diffusivity</em> as the tensorial transport coefficient that relates defect concentration gradients to defect fluxes, and</p>
 <div class="math notranslate nohighlight">
 \[\mathbf j^\text{s} = -\underline L^\text{ss}\nabla\mu^\text{s} - \underline L^\text{sv}\nabla\mu^\text{v}\]</div>
 <div class="math notranslate nohighlight">
 \[\mathbf j^\text{v} = -\underline L^\text{vv}\nabla\mu^\text{v} - \underline L^\text{sv}\nabla\mu^\text{s}\]</div>
-<p>defines the <em>Onsager coefficients</em> as the tensorial transport
-coefficients that relate solute and vacancy chemical potential gradients
-to solute and vacancy fluxes. We use these equation to also define the
-<em>units</em> of our transport coefficients. Fluxes are in units of
-(number)/area/time, so with concentration in (number)/volume,
-diffusivity has units of area/time. If the chemical potential is written
-in units of energy, the Onsager coefficients have units of
-(number)/length/energy/time. If the chemical potentials will instead
-have units of energy/volume, then the corresponding Onsager coefficients
-have units of area/energy/time.</p>
-<p>Below are more specific details about the different calculators and the
-output available.</p>
+<p>defines the <em>Onsager coefficients</em> as the tensorial transport coefficients that relate solute and vacancy chemical potential gradients to solute and vacancy fluxes. We use these equation to also define the <em>units</em> of our transport coefficients. Fluxes are in units of (number)/area/time, so with concentration in (number)/volume, diffusivity has units of area/time. If the chemical potential is written in units of energy, the Onsager coefficients have units of (number)/length/energy/time. If the
+chemical potentials will instead have units of energy/volume, then the corresponding Onsager coefficients have units of area/energy/time.</p>
+<p>Below are more specific details about the different calculators and the output available.</p>
 <div class="section" id="Interstitial-diffusivity">
 <h3>Interstitial diffusivity<a class="headerlink" href="#Interstitial-diffusivity" title="Permalink to this headline">¶</a></h3>
-<p>The interstitial diffuser outputs a diffusivity tensor that has the
-units of squared length based on the lengths in the corresponding
-<code class="docutils literal notranslate"><span class="pre">Crystal</span></code>, and inverse time units corresponding to the rates that are
-given as input: the ratio of transition state prefactors to
-configuration prefactors. In a crystalline system, it is typical to
-specify the lattice vectors in either nm (<span class="math notranslate nohighlight">\(10^{-9}\text{ m}\)</span>) or Å
-(<span class="math notranslate nohighlight">\(10^{-10}\text{ m}\)</span>), and the prefactors of rates are often THz
-(<span class="math notranslate nohighlight">\(10^{12}\text{ s}\)</span>), while diffusivity is often reported in
-either <span class="math notranslate nohighlight">\(\text{m}^2/\text{s}\)</span> or <span class="math notranslate nohighlight">\(\text{cm}^2/\text{s}\)</span>. The
-conversion factors are</p>
+<p>The interstitial diffuser outputs a diffusivity tensor that has the units of squared length based on the lengths in the corresponding <code class="docutils literal notranslate"><span class="pre">Crystal</span></code>, and inverse time units corresponding to the rates that are given as input: the ratio of transition state prefactors to configuration prefactors. In a crystalline system, it is typical to specify the lattice vectors in either nm (<span class="math notranslate nohighlight">\(10^{-9}\text{ m}\)</span>) or Å (<span class="math notranslate nohighlight">\(10^{-10}\text{ m}\)</span>), and the prefactors of rates are often THz
+(<span class="math notranslate nohighlight">\(10^{12}\text{ s}\)</span>), while diffusivity is often reported in either <span class="math notranslate nohighlight">\(\text{m}^2/\text{s}\)</span> or <span class="math notranslate nohighlight">\(\text{cm}^2/\text{s}\)</span>. The conversion factors are</p>
 <div class="math notranslate nohighlight">
 \[1\text{ nm}^2\cdot\text{THz} = 10^{-6}\text{ m}^2/\text{s} = 10^{-2}\text{ cm}^2/\text{s}\]</div>
 <div class="math notranslate nohighlight">
 \[1\text{ A}^2\cdot\text{THz} = 10^{-8}\text{ m}^2/\text{s} = 10^{-4}\text{ cm}^2/\text{s}\]</div>
-<p>It it worth noting that this model of diffusion assumes that the
-“interstitial” form of the defect is its ground state configuration (or
-at least <em>one</em> of the configurations used in the derivation of the
-diffusivity is a ground state configuration). This is generally the case
-for the diffusion of a vacancy, or light interstitial elements; however,
-the are materials where a solute has a lower energy as a substitutional
-defect, but can occupy an interstitial site and diffuse from there. This
-requires knowledge of the <em>relative occupancy</em> of the two states. Using
-Kroger-Vink notation, let [B] be the total solute concentration, and
-<span class="math notranslate nohighlight">\([\text{B}_\text{A}]\)</span> and <span class="math notranslate nohighlight">\([\text{B}_\text{i}]\)</span> the
-substitutional and interstitial concentrations, then</p>
+<p>It it worth noting that this model of diffusion assumes that the “interstitial” form of the defect is its ground state configuration (or at least <em>one</em> of the configurations used in the derivation of the diffusivity is a ground state configuration). This is generally the case for the diffusion of a vacancy, or light interstitial elements; however, the are materials where a solute has a lower energy as a substitutional defect, but can occupy an interstitial site and diffuse from there. This
+requires knowledge of the <em>relative occupancy</em> of the two states. Using Kroger-Vink notation, let [B] be the total solute concentration, and <span class="math notranslate nohighlight">\([\text{B}_\text{A}]\)</span> and <span class="math notranslate nohighlight">\([\text{B}_\text{i}]\)</span> the substitutional and interstitial concentrations, then</p>
 <div class="math notranslate nohighlight">
 \[D_\text{B} = \left\{[\text{B}_\text{i}]D_\text{int} + [\text{B}_\text{A}]D_\text{sub}\right\}/[\text{B}]\]</div>
-<p>for interstitial diffusivity <span class="math notranslate nohighlight">\(D_\text{int}\)</span> and substitutional
-diffusivity <span class="math notranslate nohighlight">\(D_\text{sub}\)</span>. The relative occupancies may be
-determined by <em>global thermal equilibrium</em> or <em>local thermal
-equilibrium</em>. The latter is more complex, and relies on knowledge of
-local defect processes and conditions, and is not discussed further
-here. For global thermal equilibrium, if we know the energy of the
-ground state substitutional defect <span class="math notranslate nohighlight">\(E_\text{sub}\)</span> and the lowest
-energy configuration used by the diffuser <span class="math notranslate nohighlight">\(E_\text{int}\)</span>, then</p>
+<p>for interstitial diffusivity <span class="math notranslate nohighlight">\(D_\text{int}\)</span> and substitutional diffusivity <span class="math notranslate nohighlight">\(D_\text{sub}\)</span>. The relative occupancies may be determined by <em>global thermal equilibrium</em> or <em>local thermal equilibrium</em>. The latter is more complex, and relies on knowledge of local defect processes and conditions, and is not discussed further here. For global thermal equilibrium, if we know the energy of the ground state substitutional defect <span class="math notranslate nohighlight">\(E_\text{sub}\)</span> and the lowest energy configuration used by
+the diffuser <span class="math notranslate nohighlight">\(E_\text{int}\)</span>, then</p>
 <div class="math notranslate nohighlight">
 \[[\text{B}_\text{i}]/[\text{B}] = (1 + \exp((E_\text{int}-E_\text{sub})/k_\text{B}T)^{-1} \approx \exp(-(E_\text{int}-E_\text{sub})/k_\text{B}T)\]</div>
 <p>and</p>
 <div class="math notranslate nohighlight">
 \[[\text{B}_\text{A}]/[\text{B}] = (1 + \exp(-(E_\text{int}-E_\text{sub})/k_\text{B}T)^{-1} \approx 1\]</div>
-<p>where the approximations are valid when
-<span class="math notranslate nohighlight">\(E_\text{int}-E_\text{sub}\gg k_\text{B}T\)</span>.</p>
+<p>where the approximations are valid when <span class="math notranslate nohighlight">\(E_\text{int}-E_\text{sub}\gg k_\text{B}T\)</span>.</p>
 </div>
 <div class="section" id="Derivatives-of-diffusivity:-activation-barrier-tensor">
 <h3>Derivatives of diffusivity: activation barrier tensor<a class="headerlink" href="#Derivatives-of-diffusivity:-activation-barrier-tensor" title="Permalink to this headline">¶</a></h3>
-<p>At any given temperature, the temperature dependence of the diffusivity
-can be taken as an Arrhenius form,</p>
+<p>At any given temperature, the temperature dependence of the diffusivity can be taken as an Arrhenius form,</p>
 <div class="math notranslate nohighlight">
 \[\underline D = \underline D_0 \exp(-\beta \underline E^\text{act})\]</div>
-<p>for inverse temperature <span class="math notranslate nohighlight">\(\beta = (k_\text{B}T)^{-1}\)</span>, and the
-activation barrier, <span class="math notranslate nohighlight">\(\underline E^\text{act}\)</span> can also display
-anisotropy. Note that in this expression, the exponential is taken on a
-per-component basis, not as a true tensor exponential. We can compute
-<span class="math notranslate nohighlight">\(Q\)</span> by taking the per-component logarithmic derivative with
-respect to inverse temperature,</p>
+<p>for inverse temperature <span class="math notranslate nohighlight">\(\beta = (k_\text{B}T)^{-1}\)</span>, and the activation barrier, <span class="math notranslate nohighlight">\(\underline E^\text{act}\)</span> can also display anisotropy. Note that in this expression, the exponential is taken on a per-component basis, not as a true tensor exponential. We can compute <span class="math notranslate nohighlight">\(Q\)</span> by taking the per-component logarithmic derivative with respect to inverse temperature,</p>
 <div class="math notranslate nohighlight">
 \[\underline E^\text{act} = -\underline D^{-1/2}\frac{d\underline D}{d\beta}\underline D^{-1/2}\]</div>
-<p>The <code class="docutils literal notranslate"><span class="pre">diffusivity()</span></code> function with <code class="docutils literal notranslate"><span class="pre">CalcDeriv=True</span></code> returns a second
-tensorial quantity, <code class="docutils literal notranslate"><span class="pre">dD</span></code> which when multiplied by <span class="math notranslate nohighlight">\(k_\text{B}T\)</span>,
-gives <span class="math notranslate nohighlight">\(d\underline D/d\beta\)</span>. Hence, to compute the activation
-barrier tensor, we evaluate:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">diffusivity()</span></code> function with <code class="docutils literal notranslate"><span class="pre">CalcDeriv=True</span></code> returns a second tensorial quantity, <code class="docutils literal notranslate"><span class="pre">dD</span></code> which when multiplied by <span class="math notranslate nohighlight">\(k_\text{B}T\)</span>, gives <span class="math notranslate nohighlight">\(d\underline D/d\beta\)</span>. Hence, to compute the activation barrier tensor, we evaluate:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [50]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2817,96 +2430,51 @@ barrier tensor, we evaluate:</p>
  [  4.84706356e-18  -4.84706356e-18   9.08288044e-01]]
 </pre></div></div>
 </div>
-<p>In this case, as the matrices are isotropic, we can use
-<span class="math notranslate nohighlight">\(\underline D^{-1}\)</span> rather than <span class="math notranslate nohighlight">\(\underline D^{-1/2}\)</span> which
-must be computed via diagonalization.</p>
+<p>In this case, as the matrices are isotropic, we can use <span class="math notranslate nohighlight">\(\underline D^{-1}\)</span> rather than <span class="math notranslate nohighlight">\(\underline D^{-1/2}\)</span> which must be computed via diagonalization.</p>
 <p>This tensor has the same energy units as the variable <code class="docutils literal notranslate"><span class="pre">kBT</span></code>.</p>
-<p>Given the barriers for diffusion, one might have expected that
-<span class="math notranslate nohighlight">\(\underline E^\text{act}\)</span> would be 1, as that is the transition
-state energy to go from octahedral to tetrahedral. However, the
-activation barrier is approximately the rate-limiting transition state
-energy minus the <em>average configuration energy</em>. Since we’ve chosen a
-large temperature, the tetrahedral sites have non-negligible occupation,
-which raises the average energy. As the temperature decreases, the
-activation energy will approach 1.</p>
+<p>Given the barriers for diffusion, one might have expected that <span class="math notranslate nohighlight">\(\underline E^\text{act}\)</span> would be 1, as that is the transition state energy to go from octahedral to tetrahedral. However, the activation barrier is approximately the rate-limiting transition state energy minus the <em>average configuration energy</em>. Since we’ve chosen a large temperature, the tetrahedral sites have non-negligible occupation, which raises the average energy. As the temperature decreases, the activation energy will
+approach 1.</p>
 </div>
 <div class="section" id="Derivatives-of-diffusivity:-elastodiffusion-and-activation-volume-tensor">
 <h3>Derivatives of diffusivity: elastodiffusion and activation volume tensor<a class="headerlink" href="#Derivatives-of-diffusivity:-elastodiffusion-and-activation-volume-tensor" title="Permalink to this headline">¶</a></h3>
-<p>The derivative with respect to strain is the fourth-rank
-<em>elastodiffusivity</em> tensor <span class="math notranslate nohighlight">\(\underline d\)</span>, where</p>
+<p>The derivative with respect to strain is the fourth-rank <em>elastodiffusivity</em> tensor <span class="math notranslate nohighlight">\(\underline d\)</span>, where</p>
 <div class="math notranslate nohighlight">
 \[d_{abcd} = \frac{dD_{ab}}{d\varepsilon_{cd}}\]</div>
-<p>This is returned by the <code class="docutils literal notranslate"><span class="pre">elastodiffusion</span></code> function, which requires the
-elastic dipole tensors be included in the function call as well. The
-elastic dipoles have the same units of energies, and so are input as
-<span class="math notranslate nohighlight">\(\beta\underline P\)</span>, which is unitless. The returned tensor has
-the same units as the diffusivity.</p>
-<p>The <em>activation volume</em> tensor (logarithmic derivative of diffusivity
-with respect to stress) can be computed from the elastodiffusivity
-tensor if the compliance tensor <span class="math notranslate nohighlight">\(\underline S\)</span> is known; then,</p>
+<p>This is returned by the <code class="docutils literal notranslate"><span class="pre">elastodiffusion</span></code> function, which requires the elastic dipole tensors be included in the function call as well. The elastic dipoles have the same units of energies, and so are input as <span class="math notranslate nohighlight">\(\beta\underline P\)</span>, which is unitless. The returned tensor has the same units as the diffusivity.</p>
+<p>The <em>activation volume</em> tensor (logarithmic derivative of diffusivity with respect to stress) can be computed from the elastodiffusivity tensor if the compliance tensor <span class="math notranslate nohighlight">\(\underline S\)</span> is known; then,</p>
 <div class="math notranslate nohighlight">
 \[V^\text{act}_{abcd} = k_\text{B}T \sum_{ijkl=1}^3 (\underline D^{-1/2})_{ai} d_{ijkl} (\underline D^{-1/2})_{bj} S_{klcd}\]</div>
-<p>The units of this quantity are given by the units of <span class="math notranslate nohighlight">\(k_\text{B}T\)</span>
-(energy) multiplied by the units of <span class="math notranslate nohighlight">\(\underline S\)</span> (inverse
-pressure). Typically, <span class="math notranslate nohighlight">\(k_\text{B}T\)</span> will be known in eV and
-<span class="math notranslate nohighlight">\(\underline S\)</span> in GPa<span class="math notranslate nohighlight">\(^{-1}\)</span>, so the conversion factor</p>
+<p>The units of this quantity are given by the units of <span class="math notranslate nohighlight">\(k_\text{B}T\)</span> (energy) multiplied by the units of <span class="math notranslate nohighlight">\(\underline S\)</span> (inverse pressure). Typically, <span class="math notranslate nohighlight">\(k_\text{B}T\)</span> will be known in eV and <span class="math notranslate nohighlight">\(\underline S\)</span> in GPa<span class="math notranslate nohighlight">\(^{-1}\)</span>, so the conversion factor</p>
 <div class="math notranslate nohighlight">
 \[1\text{ eV}\cdot\text{GPa}^{-1} = 1.6022\times10^{-19}\text{ J}\cdot10^{-9}\text{ m}^3/\text{J} = 0.16022\text{ nm}^3 = 160.22\text{ A}^3\]</div>
 <p>can be useful.</p>
 </div>
 <div class="section" id="Vacancy-mediated-diffusivity">
 <h3>Vacancy-mediated diffusivity<a class="headerlink" href="#Vacancy-mediated-diffusivity" title="Permalink to this headline">¶</a></h3>
-<p>The interstitial diffuser outputs a diffusivity tensor that has the
-units of squared length based on the lengths in the corresponding
-<code class="docutils literal notranslate"><span class="pre">Crystal</span></code>, and inverse time units corresponding to the rates that are
-given as input: the ratio of transition state prefactors to
-configuration prefactors. In a crystalline system, it is typical to
-specify the lattice vectors in either nm (<span class="math notranslate nohighlight">\(10^{-9}\text{ m}\)</span>) or Å
-(<span class="math notranslate nohighlight">\(10^{-10}\text{ m}\)</span>), and the prefactors of rates are often THz
-(<span class="math notranslate nohighlight">\(10^{12}\text{ s}\)</span>). The quantities <code class="docutils literal notranslate"><span class="pre">L0vv</span></code>, <code class="docutils literal notranslate"><span class="pre">Lss</span></code>, <code class="docutils literal notranslate"><span class="pre">Lsv</span></code>,
-and <code class="docutils literal notranslate"><span class="pre">L1vv</span></code> output by the <code class="docutils literal notranslate"><span class="pre">Lij</span></code> function all have the units of
-area/time, so the the conversion factors below are often useful:</p>
+<p>The interstitial diffuser outputs a diffusivity tensor that has the units of squared length based on the lengths in the corresponding <code class="docutils literal notranslate"><span class="pre">Crystal</span></code>, and inverse time units corresponding to the rates that are given as input: the ratio of transition state prefactors to configuration prefactors. In a crystalline system, it is typical to specify the lattice vectors in either nm (<span class="math notranslate nohighlight">\(10^{-9}\text{ m}\)</span>) or Å (<span class="math notranslate nohighlight">\(10^{-10}\text{ m}\)</span>), and the prefactors of rates are often THz
+(<span class="math notranslate nohighlight">\(10^{12}\text{ s}\)</span>). The quantities <code class="docutils literal notranslate"><span class="pre">L0vv</span></code>, <code class="docutils literal notranslate"><span class="pre">Lss</span></code>, <code class="docutils literal notranslate"><span class="pre">Lsv</span></code>, and <code class="docutils literal notranslate"><span class="pre">L1vv</span></code> output by the <code class="docutils literal notranslate"><span class="pre">Lij</span></code> function all have the units of area/time, so the the conversion factors below are often useful:</p>
 <div class="math notranslate nohighlight">
 \[1\text{ nm}^2\cdot\text{THz} = 10^{-6}\text{ m}^2/\text{s} = 10^{-2}\text{ cm}^2/\text{s}\]</div>
 <div class="math notranslate nohighlight">
 \[1\text{ A}^2\cdot\text{THz} = 10^{-8}\text{ m}^2/\text{s} = 10^{-4}\text{ cm}^2/\text{s}\]</div>
-<p>To convert the four quantities into <span class="math notranslate nohighlight">\(\underline L^\text{vv}\)</span>,
-<span class="math notranslate nohighlight">\(\underline L^\text{ss}\)</span>, and <span class="math notranslate nohighlight">\(\underline L^\text{sv}\)</span>, some
-additional information is required.</p>
-<p>First, in the dilute limit, <span class="math notranslate nohighlight">\(\underline L^\text{ss}\)</span> and
-<span class="math notranslate nohighlight">\(\underline L^\text{sv}\)</span> are proportional to
-<span class="math notranslate nohighlight">\((k_\text{B}T)^{-1}c^\text{v}c^\text{s}\)</span>; none of these quantities
-are known to the diffuser, and the two concentrations are essentially
-independent variables that must be supplied. The concentrations in these
-cases are <em>fractional concentrations</em>, not per volume. Finally, if the
-Onsager coefficients are for chemical potential specified as energies
-(not energies per volume), the quantities need to be <em>divided by the
-volume per atom</em>, and the final quantity has the appropriate units.
-Hence,</p>
+<p>To convert the four quantities into <span class="math notranslate nohighlight">\(\underline L^\text{vv}\)</span>, <span class="math notranslate nohighlight">\(\underline L^\text{ss}\)</span>, and <span class="math notranslate nohighlight">\(\underline L^\text{sv}\)</span>, some additional information is required.</p>
+<p>First, in the dilute limit, <span class="math notranslate nohighlight">\(\underline L^\text{ss}\)</span> and <span class="math notranslate nohighlight">\(\underline L^\text{sv}\)</span> are proportional to <span class="math notranslate nohighlight">\((k_\text{B}T)^{-1}c^\text{v}c^\text{s}\)</span>; none of these quantities are known to the diffuser, and the two concentrations are essentially independent variables that must be supplied. The concentrations in these cases are <em>fractional concentrations</em>, not per volume. Finally, if the Onsager coefficients are for chemical potential specified as energies (not energies per volume),
+the quantities need to be <em>divided by the volume per atom</em>, and the final quantity has the appropriate units. Hence,</p>
 <ul class="simple">
-<li><span class="math notranslate nohighlight">\(\underline L^\text{ss}\)</span> =
-<code class="docutils literal notranslate"><span class="pre">Lss*(solute</span> <span class="pre">concentration)*(vacancy</span> <span class="pre">concentration)/(volume)/kBT</span></code></li>
-<li><span class="math notranslate nohighlight">\(\underline L^\text{sv}\)</span> =
-<code class="docutils literal notranslate"><span class="pre">Lsv*(solute</span> <span class="pre">concentration)*(vacancy</span> <span class="pre">concentration)/(volume)/kBT</span></code></li>
+<li><p><span class="math notranslate nohighlight">\(\underline L^\text{ss}\)</span> = <code class="docutils literal notranslate"><span class="pre">Lss*(solute</span> <span class="pre">concentration)*(vacancy</span> <span class="pre">concentration)/(volume)/kBT</span></code></p></li>
+<li><p><span class="math notranslate nohighlight">\(\underline L^\text{sv}\)</span> = <code class="docutils literal notranslate"><span class="pre">Lsv*(solute</span> <span class="pre">concentration)*(vacancy</span> <span class="pre">concentration)/(volume)/kBT</span></code></p></li>
 </ul>
 <p>where the concentration quantities are <em>fractional</em>.</p>
-<p>The vacancy <span class="math notranslate nohighlight">\(\underline L^\text{vv}\)</span> is more complicated, as it
-has a leading order term that is independent of solute, and a first
-order correction that is linear in the solute concentration. Hence,</p>
+<p>The vacancy <span class="math notranslate nohighlight">\(\underline L^\text{vv}\)</span> is more complicated, as it has a leading order term that is independent of solute, and a first order correction that is linear in the solute concentration. Hence,</p>
 <ul class="simple">
-<li><span class="math notranslate nohighlight">\(\underline L^\text{vv}\)</span> =
-<code class="docutils literal notranslate"><span class="pre">(L0vv</span> <span class="pre">+</span> <span class="pre">L1vv*(solute</span> <span class="pre">concentration))*(vacancy</span> <span class="pre">concentration)/(volume)/kBT</span></code></li>
+<li><p><span class="math notranslate nohighlight">\(\underline L^\text{vv}\)</span> = <code class="docutils literal notranslate"><span class="pre">(L0vv</span> <span class="pre">+</span> <span class="pre">L1vv*(solute</span> <span class="pre">concentration))*(vacancy</span> <span class="pre">concentration)/(volume)/kBT</span></code></p></li>
 </ul>
 </div>
 <div class="section" id="Drag-ratio">
 <h3>Drag ratio<a class="headerlink" href="#Drag-ratio" title="Permalink to this headline">¶</a></h3>
-<p>The <em>drag ratio</em> is the unitless (tensorial) quantity
-<span class="math notranslate nohighlight">\(\underline L^\text{sv}(\underline L^\text{ss})^{-1}\)</span>. Because of
-the identical prefactors in front of both terms in the dilute limit,
-this is given by</p>
+<p>The <em>drag ratio</em> is the unitless (tensorial) quantity <span class="math notranslate nohighlight">\(\underline L^\text{sv}(\underline L^\text{ss})^{-1}\)</span>. Because of the identical prefactors in front of both terms in the dilute limit, this is given by</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [51]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -2924,44 +2492,29 @@ this is given by</p>
  [ 0.          0.         -0.30443445]]
 </pre></div></div>
 </div>
-<p>The vacancy wind factor
-<span class="math notranslate nohighlight">\(G=\underline L^\text{As}(\underline L^\text{ss})^{-1}\)</span> is related
-to the drag ratio by simple transformations.</p>
+<p>The vacancy wind factor <span class="math notranslate nohighlight">\(G=\underline L^\text{As}(\underline L^\text{ss})^{-1}\)</span> is related to the drag ratio by simple transformations.</p>
 </div>
 <div class="section" id="Solute-diffusivity-in-the-dilute-limit">
 <h3>Solute diffusivity in the dilute limit<a class="headerlink" href="#Solute-diffusivity-in-the-dilute-limit" title="Permalink to this headline">¶</a></h3>
-<p>The solute diffusivity can also be computed for the dilute limit as
-well. The general relation between <span class="math notranslate nohighlight">\(\underline D^\text{s}\)</span> and the
-Onsager transport coefficients is</p>
+<p>The solute diffusivity can also be computed for the dilute limit as well. The general relation between <span class="math notranslate nohighlight">\(\underline D^\text{s}\)</span> and the Onsager transport coefficients is</p>
 <div class="math notranslate nohighlight">
 \[\underline D^\text{s} = k_\text{B}T\Omega\left\{(c^\text{s})^{-1}\underline L^\text{ss} - (1-c^\text{s}-c^\text{v})^{-1}\underline L^\text{As}\right\}\left(1+\frac{d\ln\gamma^\text{s}}{d\ln c^\text{s}}\right)\]</div>
-<p>where <span class="math notranslate nohighlight">\(\Omega\)</span> is the volume per atom and <span class="math notranslate nohighlight">\(\gamma^\text{s}\)</span>
-is the solute activity:</p>
+<p>where <span class="math notranslate nohighlight">\(\Omega\)</span> is the volume per atom and <span class="math notranslate nohighlight">\(\gamma^\text{s}\)</span> is the solute activity:</p>
 <div class="math notranslate nohighlight">
 \[\mu^\text{s} = \mu^\text{s}_0 + k_\text{B}T\ln\left(\gamma^\text{s}c^\text{s}/c^\text{s}_0\right)\]</div>
 <p>In the dilute limit, <span class="math notranslate nohighlight">\(\gamma^\text{s}\to 1\)</span>, and thus</p>
 <div class="math notranslate nohighlight">
 \[\underline D^\text{s} = k_\text{B}T\Omega(c^\text{s})^{-1}\underline L^\text{ss}\]</div>
-<p>Conveniently, this cancels most of the “missing” prefactors we put in to
-compute the Onsager coefficient; hence,</p>
+<p>Conveniently, this cancels most of the “missing” prefactors we put in to compute the Onsager coefficient; hence,</p>
 <ul class="simple">
-<li><span class="math notranslate nohighlight">\(\underline D^\text{s}\)</span> = <code class="docutils literal notranslate"><span class="pre">Lss*(vacancy</span> <span class="pre">concentration)</span></code></li>
+<li><p><span class="math notranslate nohighlight">\(\underline D^\text{s}\)</span> = <code class="docutils literal notranslate"><span class="pre">Lss*(vacancy</span> <span class="pre">concentration)</span></code></p></li>
 </ul>
-<p>where the concentration quantities are <em>fractional</em>. In the case of
-<em>global thermal equilibrium</em>, the vacancy concentration is the
-equilibrium concentration
-<span class="math notranslate nohighlight">\(\exp(-(E^\text{v}_\text{form} - TS^\text{v}_\text{form})/k_\text{B}T)\)</span>.</p>
+<p>where the concentration quantities are <em>fractional</em>. In the case of <em>global thermal equilibrium</em>, the vacancy concentration is the equilibrium concentration <span class="math notranslate nohighlight">\(\exp(-(E^\text{v}_\text{form} - TS^\text{v}_\text{form})/k_\text{B}T)\)</span>.</p>
 <p>A similar argument holds for the vacancy diffusivity in the dilute limit</p>
 <ul class="simple">
-<li><span class="math notranslate nohighlight">\(\underline D^\text{v}\)</span> =
-<code class="docutils literal notranslate"><span class="pre">L0vv</span> <span class="pre">+</span> <span class="pre">(solute</span> <span class="pre">concentration)*L1vv</span></code></li>
+<li><p><span class="math notranslate nohighlight">\(\underline D^\text{v}\)</span> = <code class="docutils literal notranslate"><span class="pre">L0vv</span> <span class="pre">+</span> <span class="pre">(solute</span> <span class="pre">concentration)*L1vv</span></code></p></li>
 </ul>
-<p>The off-diagonal diffusivity terms are more complex as (1) they are
-non-symmetric
-(<span class="math notranslate nohighlight">\(\underline D^\text{sv} \ne \underline D^\text{vs}\)</span>), and (2) the
-vacancy-dependency of the solute activity and the solute-dependence of
-the vacancy activity needs to be known to properly include thermodynamic
-factors.</p>
+<p>The off-diagonal diffusivity terms are more complex as (1) they are non-symmetric (<span class="math notranslate nohighlight">\(\underline D^\text{sv} \ne \underline D^\text{vs}\)</span>), and (2) the vacancy-dependency of the solute activity and the solute-dependence of the vacancy activity needs to be known to properly include thermodynamic factors.</p>
 </div>
 </div>
 </div>
@@ -2977,7 +2530,7 @@ factors.</p>
         <a href="notebooks.html" class="btn btn-neutral float-right" title="Example Notebooks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="includeme.html" class="btn btn-neutral" title="Onsager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="includeme.html" class="btn btn-neutral float-left" title="Onsager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -2986,7 +2539,7 @@ factors.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Dallas R. Trinkle.
+        &copy; Copyright 2017, Dallas R. Trinkle
 
     </p>
   </div>
@@ -3003,34 +2556,16 @@ factors.</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.3.2',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="_static/language_data.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

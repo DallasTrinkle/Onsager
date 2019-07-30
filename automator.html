@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Automator &mdash; Onsager 1.3.2 documentation</title>
+  <title>Automator &mdash; Onsager 1.3.3 documentation</title>
   
 
   
@@ -17,33 +17,37 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="OnsagerCalc" href="OnsagerCalc.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -176,23 +180,13 @@
     margin-top: -19px;
 }
 
-/* nice headers on first paragraph of info/warning boxes */
-.admonition .first {
-    margin: -12px;
-    padding: 6px 12px;
-    margin-bottom: 12px;
-    color: #fff;
-    line-height: 1;
-    display: block;
-}
-.admonition.warning .first {
-    background: #f0b37e;
-}
-.admonition.note .first {
-    background: #6ab0de;
-}
 .admonition > p:before {
     margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
 }
 </style>
 <div class="section" id="automator">
@@ -204,42 +198,37 @@
 that contains all of the input files in an organized directory structure to run the
 atomic-scale transition state calculations. This includes:</p>
 <ol class="arabic simple">
-<li>All positions in POSCAR format (POSCAR files for states to relax, POS as reference for transition endpoints that need to be relaxed)</li>
-<li>Transformation information from relaxed states to initial states.</li>
-<li>INCAR files for relaxation and NEB runs; KPOINTS for each.</li>
-<li>perl script to transform CONTCAR output from a state relaxation to NEB endpoints.</li>
-<li>perl script to linearly interpolate between NEB endpoints.*</li>
-<li>Makefile to run NEB construction.</li>
+<li><p>All positions in POSCAR format (POSCAR files for states to relax, POS as reference for transition endpoints that need to be relaxed)</p></li>
+<li><p>Transformation information from relaxed states to initial states.</p></li>
+<li><p>INCAR files for relaxation and NEB runs; KPOINTS for each.</p></li>
+<li><p>perl script to transform CONTCAR output from a state relaxation to NEB endpoints.</p></li>
+<li><p>perl script to linearly interpolate between NEB endpoints.*</p></li>
+<li><p>Makefile to run NEB construction.</p></li>
 </ol>
 <p><em>Note:</em> the NEB interpolator script (nebmake.pl) is part of the <a class="reference external" href="http://theory.cm.utexas.edu/vtsttools/scripts.html">VTST scripts</a>.</p>
 <dl class="function">
 <dt id="automator.map2string">
-<code class="descclassname">automator.</code><code class="descname">map2string</code><span class="sig-paren">(</span><em>tag</em>, <em>groupop</em>, <em>mapping</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#map2string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.map2string" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">automator.</code><code class="sig-name descname">map2string</code><span class="sig-paren">(</span><em class="sig-param">tag</em>, <em class="sig-param">groupop</em>, <em class="sig-param">mapping</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#map2string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.map2string" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes in a map: tag, groupop, mapping and constructs a string representation
 to be dumped to a file. If we want to call using the tuple, <code class="docutils literal notranslate"><span class="pre">map2string(*(map))</span></code> will suffice.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>tag</strong> – string of initial state to rotate</li>
-<li><strong>groupop</strong> – see crystal.GroupOp; we use the rot and trans. This is in the supercell coord.</li>
-<li><strong>mapping</strong> – in “chemorder” format; list by chemistry of lists of indices of position
-in initial cell to use.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tag</strong> – string of initial state to rotate</p></li>
+<li><p><strong>groupop</strong> – see crystal.GroupOp; we use the rot and trans. This is in the supercell coord.</p></li>
+<li><p><strong>mapping</strong> – in “chemorder” format; list by chemistry of lists of indices of position
+in initial cell to use.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return string_rep:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">string representation (to be used by an external script)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Return string_rep</dt>
+<dd class="field-even"><p>string representation (to be used by an external script)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="automator.supercelltar">
-<code class="descclassname">automator.</code><code class="descname">supercelltar</code><span class="sig-paren">(</span><em>tar</em>, <em>superdict</em>, <em>filemode=436</em>, <em>directmode=509</em>, <em>timestamp=None</em>, <em>INCARrelax='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\n'</em>, <em>INCARNEB='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\nIMAGES = 1\nSPRING = -5\nLCLIMB = .TRUE.\nNELMIN = 4\nNFREE = 10\n'</em>, <em>KPOINTS='Gamma\n1\nReciprocal\n0. 0. 0. 1.\n'</em>, <em>basedir=''</em>, <em>statename='relax.'</em>, <em>transitionname='neb.'</em>, <em>IDformat='{:02d}'</em>, <em>JSONdict='tags.json'</em>, <em>YAMLdef='supercell.yaml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#supercelltar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.supercelltar" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">automator.</code><code class="sig-name descname">supercelltar</code><span class="sig-paren">(</span><em class="sig-param">tar</em>, <em class="sig-param">superdict</em>, <em class="sig-param">filemode=436</em>, <em class="sig-param">directmode=509</em>, <em class="sig-param">timestamp=None</em>, <em class="sig-param">INCARrelax='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\n'</em>, <em class="sig-param">INCARNEB='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\nIMAGES = 1\nSPRING = -5\nLCLIMB = .TRUE.\nNELMIN = 4\nNFREE = 10\n'</em>, <em class="sig-param">KPOINTS='Gamma\n1\nReciprocal\n0. 0. 0. 1.\n'</em>, <em class="sig-param">basedir=''</em>, <em class="sig-param">statename='relax.'</em>, <em class="sig-param">transitionname='neb.'</em>, <em class="sig-param">IDformat='{:02d}'</em>, <em class="sig-param">JSONdict='tags.json'</em>, <em class="sig-param">YAMLdef='supercell.yaml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#supercelltar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.supercelltar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes in a tarfile (needs to be open for writing) and a supercelldict (from a
 diffuser) and creates the full directory structure inside the tarfile. Best used in
 a form like</p>
@@ -247,45 +236,41 @@ a form like</p>
     <span class="n">automator</span><span class="o">.</span><span class="n">supercelltar</span><span class="p">(</span><span class="n">tar</span><span class="p">,</span> <span class="n">supercelldict</span><span class="p">)</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>tar</strong> – tarfile open for writing; may contain other files in advance.</li>
-<li><strong>superdict</strong> – <p>dictionary of <code class="docutils literal notranslate"><span class="pre">states</span></code>, <code class="docutils literal notranslate"><span class="pre">transitions</span></code>, <code class="docutils literal notranslate"><span class="pre">transmapping</span></code>, <code class="docutils literal notranslate"><span class="pre">indices</span></code> that
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tar</strong> – tarfile open for writing; may contain other files in advance.</p></li>
+<li><p><strong>superdict</strong> – <p>dictionary of <code class="docutils literal notranslate"><span class="pre">states</span></code>, <code class="docutils literal notranslate"><span class="pre">transitions</span></code>, <code class="docutils literal notranslate"><span class="pre">transmapping</span></code>, <code class="docutils literal notranslate"><span class="pre">indices</span></code> that
 correspond to dictionaries with tags; the final tag <code class="docutils literal notranslate"><span class="pre">reference</span></code> is the basesupercell
 for calculations without defects.</p>
 <ul>
-<li>superdict[‘states’][i] = supercell of state;</li>
-<li>superdict[‘transitions’][n] = (supercell initial, supercell final);</li>
-<li>superdict[‘transmapping’][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</li>
-<li>superdict[‘indices’][tag] = (type, index) of tag, where tag is either a state or transition tag; or…</li>
-<li>superdict[‘indices’][tag] = index of tag, where tag is either a state or transition tag.</li>
-<li>superdict[‘reference’] = (optional) supercell reference, no defects</li>
+<li><p>superdict[‘states’][i] = supercell of state;</p></li>
+<li><p>superdict[‘transitions’][n] = (supercell initial, supercell final);</p></li>
+<li><p>superdict[‘transmapping’][n] = ((site tag, groupop, mapping), (site tag, groupop, mapping))</p></li>
+<li><p>superdict[‘indices’][tag] = (type, index) of tag, where tag is either a state or transition tag; or…</p></li>
+<li><p>superdict[‘indices’][tag] = index of tag, where tag is either a state or transition tag.</p></li>
+<li><p>superdict[‘reference’] = (optional) supercell reference, no defects</p></li>
 </ul>
-</li>
-<li><strong>filemode</strong> – mode to use for files (default: 664)</li>
-<li><strong>directmode</strong> – mode to use for directories (default: 775)</li>
-<li><strong>timestamp</strong> – UNIX time for files; if None, use current time (default)</li>
-<li><strong>INCARrelax</strong> – contents of INCAR file to use for relaxation; must contain {system} to be replaced
-by tag value (default: automator.INCARrelax)</li>
-<li><strong>INCARNEB</strong> – contents of INCAR file to use for NEB; must contain {system} to be replaced
-by tag value (default: automator.INCARNEB)</li>
-<li><strong>KPOINTS</strong> – contents of KPOINTS file (default: gamma-point only calculation);
-if None or empty, no KPOINTS file at all</li>
-<li><strong>basedir</strong> – prepended to all files/directories (default: ‘’)</li>
-<li><strong>statename</strong> – prepended to all state names, before 2 digit number (default: relax.)</li>
-<li><strong>transitionname</strong> – prepended to all transition names, before 2 digit number  (default: neb.)</li>
-<li><strong>IDformat</strong> – format for integer tags (default: {:02d})</li>
-<li><strong>JSONdict</strong> – name of JSON file storing the tags corresponding to each directory (default: tags.json)</li>
-<li><strong>YAMLdef</strong> – YAML file containing full definition of supercells, relationship, etc. (default: supercell.yaml);
-set to None to not output. <strong>may want to change this to None for the future</strong></li>
+</p></li>
+<li><p><strong>filemode</strong> – mode to use for files (default: 664)</p></li>
+<li><p><strong>directmode</strong> – mode to use for directories (default: 775)</p></li>
+<li><p><strong>timestamp</strong> – UNIX time for files; if None, use current time (default)</p></li>
+<li><p><strong>INCARrelax</strong> – contents of INCAR file to use for relaxation; must contain {system} to be replaced
+by tag value (default: automator.INCARrelax)</p></li>
+<li><p><strong>INCARNEB</strong> – contents of INCAR file to use for NEB; must contain {system} to be replaced
+by tag value (default: automator.INCARNEB)</p></li>
+<li><p><strong>KPOINTS</strong> – contents of KPOINTS file (default: gamma-point only calculation);
+if None or empty, no KPOINTS file at all</p></li>
+<li><p><strong>basedir</strong> – prepended to all files/directories (default: ‘’)</p></li>
+<li><p><strong>statename</strong> – prepended to all state names, before 2 digit number (default: relax.)</p></li>
+<li><p><strong>transitionname</strong> – prepended to all transition names, before 2 digit number  (default: neb.)</p></li>
+<li><p><strong>IDformat</strong> – format for integer tags (default: {:02d})</p></li>
+<li><p><strong>JSONdict</strong> – name of JSON file storing the tags corresponding to each directory (default: tags.json)</p></li>
+<li><p><strong>YAMLdef</strong> – YAML file containing full definition of supercells, relationship, etc. (default: supercell.yaml);
+set to None to not output. <strong>may want to change this to None for the future</strong></p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -299,7 +284,7 @@ set to None to not output. <strong>may want to change this to None for the futur
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="OnsagerCalc.html" class="btn btn-neutral" title="OnsagerCalc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="OnsagerCalc.html" class="btn btn-neutral float-left" title="OnsagerCalc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -308,7 +293,7 @@ set to None to not output. <strong>may want to change this to None for the futur
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Dallas R. Trinkle.
+        &copy; Copyright 2017, Dallas R. Trinkle
 
     </p>
   </div>
@@ -325,34 +310,16 @@ set to None to not output. <strong>may want to change this to None for the futur
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.3.2',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="_static/language_data.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
