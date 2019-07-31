@@ -810,6 +810,50 @@ class ClusterSupercell(object):
                         clustercount[mc] += 1
         return clustercount
 
+    def expandcluster_matrices(self, socc, clusters):
+        """
+        Expand a cluster expansion for a given spectator occupancy into matrices of indices.
+        This is designed for rapid evaluation for a fixed spectator occupancy. The clusters are
+        input as a list of lists of clusters (i.e., grouped by symmetry). We return a list of
+        lists of integer matrices of indices. This can then be used to efficiently evaluate cluster
+        counts for a given mobile occupancy. The given row of indices must be all 1 in order to
+        increment the particular cluster count.
+
+        :param socc: spectator occupancy vector (0 or 1 only)
+        :param clusters: list of lists (or sets) of Cluster objects
+        :return: clustermatrices: list of lists of matrices of indices
+        """
+        # treatment for vacancy clusters...
+        if self.vacancy is not None:
+            # sanity check:
+            ci_vac, R_vac = self.ciR(self.vacancy)
+
+        clustermatrices = []
+        for clusterlist in clusters:
+            clmat_list = []
+            for clust in clusterlist:
+                cl_indices = []
+                if clust.__vacancy__:
+                    if self.vacancy is None: continue
+                    elif clust.vacancy().ci != ci_vac: continue
+                    Rveclist = [R_vac]
+                else:
+                    Rveclist = self.Rveclist
+                for R in Rveclist:
+                    # list of indices, and whether the particular set is "active"
+                    ind, active = [], True
+                    for site in clust:
+                        n, mob = self.index(R + site.R, site.ci)
+                        if mob:
+                            ind.append(n)
+                        else:
+                            active &= (socc[n] == 1)
+                    if active:
+                        cl_indices.append(ind)
+                clmat_list.append(np.array(cl_indices, dtype=int))
+            clustermatrices.append(clmat_list)
+        return clustermatrices
+
     def evalTScluster(self, mocc, socc, TSclusters, initial, final, dx):
         """
         Evaluate a TS cluster expansion for a given mobile occupancy and spectator occupancy.

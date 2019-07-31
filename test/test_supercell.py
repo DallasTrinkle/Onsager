@@ -815,6 +815,31 @@ class ClusterSupercellTests(unittest.TestCase):
                 ene_count = sum(E for E, c in zip(interact, interact_count) if c==0)
                 self.assertAlmostEqual(ene_direct, ene_count)
 
+    def testExpandCluster_Matrices(self):
+        """Can we expand out our clusters into indexed matrices that correctly reproduce the cluster count?"""
+        B2 = crystal.Crystal(np.eye(3), [[np.array([0., 0., 0.])],
+                                         [np.array([0.55, 0.55, 0.55])]], ['A', 'B'])
+        Nsuper = 4
+        # build a supercell, but call the "A" atoms spectators to the "B" atoms
+        sup = supercell.ClusterSupercell(B2, Nsuper*self.one, spectator=[0])
+        clusterexp = cluster.makeclusters(B2, 1.2, 4)
+        for _ in range(5):
+            socc = np.random.choice((0,1), size=sup.size)
+            clustermatrices = sup.expandcluster_matrices(socc, clusterexp)
+            for _ in range(5):
+                mocc = np.random.choice((0,1), size=sup.size)
+                cluster_count = sup.evalcluster(mocc, socc, clusterexp)
+                cluster_count_compare = np.zeros_like(cluster_count)
+                cluster_count_compare[-1] = cluster_count[-1]  # this is the number of supercells
+                for mc, cllist in enumerate(clustermatrices):
+                    for clmat in cllist:
+                        if clmat.shape[1] == 0:
+                            cluster_count_compare[mc] += clmat.shape[0]
+                        else:
+                            cluster_count_compare[mc] += sum(1 for ind in clmat if np.all(mocc[ind]) == 1)
+                self.assertTrue(np.all(cluster_count == cluster_count_compare),
+                                msg='Cluster counts do not match?\n{} !=\n{}'.format(cluster_count, cluster_count_compare))
+
     def testJumpNetworkEvaluator(self):
         """Can we construct an efficient jump network evaluator?"""
         # *displaced* B2, to break symmetry
