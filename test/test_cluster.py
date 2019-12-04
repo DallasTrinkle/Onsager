@@ -49,7 +49,7 @@ class ClusterSiteTests(unittest.TestCase):
         s3 = cluster.ClusterSite((0,0), np.array([-1,0,0]))
         for s in (s1, s2, s3):
             yamlstr = yaml.dump(s)
-            scopy = yaml.load(yamlstr)
+            scopy = yaml.load(yamlstr, Loader=yaml.Loader)
             self.assertEqual(s, scopy)
 
 
@@ -413,7 +413,7 @@ class ClusterTests(unittest.TestCase):
         for clset in clusterexp:
             for cl in clset:
                 yamlstr = yaml.dump(cl)
-                clcopy = yaml.load(yamlstr)
+                clcopy = yaml.load(yamlstr, Loader=yaml.Loader)
                 self.assertEqual(cl, clcopy)
         chem = 0
         jumpnetwork = FCC.jumpnetwork(chem, cutoff)
@@ -421,13 +421,13 @@ class ClusterTests(unittest.TestCase):
         for clset in TSclusterexp:
             for cl in clset:
                 yamlstr = yaml.dump(cl)
-                clcopy = yaml.load(yamlstr)
+                clcopy = yaml.load(yamlstr, Loader=yaml.Loader)
                 self.assertEqual(cl, clcopy)
         Vacclusterexp = cluster.makeVacancyClusters(FCC, chem, clusterexp)
         for clset in Vacclusterexp:
             for cl in clset:
                 yamlstr = yaml.dump(cl)
-                clcopy = yaml.load(yamlstr)
+                clcopy = yaml.load(yamlstr, Loader=yaml.Loader)
                 self.assertEqual(cl, clcopy)
 
 

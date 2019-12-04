@@ -1115,7 +1115,7 @@ class VacancyMediated(object):
         :return VacancyMediated: new VacancyMediated diffuser object from HDF5
         """
         diffuser = cls(None, None, None, None)  # initialize
-        diffuser.crys = yaml.load(HDF5group['crystal_yaml'][()])
+        diffuser.crys = yaml.load(HDF5group['crystal_yaml'][()], Loader=yaml.Loader)
         diffuser.dim = diffuser.crys.dim
         for internal in cls.__HDF5list__:
             setattr(diffuser, internal, HDF5group[internal][()])

@@ -351,7 +351,7 @@ class InterstitialSuperTests(HCPSuperTests):
         """Can we read/write YAML representation of a supercell?"""
         sup = supercell.Supercell(self.crys, 3 * self.one, interstitial=[1])
         YAMLstring = yaml.dump(sup)
-        superYAML = yaml.load(YAMLstring)
+        superYAML = yaml.load(YAMLstring, Loader=yaml.Loader)
         self.assertOrderingSuperEqual(sup, superYAML, msg='YAML write/read fail?')
         # print(YAMLstring)
 

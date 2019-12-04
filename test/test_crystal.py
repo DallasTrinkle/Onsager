@@ -811,7 +811,7 @@ class YAMLTests(unittest.TestCase):
             # we could do this with one call; if we want to add tests for the format later
             # they should go in between here.
             awrite = yaml.dump(a)
-            aread = yaml.load(awrite)
+            aread = yaml.load(awrite, Loader=yaml.Loader)
             self.assertTrue(np.allclose(a, aread))
             self.assertIsInstance(aread, np.ndarray)
 
@@ -819,7 +819,7 @@ class YAMLTests(unittest.TestCase):
         """Test that we can use YAML to write and read a frozenset"""
         for a in [frozenset([]), frozenset([1]), frozenset([0, 1, 1]), frozenset(list(range(10)))]:
             awrite = yaml.dump(a)
-            aread = yaml.load(awrite)
+            aread = yaml.load(awrite, Loader=yaml.Loader)
             self.assertEqual(a, aread)
             self.assertIsInstance(aread, frozenset)
 
@@ -831,7 +831,7 @@ class YAMLTests(unittest.TestCase):
                             ((0,),))
         # yaml.add_representer(crystal.GroupOp, crystal.GroupOp_representer)
         gwrite = yaml.dump(g)
-        gread = yaml.load(gwrite)
+        gread = yaml.load(gwrite, Loader=yaml.Loader)
         self.assertEqual(g, gread)
         self.assertIsInstance(gread, crystal.GroupOp)
 
@@ -847,7 +847,7 @@ class YAMLTests(unittest.TestCase):
                   np.array([2. / 3., 1. / 3., 0.5])]]
         crys = crystal.Crystal(hexlatt, basis)
         cryswrite = yaml.dump(crys)
-        crysread = yaml.load(cryswrite)
+        crysread = yaml.load(cryswrite, Loader=yaml.Loader)
         self.assertIsInstance(crysread, crystal.Crystal)
         self.assertTrue(np.allclose(crys.lattice, crysread.lattice))
         self.assertTrue(np.allclose(crys.invlatt, crysread.invlatt))
@@ -884,7 +884,7 @@ basis:
   - {YAMLtag} [0.6666666666666666, 0.3333333333333333, 0.5]
 chemistry:
 - Ti""".format(YAMLtag=crystal.NDARRAY_YAMLTAG)  # rather than hard-coding the tag...
-        crysread = crystal.Crystal.fromdict(yaml.load(yamlstr))
+        crysread = crystal.Crystal.fromdict(yaml.load(yamlstr, Loader=yaml.Loader))
         self.assertIsInstance(crysread, crystal.Crystal)
         self.assertTrue(np.allclose(crys.lattice, crysread.lattice))
         self.assertTrue(np.allclose(crys.invlatt, crysread.invlatt))
