@@ -9,6 +9,7 @@ Modules in ``Onsager`` code for automated computation of diffusivity for interst
    crystal
    CrystalStars
    supercell
+   cluster
    PowerExpansion
    GFcalc
    OnsagerCalc

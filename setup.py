@@ -49,6 +49,6 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
-    install_requires=['numpy', 'scipy', 'pyyaml', 'h5py'],
+    install_requires=['numpy', 'scipy', 'pyyaml', 'h5py', 'numba'],
     test_suite = 'setup.my_test_suite'
 )
