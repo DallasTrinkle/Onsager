@@ -136,7 +136,7 @@ class GFCrystalcalc(object):
         # tuple of the Wyckoff site indices for each jump (needed to make symmrate)
         self.jumppairs = tuple((self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
                                for jumplist in jumpnetwork)
-        self.D, self.eta = 0, 0  # we don't yet know the diffusivity
+        self.D, self.eta = None, 0  # we don't yet know the diffusivity
 
     @staticmethod
     def networkcount(jumpnetwork, N):
@@ -390,7 +390,7 @@ class GFCrystalcalc(object):
         :param dx: vector pointing from i to j (can include lattice contributions)
         :return G: Green function value
         """
-        if self.D is 0: raise ValueError("Need to SetRates first")
+        if self.D is None: raise ValueError("Need to SetRates first")
         # evaluate Fourier transform component (now with better space group treatment!)
         gIFT = 0
         for gop, pair in zip(self.grouparray, self.indexpair[i][j]):
@@ -435,8 +435,8 @@ class GFCrystalcalc(object):
         :param omega_Taylor_D: Taylor expansion of the diffusivity component
         :return D: diffusivity [3,3] array
         """
-        if self.D is not 0 and omega_Taylor_D is None: return self.D
-        if self.D is 0 and omega_Taylor_D is None: raise ValueError("Need omega_Taylor_D value")
+        if self.D is not None and omega_Taylor_D is None: return self.D
+        if self.D is None and omega_Taylor_D is None: raise ValueError("Need omega_Taylor_D value")
         Taylor = T3D if self.crys.dim == 3 else T2D
         D = np.zeros((self.crys.dim, self.crys.dim))
         for (n, l, c) in omega_Taylor_D.coefflist:

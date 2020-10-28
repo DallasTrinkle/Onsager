@@ -703,7 +703,7 @@ class MonteCarloSampler(object):
                     self.clustercount[inter] += 1
 
 
-from numba import jitclass          # import the decorator
+from numba.experimental import jitclass          # import the decorator
 from numba import int64, float64    # import the types
 
 # our signature for our object
