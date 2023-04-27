@@ -1142,6 +1142,9 @@ class VectorStarSet(object):
 from onsager.crystal import DB_disp, DB_disp4, pureDBContainer, mixedDBContainer
 from onsager.DB_structs import *
 from onsager.DB_collisions import *
+from collections import defaultdict
+import time
+from functools import reduce
 
 class DBStarSet(object):
     """
@@ -1818,7 +1821,7 @@ class DBVectorStars(object):
                 pairnew = pairnew - pairnew.R_s
                 if pairnew == pair0:
                     glist.append(starset.pdbcontainer.G_crys[gdumb])  # Although appending gdumb itself also works
-            # Find the intersected vector basis for these group operations
+            # Find the intersected vector basis for these group operations - same as function "VectorBasis" in crystal module.
             vb = reduce(crystal.CombineVectorBasis, [crystal.VectorBasis(*g.eigen()) for g in glist])
             # Get orthonormal vectors
             vlist = starset.crys.vectlist(vb)
