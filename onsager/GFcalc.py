@@ -19,6 +19,7 @@ import itertools
 from copy import deepcopy
 from numpy import linalg as LA
 from scipy.special import hyp1f1, gamma, expi #, gammainc
+from scipy import linalg as spla
 
 # two quick shortcuts
 T3D, T2D = PE.Taylor3D, PE.Taylor2D
@@ -359,8 +360,9 @@ class GFCrystalcalc(object):
                                     for n in range(self.Ndiff))
             else:
                 # invert, subtract off Taylor expansion to leave semicontinuum piece
-                gsc_qij[qind] = np.linalg.inv(self.omega_qij[qind, :, :]) \
+                gsc_qij[qind] = spla.pinvh(self.omega_qij[qind, :, :], rtol=1e-10) \
                                 - self.g_Taylor(np.dot(self.pqtrans, q), g_Taylor_fnlp)
+
         # 6. Slice the pieces we want for fast(er) evaluation (since we specify i and j in evaluation)
         self.gsc_ijq = np.zeros((self.N, self.N, self.Nkpt), dtype=complex)
         for i in range(self.N):
@@ -534,3 +536,73 @@ class GFCrystalcalc(object):
             gT[ND:, 0:ND] = -(rr_inv * rd * D_inv).truncate(0)
             gT[ND:, ND:] = (rr_inv + rr_inv * rd * D_inv * dr * rr_inv).truncate(0)
         return gT.reduce()
+
+# Green's function calculator for dumbbells
+class GF_dumbbells(GFCrystalcalc):
+    """
+    Calculator for the Green function of pure dumbbells, designed to work with the Crystal class.
+    Exactly the same as the vacany GF calculator, except indexing of jumps is in (i,or) list rather than basis set (i).
+    """
+
+    def __init__(self, container, jumpnetwork, Nmax=4, kptwt=None):
+        """
+        Straigforward extenstion of the vacancy to the pure dumbbell case.
+        """
+        # this is really just used by loadHDF5() to circumvent __init__
+        if all(x is None for x in (container, jumpnetwork)): return
+        if any(len(tup) != 2 for l in jumpnetwork for tup in l):
+            raise TypeError("Need the indexed form of the jumpnetwork.")
+        self.container = container
+        self.crys = container.crys
+        self.chem = container.chem
+        self.iorlist = container.iorlist.copy()
+        self.symorlist = container.symorlist.copy()
+        self.N = len(self.iorlist)  # N - no. of dumbbell states
+        self.Ndiff = self.networkcount(jumpnetwork, self.N)
+        # Create invmap - which symmety-grouped (i,or) pair list in symorlist
+        # does a given (i,or) pair in iorlist belong to
+        self.invmap = container.invmap.copy()
+        self.NG = len(self.crys.G)  # number of group operations
+        # self.invmap = container.invmap
+        self.grouparray, self.indexpair = self.BreakdownGroups()
+        # modified BreakdownGroups using new indexmap for dumbbells
+        bmagn = np.array([np.sqrt(np.dot(self.crys.reciplatt[:, i], self.crys.reciplatt[:, i]))
+                          for i in range(self.crys.dim)])
+        bmagn /= np.power(np.product(bmagn), 1 / self.crys.dim)
+        # make sure we have even meshes - same as vacancies
+        # Don't need to change the k-mesh generation.
+        self.kptgrid = np.array([2 * np.int(np.ceil(2 * Nmax * b)) for b in bmagn], dtype=int) \
+            if kptwt is None else np.zeros(3, dtype=int)
+        self.kpts, self.wts = self.crys.reducekptmesh(self.crys.fullkptmesh(self.kptgrid)) \
+            if kptwt is None else deepcopy(kptwt)
+        self.Nkpt = self.kpts.shape[0]
+        # generate the Fourier transformation for each jump
+        # also includes the multiplicity for the onsite terms (site expansion)
+        # The latter is used to calculate escape rates
+        self.FTjumps, self.SEjumps = self.FourierTransformJumps(jumpnetwork, self.N, self.kpts)
+        # generate the Taylor expansion coefficients for each jump
+        # generate the jumppairs
+        self.jumppairs = tuple((self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
+                               for jumplist in jumpnetwork)
+        self.Taylorjumps = self.TaylorExpandJumps(jumpnetwork, self.N)
+
+        self.D, self.eta = 0, 0
+
+    def BreakdownGroups(self):
+        """
+        indexing breakdown for each (i,j) pair.
+        :return grouparray: array[NG][3][3] of the NG group operations
+                            Only the cartesian rotation matrix
+        :return indexpair: array[N][N][NG][2] of the index pair for each group operation
+        """
+        # Soham - change required in index mapping
+        grouparray = np.zeros((self.NG, self.crys.dim, self.crys.dim))
+        indexpair = np.zeros((self.N, self.N, self.NG, 2), dtype=int)
+        for ng, g in enumerate(self.container.G):
+            grouparray[ng, :, :] = g.cartrot[:, :]
+            # first construct the indexmap of the group operations for dumbbells
+            indexmap = g.indexmap[0]
+            for i in range(self.N):
+                for j in range(self.N):
+                    indexpair[i, j, ng, 0], indexpair[i, j, ng, 1] = indexmap[i], indexmap[j]
+        return grouparray, indexpair
