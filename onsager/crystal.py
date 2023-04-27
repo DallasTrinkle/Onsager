@@ -1644,3 +1644,603 @@ def float_representer(dumper, data):
 
 yaml.add_representer(np.float32, float_representer)
 yaml.add_representer(np.float64, float_representer)
+
+
+# Dumbbells begin here
+from onsager.DB_structs import dumbbell, SdPair, jump
+from onsager.DB_collisions import collision_self, collision_others
+
+
+# Define function to compute displacement of species during dumbbell jumps
+# In this case, we are dealing with pure->pure or mixed->mixed dumbbell jumps
+# For a test of this, see tes_jnet_0 and test_jnet_2 functions in test_dumbbells/test_DBContainer
+def DB_disp(dbcontainer, obj1, obj2):
+    """
+    Computes the transport vector for the initial and final states of a jump
+    param:
+        dbcontainer - dumbbell states container.
+        obj1,obj2 - the initial and final state objects of a jump
+        Return - site-to-site displacement vector when going from obj1 to obj2
+    """
+    crys, chem = dbcontainer.crys, dbcontainer.chem
+
+    if isinstance(obj1, dumbbell):
+        (i1, i2) = (dbcontainer.iorlist[obj1.iorind][0], dbcontainer.iorlist[obj2.iorind][0])
+        (R1, R2) = (obj1.R, obj2.R)
+    else:
+        (i1, i2) = (dbcontainer.iorlist[obj1.db.iorind][0], dbcontainer.iorlist[obj2.db.iorind][0])
+        (R1, R2) = (obj1.db.R, obj2.db.R)
+
+    return crys.unit2cart(R2, crys.basis[chem][i2]) - crys.unit2cart(R1, crys.basis[chem][i1])
+
+# Define function to compute displacements during mixed dumbbell fomation jumps
+# In this case, we have pure -> mixed dumbbell jumps
+# Note that the annihilation jumps will produce just the negative displacement.
+def DB_disp4(pdbcontainer, mdbcontainer, obj1, obj2):
+    """
+    Computes the transport vector for the initial and final states of a mixed dumbbell formation jump
+    param:
+        pdbcontainer - (pureDBContainer) pure dumbbell states container.
+        pdbcontainer - (pureDBContainer) mixed dumbbell states container.
+        obj1,obj2 - the initial and final states - must be of Omega4 type, meaning obj1 denotes
+        the solute-pure dumbbell complex state, and obj2 denoted the mixed dumbbell state.
+        Return - displacement when going from obj1 to obj2
+    """
+    true_crys = np.allclose(pdbcontainer.crys.lattice, mdbcontainer.crys.lattice, atol=pdbcontainer.crys.threshold)
+
+    true_basis_len = len(pdbcontainer.crys.basis) == len(mdbcontainer.crys.basis)
+    if not (true_basis_len and true_crys):
+        raise TypeError("Different crystal structures entered for pure and dumbbell states")
+
+    true_site_len = all([len(chem1) == len(chem2) for chem1, chem2 in
+                         zip(mdbcontainer.crys.basis, pdbcontainer.crys.basis)])
+    if not true_site_len:
+        raise TypeError("Different site numbers entered for pure and dumbbell states for same chemistries")
+
+    true_site_locs = all([[np.allclose(arr1, arr2) for arr1, arr2 in zip(chem1, chem2)]for chem1, chem2 in
+                          zip(mdbcontainer.crys.basis, pdbcontainer.crys.basis)])
+
+    if not true_site_locs:
+        raise TypeError("basis sites are at different locations for the two containers.")
+
+    crys, chem = pdbcontainer.crys, pdbcontainer.chem
+    (i1, i2) = (pdbcontainer.iorlist[obj1.db.iorind][0], mdbcontainer.iorlist[obj2.db.iorind][0])
+    (R1, R2) = (obj1.db.R, obj2.db.R)
+
+    return crys.unit2cart(R2, crys.basis[chem][i2]) - crys.unit2cart(R1, crys.basis[chem][i1])
+
+# Next, create pure dumbbell containers - the analogues of the Crystal object for pure dumbbells.
+# In pure dumbbells, orientation vectors and their negative orientation vectors represent equivalent states.
+
+# Create pure dumbbell states
+class pureDBContainer(object):
+    """
+    Class to to create an object that generate all possible pure dumbbell configurations
+    for given basis sites, as well as to handle symmetry mapping between them.
+    """
+
+    def __init__(self, crys, chem, family):
+        """
+        To initialize, we need the crystal object specifying the lattice, the chemistry/sublattice
+        on which dumbbells are allowed to diffuse (for now, dumbbells can diffuse in only one sublattice) and
+        a single vector that denotes a particular orientation a dumbbell can take in this lattice. The length
+        of the orientation is important in that it is used to analzye collisions during atomic jumps. It is recommended
+        to use lengths no more than the atomic diameter of the host/solvent atom.
+        Parameters:
+            - crys : (crystal object) the crystal object
+            - chem : (int) the chemistry/sublattice index
+            - family : (list of numpy vectors) all the orientations allowed to be taken by the pure dumbbell
+        """
+        if not isinstance(family, list):
+            raise TypeError("Families of orientations need to be entered as a list of lists")
+
+        for veclist in family:
+            if not isinstance(family, list):
+                raise TypeError("Familied of orientations at each site need to be entered as a list.")
+            for vec in veclist:
+                if not isinstance(vec, np.ndarray):
+                    raise TypeError("orientation vectors must be entered as numpy arrays")
+                if not vec.shape[0] == crys.dim:
+                    raise ArithmeticError("Array dimension ({}) must be the same as the crystal dimension ({})".format(vec.shape[0], crys.dim))
+
+        self.crys = crys
+        self.chem = chem
+        self.family = family
+        # make the dumbbell states, change the indexmap of the grouops and store original groupops in G_crys
+        self.iorlist = self.genpuresets()
+        self.G, self.G_crys = self.makeDbGops(self.crys, self.chem, self.iorlist)
+        self.symorlist, self.symIndlist = self.gensymset()  # make this an indexed list
+        # Store both iorlist and symorlist so that we can compare them later if needed.
+        self.threshold = crys.threshold
+        self.invmap = self.invmapping(self.symIndlist)
+        # Invmap says which (i, or) pair is present in which symmetric (i, or) list
+
+    @staticmethod
+    def invmapping(symindlist):
+        """
+        Takes an indexed symmetry list of pure dumbbells and returns which dumbbell is in which symmetry list
+        Parameters:
+             symindlist : (list of list of integers) list symmetry grouped dumbbells indentified by integer indices
+        Returns:
+            -invmap : a list of integers, as long as the number of dumbbells, containing the symmetry group of each dumbbell.
+                    example- invamp[i] gives the symmetry group of the i^th dumbbell.
+        """
+        invmap = np.zeros(sum([len(lst) for lst in symindlist]), dtype=int)
+        for symind, symlist in enumerate(symindlist):
+            for st_idx in symlist:
+                invmap[st_idx] = symind
+        return invmap
+
+    def genpuresets(self):
+        """
+        Generates complete (i,or) set from given family of orientations, including all symmetry variants.
+        Note - an orientation vector and its negative denote the same pure dumbbell, so only one is taken.
+
+        Returns:
+            -iorlist - the list of dumbbells in a single unit cell, each being denoted by a tuple (i, or) with "i"
+            being the basis atom index integer and "or" being the orientation bector.
+        """
+        if not isinstance(self.family, list):
+            raise TypeError("Enter the families as a list of lists")
+        for i in self.family:
+            if not isinstance(i, list):
+                raise TypeError("Enter the families for each site as a list of np arrays")
+            for j in i:
+                if not isinstance(j, np.ndarray):
+                    raise TypeError("Enter individual orientation families as numpy arrays")
+
+        def inlist(tup, lis):
+            return any(tup[0] == x[0] and np.allclose(tup[1], x[1], atol=1e-8) for x in lis)
+
+        def negOrInList(o, lis):
+            return any(np.allclose(o + tup[1], 0, atol=1e-8) for tup in lis)
+
+        sitelist = self.crys.sitelist(self.chem)
+        if not len(self.family) == len(sitelist):
+            raise TypeError("Orientations must be given for every Wyckoff set. Enter [0,0,0] for Wyckoff sets that "
+                            "don't have a dumbbell")
+        # Get the Wyckoff sets
+        iorlist = []
+        for wyckind, wycksites in enumerate(sitelist):
+            orlist = self.family[wyckind]  # Get the orientations allowed on the given Wyckoff set.
+            for ov in orlist:
+                ov[np.abs(ov) < 1e-10] = 0.0 # set small values to zero
+
+            if np.allclose(orlist[0], np.zeros(self.crys.dim)):
+                # If zero vector is entered, then that means this set does not have dumbbells.
+                continue
+            site = wycksites[0]  # Get the representative site of the Wyckoff set.
+            newlist = []
+            for o in orlist:
+                for g in self.crys.G:
+                    R, (ch, i_new) = self.crys.g_pos(g, np.zeros(self.crys.dim), (self.chem, site))
+                    o_new = self.crys.g_direc(g, o)
+                    o_new[np.abs(o_new) < 1e-10] = 0.0
+
+                    if not (inlist((i_new, o_new), iorlist) or inlist((i_new, -o_new), iorlist)):
+                        if negOrInList(o_new, iorlist):
+                            o_new = -o_new + 0.0
+                        iorlist.append((i_new, o_new))
+        return iorlist
+
+    def makeDbGops(self, crys, chem, iorlist):
+        """
+        Creates GroupOp objects with the same matrices as that of a crystal object, but has an index map that corresponds
+        to dumbbell states instead of just sites.
+        Parameters:
+            - crys : the crystal object.
+            - chem : the chemistry/sublattice index on which the dumbbells are allowed to diffuse.
+            - iorlist : the list of all dumbbells that can occur in a single unit cell.
+        Returns:
+            - G : (frozenset) the set of crystal group operations with index map being that of dumbbells.
+            - G_crys : (dictionary) keys : GroupOps stored in G, values : corresponding GroupOp of the crystal object.
+        """
+        G = []
+        G_crys = {}
+        for g in crys.G:
+            # Will have indexmap for each groupop
+            indexmap = []
+            for (i, o) in iorlist:
+                # Need the elements of indexmap
+                R, (ch, i_new) = crys.g_pos(g, np.zeros(self.crys.dim), (chem, i))
+                o_new = crys.g_direc(g, o)
+                o_new[np.abs(o_new) < 1e-10] = 0.
+
+                for idx2, (i2, o2) in enumerate(iorlist):
+                    if i2 == i_new and (np.allclose(o2, o_new, atol=crys.threshold) or
+                                        np.allclose(o2, -o_new, atol=crys.threshold)):
+                        indexmap.append(idx2)
+                        break
+
+            gdumb = GroupOp(g.rot, g.trans, g.cartrot, tuple([tuple(indexmap)]))
+            G.append(gdumb)
+            G_crys[gdumb] = g
+
+        return frozenset(G), G_crys
+
+    def gensymset(self):
+        """
+        Takes in a flat list of (i,or) pairs and groups them according to symmetry.
+        "i" stands for basis index of the dumbbell and "or" for orientation.
+        Returns:
+            - symIorList : list of lists (i, or) tuples grouped by symmetry.
+            - symIndlist: contains the integer indices given to each dumbbell in symIorList
+        """
+
+        # We'll take advantage of the gdumbs we have created
+        symIorList = []
+        symIndlist = []
+        allIndlist = set([])
+        for idx, (i, o) in enumerate(self.iorlist):
+            if idx in allIndlist:
+                continue
+            newlist = []
+            newindlist = []
+            for gdumb in self.G:
+                idxnew = gdumb.indexmap[0][idx]
+                if idxnew in allIndlist:
+                    continue
+                allIndlist.add(idxnew)
+                newindlist.append(idxnew)
+                newlist.append(self.iorlist[idxnew])
+            symIndlist.append(newindlist)
+            symIorList.append(newlist)
+
+        return symIorList, symIndlist
+
+    def gflip(self, gdumb, idx):
+        """
+        Takes in a (i, or) index, idx, applies a group operation and returns -1 if the groupop reverses the orientation
+        from that of the destination index (gdumb.indexmap[0][idx]), +1 if not
+        Parameters:
+            gdumb: group operation with dumbbell index map
+            idx : the index of the dumbbell.
+        """
+        inew, onew = self.iorlist[gdumb.indexmap[0][idx]]
+        if np.allclose(onew, -np.dot(gdumb.cartrot, self.iorlist[idx][1]), atol=self.crys.threshold):
+            return -1
+        return 1
+
+    def jumpnetwork(self, cutoff, solv_solv_cut, closestdistance):
+        """
+        Makes a jumpnetwork of pure dumbbells within a given distance to be used for omega_0
+        and to create the solute-dumbbell stars.
+        Parameters:
+            - cutoff - maximum jump distance
+            - solv_solv_cut - minimum allowable distance between two solvent atoms - to check for collisions
+            - closestdistance - minimum allowable distance to check for collisions with other atoms. Can be a single
+                number or a list (corresponding to each sublattice)
+        Returns:
+            - jumpnetwork - the symmetrically grouped jumps
+                Each jump is defined as a jump object. See DB_Structs.
+            - jumpindices - the jumpnetworks with dbs in pair1 and pair2 indexed to iorset -> (i,j,dx)
+        """
+        crys, chem, iorlist = self.crys, self.chem, self.iorlist
+
+        def getjumps(j, jumpset, dx):
+            "Does the symmetric list construction for an input jump and an existing jumpset"
+
+            # If the jump has not already been considered, check if it leads to collisions.
+            jlist = []
+            jindlist = []
+            db1 = j.state1
+            db2 = j.state2
+            for gdumb in self.G:
+                # Get the new dumbbells
+                db1new, mul1 = db1.gop(self, gdumb, pure=True)
+                db2new, mul2 = db2.gop(self, gdumb, pure=True)
+                R_ref = db1new.R.copy()
+                db2new = db2new - R_ref
+                db1new = db1new - R_ref
+
+                jnew = jump(db1new, db2new, j.c1 * mul1, j.c2 * mul2)
+                dx = DB_disp(self, jnew.state1, jnew.state2)
+
+                db1newneg = dumbbell(jnew.state2.iorind, jnew.state1.R)
+                db2newneg = dumbbell(jnew.state1.iorind, -jnew.state2.R)
+                jnewneg = jump(db1newneg, db2newneg, jnew.c2, jnew.c1)
+
+                if not np.allclose(db1newneg.R, np.zeros(self.crys.dim), atol=1e-8):
+                    raise RuntimeError("Initial state not at origin")
+
+                if np.allclose(dx, np.zeros(self.crys.dim)):
+                    # First, make the equivalent rotation jump
+                    jnew_equiv = jump(db1new, db2new, -jnew.c1, -jnew.c2)
+                    # Check if the rotation jump has also been taken into account.
+                    if not jnew in jumpset and not jnew_equiv in jumpset:
+                        jlist.append(jnew)
+                        jlist.append(jnewneg)
+                        jindlist.append(((jnew.state1.iorind, jnew.state2.iorind), dx))
+                        jindlist.append(((jnewneg.state1.iorind, jnewneg.state2.iorind), -dx))
+                        jumpset.add(jnew)
+                        jumpset.add(jnewneg)
+                else:
+                    if not jnew in jumpset:
+                        # add both the jump and it's negative
+                        jlist.append(jnew)
+                        jlist.append(jnewneg)
+                        jindlist.append(((jnew.state1.iorind, jnew.state2.iorind), dx))
+                        jindlist.append(((jnewneg.state1.iorind, jnewneg.state2.iorind), -dx))
+                        jumpset.add(jnew)
+                        jumpset.add(jnewneg)
+
+            return jlist, jindlist
+
+        nmax = [int(np.round(np.sqrt(cutoff ** 2 / crys.metric[i, i]))) + 1 for i in range(self.crys.dim)]
+
+        if self.crys.dim == 2:
+            Rvects = [np.array([n0, n1]) for n0 in range(-nmax[0], nmax[0] + 1)
+                      for n1 in range(-nmax[1], nmax[1] + 1)]
+
+        else:
+            Rvects = [np.array([n0, n1, n2]) for n0 in range(-nmax[0], nmax[0] + 1)
+                      for n1 in range(-nmax[1], nmax[1] + 1)
+                      for n2 in range(-nmax[2], nmax[2] + 1)]
+
+        jumplist = []
+        jumpindices = []
+        jumpset = set([])
+        for R in Rvects:
+            for i, tup1 in enumerate(iorlist):
+                for f, tup2 in enumerate(iorlist):
+                    db1 = dumbbell(i, np.zeros(self.crys.dim, dtype=int))
+                    db2 = dumbbell(f, R)
+                    if db1 == db2:  # catch the diagonal case
+                        continue
+                    dx = DB_disp(self, db1, db2)
+                    if np.dot(dx, dx) > cutoff * cutoff:
+                        continue
+                    for c1 in [-1, 1]:
+                        # Check if the jump is a rotation - 180 degree rotations end up in the same state
+                        # they are not considered
+                        if np.allclose(np.dot(dx, dx), 0., atol=crys.threshold):
+                            j = jump(db1, db2, c1, 1)
+                            j_equiv = jump(db1, db2, -c1, -1)
+                            # Also check if the equivalent rotation has been considered.
+                            if j in jumpset or j_equiv in jumpset:
+                                continue
+                            if collision_self(self, None, j, solv_solv_cut, solv_solv_cut) or \
+                                    collision_others(self, None, j, closestdistance):
+                                continue
+                            jlist, jindlist = getjumps(j, jumpset, dx)
+                            jumplist.append(jlist)
+                            jumpindices.append(jindlist)
+                            continue
+                        for c2 in [-1, 1]:
+                            j = jump(db1, db2, c1, c2)
+                            if j in jumpset:  # no point doing anything else if the jump has already been considered
+                                continue
+                            if collision_self(self, None, j, solv_solv_cut, solv_solv_cut) or \
+                                    collision_others(self, None, j, closestdistance):
+                                continue
+                            jlist, jindlist = getjumps(j, jumpset, dx)
+                            jumplist.append(jlist)
+                            jumpindices.append(jindlist)
+        return jumplist, jumpindices
+
+    def getIndex(self, t):
+        """
+        get the index of a dumbbell, if it exists (negative orientations accounted for)
+        Paramters:
+            - t: tuple containing (basis site index, orientation) of the dumbbell
+        Returns:
+            - idx (integer) - the index of (i, o) in the iorlist, if it exists.
+        """
+        for idx, tup in enumerate(self.iorlist):
+            if t[0] == tup[0] and (np.allclose(t[1], tup[1], atol=self.crys.threshold) or
+                                   np.allclose(t[1], -tup[1], atol=self.crys.threshold)):
+                return idx
+        raise ValueError("The given site orientation pair {} is not present in the container".format(t))
+
+    def db2ind(self, db):
+        """
+        Returns index of a dumbbell entered as a dumbbell object from DB_Structs.
+        Paramters:
+            - db: dumbbell object
+        Returns:
+            - idx : the index of the dumbbell in the (i, or) list. Throws error if not found.
+        """
+        if not isinstance(db, dumbbell):
+            raise TypeError("Input object must be dumbbell")
+        i = self.iorlist[db.iorind][0]
+        o = self.iorlist[db.iorind][1]
+
+        return self.getIndex((i, o))
+
+# Next, we add in the mixed dumbbell containers.
+# In mixed dumbbells, the orientation vector always points towards the solute.
+# A mixed dumbbell orientation vector and its negative denote different mixed dumbbell states.
+
+class mixedDBContainer(pureDBContainer):
+    """
+    An object to create and store mixed dumbbell information. For mixed dumbbells, positive and negative
+    orientations will denote different
+    states, unlike pure dumbbells.
+    """
+
+    def __init__(self, crys, chem, family):
+        """
+        (The initialization of mixed dumbbells is the same as the pure dumbbell container).
+        To initialize, we need the crystal object specifying the lattice, the chemistry/sublattice
+        on which dumbbells are allowed to diffuse (for now, dumbbells can diffuse in only one sublattice) and
+        a single vector that denotes a particular orientation a dumbbell can take in this lattice. The length
+        of the orientation is important in that it is used to analzye collisions during atomic jumps. It is recommended
+        to use lengths no more than the atomic diameter of the host/solvent atom.
+        Parameters:
+            - crys : (crystal object) the crystal object
+            - chem : (int) the chemistry/sublattice index
+            - family : (list of numpy vectors) all the orientations allowed to be taken by the pure dumbbell
+        """
+        self.crys = crys
+        self.chem = chem
+        self.family = family
+        # make the dumbbell states, change the indexmap of the grouops and store original groupops in G_crys
+        self.iorlist = self.genmixedsets()
+        self.G, self.G_crys = self.makeDbGops(self.crys, self.chem, self.iorlist)
+        self.symorlist, self.symIndlist = self.gensymset()  # make this an indexed list
+        # Store both iorlist and symorlist so that we can compare them later if needed.
+        self.threshold = crys.threshold
+        self.invmap = self.invmapping(self.symIndlist)
+        # Invmap says which (i, or) pair is present in which symmetric (i, or) list
+
+    def genmixedsets(self):
+        """
+        function to generate (i,or) list for mixed dumbbells.
+        """
+        crys, chem, family = self.crys, self.chem, self.family
+        if not isinstance(family, list):
+            raise TypeError("Enter the families as a list of lists")
+        for i in family:
+            if not isinstance(i, list):
+                raise TypeError("Enter the families for each site as a list of numpy arrays")
+            for j in i:
+                if not isinstance(j, np.ndarray):
+                    raise TypeError("Enter individual orientation families as numpy arrays")
+
+        def inlist(tup, lis):
+            return any(tup[0] == x[0] and np.allclose(tup[1], x[1], atol=1e-8) for x in lis)
+
+        sitelist = crys.sitelist(chem)
+        # Get the Wyckoff sets
+        pairlist = []
+        for i, wycksites in enumerate(sitelist):
+            orlist = family[i]
+            site = wycksites[0]
+            newlist = []
+            for o in orlist:
+                o[np.abs(o < 1e-10)] = 0.0
+                for g in crys.G:
+                    R, (ch, i_new) = crys.g_pos(g, np.zeros(self.crys.dim), (chem, site))
+                    o_new = crys.g_direc(g, o)
+                    o_new[np.abs(o_new) < 1e-10] = 0.0
+                    if not inlist((i_new, o_new), pairlist):
+                        pairlist.append((i_new, o_new))
+        return pairlist
+
+    def makeDbGops(self, crys, chem, iorlist):
+        """
+        Creates GroupOp objects with the same matrices as that of a crystal object, but has an index map that corresponds
+        to mixed dumbbell states instead of just sites.
+        For pure dumbbells, positive/negative orientation vectors denote same states.
+        However, for mixed dumbbells, they will denote different states.
+        Parameters:
+            - crys : the crystal object.
+            - chem : the chemistry/sublattice index on which the dumbbells are allowed to diffuse.
+            - iorlist : the list of all dumbbells that can occur in a single unit cell.
+        Returns:
+            - G : (frozenset) the set of crystal group operations with index map being that of dumbbells.
+            - G_crys : (dictionary) keys : GroupOps stored in G, values : corresponding GroupOp of the crystal object.
+        """
+        G = []
+        G_crys = {}
+        for g in crys.G:
+            # Will have indexmap for each groupop
+            indexmap = []
+            for (i, o) in iorlist:
+                # Need the elements of indexmap
+                R, (ch, i_new) = crys.g_pos(g, np.zeros(self.crys.dim), (chem, i))
+                o_new = crys.g_direc(g, o)
+                o_new[np.abs(o_new) < 1e-10] = 0.0
+                for idx2, (i2, o2) in enumerate(iorlist):
+                    if i2 == i_new and np.allclose(o2, o_new, atol=crys.threshold):
+                        indexmap.append(idx2)
+                        break
+            gdumb = GroupOp(g.rot, g.trans, g.cartrot, tuple([tuple(indexmap)]))
+            G.append(gdumb)
+            G_crys[gdumb] = g
+        return frozenset(G), G_crys
+
+    def jumpnetwork(self, cutoff, solt_solv_cut, closestdistance):
+        """
+        Makes a jumpnetwork of mixed dumbbells within a given distance to be used for omega_0
+        and to create the solute-dumbbell stars.
+        Parameters:
+            - cutoff - maximum jump distance
+            - solt_solv_cut - minimum allowable distance between solute and solvent atoms - to check for collisions
+            - closestdistance - minimum allowable distance to check for collisions with other atoms. Can be a single
+                number or a list (corresponding to each sublattice)
+        Returns:
+            - jumpnetwork - the symmetrically grouped jumpnetworks of jump objects.
+                Note - for mixed dumbbells only the solute jumps.
+            - jumpindices - the jumpnetworks with dbs in pair1 and pair2 indexed to iorset -> (i,j,dx)
+        """
+        crys, chem, mset = self.crys, self.chem, self.iorlist
+
+        nmax = [int(np.round(np.sqrt(cutoff ** 2 / crys.metric[i, i]))) + 1 for i in range(crys.dim)]
+
+        if crys.dim == 2:
+            Rvects = [np.array([n0, n1]) for n0 in range(-nmax[0], nmax[0] + 1)
+                      for n1 in range(-nmax[1], nmax[1] + 1)]
+
+        else:
+            Rvects = [np.array([n0, n1, n2]) for n0 in range(-nmax[0], nmax[0] + 1)
+                      for n1 in range(-nmax[1], nmax[1] + 1)
+                      for n2 in range(-nmax[2], nmax[2] + 1)]
+
+        jumplist = []
+        jumpindices = []
+        jumpset = set([])
+
+        for R in Rvects:
+            for i, st1 in enumerate(mset):
+                for f, st2 in enumerate(mset):
+                    db1 = dumbbell(i, np.zeros(self.crys.dim, dtype=int))
+                    p1 = SdPair(st1[0], np.zeros(self.crys.dim, dtype=int), db1)
+                    db2 = dumbbell(f, R)
+                    p2 = SdPair(st2[0], R, db2)
+                    if p1 == p2:  # Get the diagonal case
+                        continue
+                    dx = DB_disp(self, db1, db2)
+                    if np.dot(dx, dx) > cutoff ** 2:
+                        continue
+                    j = jump(p1, p2, 1, 1)  # since only solute moves, both indicators are +1
+                    if j in jumpset:
+                        continue
+                    if not (collision_self(self, None, j, solt_solv_cut, solt_solv_cut) or
+                            collision_others(self, None, j, closestdistance)):
+                        jlist = []
+                        jindlist = []
+                        for gdumb in self.G:
+                            p1new = p1.gop(self, gdumb, complex=False)
+                            p2new = p2.gop(self, gdumb, complex=False) - p1new.R_s
+                            p1new -= p1new.R_s
+
+                            jnew = jump(p1new, p2new, j.c1, j.c2)
+                            # Place some sanity checks for safety, also helpful for tests
+                            if not np.allclose(jnew.state1.R_s, np.zeros(self.crys.dim), atol=self.crys.threshold):
+                                raise ValueError("The initial state is not at the origin unit cell")
+                            if not np.allclose(jnew.state1.db.R, np.zeros(self.crys.dim), atol=self.crys.threshold):
+                                raise ValueError("The solute is not at the same site as the dumbbell in mixed dumbbell")
+                            if not np.allclose(jnew.state2.db.R, jnew.state2.R_s, atol=self.crys.threshold):
+                                raise ValueError("The solute is not at the same site as the dumbbell in mixed dumbbell")
+
+                            if not jnew in jumpset:
+                                dx = DB_disp(self, jnew.state1, jnew.state2)
+                                # create the negative jump
+                                p1neg = SdPair(p2new.i_s, p1new.R_s, dumbbell(p2new.db.iorind, p1new.db.R))
+                                p2neg = SdPair(p1new.i_s, -p2new.R_s, dumbbell(p1new.db.iorind, -p2new.db.R))
+                                jnewneg = jump(p1neg, p2neg, 1, 1)
+                                # add both the jump and its negative
+                                jlist.append(jnew)
+                                jlist.append(jnewneg)
+                                jindlist.append(((jnew.state1.db.iorind, jnew.state2.db.iorind), dx))
+                                jindlist.append(((jnew.state2.db.iorind, jnew.state1.db.iorind), -dx))
+                                jumpset.add(jnew)
+                                jumpset.add(jnewneg)
+                        jumplist.append(jlist)
+                        jumpindices.append(jindlist)
+        return jumplist, jumpindices
+
+    def getIndex(self, t):
+        """
+        get the index of a mixed dumbbell, if it exists in the container.
+        Paramters:
+            - t: tuple containing (basis site index, orientation) of the dumbbell
+        Returns:
+            - idx (integer) - the index of (i, o) in the iorlist, if it exists.
+        """
+        for idx,tup in enumerate(self.iorlist):
+            if t[0]==tup[0] and np.allclose(t[1], tup[1], atol = 1e-8):
+                return idx
+        raise ValueError("The given site orientation pair {} is not present in the container".format(t))
+
