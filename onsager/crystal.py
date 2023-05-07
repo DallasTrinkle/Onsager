@@ -2163,7 +2163,9 @@ class mixedDBContainer(pureDBContainer):
                 number or a list (corresponding to each sublattice)
         Returns:
             - jumpnetwork - the symmetrically grouped jumpnetworks of jump objects.
-                Note - for mixed dumbbells only the solute jumps.
+            The format of the jump objects are almost exactly the same as for pure dumbbell jumps. Except,
+            for mixed dumbbells jumps, both c1 and c2 are +1, since the solute is always considered to be at the
+            head of the mixed dumbbell orientation vectors.
             - jumpindices - the jumpnetworks with dbs in pair1 and pair2 indexed to iorset -> (i,j,dx)
         """
         crys, chem, mset = self.crys, self.chem, self.iorlist

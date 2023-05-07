@@ -180,6 +180,9 @@ class jump(NT_jmp):
         at the tail that moves.
         - c2 - if c2 is +1, then the jumping atom arrives at the head of the final dumbbell's orientation vector, and
         at the tail if c2 is -1.
+
+        Note: whenever a jump is used to represent a mixed dumbbell jumps, c1 and c2 are always +1,
+        since the solute is always considered to be at the head of the mixed dumbbell orientation vectors.
     """
     def __new__(cls, state1, state2, c1, c2):
         # Do Type checking of input stateects
