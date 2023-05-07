@@ -1912,8 +1912,10 @@ class pureDBContainer(object):
                 number or a list (corresponding to each sublattice)
         Returns:
             - jumpnetwork - the symmetrically grouped jumps
-                Each jump is defined as a jump object. See DB_Structs.
-            - jumpindices - the jumpnetworks with dbs in pair1 and pair2 indexed to iorset -> (i,j,dx)
+                Each jump is defined as a jump object (See DB_Structs)
+                Jump objects are named tuples with attributes (state1, state2, c1, c2)
+                In this case, state1 and state2 are the initial and final dumbbell states.
+            - jumpindices - the jumpnetworks with dumbbells indexed to iorlist -> (i,j,dx)
         """
         crys, chem, iorlist = self.crys, self.chem, self.iorlist
 

@@ -173,10 +173,13 @@ class jump(NT_jmp):
     """
         Class to define a generic jump/transition.
         A jump has four part - state1, state2, c1 and c2
-        - state1 - the initial state of a jump. Can be a dumbbell state or a solute-dumbbell pair.
+        - state1 - the initial state of a jump. Can be a dumbbell state or a solute-dumbbell pair state.
         - state2 - the final state of the jump reached by a dumbbell movement
         - c1 - the atom of the dumbbell which moves. can be -1 or +1. if c1 is +1, then it means that the
-        atom at the head of the state1 dumbbell's orientation vector makes the jump. If c1 is -1,
+        atom at the head of the state1 dumbbell's orientation vector makes the jump. If c1 is -1, it is the atom
+        at the tail that moves.
+        - c2 - if c2 is +1, then the jumping atom arrives at the head of the final dumbbell's orientation vector, and
+        at the tail if c2 is -1.
     """
     def __new__(cls, state1, state2, c1, c2):
         # Do Type checking of input stateects
@@ -241,7 +244,7 @@ class connector(NT_conn):
     """
     An object that simply connects two dumbbell objects (state1 and state2). It is a way to view the second
     dumbbell located in space relatively to the first dumbbell.
-    Similar to the jump object, but does not contain information regarding connecting path (c1, c2).
+    Similar to the jump object, but does not require information regarding connecting path (c1, c2).
     This is used to compute Green's functions between the dumbbells (see GFExpansion function in DBVectorStars).
     """
 
