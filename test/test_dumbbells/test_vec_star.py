@@ -390,8 +390,8 @@ class test_vecstars(unittest.TestCase):
             bias_cartesian = sum([tot_bias_solvent[i] * self.vec_stars.vecvec[i][0] for i in indlist])
             bias_cartesian2 = sum([tot_bias_solvent[i] * self.vec_stars.vecvec[i][n] for i in indlist])
 
-            self.assertTrue(np.allclose(bias_cartesian, bias_st_solvent))
-            self.assertTrue(np.allclose(bias_cartesian2, bias_st_solvent2))
+            self.assertTrue(np.allclose(bias_cartesian, bias_st_solvent, rtol=0, atol=1e-8))
+            self.assertTrue(np.allclose(bias_cartesian2, bias_st_solvent2, rtol=0, atol=1e-8))
 
     def test_bias2expansions(self):
 
