@@ -1,9 +1,6 @@
 Onsager
 =======
-
-[![PyPI version](https://img.shields.io/pypi/v/onsager.svg)](http://pypi.python.org/pypi/onsager)
-
-Documentation now available at the [Onsager github page](http://dallastrinkle.github.io/Onsager/). Please cite as [![DOI](https://zenodo.org/badge/14172/DallasTrinkle/Onsager.svg)](https://zenodo.org/badge/latestdoi/14172/DallasTrinkle/Onsager) or see `Onsager github <https://github.com/DallasTrinkle/Onsager>`_ for current version doi information.
+(Note: An official release for the dumbbell package is in progress. The codes are ready to use however.)
 
 The Onsager package provides routines for the general calculation of transport coefficients in vacancy-mediated diffusion and interstitial diffusion. It does this using a Green function approach, combined with point group symmetry reduction for maximum efficiency.
 
@@ -45,6 +42,7 @@ References
 * Dallas R. Trinkle, "Diffusivity and derivatives for interstitial solutes: Activation energy, volume, and elastodiffusion tensors." Philos. Mag. (2016) [doi:10.1080/14786435.2016.1212175](http://dx.doi.org/10.1080/14786435.2016.1212175); [arXiv:1605.03623](http://arxiv.org/abs/1605.03623)
 * Dallas R. Trinkle, "Automatic numerical evaluation of vacancy-mediated transport for arbitrary crystals: Onsager coefficients in the dilute limit using a Green function approach." Philos. Mag. (2017) [doi:10.1080/14786435.2017.1340685](http://dx.doi.org/10.1080/14786435.2017.1340685); [arXiv:1608.01252](http://arxiv.org/abs/1608.01252)
 * Dallas R. Trinkle, "A variational principle for mass transport." *submitted* (2018); [arXiv:1805.11618](http://arxiv.org/abs/1805.11618)
+* Soham Chattopadhyay and Dallas R. Trinkle, "Numerical calculation of interstitial dumbbell-mediated transport coefficients in dilute crystalline systems with non-truncated correlations", Philo. Mag. (2022) [doi:10.1080/14786435.2022.2120646](https://doi.org/10.1080/14786435.2022.2120646)
 
 
 Contributors
@@ -53,6 +51,7 @@ Contributors
 * Dallas R. Trinkle, initial design, derivation, and implementation.
 * Ravi Agarwal, testing of HCP interstitial calculations; testing of HCP vacancy-mediated diffusion calculations
 * Abhinav Jain, testing of HCP vacancy-mediated diffusion calculations.
+* Soham Chattopadhyay - Extending the package to compute transport coefficients for interstitial dumbbell-mediated diffusion.
 
 Thanks to discussions with Maylise Nastar (CEA, Saclay), Thomas Garnier (CEA, Saclay and UIUC), Thomas Schuler (CEA, Saclay), and Pascal Bellon (UIUC).
 
