@@ -1148,7 +1148,7 @@ from functools import reduce
 
 class DBStarSet(object):
     """
-    class to form the crystal stars (or state orbits) of complex solute-dumbbell states, with shells indicated by the number of jumps.
+    Class to form the crystal stars (or state orbits) of complex solute-dumbbell states, with shells indicated by the number of jumps.
     The minimum shell (Nshells=0) is composed of dumbbells situated atleast one jump away.
     Contains mixed dumbbell states as well.
     """
@@ -1475,7 +1475,7 @@ class DBStarSet(object):
 
     def sortstars(self):
         """
-        sorts the solute-dumbbell complex crystal stars in order of increasing solute-dumbbell separation distance.
+        Sorts the solute-dumbbell complex crystal stars in order of increasing solute-dumbbell separation distance.
         Note that this is called before mixed dumbbell stars are added in. The mixed dumbbells being in a periodic state
         space, all the mixed dumbbell states are at the origin anyway.
         """
@@ -2018,7 +2018,7 @@ class DBVectorStars(object):
 
     def GFexpansion(self):
         """
-        carries out the expansion of the Green's function in the basis of the state-vector orbits.
+        Carries out the expansion of the Green's function in the basis of the state-vector orbits.
 
         :return GFstarset_pure: (List of lists) symmetry-grouped connector objects for computing Green's functions.
         :return GFPureStarInd: dictionary mapping a connector object to a symmetry group in GFstartset_pure.
@@ -2312,7 +2312,7 @@ class DBVectorStars(object):
 
     def outer(self):
         """
-        computes the outer product tensor to perform 'bias *outer* gamma', i.e., the correlated part in the vector
+        Computes the outer product tensor to perform 'bias *outer* gamma', i.e., the correlated part in the vector
         star basis.
 
         :return outerprod: dimxdimxNvstarsxNvstars outer product tensor.
