@@ -1777,9 +1777,6 @@ class DBVectorStars(object):
 
         :param starset: StarSet, from which we pull nearly all of the info that we need
         """
-        # vecpos: list of "positions" (state indices) for each vector star (list of lists)
-        # vecvec: list of vectors for each vector star (list of lists of vectors)
-        # Nvstars: number of vector stars
 
         self.starset = None
         self.Nvstars = 0
@@ -1789,11 +1786,10 @@ class DBVectorStars(object):
 
     def generate(self, starset):
         """
-        Follows almost the same as that for solute-vacancy case. Only generalized to keep the state
-        under consideration unchanged.
-        Parameters:
-            - starset - the symmetry grouped list of lists of states.
-        Generates the full set of basis vectors for each state in the starset
+        Generates the full set of basis vectors for each state in the starset. Follows almost the same method as that for
+        solute-vacancy case, modified to handle solute-dumbbell state objects.
+
+        :param starset: the symmetry grouped list of lists of states.
         """
         self.starset = None
         if starset.Nshells == 0: return
@@ -1956,12 +1952,17 @@ class DBVectorStars(object):
 
     def genGFstarset(self):
         """
-        Makes symmetrically grouped connections between the states in the starset, to be used as GFstarset for the pure
-        and mixed state spaces.
-        The connections must lie within the starset and must connect only those states that are connected by omega_0 or
-        omega_2 jumps.
-        The GFstarset is to be returned in the form of (i,j),dx. where the indices i and j correspond to the states in
-        the iorlist
+        Makes symmetrically grouped connections between pairs of solute-pure dumbbell complex states in the star set, to be
+        used for computing the pure dumbbell Green's functions in the Dyson equation.
+
+        For connecting any two solute-pure dumbbell states, the GFstarset is returned in the form of (i,j),dx.
+        The indices i and j correspond to the indices of the pure dumbbells in the pure dumbbell container's iorlist.
+        dx corresponds to the separation distance between the pure dumbbells in the two solute-pure dumbbell complex
+        states being connected.
+
+        :return GFstarset_pure: (List of lists) symmetry-grouped connector objects for computing Green's functions.
+        :return GFPureStarInd: dictionary mapping a connector object to a symmetry group in GFstartset_pure.
+
         """
         complexStates = self.starset.complexStates
         mixedstates = self.starset.mixedstates
@@ -2017,7 +2018,12 @@ class DBVectorStars(object):
 
     def GFexpansion(self):
         """
-        carries out the expansion of the Green's function in the basis of the vector stars.
+        carries out the expansion of the Green's function in the basis of the state-vector orbits.
+
+        :return GFstarset_pure: (List of lists) symmetry-grouped connector objects for computing Green's functions.
+        :return GFPureStarInd: dictionary mapping a connector object to a symmetry group in GFstartset_pure.
+        :return GFexpansion_pure: expansion matrix for computing pure dumbbell Green's functions in the basis of
+        the state-vector orbits.
         """
         print("building GF starsets")
         start = time.time()
@@ -2057,13 +2063,23 @@ class DBVectorStars(object):
     def biasexpansion(self, jumpnetwork_omega1, jumpnetwork_omega2, jumptype, jumpnetwork_omega34):
         """
         Returns an expansion of the bias vector in terms of the displacements produced by jumps.
-        Parameters:
-            jumpnetwork_omega* - the jumpnetwork for the "*" kind of jumps (1,2,3 or 4)
-            jumptype - the omega_0 jump type that gives rise to a omega_1 jump type (see jumpnetwork_omega1 function
+        The bias expansions of the solute and solvent species are returned as a tuple of two numpy arrays for the omega 1, 2 3 and 4 jumps.
+        For jumps where the solute doesn't move, a "None" object is stored as the bias expansion.
+
+        :param jumpnetwork_omega1: (list of lists) the jumpnetwork for the omega_1 type of jumps
+        :param jumpnetwork_omega2: (list of lists) the jumpnetwork for the omega_2 type of jumps
+        :param jumptype: (list) the omega_0 jump type that gives rise to a omega_1 jump type (see jumpnetwork_omega1 function
             in stars.py module)
-        Returns:
-            bias0, bias1, bias2, bias4 and bias3 expansions, one each for solute and solvent
-            Note - bias0 for solute makes no sense, so we return only for solvent.
+        :param jumpnetwork_omega34: (list of lists) jump network containing omega_4 and omega_3 jumps.
+        In each list for symmetry-grouped jumps, the even indices should contain omega4 jumps, and the odd indices the corresponding
+        opposite omega_3 jump, in the same manner as produced in the jumpnetwork_omega34 function of the DBStartSet class.
+
+        :return bias0expansion: (numpy 2d array) solvent bias expansion due to omega0 jumps.
+        :return bias1expansion: (tuple) bias expansions due to omega 1 jumps.
+        :return bias2expansion: (tuple) bias expansions due to omega 2 jumps.
+        :return bias3expansion: (tuple) bias expansions due to omega 3 jumps.
+        :return bias4expansion: (tuple) bias expansions due to omega 4 jumps.
+        :return biasbareexpansion: (numpy 2d array) bias expansions of bare dumbbells due to omega 0 jumps.
         """
         z = np.zeros(self.crys.dim, dtype=float)
 
@@ -2190,12 +2206,7 @@ class DBVectorStars(object):
 
         if len(self.vecpos_bare) != 0:
             biasBareExpansion = zeroclean(biasBareExpansion)
-        # if len(self.vecpos_bare) == 0:
-        #     return zeroclean(bias0expansion), (zeroclean(bias1expansion_solute), zeroclean(bias1expansion_solvent)), \
-        #            (zeroclean(bias2expansion_solute), zeroclean(bias2expansion_solvent)), \
-        #            (None, zeroclean(bias3expansion_solvent)), \
-        #            (None, zeroclean(bias4expansion_solvent)), biasBareExpansion
-        # else:
+
         return zeroclean(bias0expansion), (None, zeroclean(bias1expansion_solvent)), \
                (zeroclean(bias2expansion_solute), zeroclean(bias2expansion_solvent)), \
                (None, zeroclean(bias3expansion_solvent)), \
@@ -2204,13 +2215,17 @@ class DBVectorStars(object):
     def rateexpansion(self, jumpnetwork_omega1, jumptype, jumpnetwork_omega34):
         """
         Implements expansion of the jump rates in terms of the basis function of the vector stars.
-        Parameters:
-            jumpnetwork_omega1 - the omega_1 jump network
-            jumptype - the omega_0 jump type that gives rise to a omega_1 jump type (see jumpnetwork_omega1 function
+
+        :param jumpnetwork_omega1: the omega_1 jump network
+        :param jumptype: the omega_0 jump type that gives rise to a omega_1 jump type (see jumpnetwork_omega1 function
             in stars.py module)
-            jumpnetwork_omega34 - the omega_4 and omega_3 jump networks.
-        Returns:
-            rateexpansion and escape rate expansions for omega0, omega1, omega2, omega3 and omega4 jumps
+        :param jumpnetwork_omega34: the omega_4 and omega_3 jumps, as produced in the jumpnetwork_omega34 function
+        of the DBStartSet class.
+        :return t0: rate expansion due to omega_0 jumps.
+        :return t1: rate expansion due to omega_1 jumps.
+        :return t2: rate expansion due to omega_2 jumps.
+        :return t3: rate expansion due to omega_3 jumps.
+        :return t4: rate expansion due to omega_4 jumps.
         """
         # See my slides of Sept. 10 for diagram
         rate0expansion = np.zeros((self.Nvstars_pure, self.Nvstars_pure, len(self.starset.jnet0)))
@@ -2299,8 +2314,8 @@ class DBVectorStars(object):
         """
         computes the outer product tensor to perform 'bias *outer* gamma', i.e., the correlated part in the vector
         star basis.
-        Returns:
-            - outerprod: dimxdimxNvstarsxNvstars outer product tensor.
+
+        :return outerprod: dimxdimxNvstarsxNvstars outer product tensor.
         """
         # print("Building outer product tensor")
         outerprod = np.zeros((self.crys.dim, self.crys.dim, self.Nvstars, self.Nvstars))
