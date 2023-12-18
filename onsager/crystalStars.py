@@ -1148,19 +1148,23 @@ from functools import reduce
 
 class DBStarSet(object):
     """
-    class to form the crystal stars of solute-dumbbell states, with shells indicated by the number of jumps.
+    class to form the crystal stars (or state orbits) of complex solute-dumbbell states, with shells indicated by the number of jumps.
     The minimum shell (Nshells=0) is composed of dumbbells situated atleast one jump away.
     Contains mixed dumbbell states as well.
     """
 
     def __init__(self, pdbcontainer, mdbcontainer, jnetwrk0, jnetwrk2, Nshells=None):
         """
-        Parameters:
-        pdbcontainer,mdbcontainer:
-            -containers containing the pure and mixed dumbbell information respectively
-        jnetwrk0, jnetwrk2: jumpnetworks in pure and mixed dumbbell spaces respectively.
-            Note - must send in both as pair states and indexed.
-        Nshells - number of thermodynamic shells. Minimum - one jump away - corresponds to Nshells=0
+        To create solute-dumbbell state orbits, we'll use the pure and mixed dumbbell containers and the jump
+        network to build the shells.
+
+        :param pdbcontainer: pureDBContainer container object (see crystal.py) containing the pure dumbbell information.
+        :param mdbcontainer: mixedDBContainer container object (see crystal.py) containing the mixed dumbbell information.
+        :param jnetwrk0: omega0 jumps of pure dumbbells generated from pdbcontainer. Must be a tuple containing the two
+        outputs of the pdbcontainer's jumpnetwork function (see crystal.py).
+        :param jnetwrk2: omega2 jumps of mixed dumbbells generated from mdbcontainer. Must be a tuple containing the two
+        outputs of the mdbcontainer's jumpnetwork function (see crystal.py).
+        :param Nshells: number of shells. Minimum (one jump away) corresponds to Nshells=0
         """
         # check that we have the same crystal structures for pdbcontainer and mdbcontainer
         if not np.allclose(pdbcontainer.crys.lattice, mdbcontainer.crys.lattice):
