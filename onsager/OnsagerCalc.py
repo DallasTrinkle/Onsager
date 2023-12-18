@@ -1610,11 +1610,8 @@ from scipy.linalg import pinv, pinvh
 
 class dumbbellMediated():
     """
-    class to compute dumbbell mediated solute transport coefficients. We inherit the calculator
-    for vacancies from Prof. Trinkle's code for vacancies with changes as and when required.
-
-    Here, unlike vacancies, we must compute the Green's Function by Block inversion
-    and Taylor expansion (as in the GFCalc module) for both bare pure (g0)
+    Calculator class to compute dumbbell mediated solute transport coefficients.
+    Here, unlike vacancies, we must compute the Green's Function for both bare pure (g0)
     and mixed(g2) dumbbells, since our Dyson equation requires so.
     Also, instead of working with crystal and chem, we work with the container objects.
     """
@@ -1622,18 +1619,19 @@ class dumbbellMediated():
     def __init__(self, pdbcontainer, mdbcontainer, jnet0data, jnet2data, cutoff, solt_solv_cut, solv_solv_cut,
                  closestdistance, NGFmax=4, Nthermo=0, omega43_indices=None):
         """
+        To initiate a transport coefficient calculatore, we start with the pure and mixed dumbbell containers and
+        their jump networks. From these, we'll build our state and state-vector orbits all the omega 1, 2 3 and 4
+        jump networks, compute the Green's functions between the various states with the Dyson equation approach,
+        and then compute the transport coefficients.
 
         :param pdbcontainer: The container object for pure dumbbells - instance of dbStates
         :param mdbcontainer: The container object for mixed dumbbell - instance of mStates
-
-        :param jnet0data - (jnet0, jnet0_indexed) - the jumpnetworks for pure dumbbells
+        :param jnet0data: tuple (jnet0, jnet0_indexed) - the jumpnetworks for pure dumbbells
             jnet0 - jumps are of the form (state1, state2, c1 ,c2) - must be produced from states in pdbcontainer.
             jnet0_indexed - jumps are of the form ((i, j),d x) - indices must be matched to states in pdbcontainer.
-
-        :param jnet2data - (jnet2, jnet2_indexed) - the jumpnetworks for mixed dumbbells
+        :param jnet2data: tuple (jnet2, jnet2_indexed) - the jumpnetworks for mixed dumbbells
             jnet2 - jumps are of the form (state1, state2, c1 ,c2) - must be produced from states in mdbcontainer.
             jnet2_indexed - jumps are of the form ((i, j), dx) - indices must be matched to states in mdbcontainer.
-
         :param cutoff: The maximum jump distance to be considered while building the jump networks
         :param solt_solv_cut: The collision cutoff between solute and solvent atoms
         :param solv_solv_cut: The collision cutoff between solvent and solvent atoms
@@ -1683,6 +1681,7 @@ class dumbbellMediated():
 
     def generate_jnets(self, cutoff, solt_solv_cut, solv_solv_cut, closestdistance):
         """
+        Generate the omega 1, 3 and 4 jump networks.
         Note - for mixed dumbbells, indexing to the iorlist is the same as indexing to mixedstates, as the latter is
         just the former in the form of SdPair objects, all of which are origin states.
         """
@@ -1701,8 +1700,10 @@ class dumbbellMediated():
 
     def regenerate43(self, indices):
         """
-        This will be used to extract a subset of omega43 jumps of interest
-        :param indices: indices - indices of jump lists to keep
+        This will be used to extract a subset of omega 3, 4 jumps of interest.
+
+        :param indices: list of integers corresponding to the indices of jump lists
+        to keep from an existing omega 3, 4 jump network.
         """
         self.jnet43 = [self.jnet43[i] for i in indices]
         self.jnet43_indexed = [self.jnet43_indexed[i] for i in indices]
@@ -1721,7 +1722,16 @@ class dumbbellMediated():
         self.biases = self.vkinetic.biasexpansion(self.jnet1, self.jnet2, self.om1types, self.jnet43)
 
     def generate(self, Nthermo, cutoff, solt_solv_cut, solv_solv_cut, closestdistance):
+        """
+        Generate the thermodynamic and kinetic shells.
 
+        :param Nthero: No. of shells (in terms of jumps starting from the solute site) to construct the thermodynamic
+        shell. The kinetic shell is then constructed by taking one more jump.
+        :param cutoff: the cutoff distance for the various kinds of jumps.
+        :param solt_solv_cut: threshold approach distance (for collisions) between solute and solvent species.
+        :param solv_solv_cut: threshold approach distance (for collisions) between two solvent atoms.
+        :param closestdistance: minimum allowable distance to check for collisions with other sublattice atoms.
+        """
         if Nthermo == getattr(self, "Nthermo", 0): return
         self.Nthermo = Nthermo
         print("generating thermodynamic shell")
@@ -1786,7 +1796,7 @@ class dumbbellMediated():
     # These are taken from the interstitial class by Prof. Trinkle
     @staticmethod
     def stateprob(pre, betaene, invmap):
-        """Returns our (i,or) probabilities, normalized, as a vector.
+        """Returns our probabilities, normalized, as a vector.
            Straightforward extension from vacancy case.
         """
         # be careful to make sure that we don't under-/over-flow on beta*ene
@@ -1812,11 +1822,12 @@ class dumbbellMediated():
                  for (i, j), dx in t]
                 for t, pT, beT in zip(jumpnetwork, preT, betaeneT)]
 
-    def calc_eta(self, rate0list, omega0escape): #, rate2list, omega2escape):
+    def calc_eta(self, rate0list, omega0escape):
         """
-        Function to calculate the periodic eta vectors.
-        rate0list - the NON-SYMMETRIZED rate lists for the bare and mixed dumbbell spaces.
-        We are calulcating the eta vectors, not the gamma vectors.
+        Function to calculate the relaxation vectors due to omega_0 rates in complex states.
+
+        :param rate0list: the non-symmetrized rate lists for the bare and mixed dumbbell spaces.
+        :param omega0escape: rate expansion of omega_0 escape rates.
         """
 
         # The non-local bias for the complex space has to be carried out based on the omega0 jumpnetwork,
@@ -1903,12 +1914,9 @@ class dumbbellMediated():
 
     def bias_changes(self):
         """
-        Function that allows us to construct new bias and bare expansions based on the eta vectors already calculated.
-
-        We don't want to repeat the construction of the jumpnetwork based on the recalculated displacements after
-        subtraction of the eta vectors (as in the variational principle).
-
-        The steps are illustrated in the GM slides of Feb 25, 2019 - will include in the detailed documentation later on
+        Function to compute changes in the solvent bias expansions based on the non-local solvent relaxation vectors
+        already calculated.
+        Note - function calc_eta needs to be called prior to this function to compute the omega_0 relaxations.
         """
         # create updates to the bias expansions
         # Construct the projection of eta vectors
@@ -1987,6 +1995,12 @@ class dumbbellMediated():
 
 
     def update_bias_expansions(self, rate0list, omega0escape):
+        """
+        Updates the solvent bias expansions with the changes in the bias due to subtraction of the non-local
+        (omega_0) relaxation vectors computed in bias_changes.
+        Note - function bias_changes needs to be called prior to this function to compute the bias changes in the bias
+        expansion due to omega_0 relaxations.
+        """
         self.calc_eta(rate0list, omega0escape)
         self.bias_changes()
         # self.bias1_solute_new = self.biases[1][0] # stars.zeroclean( + self.delbias1expansion_solute)
@@ -2003,14 +2017,22 @@ class dumbbellMediated():
 
     def bareExpansion(self, eta0_solvent):
         """
-        Returns the contributions to the terms of the uncorrelated diffusivity term,
-        grouped separately for each type of jump. Intended to be called after displacements have been applied to the displacements.
+        Returns the expansion matrix of the uncorrelated diffusivity term in the basis of the state-vector orbits,
+        grouped separately for each type of jump.
 
-        Params: The eta vectors in each state.
+        The uncorrelated contributions are returned as tuples for the omega_1, omega_2, omega_3 and omega_4 jumps.
+        as (Dexpansion_aa, Dexpansion_bb, D1expansion_ab), where "a" corresponds to the solute and "b" to the solvent,
+        and Dexpansion_aa gives the uncorrelated contribution to the solute-solute transport coefficient (L_aa) and
+        so on.
 
+        :param: The solvent relaxation vectors eta vectors in each state as obtained from the calc_eta function.
+        :return D0expansion_bb: (numpy 2d array) expansion of the uncorrelated term for the solvent-solvent transport coefficient due to
+        omega_0 jumps
+        :return D1expansions: tuple of uncorrelated contributions due to omega_1 jumps.
+        :return D2expansions: tuple of uncorrelated contributions due to omega_2 jumps.
+        :return D3expansions: tuple of uncorrelated contributions due to omega_3 jumps.
+        :return D4expansions: tuple of uncorrelated contributions due to omega_4 jumps.
 
-        In mixed dumbbell space, both solute and solvent will have uncorrelated contributions.
-        The mixed dumbbell space is completely non-local.
         """
         # a = solute, b = solvent
         # eta0_solute, eta0_solvent = self.eta0total_solute, self.eta0total_solvent
