@@ -2020,8 +2020,8 @@ class dumbbellMediated():
         Returns the expansion matrix of the uncorrelated diffusivity term in the basis of the state-vector orbits,
         grouped separately for each type of jump.
 
-        The uncorrelated contributions are returned as tuples for the omega_1, omega_2, omega_3 and omega_4 jumps.
-        as (Dexpansion_aa, Dexpansion_bb, D1expansion_ab), where "a" corresponds to the solute and "b" to the solvent,
+        The uncorrelated contribution expansion matrices are returned as tuples for the omega_1, omega_2, omega_3 and omega_4 jumps.
+        These tuples have the form (Dexpansion_aa, Dexpansion_bb, Dexpansion_ab), where "a" corresponds to the solute and "b" to the solvent,
         and Dexpansion_aa gives the uncorrelated contribution to the solute-solute transport coefficient (L_aa) and
         so on.
 
