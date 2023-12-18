@@ -22,7 +22,7 @@ def collision_self(dbcontainer, dbcontainer2, jump, cutoff12, cutoff13=None):
 
     def iscolliding(a0i, a1i, a0j, a1j, cutoff):
         """
-        checks if two atoms are considered to be colliding within the cutoff specified.
+        Checks if two atoms are considered to be colliding within the cutoff specified.
         The position of an atom 'i' as a function of fractional time (going from 0 to 1) is given by: R(t) = a0i + a1i * t
         Then the minimum squared distance between atoms 'i' and 'j' is then minimized as a function of time.
 
