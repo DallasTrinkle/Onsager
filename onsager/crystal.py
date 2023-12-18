@@ -1657,10 +1657,10 @@ from onsager.DB_collisions import collision_self, collision_others
 def DB_disp(dbcontainer, obj1, obj2):
     """
     Computes the transport vector for the initial and final states of a jump
-    param:
-        dbcontainer - dumbbell states container.
-        obj1,obj2 - the initial and final state objects of a jump
-        Return - site-to-site displacement vector when going from obj1 to obj2
+    :param dbcontainer: dumbbell states container object.
+    :param obj1: the initial state object of a dumbbell jump
+    :param obj2: the final state object of a dumbbell jump
+    :return dx: site-to-site displacement vector when going from obj1 to obj2
     """
     crys, chem = dbcontainer.crys, dbcontainer.chem
 
@@ -1679,12 +1679,11 @@ def DB_disp(dbcontainer, obj1, obj2):
 def DB_disp4(pdbcontainer, mdbcontainer, obj1, obj2):
     """
     Computes the transport vector for the initial and final states of a mixed dumbbell formation jump
-    param:
-        pdbcontainer - (pureDBContainer) pure dumbbell states container.
-        pdbcontainer - (pureDBContainer) mixed dumbbell states container.
-        obj1,obj2 - the initial and final states - must be of Omega4 type, meaning obj1 denotes
-        the solute-pure dumbbell complex state, and obj2 denoted the mixed dumbbell state.
-        Return - displacement when going from obj1 to obj2
+    :param pdbcontainer: pure dumbbell states container.
+    :param mdbcontainer: mixed dumbbell states container.
+    :param obj1: the initial solute-pure dumbbell complex state of an omega4 type dumbbell jump.
+    :param obj2: the final mixed dumbbell state of an omega4 type dumbbell jump.
+    :return dx: displacement when going from obj1 to obj2.
     """
     true_crys = np.allclose(pdbcontainer.crys.lattice, mdbcontainer.crys.lattice, atol=pdbcontainer.crys.threshold)
 
@@ -1726,7 +1725,7 @@ class pureDBContainer(object):
         a single vector that denotes a particular orientation a dumbbell can take in this lattice. The length
         of the orientation is important in that it is used to analzye collisions during atomic jumps. It is recommended
         to use lengths no more than the atomic diameter of the host/solvent atom.
-        Parameters:
+        :parameters:
             - crys : (crystal object) the crystal object
             - chem : (int) the chemistry/sublattice index
             - family : (list of numpy vectors) all the orientations allowed to be taken by the pure dumbbell
