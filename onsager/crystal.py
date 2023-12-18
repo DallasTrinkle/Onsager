@@ -2077,7 +2077,7 @@ class mixedDBContainer(pureDBContainer):
 
     def genmixedsets(self):
         """
-        function to generate (basis site, orientation index) list for mixed dumbbells.
+        Function to generate (basis site, orientation index) list for mixed dumbbells.
 
         :return pairlist: list of all (basis site, orientation index) tuples denoting mixed dumbbells.
         """
@@ -2226,7 +2226,7 @@ class mixedDBContainer(pureDBContainer):
 
     def getIndex(self, t):
         """
-        get the index of a mixed dumbbell, if it exists in the container.
+        Get the index of a mixed dumbbell, if it exists in the container.
 
         :param t: tuple containing (basis site index, orientation) of the dumbbell
         :return idx: (integer) - the index of (i, o) in the iorlist, if it exists.
