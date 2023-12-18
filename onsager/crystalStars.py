@@ -1212,10 +1212,9 @@ class DBStarSet(object):
     def _sortkey(self, entry):
         """
         A key function to compute solute-dumbbell distances to sort the crystal stars.
-        Parameter:
-            entry : SdPair object
-        Returns:
-            (float) the distance between the solute and dumbbell sites.
+
+        :param entry: SdPair object:
+        :returns dist: (float) the distance between the solute and dumbbell sites.
         """
         sol_pos = self.crys.unit2cart(entry.R_s, self.crys.basis[self.chem][entry.i_s])
         db_pos = self.crys.unit2cart(entry.db.R,
@@ -1224,13 +1223,12 @@ class DBStarSet(object):
 
     def genIndextoContainer(self, complexStates, mixedstates):
         """
-        Function to get the (i, or) index of the dumbbells in their containers
-        Parameters:
-            complexStates : list of solute-pure dumbbell complex states as SdPair objects.
-            mixedstates : list of mixed dumbbells as SdPair objects.
-        Returns:
-            pureDict, mixedDict : SdPair object -> (i, or) dicts containing the indices of the pure and mixed states
-            in their respective containers.
+        Function to get the index of solute-dumbbell states in their respective container objects.
+
+        :param complexStates: list of solute-pure dumbbell complex states as SdPair objects.
+        :param mixedstates: list of mixed dumbbells as SdPair objects.
+        :return pureDict: Dictionary with SdPair object -> (i, or) mapping of the solute-pure dumbbell complex states.
+        :return mixedDict: Dictionary with SdPair object -> (i, or) mapping of the mixed dumbbell states.
         """
         pureDict = {}
         mixedDict = {}
@@ -1249,26 +1247,23 @@ class DBStarSet(object):
 
         Also indexes the states contained in the starset
         All the indexing are done into the following lists
-        ->complexStates, mixedstates - lists SdPair objects, containing the complex and mixed dumbbells that make up the starset.
-        States are assgined indices based on their position in these lists.
-
-        ->stars, starindexed -> contain symmetry grouped lists of states, and the corresponding indexed version.
-        --complexIndexdict, mixedindexdict -> tell us the location of a state within the starset
+        - complexStates, mixedstates -> two lists of SdPair objects, containing the complex and mixed dumbbells that make up the starset.
+        States are assigned indices based on their position in these lists.
+        - stars, starindexed -> contain symmetry grouped lists of states (the orbits), and the corresponding indexed version,
+        which contains the index of a state in the complexStates or mixedStates lists. complex state orbits are stored first,
+        then mixed state orbits. An integer named mixedstartindex is created that stores the first index of the mixed state orbits.
+        - complexIndexdict, mixedindexdict -> tell us of the location of a state within stars (orbits).
         Example - if the "i^th" group of states (stars[i]) contains the state "s" which is the j^th state in "complexStates",
-        then complexIndexdict[s] = (j, i)
-
+        then complexIndexdict[s] = (j, i).
         Corresponding indices are also built for pure dumbbells.
-        ->bareStates - list of dumbbell objects containing the pure dumbbells in a unit cell.
-        ->barePeriodicStars, bareStarindexed - symmetry grouped pure dumbbell objects that periodically repeat in the lattice.
-                              The corresponding (i, or) version can also be found in the "symorlist" and "symIndlist"
-                              of the pure dumbbell container
+        -bareStates -> list of dumbbell objects containing the pure dumbbells in a unit cell.
+        - barePeriodicStars, bareStarindexed -> symmetry grouped pure dumbbell objects that periodically repeat in the lattice.
+        The corresponding (i, or) version can also be found in the "symorlist" and "symIndlist" of the pure dumbbell container.
+        - bareindexdict -> gives the symmetry position and position within the symmetry list in barePeriodicStars for a pure dumbbell.
 
-        ->bareindexdict - gives the symmetry position and position within the symmetry list in barePeriodicStars for a pure dumbbell.
-
-        Parameters:
-            Nshells : number of shells to look at - the shells are counted in terms of the jumps.
-            Example - Nshells = 2 indicated 1nn of 1nn sites from the solute will be considered.
-            All dumbbell orientations are considered for every site to generate the states.
+        :param Nshells: number of shells to look at - the shells are counted in terms of the jumps.
+        Example - Nshells = 2 indicated 1nn of 1nn sites from the solute will be considered.
+        All dumbbell orientations are considered at every site to generate the states.
         """
 
         # Return nothing if Nshells are not specified
@@ -1479,7 +1474,8 @@ class DBStarSet(object):
         print("building bare, mixed index dicts : {}".format(time.time() - start))
 
     def sortstars(self):
-        """sorts the solute-dumbbell complex crystal stars in order of increasing solute-dumbbell separation distance.
+        """
+        sorts the solute-dumbbell complex crystal stars in order of increasing solute-dumbbell separation distance.
         Note that this is called before mixed dumbbell stars are added in. The mixed dumbbells being in a periodic state
         space, all the mixed dumbbell states are at the origin anyway.
         """
@@ -1505,19 +1501,15 @@ class DBStarSet(object):
         Only jumps between states that have been considered within the starset are allowed to be present.
         Also, omega-1 jumps do not move the solute.
 
-        Returns:
-            - 3-tuple containing:
+        :return t: a 3-tuple containing:
                 - jumpnetwork - (list of lists of "jump" objects) the symmetry grouped jumps between solute-pure dumbbell
                 complex states within the starset.
-
                 - jumpindexed - (list of lists of tuples) indexed version of the jumpnetwork, containing tuples of the form
                 (i, j), dx - where i and j denote the indices of the initial and final states and dx
                 is the site-to-site distance for the jump.
-
                 - jtags - dictionary of lists containing initial(key) and all final states(values) of dumbbell jumps. This is used in
                 non-local relaxation vector calculations.
-
-            - jumptype - list mapping back the omega_1 jumps to omega_0 jumps.
+        :return jumptype: list mapping back the omega_1 jumps to omega_0 jumps.
         """
         jumpnetwork = []
         jumpindexed = []
@@ -1618,24 +1610,22 @@ class DBStarSet(object):
     def jumpnetwork_omega34(self, cutoff, solv_solv_cut, solt_solv_cut, closestdistance):
         """
          Builds the omega_4 and omega_3 jump networks between the complex states jumping to mixed dumbbells and vice versa.
-         Parameters:
-             - cutoff - the cutoff distance for the jump.
-             - solv_solv_cut - collision threshold distance between two solvent atoms.
-             - solt_solv_cut - collision threshold distance between the solute and a solvent atom.
-
-         Returns:
-             3 tuples (T1, T2, T3).
-             T1 contains both omega4 and omega3 jumps together. T2 has omega4 and T3 omega_3 jumps
-             respectively.
-             Each elemnet of T1, T2 and T3 correspond to:
-                 - jumpnetwork - (list of lists of "jump" objects) - The even jumps are omega_4 jumps in T1, and the odd ones omega_3
-
-                 - jumpindexed - indexed version of the jumpnetworks, containing tuples of the form (i, j), dx
+         Creates three 3-tuples: t43, t4 and t3. t43 contains information about both omega4 and omega3 jumps,
+         t4 contains information about only omega4 jumps, and t3 contains information about omega3 jumps.
+         Each element of a tuple (either t43, t4 or t3) corresponds to:
+         - jumpnetwork - (list of lists of "jump" objects) - The even jumps are omega_4 jumps in T1, and the odd ones omega_3
+         - jumpindexed - indexed version of the jumpnetworks, containing tuples of the form (i, j), dx
                  Note - The indices for solute-pure dumbbell complexes are indexed found in complexIndexdict
                  and that of the mixed dumbbells in the mixedindexdict dictionaries.
-
-                 - jtags - dictionary of lists containing initial (key) and all final states (values) of dumbbell jumps. This is used in
+         - jtags - dictionary of lists containing initial (key) and all final states (values) of dumbbell jumps. This is used in
                  non-local relaxation vector calculations.
+
+         :param cutoff: the cutoff distance for the jump.
+         :param solv_solv_cut: collision threshold distance between two solvent atoms.
+         :param solt_solv_cut: collision threshold distance between the solute and a solvent atom.
+         :return t43: a 3-tuple containing both omega4 and omega3 jumps together.
+         :return t4: a 3-tuple containing only the omega4 jumps.
+         :return t3: a 3-tuple containing only the omega 3 jumps
          """
         # building omega_4 -> association - c2=-1 -> since solvent movement is tracked
         # cutoff required - solute-solvent as well as solvent solvent
@@ -1778,12 +1768,12 @@ class DBStarSet(object):
 
 class DBVectorStars(object):
     """
-    Stores the vector stars corresponding to a given starset of dumbbell states
+    Stores the vector stars (or state-vector orbits) corresponding to a given starset of dumbbell states
     """
 
     def __init__(self, starset=None):
         """
-        Initiates a vector-star generator; work with a given star.
+        Creates the state-vector orbits by considering states within state orbits.
 
         :param starset: StarSet, from which we pull nearly all of the info that we need
         """
