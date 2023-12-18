@@ -1904,7 +1904,7 @@ class pureDBContainer(object):
 
         :param cutoff: maximum jump distance.
         :param solv_solv_cut: minimum allowable distance between two solvent atoms - to check for collisions
-        :param closestdistance: minimum allowable distance to check for collisions with other atoms. Can be a single
+        :param closestdistance: minimum allowable distance to check for collisions with other sublattice atoms. Can be a single
         number or a list (corresponding to each sublattice)
         :return jumpnetwork: the symmetrically grouped jumps. Each jump is defined as a jump object (See DB_Structs)
         :return jumpindices: the jumpnetworks with dumbbells indexed to iorlist -> (i,j,dx)
@@ -2149,7 +2149,7 @@ class mixedDBContainer(pureDBContainer):
 
         :param cutoff: maximum jump distance.
         :param solt_solv_cut: minimum allowable distance between solute and solvent atoms - to check for collisions
-        :param closestdistance: minimum allowable distance to check for collisions with other atoms. Can be a single
+        :param closestdistance: minimum allowable distance to check for collisions with other sublattice atoms. Can be a single
         number or a list (corresponding to each sublattice)
         :return jumpnetwork: the symmetrically grouped jumps. Each jump is defined as a jump object (See DB_Structs).
         For mixed dumbbells jumps, the initial and final states are SdPair objects instead of dumbbell objects, and
