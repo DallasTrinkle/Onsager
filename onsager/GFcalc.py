@@ -546,7 +546,7 @@ class GF_dumbbells(GFCrystalcalc):
 
     def __init__(self, container, jumpnetwork, Nmax=4, kptwt=None):
         """
-        Straigforward extenstion of the vacancy to the pure dumbbell case.
+        Straightforward extension of the vacancy to the pure dumbbell case.
 
         :param container: the pure dumbbell container object.
         :param jumpnetwork: the pure dumbbell (omega_0) jump network.
