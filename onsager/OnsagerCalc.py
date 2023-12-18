@@ -2122,26 +2122,45 @@ class dumbbellMediated():
                         preT1, eneT1, preT43, eneT43):
         """
         Similar to the function for vacancy mediated OnsagerCalc. Takes in the energies and entropic pre-factors for
-        the states and transition states and returns the corresponding free energies. The difference from the vacancy case
-        is the consideration of more types of states ans transition states.
+        the states (ene*, pre*) and transition states (preT*, eneT*) and returns the corresponding free energies.
 
-        Parameters:
-            pre* - entropic pre-factors
-            ene* - state/transition state energies.
-        The pre-factors for pure dumbbells are matched to the symmorlist. For mixed dumbbells the mixedstarset and
-        symmorlist are equivalent and the pre-factors are energies are matched to these.
-        For solute-dumbbell complexes, the pre-factors and the energies are matched to the star set.
+        The pre-factors and energies for pure dumbbells (predb0 and enedb0) should be matched to the symmorlist of the
+        corresponding pure dumbbell container object (i.e, there is one value for a given symmetry group).
+        Similarly, for mixed dumbbells, the pre-factors and energies (predb2 and enedb2) should be matched to the symmorlist
+        of the corresponding mixed dumbbell container object.
+        For solute-dumbbell complexes, the pre-factors and the energies are matched to the star set. However,
+        for the solute-dumbbell complexes, eneSdb and preSdb are the binding (excess) energies and pre
+        factors respectively.
+        For all the transition states, the pre-factors and energies for transition states are matched to
+        symmetry-unique jump types.
 
-        Note - for the solute-dumbbell complexes, eneSdb and preSdb are the binding (excess) energies and pre
-        factors respectively. We need to evaluate the total configuration energy separately.
-
-        For all the transitions, the pre-factors and energies for transition states are matched to symmetry-unique jump types.
-
-        Returns :
-        bFdb0, bFdb2, bFS, bFSdb, bFT0, bFT1, bFT2, bFT3, bFT4
-        the free energies for the states and transition states. Used in L_ij() and getsymmrates() to get the
-        symmetrized transition rates.
-
+        :param kT: Boltzmann constant multiplied by the temperature.
+        :param predb0: (numpy 1d array) pure dumbbell pre-factors, one for each each symmetry group.
+        :param eneb0: (numpy 1d array) pure dumbbell energies, one for each each symmetry group.
+        :param preS: (numpy 1d array) solute pre-factors, one for each each Wyckoff set. Since we consider
+        diffusion in a sinlge sublattice, this will be an array of only one element.
+        :param eneS: (numpy 1d array) solute formation energies, same shape as preS.
+        :param preSdb: (numpy 1d array) solute-pure dumbbell excess pre-factor. One for each complex state orbit.
+        :param eneSdb: (numpy 1d array) solute-pure dumbbell excess energy. One for each complex state orbit.
+        :param predb2: (numpy 1d array) mixed dumbbell pre-factors, one for each symmetry group.
+        :param enedb2: (numpy 1d array) mixed dumbbell energies, one for each symmetry group.
+        :param preT0: (numpy 1d array) transition state pre-factors for omega_0 jumps.
+        :param eneT0: (numpy 1d array) transition state energies for omega_0 jumps.
+        :param preT2: (numpy 1d array) transition state pre-factors for omega_2 jumps.
+        :param eneT2: (numpy 1d array) transition state energies for omega_2 jumps.
+        :param preT1: (numpy 1d array) transition state pre-factors for omega_1 jumps.
+        :param eneT1: (numpy 1d array) transition state energies for omega_1 jumps.
+        :param preT43: (numpy 1d array) transition state pre-factors for omega_43 jumps.
+        :param eneT43: (numpy 1d array) transition state energies for omega_43 jumps.
+        :return bFdb0: Free energy (divided by kT) for pure dumbbell formation.
+        :return bFdb2: Free energy (divided by kT) for mixed dumbbell formation.
+        :return bFS: Free energy (divided by kT) for solute formation.
+        :return bFSdb: excess free energy (divided by kT) for solute-pure dumbbell complex formation.
+        :return bFT0: Free energy (divided by kT) for omega_0 transition state formation.
+        :return bFT1: Free energy (divided by kT) for omega_1 transition state formation.
+        :return bFT2: Free energy (divided by kT) for omega_2 transition state formation.
+        :return bFT3: Free energy (divided by kT) for omega_3 transition state formation.
+        :return bFT4: Free energy (divided by kT) for omega_4 transition state formation.
 
         """
         beta = 1. / kT
@@ -2176,6 +2195,16 @@ class dumbbellMediated():
 
     def getsymmrates(self, bFdb0, bFdb2, bFSdb, bFT0, bFT1, bFT2, bFT3, bFT4):
         """
+        Compute the symmetrixed escape rates for multiplying with the rate expansions.
+        For each type of jump, the symmetrized rates are returned as tuples of the form (om, om_escape), where
+        om is a 1-d array having as many elements as the number of symmetry-unique jump, with om[i] containing the
+        symmetrized jump rate of the "i^th" symmetry-unique jump.
+        om_escape is a 2-d array.
+        For omega_0 jumps, om_escape[i,j] contains the non-symmetrized omega_0 jump rate for the i^th jump type out of a state
+        in the j^th symmetry-group.
+        For all other jumps, om_escape[i,j] contains the non-symmetrized jump rate for the i^th jump type out of a state
+        in the j^th state-vector orbit.
+
         :param bFdb0: beta * ene_db0 - ln(pre_db0) - relative to bFdb0min
         :param bFdb2: beta * ene_db2 - ln(pre_db2) - relative to bFdb2min
         :param bFSdb: beta * ene_Sdb - ln(pre_Sdb) - Total (not excess) - Relative to bFdb0min + bFSmin
@@ -2184,7 +2213,11 @@ class dumbbellMediated():
         :param bFT2: beta * ene_T2 - ln(pre_T2) - relative to bFdb2min
         :param bFT3: beta * ene_T3 - ln(pre_T3) - relative to bFdb2min
         :param bFT4: beta * ene_T4 - ln(pre_T4) - relative to bFdb0min + bFSmin
-        :return:
+        :return omega0data: tuple of (omega_0, omega_0 escape) arrays
+        :return omega1data: tuple of (omega_1, omega_1 escape) arrays
+        :return omega2data: tuple of (omega_2, omega_2 escape) arrays
+        :return omega3data: tuple of (omega_3, omega_3 escape) arrays
+        :return omega4data: tuple of (omega_4, omega_4 escape) arrays
         """
         Nvstars_mixed = self.vkinetic.Nvstars - self.vkinetic.Nvstars_pure
 
@@ -2314,7 +2347,13 @@ class dumbbellMediated():
 
     def makeGF(self, bFdb0, bFT0, omegas, mixed_prob):
         """
-        Constructs the N_vs x N_vs GF matrix.
+        Constructs the GF matrix with the Dyson equation approach.
+
+        :param bFdb0: pure dumbbell formation energies.
+        :param bFT0: pure dumbbe transition state formation energies.
+        :return GF_total: the Green's function matrix.
+        :return GF02: the non-local Green's function matrix without corrections.
+        :return delta_om: the corrections to the transition rates due to solute-dumbbell interactions and omega43 jumps.
         """
         # if not hasattr(self, 'G2'):
         #     raise AttributeError("G2 not found yet. Please run calc_eta first.")
@@ -2385,27 +2424,32 @@ class dumbbellMediated():
     def L_ij(self, bFdb0, bFT0, bFdb2, bFT2, bFS, bFSdb, bFT1, bFT3, bFT4):
 
         """
-        bFdb0[i] = beta*ene_pdb[i] - ln(pre_pdb[i]), i=1,2...,N_pdbcontainer.symorlist - pure dumbbell free energy
-        bFdb2[i] = beta*ene_mdb[i] - ln(pre_mdb[i]), i=1,2...,N_mdbcontainer.symorlist - mixed dumbbell free energy
-        bFS[i] = beta*ene_S[i] - _ln(pre_S[i]), i=1,2,..N_Wyckoff - site free energy for solute.
-        THE ABOVE THREE VALUES ARE NOT SHIFTED RELATIVE TO THEIR RESPECTIVE MINIMUM VALUES.
-        We need them to be unshifted to be able to normalize the state probabilities, which requires complex and
-        mixed dumbbell energies to be with respect to the same reference. Shifting with their respective minimum values
-        disturbs this.
-        Wherever shifting is required, it is done in-place.
+        Computes the transport coefficients.
+        The computed transport coefficients are in units of concentrations. Except for the bare dumbbell diffusivity term,
+        they are returned as tuples of (L_uc, L_c), where L_uc corresponds to the uncorrelated contribution and L_c to
+        the correlated contributions.
+        For example, the solute-solute transport coefficient in units of concentrations can be computed as
+        L_uc_aa + L_c_aa where "a" denotes the solute, and so on for the other transport coefficients.
 
-        bFSdb - beta*ene_Sdb[i] - ln(pre_Sdb[i]) [i=1,2...,mixedstartindex](binding)] excess free energy of interaction
-        between a solute and a pure dumbbell in it's vicinity. This must be non-zero only for states within the
-        thermodynamic shell. So the size is restricted to the number of thermodynamic crystal stars.
-
-        Jump barrier free energies (See preene2betaene for details):
-        bFT0[i] = beta*ene_TS[i] - ln(pre_TS[i]), i=1,2,...,N_omega0 - Shifted
-        bFT2[i] = beta*ene_TS[i] - ln(pre_TS[i]), i=1,2,...,N_omega2 - Shited
-        bFT1[i] = beta*eneT1[i] - len(preT1[i]) -> i = 1,2..,N_omega1 - Shifted
-        bFT3[i] = beta*eneT3[i] - len(preT3[i]) -> i = 1,2..,N_omega3 - Shifted
-        bFT4[i] = beta*eneT4[i] - len(preT4[i]) -> i = 1,2..,N_omega4 - Shifted
-        # See the preene2betaene function to see what the shifts are.
+        :param bFdb0: Free energy (divided by kT) for pure dumbbell formation.
+        :param bFT0: Free energy (divided by kT) for omega_0 transition state formation.
+        :param bFdb2: Free energy (divided by kT) for mixed dumbbell formation.
+        :param bFT2: Free energy (divided by kT) for omega_2 transition state formation.
+        :param bFS: Free energy (divided by kT) for solute formation.
+        :param bFSdb: excess free energy (divided by kT) for solute-pure dumbbell complex formation.
+        :param bFT1: Free energy (divided by kT) for omega_1 transition state formation.
+        :param bFT3: Free energy (divided by kT) for omega_3 transition state formation.
+        :param bFT4: Free energy (divided by kT) for omega_4 transition state formation.
+        L0bb, (L_uc_aa, L_c_aa), (L_uc_bb, L_c_bb), (L_uc_ab, L_c_ab)
+        :return L0bb: the bare dumbbell diffusivity without the solute interactions. scales as c_b.
+        :return L_aa: tuple (L_uc_aa, L_c_aa) containing the uncorrelated and correlated contributions to the solute transport coefficient.
+        Scales as c_a*c_b.
+        :return L_bb: tuple (L_uc_bb, L_c_bb) containing the uncorrelated and correlated contributions to the
+        corrections to L0bb due to solute interactions. Scales as c_a*c_b.
+        :return L_ab: tuple (L_uc_ab, L_c_ab) containing the uncorrelated and correlated contributions to the
+        solute-solvent transport coefficients. Scales as c_a*c_b.
         """
+
         if not len(bFSdb) == self.thermo.mixedstartindex:
             raise TypeError("Interaction energies must be present for all and only all thermodynamic shell states.")
         for en in bFSdb[self.thermo.mixedstartindex + 2:]:
