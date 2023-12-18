@@ -6,14 +6,12 @@ def collision_self(dbcontainer, dbcontainer2, jump, cutoff12, cutoff13=None):
     Check if the three atoms involved in a dumbbell jumping from one site to the next
     are colliding or not.
 
-    params:
-        dbcontainer - the dumbell states container (in crystal module)
-        dbcontainer2 - the second container if the jumps are occuring between pure and mixed dumbbell spaces.
-        jump - the jump object representing the transitions
-        cutoff12 - minimum allowed distance between the two atoms in the initial dumbbell.
-        cutoff13 - minimum allowed distance between the two atoms in the final dumbbell.
-    Returns:
-        True if atoms collide. False otherwise
+    :params dbcontainer: the dumbell states container (in crystal module)
+    :param dbcontainer2: the second container if the jumps are occuring between pure and mixed dumbbell spaces. "None" otherwise
+    :param jump: the jump object representing the transitions
+    :param cutoff12: minimum allowed distance between the two atoms in the initial dumbbell.
+    :param cutoff13: minimum allowed distance between the two atoms in the final dumbbell.
+    :return bool: True if atoms collide. False otherwise
     """
     crys, chem = dbcontainer.crys, dbcontainer.chem
     if cutoff13 == None:
@@ -24,18 +22,16 @@ def collision_self(dbcontainer, dbcontainer2, jump, cutoff12, cutoff13=None):
 
     def iscolliding(a0i, a1i, a0j, a1j, cutoff):
         """
-        checks if two atoms are considered to be colliding within the cutoff specified
-        Parameters:
-            - a0i - the initial position of the first atom.
-            - a1i - the total dispalcement of the first atom during the jump (a0i + a1i is the final positon).
-            - a0j - the initial position of the second atom.
-            - a1j - the total dispalcement of the second atom during the jump.
-
+        checks if two atoms are considered to be colliding within the cutoff specified.
         The position of an atom 'i' as a function of fractional time (going from 0 to 1) is given by: R(t) = a0i + a1i * t
         Then the minimum squared distance between atoms 'i' and 'j' is then minimized as a function of time.
 
-        Returns:
-             True if the given atom pair comes closer than cutoff within t=0 or t=1, False otherwise.
+        :param a0i: the initial position of the first atom.
+        :param a1i: the total displacement of the first atom during the jump (a0i + a1i is the final position).
+        :param a0j: the initial position of the second atom.
+        :param a1j: the total displacement of the second atom during the jump.
+
+        :return bool: True if the given atom pair comes closer than cutoff within t=0 or t=1, False otherwise.
         """
 
         num = np.dot((a1i - a1j), (a0i - a0j))
@@ -108,14 +104,12 @@ def collision_self(dbcontainer, dbcontainer2, jump, cutoff12, cutoff13=None):
 def collision_others(container, container2, jmp, closestdistance):
     """
     Takes a jump and sees if the moving atom of the dumbbell collides with any other atom, within a cuttoff distance.
-    params:
-        container - the dumbbell states container (instance of either dbStates or mStates from states.py module)
-        container - the second dumbbell states container in case the jumps are occurring between pure and mixed spaces.
-        jmp - the jump object to test.
-        supervect - The lattice vectors upto which the jumps extend.
-        closestdistance - (A list or a number) minimum allowable distance to other atoms
-    Returns:
-        True if atoms collide. False otherwise.
+
+    :params container: the dumbbell states container.
+    :param container2: the second dumbbell states container in case the jumps are occurring between pure and mixed dumbbells. "None" otherwise.
+    :param jmp: the jump object to test.
+    :param closestdistance: (A list or a number) minimum allowable distance to other atoms in other sublattices.
+    :return bool: True if atoms collide. False otherwise.
     """
     if container2 is None:
         container2=container
