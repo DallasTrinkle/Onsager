@@ -547,6 +547,11 @@ class GF_dumbbells(GFCrystalcalc):
     def __init__(self, container, jumpnetwork, Nmax=4, kptwt=None):
         """
         Straigforward extenstion of the vacancy to the pure dumbbell case.
+
+        :param container: the pure dumbbell container object.
+        :param jumpnetwork: the pure dumbbell (omega_0) jump network.
+        :param Nmax: Defines maximum range for kpt mesh generation (same as for vacancies in the GFCrystalCalc class)
+        :param kptwt: optional tuple of (kpt, wts) same as the case of vacancies in the GFCrystalCalc class)
         """
         # this is really just used by loadHDF5() to circumvent __init__
         if all(x is None for x in (container, jumpnetwork)): return
