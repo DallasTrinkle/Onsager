@@ -123,7 +123,7 @@ class GFCrystalcalc(object):
                           for i in range(self.crys.dim)])
         bmagn /= np.power(np.product(bmagn), 1 / self.crys.dim)
         # make sure we have even meshes
-        self.kptgrid = np.array([2 * np.int(np.ceil(2 * Nmax * b)) for b in bmagn], dtype=int) \
+        self.kptgrid = np.array([2 * int(np.ceil(2 * Nmax * b)) for b in bmagn], dtype=int) \
             if kptwt is None else np.zeros(self.crys.dim, dtype=int)
         self.kpts, self.wts = crys.reducekptmesh(crys.fullkptmesh(self.kptgrid)) \
             if kptwt is None else deepcopy(kptwt)
