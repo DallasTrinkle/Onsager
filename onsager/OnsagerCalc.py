@@ -21,7 +21,7 @@ Now with HDF5 write / read capability for VacancyMediated module
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-from scipy.linalg import pinv2, solve
+from scipy.linalg import pinv, solve
 import copy, collections, itertools, warnings
 from functools import reduce
 from onsager import GFcalc
@@ -90,7 +90,7 @@ class Interstitial(object):
             self.bias_solver = lambda omega, b: -solve(-omega, b, sym_pos=True)
         else:
             # pseudoinverse required:
-            self.bias_solver = lambda omega, b: np.dot(pinv2(omega), b)
+            self.bias_solver = lambda omega, b: np.dot(pinv(omega), b)
         # these pieces are needed in order to compute the elastodiffusion tensor
         self.sitegroupops = self.generateSiteGroupOps()  # list of group ops to take first rep. into whole list
         self.jumpgroupops = self.generateJumpGroupOps()  # list of group ops to take first rep. into whole list
@@ -1514,7 +1514,7 @@ class VacancyMediated(object):
             OSprobV = self.OSfolddown*probVsqrt  # proper null space projection
             biasSbar = np.dot(OSprobV, biasSvec)
             om2bar = np.dot(OSprobV, np.dot(om2, OSprobV.T))  # OS x OS
-            etaSbar = np.dot(pinv2(om2bar), biasSbar)
+            etaSbar = np.dot(pinv(om2bar), biasSbar)
             dDss = np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
                                  etaSbar), biasSbar) / self.N
             D0ss += dDss
