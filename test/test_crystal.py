@@ -923,7 +923,7 @@ class KPTgentest(unittest.TestCase):
         """Can we construct a mesh with the correct number of points?"""
         # reset
         kpts = self.crys.fullkptmesh(self.N)
-        self.assertEqual(kpts.shape[0], np.product(self.N))
+        self.assertEqual(kpts.shape[0], np.prod(self.N))
         self.assertEqual(kpts.shape[1], 3)
 
     def testKPT_BZ_Gpoints(self):

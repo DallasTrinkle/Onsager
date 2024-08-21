@@ -1525,7 +1525,7 @@ class Crystal(object):
         :param Nmesh: mesh divisions Nmesh[0] x Nmesh[1] x Nmesh[2]
         :return kpt: array[Nkpt][3] of kpoints
         """
-        Nkpt = np.product(Nmesh)
+        Nkpt = np.prod(Nmesh)
         if Nkpt == 0: return
         # dN = np.array([1 / x for x in Nmesh])
         # # use a list comprehension to iterate and build:
