@@ -12,8 +12,7 @@ __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
 from numbers import Number
-from scipy.special import factorial
-from scipy.misc import comb
+from scipy.special import factorial, comb
 
 
 class Taylor3D(object):
