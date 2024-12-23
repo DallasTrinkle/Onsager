@@ -1,6 +1,5 @@
 Onsager
 =======
-(Note: The codes for dumbbell-mediated diffusion are ready to use and example files are available in the "examples/Dumbbells" directory. A new package release is coming soon.)
 
 The Onsager package provides routines for the general calculation of transport coefficients in vacancy-mediated diffusion and interstitial diffusion. It does this using a Green function approach, combined with point group symmetry reduction for maximum efficiency.
 
