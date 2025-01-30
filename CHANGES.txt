@@ -8,3 +8,9 @@ v1.1, 2016-06-17 -- Roundoff error correction, automator updates
 v1.2, 2016-07-10 -- Roundoff error + non-zero bias, vacancy probability bug fix, Fe-C notebook
 v1.2.1, 2016-08-03 -- Additional notebooks added for vacancy-mediated diffuser
 v1.2.2, 2017-04-04 -- New internal friction calculator for interstitial diffuser
+v1.3, 2018-05-30 -- Two-dimensional lattice support added; new notebooks for variational calculations.
+v1.3.1, 2018-07-05 -- Bug fix in `crystal.Crystal.jumpnetwork` for search range.
+v1.3.2, 2019-04-02 -- Bug fix in `OnsagerCalc.VacancyMediated` for cases with non-zero bias vector (caused unusual occasional test failures).
+v1.3.3, 2019-07-30 -- Minor bug fix
+v1.3.4, 2025-01-29 -- Update to fix deprecated features of `numpy`
+v1.4, 2025-01-30 -- Added cluster expansion support and Monte Carlo support

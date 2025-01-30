@@ -37,7 +37,9 @@ Releases
 * 1.3 Two-dimensional lattice support added; new notebooks for variational calculations.
 * 1.3.1 Bug fix in `crystal.Crystal.jumpnetwork` for search range.
 * 1.3.2 Bug fix in `OnsagerCalc.VacancyMediated` for cases with non-zero bias vector (caused unusual occasional test failures).
-* 1.3.3 Update to fix deprecated features of `numpy`
+* 1.3.3 Minor bug fix
+* 1.3.4 Update to fix deprecated features of `numpy`
+* 1.4 Added cluster expansion support and Monte Carlo support
 
 
 References
