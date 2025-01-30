@@ -121,9 +121,9 @@ class GFCrystalcalc(object):
         # generate a kptmesh: now we try to make the mesh more "uniform" ??
         bmagn = np.array([np.sqrt(np.dot(crys.reciplatt[:, i], crys.reciplatt[:, i]))
                           for i in range(self.crys.dim)])
-        bmagn /= np.power(np.product(bmagn), 1 / self.crys.dim)
+        bmagn /= np.power(np.prod(bmagn), 1 / self.crys.dim)
         # make sure we have even meshes
-        self.kptgrid = np.array([2 * np.int(np.ceil(2 * Nmax * b)) for b in bmagn], dtype=int) \
+        self.kptgrid = np.array([2 * np.int_(np.ceil(2 * Nmax * b)) for b in bmagn], dtype=int) \
             if kptwt is None else np.zeros(self.crys.dim, dtype=int)
         self.kpts, self.wts = crys.reducekptmesh(crys.fullkptmesh(self.kptgrid)) \
             if kptwt is None else deepcopy(kptwt)
@@ -346,7 +346,7 @@ class GFCrystalcalc(object):
         self.g_Taylor = (gT_rotate.ldot(self.vr)).rdot(self.vr.T)
         self.g_Taylor.separate()
         g_Taylor_fnlp = {(n, l): Fnl_p(n, self.pmax) for (n, l) in self.g_Taylor.nl()}
-        prefactor = self.crys.volume / np.sqrt(np.product(self.d))
+        prefactor = self.crys.volume / np.sqrt(np.prod(self.d))
         self.g_Taylor_fnlu = {(n, l): Fnl_u(n, l, self.pmax, prefactor, d=self.crys.dim)
                               for (n, l) in self.g_Taylor.nl()}
         # 5. Invert Fourier expansion
