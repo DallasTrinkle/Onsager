@@ -6,6 +6,8 @@ Automatically runs at verbosity level 2; doesn't read from the command line.
 
 import unittest
 import os
+import sys
+sys.path.append('./')
 
 
 def main():

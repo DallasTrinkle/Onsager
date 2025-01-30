@@ -11,6 +11,7 @@ it corresponds to a YAML file it generated*.
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
+import yaml
 from onsager import crystal
 from onsager import OnsagerCalc
 
@@ -128,7 +129,7 @@ if __name__ == '__main__':
     else:
         # otherwise... we need to parse our YAML file, and get to work
         with open(args.yaml_input, "r") as in_f:
-            dict_def = crystal.yaml.load(in_f)
+            dict_def = yaml.load(in_f)
             crys = crystal.Crystal.fromdict(dict_def) # pull out the crystal part of the YAML
             # sites:
             sitelist = dict_def['sitelist']

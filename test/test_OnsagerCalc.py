@@ -528,8 +528,8 @@ class CrystalOnsagerTestsHCP(DiffusionTestCase):
                     else:
                         sind = ind
             # check that we've got a supercell with the correct; look at the position of the defects
-            vu = crystal.incell(np.dot(v.super, v.pos[vind])) if vind is not None else None
-            su = crystal.incell(np.dot(v.super, v.pos[sind])) if sind is not None else None
+            vu = crystal.incell(np.dot(v.superlatt, v.pos[vind])) if vind is not None else None
+            su = crystal.incell(np.dot(v.superlatt, v.pos[sind])) if sind is not None else None
             if su is None or vu is None:
                 # same check for solute only or vacancy only:
                 crysu = basis[diffuser.sitelist[diffuser.tagdict[k]][0]]
@@ -566,8 +566,8 @@ class CrystalOnsagerTestsHCP(DiffusionTestCase):
             self.assertEqual(len(vind), 2,
                              msg='transition endpoints that do not have vacancies? {}'.format(k))
             # check initial state, final state, and deltax; first, our vacancies
-            uv0, uv1 = crystal.incell(np.dot(v[0].super, v[0].pos[vind[0]])), \
-                       crystal.incell(np.dot(v[1].super, v[1].pos[vind[1]]))
+            uv0, uv1 = crystal.incell(np.dot(v[0].superlatt, v[0].pos[vind[0]])), \
+                       crystal.incell(np.dot(v[1].superlatt, v[1].pos[vind[1]]))
             # weird looking: the dictionary selects the correct jump network from jumptype, then the
             # appropriate entry, and the first member as the representative
             jumptype = diffuser.tagdicttype[k]
@@ -582,8 +582,8 @@ class CrystalOnsagerTestsHCP(DiffusionTestCase):
                 if jumptype == 'omega1':
                     self.assertEqual(sind[0], sind[1],
                                      msg='Solute changed place in an omega1? {}!={}'.format(sind[0], sind[1]))
-                us0, us1 = crystal.incell(np.dot(v[0].super, v[0].pos[sind[0]])), \
-                           crystal.incell(np.dot(v[1].super, v[1].pos[sind[1]]))
+                us0, us1 = crystal.incell(np.dot(v[0].superlatt, v[0].pos[sind[0]])), \
+                           crystal.incell(np.dot(v[1].superlatt, v[1].pos[sind[1]]))
                 PSi, PSf = diffuser.kinetic.states[i0], diffuser.kinetic.states[j0]
                 cryss0, cryss1 = basis[PSi.i], basis[PSf.i]
                 crysv0, crysv1 = basis[PSi.j], basis[PSf.j]
@@ -1031,7 +1031,7 @@ class InterstitialTests(unittest.TestCase):
                     self.assertEqual(len(indset), 1, msg='{} has multiple defects?'.format(k))
                     for ind in indset: pass  # do this to get the single index in indset, assign to ind
                 # check that we've got a supercell with the correct; look at the position of the interstitial
-                basis = crystal.incell(np.dot(v.super, v.pos[ind]))
+                basis = crystal.incell(np.dot(v.superlatt, v.pos[ind]))
                 crysbasis = diffuser.crys.basis[diffuser.chem][diffuser.sitelist[tagdict[k]][0]]
                 self.assertTrue(np.allclose(basis, crysbasis),
                                 msg='{} has interstitial at {} not {}'.format(k, basis, crysbasis))
@@ -1047,11 +1047,11 @@ class InterstitialTests(unittest.TestCase):
                         for ind in indset: indices += (ind,)  # append to our list
                 # check initial state, final state, and deltax
                 (i0, j0), dx0 = diffuser.jumpnetwork[tagdict[k]][0]
-                basis = crystal.incell(np.dot(v[0].super, v[0].pos[indices[0]]))
+                basis = crystal.incell(np.dot(v[0].superlatt, v[0].pos[indices[0]]))
                 crysbasis = diffuser.crys.basis[diffuser.chem][i0]
                 self.assertTrue(np.allclose(basis, crysbasis),
                                 msg='{} has initial interstitial at {} not {}'.format(k, basis, crysbasis))
-                basis = crystal.incell(np.dot(v[1].super, v[1].pos[indices[1]]))
+                basis = crystal.incell(np.dot(v[1].superlatt, v[1].pos[indices[1]]))
                 crysbasis = diffuser.crys.basis[diffuser.chem][j0]
                 self.assertTrue(np.allclose(basis, crysbasis),
                                 msg='{} has final interstitial at {} not {}'.format(k, basis, crysbasis))

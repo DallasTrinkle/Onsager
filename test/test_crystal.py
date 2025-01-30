@@ -6,6 +6,7 @@ __author__ = 'Dallas R. Trinkle'
 
 import unittest
 import numpy as np
+import yaml
 import onsager.crystal as crystal
 
 
@@ -712,7 +713,7 @@ class CrystalClassTests(unittest.TestCase):
         jumpnetwork = HCP_intercrys.jumpnetwork(1, self.a0 * 0.8, 0.5 * self.a0)  # tuned to avoid t->t in basal plane
         self.assertEqual(len(jumpnetwork), 2)  # should contain o->t/t->o and t->t networks
         self.assertEqual(sorted(len(t) for t in jumpnetwork), [4, 24])
-        # print crystal.yaml.dump(jumpnetwork)
+        # print yaml.dump(jumpnetwork)
         # for i, t in enumerate(jumpnetwork):
         #     print i, len(t)
         #     for ij, dx in t:
@@ -809,16 +810,16 @@ class YAMLTests(unittest.TestCase):
         for a in [np.array([1]), np.array([1., 0., 0.]), np.eye(3, dtype=float), np.eye(3, dtype=int)]:
             # we could do this with one call; if we want to add tests for the format later
             # they should go in between here.
-            awrite = crystal.yaml.dump(a)
-            aread = crystal.yaml.load(awrite)
+            awrite = yaml.dump(a)
+            aread = yaml.load(awrite, Loader=yaml.Loader)
             self.assertTrue(np.allclose(a, aread))
             self.assertIsInstance(aread, np.ndarray)
 
     def testSetYAML(self):
         """Test that we can use YAML to write and read a frozenset"""
         for a in [frozenset([]), frozenset([1]), frozenset([0, 1, 1]), frozenset(list(range(10)))]:
-            awrite = crystal.yaml.dump(a)
-            aread = crystal.yaml.load(awrite)
+            awrite = yaml.dump(a)
+            aread = yaml.load(awrite, Loader=yaml.Loader)
             self.assertEqual(a, aread)
             self.assertIsInstance(aread, frozenset)
 
@@ -828,9 +829,9 @@ class YAMLTests(unittest.TestCase):
                             np.array([0., 0., 0.]),
                             np.eye(3),
                             ((0,),))
-        # crystal.yaml.add_representer(crystal.GroupOp, crystal.GroupOp_representer)
-        gwrite = crystal.yaml.dump(g)
-        gread = crystal.yaml.load(gwrite)
+        # yaml.add_representer(crystal.GroupOp, crystal.GroupOp_representer)
+        gwrite = yaml.dump(g)
+        gread = yaml.load(gwrite, Loader=yaml.Loader)
         self.assertEqual(g, gread)
         self.assertIsInstance(gread, crystal.GroupOp)
 
@@ -845,8 +846,8 @@ class YAMLTests(unittest.TestCase):
                   np.array([1. / 3., 2. / 3., 0.5]),
                   np.array([2. / 3., 1. / 3., 0.5])]]
         crys = crystal.Crystal(hexlatt, basis)
-        cryswrite = crystal.yaml.dump(crys)
-        crysread = crystal.yaml.load(cryswrite)
+        cryswrite = yaml.dump(crys)
+        crysread = yaml.load(cryswrite, Loader=yaml.Loader)
         self.assertIsInstance(crysread, crystal.Crystal)
         self.assertTrue(np.allclose(crys.lattice, crysread.lattice))
         self.assertTrue(np.allclose(crys.invlatt, crysread.invlatt))
@@ -883,7 +884,7 @@ basis:
   - {YAMLtag} [0.6666666666666666, 0.3333333333333333, 0.5]
 chemistry:
 - Ti""".format(YAMLtag=crystal.NDARRAY_YAMLTAG)  # rather than hard-coding the tag...
-        crysread = crystal.Crystal.fromdict(crystal.yaml.load(yamlstr))
+        crysread = crystal.Crystal.fromdict(yaml.load(yamlstr, Loader=yaml.Loader))
         self.assertIsInstance(crysread, crystal.Crystal)
         self.assertTrue(np.allclose(crys.lattice, crysread.lattice))
         self.assertTrue(np.allclose(crys.invlatt, crysread.invlatt))
@@ -923,7 +924,7 @@ class KPTgentest(unittest.TestCase):
         """Can we construct a mesh with the correct number of points?"""
         # reset
         kpts = self.crys.fullkptmesh(self.N)
-        self.assertEqual(kpts.shape[0], np.product(self.N))
+        self.assertEqual(kpts.shape[0], np.prod(self.N))
         self.assertEqual(kpts.shape[1], 3)
 
     def testKPT_BZ_Gpoints(self):

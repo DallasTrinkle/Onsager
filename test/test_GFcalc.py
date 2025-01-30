@@ -27,10 +27,10 @@ def poleFT(di, u, pm, erfupm=-1):
     """
 
     if (u == 0):
-        return 0.25 * pm / np.sqrt(np.product(di * np.pi))
+        return 0.25 * pm / np.sqrt(np.prod(di * np.pi))
     if (erfupm < 0):
         erfupm = special.erf(0.5 * u * pm)
-    return erfupm * 0.25 / (np.pi * u * np.sqrt(np.product(di)))
+    return erfupm * 0.25 / (np.pi * u * np.sqrt(np.prod(di)))
 
 
 class GreenFuncCrystalTests(unittest.TestCase):
@@ -56,7 +56,7 @@ class GreenFuncCrystalTests(unittest.TestCase):
         # test the discontinuity function:
         for u in np.linspace(0, 5, 21):
             disc_orig = FCC_GF.crys.volume * (FCC_GF.pmax / (2 * np.sqrt(np.pi))) ** 3 * \
-                        np.exp(-(0.5 * u * FCC_GF.pmax) ** 2) / np.sqrt(np.product(FCC_GF.d))
+                        np.exp(-(0.5 * u * FCC_GF.pmax) ** 2) / np.sqrt(np.prod(FCC_GF.d))
             disc_new = FCC_GF.g_Taylor_fnlu[(0, 0)](u).real
             self.assertAlmostEqual(disc_orig, disc_new, places=15, msg="Disc (0,0) failed for u={}".format(u))
             # test the GF evaluation against the original
