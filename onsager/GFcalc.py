@@ -121,9 +121,9 @@ class GFCrystalcalc(object):
         # generate a kptmesh: now we try to make the mesh more "uniform" ??
         bmagn = np.array([np.sqrt(np.dot(crys.reciplatt[:, i], crys.reciplatt[:, i]))
                           for i in range(self.crys.dim)])
-        bmagn /= np.power(np.product(bmagn), 1 / self.crys.dim)
+        bmagn /= np.power(np.prod(bmagn), 1 / self.crys.dim)
         # make sure we have even meshes
-        self.kptgrid = np.array([2 * np.int(np.ceil(2 * Nmax * b)) for b in bmagn], dtype=int) \
+        self.kptgrid = np.array([2 * np.int_(np.ceil(2 * Nmax * b)) for b in bmagn], dtype=int) \
             if kptwt is None else np.zeros(self.crys.dim, dtype=int)
         self.kpts, self.wts = crys.reducekptmesh(crys.fullkptmesh(self.kptgrid)) \
             if kptwt is None else deepcopy(kptwt)
@@ -136,7 +136,7 @@ class GFCrystalcalc(object):
         # tuple of the Wyckoff site indices for each jump (needed to make symmrate)
         self.jumppairs = tuple((self.invmap[jumplist[0][0][0]], self.invmap[jumplist[0][0][1]])
                                for jumplist in jumpnetwork)
-        self.D, self.eta = 0, 0  # we don't yet know the diffusivity
+        self.D, self.eta = None, 0  # we don't yet know the diffusivity
 
     @staticmethod
     def networkcount(jumpnetwork, N):
@@ -346,7 +346,7 @@ class GFCrystalcalc(object):
         self.g_Taylor = (gT_rotate.ldot(self.vr)).rdot(self.vr.T)
         self.g_Taylor.separate()
         g_Taylor_fnlp = {(n, l): Fnl_p(n, self.pmax) for (n, l) in self.g_Taylor.nl()}
-        prefactor = self.crys.volume / np.sqrt(np.product(self.d))
+        prefactor = self.crys.volume / np.sqrt(np.prod(self.d))
         self.g_Taylor_fnlu = {(n, l): Fnl_u(n, l, self.pmax, prefactor, d=self.crys.dim)
                               for (n, l) in self.g_Taylor.nl()}
         # 5. Invert Fourier expansion
@@ -390,7 +390,7 @@ class GFCrystalcalc(object):
         :param dx: vector pointing from i to j (can include lattice contributions)
         :return G: Green function value
         """
-        if self.D is 0: raise ValueError("Need to SetRates first")
+        if self.D is None: raise ValueError("Need to SetRates first")
         # evaluate Fourier transform component (now with better space group treatment!)
         gIFT = 0
         for gop, pair in zip(self.grouparray, self.indexpair[i][j]):
@@ -435,8 +435,8 @@ class GFCrystalcalc(object):
         :param omega_Taylor_D: Taylor expansion of the diffusivity component
         :return D: diffusivity [3,3] array
         """
-        if self.D is not 0 and omega_Taylor_D is None: return self.D
-        if self.D is 0 and omega_Taylor_D is None: raise ValueError("Need omega_Taylor_D value")
+        if self.D is not None and omega_Taylor_D is None: return self.D
+        if self.D is None and omega_Taylor_D is None: raise ValueError("Need omega_Taylor_D value")
         Taylor = T3D if self.crys.dim == 3 else T2D
         D = np.zeros((self.crys.dim, self.crys.dim))
         for (n, l, c) in omega_Taylor_D.coefflist:

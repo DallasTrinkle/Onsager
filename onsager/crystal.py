@@ -221,10 +221,10 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
     def __sane__(self):
         """Return true if the cartrot and rot are consistent and 'sane'"""
         tr = self.rot.trace()
-        det = np.int(np.round(np.linalg.det(self.rot)))
+        det = np.int_(np.round(np.linalg.det(self.rot)))
         # consistency:
-        if np.int(np.round(self.cartrot.trace())) != tr: return False
-        if np.int(np.round(np.linalg.det(self.cartrot))) != det: return False
+        if np.int_(np.round(self.cartrot.trace())) != tr: return False
+        if np.int_(np.round(np.linalg.det(self.cartrot))) != det: return False
         # sanity:
         if abs(det) != 1: return False
         dimshift = 0 if self.rot.shape[0] == 3 else -1
@@ -253,7 +253,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
         """
         # dim = rot.shape[0]
         dimindexpos, dimindexneg = (1, 3) if rot.shape[0] == 3 else (2, 4)
-        tr = np.int(rot.trace())
+        tr = np.int_(rot.trace())
         if np.linalg.det(rot) > 0:
             return (2, 3, 4, 6, 1)[tr + dimindexpos]  # trace determines the rotation type [tr + 1] for 3d
         else:
@@ -279,7 +279,7 @@ class GroupOp(collections.namedtuple('GroupOp', 'rot trans cartrot indexmap')):
                 raise ValueError('Bad GroupOp:\n{}'.format(self))
         optype = self.optype(self.rot)
         det = 1 if optype > 0 else -1
-        tr = np.int(self.rot.trace())
+        tr = np.int_(self.rot.trace())
         # two trivial cases: identity, inversion:
         if optype == 1 or optype == -2:
             return optype, np.eye(self.rot.shape[0])
@@ -1399,7 +1399,7 @@ class Crystal(object):
         :return nnlist: list of nearest neighbor vectors
         """
         r2 = cutoff * cutoff
-        nmax = [int(np.round(np.sqrt(self.metric[i, i]))) + 1
+        nmax = [int(np.round(np.sqrt(r2/self.metric[i, i]))) + 1
                 for i in range(self.dim)]
         nranges = [range(-n, n+1) for n in nmax]
         supervect = [np.array(ntup) for ntup in itertools.product(*nranges)]
@@ -1530,7 +1530,7 @@ class Crystal(object):
         :param Nmesh: mesh divisions Nmesh[0] x Nmesh[1] x Nmesh[2]
         :return kpt: array[Nkpt][3] of kpoints
         """
-        Nkpt = np.product(Nmesh)
+        Nkpt = np.prod(Nmesh)
         if Nkpt == 0: return
         # dN = np.array([1 / x for x in Nmesh])
         # # use a list comprehension to iterate and build:

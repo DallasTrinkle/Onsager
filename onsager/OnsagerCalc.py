@@ -21,7 +21,7 @@ Now with HDF5 write / read capability for VacancyMediated module
 __author__ = 'Dallas R. Trinkle'
 
 import numpy as np
-from scipy.linalg import pinv2, solve
+from scipy.linalg import pinv, solve
 import copy, collections, itertools, warnings, yaml
 from functools import reduce
 from onsager import GFcalc
@@ -87,10 +87,10 @@ class Interstitial(object):
             self.omega_invertible = any(np.allclose(g.cartrot, -np.eye(self.dim)) for g in crys.G)
         if self.omega_invertible:
             # invertible, so just use solve for speed (omega is technically *negative* definite)
-            self.bias_solver = lambda omega, b: -solve(-omega, b, sym_pos=True)
+            self.bias_solver = lambda omega, b: -solve(-omega, b, assume_a='pos')
         else:
             # pseudoinverse required:
-            self.bias_solver = lambda omega, b: np.dot(pinv2(omega), b)
+            self.bias_solver = lambda omega, b: np.dot(pinv(omega), b)
         # these pieces are needed in order to compute the elastodiffusion tensor
         self.sitegroupops = self.generateSiteGroupOps()  # list of group ops to take first rep. into whole list
         self.jumpgroupops = self.generateJumpGroupOps()  # list of group ops to take first rep. into whole list
@@ -663,7 +663,7 @@ def vTKdict2arrays(vTKdict):
     vTKsplits = np.cumsum(np.array([len(v) for v in vTKexample]))[:-1]
     vTKlist = []
     vallist = []
-    for k, v in zip(vTKdict.keys(), vTKdict.values()):
+    for k, v in vTKdict.items():
         vTKlist.append(np.hstack(k))  # k.pre, k.betaene, k.preT, k.betaeneT
         vallist.append(v)
     return np.array(vTKlist), np.array(vallist), vTKsplits
@@ -1115,7 +1115,7 @@ class VacancyMediated(object):
         :return VacancyMediated: new VacancyMediated diffuser object from HDF5
         """
         diffuser = cls(None, None, None, None)  # initialize
-        diffuser.crys = yaml.load(HDF5group['crystal_yaml'][()])
+        diffuser.crys = yaml.load(HDF5group['crystal_yaml'][()], Loader=yaml.Loader)
         diffuser.dim = diffuser.crys.dim
         for internal in cls.__HDF5list__:
             setattr(diffuser, internal, HDF5group[internal][()])
@@ -1514,7 +1514,7 @@ class VacancyMediated(object):
             OSprobV = self.OSfolddown*probVsqrt  # proper null space projection
             biasSbar = np.dot(OSprobV, biasSvec)
             om2bar = np.dot(OSprobV, np.dot(om2, OSprobV.T))  # OS x OS
-            etaSbar = np.dot(pinv2(om2bar), biasSbar)
+            etaSbar = np.dot(pinv(om2bar), biasSbar)
             dDss = np.dot(np.dot(self.vkinetic.outer[:, :, self.OSindices, :, ][:, :, :, self.OSindices],
                                  etaSbar), biasSbar) / self.N
             D0ss += dDss
