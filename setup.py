@@ -20,7 +20,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 setup(
     name='onsager',
     packages=['onsager'],
-    version='1.3.3',
+    version='1.4',
     description='A package to compute Onsager coefficients for vacancy-mediated diffusion and interstitial elastodiffusion tensors',
     long_description=long_description,
     author='Dallas R. Trinkle',
