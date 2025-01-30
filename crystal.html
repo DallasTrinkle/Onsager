@@ -1,99 +1,139 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Crystal &mdash; Onsager 1.3.3 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crystal &mdash; Onsager 1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=0ed52906"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="CrystalStars" href="CrystalStars.html" />
     <link rel="prev" title="Modules" href="modules.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home"> Onsager
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Onsager
           </a>
-
-          
-            
-            
-              <div class="version">
-                1.3
-              </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="InputOutput.html">Input and output for Onsager transport calculation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks.html">Example Notebooks</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Crystal</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Crystal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.CombineTensorBasis"><code class="docutils literal notranslate"><span class="pre">CombineTensorBasis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.CombineVectorBasis"><code class="docutils literal notranslate"><span class="pre">CombineVectorBasis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.Crystal"><code class="docutils literal notranslate"><span class="pre">Crystal</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.BCC"><code class="docutils literal notranslate"><span class="pre">Crystal.BCC()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.FCC"><code class="docutils literal notranslate"><span class="pre">Crystal.FCC()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.FullVectorBasis"><code class="docutils literal notranslate"><span class="pre">Crystal.FullVectorBasis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.HCP"><code class="docutils literal notranslate"><span class="pre">Crystal.HCP()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.SymmTensorBasis"><code class="docutils literal notranslate"><span class="pre">Crystal.SymmTensorBasis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.VectorBasis"><code class="docutils literal notranslate"><span class="pre">Crystal.VectorBasis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.Wyckoffpos"><code class="docutils literal notranslate"><span class="pre">Crystal.Wyckoffpos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.__init__"><code class="docutils literal notranslate"><span class="pre">Crystal.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.__repr__"><code class="docutils literal notranslate"><span class="pre">Crystal.__repr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.__str__"><code class="docutils literal notranslate"><span class="pre">Crystal.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.__weakref__"><code class="docutils literal notranslate"><span class="pre">Crystal.__weakref__</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.addbasis"><code class="docutils literal notranslate"><span class="pre">Crystal.addbasis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.calcmetric"><code class="docutils literal notranslate"><span class="pre">Crystal.calcmetric()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.cart2pos"><code class="docutils literal notranslate"><span class="pre">Crystal.cart2pos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.cart2unit"><code class="docutils literal notranslate"><span class="pre">Crystal.cart2unit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.center"><code class="docutils literal notranslate"><span class="pre">Crystal.center()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.chemindex"><code class="docutils literal notranslate"><span class="pre">Crystal.chemindex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.fromdict"><code class="docutils literal notranslate"><span class="pre">Crystal.fromdict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.fullkptmesh"><code class="docutils literal notranslate"><span class="pre">Crystal.fullkptmesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.g_cart"><code class="docutils literal notranslate"><span class="pre">Crystal.g_cart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.g_direc"><code class="docutils literal notranslate"><span class="pre">Crystal.g_direc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.g_direc_equivalent"><code class="docutils literal notranslate"><span class="pre">Crystal.g_direc_equivalent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.g_pos"><code class="docutils literal notranslate"><span class="pre">Crystal.g_pos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.g_tensor"><code class="docutils literal notranslate"><span class="pre">Crystal.g_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.g_vect"><code class="docutils literal notranslate"><span class="pre">Crystal.g_vect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.genBZG"><code class="docutils literal notranslate"><span class="pre">Crystal.genBZG()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.genWyckoffsets"><code class="docutils literal notranslate"><span class="pre">Crystal.genWyckoffsets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.gengroup"><code class="docutils literal notranslate"><span class="pre">Crystal.gengroup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.genpoint"><code class="docutils literal notranslate"><span class="pre">Crystal.genpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.inBZ"><code class="docutils literal notranslate"><span class="pre">Crystal.inBZ()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.jumpnetwork"><code class="docutils literal notranslate"><span class="pre">Crystal.jumpnetwork()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.jumpnetwork2lattice"><code class="docutils literal notranslate"><span class="pre">Crystal.jumpnetwork2lattice()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.minlattice"><code class="docutils literal notranslate"><span class="pre">Crystal.minlattice()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.nnlist"><code class="docutils literal notranslate"><span class="pre">Crystal.nnlist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.pos2cart"><code class="docutils literal notranslate"><span class="pre">Crystal.pos2cart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.reduce"><code class="docutils literal notranslate"><span class="pre">Crystal.reduce()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.reducekptmesh"><code class="docutils literal notranslate"><span class="pre">Crystal.reducekptmesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.remapbasis"><code class="docutils literal notranslate"><span class="pre">Crystal.remapbasis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.simpleYAML"><code class="docutils literal notranslate"><span class="pre">Crystal.simpleYAML()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.sitelist"><code class="docutils literal notranslate"><span class="pre">Crystal.sitelist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.strain"><code class="docutils literal notranslate"><span class="pre">Crystal.strain()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.unit2cart"><code class="docutils literal notranslate"><span class="pre">Crystal.unit2cart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.Crystal.vectlist"><code class="docutils literal notranslate"><span class="pre">Crystal.vectlist()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.FourthRankIsotropic"><code class="docutils literal notranslate"><span class="pre">FourthRankIsotropic()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.GroupOp"><code class="docutils literal notranslate"><span class="pre">GroupOp</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.GroupOp_constructor"><code class="docutils literal notranslate"><span class="pre">GroupOp.GroupOp_constructor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.GroupOp_representer"><code class="docutils literal notranslate"><span class="pre">GroupOp.GroupOp_representer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.__add__"><code class="docutils literal notranslate"><span class="pre">GroupOp.__add__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.__eq__"><code class="docutils literal notranslate"><span class="pre">GroupOp.__eq__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.__hash__"><code class="docutils literal notranslate"><span class="pre">GroupOp.__hash__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.__mul__"><code class="docutils literal notranslate"><span class="pre">GroupOp.__mul__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.__ne__"><code class="docutils literal notranslate"><span class="pre">GroupOp.__ne__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.__sane__"><code class="docutils literal notranslate"><span class="pre">GroupOp.__sane__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.__str__"><code class="docutils literal notranslate"><span class="pre">GroupOp.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.__sub__"><code class="docutils literal notranslate"><span class="pre">GroupOp.__sub__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.eigen"><code class="docutils literal notranslate"><span class="pre">GroupOp.eigen()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.ident"><code class="docutils literal notranslate"><span class="pre">GroupOp.ident()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.incell"><code class="docutils literal notranslate"><span class="pre">GroupOp.incell()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.inhalf"><code class="docutils literal notranslate"><span class="pre">GroupOp.inhalf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.inv"><code class="docutils literal notranslate"><span class="pre">GroupOp.inv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystal.GroupOp.optype"><code class="docutils literal notranslate"><span class="pre">GroupOp.optype()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.ProjectTensorBasis"><code class="docutils literal notranslate"><span class="pre">ProjectTensorBasis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.SymmTensorBasis"><code class="docutils literal notranslate"><span class="pre">SymmTensorBasis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.VectorBasis"><code class="docutils literal notranslate"><span class="pre">VectorBasis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.Voigtstrain"><code class="docutils literal notranslate"><span class="pre">Voigtstrain()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.gcdlist"><code class="docutils literal notranslate"><span class="pre">gcdlist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.incell"><code class="docutils literal notranslate"><span class="pre">incell()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.inhalf"><code class="docutils literal notranslate"><span class="pre">inhalf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.isotropicFourthRank"><code class="docutils literal notranslate"><span class="pre">isotropicFourthRank()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.maptranslation"><code class="docutils literal notranslate"><span class="pre">maptranslation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystal.ndarray_representer"><code class="docutils literal notranslate"><span class="pre">ndarray_representer()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
 <li class="toctree-l2"><a class="reference internal" href="supercell.html">Supercell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cluster.html">Cluster</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
 <li class="toctree-l2"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
@@ -102,263 +142,200 @@
 </li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Onsager</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="modules.html">Modules</a> &raquo;</li>
-        
-      <li>Crystal</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Modules</a></li>
+      <li class="breadcrumb-item active">Crystal</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/crystal.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast + .nbinput {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="crystal">
-<h1>Crystal<a class="headerlink" href="#crystal" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="crystal">
+<h1>Crystal<a class="headerlink" href="#crystal" title="Link to this heading"></a></h1>
 <p>Crystal:</p>
 <p>The crystal module defines the <code class="docutils literal notranslate"><span class="pre">crystal</span></code> class, and <code class="docutils literal notranslate"><span class="pre">GroupOp</span></code> for group operations.</p>
-<span class="target" id="module-crystal"></span><p>Crystal class</p>
+<p id="module-crystal">Crystal class</p>
 <p>Class to store definition of a crystal, along with some analysis
 1. geometric analysis (nearest neighbor displacements)
 2. space group operations
 3. point group operations for each basis position
 4. Wyckoff position generation (for interstitials)</p>
-<dl class="function">
-<dt id="crystal.CombineTensorBasis">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">CombineTensorBasis</code><span class="sig-paren">(</span><em class="sig-param">b1</em>, <em class="sig-param">b2</em>, <em class="sig-param">symmetric=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#CombineTensorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.CombineTensorBasis" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.CombineTensorBasis">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">CombineTensorBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#CombineTensorBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.CombineTensorBasis" title="Link to this definition"></a></dt>
 <dd><p>Combines (intersects) two tensor spaces into one; uses SVD to compute null space.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>b1</strong> – list of tensors</p></li>
 <li><p><strong>b2</strong> – list of tensors</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return tensorbasis</dt>
+<dt class="field-even">Return tensorbasis<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of 2nd-rank symmetric tensors making up the basis</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystal.CombineVectorBasis">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">CombineVectorBasis</code><span class="sig-paren">(</span><em class="sig-param">b1</em>, <em class="sig-param">b2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#CombineVectorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.CombineVectorBasis" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.CombineVectorBasis">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">CombineVectorBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#CombineVectorBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.CombineVectorBasis" title="Link to this definition"></a></dt>
 <dd><p>Combines (intersects) two vector spaces into one.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>b1</strong> – (dim, vect) – dimensionality (0..3), vector defining line direction (1) or plane normal (2)</p></li>
 <li><p><strong>b2</strong> – (dim, vect)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return dim</dt>
+<dt class="field-even">Return dim<span class="colon">:</span></dt>
 <dd class="field-even"><p>dimensionality, 0..3</p>
 </dd>
-<dt class="field-odd">Return vect</dt>
+<dt class="field-odd">Return vect<span class="colon">:</span></dt>
 <dd class="field-odd"><p>vector defining line direction (1) or plane normal (2)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="class">
-<dt id="crystal.Crystal">
-<em class="property">class </em><code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">Crystal</code><span class="sig-paren">(</span><em class="sig-param">lattice</em>, <em class="sig-param">basis</em>, <em class="sig-param">chemistry=None</em>, <em class="sig-param">spins=None</em>, <em class="sig-param">NOSYM=False</em>, <em class="sig-param">noreduce=False</em>, <em class="sig-param">threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="crystal.Crystal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">Crystal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lattice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chemistry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NOSYM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noreduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal" title="Link to this definition"></a></dt>
 <dd><p>A class that defines a crystal, as well as the symmetry analysis that goes along with it.
 Now includes optional spins. These can be vectors or “scalar” spins, for which we need
 to consider a phase factor. In general, they can be complex. Ideally, they should have
 magnitude either 0 or 1.</p>
 <p>Specified by a lattice (3 vectors), a basis (list of lists of positions in direct coordinates).
 Can also name the elements (chemistry), and specify spin degrees of freedom.</p>
-<dl class="method">
-<dt id="crystal.Crystal.BCC">
-<em class="property">classmethod </em><code class="sig-name descname">BCC</code><span class="sig-paren">(</span><em class="sig-param">a0</em>, <em class="sig-param">chemistry=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.BCC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.BCC" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.BCC">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BCC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chemistry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.BCC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.BCC" title="Link to this definition"></a></dt>
 <dd><p>Create a body-centered cubic crystal with lattice constant a0</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>a0</strong> – lattice constant</p>
 </dd>
-<dt class="field-even">Return BCC crystal</dt>
+<dt class="field-even">Return BCC crystal<span class="colon">:</span></dt>
 <dd class="field-even"><p></p></dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.FCC">
-<em class="property">classmethod </em><code class="sig-name descname">FCC</code><span class="sig-paren">(</span><em class="sig-param">a0</em>, <em class="sig-param">chemistry=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.FCC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.FCC" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.FCC">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FCC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chemistry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.FCC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.FCC" title="Link to this definition"></a></dt>
 <dd><p>Create a face-centered cubic crystal with lattice constant a0</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>a0</strong> – lattice constant</p>
 </dd>
-<dt class="field-even">Return FCC crystal</dt>
+<dt class="field-even">Return FCC crystal<span class="colon">:</span></dt>
 <dd class="field-even"><p></p></dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.FullVectorBasis">
-<code class="sig-name descname">FullVectorBasis</code><span class="sig-paren">(</span><em class="sig-param">chem=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.FullVectorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.FullVectorBasis" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.FullVectorBasis">
+<span class="sig-name descname"><span class="pre">FullVectorBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.FullVectorBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.FullVectorBasis" title="Link to this definition"></a></dt>
 <dd><p>Generate our full vector basis, using the information from our crystal</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>chem</strong> – (optional) chemical index to consider; otherwise return a list of such</p>
 </dd>
-<dt class="field-even">Return VBfunctions</dt>
+<dt class="field-even">Return VBfunctions<span class="colon">:</span></dt>
 <dd class="field-even"><p>(list) of our unique vector basis lattice functions, normalized; each is an array
 (NVbasis x Nsites x 3)</p>
 </dd>
-<dt class="field-odd">Return VVouter</dt>
+<dt class="field-odd">Return VVouter<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(list) of ouf VV “outer” expansion (NVbasis x NVbasis for each chemistry)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.HCP">
-<em class="property">classmethod </em><code class="sig-name descname">HCP</code><span class="sig-paren">(</span><em class="sig-param">a0</em>, <em class="sig-param">c_a=1.632993161855452</em>, <em class="sig-param">chemistry=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.HCP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.HCP" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.HCP">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HCP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.632993161855452</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chemistry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.HCP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.HCP" title="Link to this definition"></a></dt>
 <dd><p>Create a hexagonal closed packed crystal with lattice constant a0, c/a ratio c_a</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>a0</strong> – lattice constant</p></li>
 <li><p><strong>c_a</strong> – (optional) c/a ratio, default=ideal <span class="math notranslate nohighlight">\(\sqrt{8/3}\)</span></p></li>
 </ul>
 </dd>
-<dt class="field-even">Return HCP crystal</dt>
+<dt class="field-even">Return HCP crystal<span class="colon">:</span></dt>
 <dd class="field-even"><p></p></dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.SymmTensorBasis">
-<code class="sig-name descname">SymmTensorBasis</code><span class="sig-paren">(</span><em class="sig-param">ind</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.SymmTensorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.SymmTensorBasis" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.SymmTensorBasis">
+<span class="sig-name descname"><span class="pre">SymmTensorBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.SymmTensorBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.SymmTensorBasis" title="Link to this definition"></a></dt>
 <dd><p>Generates the symmetric tensor basis corresponding to an atomic site</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ind</strong> – tuple index for atom</p>
 </dd>
-<dt class="field-even">Return tensorbasis</dt>
+<dt class="field-even">Return tensorbasis<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of 2nd-rank symmetric tensors making up the basis</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.VectorBasis">
-<code class="sig-name descname">VectorBasis</code><span class="sig-paren">(</span><em class="sig-param">ind</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.VectorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.VectorBasis" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.VectorBasis">
+<span class="sig-name descname"><span class="pre">VectorBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.VectorBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.VectorBasis" title="Link to this definition"></a></dt>
 <dd><p>Generates the vector basis corresponding to an atomic site</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ind</strong> – tuple index for atom</p>
 </dd>
-<dt class="field-even">Return dim</dt>
+<dt class="field-even">Return dim<span class="colon">:</span></dt>
 <dd class="field-even"><p>dimensionality, 0..3</p>
 </dd>
-<dt class="field-odd">Return vect</dt>
+<dt class="field-odd">Return vect<span class="colon">:</span></dt>
 <dd class="field-odd"><p>vector defining line direction (1) or plane normal (2)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.Wyckoffpos">
-<code class="sig-name descname">Wyckoffpos</code><span class="sig-paren">(</span><em class="sig-param">uvec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.Wyckoffpos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.Wyckoffpos" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.Wyckoffpos">
+<span class="sig-name descname"><span class="pre">Wyckoffpos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uvec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.Wyckoffpos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.Wyckoffpos" title="Link to this definition"></a></dt>
 <dd><p>Generates all the equivalent Wyckoff positions for a unit cell vector.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>uvec</strong> – 3-vector (float) vector in direct coordinates</p>
 </dd>
-<dt class="field-even">Return Wyckofflist</dt>
+<dt class="field-even">Return Wyckofflist<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of equivalent Wyckoff positions</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">lattice</em>, <em class="sig-param">basis</em>, <em class="sig-param">chemistry=None</em>, <em class="sig-param">spins=None</em>, <em class="sig-param">NOSYM=False</em>, <em class="sig-param">noreduce=False</em>, <em class="sig-param">threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.__init__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lattice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chemistry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NOSYM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noreduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialization; starts off with the lattice vector definition and the
 basis vectors. While it does not explicitly store the specific chemical
 elements involved, it does store that there are different elements.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>lattice</strong> – array[3,3] or list of array[3] (or 2 if 2-dimensional)
 lattice vectors; if [3,3] array, then the vectors need to be in <em>column</em> format
@@ -379,240 +356,243 @@ scalars or vectors, corresponding to collinear or non-collinear magnetism</p></l
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.__repr__">
-<code class="sig-name descname">__repr__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__repr__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.__repr__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.__repr__" title="Link to this definition"></a></dt>
 <dd><p>String representation of crystal (lattice + basis)</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.__str__">
-<code class="sig-name descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.__str__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.__str__" title="Link to this definition"></a></dt>
 <dd><p>Human-readable version of crystal (lattice + basis)</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="crystal.Crystal.__weakref__">
-<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#crystal.Crystal.__weakref__" title="Permalink to this definition">¶</a></dt>
-<dd><p>list of weak references to the object (if defined)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="crystal.Crystal.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#crystal.Crystal.__weakref__" title="Link to this definition"></a></dt>
+<dd><p>list of weak references to the object</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.addbasis">
-<code class="sig-name descname">addbasis</code><span class="sig-paren">(</span><em class="sig-param">basis</em>, <em class="sig-param">chemistry=None</em>, <em class="sig-param">spins=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.addbasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.addbasis" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.addbasis">
+<span class="sig-name descname"><span class="pre">addbasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chemistry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.addbasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.addbasis" title="Link to this definition"></a></dt>
 <dd><p>Returns a new Crystal object that contains additional sites (assumed to be new chemistry).
 This is intended to “add in” interstitial sites. Note: if the symmetry is to be
 maintained, should be the output from Wyckoffpos().</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>basis</strong> – list (or list of lists) of new sites</p></li>
 <li><p><strong>chemistry</strong> – (optional) list of chemistry names</p></li>
 <li><p><strong>spins</strong> – (optional) list of spins</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return Crystal</dt>
+<dt class="field-even">Return Crystal<span class="colon">:</span></dt>
 <dd class="field-even"><p>new crystal object, with additional sites</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.calcmetric">
-<code class="sig-name descname">calcmetric</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.calcmetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.calcmetric" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.calcmetric">
+<span class="sig-name descname"><span class="pre">calcmetric</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.calcmetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.calcmetric" title="Link to this definition"></a></dt>
 <dd><p>Computes the volume of the cell and the metric tensor</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return volume</dt>
+<dt class="field-odd">Return volume<span class="colon">:</span></dt>
 <dd class="field-odd"><p>cell volume</p>
 </dd>
-<dt class="field-even">Return metric tensor</dt>
+<dt class="field-even">Return metric tensor<span class="colon">:</span></dt>
 <dd class="field-even"><p>3x3</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.cart2pos">
-<code class="sig-name descname">cart2pos</code><span class="sig-paren">(</span><em class="sig-param">v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.cart2pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.cart2pos" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.cart2pos">
+<span class="sig-name descname"><span class="pre">cart2pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.cart2pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.cart2pos" title="Link to this definition"></a></dt>
 <dd><p>Return the lattvec and index corresponding to an atomic position in cartesian coord.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>v</strong> – 3-vector (float) position in Cartesian coordinates</p>
 </dd>
-<dt class="field-even">Return lattvec</dt>
+<dt class="field-even">Return lattvec<span class="colon">:</span></dt>
 <dd class="field-even"><p>3-vector (integer) lattice vector in direct coordinates,</p>
 </dd>
-<dt class="field-odd">Return (c,i)</dt>
+<dt class="field-odd">Return (c,i)<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple of matching basis atom; None if no match</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.cart2unit">
-<code class="sig-name descname">cart2unit</code><span class="sig-paren">(</span><em class="sig-param">v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.cart2unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.cart2unit" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.cart2unit">
+<span class="sig-name descname"><span class="pre">cart2unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.cart2unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.cart2unit" title="Link to this definition"></a></dt>
 <dd><p>Return the lattvec and unit cell coord. corresponding to a position
 in cartesian coord.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>v</strong> – 3-vector (float) position in Cartesian coordinates</p>
 </dd>
-<dt class="field-even">Return lattvec</dt>
+<dt class="field-even">Return lattvec<span class="colon">:</span></dt>
 <dd class="field-even"><p>3-vector (integer) lattice vector in direct coordinates,</p>
 </dd>
-<dt class="field-odd">Return uvec</dt>
+<dt class="field-odd">Return uvec<span class="colon">:</span></dt>
 <dd class="field-odd"><p>3-vector (float) inside unit cell, in direct coordinates</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.center">
-<code class="sig-name descname">center</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.center" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.center">
+<span class="sig-name descname"><span class="pre">center</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.center"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.center" title="Link to this definition"></a></dt>
 <dd><p>Center the atoms in the cell if there is an inversion operation present.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.chemindex">
-<code class="sig-name descname">chemindex</code><span class="sig-paren">(</span><em class="sig-param">chemistry</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.chemindex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.chemindex" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.chemindex">
+<span class="sig-name descname"><span class="pre">chemindex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chemistry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.chemindex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.chemindex" title="Link to this definition"></a></dt>
 <dd><p>Return index corresponding to chemistry; None if not present.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>chemistry</strong> – value to check</p>
 </dd>
-<dt class="field-even">Return index</dt>
+<dt class="field-even">Return index<span class="colon">:</span></dt>
 <dd class="field-even"><p>corresponding to chemistry</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.fromdict">
-<em class="property">classmethod </em><code class="sig-name descname">fromdict</code><span class="sig-paren">(</span><em class="sig-param">yamldict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.fromdict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.fromdict" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.fromdict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromdict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yamldict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noreduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.fromdict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.fromdict" title="Link to this definition"></a></dt>
 <dd><p>Creates a Crystal object from a <em>very simple</em> YAML-created dictionary</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>yamldict</strong> – dictionary; must contain ‘lattice’ (using <em>row</em> vectors!) and ‘basis’;
-can contain optional ‘lattice_constant’</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>yamldict</strong> – dictionary; must contain ‘lattice’ (using <em>row</em> vectors!) and ‘basis’;
+can contain optional ‘lattice_constant’</p></li>
+<li><p><strong>noreduce</strong> – should we pass on lattice and basis as is? (default=True)</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return Crystal(lattice.T, basis)</dt>
+<dt class="field-even">Return Crystal(lattice.T, basis)<span class="colon">:</span></dt>
 <dd class="field-even"><p>new crystal object</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.fullkptmesh">
-<code class="sig-name descname">fullkptmesh</code><span class="sig-paren">(</span><em class="sig-param">Nmesh</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.fullkptmesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.fullkptmesh" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.fullkptmesh">
+<span class="sig-name descname"><span class="pre">fullkptmesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nmesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.fullkptmesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.fullkptmesh" title="Link to this definition"></a></dt>
 <dd><p>Creates a k-point mesh of density given by Nmesh; does not symmetrize but does put the
 k-points inside the BZ. Does not return any <em>weights</em> as every point is equally weighted.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>Nmesh</strong> – mesh divisions Nmesh[0] x Nmesh[1] x Nmesh[2]</p>
 </dd>
-<dt class="field-even">Return kpt</dt>
+<dt class="field-even">Return kpt<span class="colon">:</span></dt>
 <dd class="field-even"><p>array[Nkpt][3] of kpoints</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.g_cart">
-<code class="sig-name descname">g_cart</code><span class="sig-paren">(</span><em class="sig-param">g</em>, <em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_cart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.g_cart" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.g_cart">
+<span class="sig-name descname"><span class="pre">g_cart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_cart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.g_cart" title="Link to this definition"></a></dt>
 <dd><p>Apply a space group operation to a (Cartesian) vector position</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>g</strong> – group operation (GroupOp)</p></li>
 <li><p><strong>x</strong> – 3-vector position in space</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return gx</dt>
+<dt class="field-even">Return gx<span class="colon">:</span></dt>
 <dd class="field-even"><p>3-vector position in space (Cartesian coordinates)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.g_direc">
-<em class="property">static </em><code class="sig-name descname">g_direc</code><span class="sig-paren">(</span><em class="sig-param">g</em>, <em class="sig-param">direc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_direc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.g_direc" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.g_direc">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">g_direc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_direc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.g_direc" title="Link to this definition"></a></dt>
 <dd><p>Apply a space group operation to a direction</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>g</strong> – group operation (GroupOp)</p></li>
 <li><p><strong>direc</strong> – 3-vector direction</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return gdirec</dt>
+<dt class="field-even">Return gdirec<span class="colon">:</span></dt>
 <dd class="field-even"><p>3-vector direction</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.g_direc_equivalent">
-<code class="sig-name descname">g_direc_equivalent</code><span class="sig-paren">(</span><em class="sig-param">d1</em>, <em class="sig-param">d2</em>, <em class="sig-param">threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_direc_equivalent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.g_direc_equivalent" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.g_direc_equivalent">
+<span class="sig-name descname"><span class="pre">g_direc_equivalent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_direc_equivalent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.g_direc_equivalent" title="Link to this definition"></a></dt>
 <dd><p>Tells us if two directions are equivalent by according to the space group</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>d1</strong> – direction one (array[3])</p></li>
 <li><p><strong>d2</strong> – direction two (array[3])</p></li>
 <li><p><strong>threshold</strong> – threshold for equality</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return equivalent</dt>
+<dt class="field-even">Return equivalent<span class="colon">:</span></dt>
 <dd class="field-even"><p>True if equivalent by a point group operation</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.g_pos">
-<code class="sig-name descname">g_pos</code><span class="sig-paren">(</span><em class="sig-param">g</em>, <em class="sig-param">lattvec</em>, <em class="sig-param">ind</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.g_pos" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.g_pos">
+<span class="sig-name descname"><span class="pre">g_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattvec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.g_pos" title="Link to this definition"></a></dt>
 <dd><p>Apply a space group operation to an atom position specified by its lattice and index</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>g</strong> – group operation (GroupOp)</p></li>
 <li><p><strong>lattvec</strong> – 3-vector (integer) lattice vector in direct coordinates</p></li>
 <li><p><strong>ind</strong> – two-tuple index specifying the atom: (atomtype, atomindex)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return glatt</dt>
+<dt class="field-even">Return glatt<span class="colon">:</span></dt>
 <dd class="field-even"><p>3-vector (integer) lattice vector in direct coordinates</p>
 </dd>
-<dt class="field-odd">Return gindex</dt>
+<dt class="field-odd">Return gindex<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple of new basis atom</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.g_tensor">
-<em class="property">static </em><code class="sig-name descname">g_tensor</code><span class="sig-paren">(</span><em class="sig-param">g</em>, <em class="sig-param">tensor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.g_tensor" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.g_tensor">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">g_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.g_tensor" title="Link to this definition"></a></dt>
 <dd><p>Apply a space group operation to a 2nd-rank tensor</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>g</strong> – group operation (GroupOp)</p></li>
 <li><p><strong>tensor</strong> – 2nd-rank tensor</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return gtensor</dt>
+<dt class="field-even">Return gtensor<span class="colon">:</span></dt>
 <dd class="field-even"><p>2nd-rank tensor</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.g_vect">
-<em class="property">static </em><code class="sig-name descname">g_vect</code><span class="sig-paren">(</span><em class="sig-param">g</em>, <em class="sig-param">lattvec</em>, <em class="sig-param">uvec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_vect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.g_vect" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.g_vect">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">g_vect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattvec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uvec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.g_vect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.g_vect" title="Link to this definition"></a></dt>
 <dd><p>Apply a space group operation to a vector position specified by its lattice and a location
 in the unit cell in direct coordinates</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>g</strong> – group operation (GroupOp)</p></li>
 <li><p><strong>lattvec</strong> – 3-vector (integer) lattice vector in direct coordinates</p></li>
@@ -620,169 +600,169 @@ in the unit cell in direct coordinates</p>
 <li><p><strong>guvec</strong> – 3-vector (float) vector in direct coordinates</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return glatt</dt>
+<dt class="field-even">Return glatt<span class="colon">:</span></dt>
 <dd class="field-even"><p>3-vector (integer) lattice vector in direct coordinates</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.genBZG">
-<code class="sig-name descname">genBZG</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.genBZG"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.genBZG" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.genBZG">
+<span class="sig-name descname"><span class="pre">genBZG</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.genBZG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.genBZG" title="Link to this definition"></a></dt>
 <dd><p>Generates the reciprocal lattice G points that define the Brillouin zone.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return Garray</dt>
+<dt class="field-odd">Return Garray<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array of G vectors that define the BZ, in Cartesian coordinates</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.genWyckoffsets">
-<code class="sig-name descname">genWyckoffsets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.genWyckoffsets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.genWyckoffsets" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.genWyckoffsets">
+<span class="sig-name descname"><span class="pre">genWyckoffsets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.genWyckoffsets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.genWyckoffsets" title="Link to this definition"></a></dt>
 <dd><p>Generate our Wykcoff sets.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return Wyckoffsets</dt>
+<dt class="field-odd">Return Wyckoffsets<span class="colon">:</span></dt>
 <dd class="field-odd"><p>set of sets of tuples of positions that correspond to identical Wyckoff positions</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.gengroup">
-<code class="sig-name descname">gengroup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.gengroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.gengroup" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.gengroup">
+<span class="sig-name descname"><span class="pre">gengroup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.gengroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.gengroup" title="Link to this definition"></a></dt>
 <dd><p>Generate all of the space group operations. Now handles spins! Doesn’t store
 spin phase factors for each group operation, though.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return Gset</dt>
+<dt class="field-odd">Return Gset<span class="colon">:</span></dt>
 <dd class="field-odd"><p>frozenset of group operations</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.genpoint">
-<code class="sig-name descname">genpoint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.genpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.genpoint" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.genpoint">
+<span class="sig-name descname"><span class="pre">genpoint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.genpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.genpoint" title="Link to this definition"></a></dt>
 <dd><p>Generate our point group indices. Done with crazy list comprehension due to the
 structure of our basis.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return Gpointlists</dt>
+<dt class="field-odd">Return Gpointlists<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of lists of frozensets of point group operations that leave a site unchanged</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.inBZ">
-<code class="sig-name descname">inBZ</code><span class="sig-paren">(</span><em class="sig-param">vec</em>, <em class="sig-param">BZG=None</em>, <em class="sig-param">threshold=1e-05</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.inBZ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.inBZ" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.inBZ">
+<span class="sig-name descname"><span class="pre">inBZ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BZG</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.inBZ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.inBZ" title="Link to this definition"></a></dt>
 <dd><p>Tells us if vec is inside our set of defining points.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>vec</strong> – array [3], vector to be tested</p></li>
 <li><p><strong>BGZ</strong> – array [:,3], optional (default = self.BZG), array of vectors that define the BZ</p></li>
 <li><p><strong>threshold</strong> – double, optional, threshold to use for “equality”</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return inBZ</dt>
+<dt class="field-even">Return inBZ<span class="colon">:</span></dt>
 <dd class="field-even"><p>False if outside the BZ, True otherwise</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.jumpnetwork">
-<code class="sig-name descname">jumpnetwork</code><span class="sig-paren">(</span><em class="sig-param">chem</em>, <em class="sig-param">cutoff</em>, <em class="sig-param">closestdistance=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.jumpnetwork"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.jumpnetwork" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.jumpnetwork">
+<span class="sig-name descname"><span class="pre">jumpnetwork</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">closestdistance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.jumpnetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.jumpnetwork" title="Link to this definition"></a></dt>
 <dd><p>Generate the full jump network for a specific chemical index, out to a cutoff. Organized
 by symmetry-unique transitions. Note that i-&gt;j and j-&gt;i are always related to one-another,
 but by equivalence of transition state, not symmetry. Now updated with closest-distance
 parameter.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>chem</strong> – index corresponding to the chemistry to consider</p></li>
 <li><p><strong>cutoff</strong> – distance cutoff</p></li>
 <li><p><strong>closestdistance</strong> – closest distance allowed in transition (can be a list)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return jumpnetwork</dt>
+<dt class="field-even">Return jumpnetwork<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of symmetry-unique transitions; each is a list of tuples:
 <code class="docutils literal notranslate"><span class="pre">((i,j),</span> <span class="pre">dx)</span></code> corresponding to jump from <span class="math notranslate nohighlight">\(i \to j\)</span> with vector <span class="math notranslate nohighlight">\(\mathbf{\delta x}\)</span></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.jumpnetwork2lattice">
-<code class="sig-name descname">jumpnetwork2lattice</code><span class="sig-paren">(</span><em class="sig-param">chem</em>, <em class="sig-param">jumpnetwork</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.jumpnetwork2lattice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.jumpnetwork2lattice" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.jumpnetwork2lattice">
+<span class="sig-name descname"><span class="pre">jumpnetwork2lattice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jumpnetwork</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.jumpnetwork2lattice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.jumpnetwork2lattice" title="Link to this definition"></a></dt>
 <dd><p>Convert a “standard” jumpnetwork (that specifies displacement vectors dx) into a lattice
 representation, where we replace dx with the lattice vector from i to j.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>chem</strong> – index corresponding to the chemistry to consider</p></li>
 <li><p><strong>jumpnetwork</strong> – list of symmetry-unique transitions; each is a list of tuples:
 <code class="docutils literal notranslate"><span class="pre">((i,j),</span> <span class="pre">dx)</span></code> corresponding to jump from <span class="math notranslate nohighlight">\(i \to j\)</span> with vector <span class="math notranslate nohighlight">\(\mathbf{\delta x}\)</span></p></li>
 </ul>
 </dd>
-<dt class="field-even">Return jumplattice</dt>
+<dt class="field-even">Return jumplattice<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of symmetry-unique transitions; each is a list of tuples:
 <code class="docutils literal notranslate"><span class="pre">((i,j),</span> <span class="pre">R)</span></code> corresponding to jump from i in unit cell 0 -&gt; j in unit cell R</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.minlattice">
-<code class="sig-name descname">minlattice</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.minlattice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.minlattice" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.minlattice">
+<span class="sig-name descname"><span class="pre">minlattice</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.minlattice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.minlattice" title="Link to this definition"></a></dt>
 <dd><p>Try to find the optimal lattice vector definition for a crystal. Our definition of optimal
 is (a) length of each lattice vector is minimal; (b) the vectors are ordered from
 shortest to longest; (c) the vectors have minimal dot product; (d) the basis is right-handed.</p>
 <p>Works recursively, and in-place.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.nnlist">
-<code class="sig-name descname">nnlist</code><span class="sig-paren">(</span><em class="sig-param">ind</em>, <em class="sig-param">cutoff</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.nnlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.nnlist" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.nnlist">
+<span class="sig-name descname"><span class="pre">nnlist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.nnlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.nnlist" title="Link to this definition"></a></dt>
 <dd><p>Generate the nearest neighbor list for a given cutoff. Only consider
 neighbor vectors for atoms of the same type. Returns a list of
 cartesian vectors.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ind</strong> – tuple index for atom</p></li>
 <li><p><strong>cutoff</strong> – distance cutoff</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return nnlist</dt>
+<dt class="field-even">Return nnlist<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of nearest neighbor vectors</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.pos2cart">
-<code class="sig-name descname">pos2cart</code><span class="sig-paren">(</span><em class="sig-param">lattvec</em>, <em class="sig-param">ind</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.pos2cart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.pos2cart" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.pos2cart">
+<span class="sig-name descname"><span class="pre">pos2cart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lattvec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.pos2cart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.pos2cart" title="Link to this definition"></a></dt>
 <dd><p>Return the cartesian coordinates of an atom specified by its lattice and index</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>lattvec</strong> – 3-vector (integer) lattice vector in direct coordinates</p></li>
 <li><p><strong>ind</strong> – two-tuple index specifying the atom: (atomtype, atomindex)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return v</dt>
+<dt class="field-even">Return v<span class="colon">:</span></dt>
 <dd class="field-even"><p>3-vector (float) in Cartesian coordinates</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.reduce">
-<code class="sig-name descname">reduce</code><span class="sig-paren">(</span><em class="sig-param">threshold=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.reduce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.reduce" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.reduce">
+<span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.reduce" title="Link to this definition"></a></dt>
 <dd><p>Reduces the lattice and basis, if needed. Works (tail) recursively.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>threshold</strong> – threshold for symmetry comparison; default = self.threshold</p>
 </dd>
 </dl>
@@ -799,108 +779,108 @@ atomic basis, we <em>average</em> the values that match. Finally, as we reduce, 
 <cite>self.threshold</cite> value accordingly so that recursion uses the same “effective” threshold.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.reducekptmesh">
-<code class="sig-name descname">reducekptmesh</code><span class="sig-paren">(</span><em class="sig-param">kptfull</em>, <em class="sig-param">threshold=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.reducekptmesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.reducekptmesh" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.reducekptmesh">
+<span class="sig-name descname"><span class="pre">reducekptmesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kptfull</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.reducekptmesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.reducekptmesh" title="Link to this definition"></a></dt>
 <dd><p>Takes a fully expanded mesh, and reduces it by symmetry. Assumes every point is
 equally weighted. We would need a different (more complicated) algorithm if not true…</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>kptfull</strong> – array[Nkpt][3] of kpoints</p></li>
 <li><p><strong>threshold</strong> – threshold for symmetry equality</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return kptsymm</dt>
+<dt class="field-even">Return kptsymm<span class="colon">:</span></dt>
 <dd class="field-even"><p>array[Nsymm][3] of kpoints</p>
 </dd>
-<dt class="field-odd">Return weight</dt>
+<dt class="field-odd">Return weight<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array[Nsymm] of weights (integrates to 1)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.remapbasis">
-<code class="sig-name descname">remapbasis</code><span class="sig-paren">(</span><em class="sig-param">supercell</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.remapbasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.remapbasis" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.remapbasis">
+<span class="sig-name descname"><span class="pre">remapbasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">supercell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.remapbasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.remapbasis" title="Link to this definition"></a></dt>
 <dd><p>Takes the basis definition, and using a supercell definition, returns a new basis</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>supercell</strong> – integer array[3,3]</p>
 </dd>
-<dt class="field-even">Return atomic basis</dt>
+<dt class="field-even">Return atomic basis<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of list of positions</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.simpleYAML">
-<code class="sig-name descname">simpleYAML</code><span class="sig-paren">(</span><em class="sig-param">a0=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.simpleYAML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.simpleYAML" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.simpleYAML">
+<span class="sig-name descname"><span class="pre">simpleYAML</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.simpleYAML"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.simpleYAML" title="Link to this definition"></a></dt>
 <dd><p>Creates a simplified YAML dump, in case we don’t want to output the full symmetry analysis</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return YAML</dt>
+<dt class="field-odd">Return YAML<span class="colon">:</span></dt>
 <dd class="field-odd"><p>string dump</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.sitelist">
-<code class="sig-name descname">sitelist</code><span class="sig-paren">(</span><em class="sig-param">chem</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.sitelist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.sitelist" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.sitelist">
+<span class="sig-name descname"><span class="pre">sitelist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.sitelist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.sitelist" title="Link to this definition"></a></dt>
 <dd><p>Return a list of lists of Wyckoff-related sites for a given chemistry.
 Done with a single list comprehension–useful as input for diffusion calculation</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>chem</strong> – index corresponding to chemistry to consider</p>
 </dd>
-<dt class="field-even">Return symmequivsites</dt>
+<dt class="field-even">Return symmequivsites<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of lists of indices that are equivalent by symmetry</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.strain">
-<code class="sig-name descname">strain</code><span class="sig-paren">(</span><em class="sig-param">eps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.strain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.strain" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.strain">
+<span class="sig-name descname"><span class="pre">strain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.strain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.strain" title="Link to this definition"></a></dt>
 <dd><p>Returns a new Crystal object that is a strained version of the current.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>eps</strong> – strain tensor</p>
 </dd>
-<dt class="field-even">Return Crystal</dt>
+<dt class="field-even">Return Crystal<span class="colon">:</span></dt>
 <dd class="field-even"><p>new crystal object, strained</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.unit2cart">
-<code class="sig-name descname">unit2cart</code><span class="sig-paren">(</span><em class="sig-param">lattvec</em>, <em class="sig-param">uvec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.unit2cart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.unit2cart" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.unit2cart">
+<span class="sig-name descname"><span class="pre">unit2cart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lattvec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uvec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.unit2cart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.unit2cart" title="Link to this definition"></a></dt>
 <dd><p>Return the cartesian coordinates of a position specified by its lattice and
 unit cell coordinates</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>lattvec</strong> – 3-vector (integer) lattice vector in direct coordinates</p></li>
 <li><p><strong>uvec</strong> – 3-vector (float) unit cell vector in direct coordinates</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return v</dt>
+<dt class="field-even">Return v<span class="colon">:</span></dt>
 <dd class="field-even"><p>3-vector (float) in Cartesian coordinates</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.Crystal.vectlist">
-<em class="property">static </em><code class="sig-name descname">vectlist</code><span class="sig-paren">(</span><em class="sig-param">vb</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.vectlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Crystal.vectlist" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.Crystal.vectlist">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vectlist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vb</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Crystal.vectlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Crystal.vectlist" title="Link to this definition"></a></dt>
 <dd><p>Returns a list of orthonormal vectors corresponding to our vector basis.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>vb</strong> – (dim, v)</p>
 </dd>
-<dt class="field-even">Return vlist</dt>
+<dt class="field-even">Return vlist<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of vectors</p>
 </dd>
 </dl>
@@ -908,32 +888,32 @@ unit cell coordinates</p>
 
 </dd></dl>
 
-<dl class="function">
-<dt id="crystal.FourthRankIsotropic">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">FourthRankIsotropic</code><span class="sig-paren">(</span><em class="sig-param">F</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#FourthRankIsotropic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.FourthRankIsotropic" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.FourthRankIsotropic">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">FourthRankIsotropic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">F</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#FourthRankIsotropic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.FourthRankIsotropic" title="Link to this definition"></a></dt>
 <dd><p>Returns the average and shear values from orientational averaging of a symmetric fourth-rank
 tensor.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>F</strong><strong>[</strong><strong>a</strong><strong>,</strong><strong>b</strong><strong>,</strong><strong>c</strong><strong>,</strong><strong>d</strong><strong>]</strong> – symmetric fourth-rank tensor (F[abcd]=F[abcd]=F[bacd]=F[cdab])</p>
 </dd>
-<dt class="field-even">Return average</dt>
+<dt class="field-even">Return average<span class="colon">:</span></dt>
 <dd class="field-even"><p>average value = (F11+2F12)/3, orientationally averaged</p>
 </dd>
-<dt class="field-odd">Return shear</dt>
+<dt class="field-odd">Return shear<span class="colon">:</span></dt>
 <dd class="field-odd"><p>shear value = F44, orientationally averaged</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="class">
-<dt id="crystal.GroupOp">
-<em class="property">class </em><code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">GroupOp</code><a class="reference internal" href="_modules/crystal.html#GroupOp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="crystal.GroupOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">GroupOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cartrot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indexmap</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp" title="Link to this definition"></a></dt>
 <dd><p>A class corresponding to a group operation. Based on namedtuple, so it is immutable.</p>
 <p>Intended to be used in combination with Crystal, we have a few operations that
 can be defined out-of-the-box.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>rot</strong> – np.array(3,3) integer idempotent matrix</p></li>
 <li><p><strong>trans</strong> – np.array(3) real vector</p></li>
@@ -942,69 +922,69 @@ can be defined out-of-the-box.</p>
 </ul>
 </dd>
 </dl>
-<dl class="method">
-<dt id="crystal.GroupOp.GroupOp_constructor">
-<em class="property">static </em><code class="sig-name descname">GroupOp_constructor</code><span class="sig-paren">(</span><em class="sig-param">loader</em>, <em class="sig-param">node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.GroupOp_constructor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.GroupOp_constructor" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.GroupOp_constructor">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GroupOp_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.GroupOp_constructor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.GroupOp_constructor" title="Link to this definition"></a></dt>
 <dd><p>Construct a GroupOp from YAML</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.GroupOp_representer">
-<em class="property">static </em><code class="sig-name descname">GroupOp_representer</code><span class="sig-paren">(</span><em class="sig-param">dumper</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.GroupOp_representer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.GroupOp_representer" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.GroupOp_representer">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GroupOp_representer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dumper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.GroupOp_representer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.GroupOp_representer" title="Link to this definition"></a></dt>
 <dd><p>Output a GroupOp</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.__add__">
-<code class="sig-name descname">__add__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__add__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__add__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.__add__">
+<span class="sig-name descname"><span class="pre">__add__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__add__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.__add__" title="Link to this definition"></a></dt>
 <dd><p>Add a translation to our group operation</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.__eq__">
-<code class="sig-name descname">__eq__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__eq__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__eq__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.__eq__" title="Link to this definition"></a></dt>
 <dd><p>Test for equality–we use numpy.isclose for comparison, since that’s what we usually care about</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.__hash__">
-<code class="sig-name descname">__hash__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__hash__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__hash__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__hash__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.__hash__" title="Link to this definition"></a></dt>
 <dd><p>Hash, so that we can make sets of group operations</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.__mul__">
-<code class="sig-name descname">__mul__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__mul__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__mul__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.__mul__">
+<span class="sig-name descname"><span class="pre">__mul__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__mul__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.__mul__" title="Link to this definition"></a></dt>
 <dd><p>Multiply two group operations to produce a new group operation</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.__ne__">
-<code class="sig-name descname">__ne__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__ne__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__ne__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.__ne__">
+<span class="sig-name descname"><span class="pre">__ne__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__ne__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.__ne__" title="Link to this definition"></a></dt>
 <dd><p>Inequality == not __eq__</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.__sane__">
-<code class="sig-name descname">__sane__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__sane__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__sane__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.__sane__">
+<span class="sig-name descname"><span class="pre">__sane__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__sane__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.__sane__" title="Link to this definition"></a></dt>
 <dd><p>Return true if the cartrot and rot are consistent and ‘sane’</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.__str__">
-<code class="sig-name descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__str__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.__str__" title="Link to this definition"></a></dt>
 <dd><p>Human-readable version of groupop</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.__sub__">
-<code class="sig-name descname">__sub__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__sub__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.__sub__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.__sub__">
+<span class="sig-name descname"><span class="pre">__sub__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.__sub__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.__sub__" title="Link to this definition"></a></dt>
 <dd><p>Add a (negative) translation to our group operation</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.eigen">
-<code class="sig-name descname">eigen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.eigen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.eigen" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.eigen">
+<span class="sig-name descname"><span class="pre">eigen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.eigen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.eigen" title="Link to this definition"></a></dt>
 <dd><p>Returns the type of group operation (single integer) and eigenvectors.
 1 = identity
 2, 3, 4, 6 = n- fold rotation around an axis
@@ -1015,52 +995,52 @@ eigenvect[1], eigenvect[2] = orthonormal vectors to define the plane giving a ri
 coordinate system and where rotation around [0] is positive, and the positive imaginary
 eigenvector for the complex eigenvalue is [1] + i [2].</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>integer</p>
 </dd>
-<dt class="field-even">Return eigenvectors</dt>
+<dt class="field-even">Return eigenvectors<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of [ev0, ev1, ev2]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.ident">
-<em class="property">classmethod </em><code class="sig-name descname">ident</code><span class="sig-paren">(</span><em class="sig-param">basis</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.ident"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.ident" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.ident">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ident</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.ident"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.ident" title="Link to this definition"></a></dt>
 <dd><p>Return a group operation corresponding to identity for a given basis</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.incell">
-<code class="sig-name descname">incell</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.incell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.incell" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.incell">
+<span class="sig-name descname"><span class="pre">incell</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.incell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.incell" title="Link to this definition"></a></dt>
 <dd><p>Return a version of groupop where the translation is in the unit cell</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.inhalf">
-<code class="sig-name descname">inhalf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.inhalf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.inhalf" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.inhalf">
+<span class="sig-name descname"><span class="pre">inhalf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.inhalf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.inhalf" title="Link to this definition"></a></dt>
 <dd><p>Return a version of groupop where the translation is in the centered unit cell</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.inv">
-<code class="sig-name descname">inv</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.inv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.inv" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.inv">
+<span class="sig-name descname"><span class="pre">inv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.inv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.inv" title="Link to this definition"></a></dt>
 <dd><p>Construct and return the inverse of the group operation</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystal.GroupOp.optype">
-<em class="property">static </em><code class="sig-name descname">optype</code><span class="sig-paren">(</span><em class="sig-param">rot</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.optype"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.GroupOp.optype" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystal.GroupOp.optype">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">optype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rot</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#GroupOp.optype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.GroupOp.optype" title="Link to this definition"></a></dt>
 <dd><p>Returns the type of group operation (single integer):
 1 = identity
 2, 3, 4, 6 = n- fold rotation around an axis
 negative = rotation + mirror operation, perpendicular to axis
 “special cases”: -1 = mirror, -2 = inversion</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>rot</strong> – rotation matrix (can be the integer rot)</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>integer</p>
 </dd>
 </dl>
@@ -1068,67 +1048,67 @@ negative = rotation + mirror operation, perpendicular to axis
 
 </dd></dl>
 
-<dl class="function">
-<dt id="crystal.ProjectTensorBasis">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">ProjectTensorBasis</code><span class="sig-paren">(</span><em class="sig-param">tensor</em>, <em class="sig-param">basis</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#ProjectTensorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.ProjectTensorBasis" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.ProjectTensorBasis">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">ProjectTensorBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#ProjectTensorBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.ProjectTensorBasis" title="Link to this definition"></a></dt>
 <dd><p>Given a tensor, project it onto the basis.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tensor</strong> – tensor</p></li>
 <li><p><strong>basis</strong> – list consisting of an orthonormal basis</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return tensor</dt>
+<dt class="field-even">Return tensor<span class="colon">:</span></dt>
 <dd class="field-even"><p>tensor, projected</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystal.SymmTensorBasis">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">SymmTensorBasis</code><span class="sig-paren">(</span><em class="sig-param">rottype</em>, <em class="sig-param">eigenvect</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#SymmTensorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.SymmTensorBasis" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.SymmTensorBasis">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">SymmTensorBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rottype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eigenvect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#SymmTensorBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.SymmTensorBasis" title="Link to this definition"></a></dt>
 <dd><p>Returns a symmetric second-rank tensor basis corresponding to the optype and eigenvectors
 for a GroupOp</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>rottype</strong> – output from eigen()</p></li>
 <li><p><strong>eigenvect</strong> – eigenvectors</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return tensorbasis</dt>
+<dt class="field-even">Return tensorbasis<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of 2nd-rank symmetric tensors making up the basis</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystal.VectorBasis">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">VectorBasis</code><span class="sig-paren">(</span><em class="sig-param">rottype</em>, <em class="sig-param">eigenvect</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#VectorBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.VectorBasis" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.VectorBasis">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">VectorBasis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rottype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eigenvect</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#VectorBasis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.VectorBasis" title="Link to this definition"></a></dt>
 <dd><p>Returns a vector basis corresponding to the optype and eigenvectors for a GroupOp</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>rottype</strong> – output from eigen()</p></li>
 <li><p><strong>eigenvect</strong> – eigenvectors</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return dim</dt>
+<dt class="field-even">Return dim<span class="colon">:</span></dt>
 <dd class="field-even"><p>dimensionality, 0..3</p>
 </dd>
-<dt class="field-odd">Return vect</dt>
+<dt class="field-odd">Return vect<span class="colon">:</span></dt>
 <dd class="field-odd"><p>vector defining line direction (1) or plane normal (2)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystal.Voigtstrain">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">Voigtstrain</code><span class="sig-paren">(</span><em class="sig-param">e1</em>, <em class="sig-param">e2</em>, <em class="sig-param">e3</em>, <em class="sig-param">e4</em>, <em class="sig-param">e5</em>, <em class="sig-param">e6</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Voigtstrain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.Voigtstrain" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.Voigtstrain">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">Voigtstrain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#Voigtstrain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.Voigtstrain" title="Link to this definition"></a></dt>
 <dd><p>Returns a symmetric strain tensor from the Voigt reduced strain values.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>e1</strong> – xx</p></li>
 <li><p><strong>e2</strong> – yy</p></li>
@@ -1138,66 +1118,66 @@ for a GroupOp</p>
 <li><p><strong>e6</strong> – xy + yx</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return strain</dt>
+<dt class="field-even">Return strain<span class="colon">:</span></dt>
 <dd class="field-even"><p>symmetric strain tensor</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystal.gcdlist">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">gcdlist</code><span class="sig-paren">(</span><em class="sig-param">lis</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#gcdlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.gcdlist" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.gcdlist">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">gcdlist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#gcdlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.gcdlist" title="Link to this definition"></a></dt>
 <dd><p>Returns the GCD of a list of integers</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystal.incell">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">incell</code><span class="sig-paren">(</span><em class="sig-param">vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#incell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.incell" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.incell">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">incell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#incell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.incell" title="Link to this definition"></a></dt>
 <dd><p>Returns the vector inside the unit cell (in [0,1)**3)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>vec</strong> – 3-vector (unit coord)</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>3-vector</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystal.inhalf">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">inhalf</code><span class="sig-paren">(</span><em class="sig-param">vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#inhalf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.inhalf" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.inhalf">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">inhalf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#inhalf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.inhalf" title="Link to this definition"></a></dt>
 <dd><p>Returns the vector inside the centered cell (in [-0.5,0.5)**3)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>vec</strong> – 3-vector (unit coord)</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>3-vector</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystal.isotropicFourthRank">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">isotropicFourthRank</code><span class="sig-paren">(</span><em class="sig-param">average</em>, <em class="sig-param">shear</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#isotropicFourthRank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.isotropicFourthRank" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.isotropicFourthRank">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">isotropicFourthRank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">average</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shear</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#isotropicFourthRank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.isotropicFourthRank" title="Link to this definition"></a></dt>
 <dd><p>Returns a symmetrized, isotropic fourth-rank tensor based on an average value and “shear” value</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>average</strong> – averaged value = (F11+2F12)/3</p></li>
 <li><p><strong>shear</strong> – shear value = F44 = (F11-F12)/2</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return F[a,b,c,d]</dt>
+<dt class="field-even">Return F[a,b,c,d]<span class="colon">:</span></dt>
 <dd class="field-even"><p>isotropic fourth-rank tensor</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystal.maptranslation">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">maptranslation</code><span class="sig-paren">(</span><em class="sig-param">oldpos</em>, <em class="sig-param">newpos</em>, <em class="sig-param">oldspins=None</em>, <em class="sig-param">newspins=None</em>, <em class="sig-param">threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#maptranslation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.maptranslation" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.maptranslation">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">maptranslation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oldpos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newpos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oldspins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newspins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#maptranslation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.maptranslation" title="Link to this definition"></a></dt>
 <dd><p>Given a list of transformed positions, identify if there’s a translation vector
 that maps from the current positions to the new position.</p>
 <p>The mapping specifies the index that the <em>translated</em> atom corresponds to in the
@@ -1206,7 +1186,7 @@ None; the translation vector will be meaningless.</p>
 <p>If old/newspins are given then ONLY mappings that maintain spin are considered.
 This means that a loop is needed to consider possible spin phase factors.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>oldpos</strong> – list of list of array[3]</p></li>
 <li><p><strong>newpos</strong> – list of list of array[3], same layout as oldpos</p></li>
@@ -1214,70 +1194,52 @@ This means that a loop is needed to consider possible spin phase factors.</p>
 <li><p><strong>newspins</strong> – (optional) list of list of numbers/arrays</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return translation</dt>
+<dt class="field-even">Return translation<span class="colon">:</span></dt>
 <dd class="field-even"><p>array[3]</p>
 </dd>
-<dt class="field-odd">Return mapping</dt>
+<dt class="field-odd">Return mapping<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of list of indices</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystal.ndarray_representer">
-<code class="sig-prename descclassname">crystal.</code><code class="sig-name descname">ndarray_representer</code><span class="sig-paren">(</span><em class="sig-param">dumper</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#ndarray_representer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystal.ndarray_representer" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystal.ndarray_representer">
+<span class="sig-prename descclassname"><span class="pre">crystal.</span></span><span class="sig-name descname"><span class="pre">ndarray_representer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dumper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystal.html#ndarray_representer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystal.ndarray_representer" title="Link to this definition"></a></dt>
 <dd><p>Output a numpy array</p>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="CrystalStars.html" class="btn btn-neutral float-right" title="CrystalStars" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="CrystalStars.html" class="btn btn-neutral float-right" title="CrystalStars" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2017, Dallas R. Trinkle
-
-    </p>
+    <p>&#169; Copyright 2017, Dallas R. Trinkle.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

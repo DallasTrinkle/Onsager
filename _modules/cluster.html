@@ -1,0 +1,1204 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cluster &mdash; Onsager 1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=0ed52906"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Onsager
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../InputOutput.html">Input and output for Onsager transport calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Example Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Onsager</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cluster</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cluster</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Cluster expansion module: types necessary to implement cluster expansions of</span>
+<span class="sd">quantities based on crystals.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Dallas R. Trinkle&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">collections</span><span class="o">,</span> <span class="nn">itertools</span><span class="o">,</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">onsager</span> <span class="kn">import</span> <span class="n">crystal</span><span class="p">,</span> <span class="n">supercell</span>
+
+<span class="c1"># YAML tags</span>
+<span class="n">CLUSTERSITE_YAMLTAG</span> <span class="o">=</span> <span class="s1">&#39;!ClusterSite&#39;</span>
+<span class="n">CLUSTER_YAMLTAG</span> <span class="o">=</span> <span class="s1">&#39;!Cluster&#39;</span>
+
+
+<div class="viewcode-block" id="ClusterSite">
+<a class="viewcode-back" href="../cluster.html#cluster.ClusterSite">[docs]</a>
+<span class="k">class</span> <span class="nc">ClusterSite</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;ClusterSite&#39;</span><span class="p">,</span> <span class="s1">&#39;ci R&#39;</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class corresponding to a site in a cluster.</span>
+
+<span class="sd">    :param ci: (chem, index) of the site</span>
+<span class="sd">    :param R: lattice vector of the site</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a proper dict&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;ci&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ci</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">}</span>
+
+<div class="viewcode-block" id="ClusterSite.fromcryscart">
+<a class="viewcode-back" href="../cluster.html#cluster.ClusterSite.fromcryscart">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromcryscart</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">cart_pos</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a ClusterSite corresponding to Cartesian position ``cart_pos`` in crystal ``crys``&quot;&quot;&quot;</span>
+        <span class="n">R</span><span class="p">,</span> <span class="n">ci</span> <span class="o">=</span> <span class="n">crys</span><span class="o">.</span><span class="n">cart2pos</span><span class="p">(</span><span class="n">cart_pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ci</span><span class="o">=</span><span class="n">ci</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="n">R</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ClusterSite.fromcrysunit">
+<a class="viewcode-back" href="../cluster.html#cluster.ClusterSite.fromcrysunit">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromcrysunit</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">unit_pos</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a ClusterSite corresponding to unit cell position ``unit_pos`` in crystal ``crys``&quot;&quot;&quot;</span>
+        <span class="n">cart_pos</span> <span class="o">=</span> <span class="n">crys</span><span class="o">.</span><span class="n">unit2cart</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">crys</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span> <span class="n">unit_pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">fromcryscart</span><span class="p">(</span><span class="n">cart_pos</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ClusterSite.__eq__">
+<a class="viewcode-back" href="../cluster.html#cluster.ClusterSite.__eq__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test for equality--we don&#39;t bother checking dx&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span> <span class="ow">and</span> \
+               <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ci</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">ci</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">R</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ClusterSite.__ne__">
+<a class="viewcode-back" href="../cluster.html#cluster.ClusterSite.__ne__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Inequality == not __eq__&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ClusterSite.__hash__">
+<a class="viewcode-back" href="../cluster.html#cluster.ClusterSite.__hash__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hash, so that we can make sets of states&quot;&quot;&quot;</span>
+        <span class="c1"># return self.i ^ (self.j &lt;&lt; 1) ^ (self.R[0] &lt;&lt; 2) ^ (self.R[1] &lt;&lt; 3) ^ (self.R[2] &lt;&lt; 4)</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ci</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ClusterSite.__neg__">
+<a class="viewcode-back" href="../cluster.html#cluster.ClusterSite.__neg__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Negation of site&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">ci</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ci</span><span class="p">,</span> <span class="n">R</span><span class="o">=-</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ClusterSite.__add__">
+<a class="viewcode-back" href="../cluster.html#cluster.ClusterSite.__add__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a vector to a site; other *must* be a vector</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ArithmeticError</span><span class="p">(</span><span class="s1">&#39;Dimensionality problem? Adding </span><span class="si">{}</span><span class="s1"> to </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">ci</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ci</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">other</span><span class="p">))</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+
+<div class="viewcode-block" id="ClusterSite.g">
+<a class="viewcode-back" href="../cluster.html#cluster.ClusterSite.g">[docs]</a>
+    <span class="k">def</span> <span class="nf">g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply group operation.</span>
+
+<span class="sd">        :param crys: crystal</span>
+<span class="sd">        :param g: group operation (from crys)</span>
+<span class="sd">        :return g*site: corresponding to group operation applied to self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gR</span><span class="p">,</span> <span class="n">gci</span> <span class="o">=</span> <span class="n">crys</span><span class="o">.</span><span class="n">g_pos</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ci</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">ci</span><span class="o">=</span><span class="n">gci</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="n">gR</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ClusterSite.__str__">
+<a class="viewcode-back" href="../cluster.html#cluster.ClusterSite.__str__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Human readable version&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.[</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ci</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.[</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ci</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="ClusterSite.ClusterSite_representer">
+<a class="viewcode-back" href="../cluster.html#cluster.ClusterSite.ClusterSite_representer">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">ClusterSite_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Output a ClusterSite&quot;&quot;&quot;</span>
+        <span class="c1"># asdict() returns an OrderedDictionary, so pass through dict()</span>
+        <span class="c1"># had to rewrite _asdict() for some reason...?</span>
+        <span class="k">return</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_mapping</span><span class="p">(</span><span class="n">CLUSTERSITE_YAMLTAG</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">_asdict</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="ClusterSite.ClusterSite_constructor">
+<a class="viewcode-back" href="../cluster.html#cluster.ClusterSite.ClusterSite_constructor">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">ClusterSite_constructor</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a ClusterSite from YAML&quot;&quot;&quot;</span>
+        <span class="c1"># ** turns the dictionary into parameters for ClusterSite constructor</span>
+        <span class="k">return</span> <span class="n">ClusterSite</span><span class="p">(</span><span class="o">**</span><span class="n">loader</span><span class="o">.</span><span class="n">construct_mapping</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span></div>
+</div>
+
+
+
+<span class="n">yaml</span><span class="o">.</span><span class="n">add_representer</span><span class="p">(</span><span class="n">ClusterSite</span><span class="p">,</span> <span class="n">ClusterSite</span><span class="o">.</span><span class="n">ClusterSite_representer</span><span class="p">)</span>
+<span class="n">yaml</span><span class="o">.</span><span class="n">add_constructor</span><span class="p">(</span><span class="n">CLUSTERSITE_YAMLTAG</span><span class="p">,</span> <span class="n">ClusterSite</span><span class="o">.</span><span class="n">ClusterSite_constructor</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Cluster">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster">[docs]</a>
+<span class="k">class</span> <span class="nc">Cluster</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to define (arbitrary) cluster interactions. A cluster is defined as</span>
+<span class="sd">    a set of ClusterSites. We don&#39;t implement this using sets, however, because</span>
+<span class="sd">    we make a choice of a &quot;reference&quot; site in each cluster, which has a lattice</span>
+<span class="sd">    vector of 0, to account for translational invariance.</span>
+
+<span class="sd">    The flag transition dictates whether the cluster is a transition state cluster</span>
+<span class="sd">    or not. The difference with a transition state cluster is that the first two</span>
+<span class="sd">    states in the cluster are the initial and final states of the transition, while</span>
+<span class="sd">    all of the remaining parts are the cluster.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Cluster.__init__">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clustersitelist</span><span class="p">,</span> <span class="n">transition</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">vacancy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">NOSORT</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cluster interaction, from an iterable of ClusterSites</span>
+<span class="sd">        :param clustersitelist: iterable of ClusterSites</span>
+<span class="sd">        :param transition: True if a transition state cluster; cl[0] = initial, cl[1] = final</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># this sorting is a *little* hacked together, but as long as we don&#39;t have</span>
+        <span class="c1"># more than 2^32 sites in our crystal, we&#39;re good to go:</span>
+        <span class="k">def</span> <span class="nf">sortkey</span><span class="p">(</span><span class="n">cs</span><span class="p">):</span> <span class="k">return</span> <span class="n">cs</span><span class="o">.</span><span class="n">ci</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">)</span><span class="o">+</span><span class="n">cs</span><span class="o">.</span><span class="n">ci</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># first, dump contents of iterable into a list to manipulate:</span>
+        <span class="n">lis</span> <span class="o">=</span> <span class="p">[</span><span class="n">cs</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">clustersitelist</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">NOSORT</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">transition</span><span class="p">:</span>
+                <span class="n">lis</span> <span class="o">=</span> <span class="n">lis</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">lis</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="n">key</span><span class="o">=</span><span class="n">sortkey</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">vacancy</span><span class="p">:</span>
+                <span class="n">lis</span> <span class="o">=</span> <span class="n">lis</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">lis</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">key</span><span class="o">=</span><span class="n">sortkey</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lis</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">sortkey</span><span class="p">)</span>
+        <span class="n">R0</span> <span class="o">=</span> <span class="n">lis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">R</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sites</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">cs</span><span class="o">-</span><span class="n">R0</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">lis</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Norder</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nsites</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">transition</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Norder</span> <span class="o">-=</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">vacancy</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Norder</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="c1"># a little mapping of the positions into sets to make equality checking faster,</span>
+        <span class="c1"># and explicit evaluation of hash function one time using XOR of individual values</span>
+        <span class="c1"># so that it respects permutations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__center__</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">cs</span><span class="o">.</span><span class="n">R</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__equalitymap__</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">hashcache</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">Nvac</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># how many of our sites are &quot;vacancies&quot; (to be treated differently on the sublattice)?</span>
+        <span class="k">if</span> <span class="n">vacancy</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">transition</span><span class="p">:</span>
+                <span class="n">Nvac</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Nvac</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">):</span>
+            <span class="n">shiftpos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__shift_pos__</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>  <span class="c1"># our tuple representation of site</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">ci</span>  <span class="c1"># currently does NOT have an &quot;alpha&quot; value on it... could be ci[0]?</span>
+            <span class="c1"># for equality mapping, we have to differentiate the vacancy sites from the rest:</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">Nvac</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">r</span> <span class="o">+=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>  <span class="c1"># add the &quot;vacancy&quot; indexing</span>
+                <span class="k">else</span><span class="p">:</span> <span class="n">r</span> <span class="o">+=</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span>  <span class="c1"># add the native chemistry</span>
+            <span class="n">hashcache</span> <span class="o">^=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">r</span> <span class="o">+</span> <span class="n">shiftpos</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__equalitymap__</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__equalitymap__</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">shiftpos</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__equalitymap__</span><span class="p">[</span><span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">shiftpos</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__hashcache__</span> <span class="o">=</span> <span class="n">hashcache</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__transition__</span> <span class="o">=</span> <span class="n">transition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__vacancy__</span> <span class="o">=</span> <span class="n">vacancy</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__shift_pos__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">cs</span><span class="o">.</span><span class="n">R</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Nsites</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__center__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Cluster.__eq__">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.__eq__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Test for equality of two clusters. This is a bit trickier than one would expect, since</span>
+<span class="sd">        clusters are essentially sets where all of the lattice vectors are shifted by the</span>
+<span class="sd">        center of mass of the sites.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span> <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transition__</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">__transition__</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vacancy__</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">__vacancy__</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Norder</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">Norder</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__equalitymap__</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">__equalitymap__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span> <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__equalitymap__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">__equalitymap__</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">!=</span> <span class="n">v</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transition__</span><span class="p">:</span>
+            <span class="c1"># TSself, TSother = self.transitionstate(), other.transitionstate()</span>
+            <span class="c1"># if TSself != TSother:</span>
+            <span class="c1">#     R0 = TSother[1].R</span>
+            <span class="c1">#     if TSself != (TSother[1] - R0, TSother[0] - R0):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">istransition</span><span class="p">(</span><span class="o">*</span><span class="n">other</span><span class="o">.</span><span class="n">transitionstate</span><span class="p">()):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="c1"># with the new indexing, I don&#39;t believe this check is required:</span>
+        <span class="c1"># elif self.__vacancy__:</span>
+        <span class="c1">#     if self.vacancy() != other.vacancy():</span>
+        <span class="c1">#         return False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Cluster.__hash__">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.__hash__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return our hash value, precomputed&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hashcache__</span></div>
+
+
+<div class="viewcode-block" id="Cluster.__contains__">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.__contains__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns whether a cluster site is in our cluster expansion&quot;&quot;&quot;</span>
+        <span class="c1"># elem is a cluster site</span>
+        <span class="c1"># NOTE: this will FAIL to find the &quot;vacancy&quot; in the cluster by default.</span>
+        <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">ci</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__equalitymap__</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__shift_pos__</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__equalitymap__</span><span class="p">[</span><span class="n">elem</span><span class="o">.</span><span class="n">ci</span><span class="p">]</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Norder</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">IndexError</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transition__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">2</span><span class="p">:][</span><span class="n">item</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vacancy__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">1</span><span class="p">:][</span><span class="n">item</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a proper dict&quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;clustersitelist&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transition__</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;transition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transition__</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vacancy__</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;vacancy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vacancy__</span>
+        <span class="k">return</span> <span class="n">d</span>
+
+<div class="viewcode-block" id="Cluster.transitionstate">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.transitionstate">[docs]</a>
+    <span class="k">def</span> <span class="nf">transitionstate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the two sites of the transition state&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transition__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Not a TS cluster&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Cluster.vacancy">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.vacancy">[docs]</a>
+    <span class="k">def</span> <span class="nf">vacancy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the two sites of the transition state&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vacancy__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Not a vacancy cluster&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Cluster.istransition">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.istransition">[docs]</a>
+    <span class="k">def</span> <span class="nf">istransition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site0</span><span class="p">,</span> <span class="n">site1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check whether two sites correspond to the transition state&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transition__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Not a TS cluster&#39;</span><span class="p">)</span>
+        <span class="n">R0</span> <span class="o">=</span> <span class="n">site0</span><span class="o">.</span><span class="n">R</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">site0</span> <span class="o">-</span> <span class="n">R0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">site1</span> <span class="o">-</span> <span class="n">R0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vacancy__</span><span class="p">:</span>
+            <span class="c1"># we need to short-circuit out of the next test...</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">R1</span> <span class="o">=</span> <span class="n">site1</span><span class="o">.</span><span class="n">R</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">site1</span> <span class="o">-</span> <span class="n">R1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">site0</span> <span class="o">-</span> <span class="n">R1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="Cluster.__add__">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.__add__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a clustersite to a cluster expansion&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">other</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span> <span class="o">+</span> <span class="p">(</span><span class="n">other</span><span class="p">,),</span> <span class="n">transition</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__transition__</span><span class="p">,</span> <span class="n">vacancy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__vacancy__</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Cluster.__sub__">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.__sub__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Subtract a site from a cluster. Had a very specific meaning: if the</span>
+<span class="sd">        site is in the cluster, it returns a list of all the *other* sites, shifted</span>
+<span class="sd">        so that the ``other`` site is at the origin.</span>
+
+<span class="sd">        Needs to be clarified for the case of a transition state.</span>
+
+<span class="sd">        :param other: needs to be a cluster site *in* the cluster.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transition__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">(</span><span class="s1">&#39;Subtraction not currently implemented for TS clusters&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vacancy__</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">(</span><span class="s1">&#39;Subtraction not currently implemented for vacancy clusters&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">other</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ArithmeticError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> not in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">cs</span><span class="o">-</span><span class="n">other</span><span class="o">.</span><span class="n">R</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span> <span class="k">if</span> <span class="n">cs</span> <span class="o">!=</span> <span class="n">other</span><span class="p">]</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Norder</span>
+
+<div class="viewcode-block" id="Cluster.g">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.g">[docs]</a>
+    <span class="k">def</span> <span class="nf">g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crys</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply group operation.</span>
+
+<span class="sd">        :param crys: crystal</span>
+<span class="sd">        :param g: group operation (from crys)</span>
+<span class="sd">        :return g*cluster: corresponding to group operation applied to self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">([</span><span class="n">cs</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">crys</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">],</span> <span class="n">transition</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__transition__</span><span class="p">,</span> <span class="n">vacancy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__vacancy__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Cluster.pairdistances">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.pairdistances">[docs]</a>
+    <span class="k">def</span> <span class="nf">pairdistances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crys</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a dictionary of all the pair distances between the chemistries in the cluster.</span>
+<span class="sd">        For simplicity, we include both (c1,c2) and (c2,c1).</span>
+
+<span class="sd">        :param crys: crystal</span>
+<span class="sd">        :return dist_dict: dist_dict[c1][c2] = sorted list of distances between chemistry c1 and c2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">chem_cart</span> <span class="o">=</span> <span class="p">[(</span><span class="n">cs</span><span class="o">.</span><span class="n">ci</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">crys</span><span class="o">.</span><span class="n">pos2cart</span><span class="p">(</span><span class="n">cs</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="n">cs</span><span class="o">.</span><span class="n">ci</span><span class="p">))</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">]</span>
+        <span class="n">dist_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">n0</span><span class="p">,</span> <span class="p">(</span><span class="n">c0</span><span class="p">,</span> <span class="n">x0</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chem_cart</span><span class="p">):</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">x1</span><span class="p">)</span> <span class="ow">in</span> <span class="n">chem_cart</span><span class="p">[:</span><span class="n">n0</span><span class="p">]:</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x1</span><span class="o">-</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="o">-</span><span class="n">x0</span><span class="p">))</span>
+                <span class="n">tup</span> <span class="o">=</span> <span class="p">(</span><span class="n">c0</span><span class="p">,</span> <span class="n">c1</span><span class="p">)</span> <span class="k">if</span> <span class="n">c0</span> <span class="o">&lt;=</span> <span class="n">c1</span> <span class="k">else</span> <span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">dist_dict</span><span class="p">:</span>
+                    <span class="n">dist_dict</span><span class="p">[</span><span class="n">tup</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dist_dict</span><span class="p">[</span><span class="n">tup</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">]</span>
+        <span class="c1"># sort:</span>
+        <span class="k">for</span> <span class="n">dlist</span> <span class="ow">in</span> <span class="n">dist_dict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">dlist</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="c1"># put (c1,c0) in place: (needs a list comprehension to avoid runtime error about adding keys while iterating]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">c0</span><span class="p">,</span> <span class="n">c1</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">tup</span> <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">dist_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()]:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c0</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dist_dict</span><span class="p">:</span>
+                <span class="n">dist_dict</span><span class="p">[</span><span class="n">c1</span><span class="p">,</span> <span class="n">c0</span><span class="p">]</span> <span class="o">=</span> <span class="n">dist_dict</span><span class="p">[</span><span class="n">c0</span><span class="p">,</span> <span class="n">c1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">dist_dict</span></div>
+
+
+<div class="viewcode-block" id="Cluster.__str__">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.__str__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Human readable version&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> order: &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Norder</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transition__</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; -&gt; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; : &quot;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">2</span><span class="p">:]])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vacancy__</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; (V): &quot;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">s</span></div>
+
+
+<div class="viewcode-block" id="Cluster.Cluster_representer">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.Cluster_representer">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">Cluster_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Output a ClusterSite&quot;&quot;&quot;</span>
+        <span class="c1"># asdict() returns an OrderedDictionary, so pass through dict()</span>
+        <span class="c1"># had to rewrite _asdict() for some reason...?</span>
+        <span class="k">return</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_mapping</span><span class="p">(</span><span class="n">CLUSTER_YAMLTAG</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">_asdict</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="Cluster.Cluster_constructor">
+<a class="viewcode-back" href="../cluster.html#cluster.Cluster.Cluster_constructor">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">Cluster_constructor</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a ClusterSite from YAML&quot;&quot;&quot;</span>
+        <span class="c1"># ** turns the dictionary into parameters for ClusterSite constructor</span>
+        <span class="k">return</span> <span class="n">Cluster</span><span class="p">(</span><span class="o">**</span><span class="n">loader</span><span class="o">.</span><span class="n">construct_mapping</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span></div>
+</div>
+
+
+<span class="n">yaml</span><span class="o">.</span><span class="n">add_representer</span><span class="p">(</span><span class="n">Cluster</span><span class="p">,</span> <span class="n">Cluster</span><span class="o">.</span><span class="n">Cluster_representer</span><span class="p">)</span>
+<span class="n">yaml</span><span class="o">.</span><span class="n">add_constructor</span><span class="p">(</span><span class="n">CLUSTER_YAMLTAG</span><span class="p">,</span> <span class="n">Cluster</span><span class="o">.</span><span class="n">Cluster_constructor</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="makeclusters">
+<a class="viewcode-back" href="../cluster.html#cluster.makeclusters">[docs]</a>
+<span class="k">def</span> <span class="nf">makeclusters</span><span class="p">(</span><span class="n">crys</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">maxorder</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">()):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to make clusters up to a maximum order involving all sites within a cutoff</span>
+<span class="sd">    distance. We can exclude certain chemistries; default is to use all.</span>
+
+<span class="sd">    :param crys: crystal to construct our clusters for</span>
+<span class="sd">    :param cutoff: distance between sites; all sites in a cluster must</span>
+<span class="sd">      have this mutual distance</span>
+<span class="sd">    :param maxorder: maximum order of our clusters</span>
+<span class="sd">    :param exclude: list of chemistries to exclude</span>
+<span class="sd">    :return clusterexp: list of sets of clusters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sitelist</span> <span class="o">=</span> <span class="p">[</span><span class="n">ci</span> <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="n">crys</span><span class="o">.</span><span class="n">atomindices</span> <span class="k">if</span> <span class="n">ci</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">]</span>
+    <span class="c1"># We construct our clusters in increasing order for maximum efficiency</span>
+    <span class="c1"># 1st order (sites) is slightly different than the rest.</span>
+    <span class="n">clusterexp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">clusters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="n">sitelist</span><span class="p">:</span>
+        <span class="c1"># single sites:</span>
+        <span class="n">cl</span> <span class="o">=</span> <span class="n">Cluster</span><span class="p">([</span><span class="n">ClusterSite</span><span class="p">(</span><span class="n">ci</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">crys</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))])</span>
+        <span class="k">if</span> <span class="n">cl</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">clusters</span><span class="p">:</span>
+            <span class="n">clset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">cl</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">crys</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">crys</span><span class="o">.</span><span class="n">G</span><span class="p">])</span>
+            <span class="n">clusterexp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clset</span><span class="p">)</span>
+            <span class="n">clusters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">clset</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">maxorder</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">clusterexp</span>
+    <span class="c1"># now, we can proceed to higher and higher orders...</span>
+    <span class="c1"># first, make lists of all our pairs within a given nn distance</span>
+    <span class="c1"># we could modify this to use different cutoff between different chemistries...</span>
+    <span class="n">r2</span> <span class="o">=</span> <span class="n">cutoff</span> <span class="o">*</span> <span class="n">cutoff</span>
+    <span class="n">nmax</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r2</span><span class="o">/</span><span class="n">crys</span><span class="o">.</span><span class="n">metric</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">])))</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">crys</span><span class="o">.</span><span class="n">dim</span><span class="p">)]</span>
+    <span class="n">nranges</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nmax</span><span class="p">]</span>
+    <span class="n">supervect</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ntup</span><span class="p">)</span> <span class="k">for</span> <span class="n">ntup</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">nranges</span><span class="p">)]</span>
+    <span class="n">nndict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ci0</span> <span class="ow">in</span> <span class="n">sitelist</span><span class="p">:</span>
+        <span class="n">u0</span> <span class="o">=</span> <span class="n">crys</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">ci0</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">ci0</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">nnset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ci1</span> <span class="ow">in</span> <span class="n">sitelist</span><span class="p">:</span>
+            <span class="n">u1</span> <span class="o">=</span> <span class="n">crys</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">ci1</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">ci1</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">du</span> <span class="o">=</span> <span class="n">u1</span> <span class="o">-</span> <span class="n">u0</span>
+            <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="n">supervect</span><span class="p">:</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="n">crys</span><span class="o">.</span><span class="n">unit2cart</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">du</span><span class="p">)</span>
+                <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">r2</span><span class="p">:</span>
+                    <span class="n">nnset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ClusterSite</span><span class="p">(</span><span class="n">ci1</span><span class="p">,</span> <span class="n">R</span><span class="p">))</span>
+        <span class="n">nndict</span><span class="p">[</span><span class="n">ci0</span><span class="p">]</span> <span class="o">=</span> <span class="n">nnset</span>
+    <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxorder</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># we build based on our lower order clusters:</span>
+        <span class="n">prevclusters</span><span class="p">,</span> <span class="n">clusters</span> <span class="o">=</span> <span class="n">clusters</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">clprev</span> <span class="ow">in</span> <span class="n">prevclusters</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">neigh</span> <span class="ow">in</span> <span class="n">nndict</span><span class="p">[</span><span class="n">clprev</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ci</span><span class="p">]:</span>
+                <span class="c1"># if this neighbor is already in our cluster, move on</span>
+                <span class="k">if</span> <span class="n">neigh</span> <span class="ow">in</span> <span class="n">clprev</span><span class="p">:</span> <span class="k">continue</span>
+                <span class="c1"># now check that all of the sites in the cluster are also neighbors:</span>
+                <span class="n">neighlist</span> <span class="o">=</span> <span class="n">nndict</span><span class="p">[</span><span class="n">neigh</span><span class="o">.</span><span class="n">ci</span><span class="p">]</span>
+                <span class="n">R0</span> <span class="o">=</span> <span class="n">neigh</span><span class="o">.</span><span class="n">R</span>
+                <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">ClusterSite</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">ci</span><span class="p">,</span> <span class="n">cl</span><span class="o">.</span><span class="n">R</span><span class="o">-</span><span class="n">R0</span><span class="p">)</span> <span class="ow">in</span> <span class="n">neighlist</span> <span class="k">for</span> <span class="n">cl</span> <span class="ow">in</span> <span class="n">clprev</span><span class="p">):</span>
+                    <span class="c1"># new cluster!</span>
+                    <span class="n">clnew</span> <span class="o">=</span> <span class="n">clprev</span> <span class="o">+</span> <span class="n">neigh</span>
+                    <span class="k">if</span> <span class="n">clnew</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">clusters</span><span class="p">:</span>
+                        <span class="n">clset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">clnew</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">crys</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">crys</span><span class="o">.</span><span class="n">G</span><span class="p">])</span>
+                        <span class="n">clusterexp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clset</span><span class="p">)</span>
+                        <span class="n">clusters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">clset</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">clusterexp</span></div>
+
+
+<div class="viewcode-block" id="makeTSclusters">
+<a class="viewcode-back" href="../cluster.html#cluster.makeTSclusters">[docs]</a>
+<span class="k">def</span> <span class="nf">makeTSclusters</span><span class="p">(</span><span class="n">crys</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">jumpnetwork</span><span class="p">,</span> <span class="n">clusterexp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to make TS clusters based on an existing cluster expansion corresponding</span>
+<span class="sd">    to a given jump network.</span>
+
+<span class="sd">    :param crys: crystal to construct our clusters for</span>
+<span class="sd">    :param chem: index of mobile species</span>
+<span class="sd">    :param jumpnetwork: list of lists of ((i, j), dx) transitions</span>
+<span class="sd">    :param clusterexp: list of sets of clusters to base TS cluster expansion</span>
+<span class="sd">    :return: TSclusterexp: list of sets of TS clusters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># convert the entire chem / jumpnetwork into pairs of sites:</span>
+    <span class="n">jumppairs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">jn</span> <span class="ow">in</span> <span class="n">jumpnetwork</span><span class="p">:</span>
+        <span class="k">for</span> <span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">dx</span><span class="p">)</span> <span class="ow">in</span> <span class="n">jn</span><span class="p">:</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">crys</span><span class="o">.</span><span class="n">invlatt</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span> <span class="o">-</span> <span class="n">crys</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">chem</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">crys</span><span class="o">.</span><span class="n">basis</span><span class="p">[</span><span class="n">chem</span><span class="p">][</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">jumppairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ClusterSite</span><span class="p">((</span><span class="n">chem</span><span class="p">,</span> <span class="n">i</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">crys</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)),</span> <span class="n">ClusterSite</span><span class="p">((</span><span class="n">chem</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">R</span><span class="p">)))</span>
+    <span class="n">TSclusterexp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">TSclusters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="c1"># we run through the clusters in the order they appear in the cluster expansion,</span>
+    <span class="c1"># so that if clusters are in increasing order, then they will be when returned</span>
+    <span class="k">for</span> <span class="n">clustlist</span> <span class="ow">in</span> <span class="n">clusterexp</span><span class="p">:</span>
+        <span class="n">vacancy</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">clustlist</span><span class="p">))</span><span class="o">.</span><span class="n">__vacancy__</span>
+        <span class="n">nmobile</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">clustlist</span><span class="p">))</span> <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">ci</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">chem</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vacancy</span><span class="p">:</span> <span class="n">nmobile</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">nmobile</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span> <span class="k">continue</span>
+        <span class="c1"># we can only use clusters that have at least two mobile sites</span>
+        <span class="k">for</span> <span class="n">clust</span> <span class="ow">in</span> <span class="n">clustlist</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">cs_i</span><span class="p">,</span> <span class="n">cs_j</span> <span class="ow">in</span> <span class="n">jumppairs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">vacancy</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">clust</span><span class="o">.</span><span class="n">vacancy</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cs_i</span><span class="p">:</span> <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">cs_j</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">clust</span><span class="p">:</span> <span class="k">continue</span>
+                    <span class="c1"># now we have a cluster with (1) the correct vacancy, and (2) containing our endpoint</span>
+                    <span class="c1"># so we make two different TS clusters: one with the endpoint, and one without.</span>
+                    <span class="n">cl_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">cs</span> <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">clust</span> <span class="k">if</span> <span class="n">cs</span> <span class="o">!=</span> <span class="n">cs_j</span><span class="p">]</span> <span class="c1"># exclude endpoint, but no shift.</span>
+                    <span class="c1"># There are *4* types of clusters we need to add for a vacancy:</span>
+                    <span class="c1"># cs_i-&gt;cs_j *without* endpoint, cs_j-&gt;cs_i *without* endpoint</span>
+                    <span class="c1"># cs_i-&gt;cs_j *with* endpoint (cs_j), cs_j-&gt;cs_i *with* endpoint (cs_i):</span>
+                    <span class="k">for</span> <span class="n">TS_pair</span><span class="p">,</span> <span class="n">TS_revpair</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([[</span><span class="n">cs_i</span><span class="p">,</span> <span class="n">cs_j</span><span class="p">],</span> <span class="p">[</span><span class="n">cs_i</span><span class="p">,</span> <span class="n">cs_j</span><span class="p">,</span> <span class="n">cs_j</span><span class="p">]],</span>
+                                                   <span class="p">[[</span><span class="n">cs_j</span><span class="p">,</span> <span class="n">cs_i</span><span class="p">],</span> <span class="p">[</span><span class="n">cs_j</span><span class="p">,</span> <span class="n">cs_i</span><span class="p">,</span> <span class="n">cs_i</span><span class="p">]]):</span>
+                        <span class="n">TSclust</span> <span class="o">=</span> <span class="n">Cluster</span><span class="p">(</span><span class="n">TS_pair</span> <span class="o">+</span> <span class="n">cl_list</span><span class="p">,</span> <span class="n">transition</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vacancy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">TSclust</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TSclusters</span><span class="p">:</span>
+                            <span class="c1"># new transition state cluster</span>
+                            <span class="n">TSclset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">TSclust</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">crys</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">crys</span><span class="o">.</span><span class="n">G</span><span class="p">])</span>
+                            <span class="n">TSrev</span> <span class="o">=</span> <span class="n">Cluster</span><span class="p">(</span><span class="n">TS_revpair</span> <span class="o">+</span> <span class="n">cl_list</span><span class="p">,</span> <span class="n">transition</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vacancy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">crys</span><span class="o">.</span><span class="n">G</span><span class="p">:</span> <span class="n">TSclset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">TSrev</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">crys</span><span class="p">,</span> <span class="n">g</span><span class="p">))</span>
+                            <span class="n">TSclusterexp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TSclset</span><span class="p">)</span>
+                            <span class="n">TSclusters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">TSclset</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">clust</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">ci</span> <span class="o">==</span> <span class="n">cs_i</span><span class="o">.</span><span class="n">ci</span><span class="p">:</span>
+                            <span class="n">cl_list</span> <span class="o">=</span> <span class="n">clust</span> <span class="o">-</span> <span class="n">site</span>
+                            <span class="k">if</span> <span class="n">cs_j</span> <span class="ow">in</span> <span class="n">cl_list</span><span class="p">:</span>
+                                <span class="n">cl_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cs_j</span><span class="p">)</span> <span class="c1"># remove in place</span>
+                                <span class="n">TSclust</span> <span class="o">=</span> <span class="n">Cluster</span><span class="p">([</span><span class="n">cs_i</span><span class="p">,</span> <span class="n">cs_j</span><span class="p">]</span> <span class="o">+</span> <span class="n">cl_list</span><span class="p">,</span> <span class="n">transition</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">TSclust</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TSclusters</span><span class="p">:</span>
+                                    <span class="c1"># new transition state cluster</span>
+                                    <span class="n">TSclset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">TSclust</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">crys</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">crys</span><span class="o">.</span><span class="n">G</span><span class="p">])</span>
+                                    <span class="n">TSclusterexp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TSclset</span><span class="p">)</span>
+                                    <span class="n">TSclusters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">TSclset</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">TSclusterexp</span></div>
+
+
+<div class="viewcode-block" id="makeVacancyClusters">
+<a class="viewcode-back" href="../cluster.html#cluster.makeVacancyClusters">[docs]</a>
+<span class="k">def</span> <span class="nf">makeVacancyClusters</span><span class="p">(</span><span class="n">crys</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">clusterexp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to make vacancy clusters based on an existing cluster expansion where</span>
+<span class="sd">    the vacancies live on a particular sublattice.</span>
+
+<span class="sd">    :param crys: crystal to construct our clusters for</span>
+<span class="sd">    :param chem: index of the sublattice to contain a vacancy</span>
+<span class="sd">    :param clusterexp: list of sets of clusters to base vacancy cluster expansion</span>
+<span class="sd">    :return: VacClusterexp: list of sets of vacancy clusters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Vacclusterexp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">Vacclusters</span> <span class="o">=</span><span class="nb">set</span><span class="p">()</span>
+    <span class="c1"># make all of our sites centered at the origin:</span>
+    <span class="n">site_zero</span> <span class="o">=</span> <span class="p">{</span><span class="n">ci</span><span class="p">:</span> <span class="n">ClusterSite</span><span class="p">(</span><span class="n">ci</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">crys</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span> <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="n">crys</span><span class="o">.</span><span class="n">atomindices</span> <span class="k">if</span> <span class="n">ci</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">chem</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">clustlist</span> <span class="ow">in</span> <span class="n">clusterexp</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">clustlist</span><span class="p">))</span> <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">ci</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">chem</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span> <span class="k">continue</span>
+        <span class="c1"># we can only use clusters that have at least one sublattice to check for vacancies</span>
+        <span class="k">for</span> <span class="n">clust</span> <span class="ow">in</span> <span class="n">clustlist</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">clust</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">ci</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">chem</span><span class="p">:</span>
+                    <span class="c1"># a little strange, but: remove site from the cluster, and put it at the front</span>
+                    <span class="c1"># we can&#39;t append the *site*, because we need to shift back to the origin</span>
+                    <span class="c1"># hence the use of site_zero[]</span>
+                    <span class="n">Vacclust</span> <span class="o">=</span> <span class="n">Cluster</span><span class="p">([</span><span class="n">site_zero</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">ci</span><span class="p">]]</span> <span class="o">+</span> <span class="p">(</span><span class="n">clust</span> <span class="o">-</span> <span class="n">site</span><span class="p">),</span> <span class="n">vacancy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">Vacclust</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Vacclusters</span><span class="p">:</span>
+                        <span class="c1"># new transition state cluster</span>
+                        <span class="n">Vacclset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">Vacclust</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">crys</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">crys</span><span class="o">.</span><span class="n">G</span><span class="p">])</span>
+                        <span class="n">Vacclusterexp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Vacclset</span><span class="p">)</span>
+                        <span class="n">Vacclusters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">Vacclset</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Vacclusterexp</span></div>
+
+
+
+
+<div class="viewcode-block" id="MonteCarloSampler">
+<a class="viewcode-back" href="../cluster.html#cluster.MonteCarloSampler">[docs]</a>
+<span class="k">class</span> <span class="nc">MonteCarloSampler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An object to maintain state in a supercell, evaluate energies efficiently including</span>
+<span class="sd">    &quot;trial&quot; moves. Built from cluster expansions and using a cluster supercell.</span>
+
+<span class="sd">    Now is able to handle supercells that contain a single vacancy.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="MonteCarloSampler.__init__">
+<a class="viewcode-back" href="../cluster.html#cluster.MonteCarloSampler.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">supercell</span><span class="p">,</span> <span class="n">spectator_occ</span><span class="p">,</span> <span class="n">clusterexp</span><span class="p">,</span> <span class="n">enevalues</span><span class="p">,</span>
+                 <span class="n">chem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">jumpnetwork</span><span class="o">=</span><span class="p">(),</span> <span class="n">KRAvalues</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">TSclusters</span><span class="o">=</span><span class="p">(),</span> <span class="n">TSvalues</span><span class="o">=</span><span class="p">()):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setup a MonteCarloSampler using a supercell, with a given spectator occupancy,</span>
+<span class="sd">        cluster expansion, and energy values for the clusters. Now includes the ability to</span>
+<span class="sd">        evaluate a jumpnetwork, which is optional. Because we need to be consistent with</span>
+<span class="sd">        our cluster expansion, can only be done at initialization.</span>
+
+<span class="sd">        :param supercell: should be a ClusterSupercell</span>
+<span class="sd">        :param spectator_occ: vector of occupancies for spectator species (0 or 1),</span>
+<span class="sd">          consistent with our supercell</span>
+<span class="sd">        :param clusterexp: list of sets of cluster interactions</span>
+<span class="sd">        :param enevalues: energy values corresponding to each cluster</span>
+
+<span class="sd">        :param chem: (optional) index of species that transitions</span>
+<span class="sd">        :param jumpnetwork: (optional) list of lists of jumps; each is ((i, j), dx) where ``i`` and ``j`` are</span>
+<span class="sd">          unit cell indices for species ``chem``</span>
+<span class="sd">        :param KRAvalues: (optional) list of &quot;KRA&quot; values for barriers (relative to average energy of endpoints);</span>
+<span class="sd">          if ``TSclusters`` are used, choosing 0 is more straightforward.</span>
+<span class="sd">        :param TSclusters: (optional) list of transition state cluster expansion terms; this is</span>
+<span class="sd">          always added on to KRAvalues (thus using 0 is recommended if TSclusters are also used)</span>
+<span class="sd">        :param TSvalues: (optional) values for TS cluster expansion entries</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">supercell</span> <span class="o">=</span> <span class="n">supercell</span>
+        <span class="n">siteinteract</span><span class="p">,</span> <span class="n">interactvalue</span> <span class="o">=</span> <span class="n">supercell</span><span class="o">.</span><span class="n">clusterevaluator</span><span class="p">(</span><span class="n">spectator_occ</span><span class="p">,</span> <span class="n">clusterexp</span><span class="p">,</span> <span class="n">enevalues</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nenergy</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">interactvalue</span><span class="p">)</span>
+        <span class="c1"># to be initialized via jumpnetwork_init()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jumps</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># indicates no jump network...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span> <span class="o">=</span> <span class="n">supercell</span><span class="o">.</span><span class="n">vacancy</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">chem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># quick check that chem is a mobile species:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">chem</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supercell</span><span class="o">.</span><span class="n">indexmobile</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Chemical species </span><span class="si">{}</span><span class="s1"> is a spectator in supercell?&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chem</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">siteinteract</span><span class="p">,</span> <span class="n">interactvalue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jumps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactrange</span> <span class="o">=</span> \
+                    <span class="n">supercell</span><span class="o">.</span><span class="n">jumpnetworkevaluator</span><span class="p">(</span><span class="n">spectator_occ</span><span class="p">,</span> <span class="n">clusterexp</span><span class="p">,</span> <span class="n">enevalues</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">jumpnetwork</span><span class="p">,</span>
+                                                   <span class="n">KRAvalues</span><span class="p">,</span> <span class="n">TSclusters</span><span class="p">,</span> <span class="n">TSvalues</span><span class="p">,</span> <span class="n">siteinteract</span><span class="p">,</span> <span class="n">interactvalue</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">siteinteract</span><span class="p">,</span> <span class="n">interactvalue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jumps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactrange</span> <span class="o">=</span> \
+                    <span class="n">supercell</span><span class="o">.</span><span class="n">jumpnetworkevaluator_vacancy</span><span class="p">(</span><span class="n">spectator_occ</span><span class="p">,</span> <span class="n">clusterexp</span><span class="p">,</span> <span class="n">enevalues</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">jumpnetwork</span><span class="p">,</span>
+                                                           <span class="n">KRAvalues</span><span class="p">,</span> <span class="n">TSclusters</span><span class="p">,</span> <span class="n">TSvalues</span><span class="p">,</span> <span class="n">siteinteract</span><span class="p">,</span> <span class="n">interactvalue</span><span class="p">)</span>
+        <span class="c1"># convert from lists to arrays:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">inter</span><span class="p">)</span> <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="n">siteinteract</span><span class="p">])</span>
+        <span class="c1"># see https://stackoverflow.com/questions/38619143/convert-python-sequence-to-numpy-array-filling-missing-values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">zip_longest</span><span class="p">(</span><span class="o">*</span><span class="n">siteinteract</span><span class="p">,</span> <span class="n">fillvalue</span><span class="o">=-</span><span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interactvalue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">interactvalue</span><span class="p">)</span>
+        <span class="c1"># to be initialized with start()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">occupied_set</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unoccupied_set</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="MonteCarloSampler.start">
+<a class="viewcode-back" href="../cluster.html#cluster.MonteCarloSampler.start">[docs]</a>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">occ</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize with an occupancy, and prepare for future calculations.</span>
+
+<span class="sd">        :param occ: occupancy of sites in supercell; assumed to be 0 or 1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># NOTE: we don&#39;t do this with a copy() operation...</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">occ</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s1">&#39;Supercell has a vacancy but &#39;</span>
+                                     <span class="s1">&#39;occ[</span><span class="si">{}</span><span class="s1">] = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span><span class="p">,</span> <span class="n">occ</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">occ</span> <span class="o">=</span> <span class="n">occ</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interactvalue</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">occ_list</span><span class="p">,</span> <span class="n">unocc_list</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">occ_i</span><span class="p">,</span> <span class="n">interact</span><span class="p">,</span> <span class="n">Ninteract</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">occ_i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">unocc_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">interact</span><span class="p">[:</span><span class="n">Ninteract</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">occ_i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">occ_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="c1"># occ_i == -1</span>
+            <span class="k">elif</span> <span class="n">i</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Vacancy occupancy at site&#39;</span>
+                                   <span class="s1">&#39; </span><span class="si">{}</span><span class="s1"> not matching supercell vacancy </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">occupied_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">occ_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unoccupied_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">unocc_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MonteCarloSampler.E">
+<a class="viewcode-back" href="../cluster.html#cluster.MonteCarloSampler.E">[docs]</a>
+    <span class="k">def</span> <span class="nf">E</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the energy.</span>
+
+<span class="sd">        :return E: total of all interactions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ccount</span><span class="p">,</span> <span class="n">Evalue</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">Nenergy</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactvalue</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">Nenergy</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">ccount</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">E</span> <span class="o">+=</span> <span class="n">Evalue</span>
+        <span class="k">return</span> <span class="n">E</span></div>
+
+
+<div class="viewcode-block" id="MonteCarloSampler.transitions">
+<a class="viewcode-back" href="../cluster.html#cluster.MonteCarloSampler.transitions">[docs]</a>
+    <span class="k">def</span> <span class="nf">transitions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute all transitions.</span>
+
+<span class="sd">        :return ijlist: list of (initial, final) tuples for each transition</span>
+<span class="sd">        :return Qlist: vector of energy barriers for each transition</span>
+<span class="sd">        :return dxlist: vector of displacements for each transition</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">jumps</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No jump network in sampler.&#39;</span><span class="p">)</span>
+        <span class="n">ijlist</span><span class="p">,</span> <span class="n">Qlist</span><span class="p">,</span> <span class="n">dxlist</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">dx</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jumps</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="n">ijlist</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">))</span>
+            <span class="n">dxlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dx</span><span class="p">)</span>
+            <span class="n">ran</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interactrange</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactrange</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+            <span class="n">Qlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">E</span> <span class="k">for</span> <span class="n">E</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interactvalue</span><span class="p">[</span><span class="n">ran</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="n">ran</span><span class="p">])</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ijlist</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Qlist</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dxlist</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MonteCarloSampler.deltaE_trial">
+<a class="viewcode-back" href="../cluster.html#cluster.MonteCarloSampler.deltaE_trial">[docs]</a>
+    <span class="k">def</span> <span class="nf">deltaE_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">occsites</span><span class="o">=</span><span class="p">(),</span> <span class="n">unoccsites</span><span class="o">=</span><span class="p">()):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the energy change if the sites in occsites are occupied, and the sites in</span>
+<span class="sd">        unoccsites are unoccupied.</span>
+
+<span class="sd">        A few notes: the algorithm does not check whether the same site appears in</span>
+<span class="sd">        either iterable multiple times; it trusts that the user has provided it with</span>
+<span class="sd">        a meaningful trial change.</span>
+
+<span class="sd">        :param occsites: iterable of sites to attempt occupying</span>
+<span class="sd">        :param unoccsites: iterable of sites to attempt unoccupying</span>
+<span class="sd">        :return deltaE: change in energy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># we&#39;re going to keep track just of the interactions that we change;</span>
+        <span class="c1"># this change will be kept in a dictionary, and will be the *negative* of the</span>
+        <span class="c1"># clustercount change that would occur with the trial move</span>
+        <span class="n">dclustercount</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span> <span class="ow">in</span> <span class="n">occsites</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot occupy vacancy&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span> <span class="ow">in</span> <span class="n">unoccsites</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot unoccupy vacancy&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">occsites</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span><span class="p">[</span><span class="n">i</span><span class="p">][:</span><span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span><span class="p">[</span><span class="n">i</span><span class="p">]]:</span>
+                    <span class="k">if</span> <span class="n">inter</span> <span class="ow">in</span> <span class="n">dclustercount</span><span class="p">:</span>
+                        <span class="n">dclustercount</span><span class="p">[</span><span class="n">inter</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">dclustercount</span><span class="p">[</span><span class="n">inter</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">unoccsites</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span><span class="p">[</span><span class="n">i</span><span class="p">][:</span><span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span><span class="p">[</span><span class="n">i</span><span class="p">]]:</span>
+                    <span class="k">if</span> <span class="n">inter</span> <span class="ow">in</span> <span class="n">dclustercount</span><span class="p">:</span>
+                        <span class="n">dclustercount</span><span class="p">[</span><span class="n">inter</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">dclustercount</span><span class="p">[</span><span class="n">inter</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">dE</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">interact</span><span class="p">,</span> <span class="n">dcount</span> <span class="ow">in</span> <span class="n">dclustercount</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># no change?</span>
+            <span class="k">if</span> <span class="n">dcount</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="c1"># not an *energy* interaction?</span>
+            <span class="k">if</span> <span class="n">interact</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nenergy</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="c1"># are we turning off an interaction?</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="n">interact</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">dE</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactvalue</span><span class="p">[</span><span class="n">interact</span><span class="p">]</span>
+            <span class="c1"># are we turning on an interaction?</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="n">interact</span><span class="p">]</span> <span class="o">==</span> <span class="n">dcount</span><span class="p">:</span>
+                <span class="n">dE</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactvalue</span><span class="p">[</span><span class="n">interact</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">dE</span></div>
+
+
+<div class="viewcode-block" id="MonteCarloSampler.update">
+<a class="viewcode-back" href="../cluster.html#cluster.MonteCarloSampler.update">[docs]</a>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">occsites</span><span class="o">=</span><span class="p">(),</span> <span class="n">unoccsites</span><span class="o">=</span><span class="p">()):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the state to occupy the sites in occsites and un-occupy the sites in unoccsites.</span>
+
+<span class="sd">        :param occsites: iterable of sites to occupy</span>
+<span class="sd">        :param unoccsites: iterable of sites to unoccupy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span> <span class="ow">in</span> <span class="n">occsites</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot occupy vacancy&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vacancy</span> <span class="ow">in</span> <span class="n">unoccsites</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot unoccupy vacancy&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">occsites</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">unoccupied_set</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">occupied_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span><span class="p">[</span><span class="n">i</span><span class="p">][:</span><span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span><span class="p">[</span><span class="n">i</span><span class="p">]]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="n">inter</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">unoccsites</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">unoccupied_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">occupied_set</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">inter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span><span class="p">[</span><span class="n">i</span><span class="p">][:</span><span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span><span class="p">[</span><span class="n">i</span><span class="p">]]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="n">inter</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span></div>
+</div>
+
+
+
+<span class="kn">from</span> <span class="nn">numba.experimental</span> <span class="kn">import</span> <span class="n">jitclass</span>          <span class="c1"># import the decorator</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">int64</span><span class="p">,</span> <span class="n">float64</span>    <span class="c1"># import the types</span>
+
+<span class="c1"># our signature for our object</span>
+<span class="n">MonteCarloSamplerSpec</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;Nenergy&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;Njumps&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;jump_ij&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">[:,</span> <span class="p">:]),</span>
+    <span class="p">(</span><span class="s1">&#39;jump_dx&#39;</span><span class="p">,</span> <span class="n">float64</span><span class="p">[:,</span> <span class="p">:]),</span>
+    <span class="p">(</span><span class="s1">&#39;jump_Q&#39;</span><span class="p">,</span> <span class="n">float64</span><span class="p">[:]),</span>
+    <span class="p">(</span><span class="s1">&#39;interactrange&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">[:]),</span>
+    <span class="p">(</span><span class="s1">&#39;Ninteract&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">[:]),</span>
+    <span class="p">(</span><span class="s1">&#39;siteinteract&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">[:,</span> <span class="p">:]),</span>
+    <span class="p">(</span><span class="s1">&#39;interactvalue&#39;</span><span class="p">,</span> <span class="n">float64</span><span class="p">[:]),</span>
+    <span class="p">(</span><span class="s1">&#39;Nsites&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;occ&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">[:]),</span>
+    <span class="p">(</span><span class="s1">&#39;clustercount&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">[:]),</span>
+    <span class="p">(</span><span class="s1">&#39;dcluster&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">[:]),</span>
+    <span class="p">(</span><span class="s1">&#39;Nocc&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;Nunocc&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;occupied_set&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">[:]),</span>
+    <span class="p">(</span><span class="s1">&#39;unoccupied_set&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">[:]),</span>
+    <span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">int64</span><span class="p">[:])</span>
+<span class="p">]</span>
+
+<span class="c1"># needed to convert internals of a MonteCarloSampler into the form that can be used by our jit version:</span>
+<div class="viewcode-block" id="MonteCarloSampler_param">
+<a class="viewcode-back" href="../cluster.html#cluster.MonteCarloSampler_param">[docs]</a>
+<span class="k">def</span> <span class="nf">MonteCarloSampler_param</span><span class="p">(</span><span class="n">MCsampler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Takes in a MCsampler, returns a dictionary of all the parameters for the jit-version&quot;&quot;&quot;</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;Nenergy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">Nenergy</span>
+    <span class="c1"># to be changed if there are jumps</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;Njumps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;jump_ij&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># indicates no jump network...</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;jump_dx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;jump_Q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;interactrange&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">jumps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">Njumps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">MCsampler</span><span class="o">.</span><span class="n">jumps</span><span class="p">)</span>
+        <span class="n">param</span><span class="p">[</span><span class="s1">&#39;Njumps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Njumps</span>
+        <span class="n">param</span><span class="p">[</span><span class="s1">&#39;jump_ij&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">jumps</span><span class="p">])</span>
+        <span class="n">param</span><span class="p">[</span><span class="s1">&#39;jump_dx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dx</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">jumps</span><span class="p">])</span>
+        <span class="n">param</span><span class="p">[</span><span class="s1">&#39;jump_Q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Njumps</span><span class="p">)</span>
+        <span class="n">param</span><span class="p">[</span><span class="s1">&#39;interactrange&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">MCsampler</span><span class="o">.</span><span class="n">interactrange</span><span class="p">)</span>
+    <span class="c1"># convert from lists to arrays:</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;Ninteract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">Ninteract</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;siteinteract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">siteinteract</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;interactvalue&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">interactvalue</span>
+    <span class="c1"># to be initialized with start()</span>
+    <span class="n">Nsites</span> <span class="o">=</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">supercell</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">supercell</span><span class="o">.</span><span class="n">Nmobile</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;Nsites&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Nsites</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;dcluster&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">param</span><span class="p">[</span><span class="s1">&#39;Nenergy&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">occ</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># has not been initialized yet...</span>
+        <span class="n">occ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">Nsites</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">clustercount</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">MCsampler</span><span class="o">.</span><span class="n">interactvalue</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">Nocc</span> <span class="o">=</span> <span class="n">Nsites</span>
+        <span class="n">Nunocc</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Nsites</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">occupied_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Nsites</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">unoccupied_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nsites</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">vacancy</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># special circumstances for a vacancy:</span>
+            <span class="n">occ</span><span class="p">[</span><span class="n">MCsampler</span><span class="o">.</span><span class="n">vacancy</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">Nocc</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="c1"># shift the occupied set, and shift the indices</span>
+            <span class="n">occupied_set</span><span class="p">[</span><span class="n">MCsampler</span><span class="o">.</span><span class="n">vacancy</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">occupied_set</span><span class="p">[</span><span class="n">MCsampler</span><span class="o">.</span><span class="n">vacancy</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">index</span><span class="p">[</span><span class="n">MCsampler</span><span class="o">.</span><span class="n">vacancy</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="n">MCsampler</span><span class="o">.</span><span class="n">vacancy</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">index</span><span class="p">[</span><span class="n">MCsampler</span><span class="o">.</span><span class="n">vacancy</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># has been initialized...</span>
+        <span class="n">occ</span> <span class="o">=</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">occ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">clustercount</span> <span class="o">=</span> <span class="n">MCsampler</span><span class="o">.</span><span class="n">clustercount</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">Nocc</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">Nunocc</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">occupied_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nsites</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">unoccupied_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nsites</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">occ</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">occ</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">occupied_set</span><span class="p">[</span><span class="n">Nocc</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Nocc</span>
+                <span class="n">Nocc</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">unoccupied_set</span><span class="p">[</span><span class="n">Nunocc</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Nunocc</span>
+                <span class="n">Nunocc</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;occ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">occ</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;clustercount&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clustercount</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;Nocc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Nocc</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;Nunocc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Nunocc</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;occupied_set&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">occupied_set</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;unoccupied_set&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unoccupied_set</span>
+    <span class="n">param</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
+    <span class="k">return</span> <span class="n">param</span></div>
+
+
+
+<div class="viewcode-block" id="MonteCarloSampler_jit">
+<a class="viewcode-back" href="../cluster.html#cluster.MonteCarloSampler_jit">[docs]</a>
+<span class="nd">@jitclass</span><span class="p">(</span><span class="n">MonteCarloSamplerSpec</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">MonteCarloSampler_jit</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Numba jit wrapper on a MonteCarloSampler.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Nenergy</span><span class="p">,</span> <span class="n">Njumps</span><span class="p">,</span> <span class="n">jump_ij</span><span class="p">,</span> <span class="n">jump_dx</span><span class="p">,</span> <span class="n">jump_Q</span><span class="p">,</span> <span class="n">interactrange</span><span class="p">,</span>
+                 <span class="n">Ninteract</span><span class="p">,</span> <span class="n">siteinteract</span><span class="p">,</span> <span class="n">interactvalue</span><span class="p">,</span> <span class="n">Nsites</span><span class="p">,</span> <span class="n">occ</span><span class="p">,</span> <span class="n">clustercount</span><span class="p">,</span>
+                 <span class="n">dcluster</span><span class="p">,</span> <span class="n">Nocc</span><span class="p">,</span> <span class="n">Nunocc</span><span class="p">,</span> <span class="n">occupied_set</span><span class="p">,</span> <span class="n">unoccupied_set</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setup a jit-version of a MonteCarloSampler from an existing one.</span>
+
+<span class="sd">        ::</span>
+
+<span class="sd">            MonteCarloSampler_jit(**MonteCarloSampler_param(MCsampler))</span>
+
+<span class="sd">        :param ...: all of the parameters to be used</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nenergy</span> <span class="o">=</span> <span class="n">Nenergy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Njumps</span> <span class="o">=</span> <span class="n">Njumps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jump_ij</span> <span class="o">=</span> <span class="n">jump_ij</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jump_dx</span> <span class="o">=</span> <span class="n">jump_dx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jump_Q</span> <span class="o">=</span> <span class="n">jump_Q</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interactrange</span> <span class="o">=</span> <span class="n">interactrange</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span> <span class="o">=</span> <span class="n">Ninteract</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span> <span class="o">=</span> <span class="n">siteinteract</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interactvalue</span> <span class="o">=</span> <span class="n">interactvalue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nsites</span> <span class="o">=</span> <span class="n">Nsites</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">occ</span> <span class="o">=</span> <span class="n">occ</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span> <span class="o">=</span> <span class="n">clustercount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dcluster</span> <span class="o">=</span> <span class="n">dcluster</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nocc</span> <span class="o">=</span> <span class="n">Nocc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nunocc</span> <span class="o">=</span> <span class="n">Nunocc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">occupied_set</span> <span class="o">=</span> <span class="n">occupied_set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unoccupied_set</span> <span class="o">=</span> <span class="n">unoccupied_set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+
+    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a copy of the sampler&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MonteCarloSampler_jit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nenergy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Njumps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jump_ij</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">jump_dx</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">jump_Q</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactrange</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactvalue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nsites</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">dcluster</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">Nocc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nunocc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">occupied_set</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">unoccupied_set</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">occ</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize with an occupancy, and prepare for future calculations.</span>
+
+<span class="sd">        :param occ: occupancy of sites in supercell; assumed to be 0 or 1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># start from scratch:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nocc</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nunocc</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># Note: now we keep our own copy of occ internally</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nsites</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">occupied_set</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Nocc</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nocc</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Nocc</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">occ</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">unoccupied_set</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Nunocc</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nunocc</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Nunocc</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">E</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the energy.</span>
+
+<span class="sd">        :return E: total of all interactions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">E</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nenergy</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">E</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactvalue</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">E</span>
+
+    <span class="k">def</span> <span class="nf">transitions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute all transitions.</span>
+
+<span class="sd">        :return ijlist: vector of (initial, final) tuples for each transition</span>
+<span class="sd">        :return Qlist: vector of energy barriers for each transition (Inf == forbidden)</span>
+<span class="sd">        :return dxlist: vector of displacements for each transition</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Njumps</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">jump_ij</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> \
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">jump_ij</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">jump_ij</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">jump_Q</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+                <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interactrange</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactrange</span><span class="p">[</span><span class="n">n</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">jump_Q</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactvalue</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># forbidden jump:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">jump_Q</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">Inf</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jump_ij</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jump_Q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jump_dx</span>
+
+    <span class="k">def</span> <span class="nf">deltaE_trial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">occsite</span><span class="p">,</span> <span class="n">unoccsite</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the energy change for swapping two sites.</span>
+
+<span class="sd">        Note: this is less general than our non-jit version, to see if we can be</span>
+<span class="sd">        more efficient. Note also: it does NOT check if the two sites are currently</span>
+<span class="sd">        occupied or not. The behavior is unspecified for incorrect inputs.</span>
+
+<span class="sd">        :param occsite: single site to occupy</span>
+<span class="sd">        :param unoccsite: single site to unoccupy</span>
+<span class="sd">        :return deltaE: change in energy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># we&#39;re going to keep track just of the interactions that we change;</span>
+        <span class="c1"># this change will be kept in a dictionary, and will be the *negative* of the</span>
+        <span class="c1"># clustercount change that would occur with the trial move</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dcluster</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span><span class="p">[</span><span class="n">occsite</span><span class="p">]):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span><span class="p">[</span><span class="n">occsite</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nenergy</span><span class="p">:</span> <span class="k">break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dcluster</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span><span class="p">[</span><span class="n">unoccsite</span><span class="p">]):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span><span class="p">[</span><span class="n">unoccsite</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nenergy</span><span class="p">:</span> <span class="k">break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dcluster</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">dE</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nenergy</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dcluster</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="c1"># are we turning off an interaction?</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">dE</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactvalue</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="c1"># are we turning on an interaction?</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dcluster</span><span class="p">[</span><span class="n">n</span><span class="p">]:</span>
+                <span class="n">dE</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactvalue</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">dE</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">occsite</span><span class="p">,</span> <span class="n">unoccsite</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the state to occupy the site in occsite and un-occupy the site in unoccsite.</span>
+
+<span class="sd">        :param occsite: site to occupy</span>
+<span class="sd">        :param unoccsite: site to unoccupy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># change the occupancies:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">occsite</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">occ</span><span class="p">[</span><span class="n">unoccsite</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># change the cluster counts:</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span><span class="p">[</span><span class="n">occsite</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span><span class="p">[</span><span class="n">occsite</span><span class="p">,</span> <span class="n">m</span><span class="p">]]</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ninteract</span><span class="p">[</span><span class="n">unoccsite</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clustercount</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">siteinteract</span><span class="p">[</span><span class="n">unoccsite</span><span class="p">,</span> <span class="n">m</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># change the &quot;sets&quot;:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">occsite</span><span class="p">]</span>  <span class="c1"># index of occsite in unoccupied_set</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">unoccsite</span><span class="p">]</span>  <span class="c1"># index of unoccsite in occupied_set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">occupied_set</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">occsite</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unoccupied_set</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">unoccsite</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">occsite</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>  <span class="c1"># index of occsite in occupied_set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">unoccsite</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>  <span class="c1"># index of unoccsite in unoccupied_set</span>
+
+    <span class="k">def</span> <span class="nf">MCmoves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">occchoices</span><span class="p">,</span> <span class="n">unoccchoices</span><span class="p">,</span> <span class="n">kTlogu</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Code that runs a length of MC choices, and does the updates. Makes</span>
+<span class="sd">        no changes to the occupancies. Needs three random vectors.</span>
+
+<span class="sd">        occchoices[i] \in (0,Nunocc-1) - index in unoccupied_set to occupy</span>
+<span class="sd">        unoccchoices[i] \in (0,Nocc-1) - index in occupied_set to unoccupy</span>
+<span class="sd">        kTlogu[i] &gt;= 0 - value of -kT * ln(u) for u \in (0,1)</span>
+
+<span class="sd">        :param occchoices: int[:] of indices into unoccupied_set to occupy</span>
+<span class="sd">        :param unoccchoices: int[:] of indices into occupied_set to unoccupy</span>
+<span class="sd">        :param kTlogu: float[:] of -kT ln(u) for uniformly distributed u</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">occchoices</span><span class="p">)):</span>
+            <span class="n">occ_trial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unoccupied_set</span><span class="p">[</span><span class="n">occchoices</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="n">unocc_trial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">occupied_set</span><span class="p">[</span><span class="n">unoccchoices</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="n">dE</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">deltaE_trial</span><span class="p">(</span><span class="n">occ_trial</span><span class="p">,</span> <span class="n">unocc_trial</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dE</span> <span class="o">&lt;</span> <span class="n">kTlogu</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">occ_trial</span><span class="p">,</span> <span class="n">unocc_trial</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017, Dallas R. Trinkle.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

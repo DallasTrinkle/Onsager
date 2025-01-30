@@ -1,90 +1,47 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Automator &mdash; Onsager 1.3.3 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Automator &mdash; Onsager 1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=0ed52906"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="OnsagerCalc" href="OnsagerCalc.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home"> Onsager
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Onsager
           </a>
-
-          
-            
-            
-              <div class="version">
-                1.3
-              </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="InputOutput.html">Input and output for Onsager transport calculation</a></li>
@@ -93,107 +50,49 @@
 <li class="toctree-l2"><a class="reference internal" href="crystal.html">Crystal</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
 <li class="toctree-l2"><a class="reference internal" href="supercell.html">Supercell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cluster.html">Cluster</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
 <li class="toctree-l2"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Automator</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Automator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#automator.map2string"><code class="docutils literal notranslate"><span class="pre">map2string()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automator.supercelltar"><code class="docutils literal notranslate"><span class="pre">supercelltar()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Onsager</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="modules.html">Modules</a> &raquo;</li>
-        
-      <li>Automator</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Modules</a></li>
+      <li class="breadcrumb-item active">Automator</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/automator.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast + .nbinput {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="automator">
-<h1>Automator<a class="headerlink" href="#automator" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="automator">
+<h1>Automator<a class="headerlink" href="#automator" title="Link to this heading"></a></h1>
 <p>Automator:</p>
 <p>The automator module defines functions that create a tarball from a supercell dictionary.</p>
-<span class="target" id="module-automator"></span><p>Automator code</p>
+<p id="module-automator">Automator code</p>
 <p>Functions to convert from a supercell dictionary (output from a Diffuser) into a tarball
 that contains all of the input files in an organized directory structure to run the
 atomic-scale transition state calculations. This includes:</p>
@@ -206,13 +105,13 @@ atomic-scale transition state calculations. This includes:</p>
 <li><p>Makefile to run NEB construction.</p></li>
 </ol>
 <p><em>Note:</em> the NEB interpolator script (nebmake.pl) is part of the <a class="reference external" href="http://theory.cm.utexas.edu/vtsttools/scripts.html">VTST scripts</a>.</p>
-<dl class="function">
-<dt id="automator.map2string">
-<code class="sig-prename descclassname">automator.</code><code class="sig-name descname">map2string</code><span class="sig-paren">(</span><em class="sig-param">tag</em>, <em class="sig-param">groupop</em>, <em class="sig-param">mapping</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#map2string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.map2string" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="automator.map2string">
+<span class="sig-prename descclassname"><span class="pre">automator.</span></span><span class="sig-name descname"><span class="pre">map2string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#map2string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#automator.map2string" title="Link to this definition"></a></dt>
 <dd><p>Takes in a map: tag, groupop, mapping and constructs a string representation
 to be dumped to a file. If we want to call using the tuple, <code class="docutils literal notranslate"><span class="pre">map2string(*(map))</span></code> will suffice.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tag</strong> – string of initial state to rotate</p></li>
 <li><p><strong>groupop</strong> – see crystal.GroupOp; we use the rot and trans. This is in the supercell coord.</p></li>
@@ -220,15 +119,15 @@ to be dumped to a file. If we want to call using the tuple, <code class="docutil
 in initial cell to use.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return string_rep</dt>
+<dt class="field-even">Return string_rep<span class="colon">:</span></dt>
 <dd class="field-even"><p>string representation (to be used by an external script)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="automator.supercelltar">
-<code class="sig-prename descclassname">automator.</code><code class="sig-name descname">supercelltar</code><span class="sig-paren">(</span><em class="sig-param">tar</em>, <em class="sig-param">superdict</em>, <em class="sig-param">filemode=436</em>, <em class="sig-param">directmode=509</em>, <em class="sig-param">timestamp=None</em>, <em class="sig-param">INCARrelax='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\n'</em>, <em class="sig-param">INCARNEB='SYSTEM = {system}\nPREC = High\nISIF = 2\nEDIFF = 1E-8\nEDIFFG = -10E-3\nIBRION = 2\nNSW = 50\nISMEAR = 1\nSIGMA = 0.1\n# ENCUT =\n# NGX =\n# NGY =\n# NGZ =\n# NGXF =\n# NGYF =\n# NGZF =\n# NPAR =\nLWAVE  = .FALSE.\nLCHARG = .FALSE.\nLREAL  = .FALSE.\nVOSKOWN = 1\nIMAGES = 1\nSPRING = -5\nLCLIMB = .TRUE.\nNELMIN = 4\nNFREE = 10\n'</em>, <em class="sig-param">KPOINTS='Gamma\n1\nReciprocal\n0. 0. 0. 1.\n'</em>, <em class="sig-param">basedir=''</em>, <em class="sig-param">statename='relax.'</em>, <em class="sig-param">transitionname='neb.'</em>, <em class="sig-param">IDformat='{:02d}'</em>, <em class="sig-param">JSONdict='tags.json'</em>, <em class="sig-param">YAMLdef='supercell.yaml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#supercelltar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#automator.supercelltar" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="automator.supercelltar">
+<span class="sig-prename descclassname"><span class="pre">automator.</span></span><span class="sig-name descname"><span class="pre">supercelltar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">superdict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filemode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">436</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directmode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">509</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">INCARrelax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SYSTEM</span> <span class="pre">=</span> <span class="pre">{system}\nPREC</span> <span class="pre">=</span> <span class="pre">High\nISIF</span> <span class="pre">=</span> <span class="pre">2\nEDIFF</span> <span class="pre">=</span> <span class="pre">1E-8\nEDIFFG</span> <span class="pre">=</span> <span class="pre">-10E-3\nIBRION</span> <span class="pre">=</span> <span class="pre">2\nNSW</span> <span class="pre">=</span> <span class="pre">50\nISMEAR</span> <span class="pre">=</span> <span class="pre">1\nSIGMA</span> <span class="pre">=</span> <span class="pre">0.1\n#</span> <span class="pre">ENCUT</span> <span class="pre">=\n#</span> <span class="pre">NGX</span> <span class="pre">=\n#</span> <span class="pre">NGY</span> <span class="pre">=\n#</span> <span class="pre">NGZ</span> <span class="pre">=\n#</span> <span class="pre">NGXF</span> <span class="pre">=\n#</span> <span class="pre">NGYF</span> <span class="pre">=\n#</span> <span class="pre">NGZF</span> <span class="pre">=\n#</span> <span class="pre">NPAR</span> <span class="pre">=\nLWAVE</span>&#160; <span class="pre">=</span> <span class="pre">.FALSE.\nLCHARG</span> <span class="pre">=</span> <span class="pre">.FALSE.\nLREAL</span>&#160; <span class="pre">=</span> <span class="pre">.FALSE.\nVOSKOWN</span> <span class="pre">=</span> <span class="pre">1\n'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">INCARNEB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SYSTEM</span> <span class="pre">=</span> <span class="pre">{system}\nPREC</span> <span class="pre">=</span> <span class="pre">High\nISIF</span> <span class="pre">=</span> <span class="pre">2\nEDIFF</span> <span class="pre">=</span> <span class="pre">1E-8\nEDIFFG</span> <span class="pre">=</span> <span class="pre">-10E-3\nIBRION</span> <span class="pre">=</span> <span class="pre">2\nNSW</span> <span class="pre">=</span> <span class="pre">50\nISMEAR</span> <span class="pre">=</span> <span class="pre">1\nSIGMA</span> <span class="pre">=</span> <span class="pre">0.1\n#</span> <span class="pre">ENCUT</span> <span class="pre">=\n#</span> <span class="pre">NGX</span> <span class="pre">=\n#</span> <span class="pre">NGY</span> <span class="pre">=\n#</span> <span class="pre">NGZ</span> <span class="pre">=\n#</span> <span class="pre">NGXF</span> <span class="pre">=\n#</span> <span class="pre">NGYF</span> <span class="pre">=\n#</span> <span class="pre">NGZF</span> <span class="pre">=\n#</span> <span class="pre">NPAR</span> <span class="pre">=\nLWAVE</span>&#160; <span class="pre">=</span> <span class="pre">.FALSE.\nLCHARG</span> <span class="pre">=</span> <span class="pre">.FALSE.\nLREAL</span>&#160; <span class="pre">=</span> <span class="pre">.FALSE.\nVOSKOWN</span> <span class="pre">=</span> <span class="pre">1\nIMAGES</span> <span class="pre">=</span> <span class="pre">1\nSPRING</span> <span class="pre">=</span> <span class="pre">-5\nLCLIMB</span> <span class="pre">=</span> <span class="pre">.TRUE.\nNELMIN</span> <span class="pre">=</span> <span class="pre">4\nNFREE</span> <span class="pre">=</span> <span class="pre">10\n'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KPOINTS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Gamma\n1\nReciprocal\n0.</span> <span class="pre">0.</span> <span class="pre">0.</span> <span class="pre">1.\n'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basedir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'relax.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transitionname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'neb.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">IDformat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'{:02d}'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JSONdict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tags.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">YAMLdef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'supercell.yaml'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/automator.html#supercelltar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#automator.supercelltar" title="Link to this definition"></a></dt>
 <dd><p>Takes in a tarfile (needs to be open for writing) and a supercelldict (from a
 diffuser) and creates the full directory structure inside the tarfile. Best used in
 a form like</p>
@@ -237,7 +136,7 @@ a form like</p>
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tar</strong> – tarfile open for writing; may contain other files in advance.</p></li>
 <li><p><strong>superdict</strong> – <p>dictionary of <code class="docutils literal notranslate"><span class="pre">states</span></code>, <code class="docutils literal notranslate"><span class="pre">transitions</span></code>, <code class="docutils literal notranslate"><span class="pre">transmapping</span></code>, <code class="docutils literal notranslate"><span class="pre">indices</span></code> that
@@ -273,53 +172,36 @@ set to None to not output. <strong>may want to change this to None for the futur
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href="OnsagerCalc.html" class="btn btn-neutral float-left" title="OnsagerCalc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="OnsagerCalc.html" class="btn btn-neutral float-left" title="OnsagerCalc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2017, Dallas R. Trinkle
-
-    </p>
+    <p>&#169; Copyright 2017, Dallas R. Trinkle.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

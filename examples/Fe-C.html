@@ -1,91 +1,51 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Fe-C diffusion and elastodiffusivity &mdash; Onsager 1.3.3 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fe-C diffusion and elastodiffusivity &mdash; Onsager 1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=0ed52906"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Convergence of Green function calculation" href="GF-convergence.html" />
     <link rel="prev" title="Example Notebooks" href="../notebooks.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> Onsager
           
-
-          
+          <a href="../index.html" class="icon icon-home">
+            Onsager
           </a>
-
-          
-            
-            
-              <div class="version">
-                1.3
-              </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../InputOutput.html">Input and output for Onsager transport calculation</a></li>
@@ -103,310 +63,48 @@
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Onsager</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="../notebooks.html">Example Notebooks</a> &raquo;</li>
-        
-      <li>Fe-C diffusion and elastodiffusivity</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../notebooks.html">Example Notebooks</a></li>
+      <li class="breadcrumb-item active">Fe-C diffusion and elastodiffusivity</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="../_sources/examples/Fe-C.ipynb.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput,
-div.nbinput div.prompt,
-div.nbinput div.input_area,
-div.nbinput div[class*=highlight],
-div.nbinput div[class*=highlight] pre,
-div.nboutput,
-div.nbinput div.prompt,
-div.nbinput div.output_area,
-div.nboutput div[class*=highlight],
-div.nboutput div[class*=highlight] pre {
-    background: none;
-    border: none;
-    padding: 0 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-/* avoid gaps between output lines */
-div.nboutput div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput,
-div.nboutput {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput,
-    div.nboutput {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput div.prompt,
-div.nboutput div.prompt {
-    min-width: 5ex;
-    padding-top: 0.4em;
-    padding-right: 0.4em;
-    text-align: right;
-    flex: 0;
-}
-@media (max-width: 540px) {
-    div.nbinput div.prompt,
-    div.nboutput div.prompt {
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput div.prompt.empty {
-        padding: 0;
-    }
-}
-
-/* disable scrollbars on prompts */
-div.nbinput div.prompt pre,
-div.nboutput div.prompt pre {
-    overflow: hidden;
-}
-
-/* input/output area */
-div.nbinput div.input_area,
-div.nboutput div.output_area {
-    padding: 0.4em;
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput div.input_area,
-    div.nboutput div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    background: #f5f5f5;
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-div.rendered_html th {
-  font-weight: bold;
-}
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast + .nbinput {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="Fe-C-diffusion-and-elastodiffusivity">
-<h1>Fe-C diffusion and elastodiffusivity<a class="headerlink" href="#Fe-C-diffusion-and-elastodiffusivity" title="Permalink to this headline">¶</a></h1>
-<p>Taking data from R.G.A. Veiga, M. Perez, C. Becquart, E. Clouet and C. Domain, Acta mater. <strong>59</strong> (2011) p. 6963 <a class="reference external" href="http://dx.doi.org/10.1016/j.actamat.2011.07.048">doi:10.1016/j.actamat.2011.07.048</a></p>
+             
+  <section id="Fe-C-diffusion-and-elastodiffusivity">
+<h1>Fe-C diffusion and elastodiffusivity<a class="headerlink" href="#Fe-C-diffusion-and-elastodiffusivity" title="Link to this heading"></a></h1>
+<p>Taking data from R.G.A. Veiga, M. Perez, C. Becquart, E. Clouet and C. Domain, Acta mater. <strong>59</strong> (2011) p. 6963 <a class="reference external" href="http://dx.doi.org/10.1016/j.actamat.2011.07.048">doi:10.1016/j.actamat.2011.07.048</a></p>
 <p>Fe in the body-centered cubic phase, <span class="math notranslate nohighlight">\(a_0 = 0.28553\text{ nm}\)</span>; C sit at octahedral sites, where the transition states between octahedral sites are represented by tetrahedral sites. The data is obtained from an EAM potential, where <span class="math notranslate nohighlight">\(C_{11} = 243\text{ GPa}\)</span>, <span class="math notranslate nohighlight">\(C_{12}=145\text{ GPa}\)</span>, and <span class="math notranslate nohighlight">\(C_{44} = 116\text{ GPa}\)</span>. The tetrahedral transition state is 0.816 eV above the octahedral site, and the attempt frequency is taken as 10 THz (<span class="math notranslate nohighlight">\(10^{13}\text{ Hz}\)</span>).</p>
 <p>The dipole tensors can be separated into <em>parallel</em> and <em>perpendicular</em> components; the parallel direction points towards the closest Fe atoms for the C, while the perpendicular components lie in the interstitial plane. For the octahedral, the parallel component is 8.03 eV, and the perpendicular is 3.40 eV; for the tetrahedral transition state, the parallel component is 4.87 eV, and the perpendicular is 6.66 eV.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;../&#39;</span><span class="p">])</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-whitegrid&#39;</span><span class="p">)</span>
 <span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="kn">import</span> <span class="nn">onsager.crystal</span> <span class="kn">as</span> <span class="nn">crystal</span>
-<span class="kn">import</span> <span class="nn">onsager.OnsagerCalc</span> <span class="kn">as</span> <span class="nn">onsager</span>
+<span class="kn">import</span> <span class="nn">onsager.crystal</span> <span class="k">as</span> <span class="nn">crystal</span>
+<span class="kn">import</span> <span class="nn">onsager.OnsagerCalc</span> <span class="k">as</span> <span class="nn">onsager</span>
 <span class="kn">from</span> <span class="nn">scipy.constants</span> <span class="kn">import</span> <span class="n">physical_constants</span>
 <span class="n">kB</span> <span class="o">=</span> <span class="n">physical_constants</span><span class="p">[</span><span class="s1">&#39;Boltzmann constant in eV/K&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
@@ -417,10 +115,9 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">a0</span> <span class="o">=</span> <span class="mf">0.28553</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">a0</span> <span class="o">=</span> <span class="mf">0.28553</span>
 <span class="n">Fe</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="o">.</span><span class="n">BCC</span><span class="p">(</span><span class="n">a0</span><span class="p">,</span> <span class="s2">&quot;Fe&quot;</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">Fe</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Fe</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -442,11 +139,10 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">stressconv</span> <span class="o">=</span> <span class="mf">1e9</span><span class="o">*</span><span class="mf">1e-27</span><span class="o">*</span><span class="n">Fe</span><span class="o">.</span><span class="n">volume</span><span class="o">/</span><span class="n">physical_constants</span><span class="p">[</span><span class="s1">&#39;electron volt&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stressconv</span> <span class="o">=</span> <span class="mf">1e9</span><span class="o">*</span><span class="mf">1e-27</span><span class="o">*</span><span class="n">Fe</span><span class="o">.</span><span class="n">volume</span><span class="o">/</span><span class="n">physical_constants</span><span class="p">[</span><span class="s1">&#39;electron volt&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">c11</span><span class="p">,</span> <span class="n">c12</span><span class="p">,</span> <span class="n">c44</span> <span class="o">=</span> <span class="mi">243</span><span class="o">*</span><span class="n">stressconv</span><span class="p">,</span> <span class="mi">145</span><span class="o">*</span><span class="n">stressconv</span><span class="p">,</span> <span class="mi">116</span><span class="o">*</span><span class="n">stressconv</span>
 <span class="n">s11</span><span class="p">,</span> <span class="n">s12</span><span class="p">,</span> <span class="n">s44</span> <span class="o">=</span> <span class="p">(</span><span class="n">c11</span><span class="o">+</span><span class="n">c12</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="n">c11</span><span class="o">-</span><span class="n">c12</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">c11</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">c12</span><span class="p">)),</span> <span class="o">-</span><span class="n">c12</span><span class="o">/</span><span class="p">((</span><span class="n">c11</span><span class="o">-</span><span class="n">c12</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">c11</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">c12</span><span class="p">)),</span> <span class="mi">1</span><span class="o">/</span><span class="n">c44</span>
-<span class="k">print</span><span class="p">(</span><span class="s1">&#39;S11 = {:.4f} S12 = {:.4f} S44 = {:.4f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s11</span><span class="p">,</span> <span class="n">s12</span><span class="p">,</span> <span class="n">s44</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;S11 = </span><span class="si">{:.4f}</span><span class="s1"> S12 = </span><span class="si">{:.4f}</span><span class="s1"> S44 = </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s11</span><span class="p">,</span> <span class="n">s12</span><span class="p">,</span> <span class="n">s44</span><span class="p">))</span>
 <span class="n">stensor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
@@ -471,10 +167,9 @@ S11 = 0.1023 S12 = -0.0382 S44 = 0.1187
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">uoct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Fe</span><span class="o">.</span><span class="n">invlatt</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">a0</span><span class="p">]))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">uoct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Fe</span><span class="o">.</span><span class="n">invlatt</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">a0</span><span class="p">]))</span>
 <span class="n">FeC</span> <span class="o">=</span> <span class="n">Fe</span><span class="o">.</span><span class="n">addbasis</span><span class="p">(</span><span class="n">Fe</span><span class="o">.</span><span class="n">Wyckoffpos</span><span class="p">(</span><span class="n">uoct</span><span class="p">),</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">])</span>
-<span class="k">print</span><span class="p">(</span><span class="n">FeC</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FeC</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -499,12 +194,11 @@ S11 = 0.1023 S12 = -0.0382 S44 = 0.1187
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># 1 is the index corresponding to our C atom in the crystal</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># 1 is the index corresponding to our C atom in the crystal</span>
 <span class="n">sitelist</span> <span class="o">=</span> <span class="n">FeC</span><span class="o">.</span><span class="n">sitelist</span><span class="p">(</span><span class="n">chem</span><span class="p">)</span>
 <span class="n">jumpnetwork</span> <span class="o">=</span> <span class="n">FeC</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">(</span><span class="n">chem</span><span class="p">,</span> <span class="mf">0.6</span><span class="o">*</span><span class="n">a0</span><span class="p">)</span>  <span class="c1"># 0.6*a0 is the cutoff distance for finding jumps</span>
 <span class="n">FeCdiffuser</span> <span class="o">=</span> <span class="n">onsager</span><span class="o">.</span><span class="n">Interstitial</span><span class="p">(</span><span class="n">FeC</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">sitelist</span><span class="p">,</span> <span class="n">jumpnetwork</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">FeCdiffuser</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FeCdiffuser</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -536,8 +230,7 @@ i:+0.500,+0.000,+0.500^i:+0.000,-0.500,+0.500
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">Dconv</span> <span class="o">=</span> <span class="mf">1e-2</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Dconv</span> <span class="o">=</span> <span class="mf">1e-2</span>
 <span class="n">vu0</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="n">Dconv</span>
 <span class="n">Etrans</span> <span class="o">=</span> <span class="mf">0.816</span>
 <span class="n">dipoledict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Poctpara&#39;</span><span class="p">:</span> <span class="mf">8.03</span><span class="p">,</span> <span class="s1">&#39;Poctperp&#39;</span><span class="p">:</span> <span class="mf">3.40</span><span class="p">,</span>
@@ -557,7 +250,7 @@ i:+0.500,+0.000,+0.500^i:+0.000,-0.500,+0.500
     <span class="n">FeCthermodict</span><span class="p">[</span><span class="n">dipname</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="n">Ppara</span> <span class="k">if</span> <span class="n">i</span><span class="o">==</span><span class="n">paraindex</span> <span class="k">else</span> <span class="n">Pperp</span>
                                       <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)])</span>
 <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">FeCthermodict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;{}: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -584,8 +277,7 @@ eneT: [ 0.816]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">Trange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">1200</span><span class="p">,</span> <span class="mi">91</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Trange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">1200</span><span class="p">,</span> <span class="mi">91</span><span class="p">)</span>
 <span class="n">Tlabels</span> <span class="o">=</span> <span class="n">Trange</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">30</span><span class="p">]</span>
 <span class="n">Dlist</span><span class="p">,</span> <span class="n">dDlist</span><span class="p">,</span> <span class="n">Vlist</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">Trange</span><span class="p">:</span>
@@ -609,8 +301,8 @@ eneT: [ 0.816]
                                    <span class="n">FeCthermodict</span><span class="p">[</span><span class="s1">&#39;ene&#39;</span><span class="p">],</span>
                                    <span class="n">FeCthermodict</span><span class="p">[</span><span class="s1">&#39;preT&#39;</span><span class="p">],</span>
                                    <span class="n">FeCthermodict</span><span class="p">[</span><span class="s1">&#39;eneT&#39;</span><span class="p">],</span>
-                                   <span class="n">CalcDeriv</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="s1">&#39;D0: {:.4e} cm^2/s</span><span class="se">\n</span><span class="s1">Eact: {:.3f} eV&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">D0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">dbeta</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">D</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+                                   <span class="n">CalcDeriv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;D0: </span><span class="si">{:.4e}</span><span class="s1"> cm^2/s</span><span class="se">\n</span><span class="s1">Eact: </span><span class="si">{:.3f}</span><span class="s1"> eV&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">D0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">dbeta</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">D</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
 </pre></div>
 </div>
 </div>
@@ -627,29 +319,28 @@ Eact: 0.816 eV
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">D</span><span class="p">,</span> <span class="n">dD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Dlist</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dDlist</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">D</span><span class="p">,</span> <span class="n">dD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Dlist</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dDlist</span><span class="p">)</span>
 <span class="n">d11_T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">Trange</span><span class="p">,</span> <span class="n">dD</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span>
 <span class="n">d11pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">T</span><span class="p">,</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">T</span><span class="p">,</span><span class="n">d</span> <span class="ow">in</span> <span class="n">d11_T</span> <span class="k">if</span> <span class="n">d</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">d11neg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">T</span><span class="p">,</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">T</span><span class="p">,</span><span class="n">d</span> <span class="ow">in</span> <span class="n">d11_T</span> <span class="k">if</span> <span class="n">d</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$D$&#39;</span><span class="p">)</span>
 <span class="c1"># ax1.plot(1./Trange, dD[:,0], &#39;b&#39;, label=&#39;$d_{11}$&#39;)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">d11pos</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">d11pos</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$d_{11}$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">d11pos</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">d11pos</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$d_</span><span class="si">{11}</span><span class="s1">$&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">d11neg</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">d11neg</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b--&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="n">dD</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$d_{12}$&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="n">dD</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;g-.&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$d_{44} = D$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="n">dD</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$d_</span><span class="si">{12}</span><span class="s1">$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="n">dD</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;g-.&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$d_</span><span class="si">{44}</span><span class="s1"> = D$&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$D$ [cm$^2$/s]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$T^{-1}$ [K$^{-1}$]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.15</span><span class="p">,</span><span class="mf">0.15</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-           <span class="n">shadow</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+           <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
 <span class="n">ax2</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twiny</span><span class="p">()</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">())</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mf">1.</span><span class="o">/</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">Tlabels</span><span class="p">])</span>
-<span class="n">ax2</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;{:.0f}K&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">Tlabels</span><span class="p">])</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">{:.0f}</span><span class="s2">K&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">Tlabels</span><span class="p">])</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$T$ [K]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
-<span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s1">&#39;on&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="c1"># plt.savefig(&#39;Fe-C-diffusivity.pdf&#39;, transparent=True, format=&#39;pdf&#39;)</span>
@@ -667,8 +358,7 @@ Eact: 0.816 eV
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">d11pos</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">d11neg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d11pos</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">d11neg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -676,34 +366,33 @@ Eact: 0.816 eV
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>(430.0, 420.0)
-</pre></div>
-</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(430.0, 420.0)
+</pre></div></div>
 </div>
 <p>Activation volume. We plot the isotropic value (change in diffusivity with respect to pressure), but also the <span class="math notranslate nohighlight">\(V_{xxxx}\)</span>, <span class="math notranslate nohighlight">\(V_{xxyy}\)</span>, and <span class="math notranslate nohighlight">\(V_{xyxy}\)</span> terms. Interestingly, the <span class="math notranslate nohighlight">\(V_{xxxx}\)</span> term is negative—which indicates that diffusivity along the <span class="math notranslate nohighlight">\([100]\)</span> direction <em>increases</em> with compressive stress in the <span class="math notranslate nohighlight">\([100]\)</span> direction.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Vlist</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Vlist</span><span class="p">)</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="n">V</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$V_{</span><span class="se">\\</span><span class="s1">rm{total}}$&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="n">V</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$V_{11}$&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="n">V</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$V_{12}$&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">3</span><span class="p">],</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$V_{44}$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="n">V</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$V_{</span><span class="se">\\</span><span class="s1">rm</span><span class="si">{total}</span><span class="s1">}$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="n">V</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$V_</span><span class="si">{11}</span><span class="s1">$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="n">V</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$V_</span><span class="si">{12}</span><span class="s1">$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">Trange</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">V</span><span class="p">[:,</span><span class="mi">3</span><span class="p">],</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$V_</span><span class="si">{44}</span><span class="s1">$&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$V$ [atomic volume]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$T^{-1}$ [K$^{-1}$]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.2</span><span class="p">),</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-           <span class="n">shadow</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+           <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
 <span class="n">ax2</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twiny</span><span class="p">()</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">())</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mf">1.</span><span class="o">/</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">Tlabels</span><span class="p">])</span>
-<span class="n">ax2</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;{:.0f}K&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">Tlabels</span><span class="p">])</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">{:.0f}</span><span class="s2">K&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">Tlabels</span><span class="p">])</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$T$ [K]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
-<span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s1">&#39;on&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="c1"># plt.savefig(&#39;Fe-C-activation-volume.pdf&#39;, transparent=True, format=&#39;pdf&#39;)</span>
@@ -721,8 +410,7 @@ Eact: 0.816 eV
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">print</span><span class="p">(</span><span class="s1">&#39;Total volume: {v[0]:.4f}, {V[0]:.4f}A^3</span><span class="se">\n</span><span class="s1">V_xxxx: {v[1]:.4f}, {V[1]:.4f}A^3</span><span class="se">\n</span><span class="s1">V_xxyy: {v[2]:.4f}, {V[2]:.4f}A^3</span><span class="se">\n</span><span class="s1">V_xyxy: {v[3]:.4f}, {V[3]:.4f}A^3&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="o">=</span><span class="n">V</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:],</span> <span class="n">V</span><span class="o">=</span><span class="n">V</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">*</span><span class="mf">1e3</span><span class="o">*</span><span class="n">Fe</span><span class="o">.</span><span class="n">volume</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total volume: </span><span class="si">{v[0]:.4f}</span><span class="s1">, </span><span class="si">{V[0]:.4f}</span><span class="s1">A^3</span><span class="se">\n</span><span class="s1">V_xxxx: </span><span class="si">{v[1]:.4f}</span><span class="s1">, </span><span class="si">{V[1]:.4f}</span><span class="s1">A^3</span><span class="se">\n</span><span class="s1">V_xxyy: </span><span class="si">{v[2]:.4f}</span><span class="s1">, </span><span class="si">{V[2]:.4f}</span><span class="s1">A^3</span><span class="se">\n</span><span class="s1">V_xyxy: </span><span class="si">{v[3]:.4f}</span><span class="s1">, </span><span class="si">{V[3]:.4f}</span><span class="s1">A^3&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="o">=</span><span class="n">V</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:],</span> <span class="n">V</span><span class="o">=</span><span class="n">V</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">*</span><span class="mf">1e3</span><span class="o">*</span><span class="n">Fe</span><span class="o">.</span><span class="n">volume</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -741,9 +429,8 @@ V_xyxy: 0.0061, 0.0714A^3
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">Vsph</span> <span class="o">=</span> <span class="mf">0.2</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">V</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">V</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">V</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># (3V11 + 2V12 + 2V44)/5</span>
-<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Spherical average uniaxial activation volume: {:.4f} {:.4f}A^3&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Vsph</span><span class="p">,</span> <span class="n">Vsph</span><span class="o">*</span><span class="mf">1e3</span><span class="o">*</span><span class="n">Fe</span><span class="o">.</span><span class="n">volume</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Vsph</span> <span class="o">=</span> <span class="mf">0.2</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">V</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">V</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">V</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># (3V11 + 2V12 + 2V44)/5</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Spherical average uniaxial activation volume: </span><span class="si">{:.4f}</span><span class="s1"> </span><span class="si">{:.4f}</span><span class="s1">A^3&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Vsph</span><span class="p">,</span> <span class="n">Vsph</span><span class="o">*</span><span class="mf">1e3</span><span class="o">*</span><span class="n">Fe</span><span class="o">.</span><span class="n">volume</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -755,55 +442,37 @@ V_xyxy: 0.0061, 0.0714A^3
 Spherical average uniaxial activation volume: -0.0237 -0.2757A^3
 </pre></div></div>
 </div>
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="GF-convergence.html" class="btn btn-neutral float-right" title="Convergence of Green function calculation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="../notebooks.html" class="btn btn-neutral float-left" title="Example Notebooks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../notebooks.html" class="btn btn-neutral float-left" title="Example Notebooks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="GF-convergence.html" class="btn btn-neutral float-right" title="Convergence of Green function calculation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2017, Dallas R. Trinkle
-
-    </p>
+    <p>&#169; Copyright 2017, Dallas R. Trinkle.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

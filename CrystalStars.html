@@ -1,99 +1,117 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>CrystalStars &mdash; Onsager 1.3.3 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrystalStars &mdash; Onsager 1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=0ed52906"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Supercell" href="supercell.html" />
     <link rel="prev" title="Crystal" href="crystal.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home"> Onsager
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Onsager
           </a>
-
-          
-            
-            
-              <div class="version">
-                1.3
-              </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="InputOutput.html">Input and output for Onsager transport calculation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks.html">Example Notebooks</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="crystal.html">Crystal</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">CrystalStars</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">CrystalStars</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#crystalStars.PSlist2array"><code class="docutils literal notranslate"><span class="pre">PSlist2array()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystalStars.PairState"><code class="docutils literal notranslate"><span class="pre">PairState</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.PairState_constructor"><code class="docutils literal notranslate"><span class="pre">PairState.PairState_constructor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.PairState_representer"><code class="docutils literal notranslate"><span class="pre">PairState.PairState_representer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.__add__"><code class="docutils literal notranslate"><span class="pre">PairState.__add__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.__eq__"><code class="docutils literal notranslate"><span class="pre">PairState.__eq__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.__hash__"><code class="docutils literal notranslate"><span class="pre">PairState.__hash__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.__ne__"><code class="docutils literal notranslate"><span class="pre">PairState.__ne__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.__neg__"><code class="docutils literal notranslate"><span class="pre">PairState.__neg__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.__sane__"><code class="docutils literal notranslate"><span class="pre">PairState.__sane__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.__str__"><code class="docutils literal notranslate"><span class="pre">PairState.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.__sub__"><code class="docutils literal notranslate"><span class="pre">PairState.__sub__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.__xor__"><code class="docutils literal notranslate"><span class="pre">PairState.__xor__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.fromcrys"><code class="docutils literal notranslate"><span class="pre">PairState.fromcrys()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.fromcrys_latt"><code class="docutils literal notranslate"><span class="pre">PairState.fromcrys_latt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.g"><code class="docutils literal notranslate"><span class="pre">PairState.g()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.iszero"><code class="docutils literal notranslate"><span class="pre">PairState.iszero()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.PairState.zero"><code class="docutils literal notranslate"><span class="pre">PairState.zero()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#crystalStars.StarSet"><code class="docutils literal notranslate"><span class="pre">StarSet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.__add__"><code class="docutils literal notranslate"><span class="pre">StarSet.__add__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.__contains__"><code class="docutils literal notranslate"><span class="pre">StarSet.__contains__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.__iadd__"><code class="docutils literal notranslate"><span class="pre">StarSet.__iadd__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.__init__"><code class="docutils literal notranslate"><span class="pre">StarSet.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.__str__"><code class="docutils literal notranslate"><span class="pre">StarSet.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.__weakref__"><code class="docutils literal notranslate"><span class="pre">StarSet.__weakref__</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.addhdf5"><code class="docutils literal notranslate"><span class="pre">StarSet.addhdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.copy"><code class="docutils literal notranslate"><span class="pre">StarSet.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.diffgenerate"><code class="docutils literal notranslate"><span class="pre">StarSet.diffgenerate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.generate"><code class="docutils literal notranslate"><span class="pre">StarSet.generate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.jumpnetwork_omega1"><code class="docutils literal notranslate"><span class="pre">StarSet.jumpnetwork_omega1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.jumpnetwork_omega2"><code class="docutils literal notranslate"><span class="pre">StarSet.jumpnetwork_omega2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.loadhdf5"><code class="docutils literal notranslate"><span class="pre">StarSet.loadhdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.starindex"><code class="docutils literal notranslate"><span class="pre">StarSet.starindex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.stateindex"><code class="docutils literal notranslate"><span class="pre">StarSet.stateindex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.symmatch"><code class="docutils literal notranslate"><span class="pre">StarSet.symmatch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.StarSet.symmequivjumplist"><code class="docutils literal notranslate"><span class="pre">StarSet.symmequivjumplist()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#crystalStars.VectorStarSet"><code class="docutils literal notranslate"><span class="pre">VectorStarSet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.VectorStarSet.GFexpansion"><code class="docutils literal notranslate"><span class="pre">VectorStarSet.GFexpansion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.VectorStarSet.__init__"><code class="docutils literal notranslate"><span class="pre">VectorStarSet.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.VectorStarSet.__weakref__"><code class="docutils literal notranslate"><span class="pre">VectorStarSet.__weakref__</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.VectorStarSet.addhdf5"><code class="docutils literal notranslate"><span class="pre">VectorStarSet.addhdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.VectorStarSet.bareexpansions"><code class="docutils literal notranslate"><span class="pre">VectorStarSet.bareexpansions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.VectorStarSet.biasexpansions"><code class="docutils literal notranslate"><span class="pre">VectorStarSet.biasexpansions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.VectorStarSet.generate"><code class="docutils literal notranslate"><span class="pre">VectorStarSet.generate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.VectorStarSet.generateouter"><code class="docutils literal notranslate"><span class="pre">VectorStarSet.generateouter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.VectorStarSet.loadhdf5"><code class="docutils literal notranslate"><span class="pre">VectorStarSet.loadhdf5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.VectorStarSet.originstateVectorBasisfolddown"><code class="docutils literal notranslate"><span class="pre">VectorStarSet.originstateVectorBasisfolddown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crystalStars.VectorStarSet.rateexpansions"><code class="docutils literal notranslate"><span class="pre">VectorStarSet.rateexpansions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#crystalStars.array2PSlist"><code class="docutils literal notranslate"><span class="pre">array2PSlist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystalStars.doublelist2flatlistindex"><code class="docutils literal notranslate"><span class="pre">doublelist2flatlistindex()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystalStars.flatlistindex2doublelist"><code class="docutils literal notranslate"><span class="pre">flatlistindex2doublelist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#crystalStars.zeroclean"><code class="docutils literal notranslate"><span class="pre">zeroclean()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="supercell.html">Supercell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cluster.html">Cluster</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
 <li class="toctree-l2"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
@@ -102,99 +120,36 @@
 </li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Onsager</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="modules.html">Modules</a> &raquo;</li>
-        
-      <li>CrystalStars</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Modules</a></li>
+      <li class="breadcrumb-item active">CrystalStars</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/CrystalStars.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast + .nbinput {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="crystalstars">
-<h1>CrystalStars<a class="headerlink" href="#crystalstars" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="crystalstars">
+<h1>CrystalStars<a class="headerlink" href="#crystalstars" title="Link to this heading"></a></h1>
 <p>CrystalStars:</p>
 <p>The crystalStars module defines the classes corresponding to stars (in this case, for solute-vacancy complexes that are equivalent by space group symmetry), and vector stars (the inclusion of a vector basis on the stars). These modules are primarily responsible for all the symmetry analysis, and converting that into matrix forms for rapid numerical evaluation as needed.</p>
-<span class="target" id="module-crystalStars"></span><p>Stars module, modified to work with crystal class</p>
+<p id="module-crystalStars">Stars module, modified to work with crystal class</p>
 <p>Classes to generate star sets, double star sets, and vector star sets; a lot of indexing functionality.</p>
 <p>NOTE: The naming follows that of stars; the functionality is extremely similar, and this code
 was modified as little as possible to translate that functionality to <em>crystals</em> which possess
@@ -211,36 +166,36 @@ the solute always stays inside the unit cell</p></li>
 <li><p>Using indices into the point list rather than just making lists of the vectors themselves. This
 is because the “points” now have a more complex representation (see above).</p></li>
 </ul>
-<dl class="function">
-<dt id="crystalStars.PSlist2array">
-<code class="sig-prename descclassname">crystalStars.</code><code class="sig-name descname">PSlist2array</code><span class="sig-paren">(</span><em class="sig-param">PSlist</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PSlist2array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PSlist2array" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystalStars.PSlist2array">
+<span class="sig-prename descclassname"><span class="pre">crystalStars.</span></span><span class="sig-name descname"><span class="pre">PSlist2array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PSlist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PSlist2array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PSlist2array" title="Link to this definition"></a></dt>
 <dd><p>Take in a list of pair states; return arrays that can be stored in HDF5 format</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>PSlist</strong> – list of pair states</p>
 </dd>
-<dt class="field-even">Return ij</dt>
+<dt class="field-even">Return ij<span class="colon">:</span></dt>
 <dd class="field-even"><p>int_array[N][2] = (i,j)</p>
 </dd>
-<dt class="field-odd">Return R</dt>
+<dt class="field-odd">Return R<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int[N][3]</p>
 </dd>
-<dt class="field-even">Return dx</dt>
+<dt class="field-even">Return dx<span class="colon">:</span></dt>
 <dd class="field-even"><p>float[N][3]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="class">
-<dt id="crystalStars.PairState">
-<em class="property">class </em><code class="sig-prename descclassname">crystalStars.</code><code class="sig-name descname">PairState</code><a class="reference internal" href="_modules/crystalStars.html#PairState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="crystalStars.PairState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crystalStars.</span></span><span class="sig-name descname"><span class="pre">PairState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState" title="Link to this definition"></a></dt>
 <dd><p>A class corresponding to a “pair” state; in this case, a solute-vacancy pair, but can
 also be a transition state pair. The solute (or initial state) is in unit cell 0, in position
 indexed i; the vacancy (or final state) is in unit cell R, in position indexed j.
 The cartesian vector dx connects them. We can add and subtract, negate, and “endpoint”
 subtract (useful for determining what Green function entry to use)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>i</strong> – index of the first member of the pair (solute)</p></li>
 <li><p><strong>j</strong> – index of the second member of the pair (vacancy)</p></li>
@@ -249,161 +204,161 @@ subtract (useful for determining what Green function entry to use)</p>
 </ul>
 </dd>
 </dl>
-<dl class="method">
-<dt id="crystalStars.PairState.PairState_constructor">
-<em class="property">static </em><code class="sig-name descname">PairState_constructor</code><span class="sig-paren">(</span><em class="sig-param">loader</em>, <em class="sig-param">node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.PairState_constructor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.PairState_constructor" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.PairState_constructor">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PairState_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.PairState_constructor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.PairState_constructor" title="Link to this definition"></a></dt>
 <dd><p>Construct a GroupOp from YAML</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.PairState_representer">
-<em class="property">static </em><code class="sig-name descname">PairState_representer</code><span class="sig-paren">(</span><em class="sig-param">dumper</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.PairState_representer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.PairState_representer" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.PairState_representer">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PairState_representer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dumper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.PairState_representer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.PairState_representer" title="Link to this definition"></a></dt>
 <dd><p>Output a PairState</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.__add__">
-<code class="sig-name descname">__add__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__add__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__add__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.__add__">
+<span class="sig-name descname"><span class="pre">__add__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__add__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.__add__" title="Link to this definition"></a></dt>
 <dd><p>Add two states: works if and only if self.j == other.i
 (i,j) R + (j,k) R’ = (i,k) R+R’  : works for thinking about transitions…
 Note: a + b != b + a, and may be that only one of those is even defined</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.__eq__">
-<code class="sig-name descname">__eq__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__eq__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__eq__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.__eq__" title="Link to this definition"></a></dt>
 <dd><p>Test for equality–we don’t bother checking dx</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.__hash__">
-<code class="sig-name descname">__hash__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__hash__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__hash__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__hash__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.__hash__" title="Link to this definition"></a></dt>
 <dd><p>Hash, so that we can make sets of states</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.__ne__">
-<code class="sig-name descname">__ne__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__ne__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__ne__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.__ne__">
+<span class="sig-name descname"><span class="pre">__ne__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__ne__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.__ne__" title="Link to this definition"></a></dt>
 <dd><p>Inequality == not __eq__</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.__neg__">
-<code class="sig-name descname">__neg__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__neg__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__neg__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.__neg__">
+<span class="sig-name descname"><span class="pre">__neg__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__neg__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.__neg__" title="Link to this definition"></a></dt>
 <dd><p>Negation of state (swap members of pair)
 - (i,j) R = (j,i) -R
 Note: a + (-a) == (-a) + a == 0 because we define what “zero” is.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.__sane__">
-<code class="sig-name descname">__sane__</code><span class="sig-paren">(</span><em class="sig-param">crys</em>, <em class="sig-param">chem</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__sane__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__sane__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.__sane__">
+<span class="sig-name descname"><span class="pre">__sane__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__sane__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.__sane__" title="Link to this definition"></a></dt>
 <dd><p>Determine if the dx value makes sense given everything else…</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.__str__">
-<code class="sig-name descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__str__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.__str__" title="Link to this definition"></a></dt>
 <dd><p>Human readable version</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.__sub__">
-<code class="sig-name descname">__sub__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__sub__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__sub__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.__sub__">
+<span class="sig-name descname"><span class="pre">__sub__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__sub__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.__sub__" title="Link to this definition"></a></dt>
 <dd><p>Add a negative:
 a-b points from initial of a to initial of b if same final state
 (i,j) R - (k,j) R’ = (i,k) R-R’
 Note: this means that (a-b) + b = a, but b + (a-b) is an error. (b-a) + a = b</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.__xor__">
-<code class="sig-name descname">__xor__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__xor__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.__xor__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.__xor__">
+<span class="sig-name descname"><span class="pre">__xor__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.__xor__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.__xor__" title="Link to this definition"></a></dt>
 <dd><p>Subtraction on the endpoints (sort of the “opposite” of a-b):
 a^b points from final of b to final of a if same initial state
 (i,j) R ^ (i,k) R’ = (k,j) R-R’
 Note: b + (a^b) = a but (a^b) + b is an error. a + (b^a) = b</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.fromcrys">
-<em class="property">classmethod </em><code class="sig-name descname">fromcrys</code><span class="sig-paren">(</span><em class="sig-param">crys</em>, <em class="sig-param">chem</em>, <em class="sig-param">ij</em>, <em class="sig-param">dx</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.fromcrys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.fromcrys" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.fromcrys">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromcrys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ij</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.fromcrys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.fromcrys" title="Link to this definition"></a></dt>
 <dd><p>Convert (i,j), dx into PairState</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.fromcrys_latt">
-<em class="property">classmethod </em><code class="sig-name descname">fromcrys_latt</code><span class="sig-paren">(</span><em class="sig-param">crys</em>, <em class="sig-param">chem</em>, <em class="sig-param">ij</em>, <em class="sig-param">R</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.fromcrys_latt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.fromcrys_latt" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.fromcrys_latt">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromcrys_latt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ij</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.fromcrys_latt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.fromcrys_latt" title="Link to this definition"></a></dt>
 <dd><p>Convert (i,j), R into PairState</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.g">
-<code class="sig-name descname">g</code><span class="sig-paren">(</span><em class="sig-param">crys</em>, <em class="sig-param">chem</em>, <em class="sig-param">g</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.g"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.g" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.g">
+<span class="sig-name descname"><span class="pre">g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.g" title="Link to this definition"></a></dt>
 <dd><p>Apply group operation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>crys</strong> – crystal</p></li>
 <li><p><strong>chem</strong> – chemical index</p></li>
 <li><p><strong>g</strong> – group operation (from crys)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return g*PairState</dt>
+<dt class="field-even">Return g*PairState<span class="colon">:</span></dt>
 <dd class="field-even"><p>corresponding to group operation applied to self</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.iszero">
-<code class="sig-name descname">iszero</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.iszero"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.iszero" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.iszero">
+<span class="sig-name descname"><span class="pre">iszero</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.iszero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.iszero" title="Link to this definition"></a></dt>
 <dd><p>Quicker than self == PairState.zero()</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.PairState.zero">
-<em class="property">classmethod </em><code class="sig-name descname">zero</code><span class="sig-paren">(</span><em class="sig-param">n=0</em>, <em class="sig-param">dim=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.zero"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.PairState.zero" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.PairState.zero">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#PairState.zero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.PairState.zero" title="Link to this definition"></a></dt>
 <dd><p>Return a “zero” state</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="crystalStars.StarSet">
-<em class="property">class </em><code class="sig-prename descclassname">crystalStars.</code><code class="sig-name descname">StarSet</code><span class="sig-paren">(</span><em class="sig-param">jumpnetwork</em>, <em class="sig-param">crys</em>, <em class="sig-param">chem</em>, <em class="sig-param">Nshells=0</em>, <em class="sig-param">originstates=False</em>, <em class="sig-param">lattice=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="crystalStars.StarSet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crystalStars.</span></span><span class="sig-name descname"><span class="pre">StarSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jumpnetwork</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nshells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">originstates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet" title="Link to this definition"></a></dt>
 <dd><p>A class to construct crystal stars, and be able to efficiently index.</p>
 <p>Takes in a jumpnetwork, which is used to construct the corresponding stars, a crystal
 object with which to operate, a specification of the chemical index for the atom moving
 (needs to be consistent with jumpnetwork and crys), and then the number of shells.</p>
 <p>In this case, <code class="docutils literal notranslate"><span class="pre">shells</span></code> = number of successive “jumps” from a state. As an example,
 in FCC, 1 shell = 1st neighbor, 2 shell = 1-4th neighbors.</p>
-<dl class="method">
-<dt id="crystalStars.StarSet.__add__">
-<code class="sig-name descname">__add__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__add__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.__add__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.__add__">
+<span class="sig-name descname"><span class="pre">__add__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__add__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.__add__" title="Link to this definition"></a></dt>
 <dd><p>Add two StarSets together; done by making a copy of one, and iadding</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.__contains__">
-<code class="sig-name descname">__contains__</code><span class="sig-paren">(</span><em class="sig-param">PS</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__contains__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.__contains__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PS</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__contains__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.__contains__" title="Link to this definition"></a></dt>
 <dd><p>Return true if PS is in the star</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.__iadd__">
-<code class="sig-name descname">__iadd__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__iadd__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.__iadd__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.__iadd__">
+<span class="sig-name descname"><span class="pre">__iadd__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__iadd__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.__iadd__" title="Link to this definition"></a></dt>
 <dd><p>Add another StarSet to this one; very similar to generate()</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">jumpnetwork</em>, <em class="sig-param">crys</em>, <em class="sig-param">chem</em>, <em class="sig-param">Nshells=0</em>, <em class="sig-param">originstates=False</em>, <em class="sig-param">lattice=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.__init__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jumpnetwork</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nshells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">originstates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initiates a star set generator for a given jumpnetwork, crystal, and specified
 chemical index. Does not include “origin states” by default; these are PairStates that
 iszero() is True; they are only needed if crystal has a nonzero VectorBasis.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>jumpnetwork</strong> – list of symmetry unique jumps, as a list of list of tuples; either
 <code class="docutils literal notranslate"><span class="pre">((i,j),</span> <span class="pre">dx)</span></code> for jump from i to j with displacement dx, or
@@ -418,44 +373,44 @@ iszero() is True; they are only needed if crystal has a nonzero VectorBasis.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.__str__">
-<code class="sig-name descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.__str__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.__str__" title="Link to this definition"></a></dt>
 <dd><p>Human readable version</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="crystalStars.StarSet.__weakref__">
-<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#crystalStars.StarSet.__weakref__" title="Permalink to this definition">¶</a></dt>
-<dd><p>list of weak references to the object (if defined)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="crystalStars.StarSet.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#crystalStars.StarSet.__weakref__" title="Link to this definition"></a></dt>
+<dd><p>list of weak references to the object</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.addhdf5">
-<code class="sig-name descname">addhdf5</code><span class="sig-paren">(</span><em class="sig-param">HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.addhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.addhdf5" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.addhdf5">
+<span class="sig-name descname"><span class="pre">addhdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">HDF5group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.addhdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.addhdf5" title="Link to this definition"></a></dt>
 <dd><p>Adds an HDF5 representation of object into an HDF5group (needs to already exist).</p>
 <p>Example: if f is an open HDF5, then StarSet.addhdf5(f.create_group(‘StarSet’)) will
 (1) create the group named ‘StarSet’, and then (2) put the StarSet representation in that group.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>HDF5group</strong> – HDF5 group</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.copy">
-<code class="sig-name descname">copy</code><span class="sig-paren">(</span><em class="sig-param">empty=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.copy" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">empty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.copy" title="Link to this definition"></a></dt>
 <dd><p>Return a copy of the StarSet; done as efficiently as possible; empty means skip the shells, etc.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.diffgenerate">
-<code class="sig-name descname">diffgenerate</code><span class="sig-paren">(</span><em class="sig-param">S1</em>, <em class="sig-param">S2</em>, <em class="sig-param">threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.diffgenerate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.diffgenerate" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.diffgenerate">
+<span class="sig-name descname"><span class="pre">diffgenerate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">S1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.diffgenerate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.diffgenerate" title="Link to this definition"></a></dt>
 <dd><p>Construct a starSet using endpoint subtraction from starset S1 to starset S2. Will
 include zero. Points from vacancy states of S1 to vacancy states of S2.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>S1</strong> – starSet for start</p></li>
 <li><p><strong>S2</strong> – starSet for final</p></li>
@@ -465,13 +420,13 @@ include zero. Points from vacancy states of S1 to vacancy states of S2.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.generate">
-<code class="sig-name descname">generate</code><span class="sig-paren">(</span><em class="sig-param">Nshells</em>, <em class="sig-param">threshold=1e-08</em>, <em class="sig-param">originstates=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.generate" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Nshells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">originstates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.generate" title="Link to this definition"></a></dt>
 <dd><p>Construct the points and the stars in the set. Does not include “origin states” by default; these
 are PairStates that iszero() is True; they are only needed if crystal has a nonzero VectorBasis.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>Nshells</strong> – number of shells to generate; this is interpreted as subsequent
 “sums” of jumplist (as we need the solute to be connected to the vacancy by at least one jump)</p></li>
@@ -482,98 +437,98 @@ are PairStates that iszero() is True; they are only needed if crystal has a nonz
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.jumpnetwork_omega1">
-<code class="sig-name descname">jumpnetwork_omega1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.jumpnetwork_omega1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.jumpnetwork_omega1" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.jumpnetwork_omega1">
+<span class="sig-name descname"><span class="pre">jumpnetwork_omega1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.jumpnetwork_omega1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.jumpnetwork_omega1" title="Link to this definition"></a></dt>
 <dd><p>Generate a jumpnetwork corresponding to vacancy jumping while the solute remains fixed.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return jumpnetwork</dt>
+<dt class="field-odd">Return jumpnetwork<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of symmetry unique jumps; list of list of tuples (i,f), dx where
 i,f index into states for the initial and final states, and dx = displacement of vacancy
 in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx</p>
 </dd>
-<dt class="field-even">Return jumptype</dt>
+<dt class="field-even">Return jumptype<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of indices corresponding to the (original) jump type for each
 symmetry unique jump; useful for constructing a LIMB approximation, and needed to
 construct delta_omega</p>
 </dd>
-<dt class="field-odd">Return starpair</dt>
+<dt class="field-odd">Return starpair<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of tuples of the star indices of the i and f states for each
 symmetry unique jump</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.jumpnetwork_omega2">
-<code class="sig-name descname">jumpnetwork_omega2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.jumpnetwork_omega2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.jumpnetwork_omega2" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.jumpnetwork_omega2">
+<span class="sig-name descname"><span class="pre">jumpnetwork_omega2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.jumpnetwork_omega2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.jumpnetwork_omega2" title="Link to this definition"></a></dt>
 <dd><p>Generate a jumpnetwork corresponding to vacancy exchanging with a solute.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return jumpnetwork</dt>
+<dt class="field-odd">Return jumpnetwork<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of symmetry unique jumps; list of list of tuples (i,f), dx where
 i,f index into states for the initial and final states, and dx = displacement of vacancy
 in Cartesian coordinates. Note: if (i,f), dx is present, so if (f,i), -dx</p>
 </dd>
-<dt class="field-even">Return jumptype</dt>
+<dt class="field-even">Return jumptype<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of indices corresponding to the (original) jump type for each
 symmetry unique jump; useful for constructing a LIMB approximation, and needed to
 construct delta_omega</p>
 </dd>
-<dt class="field-odd">Return starpair</dt>
+<dt class="field-odd">Return starpair<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of tuples of the star indices of the i and f states for each
 symmetry unique jump</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.loadhdf5">
-<em class="property">classmethod </em><code class="sig-name descname">loadhdf5</code><span class="sig-paren">(</span><em class="sig-param">crys</em>, <em class="sig-param">HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.loadhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.loadhdf5" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.loadhdf5">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loadhdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HDF5group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.loadhdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.loadhdf5" title="Link to this definition"></a></dt>
 <dd><p>Creates a new StarSet from an HDF5 group.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>crys</strong> – crystal object–MUST BE PASSED IN as it is not stored with the StarSet</p></li>
 <li><p><strong>HDFgroup</strong> – HDF5 group</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return StarSet</dt>
+<dt class="field-even">Return StarSet<span class="colon">:</span></dt>
 <dd class="field-even"><p>new StarSet object</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.starindex">
-<code class="sig-name descname">starindex</code><span class="sig-paren">(</span><em class="sig-param">PS</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.starindex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.starindex" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.starindex">
+<span class="sig-name descname"><span class="pre">starindex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PS</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.starindex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.starindex" title="Link to this definition"></a></dt>
 <dd><p>Return the index for the star to which pair state PS belongs; None if not found</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.stateindex">
-<code class="sig-name descname">stateindex</code><span class="sig-paren">(</span><em class="sig-param">PS</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.stateindex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.stateindex" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.stateindex">
+<span class="sig-name descname"><span class="pre">stateindex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PS</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.stateindex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.stateindex" title="Link to this definition"></a></dt>
 <dd><p>Return the index of pair state PS; None if not found</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.symmatch">
-<code class="sig-name descname">symmatch</code><span class="sig-paren">(</span><em class="sig-param">PS1</em>, <em class="sig-param">PS2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.symmatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.symmatch" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.symmatch">
+<span class="sig-name descname"><span class="pre">symmatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PS1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PS2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.symmatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.symmatch" title="Link to this definition"></a></dt>
 <dd><p>True if there exists a group operation that makes PS1 == PS2.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.StarSet.symmequivjumplist">
-<code class="sig-name descname">symmequivjumplist</code><span class="sig-paren">(</span><em class="sig-param">i</em>, <em class="sig-param">f</em>, <em class="sig-param">dx</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.symmequivjumplist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.StarSet.symmequivjumplist" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.StarSet.symmequivjumplist">
+<span class="sig-name descname"><span class="pre">symmequivjumplist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#StarSet.symmequivjumplist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.StarSet.symmequivjumplist" title="Link to this definition"></a></dt>
 <dd><p>Returns a list of tuples of symmetry equivalent jumps</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>i</strong> – index of initial state</p></li>
 <li><p><strong>f</strong> – index of final state</p></li>
 <li><p><strong>dx</strong> – displacement vector</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return symmjumplist</dt>
+<dt class="field-even">Return symmjumplist<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of tuples of ((gi, gf), gdx) for every group op</p>
 </dd>
 </dl>
@@ -581,47 +536,47 @@ symmetry unique jump</p>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="crystalStars.VectorStarSet">
-<em class="property">class </em><code class="sig-prename descclassname">crystalStars.</code><code class="sig-name descname">VectorStarSet</code><span class="sig-paren">(</span><em class="sig-param">starset=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="crystalStars.VectorStarSet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crystalStars.</span></span><span class="sig-name descname"><span class="pre">VectorStarSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">starset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.VectorStarSet" title="Link to this definition"></a></dt>
 <dd><p>A class to construct vector star sets, and be able to efficiently index.</p>
 <p>All based on a StarSet</p>
-<dl class="method">
-<dt id="crystalStars.VectorStarSet.GFexpansion">
-<code class="sig-name descname">GFexpansion</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.GFexpansion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.GFexpansion" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.VectorStarSet.GFexpansion">
+<span class="sig-name descname"><span class="pre">GFexpansion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.GFexpansion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.VectorStarSet.GFexpansion" title="Link to this definition"></a></dt>
 <dd><p>Construct the GF matrix expansion in terms of the star vectors, and indexed
 to GFstarset.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return GFexpansion</dt>
+<dt class="field-odd">Return GFexpansion<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array[Nsv, Nsv, NGFstars]
 the GF matrix[i, j] = sum(GFexpansion[i, j, k] * GF(starGF[k]))</p>
 </dd>
-<dt class="field-even">Return GFstarset</dt>
+<dt class="field-even">Return GFstarset<span class="colon">:</span></dt>
 <dd class="field-even"><p>starSet corresponding to the GF</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.VectorStarSet.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">starset=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.__init__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.VectorStarSet.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">starset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.VectorStarSet.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initiates a vector-star generator; work with a given star.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>starset</strong> – StarSet, from which we pull nearly all of the info that we need</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="crystalStars.VectorStarSet.__weakref__">
-<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#crystalStars.VectorStarSet.__weakref__" title="Permalink to this definition">¶</a></dt>
-<dd><p>list of weak references to the object (if defined)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="crystalStars.VectorStarSet.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#crystalStars.VectorStarSet.__weakref__" title="Link to this definition"></a></dt>
+<dd><p>list of weak references to the object</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.VectorStarSet.addhdf5">
-<code class="sig-name descname">addhdf5</code><span class="sig-paren">(</span><em class="sig-param">HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.addhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.addhdf5" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.VectorStarSet.addhdf5">
+<span class="sig-name descname"><span class="pre">addhdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">HDF5group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.addhdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.VectorStarSet.addhdf5" title="Link to this definition"></a></dt>
 <dd><p>Adds an HDF5 representation of object into an HDF5group (needs to already exist).</p>
 <dl class="simple">
 <dt>Example: if f is an open HDF5, then StarSet.addhdf5(f.create_group(‘VectorStarSet’)) will</dt><dd><p>(1) create the group named ‘VectorStarSet’, and then (2) put the VectorStarSet
@@ -629,15 +584,15 @@ representation in that group.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>HDF5group</strong> – HDF5 group</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.VectorStarSet.bareexpansions">
-<code class="sig-name descname">bareexpansions</code><span class="sig-paren">(</span><em class="sig-param">jumpnetwork</em>, <em class="sig-param">jumptype</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.bareexpansions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.bareexpansions" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.VectorStarSet.bareexpansions">
+<span class="sig-name descname"><span class="pre">bareexpansions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jumpnetwork</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jumptype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.bareexpansions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.VectorStarSet.bareexpansions" title="Link to this definition"></a></dt>
 <dd><p>Construct the bare diffusivity expansion in terms of the jumpnetwork.
 We return the reference (0) contribution so that the change can be determined; this
 is useful for the vacancy contributions.
@@ -649,7 +604,7 @@ for the endpoint of the jump; we just call it the ‘probfactor’ below.</p>
 <p>Note also: this <em>currently assumes</em> that the displacement vector <em>does not change</em> between
 omega0 and omega(1/2).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>jumpnetwork</strong> – jumpnetwork of symmetry unique omega1-type jumps,
 corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
@@ -657,20 +612,20 @@ are indices corresponding to states in our starset.</p></li>
 <li><p><strong>jumptype</strong> – specific omega0 jump type that the jump corresponds to</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return D0expansion</dt>
+<dt class="field-even">Return D0expansion<span class="colon">:</span></dt>
 <dd class="field-even"><p>array[3,3, Njump_omega0]
 the D0[a,b,jt] = sum(D0expansion[a,b, jt] * sqrt(probfactor0[PS[jt][0]]*probfactor0[PS[jt][1]) * omega0[jt])</p>
 </dd>
-<dt class="field-odd">Return D1expansion</dt>
+<dt class="field-odd">Return D1expansion<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array[3,3, Njump_omega1]
 the D1[a,b,k] = sum(D1expansion[a,b, k] * sqrt(probfactor[PS[k][0]]*probfactor[PS[k][1]) * omega[k])</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.VectorStarSet.biasexpansions">
-<code class="sig-name descname">biasexpansions</code><span class="sig-paren">(</span><em class="sig-param">jumpnetwork</em>, <em class="sig-param">jumptype</em>, <em class="sig-param">omega2=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.biasexpansions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.biasexpansions" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.VectorStarSet.biasexpansions">
+<span class="sig-name descname"><span class="pre">biasexpansions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jumpnetwork</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jumptype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.biasexpansions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.VectorStarSet.biasexpansions" title="Link to this definition"></a></dt>
 <dd><p>Construct the bias1 and bias0 vector expansion in terms of the jumpnetwork.
 We return the bias0 contribution so that the db = bias1 - bias0 can be determined.
 This saves us from having to deal with issues with our outer shell where we only
@@ -684,7 +639,7 @@ Note also that if jumpnetwork_omega2 is passed, it also works for that. However,
 in that case we have a different approach for the calculation of bias1expansion:
 if there are origin states, they get the negative summed bias of the others.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>jumpnetwork</strong> – jumpnetwork of symmetry unique omega1-type jumps,
 corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
@@ -694,80 +649,80 @@ are indices corresponding to states in our starset.</p></li>
 origin states? (default=False)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return bias0expansion</dt>
+<dt class="field-even">Return bias0expansion<span class="colon">:</span></dt>
 <dd class="field-even"><p>array[Nsv, Njump_omega0]
 the gen0 vector[i] = sum(bias0expasion[i, k] * sqrt(probfactor0[PS[k]]) * omega0[k])</p>
 </dd>
-<dt class="field-odd">Return bias1expansion</dt>
+<dt class="field-odd">Return bias1expansion<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array[Nsv, Njump_omega1]
 the gen1 vector[i] = sum(bias1expansion[i, k] * sqrt(probfactor[PS[k]] * omega1[k])</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.VectorStarSet.generate">
-<code class="sig-name descname">generate</code><span class="sig-paren">(</span><em class="sig-param">starset</em>, <em class="sig-param">threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.generate" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.VectorStarSet.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">starset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.VectorStarSet.generate" title="Link to this definition"></a></dt>
 <dd><p>Construct the actual vectors stars</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>starset</strong> – StarSet, from which we pull nearly all of the info that we need</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.VectorStarSet.generateouter">
-<code class="sig-name descname">generateouter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.generateouter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.generateouter" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.VectorStarSet.generateouter">
+<span class="sig-name descname"><span class="pre">generateouter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.generateouter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.VectorStarSet.generateouter" title="Link to this definition"></a></dt>
 <dd><p>Generate our outer products for our star-vectors.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return outer</dt>
+<dt class="field-odd">Return outer<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array [3, 3, Nvstars, Nvstars]
 outer[:, :, i, j] is the 3x3 tensor outer product for two vector-stars vs[i] and vs[j]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.VectorStarSet.loadhdf5">
-<em class="property">classmethod </em><code class="sig-name descname">loadhdf5</code><span class="sig-paren">(</span><em class="sig-param">SSet</em>, <em class="sig-param">HDF5group</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.loadhdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.loadhdf5" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.VectorStarSet.loadhdf5">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loadhdf5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">SSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HDF5group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.loadhdf5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.VectorStarSet.loadhdf5" title="Link to this definition"></a></dt>
 <dd><p>Creates a new VectorStarSet from an HDF5 group.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>SSet</strong> – StarSet–MUST BE PASSED IN as it is not stored with the VectorStarSet</p></li>
 <li><p><strong>HDFgroup</strong> – HDF5 group</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return VectorStarSet</dt>
+<dt class="field-even">Return VectorStarSet<span class="colon">:</span></dt>
 <dd class="field-even"><p>new VectorStarSet object</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.VectorStarSet.originstateVectorBasisfolddown">
-<code class="sig-name descname">originstateVectorBasisfolddown</code><span class="sig-paren">(</span><em class="sig-param">elemtype='solute'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.originstateVectorBasisfolddown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.originstateVectorBasisfolddown" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.VectorStarSet.originstateVectorBasisfolddown">
+<span class="sig-name descname"><span class="pre">originstateVectorBasisfolddown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elemtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'solute'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.originstateVectorBasisfolddown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.VectorStarSet.originstateVectorBasisfolddown" title="Link to this definition"></a></dt>
 <dd><p>Construct the expansion to “fold down” from vector stars to origin states.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>elemtype</strong> – ‘solute’ of ‘vacancy’, depending on which site we need to reduce</p>
 </dd>
-<dt class="field-even">Return OSindices</dt>
+<dt class="field-even">Return OSindices<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of indices corresponding to origin states</p>
 </dd>
-<dt class="field-odd">Return folddown</dt>
+<dt class="field-odd">Return folddown<span class="colon">:</span></dt>
 <dd class="field-odd"><p>[NOS, Nvstars] to map vector stars to origin states</p>
 </dd>
-<dt class="field-even">Return OS_VB</dt>
+<dt class="field-even">Return OS_VB<span class="colon">:</span></dt>
 <dd class="field-even"><p>[NOS, Nsites, 3] mapping of origin state to a vector basis</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="crystalStars.VectorStarSet.rateexpansions">
-<code class="sig-name descname">rateexpansions</code><span class="sig-paren">(</span><em class="sig-param">jumpnetwork</em>, <em class="sig-param">jumptype</em>, <em class="sig-param">omega2=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.rateexpansions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.VectorStarSet.rateexpansions" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="crystalStars.VectorStarSet.rateexpansions">
+<span class="sig-name descname"><span class="pre">rateexpansions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jumpnetwork</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jumptype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#VectorStarSet.rateexpansions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.VectorStarSet.rateexpansions" title="Link to this definition"></a></dt>
 <dd><p>Construct the omega0 and omega1 matrix expansions in terms of the jumpnetwork;
 includes the escape terms separately. The escape terms are tricky because they have
 probability factors that differ from the transitions; the PS (pair stars) is useful for
@@ -778,7 +733,7 @@ for that. However, in that case we have a different approach for the calculation
 rate0expansion: if there are origin states, then we need to “jump” to those; if there
 is a non-empty VectorBasis we will want to account for them there.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>jumpnetwork</strong> – jumpnetwork of symmetry unique omega1-type jumps,
 corresponding to our starset. List of lists of (IS, FS), dx tuples, where IS and FS
@@ -788,21 +743,21 @@ are indices corresponding to states in our starset.</p></li>
 origin states? (default=False)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return rate0expansion</dt>
+<dt class="field-even">Return rate0expansion<span class="colon">:</span></dt>
 <dd class="field-even"><p>array[Nsv, Nsv, Njump_omega0]
 the omega0 matrix[i, j] = sum(rate0expansion[i, j, k] * omega0[k]); <em>IF</em> NVB&gt;0
 we “hijack” this and use it for [NVB, Nsv, Njump_omega0], as we’re doing an omega2
 calc and rate0expansion won’t be used <em>anyway</em>.</p>
 </dd>
-<dt class="field-odd">Return rate0escape</dt>
+<dt class="field-odd">Return rate0escape<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array[Nsv, Njump_omega0]
 the escape contributions: omega0[i,i] += sum(rate0escape[i,k]*omega0[k]*probfactor0(PS[k]))</p>
 </dd>
-<dt class="field-even">Return rate1expansion</dt>
+<dt class="field-even">Return rate1expansion<span class="colon">:</span></dt>
 <dd class="field-even"><p>array[Nsv, Nsv, Njump_omega1]
 the omega1 matrix[i, j] = sum(rate1expansion[i, j, k] * omega1[k])</p>
 </dd>
-<dt class="field-odd">Return rate1escape</dt>
+<dt class="field-odd">Return rate1escape<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array[Nsv, Njump_omega1]
 the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega1[k]*probfactor(PS[k]))</p>
 </dd>
@@ -811,113 +766,95 @@ the escape contributions: omega1[i,i] += sum(rate1escape[i,k]*omega1[k]*probfact
 
 </dd></dl>
 
-<dl class="function">
-<dt id="crystalStars.array2PSlist">
-<code class="sig-prename descclassname">crystalStars.</code><code class="sig-name descname">array2PSlist</code><span class="sig-paren">(</span><em class="sig-param">ij</em>, <em class="sig-param">R</em>, <em class="sig-param">dx</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#array2PSlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.array2PSlist" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystalStars.array2PSlist">
+<span class="sig-prename descclassname"><span class="pre">crystalStars.</span></span><span class="sig-name descname"><span class="pre">array2PSlist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ij</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#array2PSlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.array2PSlist" title="Link to this definition"></a></dt>
 <dd><p>Take in arrays of ij, R, dx (from HDF5), return a list of PairStates</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ij</strong> – int_array[N][2] = (i,j)</p></li>
 <li><p><strong>R</strong> – int[N][3]</p></li>
 <li><p><strong>dx</strong> – float[N][3]</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return PSlist</dt>
+<dt class="field-even">Return PSlist<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of pair states</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystalStars.doublelist2flatlistindex">
-<code class="sig-prename descclassname">crystalStars.</code><code class="sig-name descname">doublelist2flatlistindex</code><span class="sig-paren">(</span><em class="sig-param">listlist</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#doublelist2flatlistindex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.doublelist2flatlistindex" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystalStars.doublelist2flatlistindex">
+<span class="sig-prename descclassname"><span class="pre">crystalStars.</span></span><span class="sig-name descname"><span class="pre">doublelist2flatlistindex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">listlist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#doublelist2flatlistindex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.doublelist2flatlistindex" title="Link to this definition"></a></dt>
 <dd><p>Takes a list of lists, returns a flattened list and an index array</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>listlist</strong> – list of lists of objects</p>
 </dd>
-<dt class="field-even">Return flatlist</dt>
+<dt class="field-even">Return flatlist<span class="colon">:</span></dt>
 <dd class="field-even"><p>flat list of objects (preserving order)</p>
 </dd>
-<dt class="field-odd">Return indexarray</dt>
+<dt class="field-odd">Return indexarray<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array indexing which original list it came from</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystalStars.flatlistindex2doublelist">
-<code class="sig-prename descclassname">crystalStars.</code><code class="sig-name descname">flatlistindex2doublelist</code><span class="sig-paren">(</span><em class="sig-param">flatlist</em>, <em class="sig-param">indexarray</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#flatlistindex2doublelist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.flatlistindex2doublelist" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystalStars.flatlistindex2doublelist">
+<span class="sig-prename descclassname"><span class="pre">crystalStars.</span></span><span class="sig-name descname"><span class="pre">flatlistindex2doublelist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flatlist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indexarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#flatlistindex2doublelist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.flatlistindex2doublelist" title="Link to this definition"></a></dt>
 <dd><p>Takes a flattened list and an index array, returns a list of lists</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>flatlist</strong> – flat list of objects (preserving order)</p></li>
 <li><p><strong>indexarray</strong> – array indexing which original list it came from</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return listlist</dt>
+<dt class="field-even">Return listlist<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of lists of objects</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="crystalStars.zeroclean">
-<code class="sig-prename descclassname">crystalStars.</code><code class="sig-name descname">zeroclean</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">threshold=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#zeroclean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crystalStars.zeroclean" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="crystalStars.zeroclean">
+<span class="sig-prename descclassname"><span class="pre">crystalStars.</span></span><span class="sig-name descname"><span class="pre">zeroclean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crystalStars.html#zeroclean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crystalStars.zeroclean" title="Link to this definition"></a></dt>
 <dd><p>Modify x in place, return 0 if x is below a threshold; useful for “symmetrizing” our expansions</p>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="supercell.html" class="btn btn-neutral float-right" title="Supercell" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="crystal.html" class="btn btn-neutral float-left" title="Crystal" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="crystal.html" class="btn btn-neutral float-left" title="Crystal" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="supercell.html" class="btn btn-neutral float-right" title="Supercell" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2017, Dallas R. Trinkle
-
-    </p>
+    <p>&#169; Copyright 2017, Dallas R. Trinkle.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

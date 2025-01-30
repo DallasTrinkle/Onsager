@@ -1,91 +1,48 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Supercell &mdash; Onsager 1.3.3 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supercell &mdash; Onsager 1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=0ed52906"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="PowerExpansion" href="PowerExpansion.html" />
+    <link rel="next" title="Cluster" href="cluster.html" />
     <link rel="prev" title="CrystalStars" href="CrystalStars.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home"> Onsager
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Onsager
           </a>
-
-          
-            
-            
-              <div class="version">
-                1.3
-              </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="InputOutput.html">Input and output for Onsager transport calculation</a></li>
@@ -93,7 +50,61 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="crystal.html">Crystal</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Supercell</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Supercell</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#supercell.ClusterSupercell"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.Supercell_occ"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.Supercell_occ()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.__init__"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.__weakref__"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.__weakref__</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.addvacancy"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.addvacancy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.ciR"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.ciR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.clusterevaluator"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.clusterevaluator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.evalTScluster"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.evalTScluster()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.evalcluster"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.evalcluster()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.expandcluster_matrices"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.expandcluster_matrices()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.expiqx"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.expiqx()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.incell"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.incell()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.index"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.indexpos"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.indexpos()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.jumpnetworkevaluator"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.jumpnetworkevaluator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.jumpnetworkevaluator_vacancy"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.jumpnetworkevaluator_vacancy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.ClusterSupercell.makesites"><code class="docutils literal notranslate"><span class="pre">ClusterSupercell.makesites()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#supercell.Supercell"><code class="docutils literal notranslate"><span class="pre">Supercell</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.KrogerVink"><code class="docutils literal notranslate"><span class="pre">Supercell.KrogerVink()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.POSCAR"><code class="docutils literal notranslate"><span class="pre">Supercell.POSCAR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.POSCAR_occ"><code class="docutils literal notranslate"><span class="pre">Supercell.POSCAR_occ()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.__eq__"><code class="docutils literal notranslate"><span class="pre">Supercell.__eq__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.__getitem__"><code class="docutils literal notranslate"><span class="pre">Supercell.__getitem__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.__hash__"><code class="docutils literal notranslate"><span class="pre">Supercell.__hash__</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.__imul__"><code class="docutils literal notranslate"><span class="pre">Supercell.__imul__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.__init__"><code class="docutils literal notranslate"><span class="pre">Supercell.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.__mul__"><code class="docutils literal notranslate"><span class="pre">Supercell.__mul__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.__ne__"><code class="docutils literal notranslate"><span class="pre">Supercell.__ne__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.__rmul__"><code class="docutils literal notranslate"><span class="pre">Supercell.__rmul__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.__sane__"><code class="docutils literal notranslate"><span class="pre">Supercell.__sane__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.__setitem__"><code class="docutils literal notranslate"><span class="pre">Supercell.__setitem__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.__str__"><code class="docutils literal notranslate"><span class="pre">Supercell.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.__weakref__"><code class="docutils literal notranslate"><span class="pre">Supercell.__weakref__</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.copy"><code class="docutils literal notranslate"><span class="pre">Supercell.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.defect_chemmapping"><code class="docutils literal notranslate"><span class="pre">Supercell.defect_chemmapping()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.defectindices"><code class="docutils literal notranslate"><span class="pre">Supercell.defectindices()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.definesolute"><code class="docutils literal notranslate"><span class="pre">Supercell.definesolute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.equivalencemap"><code class="docutils literal notranslate"><span class="pre">Supercell.equivalencemap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.fillperiodic"><code class="docutils literal notranslate"><span class="pre">Supercell.fillperiodic()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.gengroup"><code class="docutils literal notranslate"><span class="pre">Supercell.gengroup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.index"><code class="docutils literal notranslate"><span class="pre">Supercell.index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.makesites"><code class="docutils literal notranslate"><span class="pre">Supercell.makesites()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.maketrans"><code class="docutils literal notranslate"><span class="pre">Supercell.maketrans()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.occposlist"><code class="docutils literal notranslate"><span class="pre">Supercell.occposlist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.reorder"><code class="docutils literal notranslate"><span class="pre">Supercell.reorder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.setocc"><code class="docutils literal notranslate"><span class="pre">Supercell.setocc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#supercell.Supercell.stoichiometry"><code class="docutils literal notranslate"><span class="pre">Supercell.stoichiometry()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cluster.html">Cluster</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
 <li class="toctree-l2"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
@@ -102,99 +113,36 @@
 </li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Onsager</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="modules.html">Modules</a> &raquo;</li>
-        
-      <li>Supercell</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Modules</a></li>
+      <li class="breadcrumb-item active">Supercell</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/supercell.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast + .nbinput {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="supercell">
-<h1>Supercell<a class="headerlink" href="#supercell" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="supercell">
+<h1>Supercell<a class="headerlink" href="#supercell" title="Link to this heading"></a></h1>
 <p>Supercell:</p>
 <p>The supercell module defines the <code class="docutils literal notranslate"><span class="pre">supercell</span></code> class for building supercells from <code class="docutils literal notranslate"><span class="pre">crystal.Crystal</span></code> classes.</p>
-<span class="target" id="module-supercell"></span><p>Supercell class</p>
+<p id="module-supercell">Supercell class</p>
 <p>Class to store supercells of crystals. A supercell is a lattice model of a crystal, with
 periodically repeating unit cells. In that framework we can</p>
 <ol class="arabic simple">
@@ -202,94 +150,473 @@ periodically repeating unit cells. In that framework we can</p>
 <li><p>find the transformation map between two different representations of the same supercell</p></li>
 <li><p>output POSCAR format (possibly other formats?)</p></li>
 </ol>
-<dl class="class">
-<dt id="supercell.Supercell">
-<em class="property">class </em><code class="sig-prename descclassname">supercell.</code><code class="sig-name descname">Supercell</code><span class="sig-paren">(</span><em class="sig-param">crys</em>, <em class="sig-param">super</em>, <em class="sig-param">interstitial=()</em>, <em class="sig-param">Nsolute=0</em>, <em class="sig-param">empty=False</em>, <em class="sig-param">NOSYM=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell" title="Permalink to this definition">¶</a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">supercell.</span></span><span class="sig-name descname"><span class="pre">ClusterSupercell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">superlatt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell" title="Link to this definition"></a></dt>
+<dd><p>A class that defines a Supercell of a crystal for purposes of evaluating a cluster expansion.
+We intend to use this with Monte Carlo sampling.</p>
+<p>Takes in a crystal, a supercell (3x3 integer matrix). We can identify sites
+as spectator sites (that is, they can have different occupancies, but we do not intend
+for those to change during a Monte Carlo simulation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.Supercell_occ">
+<span class="sig-name descname"><span class="pre">Supercell_occ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chemmapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.Supercell_occ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.Supercell_occ" title="Link to this definition"></a></dt>
+<dd><p>Takes in a Supercell object (that is assumed to be consistent with this supercell!)
+and produces the corresponding occupancy vectors for <em>this</em> supercell, using a
+specific chemical mapping (described below).</p>
+<p>In a Supercell object, each <em>site</em> has a “native” chemistry; moreover, those sites
+may be occupied by everything from a vacancy (-1) to a different chemical element (&gt;=0).
+We need to define how that happens, since ClusterSupercells only have occupancies of 0 or 1.</p>
+<p><code class="docutils literal notranslate"><span class="pre">chemmapping</span></code> is a dictionary of dictionaries. <code class="docutils literal notranslate"><span class="pre">chemmapping[csite][cocc]</span></code> = 0 or 1
+to dictate what the occupancy for a site <em>should</em> be if chemistry of type <code class="docutils literal notranslate"><span class="pre">cocc</span></code> occurs
+on a site with native chemistry <code class="docutils literal notranslate"><span class="pre">csite</span></code>.</p>
+<p>If the <code class="docutils literal notranslate"><span class="pre">chemmapping</span></code> is None, we use a default “defect” occupancy mapping; namely,
+if <code class="docutils literal notranslate"><span class="pre">csite</span></code> != Interstitial, then we use 0 when <code class="docutils literal notranslate"><span class="pre">csite==cocc</span></code>, 1 otherwise; and
+if <code class="docutils literal notranslate"><span class="pre">csite</span></code> == Interstitial, we use 0 when <code class="docutils literal notranslate"><span class="pre">csite==-1</span></code>, 1 otherwise. See
+<code class="docutils literal notranslate"><span class="pre">Supercell.defect_chemmapping()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sup</strong> – Supercell object, with appropriate chemical occupancies</p></li>
+<li><p><strong>chemmapping</strong> – mapping of chemical identities to occupancy variables.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return mocc<span class="colon">:</span></dt>
+<dd class="field-even"><p>mobile occupancy vector</p>
+</dd>
+<dt class="field-odd">Return socc<span class="colon">:</span></dt>
+<dd class="field-odd"><p>spectator occupancy vector</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">superlatt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize our supercell to an empty supercell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>crys</strong> – crystal object</p></li>
+<li><p><strong>superlatt</strong> – 3x3 integer matrix</p></li>
+<li><p><strong>spectator</strong> – list of indices of chemistries that will be considered “spectators”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#supercell.ClusterSupercell.__weakref__" title="Link to this definition"></a></dt>
+<dd><p>list of weak references to the object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.addvacancy">
+<span class="sig-name descname"><span class="pre">addvacancy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.addvacancy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.addvacancy" title="Link to this definition"></a></dt>
+<dd><p>Adds a vacancy into the mobile species at a specific index</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.ciR">
+<span class="sig-name descname"><span class="pre">ciR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mobile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.ciR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.ciR" title="Link to this definition"></a></dt>
+<dd><p>Return the chem/index and lattice vector for a specific indexed position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ind</strong> – index of site</p></li>
+<li><p><strong>mobile</strong> – True if mobile; false if spectator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return ci<span class="colon">:</span></dt>
+<dd class="field-even"><p>(c, i) index</p>
+</dd>
+<dt class="field-odd">Return R<span class="colon">:</span></dt>
+<dd class="field-odd"><p>lattice vector</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.clusterevaluator">
+<span class="sig-name descname"><span class="pre">clusterevaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">socc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.clusterevaluator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.clusterevaluator" title="Link to this definition"></a></dt>
+<dd><p>Construct the information necessary for an (efficient) cluster evaluator,
+for a given spectator occupancy, set of clusters, and values for those clusters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>socc</strong> – spectator occupancy vector (0 or 1 only)</p></li>
+<li><p><strong>clusters</strong> – list of lists (or sets) of Cluster objects</p></li>
+<li><p><strong>values</strong> – vector of values for the clusters; if it is longer than the
+list of clusters by one, the last values is assumed to be the constant value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return siteinteract<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of lists of interactions for each site</p>
+</dd>
+<dt class="field-odd">Return interact<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of interaction values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.evalTScluster">
+<span class="sig-name descname"><span class="pre">evalTScluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mocc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">socc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TSclusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.evalTScluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.evalTScluster" title="Link to this definition"></a></dt>
+<dd><p>Evaluate a TS cluster expansion for a given mobile occupancy and spectator occupancy.
+Indexing corresponds to <code class="docutils literal notranslate"><span class="pre">mobilepos</span></code> and <code class="docutils literal notranslate"><span class="pre">specpos</span></code>. The clusters are input as a
+list of lists of clusters (where it is assumed that all of the clusters in a given
+sublist have equal coefficients (i.e., grouped by symmetry). We return a vector
+of length Nclusters; each entry is the number of times each cluster appears.
+This can then be dotted into the vector of values to get the cluster expansion value.
+This is evaluated for the transition where the mobile species at <code class="docutils literal notranslate"><span class="pre">initial</span></code> jumps
+to the position at <code class="docutils literal notranslate"><span class="pre">final</span></code>. Requires mocc[initial] == 1 and mocc[final] == 0</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mocc</strong> – mobile occupancy vector (0 or 1 only)</p></li>
+<li><p><strong>socc</strong> – spectator occupancy vector (0 or 1 only)</p></li>
+<li><p><strong>TSclusters</strong> – list of lists (or sets) of (transition state) Cluster objects</p></li>
+<li><p><strong>initial</strong> – index of initial state</p></li>
+<li><p><strong>final</strong> – index of final state</p></li>
+<li><p><strong>dx</strong> – displacement vector (necessary to deal with PBC)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>clustercount: count of how many of each cluster is in this supercell.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.evalcluster">
+<span class="sig-name descname"><span class="pre">evalcluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mocc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">socc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.evalcluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.evalcluster" title="Link to this definition"></a></dt>
+<dd><p>Evaluate a cluster expansion for a given mobile occupancy and spectator occupancy.
+Indexing corresponds to <code class="docutils literal notranslate"><span class="pre">mobilepos</span></code> and <code class="docutils literal notranslate"><span class="pre">specpos</span></code>. The clusters are input as a
+list of lists of clusters (where it is assumed that all of the clusters in a given
+sublist have equal coefficients (i.e., grouped by symmetry). We return a vector
+of length Nclusters + 1; each entry is the number of times each cluster appears,
+and the <em>last</em> entry is equal to the size of the supercell (which would be an
+“empty” cluster). This can then be dotted into the vector of values to get the
+cluster expansion value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mocc</strong> – mobile occupancy vector (0 or 1 only)</p></li>
+<li><p><strong>socc</strong> – spectator occupancy vector (0 or 1 only)</p></li>
+<li><p><strong>clusters</strong> – list of lists (or sets) of Cluster objects</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>clustercount: count of how many of each cluster is in this supercell.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.expandcluster_matrices">
+<span class="sig-name descname"><span class="pre">expandcluster_matrices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">socc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.expandcluster_matrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.expandcluster_matrices" title="Link to this definition"></a></dt>
+<dd><p>Expand a cluster expansion for a given spectator occupancy into matrices of indices.
+This is designed for rapid evaluation for a fixed spectator occupancy. The clusters are
+input as a list of lists of clusters (i.e., grouped by symmetry). We return a list of
+lists of integer matrices of indices. This can then be used to efficiently evaluate cluster
+counts for a given mobile occupancy. The given row of indices must be all 1 in order to
+increment the particular cluster count.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>socc</strong> – spectator occupancy vector (0 or 1 only)</p></li>
+<li><p><strong>clusters</strong> – list of lists (or sets) of Cluster objects</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>clustermatrices: list of lists of matrices of indices</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.expiqx">
+<span class="sig-name descname"><span class="pre">expiqx</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.expiqx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.expiqx" title="Link to this definition"></a></dt>
+<dd><p>Construct a Fourier transform matrix for our mobile species</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>exp( I q[i] . x[j]) as a matrix</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>gamma_index of the gamma point (0)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.incell">
+<span class="sig-name descname"><span class="pre">incell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.incell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.incell" title="Link to this definition"></a></dt>
+<dd><p>Map a lattice vector into a translation vector in the cell</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ci</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.index" title="Link to this definition"></a></dt>
+<dd><p>Return the index that corresponds to a position specified by a lattice vector R and
+a chem/index (c,i). We also need to specify if its in the spectator basis or mobile basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>R</strong> – lattice vector</p></li>
+<li><p><strong>ci</strong> – (c, i) index</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return ind<span class="colon">:</span></dt>
+<dd class="field-even"><p>index of site in our position</p>
+</dd>
+<dt class="field-odd">Return mobile<span class="colon">:</span></dt>
+<dd class="field-odd"><p>boolean; True if mobile, False if spectator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.indexpos">
+<span class="sig-name descname"><span class="pre">indexpos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CARTESIAN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.indexpos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.indexpos" title="Link to this definition"></a></dt>
+<dd><p>Return the index that corresponds to the position <em>closest</em> to pos in the supercell.
+Done in direct coordinates of the supercell, using periodic boundary conditions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos</strong> – 3-vector</p></li>
+<li><p><strong>threshold</strong> – (optional) minimum squared “distance” in supercell for a match; default=1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return index<span class="colon">:</span></dt>
+<dd class="field-even"><p>index of closest position</p>
+</dd>
+<dt class="field-odd">Return mobile<span class="colon">:</span></dt>
+<dd class="field-odd"><p>boolean; True if mobile, False if spectator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.jumpnetworkevaluator">
+<span class="sig-name descname"><span class="pre">jumpnetworkevaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">socc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jumpnetwork</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KRAvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TSclusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TSvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">siteinteract</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.jumpnetworkevaluator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.jumpnetworkevaluator" title="Link to this definition"></a></dt>
+<dd><p>Build out an efficient jump network evaluator. Similar inputs to <code class="docutils literal notranslate"><span class="pre">clusterevaluator</span></code>,
+with the addition of a jumpnetwork and energies. The interactions can be appended
+onto existing interactions, if included. The information about all of the
+transitions is: initial state, final state, delta x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>socc</strong> – spectator occupancy vector (0 or 1 only)</p></li>
+<li><p><strong>clusters</strong> – list of lists (or sets) of Cluster objects</p></li>
+<li><p><strong>values</strong> – vector of values for the clusters; if it is longer than the
+list of clusters by one, the last values is assumed to be the constant value.</p></li>
+<li><p><strong>chem</strong> – index of species that transitions</p></li>
+<li><p><strong>jumpnetwork</strong> – list of lists of jumps; each is ((i, j), dx) where <code class="docutils literal notranslate"><span class="pre">i</span></code> and <code class="docutils literal notranslate"><span class="pre">j</span></code> are
+unit cell indices for species <code class="docutils literal notranslate"><span class="pre">chem</span></code></p></li>
+<li><p><strong>KRAvalues</strong> – list of “KRA” values for barriers (relative to average energy of endpoints);
+if <code class="docutils literal notranslate"><span class="pre">TSclusters</span></code> are used, choosing 0 is more straightforward.</p></li>
+<li><p><strong>TSclusters</strong> – (optional) list of transition state cluster expansion terms; this is
+always added on to KRAvalues (thus using 0 is recommended if TSclusters are also used)</p></li>
+<li><p><strong>TSvalues</strong> – (optional) values for TS cluster expansion entries</p></li>
+<li><p><strong>siteinteract</strong> – (optional) list of lists of interactions for each site, to append</p></li>
+<li><p><strong>interact</strong> – (optional) list of interaction values, to append</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return siteinteract<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of lists of interactions for each site</p>
+</dd>
+<dt class="field-odd">Return interact<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of interaction values</p>
+</dd>
+<dt class="field-even">Return jumps<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of ((initial, final), dx)</p>
+</dd>
+<dt class="field-odd">Return interactrange<span class="colon">:</span></dt>
+<dd class="field-odd"><p>range of indices to count in interact for each jump; for the nth
+jump, sum over interactrange[n-1]:interactrange[n]; interactrange[-1] == range for energy</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.jumpnetworkevaluator_vacancy">
+<span class="sig-name descname"><span class="pre">jumpnetworkevaluator_vacancy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">socc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jumpnetwork</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KRAvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TSclusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TSvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">siteinteract</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.jumpnetworkevaluator_vacancy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.jumpnetworkevaluator_vacancy" title="Link to this definition"></a></dt>
+<dd><p>Build out an efficient jump network evaluator for a vacancy. Similar inputs to
+<code class="docutils literal notranslate"><span class="pre">jumpnetworkevaluator</span></code>. This is designed for a “stationary” vacancy, where we’ll
+just look at its jumps in the supercell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>socc</strong> – spectator occupancy vector (0 or 1 only)</p></li>
+<li><p><strong>clusters</strong> – list of lists (or sets) of Cluster objects</p></li>
+<li><p><strong>values</strong> – vector of values for the clusters; if it is longer than the
+list of clusters by one, the last values is assumed to be the constant value.</p></li>
+<li><p><strong>chem</strong> – index of species that transitions</p></li>
+<li><p><strong>jumpnetwork</strong> – list of lists of jumps; each is ((i, j), dx) where <code class="docutils literal notranslate"><span class="pre">i</span></code> and <code class="docutils literal notranslate"><span class="pre">j</span></code> are
+unit cell indices for species <code class="docutils literal notranslate"><span class="pre">chem</span></code></p></li>
+<li><p><strong>KRAvalues</strong> – list of “KRA” values for barriers (relative to average energy of endpoints);
+if <code class="docutils literal notranslate"><span class="pre">TSclusters</span></code> are used, choosing 0 is more straightforward.</p></li>
+<li><p><strong>TSclusters</strong> – (optional) list of transition state cluster expansion terms; this is
+always added on to KRAvalues (thus using 0 is recommended if TSclusters are also used)</p></li>
+<li><p><strong>TSvalues</strong> – (optional) values for TS cluster expansion entries</p></li>
+<li><p><strong>siteinteract</strong> – (optional) list of lists of interactions for each site, to append</p></li>
+<li><p><strong>interact</strong> – (optional) list of interaction values, to append</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return siteinteract<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of lists of interactions for each site</p>
+</dd>
+<dt class="field-odd">Return interact<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of interaction values</p>
+</dd>
+<dt class="field-even">Return jumps<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of ((initial, final), dx)</p>
+</dd>
+<dt class="field-odd">Return interactrange<span class="colon">:</span></dt>
+<dd class="field-odd"><p>range of indices to count in interact for each jump; for the nth
+jump, sum over interactrange[n-1]:interactrange[n]; interactrange[-1] == range for energy</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.ClusterSupercell.makesites">
+<span class="sig-name descname"><span class="pre">makesites</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#ClusterSupercell.makesites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.ClusterSupercell.makesites" title="Link to this definition"></a></dt>
+<dd><p>Generate the array corresponding to the sites; the indexing is based on the translations
+and the atomindices in crys. These may not all be filled when the supercell is finished.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return pos<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array [N*size, 3] of supercell positions in direct coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="supercell.Supercell">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">supercell.</span></span><span class="sig-name descname"><span class="pre">Supercell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">superlatt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interstitial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nsolute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NOSYM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell" title="Link to this definition"></a></dt>
 <dd><p>A class that defines a Supercell of a crystal.</p>
 <p>Takes in a crystal, a supercell (3x3 integer matrix). We can identify sites
 as interstitial sites, and specify if we’ll have solutes.</p>
-<dl class="method">
-<dt id="supercell.Supercell.KrogerVink">
-<code class="sig-name descname">KrogerVink</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.KrogerVink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.KrogerVink" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.KrogerVink">
+<span class="sig-name descname"><span class="pre">KrogerVink</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.KrogerVink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.KrogerVink" title="Link to this definition"></a></dt>
 <dd><p>Attempt to make a “simple” string based on the defectindices, using Kroger-Vink notation.
 That is, we identify: vacancies, antisites, and interstitial sites, and return a string.
 NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return KV</dt>
+<dt class="field-odd">Return KV<span class="colon">:</span></dt>
 <dd class="field-odd"><p>string representation</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.POSCAR">
-<code class="sig-name descname">POSCAR</code><span class="sig-paren">(</span><em class="sig-param">name=None</em>, <em class="sig-param">stoichiometry=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.POSCAR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.POSCAR" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.POSCAR">
+<span class="sig-name descname"><span class="pre">POSCAR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stoichiometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.POSCAR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.POSCAR" title="Link to this definition"></a></dt>
 <dd><p>Return a VASP-style POSCAR, returned as a string.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – (optional) name to use for first list</p></li>
 <li><p><strong>stoichiometry</strong> – (optional) if True, append stoichiometry to name</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return POSCAR</dt>
+<dt class="field-even">Return POSCAR<span class="colon">:</span></dt>
 <dd class="field-even"><p>string</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.__eq__">
-<code class="sig-name descname">__eq__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__eq__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__eq__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.POSCAR_occ">
+<span class="sig-name descname"><span class="pre">POSCAR_occ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">POSCAR_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EMPTY_SUPER</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latt_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.POSCAR_occ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.POSCAR_occ" title="Link to this definition"></a></dt>
+<dd><p>Takes in a POSCAR_str, and sets the occupancy of the supercell accordingly.
+Note: if we want to read a POSCAR from a file instead, the proper usage is</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">POSCAR_filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">sup</span><span class="o">.</span><span class="n">from_POSCAR</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Warning: there is only minimal validity checking; it makes a strong assumption
+that a reasonable POSCAR file is being given, and that the sites should correspond
+to the supercell object. Should that not be the case, the behavior is unspecified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>POSCAR_str</strong> – string form of a POSCAR</p></li>
+<li><p><strong>EMPTY_SUPER</strong> – initialize supercell by emptying it first (default=True)</p></li>
+<li><p><strong>disp_threshold</strong> – threshold for difference in position to raise an error, in
+unit cell coordinates. For a negative value, we compute a value that is ~0.1A.
+If you do <em>not</em> want this check to be meaningful, choose a value &gt;sqrt(3)=1.733</p></li>
+<li><p><strong>latt_threshold</strong> – threshold for supercell lattice check, in units of strain.
+For a negative values <strong>do not check</strong>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>name from the POSCAR</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.__eq__" title="Link to this definition"></a></dt>
 <dd><p>Return True if two supercells are equal; this means they should have the same occupancy.
 <em>and</em> the same ordering</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>other</strong> – supercell for comparison</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True if same crystal, supercell, occupancy, and ordering; False otherwise</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.__getitem__">
-<code class="sig-name descname">__getitem__</code><span class="sig-paren">(</span><em class="sig-param">key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__getitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.__getitem__" title="Link to this definition"></a></dt>
 <dd><p>Index into supercell</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>key</strong> – index (either an int, a slice, or a position)</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>chemical occupation at that point</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.__imul__">
-<code class="sig-name descname">__imul__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__imul__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__imul__" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="supercell.Supercell.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#supercell.Supercell.__hash__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.__imul__">
+<span class="sig-name descname"><span class="pre">__imul__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__imul__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.__imul__" title="Link to this definition"></a></dt>
 <dd><p>Multiply by a GroupOp, in place.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>other</strong> – must be a GroupOp (and <em>should</em> be a GroupOp of the supercell!)</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>self</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">crys</em>, <em class="sig-param">super</em>, <em class="sig-param">interstitial=()</em>, <em class="sig-param">Nsolute=0</em>, <em class="sig-param">empty=False</em>, <em class="sig-param">NOSYM=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__init__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">superlatt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interstitial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Nsolute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NOSYM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialize our supercell to an empty supercell.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>crys</strong> – crystal object</p></li>
-<li><p><strong>super</strong> – 3x3 integer matrix</p></li>
+<li><p><strong>superlatt</strong> – 3x3 integer matrix</p></li>
 <li><p><strong>interstitial</strong> – (optional) list/tuple of indices that correspond to interstitial sites</p></li>
 <li><p><strong>Nsolute</strong> – (optional) number of substitutional solute elements to consider; default=0</p></li>
 <li><p><strong>empty</strong> – (optional) designed to allow “copy” to work–skips all derived info</p></li>
@@ -299,52 +626,52 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.__mul__">
-<code class="sig-name descname">__mul__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__mul__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__mul__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.__mul__">
+<span class="sig-name descname"><span class="pre">__mul__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__mul__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.__mul__" title="Link to this definition"></a></dt>
 <dd><p>Multiply by a GroupOp; returns a new supercell (constructed via copy).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>other</strong> – must be a GroupOp (and <em>should</em> be a GroupOp of the supercell!)</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>rotated supercell</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.__ne__">
-<code class="sig-name descname">__ne__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__ne__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__ne__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.__ne__">
+<span class="sig-name descname"><span class="pre">__ne__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__ne__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.__ne__" title="Link to this definition"></a></dt>
 <dd><p>Inequality == not __eq__</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.__rmul__">
-<code class="sig-name descname">__rmul__</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__rmul__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__rmul__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.__rmul__">
+<span class="sig-name descname"><span class="pre">__rmul__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__rmul__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.__rmul__" title="Link to this definition"></a></dt>
 <dd><p>Multiply by a GroupOp; returns a new supercell (constructed via copy).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>other</strong> – must be a GroupOp (and <em>should</em> be a GroupOp of the supercell!)</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>rotated supercell</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.__sane__">
-<code class="sig-name descname">__sane__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__sane__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__sane__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.__sane__">
+<span class="sig-name descname"><span class="pre">__sane__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__sane__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.__sane__" title="Link to this definition"></a></dt>
 <dd><p>Return True if supercell occupation and chemorder are consistent</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.__setitem__">
-<code class="sig-name descname">__setitem__</code><span class="sig-paren">(</span><em class="sig-param">key</em>, <em class="sig-param">value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__setitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.__setitem__">
+<span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__setitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.__setitem__" title="Link to this definition"></a></dt>
 <dd><p>Set specific composition for site; uses same indexing as __getitem__</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>key</strong> – index (either an int, a slice, or a position)</p></li>
 <li><p><strong>value</strong> – chemical occupation at that point</p></li>
@@ -353,47 +680,53 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.__str__">
-<code class="sig-name descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__str__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.__str__" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.__str__" title="Link to this definition"></a></dt>
 <dd><p>Human readable version of supercell</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="supercell.Supercell.__weakref__">
-<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#supercell.Supercell.__weakref__" title="Permalink to this definition">¶</a></dt>
-<dd><p>list of weak references to the object (if defined)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="supercell.Supercell.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#supercell.Supercell.__weakref__" title="Link to this definition"></a></dt>
+<dd><p>list of weak references to the object</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.copy">
-<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.copy" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.copy" title="Link to this definition"></a></dt>
 <dd><p>Make a copy of the supercell; initializes, then copies over <code class="docutils literal notranslate"><span class="pre">__copyattr__</span></code> and
 <code class="docutils literal notranslate"><span class="pre">__eqattr__</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>new supercell object, copy of the original</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.defectindices">
-<code class="sig-name descname">defectindices</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.defectindices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.defectindices" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.defect_chemmapping">
+<span class="sig-name descname"><span class="pre">defect_chemmapping</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.defect_chemmapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.defect_chemmapping" title="Link to this definition"></a></dt>
+<dd><p>Returns a <code class="docutils literal notranslate"><span class="pre">chemmapping</span></code> dictionary corresponding to defects</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.defectindices">
+<span class="sig-name descname"><span class="pre">defectindices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.defectindices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.defectindices" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary that corresponds to the “defect” content of the supercell.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return defects</dt>
+<dt class="field-odd">Return defects<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dictionary, keyed by defect type, with a set of indices of corresponding defects</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.definesolute">
-<code class="sig-name descname">definesolute</code><span class="sig-paren">(</span><em class="sig-param">c</em>, <em class="sig-param">chemistry</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.definesolute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.definesolute" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.definesolute">
+<span class="sig-name descname"><span class="pre">definesolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chemistry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.definesolute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.definesolute" title="Link to this definition"></a></dt>
 <dd><p>Set the name of the chemistry of chemical index c. Only works for substitutional solutes.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>c</strong> – index</p></li>
 <li><p><strong>chemistry</strong> – string</p></li>
@@ -402,10 +735,10 @@ NOTE: there is no relative charges, so this is a pseudo-KV notation.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.equivalencemap">
-<code class="sig-name descname">equivalencemap</code><span class="sig-paren">(</span><em class="sig-param">other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.equivalencemap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.equivalencemap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given the super <code class="docutils literal notranslate"><span class="pre">other</span></code> we want to find a group operation that transforms <code class="docutils literal notranslate"><span class="pre">self</span></code>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.equivalencemap">
+<span class="sig-name descname"><span class="pre">equivalencemap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.equivalencemap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.equivalencemap" title="Link to this definition"></a></dt>
+<dd><p>Given the superlatt <code class="docutils literal notranslate"><span class="pre">other</span></code> we want to find a group operation that transforms <code class="docutils literal notranslate"><span class="pre">self</span></code>
 into other. This is a GroupOp <em>along</em> with an index mapping of chemorder. The index
 mapping is to get the occposlist to match up:
 <code class="docutils literal notranslate"><span class="pre">(g*self).occposlist()[c][mapping[c][i]]</span> <span class="pre">==</span> <span class="pre">other.occposlist()[c][i]</span></code>
@@ -414,132 +747,132 @@ We’re going to return both g and mapping.</p>
 <p><em>Remember:</em> <code class="docutils literal notranslate"><span class="pre">g</span></code> does not change the presentation ordering; <code class="docutils literal notranslate"><span class="pre">mapping</span></code> is
 necessary for full equivalence. If no such equivalence, return <code class="docutils literal notranslate"><span class="pre">None,None</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>other</strong> – Supercell</p>
 </dd>
-<dt class="field-even">Return g</dt>
+<dt class="field-even">Return g<span class="colon">:</span></dt>
 <dd class="field-even"><p>GroupOp to transform sites from <code class="docutils literal notranslate"><span class="pre">self</span></code> to <code class="docutils literal notranslate"><span class="pre">other</span></code></p>
 </dd>
-<dt class="field-odd">Return mapping</dt>
+<dt class="field-odd">Return mapping<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of maps, such that (g*self).chemorder[c][mapping[c][i]] == other.chemorder[c][i]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.fillperiodic">
-<code class="sig-name descname">fillperiodic</code><span class="sig-paren">(</span><em class="sig-param">ci</em>, <em class="sig-param">Wyckoff=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.fillperiodic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.fillperiodic" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.fillperiodic">
+<span class="sig-name descname"><span class="pre">fillperiodic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ci</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Wyckoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.fillperiodic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.fillperiodic" title="Link to this definition"></a></dt>
 <dd><p>Occupies all of the (Wyckoff) sites corresponding to chemical index with the appropriate chemistry.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ci</strong> – tuple of (chem, index) in crystal</p></li>
 <li><p><strong>Wyckoff</strong> – (optional) if False, <em>only</em> occupy the specific tuple, but still periodically</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return self</dt>
+<dt class="field-even">Return self<span class="colon">:</span></dt>
 <dd class="field-even"><p></p></dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.gengroup">
-<code class="sig-name descname">gengroup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.gengroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.gengroup" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.gengroup">
+<span class="sig-name descname"><span class="pre">gengroup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.gengroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.gengroup" title="Link to this definition"></a></dt>
 <dd><p>Generate the group operations internal to the supercell</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return G</dt>
+<dt class="field-odd">Return G<span class="colon">:</span></dt>
 <dd class="field-odd"><p>set of GroupOps</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.index">
-<code class="sig-name descname">index</code><span class="sig-paren">(</span><em class="sig-param">pos</em>, <em class="sig-param">threshold=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.index" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.index" title="Link to this definition"></a></dt>
 <dd><p>Return the index that corresponds to the position <em>closest</em> to pos in the supercell.
 Done in direct coordinates of the supercell, using periodic boundary conditions.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>pos</strong> – 3-vector</p></li>
 <li><p><strong>threshold</strong> – (optional) minimum squared “distance” in supercell for a match; default=1.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return index</dt>
+<dt class="field-even">Return index<span class="colon">:</span></dt>
 <dd class="field-even"><p>index of closest position</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.makesites">
-<code class="sig-name descname">makesites</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.makesites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.makesites" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.makesites">
+<span class="sig-name descname"><span class="pre">makesites</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.makesites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.makesites" title="Link to this definition"></a></dt>
 <dd><p>Generate the array corresponding to the sites; the indexing is based on the translations
 and the atomindices in crys. These may not all be filled when the supercell is finished.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return pos</dt>
+<dt class="field-odd">Return pos<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array [N*size, 3] of supercell positions in direct coordinates</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.maketrans">
-<em class="property">static </em><code class="sig-name descname">maketrans</code><span class="sig-paren">(</span><em class="sig-param">super</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.maketrans"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.maketrans" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.maketrans">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maketrans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">superlatt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.maketrans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.maketrans" title="Link to this definition"></a></dt>
 <dd><p>Takes in a supercell matrix, and returns a list of all translations of the unit
 cell that remain inside the supercell</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>super</strong> – 3x3 integer matrix</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>superlatt</strong> – 3x3 integer matrix</p>
 </dd>
-<dt class="field-even">Return size</dt>
+<dt class="field-even">Return size<span class="colon">:</span></dt>
 <dd class="field-even"><p>integer, corresponding to number of unit cells</p>
 </dd>
-<dt class="field-odd">Return invsuper</dt>
+<dt class="field-odd">Return invsuper<span class="colon">:</span></dt>
 <dd class="field-odd"><p>integer matrix inverse of supercell (needs to be divided by size)</p>
 </dd>
-<dt class="field-even">Return translist</dt>
+<dt class="field-even">Return translist<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of integer vectors (to be divided by <code class="docutils literal notranslate"><span class="pre">size</span></code>) corresponding
 to unit cell positions</p>
 </dd>
-<dt class="field-odd">Return transdict</dt>
+<dt class="field-odd">Return transdict<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dictionary of tuples and their corresponding index (inverse of trans)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.occposlist">
-<code class="sig-name descname">occposlist</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.occposlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.occposlist" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.occposlist">
+<span class="sig-name descname"><span class="pre">occposlist</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.occposlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.occposlist" title="Link to this definition"></a></dt>
 <dd><p>Returns a list of lists of occupied positions, in (chem)order.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return occposlist</dt>
+<dt class="field-odd">Return occposlist<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of lists of supercell coord. positions</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.reorder">
-<code class="sig-name descname">reorder</code><span class="sig-paren">(</span><em class="sig-param">mapping</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.reorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.reorder" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.reorder">
+<span class="sig-name descname"><span class="pre">reorder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.reorder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.reorder" title="Link to this definition"></a></dt>
 <dd><p>Reorder (in place) the occupied sites. Does not change the occupancies, only the ordering
 for “presentation”.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>mapping</strong> – list of maps; will make newchemorder[c][i] = chemorder[c][mapping[c][i]]</p>
 </dd>
-<dt class="field-even">Return self</dt>
+<dt class="field-even">Return self<span class="colon">:</span></dt>
 <dd class="field-even"><p></p></dd>
 </dl>
 <p>If mapping is not a proper permutation, raises ValueError.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.setocc">
-<code class="sig-name descname">setocc</code><span class="sig-paren">(</span><em class="sig-param">ind</em>, <em class="sig-param">c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.setocc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.setocc" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.setocc">
+<span class="sig-name descname"><span class="pre">setocc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.setocc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.setocc" title="Link to this definition"></a></dt>
 <dd><p>Set the occupancy of position indexed by ind, to chemistry c. Used by all the other algorithms.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ind</strong> – integer index</p></li>
 <li><p><strong>c</strong> – chemistry index</p></li>
@@ -548,63 +881,45 @@ for “presentation”.</p>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="supercell.Supercell.stoichiometry">
-<code class="sig-name descname">stoichiometry</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.stoichiometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#supercell.Supercell.stoichiometry" title="Permalink to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="supercell.Supercell.stoichiometry">
+<span class="sig-name descname"><span class="pre">stoichiometry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/supercell.html#Supercell.stoichiometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#supercell.Supercell.stoichiometry" title="Link to this definition"></a></dt>
 <dd><p>Return a string representing the current stoichiometry</p>
 </dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="PowerExpansion.html" class="btn btn-neutral float-right" title="PowerExpansion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="CrystalStars.html" class="btn btn-neutral float-left" title="CrystalStars" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="CrystalStars.html" class="btn btn-neutral float-left" title="CrystalStars" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cluster.html" class="btn btn-neutral float-right" title="Cluster" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2017, Dallas R. Trinkle
-
-    </p>
+    <p>&#169; Copyright 2017, Dallas R. Trinkle.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

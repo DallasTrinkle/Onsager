@@ -1,91 +1,51 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Input and output for Onsager transport calculation &mdash; Onsager 1.3.3 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Input and output for Onsager transport calculation &mdash; Onsager 1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=0ed52906"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Example Notebooks" href="notebooks.html" />
     <link rel="prev" title="Onsager" href="includeme.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home"> Onsager
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Onsager
           </a>
-
-          
-            
-            
-              <div class="version">
-                1.3
-              </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Input and output for Onsager transport calculation</a><ul>
@@ -97,9 +57,9 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#Interstitial-calculator-setup">Interstitial calculator setup</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-vacancy-diffusion">Face-centered cubic crystal, vacancy-diffusion</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Rocksalt-crystal,-vacancy-diffusion">Rocksalt crystal, vacancy-diffusion</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-interstitial-diffusion">Face-centered cubic crystal, interstitial diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Face-centered cubic crystal, vacancy-diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Rocksalt crystal, vacancy-diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Face-centered cubic crystal, interstitial diffusion</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#Vacancy-mediated-calculator-setup">Vacancy-mediated calculator setup</a><ul>
@@ -107,13 +67,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#VASP-style-input-files">VASP-style input files</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-interstitial-diffusion">Face-centered cubic crystal, interstitial diffusion</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion">Face-centered cubic crystal, vacancy mediated-diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Face-centered cubic crystal, interstitial diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Face-centered cubic crystal, vacancy mediated-diffusion</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#Formatting-of-input-data">Formatting of input data</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-interstitial-diffusion">Face-centered cubic crystal, interstitial diffusion</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion">Face-centered cubic crystal, vacancy mediated-diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Face-centered cubic crystal, interstitial diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Face-centered cubic crystal, vacancy mediated-diffusion</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#Interpretation-of-output">Interpretation of output</a><ul>
@@ -131,292 +91,32 @@
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Onsager</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>Input and output for Onsager transport calculation</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Input and output for Onsager transport calculation</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/InputOutput.ipynb.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput,
-div.nbinput div.prompt,
-div.nbinput div.input_area,
-div.nbinput div[class*=highlight],
-div.nbinput div[class*=highlight] pre,
-div.nboutput,
-div.nbinput div.prompt,
-div.nbinput div.output_area,
-div.nboutput div[class*=highlight],
-div.nboutput div[class*=highlight] pre {
-    background: none;
-    border: none;
-    padding: 0 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-/* avoid gaps between output lines */
-div.nboutput div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput,
-div.nboutput {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput,
-    div.nboutput {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput div.prompt,
-div.nboutput div.prompt {
-    min-width: 5ex;
-    padding-top: 0.4em;
-    padding-right: 0.4em;
-    text-align: right;
-    flex: 0;
-}
-@media (max-width: 540px) {
-    div.nbinput div.prompt,
-    div.nboutput div.prompt {
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput div.prompt.empty {
-        padding: 0;
-    }
-}
-
-/* disable scrollbars on prompts */
-div.nbinput div.prompt pre,
-div.nboutput div.prompt pre {
-    overflow: hidden;
-}
-
-/* input/output area */
-div.nbinput div.input_area,
-div.nboutput div.output_area {
-    padding: 0.4em;
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput div.input_area,
-    div.nboutput div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    background: #f5f5f5;
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-div.rendered_html th {
-  font-weight: bold;
-}
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast + .nbinput {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="Input-and-output-for-Onsager-transport-calculation">
-<h1>Input and output for Onsager transport calculation<a class="headerlink" href="#Input-and-output-for-Onsager-transport-calculation" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="Input-and-output-for-Onsager-transport-calculation">
+<h1>Input and output for Onsager transport calculation<a class="headerlink" href="#Input-and-output-for-Onsager-transport-calculation" title="Link to this heading"></a></h1>
 <p>The Onsager calculators currently include two computational approaches to determining transport coefficients: an “interstitial” calculation, and a “vacancy-mediated” calculator. Below we describe the</p>
 <ol class="arabic simple" start="0">
 <li><p><strong>Assumptions used in transport model</strong> that are necessary to understand the data to be input, and the limitations of the results;</p></li>
@@ -435,8 +135,8 @@ div.rendered_html tbody tr:hover {
 <li><p>Input the data in a format that the calculator can understand, and transform those energies and frequencies into rates at a given temperature assuming Arrhenius behavior.</p></li>
 <li><p>Transform the output into physically relevant quantities (Onsager coefficients, solute diffusivities, mobilities, or drag ratios) with appropriate units.</p></li>
 </ol>
-<div class="section" id="Assumptions-used-in-Onsager">
-<h2>Assumptions used in Onsager<a class="headerlink" href="#Assumptions-used-in-Onsager" title="Permalink to this headline">¶</a></h2>
+<section id="Assumptions-used-in-Onsager">
+<h2>Assumptions used in Onsager<a class="headerlink" href="#Assumptions-used-in-Onsager" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Onsager</span></code> code computes transport of defects on an infinite crystalline lattice. Currently, the code requires that the particular defects can be mapped onto Wyckoff positions in a crystal. This does not <em>require</em> that the defect be an atom occupying various Wyckoff positions (though that obviously is captured), but merely that the defect have the symmetry and transitions that can be equivalently described by an “object” that occupies Wyckoff positions. Simple examples include vacancies,
 substitutional solutes, simple interstitial atoms, as well as more complex cases such as split vacancy defects (e.g.: a V-O<span class="math notranslate nohighlight">\(_\text{i}\)</span>-V split double vacancy with oxygen interstitial in a closed-packed crystal; the entire defect complex can be mapped on to the Wyckoff position of the oxygen interstitial). In order to calculate diffusion, a few assumptions are made:</p>
 <ul class="simple">
@@ -447,9 +147,9 @@ substitutional solutes, simple interstitial atoms, as well as more complex cases
 <p>All of these assumptions are usually good: the dilute limit is valid without strong interactions (such as site blocking), Markovian processes are valid as long as barriers are a few times <span class="math notranslate nohighlight">\(k_\text{B}T\)</span>, and we are not currently aware of any (simple) defects that induce phase transformations.</p>
 <p>Furthermore, relaxation around a defect (or defect cluster) is allowed, but the assumption is that all of the atomic positions can be easily mapped back to “perfect” crystal lattice sites. This is an “off-lattice” model. In some cases, it can be possible to incorporate “new” states, especially metastable states, that are only accessible by a defect.</p>
 <p>Finally, the code requires that all diffusion happens on a single sublattice. This sublattice is defined by a single chemical species; it can include multiple Wyckoff positions. But the current algorithms assume that transitions do not result in the creation of <em>antisite defects</em> (where a chemical species is on an “incorrect” sublattice).</p>
-</div>
-<div class="section" id="Crystal-class-setup">
-<h2>Crystal class setup<a class="headerlink" href="#Crystal-class-setup" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Crystal-class-setup">
+<h2>Crystal class setup<a class="headerlink" href="#Crystal-class-setup" title="Link to this heading"></a></h2>
 <p>The assumption of translational invariance of our defects is captured by the use of a <code class="docutils literal notranslate"><span class="pre">Crystal</span></code> object. Following the standard definition of a crystal, we need to specify (a) three lattice vectors, and (b) at least one basis position, corresponding to at least one site. The crystal needs to contain <em>at least</em> the Wyckoff positions on a single sublattice corresponding to the diffusing defects. It can be useful for it to contain <em>more</em> atoms that act as “spectator” atoms: they do not participate
 in diffusion, but define both the underlying symmetry of the crystal, and if atomic-scale calculations will be used to compute configuration and transition-state energies, are necessary to define the energy landscape of diffusion.</p>
 <p>The lattice vectors of the underlying crystal set the units of <em>length</em> in the transport coefficients. Hence, if the vectors are entered in units of nm, this corresponds to a factor of <span class="math notranslate nohighlight">\(10^{-18}\text{ m}^2\)</span> in the transport coefficients. This should also be considered when including factors of volume per atom as well.</p>
@@ -474,28 +174,26 @@ object.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">])</span>
 <span class="kn">from</span> <span class="nn">onsager</span> <span class="kn">import</span> <span class="n">crystal</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="Face-centered-cubic-crystal,-vacancy-diffusion">
-<h3>Face-centered cubic crystal, vacancy-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-diffusion" title="Permalink to this headline">¶</a></h3>
+<section id="Face-centered-cubic-crystal,-vacancy-diffusion">
+<h3>Face-centered cubic crystal, vacancy-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-diffusion" title="Link to this heading"></a></h3>
 <p>Face-centered cubic crystals could be created either by entering the primitive basis:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">a0</span> <span class="o">=</span> <span class="mf">1.</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">a0</span> <span class="o">=</span> <span class="mf">1.</span>
 <span class="n">FCCcrys</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">([</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]),</span>
                            <span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]),</span>
                            <span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">])],</span>
                           <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">])],</span> <span class="n">chemistry</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;fcc&#39;</span><span class="p">])</span>
-<span class="k">print</span><span class="p">(</span><span class="n">FCCcrys</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FCCcrys</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -517,12 +215,11 @@ object.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">FCCcrys2</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">(</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FCCcrys2</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">(</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
                            <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]),</span>
                             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">])],</span>
                            <span class="n">chemistry</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;fcc&#39;</span><span class="p">])</span>
-<span class="k">print</span><span class="p">(</span><span class="n">FCCcrys2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FCCcrys2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -544,12 +241,11 @@ object.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">FCCcrys3</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">(</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FCCcrys3</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">(</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
                            <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]),</span>
                             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">])],</span>
-                           <span class="n">chemistry</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;fcc&#39;</span><span class="p">],</span> <span class="n">noreduce</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">FCCcrys3</span><span class="p">)</span>
+                           <span class="n">chemistry</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;fcc&#39;</span><span class="p">],</span> <span class="n">noreduce</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FCCcrys3</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -569,21 +265,20 @@ object.</p>
   (fcc) 0.3 = [ 0.5  0.5  0. ]
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Rocksalt-crystal,-vacancy-diffusion">
-<h3>Rocksalt crystal, vacancy-diffusion<a class="headerlink" href="#Rocksalt-crystal,-vacancy-diffusion" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Rocksalt-crystal,-vacancy-diffusion">
+<h3>Rocksalt crystal, vacancy-diffusion<a class="headerlink" href="#Rocksalt-crystal,-vacancy-diffusion" title="Link to this heading"></a></h3>
 <p>Two chemical species, with interpenetrating FCC lattices. In MgO, we would allow for V<span class="math notranslate nohighlight">\(_\text{O}\)</span> (oxygen vacancies) to diffuse, with Mg as a “spectator species”:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">MgO</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">([</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]),</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">MgO</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="p">([</span><span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]),</span>
                        <span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]),</span>
                        <span class="n">a0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">])],</span>
                       <span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">])],</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">])]],</span>
                       <span class="n">chemistry</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Mg&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">])</span>
-<span class="k">print</span><span class="p">(</span><span class="n">MgO</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">MgO</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -601,21 +296,20 @@ object.</p>
   (O) 1.0 = [ 0.5  0.5  0.5]
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Face-centered-cubic-crystal,-interstitial-diffusion">
-<h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Face-centered-cubic-crystal,-interstitial-diffusion">
+<h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Link to this heading"></a></h3>
 <p>Interstitials in FCC crystals usually diffuse through a network of octahedral and tetrahedral sites. We can use the <code class="docutils literal notranslate"><span class="pre">Wyckoffpos(u)</span></code> function in a crystal to generate a list of equivalent sites corresponding to the interstitial positions, and the <code class="docutils literal notranslate"><span class="pre">addbasis()</span></code> function to create a new crystal with these interstitial sites.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">octbasis</span> <span class="o">=</span> <span class="n">FCCcrys</span><span class="o">.</span><span class="n">Wyckoffpos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">octbasis</span> <span class="o">=</span> <span class="n">FCCcrys</span><span class="o">.</span><span class="n">Wyckoffpos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]))</span>
 <span class="n">tetbasis</span> <span class="o">=</span> <span class="n">FCCcrys</span><span class="o">.</span><span class="n">Wyckoffpos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">]))</span>
 <span class="n">FCCcrysint</span> <span class="o">=</span> <span class="n">FCCcrys</span><span class="o">.</span><span class="n">addbasis</span><span class="p">(</span><span class="n">octbasis</span> <span class="o">+</span> <span class="n">tetbasis</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;int&#39;</span><span class="p">])</span>
-<span class="k">print</span><span class="p">(</span><span class="n">octbasis</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">tetbasis</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">FCCcrysint</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">octbasis</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tetbasis</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FCCcrysint</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -637,10 +331,10 @@ object.</p>
   (int) 1.2 = [ 0.25  0.25  0.25]
 </pre></div></div>
 </div>
-</div>
-</div>
-<div class="section" id="Interstitial-calculator-setup">
-<h2>Interstitial calculator setup<a class="headerlink" href="#Interstitial-calculator-setup" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="Interstitial-calculator-setup">
+<h2>Interstitial calculator setup<a class="headerlink" href="#Interstitial-calculator-setup" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Interstitial</span></code> calculator is designed for systems where we have a <strong>single defect species</strong> that diffuses throughout the crystal. This includes single vacancy diffusion, and interstitial solute diffusivity. As for any diffusion calculator, we need to define the configurations that the defect will sample, and the transition states of the defect. In the case of a single defect species,</p>
 <ul class="simple">
 <li><p>configurations are simply the Wyckoff positions of the particular sublattice (specified by a <code class="docutils literal notranslate"><span class="pre">chemistry</span></code> index);</p></li>
@@ -663,22 +357,20 @@ unique tags are printed. Note that all of the symmetry equivalent tags are store
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">onsager</span> <span class="kn">import</span> <span class="n">OnsagerCalc</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">onsager</span> <span class="kn">import</span> <span class="n">OnsagerCalc</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="Face-centered-cubic-crystal,-vacancy-diffusion">
-<h3>Face-centered cubic crystal, vacancy-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-diffusion" title="Permalink to this headline">¶</a></h3>
+<section id="id1">
+<h3>Face-centered cubic crystal, vacancy-diffusion<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <p>We identify the vacancy sites with the crystal sites in the lattice.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">FCCsitelist</span> <span class="o">=</span> <span class="n">FCCcrys</span><span class="o">.</span><span class="n">sitelist</span><span class="p">(</span><span class="n">chem</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">FCCsitelist</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FCCsitelist</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -694,13 +386,12 @@ unique tags are printed. Note that all of the symmetry equivalent tags are store
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">FCCjumpnetwork</span> <span class="o">=</span> <span class="n">FCCcrys</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">(</span><span class="n">chem</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="n">a0</span><span class="o">*</span><span class="mf">0.78</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">jn</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">FCCjumpnetwork</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Jump type {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Jump type </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
     <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">jn</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;  {} -&gt; {} dx= {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">dx</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> -&gt; </span><span class="si">{}</span><span class="s1"> dx= </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">dx</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -728,10 +419,9 @@ Jump type 0
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">FCCvacancydiffuser</span> <span class="o">=</span> <span class="n">OnsagerCalc</span><span class="o">.</span><span class="n">Interstitial</span><span class="p">(</span><span class="n">FCCcrys</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">FCCsitelist</span><span class="p">,</span> <span class="n">FCCjumpnetwork</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">FCCvacancydiffuser</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FCCvacancydiffuser</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -754,18 +444,17 @@ i:+0.000,+0.000,+0.000^i:-1.000,+0.000,+0.000
 
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Rocksalt-crystal,-vacancy-diffusion">
-<h3>Rocksalt crystal, vacancy-diffusion<a class="headerlink" href="#Rocksalt-crystal,-vacancy-diffusion" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="id2">
+<h3>Rocksalt crystal, vacancy-diffusion<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <p>Two chemical species, with interpenetrating FCC lattices. In MgO, we would allow for V<span class="math notranslate nohighlight">\(_\text{O}\)</span> (oxygen vacancies) to diffuse, with Mg as a “spectator species”.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">MgOsitelist</span> <span class="o">=</span> <span class="n">MgO</span><span class="o">.</span><span class="n">sitelist</span><span class="p">(</span><span class="n">chem</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">MgOsitelist</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">MgOsitelist</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -781,13 +470,12 @@ i:+0.000,+0.000,+0.000^i:-1.000,+0.000,+0.000
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">MgOjumpnetwork</span> <span class="o">=</span> <span class="n">MgO</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">(</span><span class="n">chem</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="n">a0</span><span class="o">*</span><span class="mf">0.78</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">jn</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">MgOjumpnetwork</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Jump type {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Jump type </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
     <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">jn</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;  {} -&gt; {} dx= {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">dx</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> -&gt; </span><span class="si">{}</span><span class="s1"> dx= </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">dx</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -815,10 +503,9 @@ Jump type 0
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">MgOdiffuser</span> <span class="o">=</span> <span class="n">OnsagerCalc</span><span class="o">.</span><span class="n">Interstitial</span><span class="p">(</span><span class="n">MgO</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span> <span class="n">MgOsitelist</span><span class="p">,</span> <span class="n">MgOjumpnetwork</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">MgOdiffuser</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">MgOdiffuser</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -842,18 +529,17 @@ i:+0.500,+0.500,+0.500^i:+0.500,-0.500,+1.500
 
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Face-centered-cubic-crystal,-interstitial-diffusion">
-<h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="id3">
+<h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <p>Interstitials in FCC crystals usually diffuse through a network of octahedral and tetrahedral sites. Nominally, diffusion should occur through an octahedral-tetrahedral jumps, but we can extend the cutoff distance to find additinoal jumps between tetrahedrals.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">FCCintsitelist</span> <span class="o">=</span> <span class="n">FCCcrysint</span><span class="o">.</span><span class="n">sitelist</span><span class="p">(</span><span class="n">chem</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">FCCintsitelist</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FCCintsitelist</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -869,13 +555,12 @@ i:+0.500,+0.500,+0.500^i:+0.500,-0.500,+1.500
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">FCCintjumpnetwork</span> <span class="o">=</span> <span class="n">FCCcrysint</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">(</span><span class="n">chem</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="n">a0</span><span class="o">*</span><span class="mf">0.51</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">jn</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">FCCintjumpnetwork</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Jump type {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Jump type </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
     <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">),</span> <span class="n">dx</span> <span class="ow">in</span> <span class="n">jn</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;  {} -&gt; {} dx= {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">dx</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">{}</span><span class="s1"> -&gt; </span><span class="si">{}</span><span class="s1"> dx= </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">dx</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -920,11 +605,10 @@ Jump type 1
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">FCCintdiffuser</span> <span class="o">=</span> <span class="n">OnsagerCalc</span><span class="o">.</span><span class="n">Interstitial</span><span class="p">(</span><span class="n">FCCcrysint</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span>
                                           <span class="n">FCCintsitelist</span><span class="p">,</span> <span class="n">FCCintjumpnetwork</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">FCCintdiffuser</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FCCintdiffuser</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -958,9 +642,8 @@ respect to strain (elastodiffusion tensor, activation volume tensor).</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">print</span><span class="p">(</span><span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">simpleYAML</span><span class="p">()</span> <span class="o">+</span>
-      <span class="s1">&#39;chem: {}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">chem</span><span class="p">)</span> <span class="o">+</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">crys</span><span class="o">.</span><span class="n">simpleYAML</span><span class="p">()</span> <span class="o">+</span>
+      <span class="s1">&#39;chem: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">chem</span><span class="p">)</span> <span class="o">+</span>
       <span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">sitelistYAML</span><span class="p">(</span><span class="n">FCCintsitelist</span><span class="p">)</span> <span class="o">+</span>
       <span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">jumpnetworkYAML</span><span class="p">(</span><span class="n">FCCintjumpnetwork</span><span class="p">))</span>
 </pre></div>
@@ -1098,10 +781,10 @@ jumpnetwork:
 
 </pre></div></div>
 </div>
-</div>
-</div>
-<div class="section" id="Vacancy-mediated-calculator-setup">
-<h2>Vacancy-mediated calculator setup<a class="headerlink" href="#Vacancy-mediated-calculator-setup" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="Vacancy-mediated-calculator-setup">
+<h2>Vacancy-mediated calculator setup<a class="headerlink" href="#Vacancy-mediated-calculator-setup" title="Link to this heading"></a></h2>
 <p>For the vacancy mediated diffuser, the configurations and transition states are more complicated. First, we have three types of configurations:</p>
 <ol class="arabic simple">
 <li><p>Vacancy, sufficiently far away from the solute to have zero interaction energy.</p></li>
@@ -1138,18 +821,17 @@ treated, we do not currently have an implementation that supports this.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">omega2:</span></code> + (initial solute-vacancy configuration) + <code class="docutils literal notranslate"><span class="pre">^</span></code> + (final solute-vacancy configuration).</p></li>
 </ul>
 <p>When one pretty-prints the vacancy-mediated diffuser object, the symmetry unique tags are printed. Note that all of the symmetry equivalent tags are stored in the object, and can be used to identify configurations and transition states, and this is the preferred method for indexing, rather than relying on the particular index into the corresponding lists. The vacancy-mediated diffuser calculator contains dictionaries that can be used to convert from tags to indices and vice versa.</p>
-<div class="section" id="Face-centered-cubic-crystal,-vacancy-mediated-diffusion">
-<h3>Face-centered cubic crystal, vacancy mediated-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion" title="Permalink to this headline">¶</a></h3>
+<section id="Face-centered-cubic-crystal,-vacancy-mediated-diffusion">
+<h3>Face-centered cubic crystal, vacancy mediated-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion" title="Link to this heading"></a></h3>
 <p>We construct the <code class="docutils literal notranslate"><span class="pre">Onsager</span></code> equivalent of the classic five-frequency model. We can use the sitelist and jumpnetwork that we <em>already constructed for the vacancy by itself</em>. Note that the omega-1 list contains four jumps: one that is the normally identified “omega-1”, and three others that correspond to vacancy “escapes” from the first neighbor complex: to the second, third, and fourth neighbors. In the classic five-frequency model, these rates are all forced to be equal.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chem</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">fivefreqdiffuser</span> <span class="o">=</span> <span class="n">OnsagerCalc</span><span class="o">.</span><span class="n">VacancyMediated</span><span class="p">(</span><span class="n">FCCcrys</span><span class="p">,</span> <span class="n">chem</span><span class="p">,</span>
                                                <span class="n">FCCsitelist</span><span class="p">,</span> <span class="n">FCCjumpnetwork</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">fivefreqdiffuser</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fivefreqdiffuser</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1188,17 +870,16 @@ omega2:s:+0.000,+0.000,+0.000-v:+1.000,+0.000,+0.000^s:+0.000,+0.000,+0.000-v:-1
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">h5py</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">h5py</span>
 <span class="c1"># replace &#39;/dev/null&#39; with your file of choice, and remove backing_store=False</span>
 <span class="c1"># to read and write to an HDF5 file.</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;/dev/null&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;core&#39;</span><span class="p">,</span> <span class="n">backing_store</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;/dev/null&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;core&#39;</span><span class="p">,</span> <span class="n">backing_store</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">addhdf5</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>  <span class="c1"># adds the diffuser to the HDF5 file</span>
 
 <span class="c1"># how to read in (after opening `f` as an HDF5 file)</span>
 <span class="n">fivefreqcopy</span> <span class="o">=</span> <span class="n">OnsagerCalc</span><span class="o">.</span><span class="n">VacancyMediated</span><span class="o">.</span><span class="n">loadhdf5</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>  <span class="c1"># creates a new diffuser from HDF5</span>
 <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># close up the HDF5 file</span>
-<span class="k">print</span><span class="p">(</span><span class="n">fivefreqcopy</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fivefreqcopy</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1232,10 +913,10 @@ omega2:s:+0.000,+0.000,+0.000-v:+1.000,+0.000,+0.000^s:+0.000,+0.000,+0.000-v:-1
 
 </pre></div></div>
 </div>
-</div>
-</div>
-<div class="section" id="VASP-style-input-files">
-<h2>VASP-style input files<a class="headerlink" href="#VASP-style-input-files" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="VASP-style-input-files">
+<h2>VASP-style input files<a class="headerlink" href="#VASP-style-input-files" title="Link to this heading"></a></h2>
 <p>At this stage, we have the diffusion “calculator” necessary to compute diffusion, but we need to determine appropriate atomic-scale data to act as input into our calculators. There are two primary steps: (1) constructing appropriate “supercells” containing defect configurations and transition states to be computed, and (2) extracting the appropriate information from those calculations to use in the diffuser. This section deals with the former; the next section will deal with the latter.</p>
 <p>The tags are the most straightforward way to identify structures as they are computed, and hence they serve as the mechanism for communicating data into the calculators. To make supercells with defects, we take advantage of the <code class="docutils literal notranslate"><span class="pre">supercell</span></code> module in <code class="docutils literal notranslate"><span class="pre">Onsager</span></code>; both calculators contain a <code class="docutils literal notranslate"><span class="pre">makesupercell()</span></code> function that returns dictionaries of supercells, tags, and appropriate information. Currently, to transform these into usable input files, the <code class="docutils literal notranslate"><span class="pre">automator</span></code> module can convert such
 dictionaries into tarballs with an appropriate directory structure, files containing information about appropriate tags for the different configurations, a <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> that converts <code class="docutils literal notranslate"><span class="pre">CONTCAR</span></code> output into appropriate <code class="docutils literal notranslate"><span class="pre">POS</span></code> input for the nudged-elastic band calculation.</p>
@@ -1244,21 +925,19 @@ dictionaries into tarballs with an appropriate directory structure, files contai
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">onsager</span> <span class="kn">import</span> <span class="n">automator</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">onsager</span> <span class="kn">import</span> <span class="n">automator</span>
 <span class="kn">import</span> <span class="nn">tarfile</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="Face-centered-cubic-crystal,-interstitial-diffusion">
-<h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Permalink to this headline">¶</a></h3>
+<section id="id4">
+<h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <p>We will need to construct (and relax) appropriate intersitial sites, and the transition states between them.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">help</span><span class="p">(</span><span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">makesupercells</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">help</span><span class="p">(</span><span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">makesupercells</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1288,9 +967,8 @@ makesupercells(super_n) method of onsager.OnsagerCalc.Interstitial instance
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]])</span>  <span class="c1"># 32 atom FCC supercell</span>
-<span class="k">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">FCCcrys</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]])</span>  <span class="c1"># 32 atom FCC supercell</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">FCCcrys</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
 <span class="n">FCCintsupercells</span> <span class="o">=</span> <span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">makesupercells</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1309,8 +987,7 @@ makesupercells(super_n) method of onsager.OnsagerCalc.Interstitial instance
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">help</span><span class="p">(</span><span class="n">automator</span><span class="o">.</span><span class="n">supercelltar</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">help</span><span class="p">(</span><span class="n">automator</span><span class="o">.</span><span class="n">supercelltar</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1366,8 +1043,7 @@ supercelltar(tar, superdict, filemode=436, directmode=509, timestamp=None, INCAR
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;io-test-int.tar.gz&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w:gz&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;io-test-int.tar.gz&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w:gz&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
     <span class="n">automator</span><span class="o">.</span><span class="n">supercelltar</span><span class="p">(</span><span class="n">tar</span><span class="p">,</span> <span class="n">FCCintsupercells</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1376,8 +1052,7 @@ supercelltar(tar, superdict, filemode=436, directmode=509, timestamp=None, INCAR
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">tar</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;io-test-int.tar.gz&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r:gz&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;io-test-int.tar.gz&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r:gz&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1385,8 +1060,7 @@ supercelltar(tar, superdict, filemode=436, directmode=509, timestamp=None, INCAR
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">tar</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1443,9 +1117,8 @@ supercelltar(tar, superdict, filemode=436, directmode=509, timestamp=None, INCAR
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;Makefile&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;Makefile&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1501,9 +1174,8 @@ neb.01/POSCAR.final: neb.01/trans.final relax.00/CONTCAR
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;tags.json&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;tags.json&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1526,9 +1198,8 @@ neb.01/POSCAR.final: neb.01/trans.final relax.00/CONTCAR
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;relax.00/POSCAR&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;relax.00/POSCAR&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1584,21 +1255,19 @@ Direct
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">tar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Face-centered-cubic-crystal,-vacancy-mediated-diffusion">
-<h3>Face-centered cubic crystal, vacancy mediated-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="id5">
+<h3>Face-centered cubic crystal, vacancy mediated-diffusion<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <p>We will need to construct (and relax) appropriate vacancy, solute, and solute-vacancy complexes, and the transition states between them. The commands are nearly identical to the interstitial diffuser; the primary difference is the larger number of configurations and files.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">help</span><span class="p">(</span><span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">makesupercells</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">help</span><span class="p">(</span><span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">makesupercells</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1647,9 +1316,8 @@ makesupercells(super_n) method of onsager.OnsagerCalc.VacancyMediated instance
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">3</span><span class="p">]])</span>  <span class="c1"># 108 atom FCC supercell</span>
-<span class="k">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">FCCcrys</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">3</span><span class="p">]])</span>  <span class="c1"># 108 atom FCC supercell</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">FCCcrys</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
 <span class="n">fivefreqsupercells</span> <span class="o">=</span> <span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">makesupercells</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1668,8 +1336,7 @@ makesupercells(super_n) method of onsager.OnsagerCalc.VacancyMediated instance
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;io-test-fivefreq.tar.gz&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w:gz&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;io-test-fivefreq.tar.gz&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w:gz&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tar</span><span class="p">:</span>
     <span class="n">automator</span><span class="o">.</span><span class="n">supercelltar</span><span class="p">(</span><span class="n">tar</span><span class="p">,</span> <span class="n">fivefreqsupercells</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1678,8 +1345,7 @@ makesupercells(super_n) method of onsager.OnsagerCalc.VacancyMediated instance
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">tar</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;io-test-fivefreq.tar.gz&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r:gz&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;io-test-fivefreq.tar.gz&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r:gz&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1687,8 +1353,7 @@ makesupercells(super_n) method of onsager.OnsagerCalc.VacancyMediated instance
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">tar</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1785,9 +1450,8 @@ makesupercells(super_n) method of onsager.OnsagerCalc.VacancyMediated instance
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;Makefile&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;Makefile&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1848,9 +1512,8 @@ neb.05/POSCAR.final: neb.05/trans.final relax.01/CONTCAR
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;tags.json&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;tags.json&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1878,9 +1541,8 @@ neb.05/POSCAR.final: neb.05/trans.final relax.01/CONTCAR
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">with</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;relax.01/POSCAR&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">tar</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="s1">&#39;relax.01/POSCAR&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -2010,15 +1672,14 @@ Direct
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">tar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
-</div>
-</div>
-<div class="section" id="Formatting-of-input-data">
-<h2>Formatting of input data<a class="headerlink" href="#Formatting-of-input-data" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="Formatting-of-input-data">
+<h2>Formatting of input data<a class="headerlink" href="#Formatting-of-input-data" title="Link to this heading"></a></h2>
 <p>Once the atomic-scale data from an appropriate total energy calculation is finished, the data needs to be input into formats that the appropriate diffusion calculator can understand. There are some common definitions between the two, but some differences as well.</p>
 <p>In all cases, we work with the assumption that our states are thermally occupied, and our rates are Arrhenius. That means that the (relative) probability of any state can be written as</p>
 <div class="math notranslate nohighlight">
@@ -2038,15 +1699,14 @@ jump rates: the <span class="math notranslate nohighlight">\(3\times3\)</span> f
 <p>Note the units: <span class="math notranslate nohighlight">\(\rho^0\)</span> is unitless, while <span class="math notranslate nohighlight">\(\nu^\text{T}\)</span> has units of inverse time; this means that the inverse time unit in the computed transport coefficients will come from <span class="math notranslate nohighlight">\(\nu^\text{T}\)</span> values. If they are entered in THz, that contributes <span class="math notranslate nohighlight">\(10^{12}\text{ s}^{-1}\)</span>.</p>
 <p>Because we normalize our probabilities, our energies and transition state energies are relative to each other. In all of our calculations, we will multiply energies by <span class="math notranslate nohighlight">\(\beta=(k_\text{B}T)^{-1}\)</span> to get a unitless values as inputs for our diffusion calculators. This means that the diffusers <em>do not have direct information about temperature</em>; explicit temperature factors that appear in the Onsager coefficients must be included by hand from the output transport coefficients. It also means
 that the calculators do not have a “unit” of energy; rather, <span class="math notranslate nohighlight">\(k_\text{B}T\)</span> and the energies must be in the same units.</p>
-<div class="section" id="Face-centered-cubic-crystal,-interstitial-diffusion">
-<h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-interstitial-diffusion" title="Permalink to this headline">¶</a></h3>
+<section id="id6">
+<h3>Face-centered cubic crystal, interstitial diffusion<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
 <p>We need to compute prefactors and energies for our interstitial diffuser. We can <em>also</em> include information about elastic dipoles (derivatives of energy with respect to strain) in order to compute derivatives of diffusivity with respect to strain (elastodiffusion).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">help</span><span class="p">(</span><span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">diffusivity</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">help</span><span class="p">(</span><span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">diffusivity</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -2078,8 +1738,7 @@ diffusivity(pre, betaene, preT, betaeneT, CalcDeriv=False) method of onsager.Ons
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">tags</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">tags</span>
 </pre></div>
 </div>
 </div>
@@ -2087,8 +1746,9 @@ diffusivity(pre, betaene, preT, betaeneT, CalcDeriv=False) method of onsager.Ons
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>{&#39;states&#39;: [[&#39;i:+0.500,+0.500,+0.500&#39;],
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;states&#39;: [[&#39;i:+0.500,+0.500,+0.500&#39;],
   [&#39;i:+0.750,+0.750,+0.750&#39;, &#39;i:+0.250,+0.250,+0.250&#39;]],
  &#39;transitions&#39;: [[&#39;i:+0.500,+0.500,+0.500^i:+0.250,+1.250,+0.250&#39;,
    &#39;i:+0.250,+0.250,+0.250^i:+0.500,-0.500,+0.500&#39;,
@@ -2118,16 +1778,14 @@ diffusivity(pre, betaene, preT, betaeneT, CalcDeriv=False) method of onsager.Ons
    &#39;i:+0.750,+0.750,+0.750^i:+1.250,+0.250,+0.250&#39;,
    &#39;i:+0.250,+0.250,+0.250^i:-0.250,-0.250,+0.750&#39;,
    &#39;i:+0.750,+0.750,+0.750^i:+1.250,+1.250,+0.250&#39;]]}
-</pre></div>
-</div>
+</pre></div></div>
 </div>
 <p>In this example, the energy of the octahedral site is 0, with a base prefactor of 1. The tetrahedral site has an energy of 0.5 (eV) above, with a higher relative vibrational degeneracy of 2. The transition state energy from octahedral to tetrahedral is 1.0 (eV) with a prefactor of 10 (THz); and the transition state energy from tetrahedral to tetrahedral is 2.0 (eV) with a prefactor of 50 (THz).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">FCCintdata</span> <span class="o">=</span> <span class="p">{</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FCCintdata</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;i:+0.500,+0.500,+0.500&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
     <span class="s1">&#39;i:+0.750,+0.750,+0.750&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
     <span class="s1">&#39;i:+0.500,+0.500,+0.500^i:+0.750,+0.750,-0.250&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">10.</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
@@ -2140,8 +1798,7 @@ diffusivity(pre, betaene, preT, betaeneT, CalcDeriv=False) method of onsager.Ons
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Conversion from dictionary to lists for a given kBT</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Conversion from dictionary to lists for a given kBT</span>
 <span class="c1"># We go through the tags in order, and find one in our data set.</span>
 <span class="n">kBT</span> <span class="o">=</span> <span class="mf">0.25</span>  <span class="c1"># eV; a rather high temperature</span>
 <span class="n">pre</span> <span class="o">=</span> <span class="p">[</span><span class="n">FCCintdata</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">taglist</span> <span class="ow">in</span> <span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="s1">&#39;states&#39;</span><span class="p">]</span>
@@ -2152,7 +1809,7 @@ diffusivity(pre, betaene, preT, betaeneT, CalcDeriv=False) method of onsager.Ons
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">taglist</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">FCCintdata</span><span class="p">]</span>
 <span class="n">betaeneT</span> <span class="o">=</span> <span class="p">[</span><span class="n">FCCintdata</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">kBT</span> <span class="k">for</span> <span class="n">taglist</span> <span class="ow">in</span> <span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="s1">&#39;transitions&#39;</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">taglist</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">FCCintdata</span><span class="p">]</span>
-<span class="k">print</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span><span class="n">betaene</span><span class="p">,</span><span class="n">preT</span><span class="p">,</span><span class="n">betaeneT</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span><span class="n">betaene</span><span class="p">,</span><span class="n">preT</span><span class="p">,</span><span class="n">betaeneT</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -2171,9 +1828,8 @@ diffusivity(pre, betaene, preT, betaeneT, CalcDeriv=False) method of onsager.Ons
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">DFCCint</span><span class="p">,</span> <span class="n">dDFCCint</span> <span class="o">=</span> <span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">diffusivity</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">betaene</span><span class="p">,</span> <span class="n">preT</span><span class="p">,</span> <span class="n">betaeneT</span><span class="p">,</span> <span class="n">CalcDeriv</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">DFCCint</span><span class="p">,</span> <span class="n">dDFCCint</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">DFCCint</span><span class="p">,</span> <span class="n">dDFCCint</span> <span class="o">=</span> <span class="n">FCCintdiffuser</span><span class="o">.</span><span class="n">diffusivity</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">betaene</span><span class="p">,</span> <span class="n">preT</span><span class="p">,</span> <span class="n">betaeneT</span><span class="p">,</span> <span class="n">CalcDeriv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">DFCCint</span><span class="p">,</span> <span class="n">dDFCCint</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -2191,17 +1847,16 @@ diffusivity(pre, betaene, preT, betaeneT, CalcDeriv=False) method of onsager.Ons
 </pre></div></div>
 </div>
 <p>The interpretation of this output will be described below.</p>
-</div>
-<div class="section" id="Face-centered-cubic-crystal,-vacancy-mediated-diffusion">
-<h3>Face-centered cubic crystal, vacancy mediated-diffusion<a class="headerlink" href="#Face-centered-cubic-crystal,-vacancy-mediated-diffusion" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="id7">
+<h3>Face-centered cubic crystal, vacancy mediated-diffusion<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
 <p>We will need to compute prefactors and energies for our vacancy, solute, and solute-vacancy complexes, and the transition states between them. The difference compared with the interstitial case is that complex prefactors and energies are <em>excess</em> quantities. That means for a complex, its <span class="math notranslate nohighlight">\(\rho^0\)</span> is the product of <span class="math notranslate nohighlight">\(\rho^0\)</span> for the solute state, the vacancy state, <em>and</em> the excess; the energy <span class="math notranslate nohighlight">\(E\)</span> is the sum of the energy of the solute state, the vacancy state, <em>and</em> the excess.
 <strong>However</strong> for the <em>transition states</em>, the prefactors and energies are “absolute”.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">help</span><span class="p">(</span><span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">Lij</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">help</span><span class="p">(</span><span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">Lij</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -2237,8 +1892,7 @@ Lij(bFV, bFS, bFSV, bFT0, bFT1, bFT2, large_om2=100000000.0) method of onsager.O
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">help</span><span class="p">(</span><span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">preene2betafree</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">help</span><span class="p">(</span><span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">preene2betafree</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -2284,8 +1938,7 @@ preene2betafree(kT, preV, eneV, preS, eneS, preSV, eneSV, preT0, eneT0, preT1, e
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">help</span><span class="p">(</span><span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">tags2preene</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">help</span><span class="p">(</span><span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">tags2preene</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -2314,8 +1967,7 @@ tags2preene(usertagdict, VERBOSE=False) method of onsager.OnsagerCalc.VacancyMed
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">fivefreqdata</span> <span class="o">=</span> <span class="p">{</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fivefreqdata</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;v:+0.000,+0.000,+0.000&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
     <span class="s1">&#39;s:+0.000,+0.000,+0.000&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
     <span class="s1">&#39;s:+0.000,+0.000,+0.000-v:+0.000,-1.000,+0.000&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">],</span>
@@ -2334,14 +1986,13 @@ tags2preene(usertagdict, VERBOSE=False) method of onsager.OnsagerCalc.VacancyMed
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Conversion from dictionary to lists for a given kBT</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Conversion from dictionary to lists for a given kBT</span>
 <span class="c1"># note that we can nest the mapping functions.</span>
 <span class="n">kBT</span> <span class="o">=</span> <span class="mf">0.25</span>  <span class="c1"># eV; a rather high temperature</span>
 <span class="n">fivefreqpreene</span> <span class="o">=</span> <span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">tags2preene</span><span class="p">(</span><span class="n">fivefreqdata</span><span class="p">)</span>
 <span class="n">fivefreqbetaF</span> <span class="o">=</span> <span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">preene2betafree</span><span class="p">(</span><span class="n">kBT</span><span class="p">,</span> <span class="o">**</span><span class="n">fivefreqpreene</span><span class="p">)</span>
 <span class="n">L0vv</span><span class="p">,</span> <span class="n">Lss</span><span class="p">,</span> <span class="n">Lsv</span><span class="p">,</span> <span class="n">L1vv</span> <span class="o">=</span> <span class="n">fivefreqdiffuser</span><span class="o">.</span><span class="n">Lij</span><span class="p">(</span><span class="o">*</span><span class="n">fivefreqbetaF</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">L0vv</span><span class="p">,</span> <span class="n">Lss</span><span class="p">,</span> <span class="n">Lsv</span><span class="p">,</span> <span class="n">L1vv</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">L0vv</span><span class="p">,</span> <span class="n">Lss</span><span class="p">,</span> <span class="n">Lsv</span><span class="p">,</span> <span class="n">L1vv</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -2365,10 +2016,10 @@ tags2preene(usertagdict, VERBOSE=False) method of onsager.OnsagerCalc.VacancyMed
 </pre></div></div>
 </div>
 <p>The interpretation of this output will be described below.</p>
-</div>
-</div>
-<div class="section" id="Interpretation-of-output">
-<h2>Interpretation of output<a class="headerlink" href="#Interpretation-of-output" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="Interpretation-of-output">
+<h2>Interpretation of output<a class="headerlink" href="#Interpretation-of-output" title="Link to this heading"></a></h2>
 <p>The final step is to take the output from the diffuser calculator, and convert this into physical quantities: solute diffusivity, elastodiffusivity, Onsager coefficients, drag ratios, and so on.</p>
 <p>There are two underlying definitions that we use to define our transport coefficients:</p>
 <div class="math notranslate nohighlight">
@@ -2381,8 +2032,8 @@ tags2preene(usertagdict, VERBOSE=False) method of onsager.OnsagerCalc.VacancyMed
 <p>defines the <em>Onsager coefficients</em> as the tensorial transport coefficients that relate solute and vacancy chemical potential gradients to solute and vacancy fluxes. We use these equation to also define the <em>units</em> of our transport coefficients. Fluxes are in units of (number)/area/time, so with concentration in (number)/volume, diffusivity has units of area/time. If the chemical potential is written in units of energy, the Onsager coefficients have units of (number)/length/energy/time. If the
 chemical potentials will instead have units of energy/volume, then the corresponding Onsager coefficients have units of area/energy/time.</p>
 <p>Below are more specific details about the different calculators and the output available.</p>
-<div class="section" id="Interstitial-diffusivity">
-<h3>Interstitial diffusivity<a class="headerlink" href="#Interstitial-diffusivity" title="Permalink to this headline">¶</a></h3>
+<section id="Interstitial-diffusivity">
+<h3>Interstitial diffusivity<a class="headerlink" href="#Interstitial-diffusivity" title="Link to this heading"></a></h3>
 <p>The interstitial diffuser outputs a diffusivity tensor that has the units of squared length based on the lengths in the corresponding <code class="docutils literal notranslate"><span class="pre">Crystal</span></code>, and inverse time units corresponding to the rates that are given as input: the ratio of transition state prefactors to configuration prefactors. In a crystalline system, it is typical to specify the lattice vectors in either nm (<span class="math notranslate nohighlight">\(10^{-9}\text{ m}\)</span>) or Å (<span class="math notranslate nohighlight">\(10^{-10}\text{ m}\)</span>), and the prefactors of rates are often THz
 (<span class="math notranslate nohighlight">\(10^{12}\text{ s}\)</span>), while diffusivity is often reported in either <span class="math notranslate nohighlight">\(\text{m}^2/\text{s}\)</span> or <span class="math notranslate nohighlight">\(\text{cm}^2/\text{s}\)</span>. The conversion factors are</p>
 <div class="math notranslate nohighlight">
@@ -2401,9 +2052,9 @@ the diffuser <span class="math notranslate nohighlight">\(E_\text{int}\)</span>,
 <div class="math notranslate nohighlight">
 \[[\text{B}_\text{A}]/[\text{B}] = (1 + \exp(-(E_\text{int}-E_\text{sub})/k_\text{B}T)^{-1} \approx 1\]</div>
 <p>where the approximations are valid when <span class="math notranslate nohighlight">\(E_\text{int}-E_\text{sub}\gg k_\text{B}T\)</span>.</p>
-</div>
-<div class="section" id="Derivatives-of-diffusivity:-activation-barrier-tensor">
-<h3>Derivatives of diffusivity: activation barrier tensor<a class="headerlink" href="#Derivatives-of-diffusivity:-activation-barrier-tensor" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Derivatives-of-diffusivity:-activation-barrier-tensor">
+<h3>Derivatives of diffusivity: activation barrier tensor<a class="headerlink" href="#Derivatives-of-diffusivity:-activation-barrier-tensor" title="Link to this heading"></a></h3>
 <p>At any given temperature, the temperature dependence of the diffusivity can be taken as an Arrhenius form,</p>
 <div class="math notranslate nohighlight">
 \[\underline D = \underline D_0 \exp(-\beta \underline E^\text{act})\]</div>
@@ -2415,8 +2066,7 @@ the diffuser <span class="math notranslate nohighlight">\(E_\text{int}\)</span>,
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">DFCCint</span><span class="p">),</span> <span class="n">kBT</span><span class="o">*</span><span class="n">dDFCCint</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">DFCCint</span><span class="p">),</span> <span class="n">kBT</span><span class="o">*</span><span class="n">dDFCCint</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -2434,9 +2084,9 @@ the diffuser <span class="math notranslate nohighlight">\(E_\text{int}\)</span>,
 <p>This tensor has the same energy units as the variable <code class="docutils literal notranslate"><span class="pre">kBT</span></code>.</p>
 <p>Given the barriers for diffusion, one might have expected that <span class="math notranslate nohighlight">\(\underline E^\text{act}\)</span> would be 1, as that is the transition state energy to go from octahedral to tetrahedral. However, the activation barrier is approximately the rate-limiting transition state energy minus the <em>average configuration energy</em>. Since we’ve chosen a large temperature, the tetrahedral sites have non-negligible occupation, which raises the average energy. As the temperature decreases, the activation energy will
 approach 1.</p>
-</div>
-<div class="section" id="Derivatives-of-diffusivity:-elastodiffusion-and-activation-volume-tensor">
-<h3>Derivatives of diffusivity: elastodiffusion and activation volume tensor<a class="headerlink" href="#Derivatives-of-diffusivity:-elastodiffusion-and-activation-volume-tensor" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Derivatives-of-diffusivity:-elastodiffusion-and-activation-volume-tensor">
+<h3>Derivatives of diffusivity: elastodiffusion and activation volume tensor<a class="headerlink" href="#Derivatives-of-diffusivity:-elastodiffusion-and-activation-volume-tensor" title="Link to this heading"></a></h3>
 <p>The derivative with respect to strain is the fourth-rank <em>elastodiffusivity</em> tensor <span class="math notranslate nohighlight">\(\underline d\)</span>, where</p>
 <div class="math notranslate nohighlight">
 \[d_{abcd} = \frac{dD_{ab}}{d\varepsilon_{cd}}\]</div>
@@ -2448,9 +2098,9 @@ approach 1.</p>
 <div class="math notranslate nohighlight">
 \[1\text{ eV}\cdot\text{GPa}^{-1} = 1.6022\times10^{-19}\text{ J}\cdot10^{-9}\text{ m}^3/\text{J} = 0.16022\text{ nm}^3 = 160.22\text{ A}^3\]</div>
 <p>can be useful.</p>
-</div>
-<div class="section" id="Vacancy-mediated-diffusivity">
-<h3>Vacancy-mediated diffusivity<a class="headerlink" href="#Vacancy-mediated-diffusivity" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Vacancy-mediated-diffusivity">
+<h3>Vacancy-mediated diffusivity<a class="headerlink" href="#Vacancy-mediated-diffusivity" title="Link to this heading"></a></h3>
 <p>The interstitial diffuser outputs a diffusivity tensor that has the units of squared length based on the lengths in the corresponding <code class="docutils literal notranslate"><span class="pre">Crystal</span></code>, and inverse time units corresponding to the rates that are given as input: the ratio of transition state prefactors to configuration prefactors. In a crystalline system, it is typical to specify the lattice vectors in either nm (<span class="math notranslate nohighlight">\(10^{-9}\text{ m}\)</span>) or Å (<span class="math notranslate nohighlight">\(10^{-10}\text{ m}\)</span>), and the prefactors of rates are often THz
 (<span class="math notranslate nohighlight">\(10^{12}\text{ s}\)</span>). The quantities <code class="docutils literal notranslate"><span class="pre">L0vv</span></code>, <code class="docutils literal notranslate"><span class="pre">Lss</span></code>, <code class="docutils literal notranslate"><span class="pre">Lsv</span></code>, and <code class="docutils literal notranslate"><span class="pre">L1vv</span></code> output by the <code class="docutils literal notranslate"><span class="pre">Lij</span></code> function all have the units of area/time, so the the conversion factors below are often useful:</p>
 <div class="math notranslate nohighlight">
@@ -2469,16 +2119,15 @@ the quantities need to be <em>divided by the volume per atom</em>, and the final
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(\underline L^\text{vv}\)</span> = <code class="docutils literal notranslate"><span class="pre">(L0vv</span> <span class="pre">+</span> <span class="pre">L1vv*(solute</span> <span class="pre">concentration))*(vacancy</span> <span class="pre">concentration)/(volume)/kBT</span></code></p></li>
 </ul>
-</div>
-<div class="section" id="Drag-ratio">
-<h3>Drag ratio<a class="headerlink" href="#Drag-ratio" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Drag-ratio">
+<h3>Drag ratio<a class="headerlink" href="#Drag-ratio" title="Link to this heading"></a></h3>
 <p>The <em>drag ratio</em> is the unitless (tensorial) quantity <span class="math notranslate nohighlight">\(\underline L^\text{sv}(\underline L^\text{ss})^{-1}\)</span>. Because of the identical prefactors in front of both terms in the dilute limit, this is given by</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Lsv</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Lss</span><span class="p">)))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Lsv</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Lss</span><span class="p">)))</span>
 </pre></div>
 </div>
 </div>
@@ -2493,9 +2142,9 @@ the quantities need to be <em>divided by the volume per atom</em>, and the final
 </pre></div></div>
 </div>
 <p>The vacancy wind factor <span class="math notranslate nohighlight">\(G=\underline L^\text{As}(\underline L^\text{ss})^{-1}\)</span> is related to the drag ratio by simple transformations.</p>
-</div>
-<div class="section" id="Solute-diffusivity-in-the-dilute-limit">
-<h3>Solute diffusivity in the dilute limit<a class="headerlink" href="#Solute-diffusivity-in-the-dilute-limit" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="Solute-diffusivity-in-the-dilute-limit">
+<h3>Solute diffusivity in the dilute limit<a class="headerlink" href="#Solute-diffusivity-in-the-dilute-limit" title="Link to this heading"></a></h3>
 <p>The solute diffusivity can also be computed for the dilute limit as well. The general relation between <span class="math notranslate nohighlight">\(\underline D^\text{s}\)</span> and the Onsager transport coefficients is</p>
 <div class="math notranslate nohighlight">
 \[\underline D^\text{s} = k_\text{B}T\Omega\left\{(c^\text{s})^{-1}\underline L^\text{ss} - (1-c^\text{s}-c^\text{v})^{-1}\underline L^\text{As}\right\}\left(1+\frac{d\ln\gamma^\text{s}}{d\ln c^\text{s}}\right)\]</div>
@@ -2515,57 +2164,39 @@ the quantities need to be <em>divided by the volume per atom</em>, and the final
 <li><p><span class="math notranslate nohighlight">\(\underline D^\text{v}\)</span> = <code class="docutils literal notranslate"><span class="pre">L0vv</span> <span class="pre">+</span> <span class="pre">(solute</span> <span class="pre">concentration)*L1vv</span></code></p></li>
 </ul>
 <p>The off-diagonal diffusivity terms are more complex as (1) they are non-symmetric (<span class="math notranslate nohighlight">\(\underline D^\text{sv} \ne \underline D^\text{vs}\)</span>), and (2) the vacancy-dependency of the solute activity and the solute-dependence of the vacancy activity needs to be known to properly include thermodynamic factors.</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="notebooks.html" class="btn btn-neutral float-right" title="Example Notebooks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="includeme.html" class="btn btn-neutral float-left" title="Onsager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="includeme.html" class="btn btn-neutral float-left" title="Onsager" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="notebooks.html" class="btn btn-neutral float-right" title="Example Notebooks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2017, Dallas R. Trinkle
-
-    </p>
+    <p>&#169; Copyright 2017, Dallas R. Trinkle.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -1,91 +1,51 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Convergence of Green function calculation &mdash; Onsager 1.3.3 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Convergence of Green function calculation &mdash; Onsager 1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=0ed52906"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Tracer correlation coefficients" href="Tracer-correlation.html" />
     <link rel="prev" title="Fe-C diffusion and elastodiffusivity" href="Fe-C.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> Onsager
           
-
-          
+          <a href="../index.html" class="icon icon-home">
+            Onsager
           </a>
-
-          
-            
-            
-              <div class="version">
-                1.3
-              </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../includeme.html">Onsager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../InputOutput.html">Input and output for Onsager transport calculation</a></li>
@@ -103,294 +63,33 @@
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">Modules</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Onsager</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="../notebooks.html">Example Notebooks</a> &raquo;</li>
-        
-      <li>Convergence of Green function calculation</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../notebooks.html">Example Notebooks</a></li>
+      <li class="breadcrumb-item active">Convergence of Green function calculation</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="../_sources/examples/GF-convergence.ipynb.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput,
-div.nbinput div.prompt,
-div.nbinput div.input_area,
-div.nbinput div[class*=highlight],
-div.nbinput div[class*=highlight] pre,
-div.nboutput,
-div.nbinput div.prompt,
-div.nbinput div.output_area,
-div.nboutput div[class*=highlight],
-div.nboutput div[class*=highlight] pre {
-    background: none;
-    border: none;
-    padding: 0 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-/* avoid gaps between output lines */
-div.nboutput div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput,
-div.nboutput {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput,
-    div.nboutput {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput div.prompt,
-div.nboutput div.prompt {
-    min-width: 5ex;
-    padding-top: 0.4em;
-    padding-right: 0.4em;
-    text-align: right;
-    flex: 0;
-}
-@media (max-width: 540px) {
-    div.nbinput div.prompt,
-    div.nboutput div.prompt {
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput div.prompt.empty {
-        padding: 0;
-    }
-}
-
-/* disable scrollbars on prompts */
-div.nbinput div.prompt pre,
-div.nboutput div.prompt pre {
-    overflow: hidden;
-}
-
-/* input/output area */
-div.nbinput div.input_area,
-div.nboutput div.output_area {
-    padding: 0.4em;
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput div.input_area,
-    div.nboutput div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    background: #f5f5f5;
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-div.rendered_html th {
-  font-weight: bold;
-}
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast,
-.nboutput.nblast {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast + .nbinput {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="Convergence-of-Green-function-calculation">
-<h1>Convergence of Green function calculation<a class="headerlink" href="#Convergence-of-Green-function-calculation" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="Convergence-of-Green-function-calculation">
+<h1>Convergence of Green function calculation<a class="headerlink" href="#Convergence-of-Green-function-calculation" title="Link to this heading"></a></h1>
 <p>We check the convergence with <span class="math notranslate nohighlight">\(N_\text{kpt}\)</span> for the calculation of the vacancy Green function for FCC and HCP structures. In particular, we will look at:</p>
 <ol class="arabic simple">
 <li><p>The <span class="math notranslate nohighlight">\(\mathbf{R}=0\)</span> value,</p></li>
@@ -402,15 +101,14 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;../&#39;</span><span class="p">])</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;seaborn-whitegrid&#39;</span><span class="p">)</span>
 <span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="kn">import</span> <span class="nn">onsager.crystal</span> <span class="kn">as</span> <span class="nn">crystal</span>
-<span class="kn">import</span> <span class="nn">onsager.GFcalc</span> <span class="kn">as</span> <span class="nn">GFcalc</span>
+<span class="kn">import</span> <span class="nn">onsager.crystal</span> <span class="k">as</span> <span class="nn">crystal</span>
+<span class="kn">import</span> <span class="nn">onsager.GFcalc</span> <span class="k">as</span> <span class="nn">GFcalc</span>
 </pre></div>
 </div>
 </div>
@@ -419,11 +117,10 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">a0</span> <span class="o">=</span> <span class="mf">1.</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">a0</span> <span class="o">=</span> <span class="mf">1.</span>
 <span class="n">FCC</span><span class="p">,</span> <span class="n">HCP</span> <span class="o">=</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="o">.</span><span class="n">FCC</span><span class="p">(</span><span class="n">a0</span><span class="p">,</span> <span class="s2">&quot;fcc&quot;</span><span class="p">),</span> <span class="n">crystal</span><span class="o">.</span><span class="n">Crystal</span><span class="o">.</span><span class="n">HCP</span><span class="p">(</span><span class="n">a0</span><span class="p">,</span> <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;hcp&quot;</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">FCC</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">HCP</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FCC</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">HCP</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -457,8 +154,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">FCCR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mf">2.</span><span class="p">,</span><span class="mf">2.</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FCCR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mf">2.</span><span class="p">,</span><span class="mf">2.</span><span class="p">])</span>
 <span class="n">HCPR1</span><span class="p">,</span> <span class="n">HCPR2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">4.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">8</span><span class="o">/</span><span class="mi">3</span><span class="p">)])</span>
 </pre></div>
 </div>
@@ -467,8 +163,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">FCCsite</span><span class="p">,</span> <span class="n">FCCjn</span> <span class="o">=</span> <span class="n">FCC</span><span class="o">.</span><span class="n">sitelist</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">FCC</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FCCsite</span><span class="p">,</span> <span class="n">FCCjn</span> <span class="o">=</span> <span class="n">FCC</span><span class="o">.</span><span class="n">sitelist</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">FCC</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">)</span>
 <span class="n">HCPsite</span><span class="p">,</span> <span class="n">HCPjn</span> <span class="o">=</span> <span class="n">HCP</span><span class="o">.</span><span class="n">sitelist</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">HCP</span><span class="o">.</span><span class="n">jumpnetwork</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.01</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -478,19 +173,18 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">FCCdata</span> <span class="o">=</span> <span class="p">{</span><span class="n">pmaxerror</span><span class="p">:[]</span> <span class="k">for</span> <span class="n">pmaxerror</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">16</span><span class="p">,</span><span class="mi">0</span><span class="p">)}</span>
-<span class="k">print</span><span class="p">(</span><span class="s1">&#39;kpt</span><span class="se">\t</span><span class="s1">Nkpt</span><span class="se">\t</span><span class="s1">G(0)</span><span class="se">\t</span><span class="s1">G(R)</span><span class="se">\t</span><span class="s1">G diff&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FCCdata</span> <span class="o">=</span> <span class="p">{</span><span class="n">pmaxerror</span><span class="p">:[]</span> <span class="k">for</span> <span class="n">pmaxerror</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">16</span><span class="p">,</span><span class="mi">0</span><span class="p">)}</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;kpt</span><span class="se">\t</span><span class="s1">Nkpt</span><span class="se">\t</span><span class="s1">G(0)</span><span class="se">\t</span><span class="s1">G(R)</span><span class="se">\t</span><span class="s1">G diff&#39;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">Nmax</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">13</span><span class="p">):</span>
     <span class="n">GFFCC</span> <span class="o">=</span> <span class="n">GFcalc</span><span class="o">.</span><span class="n">GFCrystalcalc</span><span class="p">(</span><span class="n">FCC</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">FCCsite</span><span class="p">,</span> <span class="n">FCCjn</span><span class="p">,</span> <span class="n">Nmax</span><span class="o">=</span><span class="n">Nmax</span><span class="p">)</span>
     <span class="n">Nreduce</span><span class="p">,</span> <span class="n">Nkpt</span><span class="p">,</span> <span class="n">kpt</span> <span class="o">=</span> <span class="n">GFFCC</span><span class="o">.</span><span class="n">Nkpt</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">GFFCC</span><span class="o">.</span><span class="n">kptgrid</span><span class="p">),</span> <span class="n">GFFCC</span><span class="o">.</span><span class="n">kptgrid</span>
-    <span class="k">for</span> <span class="n">pmax</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">FCCdata</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">pmax</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">FCCdata</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="n">GFFCC</span><span class="o">.</span><span class="n">SetRates</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">12</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">pmax</span><span class="p">))</span>
         <span class="n">g0</span><span class="p">,</span><span class="n">gR</span> <span class="o">=</span> <span class="n">GFFCC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)),</span> <span class="n">GFFCC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">FCCR</span><span class="p">)</span>
         <span class="n">FCCdata</span><span class="p">[</span><span class="n">pmax</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">Nkpt</span><span class="p">,</span> <span class="n">g0</span><span class="p">,</span> <span class="n">gR</span><span class="p">))</span>
     <span class="n">Nkpt</span><span class="p">,</span><span class="n">g0</span><span class="p">,</span><span class="n">gR</span> <span class="o">=</span> <span class="n">FCCdata</span><span class="p">[</span><span class="o">-</span><span class="mi">8</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># print the 10^-8 values</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{k[0]}x{k[1]}x{k[2]}</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="n">kpt</span><span class="p">)</span> <span class="o">+</span>
-          <span class="s2">&quot; {:5d} ({})</span><span class="se">\t</span><span class="s2">{:.12f}</span><span class="se">\t</span><span class="s2">{:.12f}</span><span class="se">\t</span><span class="s2">{:.12f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Nkpt</span><span class="p">,</span> <span class="n">Nreduce</span><span class="p">,</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{k[0]}</span><span class="s2">x</span><span class="si">{k[1]}</span><span class="s2">x</span><span class="si">{k[2]}</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="n">kpt</span><span class="p">)</span> <span class="o">+</span>
+          <span class="s2">&quot; </span><span class="si">{:5d}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">)</span><span class="se">\t</span><span class="si">{:.12f}</span><span class="se">\t</span><span class="si">{:.12f}</span><span class="se">\t</span><span class="si">{:.12f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Nkpt</span><span class="p">,</span> <span class="n">Nreduce</span><span class="p">,</span>
                                                                <span class="n">g0</span><span class="p">,</span> <span class="n">gR</span><span class="p">,</span><span class="n">g0</span><span class="o">-</span><span class="n">gR</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -519,17 +213,16 @@ kpt     Nkpt    G(0)    G(R)    G diff
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">HCPdata</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">print</span><span class="p">(</span><span class="s1">&#39;kpt</span><span class="se">\t</span><span class="s1">Nkpt</span><span class="se">\t</span><span class="s1">G(0)</span><span class="se">\t</span><span class="s1">G(R1)</span><span class="se">\t</span><span class="s1">G(R2)</span><span class="se">\t</span><span class="s1">G(R1)-G(0)</span><span class="se">\t</span><span class="s1">G(R2)-G0&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">HCPdata</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;kpt</span><span class="se">\t</span><span class="s1">Nkpt</span><span class="se">\t</span><span class="s1">G(0)</span><span class="se">\t</span><span class="s1">G(R1)</span><span class="se">\t</span><span class="s1">G(R2)</span><span class="se">\t</span><span class="s1">G(R1)-G(0)</span><span class="se">\t</span><span class="s1">G(R2)-G0&#39;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">Nmax</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">13</span><span class="p">):</span>
     <span class="n">GFHCP</span> <span class="o">=</span> <span class="n">GFcalc</span><span class="o">.</span><span class="n">GFCrystalcalc</span><span class="p">(</span><span class="n">HCP</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">HCPsite</span><span class="p">,</span> <span class="n">HCPjn</span><span class="p">,</span> <span class="n">Nmax</span><span class="o">=</span><span class="n">Nmax</span><span class="p">)</span>
     <span class="n">GFHCP</span><span class="o">.</span><span class="n">SetRates</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">12</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="mf">1e-8</span><span class="p">)</span>
     <span class="n">g0</span><span class="p">,</span><span class="n">gR1</span><span class="p">,</span><span class="n">gR2</span> <span class="o">=</span> <span class="n">GFHCP</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)),</span> <span class="n">GFHCP</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">HCPR1</span><span class="p">),</span> <span class="n">GFHCP</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">HCPR2</span><span class="p">)</span>
     <span class="n">Nreduce</span><span class="p">,</span> <span class="n">Nkpt</span><span class="p">,</span> <span class="n">kpt</span> <span class="o">=</span> <span class="n">GFHCP</span><span class="o">.</span><span class="n">Nkpt</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">GFHCP</span><span class="o">.</span><span class="n">kptgrid</span><span class="p">),</span> <span class="n">GFHCP</span><span class="o">.</span><span class="n">kptgrid</span>
     <span class="n">HCPdata</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">Nkpt</span><span class="p">,</span> <span class="n">g0</span><span class="p">,</span> <span class="n">gR1</span><span class="p">,</span> <span class="n">gR2</span><span class="p">))</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{k[0]}x{k[1]}x{k[2]}</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="n">kpt</span><span class="p">)</span> <span class="o">+</span>
-          <span class="s2">&quot;{:5d} ({})</span><span class="se">\t</span><span class="s2">{:.12f}</span><span class="se">\t</span><span class="s2">{:.12f}</span><span class="se">\t</span><span class="s2">{:.12f}</span><span class="se">\t</span><span class="s2">{:.12f}</span><span class="se">\t</span><span class="s2">{:.12f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Nkpt</span><span class="p">,</span> <span class="n">Nreduce</span><span class="p">,</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{k[0]}</span><span class="s2">x</span><span class="si">{k[1]}</span><span class="s2">x</span><span class="si">{k[2]}</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="n">kpt</span><span class="p">)</span> <span class="o">+</span>
+          <span class="s2">&quot;</span><span class="si">{:5d}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">)</span><span class="se">\t</span><span class="si">{:.12f}</span><span class="se">\t</span><span class="si">{:.12f}</span><span class="se">\t</span><span class="si">{:.12f}</span><span class="se">\t</span><span class="si">{:.12f}</span><span class="se">\t</span><span class="si">{:.12f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Nkpt</span><span class="p">,</span> <span class="n">Nreduce</span><span class="p">,</span>
                                                                                   <span class="n">g0</span><span class="p">,</span> <span class="n">gR1</span><span class="p">,</span> <span class="n">gR2</span><span class="p">,</span>
                                                                                   <span class="n">g0</span><span class="o">-</span><span class="n">gR1</span><span class="p">,</span> <span class="n">g0</span><span class="o">-</span><span class="n">gR2</span><span class="p">))</span>
 </pre></div>
@@ -560,10 +253,9 @@ kpt     Nkpt    G(0)    G(R1)   G(R2)   G(R1)-G(0)      G(R2)-G0
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">print</span><span class="p">(</span><span class="s1">&#39;pmax</span><span class="se">\t</span><span class="s1">Ginf</span><span class="se">\t</span><span class="s1">alpha (Nkpt^-5/3 prefactor)&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;pmax</span><span class="se">\t</span><span class="s1">Ginf</span><span class="se">\t</span><span class="s1">alpha (Nkpt^-5/3 prefactor)&#39;</span><span class="p">)</span>
 <span class="n">Ginflist</span><span class="o">=</span><span class="p">[]</span>
-<span class="k">for</span> <span class="n">pmax</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">FCCdata</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">pmax</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">FCCdata</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">FCCdata</span><span class="p">[</span><span class="n">pmax</span><span class="p">]</span>
     <span class="n">Nk53</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">N</span><span class="o">**</span><span class="p">(</span><span class="mi">5</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">g0</span><span class="p">,</span><span class="n">gR</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>
     <span class="n">gval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g0</span> <span class="k">for</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">g0</span><span class="p">,</span><span class="n">gR</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>
@@ -572,7 +264,7 @@ kpt     Nkpt    G(0)    G(R1)   G(R2)   G(R1)-G(0)      G(R2)-G0
     <span class="n">denom</span> <span class="o">=</span> <span class="n">N10</span><span class="o">-</span><span class="n">N5</span><span class="o">**</span><span class="mi">2</span>
     <span class="n">Ginf</span><span class="p">,</span><span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span><span class="n">g10</span><span class="o">-</span><span class="n">g5</span><span class="o">*</span><span class="n">N5</span><span class="p">)</span><span class="o">/</span><span class="n">denom</span><span class="p">,</span> <span class="p">(</span><span class="n">g10</span><span class="o">*</span><span class="n">N5</span><span class="o">-</span><span class="n">g5</span><span class="o">*</span><span class="n">N10</span><span class="p">)</span><span class="o">/</span><span class="n">denom</span>
     <span class="n">Ginflist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Ginf</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;{}</span><span class="se">\t</span><span class="s1">{}</span><span class="se">\t</span><span class="s1">{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pmax</span><span class="p">,</span> <span class="n">Ginf</span><span class="p">,</span> <span class="n">alpha</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pmax</span><span class="p">,</span> <span class="n">Ginf</span><span class="p">,</span> <span class="n">alpha</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -605,8 +297,7 @@ pmax    Ginf    alpha (Nkpt^-5/3 prefactor)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># plot the errors from pmax = 10^-8</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot the errors from pmax = 10^-8</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">FCCdata</span><span class="p">[</span><span class="o">-</span><span class="mi">8</span><span class="p">]</span>
 <span class="n">Nk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">N</span> <span class="k">for</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">g0</span><span class="p">,</span><span class="n">gR</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>
 <span class="n">g0val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g0</span> <span class="k">for</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">g0</span><span class="p">,</span><span class="n">gR</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>
@@ -623,24 +314,24 @@ pmax    Ginf    alpha (Nkpt^-5/3 prefactor)
     <span class="n">gplot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">gdata</span><span class="o">-</span><span class="n">Ginf</span><span class="p">))</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf{0})$ error $\sim N_{\mathrm{kpt}}^{-5/3}$&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf{R})$ error $\sim N_{\mathrm{kpt}}^{-5/3}$&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;b--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf{0})-G(\mathbf{R})$ error&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf</span><span class="si">{0}</span><span class="s1">)$ error $\sim N_{\mathrm</span><span class="si">{kpt}</span><span class="s1">}^{-5/3}$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf</span><span class="si">{R}</span><span class="s1">)$ error $\sim N_{\mathrm</span><span class="si">{kpt}</span><span class="s1">}^{-5/3}$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;b--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf</span><span class="si">{0}</span><span class="s1">)-G(\mathbf</span><span class="si">{R}</span><span class="s1">)$ error&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">((</span><span class="mf">1e2</span><span class="p">,</span><span class="mf">2e5</span><span class="p">))</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">((</span><span class="mf">1e-11</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$N_{\mathrm{kpt}}$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$N_{\mathrm</span><span class="si">{kpt}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;integration error $G-G^\infty$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-           <span class="n">shadow</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+           <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
 <span class="n">ax2</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twiny</span><span class="p">()</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">())</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">Nk</span><span class="p">])</span>
-<span class="n">ax2</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;${:.0f}^3$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">Nk</span><span class="p">])</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;$</span><span class="si">{:.0f}</span><span class="s2">^3$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">Nk</span><span class="p">])</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;k-point grid&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
-<span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s1">&#39;on&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="c1"># plt.savefig(&#39;FCC-GFerror.pdf&#39;, transparent=True, format=&#39;pdf&#39;)</span>
@@ -659,8 +350,7 @@ pmax    Ginf    alpha (Nkpt^-5/3 prefactor)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># plot the errors from pmax = 10^-8</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot the errors from pmax = 10^-8</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">HCPdata</span>
 <span class="n">Nk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">N</span> <span class="k">for</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">g0</span><span class="p">,</span><span class="n">gR1</span><span class="p">,</span><span class="n">gR2</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>
 <span class="n">g0val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g0</span> <span class="k">for</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">g0</span><span class="p">,</span><span class="n">gR1</span><span class="p">,</span><span class="n">gR2</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>
@@ -678,19 +368,19 @@ pmax    Ginf    alpha (Nkpt^-5/3 prefactor)
     <span class="n">gplot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">gdata</span><span class="o">-</span><span class="n">Ginf</span><span class="p">))</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf{0})$ error $\sim N_{\mathrm{kpt}}^{-5/3}$&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf{R}_1)$ error $\sim N_{\mathrm{kpt}}^{-5/3}$&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf{R}_2)$ error $\sim N_{\mathrm{kpt}}^{-5/3}$&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="s1">&#39;b--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf{0})-G(\mathbf{R}_1)$ error&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="s1">&#39;r--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf{0})-G(\mathbf{R}_2)$ error&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf</span><span class="si">{0}</span><span class="s1">)$ error $\sim N_{\mathrm</span><span class="si">{kpt}</span><span class="s1">}^{-5/3}$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf</span><span class="si">{R}</span><span class="s1">_1)$ error $\sim N_{\mathrm</span><span class="si">{kpt}</span><span class="s1">}^{-5/3}$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf</span><span class="si">{R}</span><span class="s1">_2)$ error $\sim N_{\mathrm</span><span class="si">{kpt}</span><span class="s1">}^{-5/3}$&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="s1">&#39;b--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf</span><span class="si">{0}</span><span class="s1">)-G(\mathbf</span><span class="si">{R}</span><span class="s1">_1)$ error&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Nk</span><span class="p">,</span> <span class="n">gplot</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="s1">&#39;r--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$G(\mathbf</span><span class="si">{0}</span><span class="s1">)-G(\mathbf</span><span class="si">{R}</span><span class="s1">_2)$ error&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">((</span><span class="mf">1e2</span><span class="p">,</span><span class="mf">2e5</span><span class="p">))</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">((</span><span class="mf">1e-11</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$N_{\mathrm{kpt}}$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$N_{\mathrm</span><span class="si">{kpt}</span><span class="s1">}$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;integration error $G-G^\infty$&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-           <span class="n">shadow</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;medium&#39;</span><span class="p">)</span>
+           <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;medium&#39;</span><span class="p">)</span>
 <span class="n">ax2</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twiny</span><span class="p">()</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">ax1</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">())</span>
@@ -698,7 +388,7 @@ pmax    Ginf    alpha (Nkpt^-5/3 prefactor)
 <span class="c1"># ax2.set_xticklabels([&quot;${:.0f}$&quot;.format((n*1.875)**(1/3)) for n in Nk])</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s1">&#39;6&#39;</span><span class="p">,</span><span class="s1">&#39;10&#39;</span><span class="p">,</span><span class="s1">&#39;16&#39;</span><span class="p">,</span><span class="s1">&#39;20&#39;</span><span class="p">,</span><span class="s1">&#39;26&#39;</span><span class="p">,</span><span class="s1">&#39;30&#39;</span><span class="p">,</span><span class="s1">&#39;36&#39;</span><span class="p">,</span><span class="s1">&#39;40&#39;</span><span class="p">,</span><span class="s1">&#39;46&#39;</span><span class="p">,</span><span class="s1">&#39;50&#39;</span><span class="p">,</span><span class="s1">&#39;56&#39;</span><span class="p">,</span><span class="s1">&#39;60&#39;</span><span class="p">])</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;k-point divisions (basal)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
-<span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s1">&#39;on&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="c1"># plt.savefig(&#39;HCP-GFerror.pdf&#39;, transparent=True, format=&#39;pdf&#39;)</span>
@@ -712,55 +402,37 @@ pmax    Ginf    alpha (Nkpt^-5/3 prefactor)
 <img alt="../_images/examples_GF-convergence_15_0.png" src="../_images/examples_GF-convergence_15_0.png" />
 </div>
 </div>
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="Tracer-correlation.html" class="btn btn-neutral float-right" title="Tracer correlation coefficients" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="Fe-C.html" class="btn btn-neutral float-left" title="Fe-C diffusion and elastodiffusivity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Fe-C.html" class="btn btn-neutral float-left" title="Fe-C diffusion and elastodiffusivity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Tracer-correlation.html" class="btn btn-neutral float-right" title="Tracer correlation coefficients" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2017, Dallas R. Trinkle
-
-    </p>
+    <p>&#169; Copyright 2017, Dallas R. Trinkle.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

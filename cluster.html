@@ -1,0 +1,590 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cluster &mdash; Onsager 1.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=0ed52906"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="PowerExpansion" href="PowerExpansion.html" />
+    <link rel="prev" title="Supercell" href="supercell.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Onsager
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="includeme.html">Onsager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="InputOutput.html">Input and output for Onsager transport calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Example Notebooks</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="crystal.html">Crystal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CrystalStars.html">CrystalStars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="supercell.html">Supercell</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Cluster</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cluster.Cluster"><code class="docutils literal notranslate"><span class="pre">Cluster</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.Cluster_constructor"><code class="docutils literal notranslate"><span class="pre">Cluster.Cluster_constructor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.Cluster_representer"><code class="docutils literal notranslate"><span class="pre">Cluster.Cluster_representer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.__add__"><code class="docutils literal notranslate"><span class="pre">Cluster.__add__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.__contains__"><code class="docutils literal notranslate"><span class="pre">Cluster.__contains__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.__eq__"><code class="docutils literal notranslate"><span class="pre">Cluster.__eq__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.__hash__"><code class="docutils literal notranslate"><span class="pre">Cluster.__hash__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.__init__"><code class="docutils literal notranslate"><span class="pre">Cluster.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.__str__"><code class="docutils literal notranslate"><span class="pre">Cluster.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.__sub__"><code class="docutils literal notranslate"><span class="pre">Cluster.__sub__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.__weakref__"><code class="docutils literal notranslate"><span class="pre">Cluster.__weakref__</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.g"><code class="docutils literal notranslate"><span class="pre">Cluster.g()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.istransition"><code class="docutils literal notranslate"><span class="pre">Cluster.istransition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.pairdistances"><code class="docutils literal notranslate"><span class="pre">Cluster.pairdistances()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.transitionstate"><code class="docutils literal notranslate"><span class="pre">Cluster.transitionstate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.Cluster.vacancy"><code class="docutils literal notranslate"><span class="pre">Cluster.vacancy()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cluster.ClusterSite"><code class="docutils literal notranslate"><span class="pre">ClusterSite</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.ClusterSite.ClusterSite_constructor"><code class="docutils literal notranslate"><span class="pre">ClusterSite.ClusterSite_constructor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.ClusterSite.ClusterSite_representer"><code class="docutils literal notranslate"><span class="pre">ClusterSite.ClusterSite_representer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.ClusterSite.__add__"><code class="docutils literal notranslate"><span class="pre">ClusterSite.__add__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.ClusterSite.__eq__"><code class="docutils literal notranslate"><span class="pre">ClusterSite.__eq__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.ClusterSite.__hash__"><code class="docutils literal notranslate"><span class="pre">ClusterSite.__hash__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.ClusterSite.__ne__"><code class="docutils literal notranslate"><span class="pre">ClusterSite.__ne__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.ClusterSite.__neg__"><code class="docutils literal notranslate"><span class="pre">ClusterSite.__neg__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.ClusterSite.__str__"><code class="docutils literal notranslate"><span class="pre">ClusterSite.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.ClusterSite.fromcryscart"><code class="docutils literal notranslate"><span class="pre">ClusterSite.fromcryscart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.ClusterSite.fromcrysunit"><code class="docutils literal notranslate"><span class="pre">ClusterSite.fromcrysunit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.ClusterSite.g"><code class="docutils literal notranslate"><span class="pre">ClusterSite.g()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cluster.MonteCarloSampler"><code class="docutils literal notranslate"><span class="pre">MonteCarloSampler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.MonteCarloSampler.E"><code class="docutils literal notranslate"><span class="pre">MonteCarloSampler.E()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.MonteCarloSampler.__init__"><code class="docutils literal notranslate"><span class="pre">MonteCarloSampler.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.MonteCarloSampler.__weakref__"><code class="docutils literal notranslate"><span class="pre">MonteCarloSampler.__weakref__</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.MonteCarloSampler.deltaE_trial"><code class="docutils literal notranslate"><span class="pre">MonteCarloSampler.deltaE_trial()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.MonteCarloSampler.start"><code class="docutils literal notranslate"><span class="pre">MonteCarloSampler.start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.MonteCarloSampler.transitions"><code class="docutils literal notranslate"><span class="pre">MonteCarloSampler.transitions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster.MonteCarloSampler.update"><code class="docutils literal notranslate"><span class="pre">MonteCarloSampler.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cluster.MonteCarloSampler_jit"><code class="docutils literal notranslate"><span class="pre">MonteCarloSampler_jit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cluster.MonteCarloSampler_param"><code class="docutils literal notranslate"><span class="pre">MonteCarloSampler_param()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cluster.makeTSclusters"><code class="docutils literal notranslate"><span class="pre">makeTSclusters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cluster.makeVacancyClusters"><code class="docutils literal notranslate"><span class="pre">makeVacancyClusters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cluster.makeclusters"><code class="docutils literal notranslate"><span class="pre">makeclusters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="PowerExpansion.html">PowerExpansion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GFcalc.html">GFcalc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OnsagerCalc.html">OnsagerCalc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automator.html">Automator</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Onsager</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Modules</a></li>
+      <li class="breadcrumb-item active">Cluster</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cluster.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cluster">
+<h1>Cluster<a class="headerlink" href="#cluster" title="Link to this heading"></a></h1>
+<p>Cluster:</p>
+<p>The cluster module defines the <code class="docutils literal notranslate"><span class="pre">Cluster</span></code> object (for simple clusters, transition state clusters, and vacancy-base clusters), and a <code class="docutils literal notranslate"><span class="pre">MonteCarloSampler</span></code> object with a <code class="docutils literal notranslate"><span class="pre">jit</span></code> version.</p>
+<p id="module-cluster">Cluster expansion module: types necessary to implement cluster expansions of
+quantities based on crystals.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cluster.Cluster">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cluster.</span></span><span class="sig-name descname"><span class="pre">Cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clustersitelist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vacancy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NOSORT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster" title="Link to this definition"></a></dt>
+<dd><p>Class to define (arbitrary) cluster interactions. A cluster is defined as
+a set of ClusterSites. We don’t implement this using sets, however, because
+we make a choice of a “reference” site in each cluster, which has a lattice
+vector of 0, to account for translational invariance.</p>
+<p>The flag transition dictates whether the cluster is a transition state cluster
+or not. The difference with a transition state cluster is that the first two
+states in the cluster are the initial and final states of the transition, while
+all of the remaining parts are the cluster.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.Cluster_constructor">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Cluster_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.Cluster_constructor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.Cluster_constructor" title="Link to this definition"></a></dt>
+<dd><p>Construct a ClusterSite from YAML</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.Cluster_representer">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Cluster_representer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dumper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.Cluster_representer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.Cluster_representer" title="Link to this definition"></a></dt>
+<dd><p>Output a ClusterSite</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.__add__">
+<span class="sig-name descname"><span class="pre">__add__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.__add__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.__add__" title="Link to this definition"></a></dt>
+<dd><p>Add a clustersite to a cluster expansion</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.__contains__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.__contains__" title="Link to this definition"></a></dt>
+<dd><p>Returns whether a cluster site is in our cluster expansion</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.__eq__" title="Link to this definition"></a></dt>
+<dd><p>Test for equality of two clusters. This is a bit trickier than one would expect, since
+clusters are essentially sets where all of the lattice vectors are shifted by the
+center of mass of the sites.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.__hash__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.__hash__" title="Link to this definition"></a></dt>
+<dd><p>Return our hash value, precomputed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clustersitelist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vacancy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NOSORT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.__init__" title="Link to this definition"></a></dt>
+<dd><p>Cluster interaction, from an iterable of ClusterSites
+:param clustersitelist: iterable of ClusterSites
+:param transition: True if a transition state cluster; cl[0] = initial, cl[1] = final</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.__str__" title="Link to this definition"></a></dt>
+<dd><p>Human readable version</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.__sub__">
+<span class="sig-name descname"><span class="pre">__sub__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.__sub__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.__sub__" title="Link to this definition"></a></dt>
+<dd><p>Subtract a site from a cluster. Had a very specific meaning: if the
+site is in the cluster, it returns a list of all the <em>other</em> sites, shifted
+so that the <code class="docutils literal notranslate"><span class="pre">other</span></code> site is at the origin.</p>
+<p>Needs to be clarified for the case of a transition state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – needs to be a cluster site <em>in</em> the cluster.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cluster.Cluster.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#cluster.Cluster.__weakref__" title="Link to this definition"></a></dt>
+<dd><p>list of weak references to the object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.g">
+<span class="sig-name descname"><span class="pre">g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.g" title="Link to this definition"></a></dt>
+<dd><p>Apply group operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>crys</strong> – crystal</p></li>
+<li><p><strong>g</strong> – group operation (from crys)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return g*cluster<span class="colon">:</span></dt>
+<dd class="field-even"><p>corresponding to group operation applied to self</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.istransition">
+<span class="sig-name descname"><span class="pre">istransition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.istransition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.istransition" title="Link to this definition"></a></dt>
+<dd><p>Check whether two sites correspond to the transition state</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.pairdistances">
+<span class="sig-name descname"><span class="pre">pairdistances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.pairdistances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.pairdistances" title="Link to this definition"></a></dt>
+<dd><p>Return a dictionary of all the pair distances between the chemistries in the cluster.
+For simplicity, we include both (c1,c2) and (c2,c1).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>crys</strong> – crystal</p>
+</dd>
+<dt class="field-even">Return dist_dict<span class="colon">:</span></dt>
+<dd class="field-even"><p>dist_dict[c1][c2] = sorted list of distances between chemistry c1 and c2</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.transitionstate">
+<span class="sig-name descname"><span class="pre">transitionstate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.transitionstate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.transitionstate" title="Link to this definition"></a></dt>
+<dd><p>Return the two sites of the transition state</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.Cluster.vacancy">
+<span class="sig-name descname"><span class="pre">vacancy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#Cluster.vacancy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.Cluster.vacancy" title="Link to this definition"></a></dt>
+<dd><p>Return the two sites of the transition state</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cluster.ClusterSite">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cluster.</span></span><span class="sig-name descname"><span class="pre">ClusterSite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ci</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#ClusterSite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.ClusterSite" title="Link to this definition"></a></dt>
+<dd><p>A class corresponding to a site in a cluster.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ci</strong> – (chem, index) of the site</p></li>
+<li><p><strong>R</strong> – lattice vector of the site</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.ClusterSite.ClusterSite_constructor">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ClusterSite_constructor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#ClusterSite.ClusterSite_constructor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.ClusterSite.ClusterSite_constructor" title="Link to this definition"></a></dt>
+<dd><p>Construct a ClusterSite from YAML</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.ClusterSite.ClusterSite_representer">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ClusterSite_representer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dumper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#ClusterSite.ClusterSite_representer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.ClusterSite.ClusterSite_representer" title="Link to this definition"></a></dt>
+<dd><p>Output a ClusterSite</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.ClusterSite.__add__">
+<span class="sig-name descname"><span class="pre">__add__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#ClusterSite.__add__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.ClusterSite.__add__" title="Link to this definition"></a></dt>
+<dd><p>Add a vector to a site; other <em>must</em> be a vector</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.ClusterSite.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#ClusterSite.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.ClusterSite.__eq__" title="Link to this definition"></a></dt>
+<dd><p>Test for equality–we don’t bother checking dx</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.ClusterSite.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#ClusterSite.__hash__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.ClusterSite.__hash__" title="Link to this definition"></a></dt>
+<dd><p>Hash, so that we can make sets of states</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.ClusterSite.__ne__">
+<span class="sig-name descname"><span class="pre">__ne__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#ClusterSite.__ne__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.ClusterSite.__ne__" title="Link to this definition"></a></dt>
+<dd><p>Inequality == not __eq__</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.ClusterSite.__neg__">
+<span class="sig-name descname"><span class="pre">__neg__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#ClusterSite.__neg__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.ClusterSite.__neg__" title="Link to this definition"></a></dt>
+<dd><p>Negation of site</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.ClusterSite.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#ClusterSite.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.ClusterSite.__str__" title="Link to this definition"></a></dt>
+<dd><p>Human readable version</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.ClusterSite.fromcryscart">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromcryscart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cart_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#ClusterSite.fromcryscart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.ClusterSite.fromcryscart" title="Link to this definition"></a></dt>
+<dd><p>Return a ClusterSite corresponding to Cartesian position <code class="docutils literal notranslate"><span class="pre">cart_pos</span></code> in crystal <code class="docutils literal notranslate"><span class="pre">crys</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.ClusterSite.fromcrysunit">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromcrysunit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#ClusterSite.fromcrysunit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.ClusterSite.fromcrysunit" title="Link to this definition"></a></dt>
+<dd><p>Return a ClusterSite corresponding to unit cell position <code class="docutils literal notranslate"><span class="pre">unit_pos</span></code> in crystal <code class="docutils literal notranslate"><span class="pre">crys</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.ClusterSite.g">
+<span class="sig-name descname"><span class="pre">g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#ClusterSite.g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.ClusterSite.g" title="Link to this definition"></a></dt>
+<dd><p>Apply group operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>crys</strong> – crystal</p></li>
+<li><p><strong>g</strong> – group operation (from crys)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return g*site<span class="colon">:</span></dt>
+<dd class="field-even"><p>corresponding to group operation applied to self</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cluster.MonteCarloSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cluster.</span></span><span class="sig-name descname"><span class="pre">MonteCarloSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">supercell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectator_occ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusterexp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enevalues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jumpnetwork</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KRAvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TSclusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TSvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#MonteCarloSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.MonteCarloSampler" title="Link to this definition"></a></dt>
+<dd><p>An object to maintain state in a supercell, evaluate energies efficiently including
+“trial” moves. Built from cluster expansions and using a cluster supercell.</p>
+<p>Now is able to handle supercells that contain a single vacancy.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.MonteCarloSampler.E">
+<span class="sig-name descname"><span class="pre">E</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#MonteCarloSampler.E"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.MonteCarloSampler.E" title="Link to this definition"></a></dt>
+<dd><p>Compute the energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return E<span class="colon">:</span></dt>
+<dd class="field-odd"><p>total of all interactions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.MonteCarloSampler.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">supercell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectator_occ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusterexp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enevalues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jumpnetwork</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KRAvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TSclusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TSvalues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#MonteCarloSampler.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.MonteCarloSampler.__init__" title="Link to this definition"></a></dt>
+<dd><p>Setup a MonteCarloSampler using a supercell, with a given spectator occupancy,
+cluster expansion, and energy values for the clusters. Now includes the ability to
+evaluate a jumpnetwork, which is optional. Because we need to be consistent with
+our cluster expansion, can only be done at initialization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>supercell</strong> – should be a ClusterSupercell</p></li>
+<li><p><strong>spectator_occ</strong> – vector of occupancies for spectator species (0 or 1),
+consistent with our supercell</p></li>
+<li><p><strong>clusterexp</strong> – list of sets of cluster interactions</p></li>
+<li><p><strong>enevalues</strong> – energy values corresponding to each cluster</p></li>
+<li><p><strong>chem</strong> – (optional) index of species that transitions</p></li>
+<li><p><strong>jumpnetwork</strong> – (optional) list of lists of jumps; each is ((i, j), dx) where <code class="docutils literal notranslate"><span class="pre">i</span></code> and <code class="docutils literal notranslate"><span class="pre">j</span></code> are
+unit cell indices for species <code class="docutils literal notranslate"><span class="pre">chem</span></code></p></li>
+<li><p><strong>KRAvalues</strong> – (optional) list of “KRA” values for barriers (relative to average energy of endpoints);
+if <code class="docutils literal notranslate"><span class="pre">TSclusters</span></code> are used, choosing 0 is more straightforward.</p></li>
+<li><p><strong>TSclusters</strong> – (optional) list of transition state cluster expansion terms; this is
+always added on to KRAvalues (thus using 0 is recommended if TSclusters are also used)</p></li>
+<li><p><strong>TSvalues</strong> – (optional) values for TS cluster expansion entries</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cluster.MonteCarloSampler.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#cluster.MonteCarloSampler.__weakref__" title="Link to this definition"></a></dt>
+<dd><p>list of weak references to the object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.MonteCarloSampler.deltaE_trial">
+<span class="sig-name descname"><span class="pre">deltaE_trial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occsites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unoccsites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#MonteCarloSampler.deltaE_trial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.MonteCarloSampler.deltaE_trial" title="Link to this definition"></a></dt>
+<dd><p>Compute the energy change if the sites in occsites are occupied, and the sites in
+unoccsites are unoccupied.</p>
+<p>A few notes: the algorithm does not check whether the same site appears in
+either iterable multiple times; it trusts that the user has provided it with
+a meaningful trial change.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>occsites</strong> – iterable of sites to attempt occupying</p></li>
+<li><p><strong>unoccsites</strong> – iterable of sites to attempt unoccupying</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return deltaE<span class="colon">:</span></dt>
+<dd class="field-even"><p>change in energy</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.MonteCarloSampler.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occ</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#MonteCarloSampler.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.MonteCarloSampler.start" title="Link to this definition"></a></dt>
+<dd><p>Initialize with an occupancy, and prepare for future calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>occ</strong> – occupancy of sites in supercell; assumed to be 0 or 1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.MonteCarloSampler.transitions">
+<span class="sig-name descname"><span class="pre">transitions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#MonteCarloSampler.transitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.MonteCarloSampler.transitions" title="Link to this definition"></a></dt>
+<dd><p>Compute all transitions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return ijlist<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of (initial, final) tuples for each transition</p>
+</dd>
+<dt class="field-even">Return Qlist<span class="colon">:</span></dt>
+<dd class="field-even"><p>vector of energy barriers for each transition</p>
+</dd>
+<dt class="field-odd">Return dxlist<span class="colon">:</span></dt>
+<dd class="field-odd"><p>vector of displacements for each transition</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cluster.MonteCarloSampler.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">occsites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unoccsites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#MonteCarloSampler.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.MonteCarloSampler.update" title="Link to this definition"></a></dt>
+<dd><p>Update the state to occupy the sites in occsites and un-occupy the sites in unoccsites.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>occsites</strong> – iterable of sites to occupy</p></li>
+<li><p><strong>unoccsites</strong> – iterable of sites to unoccupy</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cluster.MonteCarloSampler_jit">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cluster.</span></span><span class="sig-name descname"><span class="pre">MonteCarloSampler_jit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#MonteCarloSampler_jit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.MonteCarloSampler_jit" title="Link to this definition"></a></dt>
+<dd><p>Numba jit wrapper on a MonteCarloSampler.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cluster.MonteCarloSampler_param">
+<span class="sig-prename descclassname"><span class="pre">cluster.</span></span><span class="sig-name descname"><span class="pre">MonteCarloSampler_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">MCsampler</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#MonteCarloSampler_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.MonteCarloSampler_param" title="Link to this definition"></a></dt>
+<dd><p>Takes in a MCsampler, returns a dictionary of all the parameters for the jit-version</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cluster.makeTSclusters">
+<span class="sig-prename descclassname"><span class="pre">cluster.</span></span><span class="sig-name descname"><span class="pre">makeTSclusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jumpnetwork</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusterexp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#makeTSclusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.makeTSclusters" title="Link to this definition"></a></dt>
+<dd><p>Function to make TS clusters based on an existing cluster expansion corresponding
+to a given jump network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>crys</strong> – crystal to construct our clusters for</p></li>
+<li><p><strong>chem</strong> – index of mobile species</p></li>
+<li><p><strong>jumpnetwork</strong> – list of lists of ((i, j), dx) transitions</p></li>
+<li><p><strong>clusterexp</strong> – list of sets of clusters to base TS cluster expansion</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TSclusterexp: list of sets of TS clusters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cluster.makeVacancyClusters">
+<span class="sig-prename descclassname"><span class="pre">cluster.</span></span><span class="sig-name descname"><span class="pre">makeVacancyClusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusterexp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#makeVacancyClusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.makeVacancyClusters" title="Link to this definition"></a></dt>
+<dd><p>Function to make vacancy clusters based on an existing cluster expansion where
+the vacancies live on a particular sublattice.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>crys</strong> – crystal to construct our clusters for</p></li>
+<li><p><strong>chem</strong> – index of the sublattice to contain a vacancy</p></li>
+<li><p><strong>clusterexp</strong> – list of sets of clusters to base vacancy cluster expansion</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>VacClusterexp: list of sets of vacancy clusters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cluster.makeclusters">
+<span class="sig-prename descclassname"><span class="pre">cluster.</span></span><span class="sig-name descname"><span class="pre">makeclusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">crys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxorder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cluster.html#makeclusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cluster.makeclusters" title="Link to this definition"></a></dt>
+<dd><p>Function to make clusters up to a maximum order involving all sites within a cutoff
+distance. We can exclude certain chemistries; default is to use all.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>crys</strong> – crystal to construct our clusters for</p></li>
+<li><p><strong>cutoff</strong> – distance between sites; all sites in a cluster must
+have this mutual distance</p></li>
+<li><p><strong>maxorder</strong> – maximum order of our clusters</p></li>
+<li><p><strong>exclude</strong> – list of chemistries to exclude</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return clusterexp<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of sets of clusters</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="supercell.html" class="btn btn-neutral float-left" title="Supercell" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="PowerExpansion.html" class="btn btn-neutral float-right" title="PowerExpansion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017, Dallas R. Trinkle.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
